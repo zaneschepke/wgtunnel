@@ -20,6 +20,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.rounded.LocationOff
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.Button
@@ -28,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -44,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -100,13 +106,25 @@ fun SettingsScreen(
             }
         }
     }
+
+    fun saveTrustedSSID() {
+        if (currentText.isNotEmpty()) {
+            scope.launch {
+                viewModel.onSaveTrustedSSID(currentText)
+                currentText = ""
+            }
+        }
+    }
+
     if(!backgroundLocationState.status.isGranted) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)) {
-            Icon(Icons.Rounded.LocationOff, contentDescription = "Map", modifier = Modifier.padding(30.dp).size(128.dp))
+            Icon(Icons.Rounded.LocationOff, contentDescription = "Map", modifier = Modifier
+                .padding(30.dp)
+                .size(128.dp))
             Text(stringResource(R.string.prominent_background_location_title), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 20.sp)
             Text(stringResource(R.string.prominent_background_location_message), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 15.sp)
             //Spacer(modifier = Modifier.weight(1f))
@@ -257,14 +275,20 @@ fun SettingsScreen(
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    scope.launch {
-                        if (currentText.isNotEmpty()) {
-                            viewModel.onSaveTrustedSSID(currentText)
-                            currentText = ""
-                        }
-                    }
+                    saveTrustedSSID()
                 }
             ),
+            trailingIcon = {
+                IconButton(onClick = { saveTrustedSSID() }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = if (currentText == "") stringResource(id = R.string.trusted_ssid_empty_description) else stringResource(
+                            id = R.string.trusted_ssid_value_description
+                        ),
+                        tint = if(currentText == "") Color.Transparent else Color.Green
+                    )
+                }
+            },
         )
         Row(
             modifier = Modifier

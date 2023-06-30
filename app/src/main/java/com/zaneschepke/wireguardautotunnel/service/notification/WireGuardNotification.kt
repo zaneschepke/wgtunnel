@@ -21,8 +21,10 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
         channelName: String,
         title: String,
         description: String,
+        showTimestamp: Boolean,
         importance: Int,
         vibration: Boolean,
+        onGoing: Boolean,
         lights: Boolean
     ) : Notification {
         val channel = NotificationChannel(
@@ -53,7 +55,8 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
             .setContentTitle(title)
             .setContentText(description)
             .setContentIntent(pendingIntent)
-            .setShowWhen(true)
+            .setOngoing(onGoing)
+            .setShowWhen(showTimestamp)
             .setSmallIcon(R.mipmap.ic_launcher_foreground)
             .build()
     }

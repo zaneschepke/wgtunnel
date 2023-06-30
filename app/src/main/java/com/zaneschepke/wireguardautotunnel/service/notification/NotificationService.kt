@@ -7,10 +7,12 @@ interface NotificationService {
     fun createNotification(
         channelId: String,
         channelName: String,
-        title: String,
+        title: String = "",
         description: String,
+        showTimestamp : Boolean = false,
         importance: Int = NotificationManager.IMPORTANCE_HIGH,
         vibration: Boolean = true,
+        onGoing: Boolean = true,
         lights: Boolean = true
     ): Notification
 }

@@ -29,6 +29,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class WireGuardConnectivityWatcherService : ForegroundService() {
 
+    private val foregroundId = 122;
+
     @Inject
     lateinit var wifiService : NetworkService<WifiService>
 
@@ -66,7 +68,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         // we need this lock so our service gets not affected by Doze Mode
         initWakeLock()
         cancelWatcherJob()
-        startWatcherNotification()
+        launchWatcherNotification()
         if(this::tunnelId.isInitialized) {
             startWatcherJob()
         } else {
@@ -86,13 +88,12 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         stopSelf()
     }
 
-    private fun startWatcherNotification() {
+    private fun launchWatcherNotification() {
         val notification = notificationService.createNotification(
             channelId = getString(R.string.watcher_channel_id),
             channelName = getString(R.string.watcher_channel_name),
-            title = getString(R.string.watcher_notification_title),
             description = getString(R.string.watcher_notification_text))
-        super.startForeground(1, notification)
+        super.startForeground(foregroundId, notification)
     }
 
     //try to start task again if killed

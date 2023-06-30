@@ -19,6 +19,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class WireGuardTunnelService : ForegroundService() {
 
+    private val foregroundId = 123;
+
     @Inject
     lateinit var vpnService : VpnService
 
@@ -64,9 +66,11 @@ class WireGuardTunnelService : ForegroundService() {
             channelId = getString(R.string.vpn_channel_id),
             channelName = getString(R.string.vpn_channel_name),
             title = getString(R.string.tunnel_start_title),
+            onGoing = false,
+            showTimestamp = true,
             description = "${getString(R.string.tunnel_start_text)} $tunnelName"
         )
-        super.startForeground(1, notification)
+        super.startForeground(foregroundId, notification)
     }
     private fun cancelJob() {
         if(this::job.isInitialized) {

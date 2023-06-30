@@ -14,7 +14,7 @@
     <string name="tunnel_exists">Tunnel name already exists</string>
     <string name="discord_url">https://discord.gg/Ad5fuEts</string>
     <string name="watcher_notification_title">Watcher Service</string>
-    <string name="watcher_notification_text">Now watching for Wi-Fi state changes</string>
+    <string name="watcher_notification_text">Monitoring network state changes</string>
     <string name="tunnel_start_title">VPN Connected</string>
     <string name="tunnel_start_text">Connected to tunnel -</string>
     <string name="vpn_permission_required">VPN permission is required for the app to work properly.</string>
@@ -35,4 +35,6 @@
     <string name="prominent_background_location_message">This feature requires background location permission to enable Wi-Fi SSID monitoring even while the application is closed. For more details, please see the Privacy Policy linked on the Support screen.</string>
     <string name="prominent_background_location_title">Background Location Disclosure</string>
     <string name="support_text">Thank you for using WG Tunnel! If you are experiencing issues with the app, please reach out on Discord or create an issue on Github. I will try to address the issue as quickly as possible. Thank you!</string>
+    <string name="trusted_ssid_empty_description">Enter SSID</string>
+    <string name="trusted_ssid_value_description">Submit SSID</string>
 </resources>
