@@ -131,7 +131,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
             if(!settings.isNullOrEmpty()) {
                 setting = settings[0]
             }
-            watchForWifiConnectivityChanges()
+            GlobalScope.launch {
+                watchForWifiConnectivityChanges()
+            }
             if(setting.isTunnelOnMobileDataEnabled) {
                 GlobalScope.launch {
                     watchForMobileDataConnectivityChanges()
