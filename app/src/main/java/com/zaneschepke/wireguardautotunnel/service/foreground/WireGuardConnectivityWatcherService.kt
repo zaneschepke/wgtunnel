@@ -131,12 +131,12 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
             if(!settings.isNullOrEmpty()) {
                 setting = settings[0]
             }
+            watchForWifiConnectivityChanges()
             if(setting.isTunnelOnMobileDataEnabled) {
                 GlobalScope.launch {
                     watchForMobileDataConnectivityChanges()
                 }
             }
-            watchForWifiConnectivityChanges()
         }
     }
 
@@ -171,16 +171,18 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         isWifiConnected = true
                     }
                     is NetworkStatus.CapabilitiesChanged -> {
+                        Timber.d("Wifi capabilities changed")
                         isWifiConnected = true
                         if (!connecting && !disconnecting) {
+                            Timber.d("Not connect and not disconnecting")
                             val ssid = wifiService.getNetworkName(it.networkCapabilities);
                             Timber.d("SSID: $ssid")
                             if ((setting.trustedNetworkSSIDs?.contains(ssid) == false) && vpnService.getState() == Tunnel.State.DOWN) {
                                 Timber.d("Starting VPN Tunnel for untrusted network: $ssid")
                                 startVPN()
-                            } else if (!disconnecting && vpnService.getState() == Tunnel.State.UP && (setting.trustedNetworkSSIDs?.contains(
+                            } else if (!disconnecting && vpnService.getState() == Tunnel.State.UP && setting.trustedNetworkSSIDs.contains(
                                     ssid
-                                ) == true)
+                                )
                             ) {
                                 Timber.d("Stopping VPN Tunnel for trusted network with ssid: $ssid")
                                 stopVPN()
@@ -191,7 +193,10 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         isWifiConnected = false
                         Timber.d("Lost Wi-Fi connection")
                         if(setting.isTunnelOnMobileDataEnabled && vpnService.getState() == Tunnel.State.DOWN
-                            && isMobileDataConnected) startVPN()
+                            && isMobileDataConnected){
+                            Timber.d("Wifi not available so starting vpn for mobile data")
+                            startVPN()
+                        }
                     }
                 }
             }

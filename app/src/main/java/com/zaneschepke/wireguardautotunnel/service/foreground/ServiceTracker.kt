@@ -1,29 +1,25 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
+import android.app.ActivityManager
 import android.app.Application
 import android.app.Service
 import android.content.Context
+import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import android.content.SharedPreferences
 import com.zaneschepke.wireguardautotunnel.R
 
 object ServiceTracker {
-    fun <T : Service> setServiceState(context: Context, state: ServiceState, cls : Class<T>) {
-        val sharedPrefs = getPreferences(context)
-        sharedPrefs.edit().let {
-            it.putString(cls.simpleName, state.name)
-            it.apply()
-        }
-    }
+    @Suppress("DEPRECATION")
+    private // Deprecated for third party Services.
+    fun <T> Context.isServiceRunning(service: Class<T>) =
+        (getSystemService(ACTIVITY_SERVICE) as ActivityManager)
+            .getRunningServices(Integer.MAX_VALUE)
+            .any { it.service.className == service.name }
 
-    private fun <T : Service> getServiceState(context: Context, cls : Class<T>): ServiceState {
-        val sharedPrefs = getPreferences(context)
-        val value = sharedPrefs.getString(cls.simpleName, ServiceState.STOPPED.name)
-        return ServiceState.valueOf(value!!)
-    }
-
-    private fun getPreferences(context: Context): SharedPreferences {
-        return context.getSharedPreferences(context.resources.getString(R.string.foreground_file), 0)
+    fun <T : Service> getServiceState(context: Context, cls : Class<T>): ServiceState {
+        val isServiceRunning = context.isServiceRunning(cls)
+        return if(isServiceRunning) ServiceState.STARTED else ServiceState.STOPPED
     }
 
     fun <T : Service> actionOnService(action: Action, application: Application, cls : Class<T>, extras : Map<String,String>? = null) {

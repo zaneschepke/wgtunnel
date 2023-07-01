@@ -11,6 +11,7 @@ import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceTracker
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
@@ -23,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -48,9 +50,24 @@ class MainViewModel @Inject constructor(private val application : Application,
         viewModelScope.launch {
             settingsRepo.itemFlow.collect {
                 val settings = it.first()
+                validateWatcherServiceState(settings)
                 _settings.emit(settings)
             }
         }
+    }
+
+    private fun validateWatcherServiceState(settings: Settings) {
+        val watcherState = ServiceTracker.getServiceState(application, WireGuardConnectivityWatcherService::class.java)
+        if(settings.isAutoTunnelEnabled && watcherState == ServiceState.STOPPED && settings.defaultTunnel != null) {
+            startWatcherService(settings.defaultTunnel!!)
+        }
+    }
+
+    private fun startWatcherService(tunnel : String) {
+        ServiceTracker.actionOnService(
+            Action.START, application,
+            WireGuardConnectivityWatcherService::class.java,
+            mapOf(application.resources.getString(R.string.tunnel_extras_key) to tunnel))
     }
 
     fun onDelete(tunnel : TunnelConfig) {

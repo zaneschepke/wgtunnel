@@ -45,7 +45,6 @@ open class ForegroundService : Service() {
         if (isServiceStarted) return
         Timber.d("Starting ${this.javaClass.simpleName}")
         isServiceStarted = true
-        ServiceTracker.setServiceState(this, ServiceState.STARTED, this.javaClass)
     }
 
     protected open fun stopService(extras : Bundle?) {
@@ -57,6 +56,5 @@ open class ForegroundService : Service() {
             Timber.d("Service stopped without being started: ${e.message}")
         }
         isServiceStarted = false
-        ServiceTracker.setServiceState(this, ServiceState.STOPPED, this.javaClass)
     }
 }
