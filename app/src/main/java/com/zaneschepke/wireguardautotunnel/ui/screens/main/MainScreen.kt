@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -73,7 +72,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
     val viewState = viewModel.viewState.collectAsStateWithLifecycle()
     var showAlertDialog by remember { mutableStateOf(false) }
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
-    val settings by viewModel.settings.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
 

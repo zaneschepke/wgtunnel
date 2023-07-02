@@ -17,7 +17,7 @@
     <string name="watcher_notification_text">Monitoring network state changes</string>
     <string name="tunnel_start_title">VPN Connected</string>
     <string name="tunnel_start_text">Connected to tunnel -</string>
-    <string name="vpn_permission_required">VPN permission is required for the app to work properly.</string>
+    <string name="vpn_permission_required">VPN permission is required for the app to work properly. If this permission is not launching, please disable \"Always-on VPN\" in your phone settings for the official WireGuard mobile app and try again.</string>
     <string name="notification_permission_required">Notifications permission is required for the app to work properly.</string>
     <string name="open_settings">Open Settings</string>
     <string name="add_trusted_ssid">Add Trusted SSID</string>
