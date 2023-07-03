@@ -1,5 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.module
 
+import com.zaneschepke.wireguardautotunnel.service.barcode.CodeScanner
+import com.zaneschepke.wireguardautotunnel.service.barcode.QRScanner
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.network.WifiService
@@ -10,6 +12,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.scopes.ServiceScoped
+import dagger.hilt.android.scopes.ViewModelScoped
 
 @Module
 @InstallIn(ServiceComponent::class)

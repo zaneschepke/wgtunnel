@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.service.barcode.CodeScanner
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceTracker
@@ -32,7 +33,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val application : Application,
                                         private val tunnelRepo : Repository<TunnelConfig>,
                                         private val settingsRepo : Repository<Settings>,
-                                        private val vpnService: VpnService
+                                        private val vpnService: VpnService,
+                                        private val codeScanner: CodeScanner
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(ViewState())
@@ -43,7 +45,9 @@ class MainViewModel @Inject constructor(private val application : Application,
     private val _settings = MutableStateFlow(Settings())
     val settings get() = _settings.asStateFlow()
 
-    private val defaultConfigName = "tunnel${(Math.random() * 1000).toInt()}"
+    private val defaultConfigName = {
+        "tunnel${(Math.random() * 100000).toInt()}"
+    }
 
 
     init {
@@ -111,6 +115,15 @@ class MainViewModel @Inject constructor(private val application : Application,
         ServiceTracker.actionOnService( Action.STOP, application, WireGuardTunnelService::class.java)
     }
 
+    suspend fun onTunnelQRSelected() {
+        codeScanner.scan().collect {
+            Timber.d(it)
+            if(!it.isNullOrEmpty()) {
+                tunnelRepo.save(TunnelConfig(name = defaultConfigName(), wgQuick = it))
+            }
+        }
+    }
+
     fun onTunnelFileSelected(uri : Uri) {
         val fileName = getFileName(application.applicationContext, uri)
         val extension = getFileExtensionFromFileName(fileName)
@@ -135,14 +148,14 @@ class MainViewModel @Inject constructor(private val application : Application,
     private fun getFileName(context: Context, uri: Uri): String {
         if (uri.scheme == "content") {
             val cursor = context.contentResolver.query(uri, null, null, null, null)
-            cursor ?: return defaultConfigName
+            cursor ?: return defaultConfigName()
             cursor.use {
                 if(cursor.moveToFirst()) {
                     return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
                 }
             }
         }
-        return defaultConfigName
+        return defaultConfigName()
     }
 
     suspend fun showSnackBarMessage(message : String) {

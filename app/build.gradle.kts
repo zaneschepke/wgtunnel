@@ -16,8 +16,8 @@ android {
     compileSdk = 33
 
     val versionMajor = 1
-    val versionMinor = 1
-    val versionPatch = 6
+    val versionMinor = 2
+    val versionPatch = 0
     val versionBuild = 0
 
     defaultConfig {
@@ -71,7 +71,7 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3:1.1.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
 
     testImplementation("junit:junit:4.13.2")
@@ -89,7 +89,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // compose navigation
-    implementation("androidx.navigation:navigation-compose:2.5.3")
+    implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // hilt
@@ -119,6 +119,11 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
     implementation("com.google.firebase:firebase-crashlytics-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
+
+    //barcode scanning
+    implementation("com.google.android.gms:play-services-code-scanner:16.0.0")
+
+
 
 }
 kapt {

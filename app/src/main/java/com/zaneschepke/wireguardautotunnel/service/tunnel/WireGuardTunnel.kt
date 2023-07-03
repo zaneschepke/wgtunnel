@@ -24,7 +24,7 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend) : VpnSe
     override val state get() = _state.asSharedFlow()
 
     override suspend fun startTunnel(tunnelConfig: TunnelConfig) : Tunnel.State{
-        try {
+        return try {
             if(getState() == Tunnel.State.UP && _tunnelName.value != tunnelConfig.name) {
                 stopTunnel()
             }
@@ -33,10 +33,10 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend) : VpnSe
             val state = backend.setState(
                 this, Tunnel.State.UP, config)
             _state.emit(state)
-            return state;
+            state;
         } catch (e : Exception) {
             Timber.e("Failed to start tunnel with error: ${e.message}")
-            return Tunnel.State.DOWN
+            Tunnel.State.DOWN
         }
     }
 
