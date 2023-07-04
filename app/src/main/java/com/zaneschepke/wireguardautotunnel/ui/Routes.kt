@@ -9,7 +9,8 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 enum class Routes {
     Main,
     Settings,
-    Support;
+    Support,
+    Config;
 
 
     companion object {

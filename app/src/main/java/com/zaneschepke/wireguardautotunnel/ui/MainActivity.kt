@@ -33,6 +33,7 @@ import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
+import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -121,11 +122,11 @@ class MainActivity : AppCompatActivity() {
                                     )
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(2000))
+                                    fadeIn(animationSpec = tween(1000))
                                 }
                             }
                         }) {
-                            MainScreen(padding = padding, snackbarHostState = snackbarHostState)
+                            MainScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController)
                         }
                         composable(Routes.Settings.name, enterTransition = {
                             when (initialState.destination.route) {
@@ -143,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                                 }
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(2000))
+                                    fadeIn(animationSpec = tween(1000))
                                 }
                             }
                         }) { SettingsScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController) }
@@ -156,10 +157,13 @@ class MainActivity : AppCompatActivity() {
                                     )
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(2000))
+                                    fadeIn(animationSpec = tween(1000))
                                 }
                             }
                         }) { SupportScreen(padding = padding) }
+                        composable("${Routes.Config.name}/{id}", enterTransition = {
+                            fadeIn(animationSpec = tween(1000))
+                        }) { ConfigScreen(padding = padding, navController = navController, id = it.arguments?.getString("id"))}
                     }
                 }
             }

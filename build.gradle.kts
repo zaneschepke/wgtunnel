@@ -4,12 +4,11 @@ buildscript {
     val objectBoxVersion by extra("3.5.1")
     val hiltVersion by extra("2.44")
     val accompanistVersion by extra("0.31.2-alpha")
-    val cameraVersion by extra("1.3.0-beta01")
 
     dependencies {
         classpath("io.objectbox:objectbox-gradle-plugin:$objectBoxVersion")
         classpath("com.google.gms:google-services:4.3.15")
-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.5")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.6")
     }
 }
 

@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -22,10 +21,7 @@ import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -33,17 +29,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -65,9 +55,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import kotlinx.coroutines.launch
 
@@ -75,7 +67,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValues,
-               snackbarHostState : SnackbarHostState) {
+               snackbarHostState : SnackbarHostState, navController: NavController) {
 
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -85,7 +77,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
     var showBottomSheet by remember { mutableStateOf(false) }
     val tunnels by viewModel.tunnels.collectAsStateWithLifecycle(mutableListOf())
     val viewState = viewModel.viewState.collectAsStateWithLifecycle()
-    var showAlertDialog by remember { mutableStateOf(false) }
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
@@ -131,7 +122,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
-                    contentDescription = "Add Tunnel",
+                    contentDescription = stringResource(id = R.string.add_tunnel),
                     tint = Color.DarkGray,
                 )
             }
@@ -157,24 +148,30 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
             ) {
                 // Sheet content
                 Row(
-                    modifier = Modifier.fillMaxWidth().clickable {
-                    showBottomSheet = false
-                    pickFileLauncher.launch("*/*")
-                }.padding(10.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showBottomSheet = false
+                            pickFileLauncher.launch("*/*")
+                        }
+                        .padding(10.dp)
                 ) {
-                    Icon(Icons.Filled.FileOpen, contentDescription = "File Open", modifier = Modifier.padding(10.dp))
-                    Text("Add tunnel from files", modifier = Modifier.padding(10.dp))
+                    Icon(Icons.Filled.FileOpen, contentDescription = stringResource(id = R.string.open_file), modifier = Modifier.padding(10.dp))
+                    Text(stringResource(id = R.string.add_from_file), modifier = Modifier.padding(10.dp))
                 }
                 Divider()
-                Row(modifier = Modifier.fillMaxWidth().clickable {
-                    scope.launch {
-                        showBottomSheet = false
-                        viewModel.onTunnelQRSelected()
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        scope.launch {
+                            showBottomSheet = false
+                            viewModel.onTunnelQRSelected()
+                        }
                     }
-                }.padding(10.dp)
+                    .padding(10.dp)
                 ) {
-                    Icon(Icons.Filled.QrCode, contentDescription = "QR Scan", modifier = Modifier.padding(10.dp))
-                    Text("Add tunnel from QR code", modifier = Modifier.padding(10.dp))
+                    Icon(Icons.Filled.QrCode, contentDescription = stringResource(id = R.string.qr_scan), modifier = Modifier.padding(10.dp))
+                    Text(stringResource(id = R.string.add_from_qr), modifier = Modifier.padding(10.dp))
                 }
             }
         }
@@ -201,12 +198,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
                         if (tunnel.id == selectedTunnel?.id) {
                             Row() {
                                 IconButton(onClick = {
-                                    showAlertDialog = true
+                                    navController.navigate("${Routes.Config.name}/${selectedTunnel?.id}")
                                 }) {
-                                    Icon(Icons.Rounded.Edit, "Edit")
+                                    Icon(Icons.Rounded.Edit, stringResource(id = R.string.edit))
                                 }
                                 IconButton(onClick = { viewModel.onDelete(tunnel) }) {
-                                    Icon(Icons.Rounded.Delete, "Delete")
+                                    Icon(Icons.Rounded.Delete, stringResource(id = R.string.delete))
                                 }
                             }
                         } else {
@@ -219,40 +216,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
                         }
                     })
                 }
-            }
-            if (showAlertDialog && selectedTunnel != null) {
-                AlertDialog(onDismissRequest = {
-                    showAlertDialog = false
-                }, confirmButton = {
-                    Button(onClick = {
-                        if (tunnels.any { it.name == selectedTunnel?.name }) {
-                            Toast.makeText(
-                                context,
-                                context.resources.getString(R.string.tunnel_exists),
-                                Toast.LENGTH_LONG
-                            )
-                                .show()
-                            return@Button
-                        }
-                        viewModel.onEditTunnel(selectedTunnel!!)
-                        showAlertDialog = false
-                    }) {
-                        Text("Save")
-                    }
-                },
-                    title = { Text("Tunnel Edit") }, text = {
-                        OutlinedTextField(
-                            value = selectedTunnel!!.name,
-                            onValueChange = {
-                                selectedTunnel = selectedTunnel!!.copy(
-                                    name = it
-                                )
-                            },
-                            label = { Text("Tunnel Name") },
-                            modifier = Modifier.padding(start = 15.dp, top = 5.dp),
-                            maxLines = 1,
-                        )
-                    })
             }
         }
     }

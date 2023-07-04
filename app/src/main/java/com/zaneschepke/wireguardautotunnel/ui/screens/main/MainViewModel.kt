@@ -90,22 +90,6 @@ class MainViewModel @Inject constructor(private val application : Application,
         }
     }
 
-
-    fun onEditTunnel(tunnel: TunnelConfig) {
-        viewModelScope.launch {
-            tunnelRepo.save(tunnel)
-            val settings = settingsRepo.getAll()
-            if(!settings.isNullOrEmpty() && settings[0].defaultTunnel != null) {
-                val setting = settings[0]
-                val defaultTunnelConfig = TunnelConfig.from(setting.defaultTunnel!!)
-                if(defaultTunnelConfig.id == tunnel.id) {
-                    setting.defaultTunnel = tunnel.toString()
-                    settingsRepo.save(setting)
-                }
-            }
-        }
-    }
-
     fun onTunnelStart(tunnelConfig : TunnelConfig) = viewModelScope.launch {
             ServiceTracker.actionOnService( Action.START, application, WireGuardTunnelService::class.java,
                 mapOf(application.resources.getString(R.string.tunnel_extras_key) to tunnelConfig.toString()))
@@ -118,8 +102,10 @@ class MainViewModel @Inject constructor(private val application : Application,
     suspend fun onTunnelQRSelected() {
         codeScanner.scan().collect {
             Timber.d(it)
-            if(!it.isNullOrEmpty()) {
+            if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.config_validation))) {
                 tunnelRepo.save(TunnelConfig(name = defaultConfigName(), wgQuick = it))
+            } else {
+                showSnackBarMessage("Invalid QR code. Try again.")
             }
         }
     }

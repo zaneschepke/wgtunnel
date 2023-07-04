@@ -4,28 +4,24 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AddCircleOutline
-import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.rounded.LocationOff
-import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -68,7 +65,6 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
-import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class,
@@ -84,6 +80,9 @@ fun SettingsScreen(
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val interactionSource = remember { MutableInteractionSource() }
+
     var expanded by remember { mutableStateOf(false) }
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -122,7 +121,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)) {
-            Icon(Icons.Rounded.LocationOff, contentDescription = "Map", modifier = Modifier
+            Icon(Icons.Rounded.LocationOff, contentDescription = stringResource(id = R.string.map), modifier = Modifier
                 .padding(30.dp)
                 .size(128.dp))
             Text(stringResource(R.string.prominent_background_location_title), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 20.sp)
@@ -138,7 +137,7 @@ fun SettingsScreen(
                 Button(onClick = {
                     navController.navigate(Routes.Main.name)
                 }) {
-                    Text("No thanks")
+                    Text(stringResource(id = R.string.no_thanks))
                 }
                 Button(onClick = {
                     scope.launch {
@@ -149,7 +148,7 @@ fun SettingsScreen(
                         context.startActivity(intentSettings)
                     }
                 }) {
-                    Text("Turn on")
+                    Text(stringResource(id = R.string.turn_on))
                 }
             }
         }
@@ -179,6 +178,9 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
+            .clickable(indication = null, interactionSource = interactionSource) {
+                focusManager.clearFocus()
+            }
             .padding(padding)
     ) {
         Row(

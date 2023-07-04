@@ -15,8 +15,8 @@ android {
     namespace = "com.zaneschepke.wireguardautotunnel"
     compileSdk = 33
 
-    val versionMajor = 1
-    val versionMinor = 2
+    val versionMajor = 2
+    val versionMinor = 0
     val versionPatch = 0
     val versionBuild = 0
 
@@ -101,6 +101,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:${rExtra.get("accompanistVersion")}")
     implementation("com.google.accompanist:accompanist-flowlayout:${rExtra.get("accompanistVersion")}")
     implementation("com.google.accompanist:accompanist-navigation-animation:${rExtra.get("accompanistVersion")}")
+    implementation("com.google.accompanist:accompanist-drawablepainter:${rExtra.get("accompanistVersion")}")
 
     //db
     implementation("io.objectbox:objectbox-kotlin:${rExtra.get("objectBoxVersion")}")

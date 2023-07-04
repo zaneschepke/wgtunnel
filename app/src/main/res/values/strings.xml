@@ -37,4 +37,24 @@
     <string name="support_text">Thank you for using WG Tunnel! If you are experiencing issues with the app, please reach out on Discord or create an issue on Github. I will try to address the issue as quickly as possible. Thank you!</string>
     <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
+    <string name="config_validation">[Interface]</string>
+    <string name="invalid_qr">Invalid QR code.</string>
+    <string name="add_from_file">Add tunnel from files</string>
+    <string name="open_file">File Open</string>
+    <string name="add_from_qr">Add tunnel from QR code</string>
+    <string name="qr_scan">QR Scan</string>
+    <string name="tunnel_edit">Tunnel Edit</string>
+    <string name="tunnel_name">Tunnel Name</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="add_tunnel">Add Tunnel</string>
+    <string name="exclude">Exclude</string>
+    <string name="include">Include</string>
+    <string name="tunnel_all">Tunnel all applications</string>
+    <string name="config_changes_saved">Configuration changes saved.</string>
+    <string name="save_changes">Save changes</string>
+    <string name="icon">Icon</string>
+    <string name="no_thanks">No thanks</string>
+    <string name="turn_on">Turn on</string>
+    <string name="map">Map</string>
 </resources>

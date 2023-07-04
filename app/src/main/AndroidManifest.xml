@@ -17,6 +17,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!--start service on boot permission-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+    </queries>
     <application
         android:allowBackup="true"
         android:name=".WireGuardAutoTunnel"
