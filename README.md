@@ -43,6 +43,7 @@ The inspiration for this app came from the inconvenience of constantly having to
 
 * Add tunnels via .conf file
 * Auto connect to VPN based on Wi-Fi SSID
+* Split tunneling by application
 * Configurable Trusted Network list 
 * Optional auto connect on mobile data
 * Automatic service restart after reboot
