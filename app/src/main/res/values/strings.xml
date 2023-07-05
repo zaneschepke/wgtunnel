@@ -12,7 +12,7 @@
     <string name="turn_off_tunnel">Turn off tunnel before editing</string>
     <string name="no_tunnels">No tunnels added yet!</string>
     <string name="tunnel_exists">Tunnel name already exists</string>
-    <string name="discord_url">https://discord.gg/Ad5fuEts</string>
+    <string name="discord_url">https://discord.gg/rbRRNh6H7V</string>
     <string name="watcher_notification_title">Watcher Service</string>
     <string name="watcher_notification_text">Monitoring network state changes</string>
     <string name="tunnel_start_title">VPN Connected</string>
