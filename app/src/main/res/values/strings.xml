@@ -57,4 +57,5 @@
     <string name="no_thanks">No thanks</string>
     <string name="turn_on">Turn on</string>
     <string name="map">Map</string>
+    <string name="bad_config">Bad config. Please try again.</string>
 </resources>

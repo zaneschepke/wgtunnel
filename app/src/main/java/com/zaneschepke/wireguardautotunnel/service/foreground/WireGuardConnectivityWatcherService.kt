@@ -161,6 +161,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     if(!isWifiConnected && vpnService.getState() == Tunnel.State.UP) stopVPN()
                     Timber.d("Lost mobile data connection")
                 }
+                else -> {}
             }
         }
     }
@@ -200,6 +201,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             startVPN()
                         }
                     }
+                    else -> {}
                 }
             }
         }

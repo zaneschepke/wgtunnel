@@ -6,8 +6,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
-import android.content.SharedPreferences
-import com.zaneschepke.wireguardautotunnel.R
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 
 object ServiceTracker {
     @Suppress("DEPRECATION")
@@ -31,7 +31,11 @@ object ServiceTracker {
             }
         }
         intent.component?.javaClass
-        application.startService(intent)
+        try {
+            application.startService(intent)
+        } catch (e : Exception) {
+            e.message?.let { Firebase.crashlytics.log(it) }
+        }
     }
 
     fun <T : Service> actionOnService(action: Action, context: Context, cls : Class<T>, extras : Map<String,String>? = null) {
@@ -43,6 +47,10 @@ object ServiceTracker {
             }
         }
         intent.component?.javaClass
-        context.startService(intent)
+        try {
+            context.startService(intent)
+        } catch (e : Exception) {
+            e.message?.let { Firebase.crashlytics.log(it) }
+        }
     }
 }

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wireguard.config.BadConfigException
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
@@ -122,12 +123,18 @@ class MainViewModel @Inject constructor(private val application : Application,
         val stream = application.applicationContext.contentResolver.openInputStream(uri)
         stream ?: return
         val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
-        val config = Config.parse(bufferReader)
-        val tunnelName = getNameFromFileName(fileName)
-        viewModelScope.launch {
-            tunnelRepo.save(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+        try {
+            val config = Config.parse(bufferReader)
+            val tunnelName = getNameFromFileName(fileName)
+            viewModelScope.launch {
+                tunnelRepo.save(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+            }
+            stream.close()
+        } catch(_: BadConfigException) {
+            viewModelScope.launch {
+                showSnackBarMessage(application.applicationContext.getString(R.string.bad_config))
+            }
         }
-        stream.close()
     }
 
     @SuppressLint("Range")

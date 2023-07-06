@@ -36,7 +36,7 @@ class BootReceiver : BroadcastReceiver() {
                                 Action.START, context,
                                 WireGuardConnectivityWatcherService::class.java,
                                 mapOf(context.resources.getString(R.string.tunnel_extras_key) to
-                                defaultTunnel.id.toString())
+                                defaultTunnel.toString())
                             )
                         }
                     }
