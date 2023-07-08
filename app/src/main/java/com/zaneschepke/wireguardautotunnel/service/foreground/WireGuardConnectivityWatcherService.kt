@@ -19,9 +19,10 @@ import com.zaneschepke.wireguardautotunnel.service.notification.NotificationServ
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -99,9 +100,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     //try to start task again if killed
     override fun onTaskRemoved(rootIntent: Intent) {
         Timber.d("Task Removed called")
-        val restartServiceIntent = Intent(applicationContext, this::class.java).also {
-            it.setPackage(packageName)
-        };
+        val restartServiceIntent = Intent(rootIntent)
         val restartServicePendingIntent: PendingIntent = PendingIntent.getService(this, 1, restartServiceIntent,
             PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE);
         applicationContext.getSystemService(Context.ALARM_SERVICE);
@@ -126,16 +125,16 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun startWatcherJob() {
-        watcherJob = GlobalScope.launch {
+        watcherJob = CoroutineScope(SupervisorJob()).launch {
             val settings = settingsRepo.getAll();
             if(!settings.isNullOrEmpty()) {
                 setting = settings[0]
             }
-            GlobalScope.launch {
+            CoroutineScope(watcherJob).launch {
                 watchForWifiConnectivityChanges()
             }
             if(setting.isTunnelOnMobileDataEnabled) {
-                GlobalScope.launch {
+                CoroutineScope(watcherJob).launch {
                     watchForMobileDataConnectivityChanges()
                 }
             }
@@ -161,7 +160,6 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     if(!isWifiConnected && vpnService.getState() == Tunnel.State.UP) stopVPN()
                     Timber.d("Lost mobile data connection")
                 }
-                else -> {}
             }
         }
     }
@@ -195,13 +193,19 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     is NetworkStatus.Unavailable -> {
                         isWifiConnected = false
                         Timber.d("Lost Wi-Fi connection")
-                        if(setting.isTunnelOnMobileDataEnabled && vpnService.getState() == Tunnel.State.DOWN
-                            && isMobileDataConnected){
-                            Timber.d("Wifi not available so starting vpn for mobile data")
-                            startVPN()
+                        if(!connecting || !disconnecting) {
+                            if(setting.isTunnelOnMobileDataEnabled && vpnService.getState() == Tunnel.State.DOWN
+                                && isMobileDataConnected){
+                                Timber.d("Wifi not available so starting vpn for mobile data")
+                                startVPN()
+                            }
+                            if(!setting.isTunnelOnMobileDataEnabled && vpnService.getState() == Tunnel.State.UP) {
+                                Timber.d("Lost WiFi connection, disabling vpn")
+                                stopVPN()
+                            }
                         }
+
                     }
-                    else -> {}
                 }
             }
         }

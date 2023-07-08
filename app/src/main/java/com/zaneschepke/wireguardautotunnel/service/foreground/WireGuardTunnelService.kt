@@ -8,10 +8,9 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -29,12 +28,11 @@ class WireGuardTunnelService : ForegroundService() {
 
     private lateinit var job : Job
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun startService(extras : Bundle?) {
         super.startService(extras)
         val tunnelConfigString = extras?.getString(getString(R.string.tunnel_extras_key))
         cancelJob()
-        job = GlobalScope.launch {
+        job = CoroutineScope(SupervisorJob()).launch {
             if(tunnelConfigString != null) {
                 try {
                     val tunnelConfig = TunnelConfig.from(tunnelConfigString)

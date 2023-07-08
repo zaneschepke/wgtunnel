@@ -10,8 +10,9 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectiv
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,7 +26,7 @@ class BootReceiver : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            GlobalScope.launch {
+            CoroutineScope(SupervisorJob()).launch {
                 try {
                     val settings = settingsRepo.getAll()
                     if (!settings.isNullOrEmpty()) {
