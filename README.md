@@ -5,7 +5,7 @@ WG Tunnel
 <span align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Discord Chat](https://img.shields.io/discord/1108285024631001111.svg)](https://discord.gg/Ad5fuEts)
+[![Discord Chat](https://img.shields.io/discord/1108285024631001111.svg)](https://discord.gg/rbRRNh6H7V)
 
 </span>
 
