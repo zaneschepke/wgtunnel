@@ -20,7 +20,6 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -123,7 +122,6 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun startWatcherJob() {
         watcherJob = CoroutineScope(SupervisorJob()).launch {
             val settings = settingsRepo.getAll();
@@ -151,13 +149,17 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 is NetworkStatus.CapabilitiesChanged -> {
                     isMobileDataConnected = true
                     Timber.d("Mobile data capabilities changed")
-                    if(!isWifiConnected && setting.isTunnelOnMobileDataEnabled
-                        && vpnService.getState() == Tunnel.State.DOWN)
-                        startVPN()
+                    if(!disconnecting && !connecting) {
+                        if(!isWifiConnected && setting.isTunnelOnMobileDataEnabled
+                            && vpnService.getState() == Tunnel.State.DOWN)
+                            startVPN()
+                    }
                 }
                 is NetworkStatus.Unavailable -> {
                     isMobileDataConnected = false
-                    if(!isWifiConnected && vpnService.getState() == Tunnel.State.UP) stopVPN()
+                    if(!disconnecting && !connecting) {
+                        if(!isWifiConnected && vpnService.getState() == Tunnel.State.UP) stopVPN()
+                    }
                     Timber.d("Lost mobile data connection")
                 }
             }
@@ -178,7 +180,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             Timber.d("Not connect and not disconnecting")
                             val ssid = wifiService.getNetworkName(it.networkCapabilities);
                             Timber.d("SSID: $ssid")
-                            if ((setting.trustedNetworkSSIDs?.contains(ssid) == false) && vpnService.getState() == Tunnel.State.DOWN) {
+                            if (!setting.trustedNetworkSSIDs.contains(ssid) && vpnService.getState() == Tunnel.State.DOWN) {
                                 Timber.d("Starting VPN Tunnel for untrusted network: $ssid")
                                 startVPN()
                             } else if (!disconnecting && vpnService.getState() == Tunnel.State.UP && setting.trustedNetworkSSIDs.contains(

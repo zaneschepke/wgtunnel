@@ -42,6 +42,8 @@ class MainViewModel @Inject constructor(private val application : Application,
     val viewState get() = _viewState.asStateFlow()
     val tunnels get() = tunnelRepo.itemFlow
     val state get() = vpnService.state
+
+    val handshakeStatus get() = vpnService.handshakeStatus
     val tunnelName get() = vpnService.tunnelName
     private val _settings = MutableStateFlow(Settings())
     val settings get() = _settings.asStateFlow()
@@ -102,33 +104,34 @@ class MainViewModel @Inject constructor(private val application : Application,
 
     suspend fun onTunnelQRSelected() {
         codeScanner.scan().collect {
-            Timber.d(it)
             if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.config_validation))) {
                 tunnelRepo.save(TunnelConfig(name = defaultConfigName(), wgQuick = it))
+            } else if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.barcode_downloading))) {
+                showSnackBarMessage(application.resources.getString(R.string.barcode_downloading_message))
             } else {
-                showSnackBarMessage("Invalid QR code. Try again.")
+                showSnackBarMessage(application.resources.getString(R.string.barcode_error))
             }
         }
     }
 
     fun onTunnelFileSelected(uri : Uri) {
-        val fileName = getFileName(application.applicationContext, uri)
-        val extension = getFileExtensionFromFileName(fileName)
-        if(extension != ".conf") {
-            viewModelScope.launch {
-                showSnackBarMessage(application.resources.getString(R.string.file_extension_message))
-            }
-            return
-        }
-        val stream = application.applicationContext.contentResolver.openInputStream(uri)
-        stream ?: return
-        val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
         try {
-            val config = Config.parse(bufferReader)
-            val tunnelName = getNameFromFileName(fileName)
-            viewModelScope.launch {
-                tunnelRepo.save(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+            val fileName = getFileName(application.applicationContext, uri)
+            val extension = getFileExtensionFromFileName(fileName)
+            if(extension != ".conf") {
+                viewModelScope.launch {
+                    showSnackBarMessage(application.resources.getString(R.string.file_extension_message))
+                }
+                return
             }
+            val stream = application.applicationContext.contentResolver.openInputStream(uri)
+            stream ?: return
+            val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
+                val config = Config.parse(bufferReader)
+                val tunnelName = getNameFromFileName(fileName)
+                viewModelScope.launch {
+                    tunnelRepo.save(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+                }
             stream.close()
         } catch(_: BadConfigException) {
             viewModelScope.launch {
@@ -177,6 +180,10 @@ class MainViewModel @Inject constructor(private val application : Application,
     }
 
     private fun getFileExtensionFromFileName(fileName : String) : String {
-        return fileName.substring(fileName.lastIndexOf('.'))
+        return try {
+            fileName.substring(fileName.lastIndexOf('.'))
+        } catch (e : Exception) {
+            ""
+        }
     }
 }

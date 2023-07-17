@@ -20,13 +20,15 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
         channelId: String,
         channelName: String,
         title: String,
+        action: PendingIntent?,
+        actionText: String?,
         description: String,
         showTimestamp: Boolean,
         importance: Int,
         vibration: Boolean,
         onGoing: Boolean,
         lights: Boolean
-    ) : Notification {
+    ): Notification {
         val channel = NotificationChannel(
             channelId,
             channelName,
@@ -42,7 +44,12 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
         notificationManager.createNotificationChannel(channel)
         val pendingIntent: PendingIntent =
             Intent(context, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    notificationIntent,
+                    PendingIntent.FLAG_IMMUTABLE
+                )
             }
 
         val builder: Notification.Builder =
@@ -50,14 +57,21 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
                 context,
                 channelId
             )
-
-        return builder
-            .setContentTitle(title)
-            .setContentText(description)
-            .setContentIntent(pendingIntent)
-            .setOngoing(onGoing)
-            .setShowWhen(showTimestamp)
-            .setSmallIcon(R.mipmap.ic_launcher_foreground)
-            .build()
+        return builder.let {
+            if(action != null && actionText != null) {
+                //TODO find a not deprecated way to do this
+                it.addAction(
+                    Notification.Action.Builder(0, actionText, action)
+                        .build())
+                    it.setAutoCancel(true)
+            }
+                it.setContentTitle(title)
+                .setContentText(description)
+                .setContentIntent(pendingIntent)
+                .setOngoing(onGoing)
+                .setShowWhen(showTimestamp)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .build()
+        }
     }
 }
