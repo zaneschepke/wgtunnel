@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.service.network
 
-import android.app.Service
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -10,12 +9,10 @@ import android.net.wifi.SupplicantState
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 
 abstract class BaseNetworkService<T : BaseNetworkService<T>>(val context: Context, networkCapability : Int) : NetworkService<T> {

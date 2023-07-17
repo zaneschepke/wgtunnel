@@ -16,8 +16,8 @@ android {
     compileSdk = 33
 
     val versionMajor = 2
-    val versionMinor = 0
-    val versionPatch = 3
+    val versionMinor = 1
+    val versionPatch = 2
     val versionBuild = 0
 
     defaultConfig {
@@ -54,7 +54,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.4.8"
     }
     packaging {
         resources {
@@ -83,7 +83,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     //wireguard tunnel
-    implementation("com.wireguard.android:tunnel:1.0.20230405")
+    implementation("com.wireguard.android:tunnel:1.0.20230427")
 
     //logging
     implementation("com.jakewharton.timber:timber:5.0.1")
@@ -127,6 +127,7 @@ dependencies {
 
 
 }
+
 kapt {
     correctErrorTypes = true
 }

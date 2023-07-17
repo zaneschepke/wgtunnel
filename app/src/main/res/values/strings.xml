@@ -58,4 +58,23 @@
     <string name="turn_on">Turn on</string>
     <string name="map">Map</string>
     <string name="bad_config">Bad config. Please try again.</string>
+    <string name="config_interface">Interface</string>
+    <string name="public_key">Public key</string>
+    <string name="barcode_downloading">Waiting for the Barcode UI module to be downloaded.</string>
+    <string name="barcode_downloading_message">Barcode module downloading. Try again.</string>
+    <string name="barcode_error">Invalid QR code. Try again.</string>
+    <string name="addresses">Addresses</string>
+    <string name="dns_servers">DNS servers</string>
+    <string name="mtu">MTU</string>
+    <string name="peer">Peer</string>
+    <string name="allowed_ips">Allowed IPs</string>
+    <string name="endpoint">Endpoint</string>
+    <string name="transfer">Transfer</string>
+    <string name="last_handshake">Last handshake</string>
+    <string name="name">Name</string>
+    <string name="restart">Restart Tunnel</string>
+    <string name="vpn_connection_failed">VPN Connection Failed</string>
+    <string name="failed_connection_to">Failed connection to -</string>
+    <string name="initial_connection_failure_message">Attempting to connect to server after 30 seconds of no response.</string>
+    <string name="lost_connection_failure_message">Attempting to reconnect to server after more than one minute of no response.</string>
 </resources>

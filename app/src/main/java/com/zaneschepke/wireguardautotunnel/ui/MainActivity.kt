@@ -14,7 +14,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -34,6 +33,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.detail.DetailScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -44,7 +44,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class,
+    @OptIn(ExperimentalAnimationApi::class,
         ExperimentalPermissionsApi::class
     )
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,6 +164,9 @@ class MainActivity : AppCompatActivity() {
                         composable("${Routes.Config.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(1000))
                         }) { ConfigScreen(padding = padding, navController = navController, id = it.arguments?.getString("id"))}
+                        composable("${Routes.Detail.name}/{id}", enterTransition = {
+                            fadeIn(animationSpec = tween(1000))
+                        }) { DetailScreen(padding = padding, id = it.arguments?.getString("id")) }
                     }
                 }
             }

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Divider
@@ -58,16 +59,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
+import com.zaneschepke.wireguardautotunnel.ui.theme.brickRed
+import com.zaneschepke.wireguardautotunnel.ui.theme.mint
+import com.zaneschepke.wireguardautotunnel.ui.theme.pinkRed
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValues,
-               snackbarHostState : SnackbarHostState, navController: NavController) {
+fun MainScreen(
+    viewModel: MainViewModel = hiltViewModel(), padding: PaddingValues,
+    snackbarHostState: SnackbarHostState, navController: NavController
+) {
 
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -76,11 +83,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
     val tunnels by viewModel.tunnels.collectAsStateWithLifecycle(mutableListOf())
+    val handshakeStatus by viewModel.handshakeStatus.collectAsStateWithLifecycle(HandshakeStatus.NOT_STARTED)
     val viewState = viewModel.viewState.collectAsStateWithLifecycle()
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
-
 
     LaunchedEffect(viewState.value) {
         if (viewState.value.showSnackbarMessage) {
@@ -156,8 +163,15 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
                         }
                         .padding(10.dp)
                 ) {
-                    Icon(Icons.Filled.FileOpen, contentDescription = stringResource(id = R.string.open_file), modifier = Modifier.padding(10.dp))
-                    Text(stringResource(id = R.string.add_from_file), modifier = Modifier.padding(10.dp))
+                    Icon(
+                        Icons.Filled.FileOpen,
+                        contentDescription = stringResource(id = R.string.open_file),
+                        modifier = Modifier.padding(10.dp)
+                    )
+                    Text(
+                        stringResource(id = R.string.add_from_file),
+                        modifier = Modifier.padding(10.dp)
+                    )
                 }
                 Divider()
                 Row(modifier = Modifier
@@ -170,8 +184,15 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
                     }
                     .padding(10.dp)
                 ) {
-                    Icon(Icons.Filled.QrCode, contentDescription = stringResource(id = R.string.qr_scan), modifier = Modifier.padding(10.dp))
-                    Text(stringResource(id = R.string.add_from_qr), modifier = Modifier.padding(10.dp))
+                    Icon(
+                        Icons.Filled.QrCode,
+                        contentDescription = stringResource(id = R.string.qr_scan),
+                        modifier = Modifier.padding(10.dp)
+                    )
+                    Text(
+                        stringResource(id = R.string.add_from_qr),
+                        modifier = Modifier.padding(10.dp)
+                    )
                 }
             }
         }
@@ -185,36 +206,49 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), padding : PaddingValu
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(tunnels.toList()) { tunnel ->
-                    RowListItem(text = tunnel.name, onHold = {
-                        if (state == Tunnel.State.UP && tunnel.name == tunnelName) {
-                            scope.launch {
-                                viewModel.showSnackBarMessage(context.resources.getString(R.string.turn_off_tunnel))
+                    RowListItem(leadingIcon = Icons.Rounded.Circle,
+                        leadingIconColor = when (handshakeStatus) {
+                            HandshakeStatus.HEALTHY -> mint
+                            HandshakeStatus.UNHEALTHY -> brickRed
+                            HandshakeStatus.NOT_STARTED -> Color.Gray
+                            HandshakeStatus.NEVER_CONNECTED -> brickRed
+                        },
+                        text = tunnel.name,
+                        onHold = {
+                            if (state == Tunnel.State.UP && tunnel.name == tunnelName) {
+                                scope.launch {
+                                    viewModel.showSnackBarMessage(context.resources.getString(R.string.turn_off_tunnel))
+                                }
+                                return@RowListItem
                             }
-                            return@RowListItem
-                        }
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedTunnel = tunnel;
-                    }, rowButton = {
-                        if (tunnel.id == selectedTunnel?.id) {
-                            Row() {
-                                IconButton(onClick = {
-                                    navController.navigate("${Routes.Config.name}/${selectedTunnel?.id}")
-                                }) {
-                                    Icon(Icons.Rounded.Edit, stringResource(id = R.string.edit))
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            selectedTunnel = tunnel;
+                        },
+                        onClick = { navController.navigate("${Routes.Detail.name}/${tunnel.id}") },
+                        rowButton = {
+                            if (tunnel.id == selectedTunnel?.id) {
+                                Row() {
+                                    IconButton(onClick = {
+                                        navController.navigate("${Routes.Config.name}/${selectedTunnel?.id}")
+                                    }) {
+                                        Icon(Icons.Rounded.Edit, stringResource(id = R.string.edit))
+                                    }
+                                    IconButton(onClick = { viewModel.onDelete(tunnel) }) {
+                                        Icon(
+                                            Icons.Rounded.Delete,
+                                            stringResource(id = R.string.delete)
+                                        )
+                                    }
                                 }
-                                IconButton(onClick = { viewModel.onDelete(tunnel) }) {
-                                    Icon(Icons.Rounded.Delete, stringResource(id = R.string.delete))
-                                }
+                            } else {
+                                Switch(
+                                    checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
+                                    onCheckedChange = { checked ->
+                                        if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+                                    }
+                                )
                             }
-                        } else {
-                            Switch(
-                                checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
-                                onCheckedChange = { checked ->
-                                    if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
-                                }
-                            )
-                        }
-                    })
+                        })
                 }
             }
         }

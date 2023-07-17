@@ -27,7 +27,7 @@ This is an alternative Android Application for [WireGuard](https://www.wireguard
 ## Screenshots
 
 <p float="center">
-  <img label="Main" style="padding-right:25px" src="./asset/main_screen.png" width="200" />
+  <img label="Main" style="padding-right:25px" src="asset/main_screen.png" width="200" />
   <img label="Config" style="padding-left:25px" src="./asset/config_screen.png" width="200" />
   <img label="Settings" style="padding-left:25px" src="./asset/settings_screen.png" width="200" />
   <img label="Support" style="padding-left:25px" src="./asset/support_screen.png" width="200" />

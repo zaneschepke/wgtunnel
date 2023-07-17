@@ -13,6 +13,7 @@ class QRScanner @Inject constructor(private val gmsBarcodeScanner: GmsBarcodeSca
             gmsBarcodeScanner.startScan().addOnSuccessListener {
                 trySend(it.rawValue)
             }.addOnFailureListener {
+                trySend(it.message)
                 Timber.e(it.message)
             }
             awaitClose {
