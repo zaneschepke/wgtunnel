@@ -1,6 +1,8 @@
 package com.zaneschepke.wireguardautotunnel
 
 import android.app.Application
+import com.google.android.datatransport.BuildConfig
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.HiltAndroidApp
@@ -15,7 +17,10 @@ class WireGuardAutoTunnel : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if(BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
+        if(BuildConfig.DEBUG) {
+            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+            Timber.plant(Timber.DebugTree())
+        }
         settingsRepo.init()
     }
 }
