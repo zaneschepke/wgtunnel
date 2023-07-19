@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +45,7 @@ fun DetailScreen(
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle()
     val lastHandshake by viewModel.lastHandshake.collectAsStateWithLifecycle(emptyMap())
 
+
     LaunchedEffect(Unit) {
         viewModel.getTunnelById(id)
     }
@@ -58,6 +61,7 @@ fun DetailScreen(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(padding)
         ) {
             Row(

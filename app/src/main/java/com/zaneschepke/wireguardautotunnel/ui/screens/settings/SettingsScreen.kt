@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Add
@@ -91,6 +93,7 @@ fun SettingsScreen(
     val backgroundLocationState =
         rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     var currentText by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(viewState) {
         if (viewState.showSnackbarMessage) {
@@ -120,6 +123,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(padding)) {
             Icon(Icons.Rounded.LocationOff, contentDescription = stringResource(id = R.string.map), modifier = Modifier
                 .padding(30.dp)
@@ -178,6 +182,7 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .clickable(indication = null, interactionSource = interactionSource) {
                 focusManager.clearFocus()
             }

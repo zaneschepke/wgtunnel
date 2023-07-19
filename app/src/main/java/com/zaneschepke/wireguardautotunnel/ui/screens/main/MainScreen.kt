@@ -3,6 +3,9 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.main
 import android.annotation.SuppressLint
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -43,11 +46,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -65,7 +73,6 @@ import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.theme.brickRed
 import com.zaneschepke.wireguardautotunnel.ui.theme.mint
-import com.zaneschepke.wireguardautotunnel.ui.theme.pinkRed
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -78,6 +85,7 @@ fun MainScreen(
 
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val isVisible = rememberSaveable { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
 
     val sheetState = rememberModalBottomSheetState()
@@ -88,6 +96,23 @@ fun MainScreen(
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
+
+    // Nested scroll for control FAB
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Hide FAB
+                if (available.y < -1) {
+                    isVisible.value = false
+                }
+                // Show FAB
+                if (available.y > 1) {
+                    isVisible.value = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
 
     LaunchedEffect(viewState.value) {
         if (viewState.value.showSnackbarMessage) {
@@ -118,20 +143,26 @@ fun MainScreen(
             })
         },
         floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier.padding(bottom = 90.dp),
-                onClick = {
-                    showBottomSheet = true
-                },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                shape = RoundedCornerShape(16.dp),
+        floatingActionButton =  {
+            AnimatedVisibility(
+                visible = isVisible.value,
+                enter = slideInVertically(initialOffsetY = { it * 2 }),
+                exit = slideOutVertically(targetOffsetY = { it * 2 }),
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Add,
-                    contentDescription = stringResource(id = R.string.add_tunnel),
-                    tint = Color.DarkGray,
-                )
+                FloatingActionButton(
+                    modifier = Modifier.padding(bottom = 90.dp),
+                    onClick = {
+                        showBottomSheet = true
+                    },
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = stringResource(id = R.string.add_tunnel),
+                        tint = Color.DarkGray,
+                    )
+                }
             }
         }
     ) {
@@ -204,7 +235,8 @@ fun MainScreen(
                 .padding(padding)
         ) {
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(modifier = Modifier.fillMaxSize()
+                .nestedScroll(nestedScrollConnection),) {
                 items(tunnels.toList()) { tunnel ->
                     RowListItem(leadingIcon = Icons.Rounded.Circle,
                         leadingIconColor = when (handshakeStatus) {

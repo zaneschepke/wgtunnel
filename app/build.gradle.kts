@@ -5,25 +5,25 @@ plugins {
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
-    id("io.objectbox")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("io.objectbox")
 }
 
 android {
     namespace = "com.zaneschepke.wireguardautotunnel"
-    compileSdk = 33
+    compileSdk = 34
 
     val versionMajor = 2
     val versionMinor = 1
-    val versionPatch = 2
+    val versionPatch = 3
     val versionBuild = 0
 
     defaultConfig {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 29
-        targetSdk = 33
+        targetSdk = 34
         versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
 
