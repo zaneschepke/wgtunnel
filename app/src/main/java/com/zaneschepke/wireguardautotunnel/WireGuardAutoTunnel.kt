@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel
 
 import android.app.Application
-import com.google.android.datatransport.BuildConfig
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings

@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING"/>
     <!--foreground service permissions-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -39,24 +41,27 @@
             android:theme="@style/Theme.WireguardAutoTunnel">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <service
             android:name=".service.foreground.ForegroundService"
             android:enabled="true"
+            android:foregroundServiceType="remoteMessaging"
             android:exported="false">
         </service>
         <service
             android:name=".service.foreground.WireGuardTunnelService"
             android:enabled="true"
+            android:foregroundServiceType="remoteMessaging"
             android:exported="false">
         </service>
         <service
             android:name=".service.foreground.WireGuardConnectivityWatcherService"
             android:enabled="true"
             android:stopWithTask="false"
+            android:foregroundServiceType="location"
+            android:permission=""
             android:exported="false">
         </service>
         <receiver android:enabled="true" android:name=".receiver.BootReceiver"
