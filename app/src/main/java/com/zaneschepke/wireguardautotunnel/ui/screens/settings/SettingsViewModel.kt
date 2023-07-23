@@ -1,6 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 
 import android.app.Application
+import android.content.Context
+import android.location.LocationManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zaneschepke.wireguardautotunnel.R
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(private val application : Application,
     private val tunnelRepo : Repository<TunnelConfig>, private val settingsRepo : Repository<Settings>
@@ -31,6 +34,7 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
     val viewState get() = _viewState.asStateFlow()
 
     init {
+        checkLocationServicesEnabled()
         viewModelScope.launch {
             settingsRepo.itemFlow.collect {
                 val settings = it.first()
@@ -69,7 +73,7 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
 
     suspend fun toggleAutoTunnel() {
         if(_settings.value.defaultTunnel.isNullOrEmpty() && !_settings.value.isAutoTunnelEnabled) {
-            showSnackBarMessage("Please select a tunnel first")
+            showSnackBarMessage(application.getString(R.string.select_tunnel_message))
             return
         }
         if(_settings.value.isAutoTunnelEnabled) {
@@ -99,8 +103,7 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
             }
         }
     }
-
-    private suspend fun showSnackBarMessage(message : String) {
+    suspend fun showSnackBarMessage(message : String) {
         _viewState.emit(_viewState.value.copy(
             showSnackbarMessage = true,
             snackbarMessage = message,
@@ -117,5 +120,21 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
         _viewState.emit(_viewState.value.copy(
             showSnackbarMessage = false
         ))
+    }
+
+    suspend fun onToggleAlwaysOnVPN() {
+        if(_settings.value.defaultTunnel != null) {
+            _settings.emit(
+                _settings.value.copy(isAlwaysOnVpnEnabled = !_settings.value.isAlwaysOnVpnEnabled)
+            )
+            settingsRepo.save(_settings.value)
+        } else {
+            showSnackBarMessage(application.getString(R.string.select_tunnel_message))
+        }
+    }
+    fun checkLocationServicesEnabled() : Boolean {
+        val locationManager =
+            application.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 }

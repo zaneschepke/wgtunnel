@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
+import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +27,9 @@ class WireGuardTunnelService : ForegroundService() {
 
     @Inject
     lateinit var vpnService : VpnService
+
+    @Inject
+    lateinit var settingsRepo: Repository<Settings>
 
     @Inject
     lateinit var notificationService : NotificationService
@@ -48,7 +53,16 @@ class WireGuardTunnelService : ForegroundService() {
                     stopService(extras)
                 }
             } else {
-                Timber.e("Tunnel config null")
+                Timber.d("Tunnel config null, starting default tunnel")
+                val settings = settingsRepo.getAll();
+                if(!settings.isNullOrEmpty()) {
+                    val setting = settings[0]
+                    if(setting.defaultTunnel != null && setting.isAlwaysOnVpnEnabled) {
+                        val tunnelConfig = TunnelConfig.from(setting.defaultTunnel!!)
+                        tunnelName = tunnelConfig.name
+                        vpnService.startTunnel(tunnelConfig)
+                    }
+                }
             }
         }
         CoroutineScope(job).launch {
@@ -62,6 +76,7 @@ class WireGuardTunnelService : ForegroundService() {
                         if(!didShowFailedHandshakeNotification) {
                             launchVpnConnectionFailedNotification(getString(R.string.initial_connection_failure_message))
                             didShowFailedHandshakeNotification = true
+                            didShowConnected = false
                         }
                     }
                     HandshakeStatus.HEALTHY -> {
@@ -74,6 +89,7 @@ class WireGuardTunnelService : ForegroundService() {
                         if(!didShowFailedHandshakeNotification) {
                             launchVpnConnectionFailedNotification(getString(R.string.lost_connection_failure_message))
                             didShowFailedHandshakeNotification = true
+                            didShowConnected = false
                         }
                     }
                 }

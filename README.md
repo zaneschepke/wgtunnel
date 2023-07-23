@@ -29,8 +29,8 @@ This is an alternative Android Application for [WireGuard](https://www.wireguard
 <p float="center">
   <img label="Main" style="padding-right:25px" src="asset/main_screen.png" width="200" />
   <img label="Config" style="padding-left:25px" src="./asset/config_screen.png" width="200" />
-  <img label="Settings" style="padding-left:25px" src="./asset/settings_screen.png" width="200" />
-  <img label="Support" style="padding-left:25px" src="./asset/support_screen.png" width="200" />
+  <img label="Settings" style="padding-left:25px" src="asset/settings_screen.png" width="200" />
+  <img label="Support" style="padding-left:25px" src="asset/support_screen.png" width="200" />
 </p>
 
 <span align="left">
@@ -44,6 +44,7 @@ The inspiration for this app came from the inconvenience of constantly having to
 * Add tunnels via .conf file
 * Auto connect to VPN based on Wi-Fi SSID
 * Split tunneling by application
+* Always-on VPN for Android support
 * Configurable Trusted Network list 
 * Optional auto connect on mobile data
 * Automatic service restart after reboot

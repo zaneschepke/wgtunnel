@@ -86,6 +86,7 @@ class MainViewModel @Inject constructor(private val application : Application,
                     val setting = settings[0]
                     setting.defaultTunnel = null
                     setting.isAutoTunnelEnabled = false
+                    setting.isAlwaysOnVpnEnabled = false
                     settingsRepo.save(setting)
                 }
             }
