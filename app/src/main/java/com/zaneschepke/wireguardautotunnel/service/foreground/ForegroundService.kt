@@ -4,7 +4,10 @@ import android.app.Service
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
+import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import timber.log.Timber
+import javax.inject.Inject
 
 
 open class ForegroundService : Service() {
@@ -24,6 +27,10 @@ open class ForegroundService : Service() {
             when (action) {
                 Action.START.name -> startService(intent.extras)
                 Action.STOP.name -> stopService(intent.extras)
+                "android.net.VpnService" -> {
+                    Timber.d("Always-on VPN starting service")
+                    startService(intent.extras)
+                }
                 else -> Timber.d("This should never happen. No action in the received intent")
             }
         } else {

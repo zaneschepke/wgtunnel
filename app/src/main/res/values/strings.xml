@@ -77,4 +77,9 @@
     <string name="failed_connection_to">Failed connection to -</string>
     <string name="initial_connection_failure_message">Attempting to connect to server after 30 seconds of no response.</string>
     <string name="lost_connection_failure_message">Attempting to reconnect to server after more than one minute of no response.</string>
+    <string name="always_on_vpn_support">Enable Always-On VPN support</string>
+    <string name="select_tunnel_message">Please select a tunnel first</string>
+    <string name="location_services_not_detected">Unable to detect Location Services which are required for this feature. Please enable Location Services.</string>
+    <string name="check_again">Check again</string>
+    <string name="detecting_location_services_disabled">Detecting Location Services disabled</string>
 </resources>

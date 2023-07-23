@@ -7,7 +7,6 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.zaneschepke.wireguardautotunnel.service.barcode.CodeScanner
 import com.zaneschepke.wireguardautotunnel.service.barcode.QRScanner
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

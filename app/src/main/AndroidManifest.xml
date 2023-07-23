@@ -5,7 +5,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"
-        android:maxSdkVersion="30" />
+        android:maxSdkVersion="30"
+        tools:ignore="LeanbackUsesWifi" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -19,6 +20,14 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!--start service on boot permission-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!--android tv support-->
+    <uses-feature android:name="android.software.leanback"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
@@ -30,6 +39,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
+        android:banner="@mipmap/ic_launcher_foreground"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -42,6 +52,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
         <service
@@ -52,9 +63,15 @@
         </service>
         <service
             android:name=".service.foreground.WireGuardTunnelService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
             android:enabled="true"
             android:foregroundServiceType="remoteMessaging"
             android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
+            <meta-data android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
+                android:value="true"/>
         </service>
         <service
             android:name=".service.foreground.WireGuardConnectivityWatcherService"

@@ -94,6 +94,7 @@ fun SettingsScreen(
         rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     var currentText by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
+    var isLocationServicesEnabled by remember { mutableStateOf(viewModel.checkLocationServicesEnabled())}
 
     LaunchedEffect(viewState) {
         if (viewState.showSnackbarMessage) {
@@ -176,6 +177,34 @@ fun SettingsScreen(
         }
         return
     }
+    if(!isLocationServicesEnabled) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Text(
+                stringResource(id = R.string.location_services_not_detected),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(15.dp),
+                fontStyle = FontStyle.Italic
+            )
+            Button(onClick = {
+                val locationServicesEnabled = viewModel.checkLocationServicesEnabled()
+                isLocationServicesEnabled = locationServicesEnabled
+                if(!locationServicesEnabled) {
+                    scope.launch {
+                        viewModel.showSnackBarMessage(context.getString(R.string.detecting_location_services_disabled))
+                    }
+                }
+            }) {
+                Text(stringResource(id = R.string.check_again))
+            }
+        }
+        return
+    }
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -197,6 +226,7 @@ fun SettingsScreen(
         ) {
             Text(stringResource(R.string.enable_auto_tunnel))
             Switch(
+                enabled = !settings.isAlwaysOnVpnEnabled,
                 checked = settings.isAutoTunnelEnabled,
                 onCheckedChange = {
                     scope.launch {
@@ -213,12 +243,12 @@ fun SettingsScreen(
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = {
-                if(!settings.isAutoTunnelEnabled) {
+                if(!(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled)) {
                 expanded = !expanded }},
             modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 10.dp),
         ) {
             TextField(
-                enabled = !settings.isAutoTunnelEnabled,
+                enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
                 value = settings.defaultTunnel?.let {
                     TunnelConfig.from(it).name }
                     ?: "",
@@ -266,11 +296,11 @@ fun SettingsScreen(
                     scope.launch {
                         viewModel.onDeleteTrustedSSID(ssid)
                     }
-                }, text = ssid, icon = Icons.Filled.Close, enabled = !settings.isAutoTunnelEnabled)
+                }, text = ssid, icon = Icons.Filled.Close, enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled))
             }
         }
         OutlinedTextField(
-            enabled = !settings.isAutoTunnelEnabled,
+            enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
             value = currentText,
             onValueChange = { currentText = it },
             label = { Text(stringResource(R.string.add_trusted_ssid)) },
@@ -306,11 +336,29 @@ fun SettingsScreen(
         ) {
             Text(stringResource(R.string.tunnel_mobile_data))
             Switch(
-                enabled = !settings.isAutoTunnelEnabled,
+                enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
                 checked = settings.isTunnelOnMobileDataEnabled,
                 onCheckedChange = {
                     scope.launch {
                         viewModel.onToggleTunnelOnMobileData()
+                    }
+                }
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(stringResource(R.string.always_on_vpn_support))
+            Switch(
+                enabled = !settings.isAutoTunnelEnabled,
+                checked = settings.isAlwaysOnVpnEnabled,
+                onCheckedChange = {
+                    scope.launch {
+                        viewModel.onToggleAlwaysOnVPN()
                     }
                 }
             )

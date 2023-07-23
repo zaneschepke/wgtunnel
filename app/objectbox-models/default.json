@@ -31,7 +31,7 @@
     },
     {
       "id": "2:8887605597748372702",
-      "lastPropertyId": "8:4981008812459251156",
+      "lastPropertyId": "9:4468844863383145378",
       "name": "Settings",
       "properties": [
         {
@@ -59,6 +59,11 @@
           "id": "6:3370284381040192129",
           "name": "defaultTunnel",
           "type": 9
+        },
+        {
+          "id": "9:4468844863383145378",
+          "name": "isAlwaysOnVpnEnabled",
+          "type": 1
         }
       ],
       "relations": []
