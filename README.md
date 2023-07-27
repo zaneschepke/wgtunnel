@@ -18,15 +18,7 @@ WG Tunnel
 
 <span align="center">
 
-<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-<script>
-  kofiWidgetOverlay.draw('zaneschepke', {
-    'type': 'floating-chat',
-    'floating-chat.donateButton.text': 'Support me',
-    'floating-chat.donateButton.background-color': '#5bc0de',
-    'floating-chat.donateButton.text-color': '#323842'
-  });
-</script>
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N8NMJN2)
 
 </span>
 
