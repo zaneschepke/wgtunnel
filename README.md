@@ -16,6 +16,21 @@ WG Tunnel
 
 </span>
 
+<span align="center">
+
+<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script>
+  kofiWidgetOverlay.draw('zaneschepke', {
+    'type': 'floating-chat',
+    'floating-chat.donateButton.text': 'Support me',
+    'floating-chat.donateButton.background-color': '#5bc0de',
+    'floating-chat.donateButton.text-color': '#323842'
+  });
+</script>
+
+</span>
+
+
 <span align="left">
 
 This is an alternative Android Application for [WireGuard](https://www.wireguard.com/) with added features. Built using the [wireguard-android](https://github.com/WireGuard/wireguard-android) library and [Jetpack Compose](https://developer.android.com/jetpack/compose), this application was inspired by the official [WireGuard Android](https://github.com/WireGuard/wireguard-android) app.
