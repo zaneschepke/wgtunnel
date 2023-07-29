@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.clickable
@@ -47,6 +48,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -82,6 +85,7 @@ fun SettingsScreen(
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -92,6 +96,7 @@ fun SettingsScreen(
     val tunnels by viewModel.tunnels.collectAsStateWithLifecycle(mutableListOf())
     val backgroundLocationState =
         rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+    val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var currentText by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     var isLocationServicesEnabled by remember { mutableStateOf(viewModel.checkLocationServicesEnabled())}
@@ -119,6 +124,16 @@ fun SettingsScreen(
         }
     }
 
+    fun openSettings() {
+        scope.launch {
+            val intentSettings =
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intentSettings.data =
+                Uri.fromParts("package", context.packageName, null)
+            context.startActivity(intentSettings)
+        }
+    }
+
     if(!backgroundLocationState.status.isGranted) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
@@ -131,7 +146,6 @@ fun SettingsScreen(
                 .size(128.dp))
             Text(stringResource(R.string.prominent_background_location_title), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 20.sp)
             Text(stringResource(R.string.prominent_background_location_message), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 15.sp)
-            //Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -144,18 +158,46 @@ fun SettingsScreen(
                 }) {
                     Text(stringResource(id = R.string.no_thanks))
                 }
-                Button(onClick = {
-                    scope.launch {
-                        val intentSettings =
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intentSettings.data =
-                            Uri.fromParts("package", context.packageName, null)
-                        context.startActivity(intentSettings)
-                    }
+                Button(modifier = Modifier.focusRequester(focusRequester), onClick = {
+                    openSettings()
                 }) {
                     Text(stringResource(id = R.string.turn_on))
                 }
+                LaunchedEffect(Unit) {
+                    if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                        focusRequester.requestFocus()
+                    }
+                }
             }
+        }
+        return
+    }
+
+    if(!fineLocationState.status.isGranted) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Text(
+                stringResource(id = R.string.precise_location_message),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(15.dp),
+                fontStyle = FontStyle.Italic
+            )
+            Button(modifier = Modifier.focusRequester(focusRequester),onClick = {
+                fineLocationState.launchPermissionRequest()
+            }) {
+                Text(stringResource(id = R.string.request))
+            }
+            LaunchedEffect(Unit) {
+                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                    focusRequester.requestFocus()
+                }
+            }
+
         }
         return
     }
@@ -191,7 +233,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(15.dp),
                 fontStyle = FontStyle.Italic
             )
-            Button(onClick = {
+            Button(modifier = Modifier.focusRequester(focusRequester), onClick = {
                 val locationServicesEnabled = viewModel.checkLocationServicesEnabled()
                 isLocationServicesEnabled = locationServicesEnabled
                 if(!locationServicesEnabled) {
@@ -201,6 +243,11 @@ fun SettingsScreen(
                 }
             }) {
                 Text(stringResource(id = R.string.check_again))
+            }
+            LaunchedEffect(Unit) {
+                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                    focusRequester.requestFocus()
+                }
             }
         }
         return
@@ -226,6 +273,7 @@ fun SettingsScreen(
         ) {
             Text(stringResource(R.string.enable_auto_tunnel))
             Switch(
+                modifier = Modifier.focusRequester(focusRequester),
                 enabled = !settings.isAlwaysOnVpnEnabled,
                 checked = settings.isAutoTunnelEnabled,
                 onCheckedChange = {
@@ -234,6 +282,11 @@ fun SettingsScreen(
                     }
                 }
             )
+            LaunchedEffect(Unit) {
+                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                    focusRequester.requestFocus()
+                }
+            }
         }
         Text(
             stringResource(id = R.string.select_tunnel),
@@ -245,7 +298,9 @@ fun SettingsScreen(
             onExpandedChange = {
                 if(!(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled)) {
                 expanded = !expanded }},
-            modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 10.dp),
+            modifier = Modifier.padding(start = 15.dp, top = 5.dp, bottom = 10.dp).clickable {
+                  expanded = !expanded
+            },
         ) {
             TextField(
                 enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),

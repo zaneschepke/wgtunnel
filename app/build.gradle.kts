@@ -16,7 +16,7 @@ android {
     compileSdk = 34
 
     val versionMajor = 2
-    val versionMinor = 2
+    val versionMinor = 3
     val versionPatch = 0
     val versionBuild = 0
 
@@ -123,9 +123,6 @@ dependencies {
 
     //barcode scanning
     implementation("com.google.android.gms:play-services-code-scanner:16.0.0")
-
-
-
 }
 
 kapt {

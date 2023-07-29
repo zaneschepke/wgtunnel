@@ -82,4 +82,6 @@
     <string name="location_services_not_detected">Unable to detect Location Services which are required for this feature. Please enable Location Services.</string>
     <string name="check_again">Check again</string>
     <string name="detecting_location_services_disabled">Detecting Location Services disabled</string>
+    <string name="precise_location_message">This feature requires precise location to access Wi-Fi SSID name. Please enable precise location here or in the app settings.</string>
+    <string name="request">Request</string>
 </resources>

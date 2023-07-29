@@ -1,12 +1,14 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -49,7 +52,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -76,7 +82,7 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.mint
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(), padding: PaddingValues,
@@ -86,6 +92,7 @@ fun MainScreen(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val isVisible = rememberSaveable { mutableStateOf(true) }
+    val focusRequester = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
 
     val sheetState = rememberModalBottomSheetState()
@@ -256,7 +263,13 @@ fun MainScreen(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             selectedTunnel = tunnel;
                         },
-                        onClick = { navController.navigate("${Routes.Detail.name}/${tunnel.id}") },
+                        onClick = {
+                            if(!context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)){
+                                navController.navigate("${Routes.Detail.name}/${tunnel.id}")
+                            } else {
+                                focusRequester.requestFocus()
+                            }
+                         },
                         rowButton = {
                             if (tunnel.id == selectedTunnel?.id) {
                                 Row() {
@@ -265,7 +278,9 @@ fun MainScreen(
                                     }) {
                                         Icon(Icons.Rounded.Edit, stringResource(id = R.string.edit))
                                     }
-                                    IconButton(onClick = { viewModel.onDelete(tunnel) }) {
+                                    IconButton(
+                                        modifier = Modifier.focusable(),
+                                        onClick = { viewModel.onDelete(tunnel) }) {
                                         Icon(
                                             Icons.Rounded.Delete,
                                             stringResource(id = R.string.delete)
@@ -273,12 +288,51 @@ fun MainScreen(
                                     }
                                 }
                             } else {
-                                Switch(
-                                    checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
-                                    onCheckedChange = { checked ->
-                                        if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+                                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)){
+                                    Row() {
+                                        IconButton(modifier = Modifier.focusRequester(focusRequester),onClick = {
+                                            navController.navigate("${Routes.Detail.name}/${tunnel.id}")
+                                        }) {
+                                            Icon(Icons.Rounded.Info, "Info")
+                                        }
+                                        IconButton(onClick = {
+                                            if (state == Tunnel.State.UP && tunnel.name == tunnelName)
+                                                scope.launch {
+                                                    viewModel.showSnackBarMessage(context.resources.getString(R.string.turn_off_tunnel))
+                                                } else {
+                                                    navController.navigate("${Routes.Config.name}/${tunnel.id}")
+                                                }
+                                        }) {
+                                            Icon(Icons.Rounded.Edit, stringResource(id = R.string.edit))
+                                        }
+                                        IconButton(onClick = {
+                                            if (state == Tunnel.State.UP && tunnel.name == tunnelName)
+                                                scope.launch {
+                                                    viewModel.showSnackBarMessage(context.resources.getString(R.string.turn_off_tunnel))
+                                                } else {
+                                                    viewModel.onDelete(tunnel)
+                                                }
+                                        }) {
+                                            Icon(
+                                                Icons.Rounded.Delete,
+                                                stringResource(id = R.string.delete)
+                                            )
+                                        }
+                                        Switch(
+                                            checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
+                                            onCheckedChange = { checked ->
+                                                if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+                                            }
+                                        )
                                     }
-                                )
+                                } else {
+                                    Switch(
+                                        checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
+                                        onCheckedChange = { checked ->
+                                            if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+                                        }
+                                    )
+                                }
                             }
                         })
                 }

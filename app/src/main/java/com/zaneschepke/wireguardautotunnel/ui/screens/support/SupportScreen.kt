@@ -1,8 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,8 +19,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -34,6 +40,7 @@ import com.zaneschepke.wireguardautotunnel.R
 fun SupportScreen(padding : PaddingValues) {
 
     val context = LocalContext.current
+    val focusRequester = remember { FocusRequester() }
 
     fun openWebPage(url: String) {
         val webpage: Uri = Uri.parse(url)
@@ -46,6 +53,7 @@ fun SupportScreen(padding : PaddingValues) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .focusable()
                 .padding(padding)) {
             Text(stringResource(R.string.support_text), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 15.sp)
             Row(
@@ -60,10 +68,15 @@ fun SupportScreen(padding : PaddingValues) {
                 }) {
                     Icon(imageVector = ImageVector.vectorResource(R.drawable.discord), "Discord")
                 }
-                IconButton(onClick = {
+                IconButton(modifier = Modifier.focusRequester(focusRequester),onClick = {
                     openWebPage(context.resources.getString(R.string.github_url))
                 }) {
                     Icon(imageVector = ImageVector.vectorResource(R.drawable.github), "Github")
+                }
+                LaunchedEffect(Unit) {
+                    if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                        focusRequester.requestFocus()
+                    }
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
