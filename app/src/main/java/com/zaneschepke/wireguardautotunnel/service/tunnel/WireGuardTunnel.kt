@@ -5,6 +5,7 @@ import com.wireguard.android.backend.BackendException
 import com.wireguard.android.backend.Statistics
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.crypto.Key
+import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import kotlinx.coroutines.CoroutineScope
@@ -103,7 +104,7 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
                                 _handshakeStatus.emit(HandshakeStatus.NOT_STARTED)
                             }
                             if(neverHadHandshakeCounter <= HandshakeStatus.NEVER_CONNECTED_TO_UNHEALTHY_TIME_LIMIT_SEC) {
-                                neverHadHandshakeCounter++
+                                neverHadHandshakeCounter += 10
                             }
                             return@forEach
                         }
@@ -114,7 +115,7 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
                         }
                     }
                     _lastHandshake.emit(handshakeMap)
-                    delay(1000)
+                    delay(Constants.VPN_STATISTIC_CHECK_INTERVAL)
                 }
             }
         }

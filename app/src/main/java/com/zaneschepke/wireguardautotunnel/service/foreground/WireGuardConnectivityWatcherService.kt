@@ -8,7 +8,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PowerManager
 import android.os.SystemClock
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wireguard.android.backend.Tunnel
+import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
@@ -22,6 +25,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -46,14 +52,13 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     @Inject
     lateinit var vpnService : VpnService
 
+    private var isWifiConnected = false;
+    private var isMobileDataConnected = false;
+    private var currentNetworkSSID = "";
+
     private lateinit var watcherJob : Job;
     private lateinit var setting : Settings
     private lateinit var tunnelId: String
-
-    private var connecting = false
-    private var disconnecting = false
-    private var isWifiConnected = false
-    private var isMobileDataConnected = false
 
     private var wakeLock: PowerManager.WakeLock? = null
     private val tag = this.javaClass.name;
@@ -136,6 +141,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     watchForMobileDataConnectivityChanges()
                 }
             }
+            CoroutineScope(watcherJob).launch {
+                manageVpn()
+            }
         }
     }
 
@@ -149,17 +157,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 is NetworkStatus.CapabilitiesChanged -> {
                     isMobileDataConnected = true
                     Timber.d("Mobile data capabilities changed")
-                    if(!disconnecting && !connecting) {
-                        if(!isWifiConnected && setting.isTunnelOnMobileDataEnabled
-                            && vpnService.getState() == Tunnel.State.DOWN)
-                            startVPN()
-                    }
                 }
                 is NetworkStatus.Unavailable -> {
                     isMobileDataConnected = false
-                    if(!disconnecting && !connecting) {
-                        if(!isWifiConnected && vpnService.getState() == Tunnel.State.UP) stopVPN()
-                    }
                     Timber.d("Lost mobile data connection")
                 }
             }
@@ -176,61 +176,52 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     is NetworkStatus.CapabilitiesChanged -> {
                         Timber.d("Wifi capabilities changed")
                         isWifiConnected = true
-                        if (!connecting && !disconnecting) {
-                            Timber.d("Not connect and not disconnecting")
-                            val ssid = wifiService.getNetworkName(it.networkCapabilities);
-                            Timber.d("SSID: $ssid")
-                            if (!setting.trustedNetworkSSIDs.contains(ssid) && vpnService.getState() == Tunnel.State.DOWN) {
-                                Timber.d("Starting VPN Tunnel for untrusted network: $ssid")
-                                startVPN()
-                            } else if (!disconnecting && vpnService.getState() == Tunnel.State.UP && setting.trustedNetworkSSIDs.contains(
-                                    ssid
-                                )
-                            ) {
-                                Timber.d("Stopping VPN Tunnel for trusted network with ssid: $ssid")
-                                stopVPN()
-                            }
-                        }
+                        currentNetworkSSID = wifiService.getNetworkName(it.networkCapabilities) ?: "";
                     }
                     is NetworkStatus.Unavailable -> {
                         isWifiConnected = false
                         Timber.d("Lost Wi-Fi connection")
-                        if(!connecting || !disconnecting) {
-                            if(setting.isTunnelOnMobileDataEnabled && vpnService.getState() == Tunnel.State.DOWN
-                                && isMobileDataConnected){
-                                Timber.d("Wifi not available so starting vpn for mobile data")
-                                startVPN()
-                            }
-                            if(!setting.isTunnelOnMobileDataEnabled && vpnService.getState() == Tunnel.State.UP) {
-                                Timber.d("Lost WiFi connection, disabling vpn")
-                                stopVPN()
-                            }
-                        }
-
                     }
                 }
             }
         }
-    private fun startVPN() {
-        if(!connecting) {
-            connecting = true
-            ServiceTracker.actionOnService(
-                Action.START,
-                this.applicationContext as Application,
-                WireGuardTunnelService::class.java,
-                mapOf(getString(R.string.tunnel_extras_key) to tunnelId))
-            connecting = false
+
+    private suspend fun manageVpn() {
+        while(watcherJob.isActive) {
+            if(setting.isTunnelOnMobileDataEnabled &&
+                !isWifiConnected &&
+                isMobileDataConnected
+                && vpnService.getState() == Tunnel.State.DOWN) {
+                startVPN()
+            } else if(!setting.isTunnelOnMobileDataEnabled &&
+                !isWifiConnected &&
+                vpnService.getState() == Tunnel.State.UP) {
+                stopVPN()
+            } else if(isWifiConnected &&
+                !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
+                (vpnService.getState() != Tunnel.State.UP)) {
+                startVPN()
+            } else if((isWifiConnected &&
+                        setting.trustedNetworkSSIDs.contains(currentNetworkSSID)) &&
+                (vpnService.getState() == Tunnel.State.UP)) {
+                stopVPN()
+            }
+            delay(Constants.VPN_CONNECTIVITY_CHECK_INTERVAL)
         }
     }
+
+    private fun startVPN() {
+        ServiceTracker.actionOnService(
+            Action.START,
+            this.applicationContext as Application,
+            WireGuardTunnelService::class.java,
+            mapOf(getString(R.string.tunnel_extras_key) to tunnelId))
+    }
     private fun stopVPN() {
-        if(!disconnecting) {
-            disconnecting = true
-            ServiceTracker.actionOnService(
-                Action.STOP,
-                this.applicationContext as Application,
-                WireGuardTunnelService::class.java
-            )
-            disconnecting = false
-        }
+        ServiceTracker.actionOnService(
+            Action.STOP,
+            this.applicationContext as Application,
+            WireGuardTunnelService::class.java
+        )
     }
 }
