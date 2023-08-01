@@ -82,17 +82,17 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.mint
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(), padding: PaddingValues,
+    focusRequester: FocusRequester,
     snackbarHostState: SnackbarHostState, navController: NavController
 ) {
 
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val isVisible = rememberSaveable { mutableStateOf(true) }
-    val focusRequester = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
 
     val sheetState = rememberModalBottomSheetState()

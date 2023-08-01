@@ -80,12 +80,12 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     padding: PaddingValues,
     navController: NavController,
+    focusRequester: FocusRequester,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ) {
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -163,11 +163,6 @@ fun SettingsScreen(
                 }) {
                     Text(stringResource(id = R.string.turn_on))
                 }
-                LaunchedEffect(Unit) {
-                    if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                        focusRequester.requestFocus()
-                    }
-                }
             }
         }
         return
@@ -191,11 +186,6 @@ fun SettingsScreen(
                 fineLocationState.launchPermissionRequest()
             }) {
                 Text(stringResource(id = R.string.request))
-            }
-            LaunchedEffect(Unit) {
-                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                    focusRequester.requestFocus()
-                }
             }
 
         }
@@ -244,11 +234,6 @@ fun SettingsScreen(
             }) {
                 Text(stringResource(id = R.string.check_again))
             }
-            LaunchedEffect(Unit) {
-                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                    focusRequester.requestFocus()
-                }
-            }
         }
         return
     }
@@ -282,11 +267,6 @@ fun SettingsScreen(
                     }
                 }
             )
-            LaunchedEffect(Unit) {
-                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                    focusRequester.requestFocus()
-                }
-            }
         }
         Text(
             stringResource(id = R.string.select_tunnel),

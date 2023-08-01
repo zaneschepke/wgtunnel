@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.KeyEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.input.key.onKeyEvent
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -40,6 +44,8 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.TransparentSystemBars
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
+import java.lang.IllegalStateException
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -51,6 +57,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberAnimatedNavController()
+            val focusRequester = remember { FocusRequester() }
+
             WireguardAutoTunnelTheme {
                 TransparentSystemBars()
 
@@ -80,7 +88,25 @@ class MainActivity : AppCompatActivity() {
                     } else requestNotificationPermission()
                 }
 
-                Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) },
+                Scaffold(snackbarHost = { SnackbarHost(snackbarHostState)},
+                    modifier = Modifier.onKeyEvent {
+                        if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                            when (it.nativeKeyEvent.keyCode) {
+                                KeyEvent.KEYCODE_DPAD_UP -> {
+                                    try {
+                                        focusRequester.requestFocus()
+                                    } catch(e : IllegalStateException) {
+                                        Timber.e("No D-Pad focus request modifier added to element on screen")
+                                    }
+                                    false
+                                } else -> {
+                                   false;
+                                }
+                            }
+                        } else {
+                            false
+                        }
+                    },
                     bottomBar = if (vpnIntent == null && notificationPermissionState.status.isGranted) {
                         { BottomNavBar(navController, Routes.navItems) }
                     } else {
@@ -126,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }) {
-                            MainScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController)
+                            MainScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController, focusRequester = focusRequester)
                         }
                         composable(Routes.Settings.name, enterTransition = {
                             when (initialState.destination.route) {
@@ -147,7 +173,7 @@ class MainActivity : AppCompatActivity() {
                                     fadeIn(animationSpec = tween(1000))
                                 }
                             }
-                        }) { SettingsScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController) }
+                        }) { SettingsScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController, focusRequester = focusRequester) }
                         composable(Routes.Support.name, enterTransition = {
                             when (initialState.destination.route) {
                                 Routes.Settings.name, Routes.Main.name ->
@@ -160,10 +186,10 @@ class MainActivity : AppCompatActivity() {
                                     fadeIn(animationSpec = tween(1000))
                                 }
                             }
-                        }) { SupportScreen(padding = padding) }
+                        }) { SupportScreen(padding = padding, focusRequester) }
                         composable("${Routes.Config.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(1000))
-                        }) { ConfigScreen(padding = padding, navController = navController, id = it.arguments?.getString("id"))}
+                        }) { ConfigScreen(padding = padding, navController = navController, id = it.arguments?.getString("id"), focusRequester = focusRequester)}
                         composable("${Routes.Detail.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(1000))
                         }) { DetailScreen(padding = padding, id = it.arguments?.getString("id")) }

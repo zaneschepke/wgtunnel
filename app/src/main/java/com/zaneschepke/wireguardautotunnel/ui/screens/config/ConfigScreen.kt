@@ -52,13 +52,13 @@ import kotlinx.coroutines.launch
 fun ConfigScreen(
     viewModel: ConfigViewModel = hiltViewModel(),
     padding: PaddingValues,
+    focusRequester: FocusRequester,
     navController: NavController,
     id : String?
 ) {
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val focusRequester = remember { FocusRequester() }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
@@ -226,11 +226,6 @@ fun ConfigScreen(
                         Text(stringResource(id = R.string.save_changes))
                     }
                 }
-            }
-        }
-        LaunchedEffect(Unit) {
-            if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                focusRequester.requestFocus()
             }
         }
     }

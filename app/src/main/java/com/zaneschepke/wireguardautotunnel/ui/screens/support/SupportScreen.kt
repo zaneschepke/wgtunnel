@@ -37,10 +37,9 @@ import androidx.compose.ui.unit.sp
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
-fun SupportScreen(padding : PaddingValues) {
+fun SupportScreen(padding : PaddingValues, focusRequester: FocusRequester) {
 
     val context = LocalContext.current
-    val focusRequester = remember { FocusRequester() }
 
     fun openWebPage(url: String) {
         val webpage: Uri = Uri.parse(url)
@@ -73,11 +72,11 @@ fun SupportScreen(padding : PaddingValues) {
                 }) {
                     Icon(imageVector = ImageVector.vectorResource(R.drawable.github), "Github")
                 }
-                LaunchedEffect(Unit) {
-                    if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                        focusRequester.requestFocus()
-                    }
-                }
+//                LaunchedEffect(Unit) {
+//                    if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+//                        focusRequester.requestFocus()
+//                    }
+//                }
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(stringResource(id = R.string.privacy_policy), style = TextStyle(textDecoration = TextDecoration.Underline),
