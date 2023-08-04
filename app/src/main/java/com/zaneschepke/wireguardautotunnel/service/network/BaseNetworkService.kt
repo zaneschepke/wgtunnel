@@ -45,6 +45,7 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(val context: Contex
                     }
                 }
             }
+
             else -> {
                 object : ConnectivityManager.NetworkCallback() {
 
@@ -77,8 +78,8 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(val context: Contex
 
 
     override fun getNetworkName(networkCapabilities: NetworkCapabilities): String? {
-        var ssid : String? = getWifiNameFromCapabilities(networkCapabilities)
-        if((Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R)) {
+        var ssid: String? = getWifiNameFromCapabilities(networkCapabilities)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
             val info = wifiManager.connectionInfo
             if (info.supplicantState === SupplicantState.COMPLETED) {
                 ssid = info.ssid
@@ -89,14 +90,15 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(val context: Contex
 
 
     companion object {
-        private fun getWifiNameFromCapabilities(networkCapabilities: NetworkCapabilities) : String? {
-            val info : WifiInfo
-            if(networkCapabilities.transportInfo is WifiInfo) {
-                info = networkCapabilities.transportInfo as WifiInfo
-            } else {
-                return null
+        private fun getWifiNameFromCapabilities(networkCapabilities: NetworkCapabilities): String? {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val info: WifiInfo
+                if (networkCapabilities.transportInfo is WifiInfo) {
+                    info = networkCapabilities.transportInfo as WifiInfo
+                    return info.ssid
+                }
             }
-            return info.ssid
+            return null
         }
     }
 }

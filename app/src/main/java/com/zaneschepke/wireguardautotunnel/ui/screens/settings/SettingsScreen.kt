@@ -2,8 +2,8 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -67,6 +68,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
@@ -134,7 +136,7 @@ fun SettingsScreen(
         }
     }
 
-    if(!backgroundLocationState.status.isGranted) {
+    if(!backgroundLocationState.status.isGranted && Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
@@ -147,7 +149,9 @@ fun SettingsScreen(
             Text(stringResource(R.string.prominent_background_location_title), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 20.sp)
             Text(stringResource(R.string.prominent_background_location_message), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 15.sp)
             Row(
-                modifier = Modifier
+                modifier = if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp) else Modifier
                     .fillMaxWidth()
                     .padding(30.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -209,7 +213,7 @@ fun SettingsScreen(
         }
         return
     }
-    if(!isLocationServicesEnabled) {
+    if(!isLocationServicesEnabled && Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -237,11 +241,18 @@ fun SettingsScreen(
         }
         return
     }
-
+    val screenPadding = if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) 5.dp else 15.dp
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
-        modifier = Modifier
+        modifier = if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) Modifier
+            .fillMaxHeight(.85f)
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+            .clickable(indication = null, interactionSource = interactionSource) {
+                focusManager.clearFocus()
+            }
+            .padding(padding) else Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
             .clickable(indication = null, interactionSource = interactionSource) {
@@ -252,7 +263,7 @@ fun SettingsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(screenPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -271,7 +282,7 @@ fun SettingsScreen(
         Text(
             stringResource(id = R.string.select_tunnel),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(15.dp, bottom = 5.dp, top = 5.dp)
+            modifier = Modifier.padding(screenPadding, bottom = 5.dp, top = 5.dp)
         )
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -319,10 +330,10 @@ fun SettingsScreen(
         Text(
             stringResource(R.string.trusted_ssid),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(15.dp, bottom = 5.dp, top = 5.dp)
+            modifier = Modifier.padding(screenPadding, bottom = 5.dp, top = 5.dp)
         )
         FlowRow(
-            modifier = Modifier.padding(15.dp),
+            modifier = Modifier.padding(screenPadding),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -339,7 +350,7 @@ fun SettingsScreen(
             value = currentText,
             onValueChange = { currentText = it },
             label = { Text(stringResource(R.string.add_trusted_ssid)) },
-            modifier = Modifier.padding(start = 15.dp, top = 5.dp),
+            modifier = Modifier.padding(start = screenPadding, top = 5.dp),
             maxLines = 1,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.None,
@@ -365,7 +376,7 @@ fun SettingsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(screenPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -383,7 +394,7 @@ fun SettingsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(screenPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

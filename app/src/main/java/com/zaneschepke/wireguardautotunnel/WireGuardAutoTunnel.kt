@@ -1,6 +1,8 @@
 package com.zaneschepke.wireguardautotunnel
 
 import android.app.Application
+import android.content.Context
+import android.content.pm.PackageManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
@@ -21,5 +23,11 @@ class WireGuardAutoTunnel : Application() {
             Timber.plant(Timber.DebugTree())
         }
         settingsRepo.init()
+    }
+
+    companion object {
+        fun isRunningOnAndroidTv(context : Context) : Boolean {
+            return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+        }
     }
 }

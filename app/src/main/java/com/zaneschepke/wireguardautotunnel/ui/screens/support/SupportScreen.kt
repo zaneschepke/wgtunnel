@@ -72,11 +72,6 @@ fun SupportScreen(padding : PaddingValues, focusRequester: FocusRequester) {
                 }) {
                     Icon(imageVector = ImageVector.vectorResource(R.drawable.github), "Github")
                 }
-//                LaunchedEffect(Unit) {
-//                    if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-//                        focusRequester.requestFocus()
-//                    }
-//                }
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(stringResource(id = R.string.privacy_policy), style = TextStyle(textDecoration = TextDecoration.Underline),

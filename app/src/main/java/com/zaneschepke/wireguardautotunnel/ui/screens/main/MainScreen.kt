@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -52,7 +51,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -73,6 +71,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.Routes
@@ -246,12 +245,12 @@ fun MainScreen(
                 .nestedScroll(nestedScrollConnection),) {
                 items(tunnels.toList()) { tunnel ->
                     RowListItem(leadingIcon = Icons.Rounded.Circle,
-                        leadingIconColor = when (handshakeStatus) {
+                        leadingIconColor = if (tunnelName == tunnel.name) when (handshakeStatus) {
                             HandshakeStatus.HEALTHY -> mint
                             HandshakeStatus.UNHEALTHY -> brickRed
                             HandshakeStatus.NOT_STARTED -> Color.Gray
                             HandshakeStatus.NEVER_CONNECTED -> brickRed
-                        },
+                        } else Color.Gray,
                         text = tunnel.name,
                         onHold = {
                             if (state == Tunnel.State.UP && tunnel.name == tunnelName) {
@@ -264,7 +263,7 @@ fun MainScreen(
                             selectedTunnel = tunnel;
                         },
                         onClick = {
-                            if(!context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)){
+                            if(!WireGuardAutoTunnel.isRunningOnAndroidTv(context)){
                                 navController.navigate("${Routes.Detail.name}/${tunnel.id}")
                             } else {
                                 focusRequester.requestFocus()
@@ -288,7 +287,7 @@ fun MainScreen(
                                     }
                                 }
                             } else {
-                                if(context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)){
+                                if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)){
                                     Row() {
                                         IconButton(modifier = Modifier.focusRequester(focusRequester),onClick = {
                                             navController.navigate("${Routes.Detail.name}/${tunnel.id}")

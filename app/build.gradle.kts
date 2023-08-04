@@ -17,12 +17,12 @@ android {
 
     val versionMajor = 2
     val versionMinor = 3
-    val versionPatch = 2
+    val versionPatch = 3
     val versionBuild = 0
 
     defaultConfig {
         applicationId = "com.zaneschepke.wireguardautotunnel"
-        minSdk = 29
+        minSdk = 28
         targetSdk = 34
         versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -83,7 +83,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     //wireguard tunnel
-    implementation("com.wireguard.android:tunnel:1.0.20230427")
+    implementation("com.wireguard.android:tunnel:1.0.20230706")
 
     //logging
     implementation("com.jakewharton.timber:timber:5.0.1")
