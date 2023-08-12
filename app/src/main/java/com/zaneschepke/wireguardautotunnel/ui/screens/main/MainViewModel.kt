@@ -144,7 +144,12 @@ class MainViewModel @Inject constructor(private val application : Application,
     @SuppressLint("Range")
     private fun getFileName(context: Context, uri: Uri): String {
         if (uri.scheme == "content") {
-            val cursor = context.contentResolver.query(uri, null, null, null, null)
+            val cursor = try {
+                context.contentResolver.query(uri, null, null, null, null)
+            } catch (e : Exception) {
+                Timber.d("Exception getting config name")
+                null
+            }
             cursor ?: return defaultConfigName()
             cursor.use {
                 if(cursor.moveToFirst()) {
