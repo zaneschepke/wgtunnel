@@ -335,7 +335,7 @@ fun SettingsScreen(
         FlowRow(
             modifier = Modifier.padding(screenPadding),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
             trustedSSIDs.forEach { ssid ->
                 ClickableIconButton(onIconClick = {

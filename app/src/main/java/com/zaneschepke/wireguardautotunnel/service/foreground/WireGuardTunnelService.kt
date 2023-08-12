@@ -15,7 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -42,7 +41,7 @@ class WireGuardTunnelService : ForegroundService() {
         super.startService(extras)
         val tunnelConfigString = extras?.getString(getString(R.string.tunnel_extras_key))
         cancelJob()
-        job = CoroutineScope(SupervisorJob()).launch {
+        job = CoroutineScope(Dispatchers.IO).launch {
             if(tunnelConfigString != null) {
                 try {
                     val tunnelConfig = TunnelConfig.from(tunnelConfigString)

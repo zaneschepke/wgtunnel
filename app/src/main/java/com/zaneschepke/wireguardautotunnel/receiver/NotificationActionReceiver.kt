@@ -11,7 +11,7 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelSer
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -23,7 +23,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
     @Inject
     lateinit var settingsRepo : Repository<Settings>
     override fun onReceive(context: Context, intent: Intent?) {
-        CoroutineScope(SupervisorJob()).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 val settings = settingsRepo.getAll()
                 if (!settings.isNullOrEmpty()) {

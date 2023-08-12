@@ -8,8 +8,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PowerManager
 import android.os.SystemClock
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
@@ -23,11 +21,9 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -128,20 +124,20 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private fun startWatcherJob() {
-        watcherJob = CoroutineScope(SupervisorJob()).launch {
+        watcherJob = CoroutineScope(Dispatchers.IO).launch {
             val settings = settingsRepo.getAll();
             if(!settings.isNullOrEmpty()) {
                 setting = settings[0]
             }
-            CoroutineScope(watcherJob).launch {
+            launch {
                 watchForWifiConnectivityChanges()
             }
             if(setting.isTunnelOnMobileDataEnabled) {
-                CoroutineScope(watcherJob).launch {
+                launch {
                     watchForMobileDataConnectivityChanges()
                 }
             }
-            CoroutineScope(watcherJob).launch {
+            launch {
                 manageVpn()
             }
         }

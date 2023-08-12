@@ -17,7 +17,7 @@ android {
 
     val versionMajor = 2
     val versionMinor = 3
-    val versionPatch = 3
+    val versionPatch = 4
     val versionBuild = 0
 
     defaultConfig {
@@ -89,7 +89,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // compose navigation
-    implementation("androidx.navigation:navigation-compose:2.6.0")
+    implementation("androidx.navigation:navigation-compose:2.7.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // hilt
@@ -110,7 +110,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
 
     //icons
-    implementation("androidx.compose.material:material-icons-extended:1.4.3")
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
@@ -122,7 +122,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics-ktx")
 
     //barcode scanning
-    implementation("com.google.android.gms:play-services-code-scanner:16.0.0")
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
 }
 
 kapt {
