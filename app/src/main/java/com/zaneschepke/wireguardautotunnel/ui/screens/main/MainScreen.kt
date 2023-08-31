@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileOpen
@@ -85,7 +86,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(), padding: PaddingValues,
-    focusRequester: FocusRequester,
     snackbarHostState: SnackbarHostState, navController: NavController
 ) {
 
@@ -149,7 +149,7 @@ fun MainScreen(
             })
         },
         floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton =  {
+        floatingActionButton = {
             AnimatedVisibility(
                 visible = isVisible.value,
                 enter = slideInVertically(initialOffsetY = { it * 2 }),
@@ -241,9 +241,12 @@ fun MainScreen(
                 .padding(padding)
         ) {
 
-            LazyColumn(modifier = Modifier.fillMaxSize()
-                .nestedScroll(nestedScrollConnection),) {
-                items(tunnels.toList()) { tunnel ->
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+                    .nestedScroll(nestedScrollConnection),
+            ) {
+                itemsIndexed(tunnels.toList()) { index, tunnel ->
+                    val focusRequester = FocusRequester();
                     RowListItem(leadingIcon = Icons.Rounded.Circle,
                         leadingIconColor = if (tunnelName == tunnel.name) when (handshakeStatus) {
                             HandshakeStatus.HEALTHY -> mint
@@ -263,15 +266,15 @@ fun MainScreen(
                             selectedTunnel = tunnel;
                         },
                         onClick = {
-                            if(!WireGuardAutoTunnel.isRunningOnAndroidTv(context)){
+                            if (!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                 navController.navigate("${Routes.Detail.name}/${tunnel.id}")
                             } else {
                                 focusRequester.requestFocus()
                             }
-                         },
+                        },
                         rowButton = {
                             if (tunnel.id == selectedTunnel?.id) {
-                                Row() {
+                                Row {
                                     IconButton(onClick = {
                                         navController.navigate("${Routes.Config.name}/${selectedTunnel?.id}")
                                     }) {
@@ -287,30 +290,43 @@ fun MainScreen(
                                     }
                                 }
                             } else {
-                                if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)){
-                                    Row() {
-                                        IconButton(modifier = Modifier.focusRequester(focusRequester),onClick = {
-                                            navController.navigate("${Routes.Detail.name}/${tunnel.id}")
-                                        }) {
+                                if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                                    Row {
+                                        IconButton(
+                                            modifier = Modifier.focusRequester(focusRequester),
+                                            onClick = {
+                                                navController.navigate("${Routes.Detail.name}/${tunnel.id}")
+                                            }) {
                                             Icon(Icons.Rounded.Info, "Info")
                                         }
                                         IconButton(onClick = {
                                             if (state == Tunnel.State.UP && tunnel.name == tunnelName)
                                                 scope.launch {
-                                                    viewModel.showSnackBarMessage(context.resources.getString(R.string.turn_off_tunnel))
+                                                    viewModel.showSnackBarMessage(
+                                                        context.resources.getString(
+                                                            R.string.turn_off_tunnel
+                                                        )
+                                                    )
                                                 } else {
-                                                    navController.navigate("${Routes.Config.name}/${tunnel.id}")
-                                                }
+                                                navController.navigate("${Routes.Config.name}/${tunnel.id}")
+                                            }
                                         }) {
-                                            Icon(Icons.Rounded.Edit, stringResource(id = R.string.edit))
+                                            Icon(
+                                                Icons.Rounded.Edit,
+                                                stringResource(id = R.string.edit)
+                                            )
                                         }
                                         IconButton(onClick = {
                                             if (state == Tunnel.State.UP && tunnel.name == tunnelName)
                                                 scope.launch {
-                                                    viewModel.showSnackBarMessage(context.resources.getString(R.string.turn_off_tunnel))
+                                                    viewModel.showSnackBarMessage(
+                                                        context.resources.getString(
+                                                            R.string.turn_off_tunnel
+                                                        )
+                                                    )
                                                 } else {
-                                                    viewModel.onDelete(tunnel)
-                                                }
+                                                viewModel.onDelete(tunnel)
+                                            }
                                         }) {
                                             Icon(
                                                 Icons.Rounded.Delete,

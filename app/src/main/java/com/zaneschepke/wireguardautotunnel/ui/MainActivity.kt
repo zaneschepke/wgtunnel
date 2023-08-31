@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }) {
-                            MainScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController, focusRequester = focusRequester)
+                            MainScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController)
                         }
                         composable(Routes.Settings.name, enterTransition = {
                             when (initialState.destination.route) {

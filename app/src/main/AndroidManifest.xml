@@ -65,6 +65,20 @@
             android:exported="false">
         </service>
         <service
+            android:exported="true"
+            android:name=".service.TunnelControlTile"
+            android:icon="@drawable/shield"
+            android:label="WG Tunnel"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+            <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
             android:name=".service.foreground.WireGuardTunnelService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:enabled="true"

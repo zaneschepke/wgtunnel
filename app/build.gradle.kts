@@ -17,7 +17,7 @@ android {
 
     val versionMajor = 2
     val versionMinor = 3
-    val versionPatch = 5
+    val versionPatch = 6
     val versionBuild = 0
 
     defaultConfig {
@@ -89,7 +89,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // compose navigation
-    implementation("androidx.navigation:navigation-compose:2.7.0")
+    implementation("androidx.navigation:navigation-compose:2.7.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // hilt
