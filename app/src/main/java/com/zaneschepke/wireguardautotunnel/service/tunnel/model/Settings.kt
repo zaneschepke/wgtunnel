@@ -11,5 +11,5 @@ data class Settings(
     var isTunnelOnMobileDataEnabled : Boolean = false,
     var trustedNetworkSSIDs : MutableList<String> = mutableListOf(),
     var defaultTunnel : String? = null,
-    var isAlwaysOnVpnEnabled : Boolean = false
+    var isAlwaysOnVpnEnabled : Boolean = false,
 )

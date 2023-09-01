@@ -85,7 +85,6 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
             }
         }
         cancelWatcherJob()
-        stopVPN()
         stopSelf()
     }
 

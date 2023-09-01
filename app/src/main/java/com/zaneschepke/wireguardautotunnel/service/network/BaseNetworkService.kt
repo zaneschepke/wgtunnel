@@ -28,7 +28,6 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(val context: Contex
                 object : ConnectivityManager.NetworkCallback(
                     FLAG_INCLUDE_LOCATION_INFO
                 ) {
-
                     override fun onAvailable(network: Network) {
                         trySend(NetworkStatus.Available(network))
                     }
@@ -68,6 +67,8 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(val context: Contex
         }
         val request = NetworkRequest.Builder()
             .addTransportType(networkCapability)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
             .build()
         connectivityManager.registerNetworkCallback(request, networkStatusCallback)
 

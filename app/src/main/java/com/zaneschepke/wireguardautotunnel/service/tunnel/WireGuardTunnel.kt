@@ -30,6 +30,7 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
     override val tunnelName get() = _tunnelName.asStateFlow()
 
     private val _state = MutableSharedFlow<Tunnel.State>(
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
         replay = 1)
 
     private val _handshakeStatus = MutableSharedFlow<HandshakeStatus>(replay = 1,

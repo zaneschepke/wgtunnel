@@ -24,6 +24,7 @@ object ServiceTracker {
 
     fun <T : Service> actionOnService(action: Action, application: Application, cls : Class<T>, extras : Map<String,String>? = null) {
         if (getServiceState(application, cls) == ServiceState.STOPPED && action == Action.STOP) return
+        if (getServiceState(application, cls) == ServiceState.STARTED && action == Action.START) return
         val intent = Intent(application, cls).also {
             it.action = action.name
             extras?.forEach {(k, v) ->
@@ -40,6 +41,7 @@ object ServiceTracker {
 
     fun <T : Service> actionOnService(action: Action, context: Context, cls : Class<T>, extras : Map<String,String>? = null) {
         if (getServiceState(context, cls) == ServiceState.STOPPED && action == Action.STOP) return
+        if (getServiceState(context, cls) == ServiceState.STARTED && action == Action.START) return
         val intent = Intent(context, cls).also {
             it.action = action.name
             extras?.forEach {(k, v) ->

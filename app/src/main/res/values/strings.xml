@@ -84,4 +84,6 @@
     <string name="detecting_location_services_disabled">Detecting Location Services disabled</string>
     <string name="precise_location_message">This feature requires precise location to access Wi-Fi SSID name. Please enable precise location here or in the app settings.</string>
     <string name="request">Request</string>
+    <string name="toggle_vpn">Toggle VPN</string>
+    <string name="no_tunnel_available">No tunnels available</string>
 </resources>

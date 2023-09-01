@@ -4,10 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
-import com.zaneschepke.wireguardautotunnel.repository.Repository
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import timber.log.Timber
-import javax.inject.Inject
 
 
 open class ForegroundService : Service() {
