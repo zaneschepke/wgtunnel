@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import android.app.AlarmManager
-import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -54,7 +53,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private lateinit var watcherJob : Job;
     private lateinit var setting : Settings
-    private lateinit var tunnelId: String
+    private lateinit var tunnelConfig: String
 
     private var wakeLock: PowerManager.WakeLock? = null
     private val tag = this.javaClass.name;
@@ -64,13 +63,13 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         super.startService(extras)
         val tunnelId = extras?.getString(getString(R.string.tunnel_extras_key))
         if (tunnelId != null) {
-            this.tunnelId = tunnelId
+            this.tunnelConfig = tunnelId
         }
         // we need this lock so our service gets not affected by Doze Mode
         initWakeLock()
         cancelWatcherJob()
         launchWatcherNotification()
-        if(this::tunnelId.isInitialized) {
+        if(this::tunnelConfig.isInitialized) {
             startWatcherJob()
         } else {
             stopService(extras)
@@ -187,36 +186,21 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 !isWifiConnected &&
                 isMobileDataConnected
                 && vpnService.getState() == Tunnel.State.DOWN) {
-                startVPN()
+                ServiceManager.startVpnService(this, tunnelConfig)
             } else if(!setting.isTunnelOnMobileDataEnabled &&
                 !isWifiConnected &&
                 vpnService.getState() == Tunnel.State.UP) {
-                stopVPN()
+                ServiceManager.stopVpnService(this)
             } else if(isWifiConnected &&
                 !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
                 (vpnService.getState() != Tunnel.State.UP)) {
-                startVPN()
+                ServiceManager.startVpnService(this, tunnelConfig)
             } else if((isWifiConnected &&
                         setting.trustedNetworkSSIDs.contains(currentNetworkSSID)) &&
                 (vpnService.getState() == Tunnel.State.UP)) {
-                stopVPN()
+                ServiceManager.stopVpnService(this)
             }
             delay(Constants.VPN_CONNECTIVITY_CHECK_INTERVAL)
         }
-    }
-
-    private fun startVPN() {
-        ServiceTracker.actionOnService(
-            Action.START,
-            this.applicationContext as Application,
-            WireGuardTunnelService::class.java,
-            mapOf(getString(R.string.tunnel_extras_key) to tunnelId))
-    }
-    private fun stopVPN() {
-        ServiceTracker.actionOnService(
-            Action.STOP,
-            this.applicationContext as Application,
-            WireGuardTunnelService::class.java
-        )
     }
 }

@@ -8,12 +8,14 @@ import android.os.Build
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -96,8 +98,12 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         }
     }
 
-    suspend fun emitAllInternetCapablePackages() {
-        _packages.emit(getAllInternetCapablePackages())
+    fun emitQueriedPackages(query : String) {
+        viewModelScope.launch {
+            _packages.emit(getAllInternetCapablePackages().filter {
+                it.packageName.contains(query)
+            })
+        }
     }
 
     private fun getAllInternetCapablePackages() : List<PackageInfo> {

@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.service
+package com.zaneschepke.wireguardautotunnel.service.tile
 
 import android.os.Build
 import android.service.quicksettings.Tile
@@ -6,11 +6,7 @@ import android.service.quicksettings.TileService
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
-import com.zaneschepke.wireguardautotunnel.service.foreground.Action
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceTracker
-import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
-import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
@@ -68,9 +64,9 @@ class TunnelControlTile : TileService() {
                     if(tunnel != null) {
                         attemptWatcherServiceToggle(tunnel.toString())
                         if(vpnService.getState() == Tunnel.State.UP) {
-                            stopTunnelService();
+                            ServiceManager.stopVpnService(this@TunnelControlTile)
                         } else {
-                            startTunnelService(tunnel.toString())
+                            ServiceManager.startVpnService(this@TunnelControlTile, tunnel.toString())
                         }
                     }
                 } catch (e : Exception) {
@@ -97,34 +93,6 @@ class TunnelControlTile : TileService() {
         return tunnelConfig;
     }
 
-    private fun stopTunnelService() {
-        ServiceTracker.actionOnService(
-            Action.STOP, this.applicationContext,
-            WireGuardTunnelService::class.java)
-    }
-
-    private fun startTunnelService(tunnelConfig : String) {
-        ServiceTracker.actionOnService(
-            Action.START, this.applicationContext,
-            WireGuardTunnelService::class.java,
-            mapOf(this.applicationContext.resources.
-            getString(R.string.tunnel_extras_key) to
-                    tunnelConfig))
-    }
-
-    private fun startWatcherService(tunnelConfig : String) {
-        ServiceTracker.actionOnService(
-            Action.START, this,
-            WireGuardConnectivityWatcherService::class.java, mapOf(this.resources.
-            getString(R.string.tunnel_extras_key) to
-                    tunnelConfig))
-    }
-
-    private fun stopWatcherService() {
-        ServiceTracker.actionOnService(
-            Action.STOP, this,
-            WireGuardConnectivityWatcherService::class.java)
-    }
 
     private fun attemptWatcherServiceToggle(tunnelConfig : String) {
         scope.launch {
@@ -132,11 +100,7 @@ class TunnelControlTile : TileService() {
             if (!settings.isNullOrEmpty()) {
                 val setting = settings.first()
                 if(setting.isAutoTunnelEnabled) {
-                    when(ServiceTracker.getServiceState( this@TunnelControlTile,
-                        WireGuardConnectivityWatcherService::class.java,)) {
-                        ServiceState.STARTED -> stopWatcherService()
-                        ServiceState.STOPPED -> startWatcherService(tunnelConfig)
-                    }
+                    ServiceManager.toggleWatcherService(this@TunnelControlTile, tunnelConfig)
                 }
             }
         }

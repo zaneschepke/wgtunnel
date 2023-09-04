@@ -12,11 +12,10 @@ import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.barcode.CodeScanner
-import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceTracker
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
-import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
+import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
@@ -64,23 +63,17 @@ class MainViewModel @Inject constructor(private val application : Application,
     }
 
     private fun validateWatcherServiceState(settings: Settings) {
-        val watcherState = ServiceTracker.getServiceState(application, WireGuardConnectivityWatcherService::class.java)
+        val watcherState = ServiceManager.getServiceState(application.applicationContext, WireGuardConnectivityWatcherService::class.java)
         if(settings.isAutoTunnelEnabled && watcherState == ServiceState.STOPPED && settings.defaultTunnel != null) {
-            startWatcherService(settings.defaultTunnel!!)
+            ServiceManager.startWatcherService(application.applicationContext, settings.defaultTunnel!!)
         }
     }
 
-    private fun startWatcherService(tunnel : String) {
-        ServiceTracker.actionOnService(
-            Action.START, application,
-            WireGuardConnectivityWatcherService::class.java,
-            mapOf(application.resources.getString(R.string.tunnel_extras_key) to tunnel))
-    }
 
     fun onDelete(tunnel : TunnelConfig) {
         viewModelScope.launch {
             if(tunnelRepo.count() == 1L) {
-                ServiceTracker.actionOnService( Action.STOP, application, WireGuardConnectivityWatcherService::class.java)
+                ServiceManager.stopWatcherService(application.applicationContext)
                 val settings = settingsRepo.getAll()
                 if(!settings.isNullOrEmpty()) {
                     val setting = settings[0]
@@ -91,22 +84,23 @@ class MainViewModel @Inject constructor(private val application : Application,
                 }
             }
             tunnelRepo.delete(tunnel)
+            ShortcutsManager.removeTunnelShortcuts(application.applicationContext, tunnel)
         }
     }
 
     fun onTunnelStart(tunnelConfig : TunnelConfig) = viewModelScope.launch {
-            ServiceTracker.actionOnService( Action.START, application, WireGuardTunnelService::class.java,
-                mapOf(application.resources.getString(R.string.tunnel_extras_key) to tunnelConfig.toString()))
+        ServiceManager.startVpnService(application.applicationContext, tunnelConfig.toString())
     }
 
     fun onTunnelStop() {
-        ServiceTracker.actionOnService( Action.STOP, application, WireGuardTunnelService::class.java)
+        ServiceManager.stopVpnService(application.applicationContext)
     }
 
     suspend fun onTunnelQRSelected() {
         codeScanner.scan().collect {
             if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.config_validation))) {
-                tunnelRepo.save(TunnelConfig(name = defaultConfigName(), wgQuick = it))
+                val tunnelConfig = TunnelConfig(name = defaultConfigName(), wgQuick = it)
+                saveTunnel(tunnelConfig)
             } else if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.barcode_downloading))) {
                 showSnackBarMessage(application.resources.getString(R.string.barcode_downloading_message))
             } else {
@@ -130,14 +124,19 @@ class MainViewModel @Inject constructor(private val application : Application,
             val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
                 val config = Config.parse(bufferReader)
                 val tunnelName = getNameFromFileName(fileName)
-                viewModelScope.launch {
-                    tunnelRepo.save(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
-                }
+                saveTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
             stream.close()
         } catch(_: BadConfigException) {
             viewModelScope.launch {
                 showSnackBarMessage(application.applicationContext.getString(R.string.bad_config))
             }
+        }
+    }
+
+    private fun saveTunnel(tunnelConfig : TunnelConfig) {
+        viewModelScope.launch {
+            tunnelRepo.save(tunnelConfig)
+            ShortcutsManager.createTunnelShortcuts(application.applicationContext, tunnelConfig)
         }
     }
 

@@ -3,11 +3,8 @@ package com.zaneschepke.wireguardautotunnel.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
-import com.zaneschepke.wireguardautotunnel.service.foreground.Action
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceTracker
-import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -30,12 +27,7 @@ class BootReceiver : BroadcastReceiver() {
                     if (!settings.isNullOrEmpty()) {
                         val setting = settings.first()
                         if (setting.isAutoTunnelEnabled && setting.defaultTunnel != null) {
-                            ServiceTracker.actionOnService(
-                                Action.START, context,
-                                WireGuardConnectivityWatcherService::class.java,
-                                mapOf(context.resources.getString(R.string.tunnel_extras_key) to
-                                setting.defaultTunnel!!)
-                            )
+                            ServiceManager.startWatcherService(context, setting.defaultTunnel!!)
                         }
                     }
                 } finally {

@@ -16,8 +16,8 @@ android {
     compileSdk = 34
 
     val versionMajor = 2
-    val versionMinor = 3
-    val versionPatch = 7
+    val versionMinor = 4
+    val versionPatch = 1
     val versionBuild = 0
 
     defaultConfig {

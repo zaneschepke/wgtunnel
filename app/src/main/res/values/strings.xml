@@ -86,4 +86,7 @@
     <string name="request">Request</string>
     <string name="toggle_vpn">Toggle VPN</string>
     <string name="no_tunnel_available">No tunnels available</string>
+    <string name="hint_search_packages">Search packages</string>
+    <string name="clear_icon">Clear Icon</string>
+    <string name="search_icon">Search Icon</string>
 </resources>

@@ -7,9 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.Repository
-import com.zaneschepke.wireguardautotunnel.service.foreground.Action
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceTracker
-import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.ViewState
@@ -77,32 +75,18 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
             return
         }
         if(_settings.value.isAutoTunnelEnabled) {
-            actionOnWatcherService(Action.STOP)
+            ServiceManager.stopWatcherService(application)
         } else {
-            actionOnWatcherService(Action.START)
+            if(_settings.value.defaultTunnel != null) {
+                val defaultTunnel = _settings.value.defaultTunnel
+                ServiceManager.startWatcherService(application, defaultTunnel!!)
+            }
         }
         settingsRepo.save(_settings.value.copy(
             isAutoTunnelEnabled = !_settings.value.isAutoTunnelEnabled
         ))
     }
 
-    private fun actionOnWatcherService(action : Action) {
-        when(action) {
-            Action.START -> {
-                if(_settings.value.defaultTunnel != null) {
-                    val defaultTunnel = _settings.value.defaultTunnel
-                    ServiceTracker.actionOnService(
-                        action, application,
-                        WireGuardConnectivityWatcherService::class.java,
-                        mapOf(application.resources.getString(R.string.tunnel_extras_key) to defaultTunnel.toString()))
-                }
-            }
-            Action.STOP -> {
-                ServiceTracker.actionOnService( Action.STOP, application,
-                    WireGuardConnectivityWatcherService::class.java)
-            }
-        }
-    }
     suspend fun showSnackBarMessage(message : String) {
         _viewState.emit(_viewState.value.copy(
             showSnackbarMessage = true,

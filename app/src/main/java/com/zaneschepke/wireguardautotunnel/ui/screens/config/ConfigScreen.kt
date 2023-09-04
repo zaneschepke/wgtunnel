@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.config
 
-import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -45,6 +43,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.DrawablePainter
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Routes
+import com.zaneschepke.wireguardautotunnel.ui.common.SearchBar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -71,7 +70,7 @@ fun ConfigScreen(
 
     LaunchedEffect(Unit) {
         viewModel.getTunnelById(id)
-        viewModel.emitAllInternetCapablePackages()
+        viewModel.emitQueriedPackages("")
         viewModel.emitCurrentPackageConfigurations(id)
     }
 
@@ -163,6 +162,16 @@ fun ConfigScreen(
                                     }
                                 )
                             }
+                        }
+                    }
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween) {
+                            SearchBar(viewModel::emitQueriedPackages);
                         }
                     }
                     items(packages) { pack ->
