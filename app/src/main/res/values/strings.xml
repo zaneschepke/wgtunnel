@@ -89,4 +89,6 @@
     <string name="hint_search_packages">Search packages</string>
     <string name="clear_icon">Clear Icon</string>
     <string name="search_icon">Search Icon</string>
+    <string name="attempt_connection">Attempting connection..</string>
+    <string name="vpn_starting">VPN Starting</string>
 </resources>

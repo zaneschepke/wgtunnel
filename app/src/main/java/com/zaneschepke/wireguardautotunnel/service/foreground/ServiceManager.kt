@@ -9,6 +9,7 @@ import android.content.Intent
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.zaneschepke.wireguardautotunnel.R
+import timber.log.Timber
 
 object ServiceManager {
     @Suppress("DEPRECATION")
@@ -35,7 +36,14 @@ object ServiceManager {
         intent.component?.javaClass
         try {
             when(action) {
-                Action.START -> context.startForegroundService(intent)
+                Action.START -> {
+                    try {
+                        context.startForegroundService(intent)
+                    } catch (e : Exception) {
+                        Timber.e("Unable to start service foreground ${e.message}")
+                        context.startService(intent)
+                    }
+                }
                 Action.STOP -> context.startService(intent)
             }
         } catch (e : Exception) {

@@ -17,7 +17,7 @@ android {
 
     val versionMajor = 2
     val versionMinor = 4
-    val versionPatch = 1
+    val versionPatch = 2
     val versionBuild = 0
 
     defaultConfig {

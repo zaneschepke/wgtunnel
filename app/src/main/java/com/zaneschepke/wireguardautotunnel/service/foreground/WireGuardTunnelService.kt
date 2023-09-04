@@ -47,6 +47,7 @@ class WireGuardTunnelService : ForegroundService() {
                     val tunnelConfig = TunnelConfig.from(tunnelConfigString)
                     tunnelName = tunnelConfig.name
                     vpnService.startTunnel(tunnelConfig)
+                    launchVpnStartingNotification()
                 } catch (e : Exception) {
                     Timber.e("Problem starting tunnel: ${e.message}")
                     stopService(extras)
@@ -60,6 +61,7 @@ class WireGuardTunnelService : ForegroundService() {
                         val tunnelConfig = TunnelConfig.from(setting.defaultTunnel!!)
                         tunnelName = tunnelConfig.name
                         vpnService.startTunnel(tunnelConfig)
+                        launchVpnStartingNotification()
                     }
                 }
             }
@@ -113,6 +115,18 @@ class WireGuardTunnelService : ForegroundService() {
             onGoing = false,
             showTimestamp = true,
             description = "${getString(R.string.tunnel_start_text)} $tunnelName"
+        )
+        super.startForeground(foregroundId, notification)
+    }
+
+    private fun launchVpnStartingNotification() {
+        val notification = notificationService.createNotification(
+            channelId = getString(R.string.vpn_channel_id),
+            channelName = getString(R.string.vpn_channel_name),
+            title = getString(R.string.vpn_starting),
+            onGoing = false,
+            showTimestamp = true,
+            description = getString(R.string.attempt_connection)
         )
         super.startForeground(foregroundId, notification)
     }
