@@ -50,8 +50,10 @@ The inspiration for this app came from the inconvenience of constantly having to
 
 * Add tunnels via .conf file
 * Auto connect to VPN based on Wi-Fi SSID
-* Split tunneling by application
+* Split tunneling by application with search
 * Always-on VPN for Android support
+* Quick tile support for vpn toggling
+* Dynamic shortcuts support for automation integration
 * Configurable Trusted Network list 
 * Optional auto connect on mobile data
 * Automatic service restart after reboot
