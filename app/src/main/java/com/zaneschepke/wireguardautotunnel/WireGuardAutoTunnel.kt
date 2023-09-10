@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.mlkit.common.MlKit
 import com.zaneschepke.wireguardautotunnel.repository.Repository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.HiltAndroidApp
@@ -21,6 +22,11 @@ class WireGuardAutoTunnel : Application() {
         if(BuildConfig.DEBUG) {
             FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
             Timber.plant(Timber.DebugTree())
+        }
+        try {
+            MlKit.initialize(this)
+        } catch (e : Exception) {
+            Timber.e(e.message)
         }
         settingsRepo.init()
     }

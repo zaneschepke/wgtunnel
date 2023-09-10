@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -102,6 +101,7 @@ fun MainScreen(
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
+
 
     // Nested scroll for control FAB
     val nestedScrollConnection = remember {
@@ -242,7 +242,8 @@ fun MainScreen(
         ) {
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .nestedScroll(nestedScrollConnection),
             ) {
                 itemsIndexed(tunnels.toList()) { index, tunnel ->

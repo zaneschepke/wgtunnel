@@ -66,7 +66,7 @@ class TunnelControlTile : TileService() {
                         if(vpnService.getState() == Tunnel.State.UP) {
                             ServiceManager.stopVpnService(this@TunnelControlTile)
                         } else {
-                            ServiceManager.startVpnService(this@TunnelControlTile, tunnel.toString())
+                            ServiceManager.startVpnServiceForeground(this@TunnelControlTile, tunnel.toString())
                         }
                     }
                 } catch (e : Exception) {
@@ -100,7 +100,7 @@ class TunnelControlTile : TileService() {
             if (!settings.isNullOrEmpty()) {
                 val setting = settings.first()
                 if(setting.isAutoTunnelEnabled) {
-                    ServiceManager.toggleWatcherService(this@TunnelControlTile, tunnelConfig)
+                    ServiceManager.toggleWatcherServiceForeground(this@TunnelControlTile, tunnelConfig)
                 }
             }
         }

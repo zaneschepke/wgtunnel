@@ -22,7 +22,7 @@ open class ForegroundService : Service() {
             val action = intent.action
             Timber.d("using an intent with action $action")
             when (action) {
-                Action.START.name -> startService(intent.extras)
+                Action.START.name, Action.START_FOREGROUND.name -> startService(intent.extras)
                 Action.STOP.name -> stopService(intent.extras)
                 "android.net.VpnService" -> {
                     Timber.d("Always-on VPN starting service")

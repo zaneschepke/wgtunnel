@@ -59,8 +59,16 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     private val tag = this.javaClass.name;
 
 
+    override fun onCreate() {
+        super.onCreate()
+        CoroutineScope(Dispatchers.Main).launch {
+            launchWatcherNotification()
+        }
+    }
+
     override fun startService(extras: Bundle?) {
         super.startService(extras)
+        launchWatcherNotification()
         val tunnelId = extras?.getString(getString(R.string.tunnel_extras_key))
         if (tunnelId != null) {
             this.tunnelConfig = tunnelId
@@ -68,7 +76,6 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         // we need this lock so our service gets not affected by Doze Mode
         initWakeLock()
         cancelWatcherJob()
-        launchWatcherNotification()
         if(this::tunnelConfig.isInitialized) {
             startWatcherJob()
         } else {
@@ -181,7 +188,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         }
 
     private suspend fun manageVpn() {
-        while(watcherJob.isActive) {
+        while(true) {
             if(setting.isTunnelOnMobileDataEnabled &&
                 !isWifiConnected &&
                 isMobileDataConnected

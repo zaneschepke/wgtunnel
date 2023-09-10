@@ -37,8 +37,16 @@ class WireGuardTunnelService : ForegroundService() {
 
     private var tunnelName : String = ""
 
+    override fun onCreate() {
+        super.onCreate()
+        CoroutineScope(Dispatchers.Main).launch {
+            launchVpnStartingNotification()
+        }
+    }
+
     override fun startService(extras : Bundle?) {
         super.startService(extras)
+        launchVpnStartingNotification()
         val tunnelConfigString = extras?.getString(getString(R.string.tunnel_extras_key))
         cancelJob()
         job = CoroutineScope(Dispatchers.IO).launch {
@@ -47,7 +55,6 @@ class WireGuardTunnelService : ForegroundService() {
                     val tunnelConfig = TunnelConfig.from(tunnelConfigString)
                     tunnelName = tunnelConfig.name
                     vpnService.startTunnel(tunnelConfig)
-                    launchVpnStartingNotification()
                 } catch (e : Exception) {
                     Timber.e("Problem starting tunnel: ${e.message}")
                     stopService(extras)
@@ -61,7 +68,6 @@ class WireGuardTunnelService : ForegroundService() {
                         val tunnelConfig = TunnelConfig.from(setting.defaultTunnel!!)
                         tunnelName = tunnelConfig.name
                         vpnService.startTunnel(tunnelConfig)
-                        launchVpnStartingNotification()
                     }
                 }
             }
@@ -100,7 +106,7 @@ class WireGuardTunnelService : ForegroundService() {
 
     override fun stopService(extras : Bundle?) {
         super.stopService(extras)
-        CoroutineScope(Dispatchers.IO).launch() {
+        CoroutineScope(Dispatchers.IO).launch {
             vpnService.stopTunnel()
         }
         cancelJob()

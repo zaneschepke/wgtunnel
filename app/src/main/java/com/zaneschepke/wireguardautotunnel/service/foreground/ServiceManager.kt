@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import android.app.ActivityManager
-import android.app.Application
 import android.app.Service
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
@@ -9,7 +8,6 @@ import android.content.Intent
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.zaneschepke.wireguardautotunnel.R
-import timber.log.Timber
 
 object ServiceManager {
     @Suppress("DEPRECATION")
@@ -36,13 +34,11 @@ object ServiceManager {
         intent.component?.javaClass
         try {
             when(action) {
+                Action.START_FOREGROUND -> {
+                    context.startForegroundService(intent)
+                }
                 Action.START -> {
-                    try {
-                        context.startForegroundService(intent)
-                    } catch (e : Exception) {
-                        Timber.e("Unable to start service foreground ${e.message}")
-                        context.startService(intent)
-                    }
+                    context.startService(intent)
                 }
                 Action.STOP -> context.startService(intent)
             }
@@ -66,6 +62,22 @@ object ServiceManager {
         )
     }
 
+    fun startVpnServiceForeground(context : Context, tunnelConfig : String) {
+        actionOnService(
+            Action.START_FOREGROUND,
+            context,
+            WireGuardTunnelService::class.java,
+            mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig))
+    }
+
+    private fun startWatcherServiceForeground(context : Context, tunnelConfig : String) {
+        actionOnService(
+            Action.START, context,
+            WireGuardConnectivityWatcherService::class.java, mapOf(context.
+            getString(R.string.tunnel_extras_key) to
+                    tunnelConfig))
+    }
+
     fun startWatcherService(context : Context, tunnelConfig : String) {
         actionOnService(
             Action.START, context,
@@ -85,6 +97,14 @@ object ServiceManager {
             WireGuardConnectivityWatcherService::class.java,)) {
             ServiceState.STARTED -> stopWatcherService(context)
             ServiceState.STOPPED -> startWatcherService(context, tunnelConfig)
+        }
+    }
+
+    fun toggleWatcherServiceForeground(context: Context, tunnelConfig : String) {
+        when(getServiceState( context,
+            WireGuardConnectivityWatcherService::class.java,)) {
+            ServiceState.STARTED -> stopWatcherService(context)
+            ServiceState.STOPPED -> startWatcherServiceForeground(context, tunnelConfig)
         }
     }
 }
