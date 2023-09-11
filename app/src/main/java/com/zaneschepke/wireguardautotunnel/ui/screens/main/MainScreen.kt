@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -135,11 +136,9 @@ fun MainScreen(
     }
 
     val pickFileLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { file ->
-        if (file != null) {
-            viewModel.onTunnelFileSelected(file)
-        }
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        result.data?.data?.let { viewModel.onTunnelFileSelected(it) }
     }
 
     Scaffold(
@@ -196,7 +195,11 @@ fun MainScreen(
                         .fillMaxWidth()
                         .clickable {
                             showBottomSheet = false
-                            pickFileLauncher.launch("*/*")
+                            val fileSelectionIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                            }
+                            pickFileLauncher.launch(fileSelectionIntent)
                         }
                         .padding(10.dp)
                 ) {
