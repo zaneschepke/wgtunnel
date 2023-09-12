@@ -249,7 +249,7 @@ fun MainScreen(
                     .fillMaxSize()
                     .nestedScroll(nestedScrollConnection),
             ) {
-                itemsIndexed(tunnels.toList()) { index, tunnel ->
+                itemsIndexed(tunnels.toList()) { _, tunnel ->
                     val focusRequester = FocusRequester();
                     RowListItem(leadingIcon = Icons.Rounded.Circle,
                         leadingIconColor = if (tunnelName == tunnel.name) when (handshakeStatus) {

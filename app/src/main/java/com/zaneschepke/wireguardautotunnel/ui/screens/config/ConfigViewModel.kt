@@ -10,6 +10,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -114,12 +115,14 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             packageManager.getPackagesHoldingPermissions(permissions, PackageManager.PackageInfoFlags.of(0L))
         } else {
-            @Suppress("DEPRECATION")
             packageManager.getPackagesHoldingPermissions(permissions, 0)
         }
     }
 
     suspend fun onSaveAllChanges() {
+        if(_tunnel.value != null) {
+            ShortcutsManager.removeTunnelShortcuts(application, _tunnel.value!!)
+        }
         var wgQuick = _tunnel.value?.wgQuick
         if(wgQuick != null) {
             wgQuick = if(_include.value) {
@@ -135,6 +138,7 @@ class ConfigViewModel @Inject constructor(private val application : Application,
                 wgQuick = wgQuick
             )?.let {
                 tunnelRepo.save(it)
+                ShortcutsManager.createTunnelShortcuts(application, it)
                 val settings = settingsRepo.getAll()
                 if(settings != null) {
                     val setting = settings[0]

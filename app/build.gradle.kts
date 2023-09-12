@@ -17,12 +17,12 @@ android {
 
     val versionMajor = 2
     val versionMinor = 4
-    val versionPatch = 4
+    val versionPatch = 5
     val versionBuild = 0
 
     defaultConfig {
         applicationId = "com.zaneschepke.wireguardautotunnel"
-        minSdk = 28
+        minSdk = 26
         targetSdk = 34
         versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -64,8 +64,8 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.10.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui")
@@ -89,7 +89,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // compose navigation
-    implementation("androidx.navigation:navigation-compose:2.7.1")
+    implementation("androidx.navigation:navigation-compose:2.7.2")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // hilt
@@ -107,10 +107,10 @@ dependencies {
     implementation("io.objectbox:objectbox-kotlin:${rExtra.get("objectBoxVersion")}")
 
     //lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
     //icons
-    implementation("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("androidx.compose.material:material-icons-extended:1.5.1")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")

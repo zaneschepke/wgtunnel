@@ -96,8 +96,6 @@ fun SettingsScreen(
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val trustedSSIDs by viewModel.trustedSSIDs.collectAsStateWithLifecycle()
     val tunnels by viewModel.tunnels.collectAsStateWithLifecycle(mutableListOf())
-    val backgroundLocationState =
-        rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var currentText by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
@@ -135,41 +133,44 @@ fun SettingsScreen(
             context.startActivity(intentSettings)
         }
     }
-
-    if(!backgroundLocationState.status.isGranted && Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(padding)) {
-            Icon(Icons.Rounded.LocationOff, contentDescription = stringResource(id = R.string.map), modifier = Modifier
-                .padding(30.dp)
-                .size(128.dp))
-            Text(stringResource(R.string.prominent_background_location_title), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 20.sp)
-            Text(stringResource(R.string.prominent_background_location_message), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 15.sp)
-            Row(
-                modifier = if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp) else Modifier
-                    .fillMaxWidth()
-                    .padding(30.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = {
-                    navController.navigate(Routes.Main.name)
-                }) {
-                    Text(stringResource(id = R.string.no_thanks))
-                }
-                Button(modifier = Modifier.focusRequester(focusRequester), onClick = {
-                    openSettings()
-                }) {
-                    Text(stringResource(id = R.string.turn_on))
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val backgroundLocationState =
+            rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        if(!backgroundLocationState.status.isGranted) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(padding)) {
+                Icon(Icons.Rounded.LocationOff, contentDescription = stringResource(id = R.string.map), modifier = Modifier
+                    .padding(30.dp)
+                    .size(128.dp))
+                Text(stringResource(R.string.prominent_background_location_title), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 20.sp)
+                Text(stringResource(R.string.prominent_background_location_message), textAlign = TextAlign.Center, modifier = Modifier.padding(30.dp), fontSize = 15.sp)
+                Row(
+                    modifier = if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp) else Modifier
+                        .fillMaxWidth()
+                        .padding(30.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(onClick = {
+                        navController.navigate(Routes.Main.name)
+                    }) {
+                        Text(stringResource(id = R.string.no_thanks))
+                    }
+                    Button(modifier = Modifier.focusRequester(focusRequester), onClick = {
+                        openSettings()
+                    }) {
+                        Text(stringResource(id = R.string.turn_on))
+                    }
                 }
             }
+            return
         }
-        return
     }
 
     if(!fineLocationState.status.isGranted) {
