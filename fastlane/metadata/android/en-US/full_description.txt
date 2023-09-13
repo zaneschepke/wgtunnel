@@ -1,0 +1,10 @@
+Features
+
+- Add tunnels via .conf file or QR
+- Auto connect to VPN based on Wi-Fi SSID
+- Split tunneling by application with search
+- Always-on VPN support
+- Configurable Trusted Network list
+- Quick tile and Shortcuts integration
+- Optional auto connect on mobile data
+- Automatic service restart after reboot
