@@ -91,4 +91,5 @@
     <string name="search_icon">Search Icon</string>
     <string name="attempt_connection">Attempting connection..</string>
     <string name="vpn_starting">VPN Starting</string>
+    <string name="db_name">wg-tunnel-db</string>
 </resources>

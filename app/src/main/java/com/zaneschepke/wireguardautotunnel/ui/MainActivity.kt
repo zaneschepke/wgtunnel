@@ -33,6 +33,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.wireguard.android.backend.GoBackend
+import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
@@ -143,12 +144,12 @@ class MainActivity : AppCompatActivity() {
                             when (initialState.destination.route) {
                                 Routes.Settings.name, Routes.Support.name ->
                                     slideInHorizontally(
-                                        initialOffsetX = { -1000 },
-                                        animationSpec = tween(500)
+                                        initialOffsetX = { -Constants.SLIDE_IN_TRANSITION_OFFSET },
+                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
                                     )
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(1000))
+                                    fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                                 }
                             }
                         }) {
@@ -158,19 +159,19 @@ class MainActivity : AppCompatActivity() {
                             when (initialState.destination.route) {
                                 Routes.Main.name ->
                                     slideInHorizontally(
-                                        initialOffsetX = { 1000 },
-                                        animationSpec = tween(500)
+                                        initialOffsetX = { Constants.SLIDE_IN_TRANSITION_OFFSET },
+                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
                                     )
 
                                 Routes.Support.name -> {
                                     slideInHorizontally(
-                                        initialOffsetX = { -1000 },
-                                        animationSpec = tween(500)
+                                        initialOffsetX = { -Constants.SLIDE_IN_TRANSITION_OFFSET },
+                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
                                     )
                                 }
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(1000))
+                                    fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                                 }
                             }
                         }) { SettingsScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController, focusRequester = focusRequester) }
@@ -178,20 +179,20 @@ class MainActivity : AppCompatActivity() {
                             when (initialState.destination.route) {
                                 Routes.Settings.name, Routes.Main.name ->
                                     slideInHorizontally(
-                                        initialOffsetX = { 1000 },
-                                        animationSpec = tween(500)
+                                        initialOffsetX = { Constants.SLIDE_IN_ANIMATION_DURATION },
+                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
                                     )
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(1000))
+                                    fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                                 }
                             }
                         }) { SupportScreen(padding = padding, focusRequester) }
                         composable("${Routes.Config.name}/{id}", enterTransition = {
-                            fadeIn(animationSpec = tween(1000))
+                            fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                         }) { ConfigScreen(padding = padding, navController = navController, id = it.arguments?.getString("id"), focusRequester = focusRequester)}
                         composable("${Routes.Detail.name}/{id}", enterTransition = {
-                            fadeIn(animationSpec = tween(1000))
+                            fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                         }) { DetailScreen(padding = padding, id = it.arguments?.getString("id")) }
                     }
                 }

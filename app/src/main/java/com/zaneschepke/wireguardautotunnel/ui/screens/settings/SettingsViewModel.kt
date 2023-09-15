@@ -6,35 +6,41 @@ import android.location.LocationManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
+import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
+import com.zaneschepke.wireguardautotunnel.repository.model.Settings
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.ViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(private val application : Application,
-    private val tunnelRepo : Repository<TunnelConfig>, private val settingsRepo : Repository<Settings>
+                                            private val tunnelRepo : TunnelConfigDao, private val settingsRepo : SettingsDoa
 ) : ViewModel() {
 
     private val _trustedSSIDs = MutableStateFlow(emptyList<String>())
     val trustedSSIDs = _trustedSSIDs.asStateFlow()
     private val _settings = MutableStateFlow(Settings())
     val settings get() = _settings.asStateFlow()
-    val tunnels get() = tunnelRepo.itemFlow
+    val tunnels get() = tunnelRepo.getAllFlow()
     private val _viewState = MutableStateFlow(ViewState())
     val viewState get() = _viewState.asStateFlow()
 
     init {
         checkLocationServicesEnabled()
-        viewModelScope.launch {
-            settingsRepo.itemFlow.collect {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingsRepo.getAllFlow().filter { it.isNotEmpty() }.collect {
                 val settings = it.first()
                 _settings.emit(settings)
                 _trustedSSIDs.emit(settings.trustedNetworkSSIDs.toList())

@@ -5,9 +5,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.zaneschepke.wireguardautotunnel.R
+import timber.log.Timber
 
 object ServiceManager {
     @Suppress("DEPRECATION")
@@ -43,7 +42,7 @@ object ServiceManager {
                 Action.STOP -> context.startService(intent)
             }
         } catch (e : Exception) {
-            e.message?.let { Firebase.crashlytics.log(it) }
+            Timber.e(e.message)
         }
     }
 

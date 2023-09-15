@@ -69,7 +69,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import kotlinx.coroutines.launch

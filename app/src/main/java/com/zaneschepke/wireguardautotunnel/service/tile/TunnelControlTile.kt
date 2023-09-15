@@ -5,11 +5,11 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
+import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,10 +23,10 @@ import javax.inject.Inject
 class TunnelControlTile : TileService() {
 
     @Inject
-    lateinit var settingsRepo : Repository<Settings>
+    lateinit var settingsRepo : SettingsDoa
 
     @Inject
-    lateinit var configRepo : Repository<TunnelConfig>
+    lateinit var configRepo : TunnelConfigDao
 
     @Inject
     lateinit var vpnService : VpnService

@@ -1,25 +1,27 @@
 package com.zaneschepke.wireguardautotunnel.module
 
-import com.zaneschepke.wireguardautotunnel.repository.Repository
-import com.zaneschepke.wireguardautotunnel.repository.SettingsBox
-import com.zaneschepke.wireguardautotunnel.repository.TunnelBox
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
-import dagger.Binds
+import com.zaneschepke.wireguardautotunnel.repository.AppDatabase
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
+import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
+class RepositoryModule {
 
-    @Binds
     @Singleton
-    abstract fun provideSettingsRepository(settingsBox: SettingsBox) : Repository<Settings>
+    @Provides
+    fun provideSettingsRepository(appDatabase: AppDatabase) : SettingsDoa {
+        return appDatabase.settingDao()
+    }
 
-    @Binds
     @Singleton
-    abstract fun provideTunnelRepository(tunnelBox: TunnelBox) : Repository<TunnelConfig>
+    @Provides
+    fun provideTunnelConfigRepository(appDatabase: AppDatabase) : TunnelConfigDao {
+        return appDatabase.tunnelConfigDoa()
+    }
 }

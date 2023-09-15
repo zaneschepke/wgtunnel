@@ -13,6 +13,10 @@ object NumberUtils {
         return bytes.toBigDecimal().divide(BYTES_IN_KB.toBigDecimal())
     }
 
+    fun generateRandomTunnelName() : String {
+        return "tunnel${(Math.random() * 100000).toInt()}"
+    }
+
     fun formatDecimalTwoPlaces(bigDecimal: BigDecimal) : String {
         val df = DecimalFormat("#.##")
         return df.format(bigDecimal)

@@ -2,9 +2,9 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.detail
 
 import androidx.lifecycle.ViewModel
 import com.wireguard.config.Config
-import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailViewModel @Inject constructor(private val tunnelRepo : Repository<TunnelConfig>, private val vpnService : VpnService
+class DetailViewModel @Inject constructor(private val tunnelRepo : TunnelConfigDao, private val vpnService : VpnService
 
 ) : ViewModel() {
 

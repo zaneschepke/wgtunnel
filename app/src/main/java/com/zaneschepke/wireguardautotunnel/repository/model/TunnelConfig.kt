@@ -1,25 +1,21 @@
-package com.zaneschepke.wireguardautotunnel.service.tunnel.model
+package com.zaneschepke.wireguardautotunnel.repository.model
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.wireguard.config.Config
-import io.objectbox.annotation.ConflictStrategy
-import io.objectbox.annotation.Entity
-import io.objectbox.annotation.Id
-import io.objectbox.annotation.Unique
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 
-
-@Entity
+@Entity(indices = [Index(value = ["name"], unique = true)])
 @Serializable
 data class TunnelConfig(
-    @Id
-    var id : Long = 0,
-    @Unique(onConflict = ConflictStrategy.REPLACE)
-    var name : String,
-    var wgQuick : String
-) {
-
+    @PrimaryKey(autoGenerate = true) val id : Int = 0,
+    @ColumnInfo(name = "name") var name : String,
+    @ColumnInfo(name = "wg_quick") var wgQuick : String,
+){
 
     override fun toString(): String {
         return Json.encodeToString(serializer(), this)

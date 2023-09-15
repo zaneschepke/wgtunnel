@@ -10,14 +10,14 @@ import android.os.SystemClock
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
+import com.zaneschepke.wireguardautotunnel.repository.model.Settings
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +39,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     lateinit var mobileDataService : NetworkService<MobileDataService>
 
     @Inject
-    lateinit var settingsRepo: Repository<Settings>
+    lateinit var settingsRepo: SettingsDoa
 
     @Inject
     lateinit var notificationService : NotificationService
@@ -131,7 +131,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     private fun startWatcherJob() {
         watcherJob = CoroutineScope(Dispatchers.IO).launch {
             val settings = settingsRepo.getAll();
-            if(!settings.isNullOrEmpty()) {
+            if(settings.isNotEmpty()) {
                 setting = settings[0]
             }
             launch {

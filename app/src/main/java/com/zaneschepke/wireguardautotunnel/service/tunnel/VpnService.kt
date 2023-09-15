@@ -3,7 +3,7 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel
 import com.wireguard.android.backend.Statistics
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.crypto.Key
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import kotlinx.coroutines.flow.SharedFlow
 
 interface VpnService : Tunnel {

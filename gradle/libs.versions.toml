@@ -1,0 +1,89 @@
+[versions]
+accompanist = "0.31.2-alpha"
+activityCompose = "1.7.2"
+androidx-junit = "1.1.5"
+appcompat = "1.6.1"
+coreKtx = "1.12.0"
+espressoCore = "3.5.1"
+firebase-crashlytics-gradle = "2.9.9"
+google-services = "4.3.15"
+hiltAndroid = "2.48"
+hiltNavigationCompose = "1.0.0"
+junit = "4.13.2"
+kotlinx-serialization-json = "1.5.1"
+lifecycle-runtime-compose = "2.6.2"
+material-icons-extended = "1.5.1"
+material3 = "1.1.1"
+navigationCompose = "2.7.2"
+playServicesCodeScanner = "16.1.0"
+roomVersion = "2.6.0-beta01"
+timber = "5.0.1"
+tunnel = "1.0.20230706"
+androidGradlePlugin = "8.2.0-beta03"
+kotlin="1.9.10"
+ksp="1.9.10-1.0.13"
+composeBom="2023.09.00"
+firebaseBom="32.2.3"
+compose="1.5.1"
+crashlytics="18.4.1"
+analytics="21.3.0"
+composeCompiler="1.5.3"
+
+
+[libraries]
+# accompanist
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist" }
+accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
+accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanist" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
+#room
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
+
+#compose
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref="composeBom" }
+androidx-compose-ui-test = { module="androidx.compose.ui:ui-test-junit4", version.ref="compose" }
+androidx-compose-ui-tooling = { module="androidx.compose.ui:ui-tooling", version.ref="compose" }
+androidx-compose-manifest = { module="androidx.compose.ui:ui-test-manifest", version.ref="compose" }
+androidx-compose-ui-graphics = { module="androidx.compose.ui:ui-graphics", version.ref="compose" }
+androidx-compose-ui-tooling-preview = { module="androidx.compose.ui:ui-tooling-preview", version.ref="compose" }
+androidx-compose-ui = { module="androidx.compose.ui:ui", version.ref="compose" }
+
+#hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
+
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-compose" }
+androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material-icons-extended" }
+play-services-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "playServicesCodeScanner" }
+
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+
+tunnel = { module = "com.wireguard.android:tunnel", version.ref = "tunnel" }
+
+#firebase
+google-firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "crashlytics" }
+google-firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "analytics" }
+firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom"}
+google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

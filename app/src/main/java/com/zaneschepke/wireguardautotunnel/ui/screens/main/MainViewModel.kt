@@ -9,21 +9,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.config.BadConfigException
 import com.wireguard.config.Config
+import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
+import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
 import com.zaneschepke.wireguardautotunnel.service.barcode.CodeScanner
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
 import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.repository.model.Settings
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.ViewState
+import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -31,15 +36,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(private val application : Application,
-                                        private val tunnelRepo : Repository<TunnelConfig>,
-                                        private val settingsRepo : Repository<Settings>,
+                                        private val tunnelRepo : TunnelConfigDao,
+                                        private val settingsRepo : SettingsDoa,
                                         private val vpnService: VpnService,
                                         private val codeScanner: CodeScanner
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(ViewState())
     val viewState get() = _viewState.asStateFlow()
-    val tunnels get() = tunnelRepo.itemFlow
+    val tunnels get() = tunnelRepo.getAllFlow()
     val state get() = vpnService.state
 
     val handshakeStatus get() = vpnService.handshakeStatus
@@ -47,14 +52,9 @@ class MainViewModel @Inject constructor(private val application : Application,
     private val _settings = MutableStateFlow(Settings())
     val settings get() = _settings.asStateFlow()
 
-    private val defaultConfigName = {
-        "tunnel${(Math.random() * 100000).toInt()}"
-    }
-
-
     init {
-        viewModelScope.launch {
-            settingsRepo.itemFlow.collect {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingsRepo.getAllFlow().filter { it.isNotEmpty() }.collect {
                 val settings = it.first()
                 validateWatcherServiceState(settings)
                 _settings.emit(settings)
@@ -75,7 +75,7 @@ class MainViewModel @Inject constructor(private val application : Application,
             if(tunnelRepo.count() == 1L) {
                 ServiceManager.stopWatcherService(application.applicationContext)
                 val settings = settingsRepo.getAll()
-                if(!settings.isNullOrEmpty()) {
+                if(settings.isNotEmpty()) {
                     val setting = settings[0]
                     setting.defaultTunnel = null
                     setting.isAutoTunnelEnabled = false
@@ -99,7 +99,7 @@ class MainViewModel @Inject constructor(private val application : Application,
     suspend fun onTunnelQRSelected() {
         codeScanner.scan().collect {
             if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.config_validation))) {
-                val tunnelConfig = TunnelConfig(name = defaultConfigName(), wgQuick = it)
+                val tunnelConfig = TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = it)
                 saveTunnel(tunnelConfig)
             } else if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.barcode_downloading))) {
                 showSnackBarMessage(application.resources.getString(R.string.barcode_downloading_message))
@@ -110,34 +110,34 @@ class MainViewModel @Inject constructor(private val application : Application,
     }
 
     fun onTunnelFileSelected(uri : Uri) {
-        try {
-            val fileName = getFileName(application.applicationContext, uri)
-            val extension = getFileExtensionFromFileName(fileName)
-            if(extension != ".conf") {
-                viewModelScope.launch {
-                    showSnackBarMessage(application.resources.getString(R.string.file_extension_message))
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val fileName = getFileName(application.applicationContext, uri)
+                val extension = getFileExtensionFromFileName(fileName)
+                if (extension != ".conf") {
+                    launch {
+                        showSnackBarMessage(application.resources.getString(R.string.file_extension_message))
+                    }
+                    return@launch
                 }
-                return
-            }
-            val stream = application.applicationContext.contentResolver.openInputStream(uri)
-            stream ?: return
-            val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
+                val stream = application.applicationContext.contentResolver.openInputStream(uri)
+                stream ?: return@launch
+                val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
                 val config = Config.parse(bufferReader)
                 val tunnelName = getNameFromFileName(fileName)
                 saveTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
-            stream.close()
-        } catch(_: BadConfigException) {
-            viewModelScope.launch {
-                showSnackBarMessage(application.applicationContext.getString(R.string.bad_config))
+                stream.close()
+            } catch (_: BadConfigException) {
+                launch {
+                    showSnackBarMessage(application.applicationContext.getString(R.string.bad_config))
+                }
             }
         }
     }
 
-    private fun saveTunnel(tunnelConfig : TunnelConfig) {
-        viewModelScope.launch {
-            tunnelRepo.save(tunnelConfig)
-            ShortcutsManager.createTunnelShortcuts(application.applicationContext, tunnelConfig)
-        }
+    private suspend fun saveTunnel(tunnelConfig : TunnelConfig) {
+        tunnelRepo.save(tunnelConfig)
+        ShortcutsManager.createTunnelShortcuts(application.applicationContext, tunnelConfig)
     }
 
     @SuppressLint("Range")
@@ -149,14 +149,14 @@ class MainViewModel @Inject constructor(private val application : Application,
                 Timber.d("Exception getting config name")
                 null
             }
-            cursor ?: return defaultConfigName()
+            cursor ?: return NumberUtils.generateRandomTunnelName()
             cursor.use {
                 if(cursor.moveToFirst()) {
                     return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
                 }
             }
         }
-        return defaultConfigName()
+        return NumberUtils.generateRandomTunnelName()
     }
 
     suspend fun showSnackBarMessage(message : String) {
@@ -170,7 +170,7 @@ class MainViewModel @Inject constructor(private val application : Application,
                 }
             }
         ))
-        delay(3000)
+        delay(Constants.SNACKBAR_DELAY)
         dismissSnackBar()
     }
 

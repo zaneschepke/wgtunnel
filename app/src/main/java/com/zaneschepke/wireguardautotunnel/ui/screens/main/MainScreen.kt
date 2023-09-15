@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileOpen
@@ -73,8 +73,8 @@ import androidx.navigation.NavController
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.theme.brickRed
@@ -249,7 +249,7 @@ fun MainScreen(
                     .fillMaxSize()
                     .nestedScroll(nestedScrollConnection),
             ) {
-                itemsIndexed(tunnels.toList()) { _, tunnel ->
+                items(tunnels, key = { tunnel -> tunnel.id }) {tunnel ->
                     val focusRequester = FocusRequester();
                     RowListItem(leadingIcon = Icons.Rounded.Circle,
                         leadingIconColor = if (tunnelName == tunnel.name) when (handshakeStatus) {

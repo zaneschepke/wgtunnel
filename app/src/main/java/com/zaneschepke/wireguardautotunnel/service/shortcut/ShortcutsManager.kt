@@ -8,7 +8,7 @@ import androidx.core.graphics.drawable.IconCompat
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 
 object ShortcutsManager {
 

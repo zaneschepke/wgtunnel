@@ -9,10 +9,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
+import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
 import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,8 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConfigViewModel @Inject constructor(private val application : Application,
-                                          private val tunnelRepo : Repository<TunnelConfig>,
-                                          private val settingsRepo : Repository<Settings>) : ViewModel() {
+                                          private val tunnelRepo : TunnelConfigDao,
+                                          private val settingsRepo : SettingsDoa) : ViewModel() {
 
     private val _tunnel = MutableStateFlow<TunnelConfig?>(null)
     private val _tunnelName = MutableStateFlow("")
@@ -140,14 +140,15 @@ class ConfigViewModel @Inject constructor(private val application : Application,
                 tunnelRepo.save(it)
                 ShortcutsManager.createTunnelShortcuts(application, it)
                 val settings = settingsRepo.getAll()
-                if(settings != null) {
-                    val setting = settings[0]
-                    if(setting.defaultTunnel != null) {
-                        if(it.id == TunnelConfig.from(setting.defaultTunnel!!).id) {
-                            settingsRepo.save(setting.copy(
-                                defaultTunnel = it.toString()
-                            ))
-                        }
+                if(settings.isEmpty()) {
+                    return
+                }
+                val setting = settings[0]
+                if(setting.defaultTunnel != null) {
+                    if(it.id == TunnelConfig.from(setting.defaultTunnel!!).id) {
+                        settingsRepo.save(setting.copy(
+                            defaultTunnel = it.toString()
+                        ))
                     }
                 }
             }

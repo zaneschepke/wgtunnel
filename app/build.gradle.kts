@@ -1,14 +1,9 @@
-val rExtra = rootProject.extra
-
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    kotlin("kapt")
-    id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt.android)
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("io.objectbox")
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -16,8 +11,8 @@ android {
     compileSdk = 34
 
     val versionMajor = 2
-    val versionMinor = 4
-    val versionPatch = 5
+    val versionMinor = 5
+    val versionPatch = 0
     val versionBuild = 0
 
     defaultConfig {
@@ -26,6 +21,10 @@ android {
         targetSdk = 34
         versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+
+        multiDexEnabled = true
+
+        resourceConfigurations.addAll(listOf("en"))
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -36,13 +35,35 @@ android {
     buildTypes {
         release {
             isDebuggable = false
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            //for release testing
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        debug {
+            isDebuggable = true
         }
     }
+    flavorDimensions.add("type")
+    productFlavors {
+        create("floss") {
+            dimension = "type"
+            applicationIdSuffix = ".floss"
+        }
+        create("general") {
+            dimension = "type"
+            if (BuildHelper.isReleaseBuild(gradle) && BuildHelper.isGeneralFlavor(gradle))
+            {
+                apply(plugin = "com.google.gms.google-services")
+                apply(plugin = "com.google.firebase.crashlytics")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -52,9 +73,11 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.8"
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
     packaging {
         resources {
@@ -63,68 +86,69 @@ android {
     }
 }
 
+val generalImplementation by configurations
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3:1.1.1")
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    //test
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.manifest)
 
-    //wireguard tunnel
-    implementation("com.wireguard.android:tunnel:1.0.20230706")
+    //wg
+    implementation(libs.tunnel)
 
     //logging
-    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation(libs.timber)
 
     // compose navigation
-    implementation("androidx.navigation:navigation-compose:2.7.2")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // hilt
-    implementation("com.google.dagger:hilt-android:${rExtra.get("hiltVersion")}")
-    kapt("com.google.dagger:hilt-android-compiler:${rExtra.get("hiltVersion")}")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
 
     //accompanist
-    implementation("com.google.accompanist:accompanist-systemuicontroller:${rExtra.get("accompanistVersion")}")
-    implementation("com.google.accompanist:accompanist-permissions:${rExtra.get("accompanistVersion")}")
-    implementation("com.google.accompanist:accompanist-flowlayout:${rExtra.get("accompanistVersion")}")
-    implementation("com.google.accompanist:accompanist-navigation-animation:${rExtra.get("accompanistVersion")}")
-    implementation("com.google.accompanist:accompanist-drawablepainter:${rExtra.get("accompanistVersion")}")
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.accompanist.flowlayout)
+    implementation(libs.accompanist.navigation.animation)
+    implementation(libs.accompanist.drawablepainter)
 
-    //db
-    implementation("io.objectbox:objectbox-kotlin:${rExtra.get("objectBoxVersion")}")
+    //room
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+
 
     //lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation(libs.lifecycle.runtime.compose)
 
     //icons
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
-
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-
+    implementation(libs.material.icons.extended)
+    //serialization
+    implementation(libs.kotlinx.serialization.json)
 
     //firebase crashlytics
-    implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
+    generalImplementation(platform(libs.firebase.bom))
+    generalImplementation(libs.google.firebase.crashlytics.ktx)
+    generalImplementation(libs.google.firebase.analytics.ktx)
 
     //barcode scanning
-    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
-}
-
-kapt {
-    correctErrorTypes = true
+    implementation(libs.play.services.code.scanner)
 }

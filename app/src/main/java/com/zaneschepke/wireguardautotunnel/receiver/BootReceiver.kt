@@ -3,9 +3,8 @@ package com.zaneschepke.wireguardautotunnel.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.zaneschepke.wireguardautotunnel.repository.Repository
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.Settings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,7 @@ import javax.inject.Inject
 class BootReceiver : BroadcastReceiver() {
 
     @Inject
-    lateinit var settingsRepo : Repository<Settings>
+    lateinit var settingsRepo : SettingsDoa
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
