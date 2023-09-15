@@ -50,9 +50,8 @@ android {
     }
     flavorDimensions.add("type")
     productFlavors {
-        create("floss") {
+        create("fdroid") {
             dimension = "type"
-            applicationIdSuffix = ".floss"
         }
         create("general") {
             dimension = "type"
