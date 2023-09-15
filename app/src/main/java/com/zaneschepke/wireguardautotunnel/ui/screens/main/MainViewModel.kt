@@ -13,14 +13,13 @@ import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.service.barcode.CodeScanner
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
+import com.zaneschepke.wireguardautotunnel.repository.model.Settings
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
 import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.repository.model.Settings
-import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.ViewState
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,8 +37,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val application : Application,
                                         private val tunnelRepo : TunnelConfigDao,
                                         private val settingsRepo : SettingsDoa,
-                                        private val vpnService: VpnService,
-                                        private val codeScanner: CodeScanner
+                                        private val vpnService: VpnService
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(ViewState())
@@ -96,13 +94,12 @@ class MainViewModel @Inject constructor(private val application : Application,
         ServiceManager.stopVpnService(application.applicationContext)
     }
 
-    suspend fun onTunnelQRSelected() {
-        codeScanner.scan().collect {
-            if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.config_validation))) {
-                val tunnelConfig = TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = it)
+    fun onTunnelQrResult(result : String) {
+        viewModelScope.launch(Dispatchers.IO) {
+        if(result.contains(application.resources.getString(R.string.config_validation))) {
+            val tunnelConfig =
+                TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
                 saveTunnel(tunnelConfig)
-            } else if(!it.isNullOrEmpty() && it.contains(application.resources.getString(R.string.barcode_downloading))) {
-                showSnackBarMessage(application.resources.getString(R.string.barcode_downloading_message))
             } else {
                 showSnackBarMessage(application.resources.getString(R.string.barcode_error))
             }

@@ -92,4 +92,5 @@
     <string name="attempt_connection">Attempting connection..</string>
     <string name="vpn_starting">VPN Starting</string>
     <string name="db_name">wg-tunnel-db</string>
+    <string name="scanning_qr">Reading QR code</string>
 </resources>

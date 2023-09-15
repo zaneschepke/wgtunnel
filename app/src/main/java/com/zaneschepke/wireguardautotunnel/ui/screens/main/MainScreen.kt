@@ -70,7 +70,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.wireguard.android.backend.Tunnel
+import com.zaneschepke.wireguardautotunnel.ui.CaptureActivityPortrait
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
@@ -140,6 +143,11 @@ fun MainScreen(
     ) { result ->
         result.data?.data?.let { viewModel.onTunnelFileSelected(it) }
     }
+
+    val scanLauncher = rememberLauncherForActivityResult(
+        contract = ScanContract(),
+        onResult = { result -> viewModel.onTunnelQrResult(result.contents) }
+    )
 
     Scaffold(
         modifier = Modifier.pointerInput(Unit) {
@@ -219,7 +227,13 @@ fun MainScreen(
                     .clickable {
                         scope.launch {
                             showBottomSheet = false
-                            viewModel.onTunnelQRSelected()
+                            val scanOptions = ScanOptions()
+                            scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                            scanOptions.setOrientationLocked(true)
+                            scanOptions.setPrompt(context.getString(R.string.scanning_qr))
+                            scanOptions.setBeepEnabled(false)
+                            scanOptions.captureActivity = CaptureActivityPortrait().javaClass
+                            scanLauncher.launch(scanOptions)
                         }
                     }
                     .padding(10.dp)

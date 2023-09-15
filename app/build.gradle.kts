@@ -129,8 +129,6 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
-
-
     //lifecycle
     implementation(libs.lifecycle.runtime.compose)
 
@@ -145,5 +143,6 @@ dependencies {
     generalImplementation(libs.google.firebase.analytics.ktx)
 
     //barcode scanning
-    implementation(libs.play.services.code.scanner)
+    implementation(libs.zxing.android.embedded)
+    implementation(libs.zxing.core)
 }

@@ -59,6 +59,12 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.CaptureActivityPortrait"
+            android:screenOrientation="fullSensor"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity
             android:finishOnTaskLaunch="true"
             android:theme="@android:style/Theme.NoDisplay"
             android:name=".service.shortcut.ShortcutsActivity"/>

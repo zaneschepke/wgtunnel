@@ -15,7 +15,6 @@ lifecycle-runtime-compose = "2.6.2"
 material-icons-extended = "1.5.1"
 material3 = "1.1.1"
 navigationCompose = "2.7.2"
-playServicesCodeScanner = "16.1.0"
 roomVersion = "2.6.0-beta01"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
@@ -28,6 +27,8 @@ compose="1.5.1"
 crashlytics="18.4.1"
 analytics="21.3.0"
 composeCompiler="1.5.3"
+zxingAndroidEmbedded = "4.3.0"
+zxingCore = "3.4.1"
 
 
 [libraries]
@@ -69,7 +70,6 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material-icons-extended" }
-play-services-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "playServicesCodeScanner" }
 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
@@ -81,6 +81,9 @@ google-firebase-analytics-ktx = { module = "com.google.firebase:firebase-analyti
 firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom"}
 google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
+
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxingCore" }
+zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
