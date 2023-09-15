@@ -81,13 +81,18 @@ class TunnelControlTile : TileService() {
     private suspend fun determineTileTunnel() : TunnelConfig? {
         var tunnelConfig : TunnelConfig? = null;
         val settings = settingsRepo.getAll()
-        if (!settings.isNullOrEmpty()) {
+        if (settings.isNotEmpty()) {
             val setting = settings.first()
             tunnelConfig = if (setting.defaultTunnel != null) {
                 TunnelConfig.from(setting.defaultTunnel!!);
             } else {
-                val config = configRepo.getAll()?.first();
-                config;
+                val configs = configRepo.getAll();
+                val config  = if(configs.isNotEmpty()) {
+                    configs.first();
+                } else {
+                    null
+                }
+                config
             }
         }
         return tunnelConfig;
@@ -97,7 +102,7 @@ class TunnelControlTile : TileService() {
     private fun attemptWatcherServiceToggle(tunnelConfig : String) {
         scope.launch {
             val settings = settingsRepo.getAll()
-            if (!settings.isNullOrEmpty()) {
+            if (settings.isNotEmpty()) {
                 val setting = settings.first()
                 if(setting.isAutoTunnelEnabled) {
                     ServiceManager.toggleWatcherServiceForeground(this@TunnelControlTile, tunnelConfig)
