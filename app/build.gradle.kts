@@ -10,17 +10,12 @@ android {
     namespace = "com.zaneschepke.wireguardautotunnel"
     compileSdk = 34
 
-    val versionMajor = 2
-    val versionMinor = 5
-    val versionPatch = 0
-    val versionBuild = 0
-
     defaultConfig {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 26
         targetSdk = 34
-        versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
-        versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+        versionCode = 25000
+        versionName = "2.5.0"
 
         multiDexEnabled = true
 
