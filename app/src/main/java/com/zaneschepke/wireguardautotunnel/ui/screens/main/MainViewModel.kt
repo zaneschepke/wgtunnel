@@ -96,9 +96,8 @@ class MainViewModel @Inject constructor(private val application : Application,
 
     fun onTunnelQrResult(result : String) {
         viewModelScope.launch(Dispatchers.IO) {
-        if(result.contains(application.resources.getString(R.string.config_validation))) {
-            val tunnelConfig =
-                TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
+            if(result.contains(application.resources.getString(R.string.config_validation))) {
+                val tunnelConfig = TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
                 saveTunnel(tunnelConfig)
             } else {
                 showSnackBarMessage(application.resources.getString(R.string.barcode_error))
