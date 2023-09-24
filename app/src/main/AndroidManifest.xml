@@ -56,6 +56,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES"/>
             </intent-filter>
         </activity>
         <activity
@@ -117,8 +118,5 @@
             </intent-filter>
         </receiver>
         <receiver android:exported="false" android:name=".receiver.NotificationActionReceiver"/>
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="barcode_ui"/>
     </application>
 </manifest>

@@ -12,6 +12,7 @@ import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.repository.model.Settings
+import com.zaneschepke.wireguardautotunnel.service.network.EthernetService
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkStatus
@@ -39,6 +40,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     lateinit var mobileDataService : NetworkService<MobileDataService>
 
     @Inject
+    lateinit var ethernetService: NetworkService<EthernetService>
+
+    @Inject
     lateinit var settingsRepo: SettingsDoa
 
     @Inject
@@ -48,6 +52,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     lateinit var vpnService : VpnService
 
     private var isWifiConnected = false;
+    private var isEthernetConnected = false;
     private var isMobileDataConnected = false;
     private var currentNetworkSSID = "";
 
@@ -142,6 +147,11 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     watchForMobileDataConnectivityChanges()
                 }
             }
+            if(setting.isTunnelOnEthernetEnabled) {
+                launch {
+                    watchForEthernetConnectivityChanges()
+                }
+            }
             launch {
                 manageVpn()
             }
@@ -162,6 +172,25 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 is NetworkStatus.Unavailable -> {
                     isMobileDataConnected = false
                     Timber.d("Lost mobile data connection")
+                }
+            }
+        }
+    }
+
+    private suspend fun watchForEthernetConnectivityChanges() {
+        ethernetService.networkStatus.collect {
+            when (it) {
+                is NetworkStatus.Available -> {
+                    Timber.d("Gained Ethernet connection")
+                    isEthernetConnected = true
+                }
+                is NetworkStatus.CapabilitiesChanged -> {
+                    Timber.d("Ethernet capabilities changed")
+                    isEthernetConnected = true
+                }
+                is NetworkStatus.Unavailable -> {
+                    isEthernetConnected = false
+                    Timber.d("Lost Ethernet connection")
                 }
             }
         }
@@ -189,20 +218,23 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private suspend fun manageVpn() {
         while(true) {
-            if(setting.isTunnelOnMobileDataEnabled &&
+            if(isEthernetConnected && setting.isTunnelOnEthernetEnabled && vpnService.getState() == Tunnel.State.DOWN) {
+                ServiceManager.startVpnService(this, tunnelConfig)
+            }
+            if(!isEthernetConnected && setting.isTunnelOnMobileDataEnabled &&
                 !isWifiConnected &&
                 isMobileDataConnected
                 && vpnService.getState() == Tunnel.State.DOWN) {
                 ServiceManager.startVpnService(this, tunnelConfig)
-            } else if(!setting.isTunnelOnMobileDataEnabled &&
+            } else if(!isEthernetConnected && !setting.isTunnelOnMobileDataEnabled &&
                 !isWifiConnected &&
                 vpnService.getState() == Tunnel.State.UP) {
                 ServiceManager.stopVpnService(this)
-            } else if(isWifiConnected &&
+            } else if(!isEthernetConnected && isWifiConnected &&
                 !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
                 (vpnService.getState() != Tunnel.State.UP)) {
                 ServiceManager.startVpnService(this, tunnelConfig)
-            } else if((isWifiConnected &&
+            } else if(!isEthernetConnected && (isWifiConnected &&
                         setting.trustedNetworkSSIDs.contains(currentNetworkSSID)) &&
                 (vpnService.getState() == Tunnel.State.UP)) {
                 ServiceManager.stopVpnService(this)

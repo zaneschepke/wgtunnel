@@ -399,6 +399,24 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Text("Tunnel on Ethernet")
+            Switch(
+                enabled = !settings.isAutoTunnelEnabled,
+                checked = settings.isTunnelOnEthernetEnabled,
+                onCheckedChange = {
+                    scope.launch {
+                        viewModel.onToggleTunnelOnEthernet()
+                    }
+                }
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(screenPadding),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(stringResource(R.string.always_on_vpn_support))
             Switch(
                 enabled = !settings.isAutoTunnelEnabled,

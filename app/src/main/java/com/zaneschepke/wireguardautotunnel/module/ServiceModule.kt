@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.module
 
+import com.zaneschepke.wireguardautotunnel.service.network.EthernetService
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.network.WifiService
@@ -26,4 +27,8 @@ abstract class ServiceModule {
     @Binds
     @ServiceScoped
     abstract fun provideMobileDataService(mobileDataService : MobileDataService) : NetworkService<MobileDataService>
+
+    @Binds
+    @ServiceScoped
+    abstract fun provideEthernetService(ethernetService: EthernetService) : NetworkService<EthernetService>
 }

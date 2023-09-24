@@ -122,6 +122,18 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
             showSnackBarMessage(application.getString(R.string.select_tunnel_message))
         }
     }
+
+    suspend fun onToggleTunnelOnEthernet() {
+        if(_settings.value.defaultTunnel != null) {
+            _settings.emit(
+                _settings.value.copy(isTunnelOnEthernetEnabled = !_settings.value.isTunnelOnEthernetEnabled)
+            )
+            settingsRepo.save(_settings.value)
+        } else {
+            showSnackBarMessage(application.getString(R.string.select_tunnel_message))
+        }
+    }
+
     fun checkLocationServicesEnabled() : Boolean {
         val locationManager =
             application.getSystemService(Context.LOCATION_SERVICE) as LocationManager

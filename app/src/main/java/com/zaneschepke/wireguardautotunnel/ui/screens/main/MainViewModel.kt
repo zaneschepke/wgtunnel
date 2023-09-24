@@ -1,8 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
@@ -18,18 +18,21 @@ import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
+import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
 import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.ui.ViewState
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
+import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import java.io.InputStream
 import javax.inject.Inject
 
 
@@ -86,88 +89,164 @@ class MainViewModel @Inject constructor(private val application : Application,
         }
     }
 
-    fun onTunnelStart(tunnelConfig : TunnelConfig) = viewModelScope.launch {
+    fun onTunnelStart(tunnelConfig : TunnelConfig) {
+        viewModelScope.launch {
+            stopActiveTunnel()
+            startTunnel(tunnelConfig)
+        }
+    }
+
+    private fun startTunnel(tunnelConfig: TunnelConfig) {
         ServiceManager.startVpnService(application.applicationContext, tunnelConfig.toString())
+    }
+
+    private suspend fun stopActiveTunnel() {
+        if(ServiceManager.getServiceState(application.applicationContext,
+                WireGuardTunnelService::class.java, ) == ServiceState.STARTED) {
+            onTunnelStop()
+            delay(Constants.TOGGLE_TUNNEL_DELAY)
+        }
     }
 
     fun onTunnelStop() {
         ServiceManager.stopVpnService(application.applicationContext)
     }
 
+    private fun validateConfigString(config : String) {
+        if(!config.contains(application.getString(R.string.config_validation))) {
+            throw WgTunnelException(application.getString(R.string.config_validation))
+        }
+    }
+
     fun onTunnelQrResult(result : String) {
         viewModelScope.launch(Dispatchers.IO) {
-            if(result.contains(application.resources.getString(R.string.config_validation))) {
+            try {
+                validateConfigString(result)
                 val tunnelConfig = TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
-                saveTunnel(tunnelConfig)
-            } else {
-                showSnackBarMessage(application.resources.getString(R.string.barcode_error))
+                addTunnel(tunnelConfig)
+            } catch (e : WgTunnelException) {
+                showSnackBarMessage(e.message ?: application.getString(R.string.unknown_error_message))
             }
         }
     }
 
-    fun onTunnelFileSelected(uri : Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val fileName = getFileName(application.applicationContext, uri)
-                val extension = getFileExtensionFromFileName(fileName)
-                if (extension != ".conf") {
-                    launch {
-                        showSnackBarMessage(application.resources.getString(R.string.file_extension_message))
-                    }
-                    return@launch
-                }
-                val stream = application.applicationContext.contentResolver.openInputStream(uri)
-                stream ?: return@launch
-                val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
-                val config = Config.parse(bufferReader)
-                val tunnelName = getNameFromFileName(fileName)
-                saveTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
-                stream.close()
-            } catch (_: BadConfigException) {
-                launch {
-                    showSnackBarMessage(application.applicationContext.getString(R.string.bad_config))
-                }
-            }
+    private fun validateFileExtension(fileName : String) {
+        val extension = getFileExtensionFromFileName(fileName)
+        if(extension != Constants.VALID_FILE_EXTENSION) {
+            throw WgTunnelException(application.getString(R.string.file_extension_message))
         }
+    }
+
+    private fun saveTunnelConfigFromStream(stream : InputStream, fileName : String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
+            val config = Config.parse(bufferReader)
+            val tunnelName = getNameFromFileName(fileName)
+            addTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+            stream.close()
+        }
+    }
+
+    private fun getInputStreamFromUri(uri: Uri): InputStream {
+        return application.applicationContext.contentResolver.openInputStream(uri)
+            ?: throw WgTunnelException(application.getString(R.string.stream_failed))
+    }
+
+    fun onTunnelFileSelected(uri : Uri) {
+        try {
+            val fileName = getFileName(application.applicationContext, uri)
+            validateFileExtension(fileName)
+            val stream = getInputStreamFromUri(uri)
+            saveTunnelConfigFromStream(stream, fileName)
+        } catch (e : Exception) {
+            showExceptionMessage(e)
+        }
+    }
+
+    private fun showExceptionMessage(e : Exception) {
+        when(e) {
+            is BadConfigException -> {
+                showSnackBarMessage(application.getString(R.string.bad_config))
+            }
+            is WgTunnelException -> {
+                showSnackBarMessage(e.message ?: application.getString(R.string.unknown_error_message))
+            }
+            else -> showSnackBarMessage(application.getString(R.string.unknown_error_message))
+        }
+    }
+
+    private  suspend fun addTunnel(tunnelConfig: TunnelConfig) {
+        saveTunnel(tunnelConfig)
+        createTunnelAppShortcuts(tunnelConfig)
     }
 
     private suspend fun saveTunnel(tunnelConfig : TunnelConfig) {
         tunnelRepo.save(tunnelConfig)
+    }
+
+    private fun createTunnelAppShortcuts(tunnelConfig: TunnelConfig) {
         ShortcutsManager.createTunnelShortcuts(application.applicationContext, tunnelConfig)
     }
 
-    @SuppressLint("Range")
-    private fun getFileName(context: Context, uri: Uri): String {
-        if (uri.scheme == "content") {
-            val cursor = try {
-                context.contentResolver.query(uri, null, null, null, null)
-            } catch (e : Exception) {
-                Timber.d("Exception getting config name")
-                null
-            }
-            cursor ?: return NumberUtils.generateRandomTunnelName()
+    private fun getFileNameByCursor(context: Context, uri: Uri) : String {
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+        if(cursor != null) {
             cursor.use {
-                if(cursor.moveToFirst()) {
-                    return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-                }
+                return getDisplayNameByCursor(it)
             }
+        } else {
+            throw WgTunnelException("Failed to initialize cursor")
         }
-        return NumberUtils.generateRandomTunnelName()
     }
 
-    suspend fun showSnackBarMessage(message : String) {
-        _viewState.emit(_viewState.value.copy(
-            showSnackbarMessage = true,
-            snackbarMessage = message,
-            snackbarActionText = "Okay",
-            onSnackbarActionClick = {
-                viewModelScope.launch {
-                    dismissSnackBar()
+    private fun getDisplayNameColumnIndex(cursor: Cursor) : Int {
+        val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        if(columnIndex == -1) {
+            throw WgTunnelException("Cursor out of bounds")
+        }
+        return columnIndex
+    }
+
+    private fun getDisplayNameByCursor(cursor: Cursor) : String {
+        if(cursor.moveToFirst()) {
+            val index = getDisplayNameColumnIndex(cursor)
+            return cursor.getString(index)
+        } else {
+            throw WgTunnelException("Cursor failed to move to first")
+        }
+    }
+
+    private fun validateUriContentScheme(uri : Uri) {
+        if (uri.scheme != Constants.URI_CONTENT_SCHEME) {
+            throw WgTunnelException(application.getString(R.string.file_extension_message))
+        }
+    }
+
+
+    private fun getFileName(context: Context, uri: Uri): String {
+        validateUriContentScheme(uri)
+        return try {
+            getFileNameByCursor(context, uri)
+        } catch (_: Exception) {
+            NumberUtils.generateRandomTunnelName()
+        }
+    }
+
+    fun showSnackBarMessage(message : String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            _viewState.emit(_viewState.value.copy(
+                showSnackbarMessage = true,
+                snackbarMessage = message,
+                snackbarActionText = application.getString(R.string.okay),
+                onSnackbarActionClick = {
+                    viewModelScope.launch {
+                        dismissSnackBar()
+                    }
                 }
-            }
-        ))
-        delay(Constants.SNACKBAR_DELAY)
-        dismissSnackBar()
+            ))
+            delay(Constants.SNACKBAR_DELAY)
+            dismissSnackBar()
+        }
     }
 
     private suspend fun dismissSnackBar() {

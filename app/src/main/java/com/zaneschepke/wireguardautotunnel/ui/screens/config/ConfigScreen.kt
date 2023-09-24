@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -53,7 +54,7 @@ fun ConfigScreen(
     padding: PaddingValues,
     focusRequester: FocusRequester,
     navController: NavController,
-    id : String?
+    id : String
 ) {
 
     val context = LocalContext.current
@@ -67,11 +68,12 @@ fun ConfigScreen(
     val checkedPackages by viewModel.checkedPackages.collectAsStateWithLifecycle()
     val include by viewModel.include.collectAsStateWithLifecycle()
     val allApplications by viewModel.allApplications.collectAsStateWithLifecycle()
+    val sortedPackages = remember(packages) {
+        packages.sortedBy { viewModel.getPackageLabel(it) }
+    }
 
     LaunchedEffect(Unit) {
-        viewModel.getTunnelById(id)
-        viewModel.emitQueriedPackages("")
-        viewModel.emitCurrentPackageConfigurations(id)
+        viewModel.emitScreenData(id)
     }
 
     if(tunnel != null) {
@@ -174,7 +176,7 @@ fun ConfigScreen(
                             SearchBar(viewModel::emitQueriedPackages);
                         }
                     }
-                    items(packages) { pack ->
+                    items(sortedPackages, key = { it.packageName }) { pack ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -200,8 +202,7 @@ fun ConfigScreen(
                                     )
                                 }
                                 Text(
-                                    pack.applicationInfo.loadLabel(context.packageManager)
-                                        .toString(), modifier = Modifier.padding(5.dp)
+                                    viewModel.getPackageLabel(pack), modifier = Modifier.padding(5.dp)
                                 )
                             }
                             Checkbox(

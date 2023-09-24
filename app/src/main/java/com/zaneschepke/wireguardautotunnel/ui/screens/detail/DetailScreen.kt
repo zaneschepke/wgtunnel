@@ -36,7 +36,7 @@ import java.time.Instant
 fun DetailScreen(
     viewModel: DetailViewModel = hiltViewModel(),
     padding: PaddingValues,
-    id : String?
+    id : String
 ) {
 
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
@@ -47,15 +47,17 @@ fun DetailScreen(
 
 
     LaunchedEffect(Unit) {
-        viewModel.getTunnelById(id)
+        viewModel.emitConfig(id)
     }
 
-    if(tunnel != null) {
+    if(null != tunnel) {
         val interfaceKey = tunnel?.`interface`?.keyPair?.publicKey?.toBase64().toString()
         val addresses = tunnel?.`interface`?.addresses!!.joinToString()
         val dnsServers = tunnel?.`interface`?.dnsServers!!.joinToString()
         val optionalMtu = tunnel?.`interface`?.mtu
-        val mtu = if(optionalMtu?.isPresent == true) optionalMtu.get().toString() else "None"
+        val mtu = if(optionalMtu?.isPresent == true) optionalMtu.get().toString() else stringResource(
+            id = R.string.none
+        )
         Column(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
@@ -97,7 +99,9 @@ fun DetailScreen(
                     tunnel?.peers?.forEach{
                         val peerKey = it.publicKey.toBase64().toString()
                         val allowedIps = it.allowedIps.joinToString()
-                        val endpoint = if(it.endpoint.isPresent) it.endpoint.get().toString() else "None"
+                        val endpoint = if(it.endpoint.isPresent) it.endpoint.get().toString() else stringResource(
+                            id = R.string.none
+                        )
                         Text(stringResource(R.string.peer), fontWeight = FontWeight.Bold, fontSize = 20.sp)
                         Text(stringResource(R.string.public_key), fontStyle = FontStyle.Italic)
                         Text(text = peerKey,  modifier = Modifier.clickable {
@@ -123,7 +127,7 @@ fun DetailScreen(
                                 val handshakeEpoch = lastHandshake[it.publicKey]
                                 if(handshakeEpoch != null) {
                                     if(handshakeEpoch == 0L) {
-                                        Text("Never")
+                                        Text(stringResource(id = R.string.never))
                                     } else {
                                         val time = Instant.ofEpochMilli(handshakeEpoch)
                                         Text("${Duration.between(time, Instant.now()).seconds} seconds ago")

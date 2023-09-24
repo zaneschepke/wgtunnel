@@ -46,9 +46,11 @@ object ShortcutsManager {
         )
     }
 
-    fun removeTunnelShortcuts(context : Context, tunnelConfig : TunnelConfig) {
-        ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(tunnelConfig.id.toString() + APPEND_ON,
-            tunnelConfig.id.toString() + APPEND_OFF ))
+    fun removeTunnelShortcuts(context : Context, tunnelConfig : TunnelConfig?) {
+        if(tunnelConfig != null) {
+            ShortcutManagerCompat.removeDynamicShortcuts(context, listOf(tunnelConfig.id.toString() + APPEND_ON,
+                tunnelConfig.id.toString() + APPEND_OFF ))
+        }
     }
 
     private fun createTunnelOnIntent(context: Context, extras : Map<String,String>) : Intent {

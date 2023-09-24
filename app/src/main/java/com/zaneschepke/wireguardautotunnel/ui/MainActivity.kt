@@ -44,6 +44,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.TransparentSystemBars
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
+import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import java.lang.IllegalStateException
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                                     }
                                     false
                                 } else -> {
-                                   false;
+                                   false
                                 }
                             }
                         } else {
@@ -131,8 +132,8 @@ class MainActivity : AppCompatActivity() {
                                 val intentSettings =
                                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                                 intentSettings.data =
-                                    Uri.fromParts("package", this.packageName, null)
-                                startActivity(intentSettings);
+                                    Uri.fromParts(Constants.URI_PACKAGE_SCHEME, this.packageName, null)
+                                startActivity(intentSettings)
                             },
                             message = getString(R.string.notification_permission_required),
                             getString(R.string.open_settings)
@@ -190,10 +191,19 @@ class MainActivity : AppCompatActivity() {
                         }) { SupportScreen(padding = padding, focusRequester) }
                         composable("${Routes.Config.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
-                        }) { ConfigScreen(padding = padding, navController = navController, id = it.arguments?.getString("id"), focusRequester = focusRequester)}
+                        }) {
+                            val id = it.arguments?.getString("id")
+                            if(!id.isNullOrBlank()) {
+                                ConfigScreen(padding = padding, navController = navController, id = id, focusRequester = focusRequester)}
+                            }
                         composable("${Routes.Detail.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
-                        }) { DetailScreen(padding = padding, id = it.arguments?.getString("id")) }
+                        }) {
+                            val id = it.arguments?.getString("id")
+                            if(!id.isNullOrBlank()) {
+                                DetailScreen(padding = padding, id = id)
+                            }
+                        }
                     }
                 }
             }

@@ -73,11 +73,12 @@ import androidx.navigation.NavController
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.wireguard.android.backend.Tunnel
-import com.zaneschepke.wireguardautotunnel.ui.CaptureActivityPortrait
+import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.ui.CaptureActivityPortrait
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.theme.brickRed
@@ -146,7 +147,13 @@ fun MainScreen(
 
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract(),
-        onResult = { result -> viewModel.onTunnelQrResult(result.contents) }
+        onResult = {
+            try {
+                viewModel.onTunnelQrResult(it.contents)
+            } catch (e : Exception) {
+                viewModel.showSnackBarMessage(context.getString(R.string.qr_result_failed))
+            }
+        }
     )
 
     Scaffold(
@@ -205,7 +212,7 @@ fun MainScreen(
                             showBottomSheet = false
                             val fileSelectionIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "*/*"
+                                type = Constants.ALLOWED_FILE_TYPES
                             }
                             pickFileLauncher.launch(fileSelectionIntent)
                         }
@@ -232,7 +239,7 @@ fun MainScreen(
                             scanOptions.setOrientationLocked(true)
                             scanOptions.setPrompt(context.getString(R.string.scanning_qr))
                             scanOptions.setBeepEnabled(false)
-                            scanOptions.captureActivity = CaptureActivityPortrait().javaClass
+                            scanOptions.captureActivity = CaptureActivityPortrait::class.java
                             scanLauncher.launch(scanOptions)
                         }
                     }
@@ -264,7 +271,7 @@ fun MainScreen(
                     .nestedScroll(nestedScrollConnection),
             ) {
                 items(tunnels, key = { tunnel -> tunnel.id }) {tunnel ->
-                    val focusRequester = FocusRequester();
+                    val focusRequester = FocusRequester()
                     RowListItem(leadingIcon = Icons.Rounded.Circle,
                         leadingIconColor = if (tunnelName == tunnel.name) when (handshakeStatus) {
                             HandshakeStatus.HEALTHY -> mint
@@ -281,7 +288,7 @@ fun MainScreen(
                                 return@RowListItem
                             }
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            selectedTunnel = tunnel;
+                            selectedTunnel = tunnel
                         },
                         onClick = {
                             if (!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {

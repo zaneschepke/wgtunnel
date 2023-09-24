@@ -38,7 +38,6 @@
     <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
     <string name="config_validation">[Interface]</string>
-    <string name="invalid_qr">Invalid QR code.</string>
     <string name="add_from_file">Add tunnel from files</string>
     <string name="open_file">File Open</string>
     <string name="add_from_qr">Add tunnel from QR code</string>
@@ -62,7 +61,6 @@
     <string name="public_key">Public key</string>
     <string name="barcode_downloading">Waiting for the Barcode UI module to be downloaded.</string>
     <string name="barcode_downloading_message">Barcode module downloading. Try again.</string>
-    <string name="barcode_error">Invalid QR code. Try again.</string>
     <string name="addresses">Addresses</string>
     <string name="dns_servers">DNS servers</string>
     <string name="mtu">MTU</string>
@@ -92,5 +90,10 @@
     <string name="attempt_connection">Attempting connection..</string>
     <string name="vpn_starting">VPN Starting</string>
     <string name="db_name">wg-tunnel-db</string>
-    <string name="scanning_qr">Reading QR code</string>
+    <string name="scanning_qr">Scanning for QR</string>
+    <string name="qr_result_failed">QR scan failed</string>
+    <string name="none">None</string>
+    <string name="never">Never</string>
+    <string name="stream_failed">Failed to open file stream.</string>
+    <string name="unknown_error_message">An unknown error occurred.</string>
 </resources>

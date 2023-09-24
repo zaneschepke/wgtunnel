@@ -23,7 +23,7 @@ class BootReceiver : BroadcastReceiver() {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val settings = settingsRepo.getAll()
-                    if (!settings.isNullOrEmpty()) {
+                    if (settings.isNotEmpty()) {
                         val setting = settings.first()
                         if (setting.isAutoTunnelEnabled && setting.defaultTunnel != null) {
                             ServiceManager.startWatcherService(context, setting.defaultTunnel!!)
