@@ -96,4 +96,5 @@
     <string name="never">Never</string>
     <string name="stream_failed">Failed to open file stream.</string>
     <string name="unknown_error_message">An unknown error occurred.</string>
+    <string name="no_file_app">No file app installed.</string>
 </resources>

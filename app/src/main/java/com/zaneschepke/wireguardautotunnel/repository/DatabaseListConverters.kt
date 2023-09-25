@@ -5,7 +5,7 @@ import androidx.room.TypeConverter
 class DatabaseListConverters {
     @TypeConverter
     fun listToString(value: MutableList<String>): String {
-        return value.joinToString()
+        return value.joinToString(",")
     }
     @TypeConverter
     fun <T> stringToList(value: String): MutableList<String> {

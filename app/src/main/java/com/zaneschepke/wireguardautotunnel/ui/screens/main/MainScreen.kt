@@ -214,7 +214,11 @@ fun MainScreen(
                                 addCategory(Intent.CATEGORY_OPENABLE)
                                 type = Constants.ALLOWED_FILE_TYPES
                             }
-                            pickFileLauncher.launch(fileSelectionIntent)
+                            if (fileSelectionIntent.resolveActivity(context.packageManager) != null) {
+                                pickFileLauncher.launch(fileSelectionIntent)
+                            } else {
+                                viewModel.showSnackBarMessage(context.getString(R.string.no_file_app))
+                            }
                         }
                         .padding(10.dp)
                 ) {
@@ -271,7 +275,7 @@ fun MainScreen(
                     .nestedScroll(nestedScrollConnection),
             ) {
                 items(tunnels, key = { tunnel -> tunnel.id }) {tunnel ->
-                    val focusRequester = FocusRequester()
+                    val focusRequester = remember { FocusRequester() }
                     RowListItem(leadingIcon = Icons.Rounded.Circle,
                         leadingIconColor = if (tunnelName == tunnel.name) when (handshakeStatus) {
                             HandshakeStatus.HEALTHY -> mint
