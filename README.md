@@ -2,35 +2,37 @@
 WG Tunnel
 </h1>
 
-<span align="center">
+<div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Discord Chat](https://img.shields.io/discord/1108285024631001111.svg)](https://discord.gg/rbRRNh6H7V)
 
-</span>
+</div>
 
-<span align="center">
+<div align="center">
 
 
 [![Google Play](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.zaneschepke.wireguardautotunnel)
 [![Fire TV](https://img.shields.io/badge/fire%20tv-fc3b2d?style=for-the-badge&logo=amazon%20fire%20tv&logoColor=white)](https://www.amazon.com/gp/product/B0CFGGL7WK)
+[![F-Droid](https://img.shields.io/static/v1?style=for-the-badge&message=F-Droid&color=1976D2&logo=F-Droid&logoColor=FFFFFF&label=)](https://f-droid.org/packages/com.zaneschepke.wireguardautotunnel/)
 
-</span>
 
-<span align="center">
+</div>
+
+<div align="center">
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N8NMJN2)
 
-</span>
+</div>
 
 
-<span align="left">
+<div align="left">
 
 This is an alternative Android Application for [WireGuard](https://www.wireguard.com/) with added features. Built using the [wireguard-android](https://github.com/WireGuard/wireguard-android) library and [Jetpack Compose](https://developer.android.com/jetpack/compose), this application was inspired by the official [WireGuard Android](https://github.com/WireGuard/wireguard-android) app.
 
-</span>
+</div>
 
-<span align="center">
+<div align="center">
 
 ## Screenshots
 
@@ -41,7 +43,7 @@ This is an alternative Android Application for [WireGuard](https://www.wireguard
   <img label="Support" style="padding-left:25px" src="asset/support_screen.png" width="200" />
 </p>
 
-<span align="left">
+<div align="left">
 
 ## Inspiration
 
