@@ -210,15 +210,20 @@ fun MainScreen(
                         .fillMaxWidth()
                         .clickable {
                             showBottomSheet = false
-                            val fileSelectionIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            val fileSelectionIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
+                                putExtra(Constants.FILES_SHOW_ADVANCED, true)
                                 type = Constants.ALLOWED_FILE_TYPES
                             }
-                            if (fileSelectionIntent.resolveActivity(context.packageManager) != null) {
-                                pickFileLauncher.launch(fileSelectionIntent)
-                            } else {
-                                viewModel.showSnackBarMessage(context.getString(R.string.no_file_app))
+                            if(!viewModel.isIntentAvailable(fileSelectionIntent)) {
+                                fileSelectionIntent.action = Intent.ACTION_OPEN_DOCUMENT
+                                fileSelectionIntent.setPackage(null)
+                                if (!viewModel.isIntentAvailable(fileSelectionIntent)) {
+                                    viewModel.showSnackBarMessage(context.getString(R.string.no_file_app))
+                                    return@clickable
+                                }
                             }
+                            pickFileLauncher.launch(fileSelectionIntent)
                         }
                         .padding(10.dp)
                 ) {

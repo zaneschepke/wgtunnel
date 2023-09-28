@@ -2,6 +2,8 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -205,6 +207,23 @@ class MainViewModel @Inject constructor(private val application : Application,
             throw WgTunnelException("Cursor out of bounds")
         }
         return columnIndex
+    }
+
+    fun isIntentAvailable(i: Intent?): Boolean {
+        val packageManager = application.packageManager
+        val list = packageManager.queryIntentActivities(
+            i!!,
+            PackageManager.MATCH_DEFAULT_ONLY
+        )
+        // Ignore the Android TV framework app in the list
+        var size = list.size
+        for (ri in list) {
+            // Ignore stub apps
+            if (Constants.ANDROID_TV_STUBS == ri.activityInfo.packageName) {
+                size--
+            }
+        }
+        return size > 0
     }
 
     private fun getDisplayNameByCursor(cursor: Cursor) : String {
