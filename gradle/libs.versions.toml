@@ -6,25 +6,25 @@ appcompat = "1.6.1"
 coreKtx = "1.12.0"
 espressoCore = "3.5.1"
 firebase-crashlytics-gradle = "2.9.9"
-google-services = "4.3.15"
+google-services = "4.4.0"
 hiltAndroid = "2.48"
 hiltNavigationCompose = "1.0.0"
 junit = "4.13.2"
 kotlinx-serialization-json = "1.5.1"
 lifecycle-runtime-compose = "2.6.2"
-material-icons-extended = "1.5.1"
-material3 = "1.1.1"
-navigationCompose = "2.7.2"
-roomVersion = "2.6.0-beta01"
+material-icons-extended = "1.5.2"
+material3 = "1.1.2"
+navigationCompose = "2.7.3"
+roomVersion = "2.6.0-rc01"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
-androidGradlePlugin = "8.2.0-beta03"
+androidGradlePlugin = "8.3.0-alpha06"
 kotlin="1.9.10"
 ksp="1.9.10-1.0.13"
-composeBom="2023.09.00"
-firebaseBom="32.2.3"
-compose="1.5.1"
-crashlytics="18.4.1"
+composeBom="2023.09.02"
+firebaseBom="32.3.1"
+compose="1.5.2"
+crashlytics="18.4.3"
 analytics="21.3.0"
 composeCompiler="1.5.3"
 zxingAndroidEmbedded = "4.3.0"
@@ -38,6 +38,7 @@ accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayo
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanist" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
+
 #room
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }

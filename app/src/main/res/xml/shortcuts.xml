@@ -1,0 +1,32 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="defaultOn1"
+        android:enabled="true"
+        android:icon="@drawable/vpn_on"
+        android:shortcutShortLabel="@string/vpn_on"
+        android:shortcutLongLabel="@string/default_vpn_on"
+        android:shortcutDisabledMessage="@string/vpn_on">
+        <intent
+            android:action="START"
+            android:targetPackage="com.zaneschepke.wireguardautotunnel"
+            android:targetClass="com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsActivity">
+            <extra android:name="className" android:value="WireGuardTunnelService" />
+        </intent>
+        <capability-binding android:key="actions.intent.START" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="defaultOff1"
+        android:enabled="true"
+        android:icon="@drawable/vpn_off"
+        android:shortcutShortLabel="@string/vpn_off"
+        android:shortcutLongLabel="@string/default_vpn_off"
+        android:shortcutDisabledMessage="@string/vpn_off">
+        <intent
+            android:action="STOP"
+            android:targetPackage="com.zaneschepke.wireguardautotunnel"
+            android:targetClass="com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsActivity">
+            <extra android:name="className" android:value="WireGuardTunnelService" />
+        </intent>
+        <capability-binding android:key="actions.intent.STOP" />
+    </shortcut>
+</shortcuts>

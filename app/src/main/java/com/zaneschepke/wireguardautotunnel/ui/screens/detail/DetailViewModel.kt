@@ -38,6 +38,7 @@ class DetailViewModel @Inject constructor(private val tunnelRepo : TunnelConfigD
         viewModelScope.launch(Dispatchers.IO) {
             val tunnelConfig = getTunnelConfigById(id)
             if(tunnelConfig != null) {
+                _tunnelName.emit(tunnelConfig.name)
                 _tunnel.emit(TunnelConfig.configFromQuick(tunnelConfig.wgQuick))
             }
         }

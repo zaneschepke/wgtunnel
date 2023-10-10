@@ -27,5 +27,4 @@ class TunnelModule {
     fun provideVpnService(backend: Backend) : VpnService {
         return WireGuardTunnel(backend)
     }
-
 }

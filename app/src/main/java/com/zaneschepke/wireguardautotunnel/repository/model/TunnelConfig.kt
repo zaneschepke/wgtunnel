@@ -22,57 +22,7 @@ data class TunnelConfig(
     }
 
     companion object {
-        private const val INCLUDED_APPLICATIONS = "IncludedApplications = "
-        private const val EXCLUDED_APPLICATIONS = "ExcludedApplications = "
-        private const val INTERFACE = "[Interface]"
-        private const val NEWLINE_CHAR = "\n"
-        private const val APP_CONFIG_SEPARATOR = ", "
 
-        private fun addApplicationsToConfig(appConfig : String, wgQuick : String) : String {
-            val configList = wgQuick.split(NEWLINE_CHAR).toMutableList()
-            val interfaceIndex = configList.indexOf(INTERFACE)
-            configList.add(interfaceIndex + 1, appConfig)
-            return configList.joinToString(NEWLINE_CHAR)
-        }
-
-        fun clearAllApplicationsFromConfig(wgQuick : String) : String {
-            val configList = wgQuick.split(NEWLINE_CHAR).toMutableList()
-            val itr = configList.iterator()
-            while (itr.hasNext()) {
-                val next = itr.next()
-                if(next.contains(INCLUDED_APPLICATIONS) || next.contains(EXCLUDED_APPLICATIONS)) {
-                    itr.remove()
-                }
-            }
-            return configList.joinToString(NEWLINE_CHAR)
-        }
-
-
-        fun setExcludedApplicationsOnQuick(packages : List<String>, wgQuick: String) : String {
-            if(packages.isEmpty()) {
-                return wgQuick
-            }
-            val clearedWgQuick = clearAllApplicationsFromConfig(wgQuick)
-            val excludeConfig = buildExcludedApplicationsString(packages)
-            return addApplicationsToConfig(excludeConfig, clearedWgQuick)
-        }
-
-        fun setIncludedApplicationsOnQuick(packages : List<String>, wgQuick: String) : String {
-            if(packages.isEmpty()) {
-                return wgQuick
-            }
-            val clearedWgQuick = clearAllApplicationsFromConfig(wgQuick)
-            val includeConfig = buildIncludedApplicationsString(packages)
-            return addApplicationsToConfig(includeConfig, clearedWgQuick)
-        }
-
-        private fun buildExcludedApplicationsString(packages : List<String>) : String {
-            return EXCLUDED_APPLICATIONS + packages.joinToString(APP_CONFIG_SEPARATOR)
-        }
-
-        private fun buildIncludedApplicationsString(packages : List<String>) : String {
-            return INCLUDED_APPLICATIONS + packages.joinToString(APP_CONFIG_SEPARATOR)
-        }
         fun from(string : String) : TunnelConfig {
             return Json.decodeFromString<TunnelConfig>(string)
         }

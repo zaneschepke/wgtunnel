@@ -13,4 +13,13 @@ data class Settings(
     @ColumnInfo(name = "default_tunnel") var defaultTunnel : String? = null,
     @ColumnInfo(name = "is_always_on_vpn_enabled") var isAlwaysOnVpnEnabled : Boolean = false,
     @ColumnInfo(name = "is_tunnel_on_ethernet_enabled") var isTunnelOnEthernetEnabled : Boolean = false,
-)
+) {
+    fun isTunnelConfigDefault(tunnelConfig: TunnelConfig) : Boolean {
+        return if (defaultTunnel != null) {
+            val defaultConfig = TunnelConfig.from(defaultTunnel!!)
+            (tunnelConfig.id == defaultConfig.id)
+        } else {
+            false
+        }
+    }
+}

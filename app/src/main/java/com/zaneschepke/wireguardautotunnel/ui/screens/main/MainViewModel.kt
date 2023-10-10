@@ -2,13 +2,12 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.app.Application
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.wireguard.config.BadConfigException
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.Constants
@@ -21,13 +20,10 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
-import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.ui.ViewState
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,8 +41,6 @@ class MainViewModel @Inject constructor(private val application : Application,
                                         private val vpnService: VpnService
 ) : ViewModel() {
 
-    private val _viewState = MutableStateFlow(ViewState())
-    val viewState get() = _viewState.asStateFlow()
     val tunnels get() = tunnelRepo.getAllFlow()
     val state get() = vpnService.state
 
@@ -87,7 +81,6 @@ class MainViewModel @Inject constructor(private val application : Application,
                 }
             }
             tunnelRepo.delete(tunnel)
-            ShortcutsManager.removeTunnelShortcuts(application.applicationContext, tunnel)
         }
     }
 
@@ -127,7 +120,7 @@ class MainViewModel @Inject constructor(private val application : Application,
                 val tunnelConfig = TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
                 addTunnel(tunnelConfig)
             } catch (e : WgTunnelException) {
-                showSnackBarMessage(e.message ?: application.getString(R.string.unknown_error_message))
+                throw WgTunnelException(e.message ?: application.getString(R.string.unknown_error_message))
             }
         }
     }
@@ -156,38 +149,23 @@ class MainViewModel @Inject constructor(private val application : Application,
 
     fun onTunnelFileSelected(uri : Uri) {
         try {
-            val fileName = getFileName(application.applicationContext, uri)
-            validateFileExtension(fileName)
-            val stream = getInputStreamFromUri(uri)
-            saveTunnelConfigFromStream(stream, fileName)
+            viewModelScope.launch(Dispatchers.IO) {
+                val fileName = getFileName(application.applicationContext, uri)
+                validateFileExtension(fileName)
+                val stream = getInputStreamFromUri(uri)
+                saveTunnelConfigFromStream(stream, fileName)
+            }
         } catch (e : Exception) {
-            showExceptionMessage(e)
-        }
-    }
-
-    private fun showExceptionMessage(e : Exception) {
-        when(e) {
-            is BadConfigException -> {
-                showSnackBarMessage(application.getString(R.string.bad_config))
-            }
-            is WgTunnelException -> {
-                showSnackBarMessage(e.message ?: application.getString(R.string.unknown_error_message))
-            }
-            else -> showSnackBarMessage(application.getString(R.string.unknown_error_message))
+            throw WgTunnelException(e.message ?: "Error importing file")
         }
     }
 
     private  suspend fun addTunnel(tunnelConfig: TunnelConfig) {
         saveTunnel(tunnelConfig)
-        createTunnelAppShortcuts(tunnelConfig)
     }
 
     private suspend fun saveTunnel(tunnelConfig : TunnelConfig) {
         tunnelRepo.save(tunnelConfig)
-    }
-
-    private fun createTunnelAppShortcuts(tunnelConfig: TunnelConfig) {
-        ShortcutsManager.createTunnelShortcuts(application.applicationContext, tunnelConfig)
     }
 
     private fun getFileNameByCursor(context: Context, uri: Uri) : String {
@@ -207,23 +185,6 @@ class MainViewModel @Inject constructor(private val application : Application,
             throw WgTunnelException("Cursor out of bounds")
         }
         return columnIndex
-    }
-
-    fun isIntentAvailable(i: Intent?): Boolean {
-        val packageManager = application.packageManager
-        val list = packageManager.queryIntentActivities(
-            i!!,
-            PackageManager.MATCH_DEFAULT_ONLY
-        )
-        // Ignore the Android TV framework app in the list
-        var size = list.size
-        for (ri in list) {
-            // Ignore stub apps
-            if (Constants.ANDROID_TV_STUBS == ri.activityInfo.packageName) {
-                size--
-            }
-        }
-        return size > 0
     }
 
     private fun getDisplayNameByCursor(cursor: Cursor) : String {
@@ -251,29 +212,6 @@ class MainViewModel @Inject constructor(private val application : Application,
         }
     }
 
-    fun showSnackBarMessage(message : String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            _viewState.emit(_viewState.value.copy(
-                showSnackbarMessage = true,
-                snackbarMessage = message,
-                snackbarActionText = application.getString(R.string.okay),
-                onSnackbarActionClick = {
-                    viewModelScope.launch {
-                        dismissSnackBar()
-                    }
-                }
-            ))
-            delay(Constants.SNACKBAR_DELAY)
-            dismissSnackBar()
-        }
-    }
-
-    private suspend fun dismissSnackBar() {
-        _viewState.emit(_viewState.value.copy(
-            showSnackbarMessage = false
-        ))
-    }
-
     private fun getNameFromFileName(fileName : String) : String {
         return fileName.substring(0 , fileName.lastIndexOf('.') )
     }
@@ -283,6 +221,15 @@ class MainViewModel @Inject constructor(private val application : Application,
             fileName.substring(fileName.lastIndexOf('.'))
         } catch (e : Exception) {
             ""
+        }
+    }
+
+    suspend fun onDefaultTunnelChange(selectedTunnel: TunnelConfig?) {
+        if(selectedTunnel != null) {
+            _settings.emit(_settings.value.copy(
+                defaultTunnel = selectedTunnel.toString()
+            ))
+            settingsRepo.save(_settings.value)
         }
     }
 }

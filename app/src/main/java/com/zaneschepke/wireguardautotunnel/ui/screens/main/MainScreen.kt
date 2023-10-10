@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -17,10 +16,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.rounded.Add
@@ -28,6 +29,8 @@ import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -37,14 +40,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -89,8 +91,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel = hiltViewModel(), padding: PaddingValues,
-    snackbarHostState: SnackbarHostState, navController: NavController
+    viewModel: MainViewModel = hiltViewModel(),
+    padding: PaddingValues,
+    showSnackbarMessage: (String) -> Unit,
+    navController: NavController
 ) {
 
     val haptic = LocalHapticFeedback.current
@@ -100,13 +104,13 @@ fun MainScreen(
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showPrimaryChangeAlertDialog by remember { mutableStateOf(false) }
     val tunnels by viewModel.tunnels.collectAsStateWithLifecycle(mutableListOf())
     val handshakeStatus by viewModel.handshakeStatus.collectAsStateWithLifecycle(HandshakeStatus.NOT_STARTED)
-    val viewState = viewModel.viewState.collectAsStateWithLifecycle()
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
-
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
 
     // Nested scroll for control FAB
     val nestedScrollConnection = remember {
@@ -125,24 +129,14 @@ fun MainScreen(
         }
     }
 
-    LaunchedEffect(viewState.value) {
-        if (viewState.value.showSnackbarMessage) {
-            val result = snackbarHostState.showSnackbar(
-                message = viewState.value.snackbarMessage,
-                actionLabel = viewState.value.snackbarActionText,
-                duration = SnackbarDuration.Long,
-            )
-            when (result) {
-                SnackbarResult.ActionPerformed -> viewState.value.onSnackbarActionClick
-                SnackbarResult.Dismissed -> viewState.value.onSnackbarActionClick
-            }
-        }
-    }
-
     val pickFileLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        result.data?.data?.let { viewModel.onTunnelFileSelected(it) }
+        ActivityResultContracts.GetContent()
+    ) { result -> if (result != null)
+        try {
+            viewModel.onTunnelFileSelected(result)
+        } catch (e : Exception) {
+            showSnackbarMessage(e.message ?: "Unknown error occurred")
+        }
     }
 
     val scanLauncher = rememberLauncherForActivityResult(
@@ -150,11 +144,45 @@ fun MainScreen(
         onResult = {
             try {
                 viewModel.onTunnelQrResult(it.contents)
-            } catch (e : Exception) {
-                viewModel.showSnackBarMessage(context.getString(R.string.qr_result_failed))
+            } catch (e: Exception) {
+                showSnackbarMessage(context.getString(R.string.qr_result_failed))
             }
         }
     )
+
+    if(showPrimaryChangeAlertDialog) {
+        AlertDialog(
+            onDismissRequest = {
+               showPrimaryChangeAlertDialog = false
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch {
+                        viewModel.onDefaultTunnelChange(selectedTunnel)
+                        showPrimaryChangeAlertDialog = false
+                        selectedTunnel = null
+                    }
+                })
+                { Text(text = "Okay") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showPrimaryChangeAlertDialog = false
+                })
+                { Text(text = "Cancel") }
+            },
+            title = { Text(text = "Primary tunnel change") },
+            text = { Text(text = "Would you like to make this your primary tunnel?") }
+        )
+    }
+
+    fun onTunnelToggle(checked : Boolean , tunnel : TunnelConfig) {
+        try {
+            if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+        } catch (e : Exception) {
+            showSnackbarMessage(e.message!!)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.pointerInput(Unit) {
@@ -169,12 +197,19 @@ fun MainScreen(
                 enter = slideInVertically(initialOffsetY = { it * 2 }),
                 exit = slideOutVertically(targetOffsetY = { it * 2 }),
             ) {
+                val secondaryColor = MaterialTheme.colorScheme.secondary
+                val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+                var fobColor by remember { mutableStateOf(secondaryColor) }
                 FloatingActionButton(
-                    modifier = Modifier.padding(bottom = 90.dp),
+                    modifier = Modifier.padding(bottom = 90.dp).onFocusChanged {
+                        if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                            fobColor = if (it.isFocused) hoverColor else secondaryColor }
+                        }
+                    ,
                     onClick = {
                         showBottomSheet = true
                     },
-                    containerColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = fobColor,
                     shape = RoundedCornerShape(16.dp),
                 ) {
                     Icon(
@@ -210,20 +245,11 @@ fun MainScreen(
                         .fillMaxWidth()
                         .clickable {
                             showBottomSheet = false
-                            val fileSelectionIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                putExtra(Constants.FILES_SHOW_ADVANCED, true)
-                                type = Constants.ALLOWED_FILE_TYPES
+                            try {
+                                pickFileLauncher.launch(Constants.ALLOWED_FILE_TYPES)
+                            } catch (_: Exception) {
+                                showSnackbarMessage("No file explorer")
                             }
-                            if(!viewModel.isIntentAvailable(fileSelectionIntent)) {
-                                fileSelectionIntent.action = Intent.ACTION_OPEN_DOCUMENT
-                                fileSelectionIntent.setPackage(null)
-                                if (!viewModel.isIntentAvailable(fileSelectionIntent)) {
-                                    viewModel.showSnackBarMessage(context.getString(R.string.no_file_app))
-                                    return@clickable
-                                }
-                            }
-                            pickFileLauncher.launch(fileSelectionIntent)
                         }
                         .padding(10.dp)
                 ) {
@@ -264,6 +290,26 @@ fun MainScreen(
                         modifier = Modifier.padding(10.dp)
                     )
                 }
+                Divider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showBottomSheet = false
+                            navController.navigate("${Routes.Config.name}/${Constants.MANUAL_TUNNEL_CONFIG_ID}")
+                        }
+                        .padding(10.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Create,
+                        contentDescription = stringResource(id = R.string.create_import),
+                        modifier = Modifier.padding(10.dp)
+                    )
+                    Text(
+                        stringResource(id = R.string.create_import),
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
             }
         }
         Column(
@@ -273,27 +319,36 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .nestedScroll(nestedScrollConnection),
             ) {
-                items(tunnels, key = { tunnel -> tunnel.id }) {tunnel ->
+                items(tunnels, key = { tunnel -> tunnel.id }) { tunnel ->
+                   val leadingIconColor = (if (tunnelName == tunnel.name) when (handshakeStatus) {
+                        HandshakeStatus.HEALTHY -> mint
+                        HandshakeStatus.UNHEALTHY -> brickRed
+                        HandshakeStatus.NOT_STARTED -> Color.Gray
+                        HandshakeStatus.NEVER_CONNECTED -> brickRed
+                    } else {Color.Gray})
                     val focusRequester = remember { FocusRequester() }
-                    RowListItem(leadingIcon = Icons.Rounded.Circle,
-                        leadingIconColor = if (tunnelName == tunnel.name) when (handshakeStatus) {
-                            HandshakeStatus.HEALTHY -> mint
-                            HandshakeStatus.UNHEALTHY -> brickRed
-                            HandshakeStatus.NOT_STARTED -> Color.Gray
-                            HandshakeStatus.NEVER_CONNECTED -> brickRed
-                        } else Color.Gray,
+                    RowListItem(icon = {
+                        if (settings.isTunnelConfigDefault(tunnel))
+                            Icon(
+                                Icons.Rounded.Star, "status",
+                                tint = leadingIconColor,
+                                modifier =  Modifier.padding(end = 10.dp).size(20.dp)
+                            )
+                        else Icon(
+                            Icons.Rounded.Circle, "status",
+                            tint = leadingIconColor,
+                            modifier =  Modifier.padding(end = 15.dp).size(15.dp)
+                        )
+                    },
                         text = tunnel.name,
                         onHold = {
                             if (state == Tunnel.State.UP && tunnel.name == tunnelName) {
-                                scope.launch {
-                                    viewModel.showSnackBarMessage(context.resources.getString(R.string.turn_off_tunnel))
-                                }
+                                showSnackbarMessage(context.resources.getString(R.string.turn_off_tunnel))
                                 return@RowListItem
                             }
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -303,12 +358,22 @@ fun MainScreen(
                             if (!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                 navController.navigate("${Routes.Detail.name}/${tunnel.id}")
                             } else {
+                                selectedTunnel = tunnel
                                 focusRequester.requestFocus()
                             }
                         },
                         rowButton = {
-                            if (tunnel.id == selectedTunnel?.id) {
+                            if (tunnel.id == selectedTunnel?.id && !WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                 Row {
+                                    if(!settings.isTunnelConfigDefault(tunnel)) {
+                                        IconButton(onClick = {
+                                            if(settings.isAutoTunnelEnabled) {
+                                                showSnackbarMessage(context.resources.getString(R.string.turn_off_auto))
+                                            } else showPrimaryChangeAlertDialog = true
+                                        }) {
+                                            Icon(Icons.Rounded.Star, stringResource(id = R.string.set_primary))
+                                        }
+                                    }
                                     IconButton(onClick = {
                                         navController.navigate("${Routes.Config.name}/${selectedTunnel?.id}")
                                     }) {
@@ -326,6 +391,15 @@ fun MainScreen(
                             } else {
                                 if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                     Row {
+                                        if(!settings.isTunnelConfigDefault(tunnel)) {
+                                            IconButton(onClick = {
+                                                if(settings.isAutoTunnelEnabled) {
+                                                    showSnackbarMessage(context.resources.getString(R.string.turn_off_auto))
+                                                } else showPrimaryChangeAlertDialog = true
+                                            }) {
+                                                Icon(Icons.Rounded.Star, stringResource(id = R.string.set_primary))
+                                            }
+                                        }
                                         IconButton(
                                             modifier = Modifier.focusRequester(focusRequester),
                                             onClick = {
@@ -335,13 +409,12 @@ fun MainScreen(
                                         }
                                         IconButton(onClick = {
                                             if (state == Tunnel.State.UP && tunnel.name == tunnelName)
-                                                scope.launch {
-                                                    viewModel.showSnackBarMessage(
-                                                        context.resources.getString(
-                                                            R.string.turn_off_tunnel
-                                                        )
+                                                showSnackbarMessage(
+                                                    context.resources.getString(
+                                                        R.string.turn_off_tunnel
                                                     )
-                                                } else {
+                                                )
+                                            else {
                                                 navController.navigate("${Routes.Config.name}/${tunnel.id}")
                                             }
                                         }) {
@@ -352,13 +425,12 @@ fun MainScreen(
                                         }
                                         IconButton(onClick = {
                                             if (state == Tunnel.State.UP && tunnel.name == tunnelName)
-                                                scope.launch {
-                                                    viewModel.showSnackBarMessage(
-                                                        context.resources.getString(
-                                                            R.string.turn_off_tunnel
-                                                        )
+                                                showSnackbarMessage(
+                                                    context.resources.getString(
+                                                        R.string.turn_off_tunnel
                                                     )
-                                                } else {
+                                                )
+                                            else {
                                                 viewModel.onDelete(tunnel)
                                             }
                                         }) {
@@ -370,7 +442,7 @@ fun MainScreen(
                                         Switch(
                                             checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
                                             onCheckedChange = { checked ->
-                                                if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+                                                onTunnelToggle(checked, tunnel)
                                             }
                                         )
                                     }
@@ -378,7 +450,7 @@ fun MainScreen(
                                     Switch(
                                         checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
                                         onCheckedChange = { checked ->
-                                            if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+                                            onTunnelToggle(checked, tunnel)
                                         }
                                     )
                                 }

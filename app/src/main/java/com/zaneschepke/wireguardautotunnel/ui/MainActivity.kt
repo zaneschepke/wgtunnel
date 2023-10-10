@@ -15,9 +15,14 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -35,6 +41,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.ui.common.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
@@ -44,10 +51,11 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.TransparentSystemBars
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
-import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.IllegalStateException
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -90,7 +98,29 @@ class MainActivity : AppCompatActivity() {
                     } else requestNotificationPermission()
                 }
 
-                Scaffold(snackbarHost = { SnackbarHost(snackbarHostState)},
+                fun showSnackBarMessage(message : String) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = message,
+                            actionLabel = "Okay",
+                            duration = SnackbarDuration.Short,
+                        )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> { snackbarHostState.currentSnackbarData?.dismiss() }
+                            SnackbarResult.Dismissed -> { snackbarHostState.currentSnackbarData?.dismiss() }
+                        }
+                    }
+                }
+
+                Scaffold(snackbarHost = {
+                        SnackbarHost(snackbarHostState) { snackbarData: SnackbarData ->
+                            CustomSnackBar(
+                                snackbarData.visuals.message,
+                                isRtl = false,
+                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+                            )
+                        }
+                    },
                     modifier = Modifier.onKeyEvent {
                         if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
                             when (it.nativeKeyEvent.keyCode) {
@@ -140,6 +170,7 @@ class MainActivity : AppCompatActivity() {
                         )
                         return@Scaffold
                     }
+
                     AnimatedNavHost(navController, startDestination = Routes.Main.name) {
                         composable(Routes.Main.name, enterTransition = {
                             when (initialState.destination.route) {
@@ -154,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }) {
-                            MainScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController)
+                            MainScreen(padding = padding, showSnackbarMessage = { message -> showSnackBarMessage(message) }, navController = navController)
                         }
                         composable(Routes.Settings.name, enterTransition = {
                             when (initialState.destination.route) {
@@ -175,7 +206,7 @@ class MainActivity : AppCompatActivity() {
                                     fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                                 }
                             }
-                        }) { SettingsScreen(padding = padding, snackbarHostState = snackbarHostState, navController = navController, focusRequester = focusRequester) }
+                        }) { SettingsScreen(padding = padding, showSnackbarMessage = { message -> showSnackBarMessage(message) }, focusRequester = focusRequester) }
                         composable(Routes.Support.name, enterTransition = {
                             when (initialState.destination.route) {
                                 Routes.Settings.name, Routes.Main.name ->
@@ -191,17 +222,17 @@ class MainActivity : AppCompatActivity() {
                         }) { SupportScreen(padding = padding, focusRequester) }
                         composable("${Routes.Config.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
-                        }) {
+                        }) { it ->
                             val id = it.arguments?.getString("id")
                             if(!id.isNullOrBlank()) {
-                                ConfigScreen(padding = padding, navController = navController, id = id, focusRequester = focusRequester)}
+                                ConfigScreen(navController = navController, id = id, showSnackbarMessage = { message -> showSnackBarMessage(message) }, focusRequester = focusRequester)}
                             }
                         composable("${Routes.Detail.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                         }) {
                             val id = it.arguments?.getString("id")
                             if(!id.isNullOrBlank()) {
-                                DetailScreen(padding = padding, id = id)
+                                DetailScreen(padding = padding, focusRequester = focusRequester, id = id)
                             }
                         }
                     }

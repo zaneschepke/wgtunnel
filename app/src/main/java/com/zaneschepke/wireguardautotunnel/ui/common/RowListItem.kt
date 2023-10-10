@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RowListItem(leadingIcon : ImageVector? = null, leadingIconColor : Color = Color.Gray, text : String, onHold : () -> Unit, onClick: () -> Unit, rowButton : @Composable() () -> Unit ) {
+fun RowListItem(icon : @Composable() () -> Unit, text : String, onHold : () -> Unit, onClick: () -> Unit, rowButton : @Composable() () -> Unit ) {
     Box(
         modifier = Modifier
             .combinedClickable(
@@ -39,13 +39,7 @@ fun RowListItem(leadingIcon : ImageVector? = null, leadingIconColor : Color = Co
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically,) {
-                if(leadingIcon != null) {
-                    Icon(
-                        leadingIcon, "status",
-                        tint = leadingIconColor,
-                        modifier =  Modifier.padding(end = 10.dp).size(15.dp)
-                    )
-                }
+                icon()
                 Text(text)
             }
 
