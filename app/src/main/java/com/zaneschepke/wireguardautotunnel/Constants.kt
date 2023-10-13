@@ -12,5 +12,6 @@ object Constants {
     const val URI_CONTENT_SCHEME = "content"
     const val URI_PACKAGE_SCHEME = "package"
     const val ALLOWED_FILE_TYPES = "*/*"
-    const val ANDROID_TV_STUBS = "com.google.android.tv.frameworkpackagestubs"
+    const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
+    const val ANDROID_TV_EXPLORER_STUB = "com.android.tv.frameworkpackagestubs"
 }

@@ -1,22 +1,24 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
-import android.app.Service
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
+import androidx.lifecycle.LifecycleService
 import timber.log.Timber
 
 
-open class ForegroundService : Service() {
+open class ForegroundService : LifecycleService() {
 
     private var isServiceStarted = false
 
     override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
         // We don't provide binding, so return null
         return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         Timber.d("onStartCommand executed with startId: $startId")
         if (intent != null) {
             val action = intent.action

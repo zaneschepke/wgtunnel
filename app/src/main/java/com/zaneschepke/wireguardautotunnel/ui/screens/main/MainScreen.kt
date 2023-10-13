@@ -1,6 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -85,6 +89,8 @@ import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.theme.brickRed
 import com.zaneschepke.wireguardautotunnel.ui.theme.mint
+import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -129,13 +135,33 @@ fun MainScreen(
         }
     }
 
-    val pickFileLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { result -> if (result != null)
-        try {
-            viewModel.onTunnelFileSelected(result)
-        } catch (e : Exception) {
-            showSnackbarMessage(e.message ?: "Unknown error occurred")
+    val tunnelFileImportResultLauncher = rememberLauncherForActivityResult(object : ActivityResultContracts.GetContent() {
+        override fun createIntent(context: Context, input: String): Intent {
+            val intent = super.createIntent(context, input)
+
+            /* AndroidTV now comes with stubs that do nothing but display a Toast less helpful than
+             * what we can do, so detect this and throw an exception that we can catch later. */
+            val activitiesToResolveIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong()))
+            } else {
+                context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+            }
+            if (activitiesToResolveIntent.all {
+                    val name = it.activityInfo.packageName
+                    name.startsWith(Constants.GOOGLE_TV_EXPLORER_STUB) || name.startsWith(Constants.ANDROID_TV_EXPLORER_STUB)
+                }) {
+                throw WgTunnelException("No file explorer installed")
+            }
+            return intent
+        }
+    }) { data ->
+        if (data == null) return@rememberLauncherForActivityResult
+        scope.launch(Dispatchers.IO) {
+            try {
+                viewModel.onTunnelFileSelected(data)
+            } catch (e : Exception) {
+                showSnackbarMessage(e.message ?: "Unknown error occurred")
+            }
         }
     }
 
@@ -163,16 +189,16 @@ fun MainScreen(
                         selectedTunnel = null
                     }
                 })
-                { Text(text = "Okay") }
+                { Text(text = stringResource(R.string.okay)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showPrimaryChangeAlertDialog = false
                 })
-                { Text(text = "Cancel") }
+                { Text(text = stringResource(R.string.cancel)) }
             },
-            title = { Text(text = "Primary tunnel change") },
-            text = { Text(text = "Would you like to make this your primary tunnel?") }
+            title = { Text(text = stringResource(R.string.primary_tunnel_change)) },
+            text = { Text(text = stringResource(R.string.primary_tunnnel_change_question)) }
         )
     }
 
@@ -246,9 +272,9 @@ fun MainScreen(
                         .clickable {
                             showBottomSheet = false
                             try {
-                                pickFileLauncher.launch(Constants.ALLOWED_FILE_TYPES)
-                            } catch (_: Exception) {
-                                showSnackbarMessage("No file explorer")
+                                tunnelFileImportResultLauncher.launch(Constants.ALLOWED_FILE_TYPES)
+                            } catch (e : Exception) {
+                                showSnackbarMessage(e.message!!)
                             }
                         }
                         .padding(10.dp)
@@ -263,32 +289,34 @@ fun MainScreen(
                         modifier = Modifier.padding(10.dp)
                     )
                 }
-                Divider()
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        scope.launch {
-                            showBottomSheet = false
-                            val scanOptions = ScanOptions()
-                            scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                            scanOptions.setOrientationLocked(true)
-                            scanOptions.setPrompt(context.getString(R.string.scanning_qr))
-                            scanOptions.setBeepEnabled(false)
-                            scanOptions.captureActivity = CaptureActivityPortrait::class.java
-                            scanLauncher.launch(scanOptions)
+                if(!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                    Divider()
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            scope.launch {
+                                showBottomSheet = false
+                                val scanOptions = ScanOptions()
+                                scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                                scanOptions.setOrientationLocked(true)
+                                scanOptions.setPrompt(context.getString(R.string.scanning_qr))
+                                scanOptions.setBeepEnabled(false)
+                                scanOptions.captureActivity = CaptureActivityPortrait::class.java
+                                scanLauncher.launch(scanOptions)
+                            }
                         }
+                        .padding(10.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.QrCode,
+                            contentDescription = stringResource(id = R.string.qr_scan),
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Text(
+                            stringResource(id = R.string.add_from_qr),
+                            modifier = Modifier.padding(10.dp)
+                        )
                     }
-                    .padding(10.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.QrCode,
-                        contentDescription = stringResource(id = R.string.qr_scan),
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Text(
-                        stringResource(id = R.string.add_from_qr),
-                        modifier = Modifier.padding(10.dp)
-                    )
                 }
                 Divider()
                 Row(
@@ -440,6 +468,7 @@ fun MainScreen(
                                             )
                                         }
                                         Switch(
+                                            modifier = Modifier.focusRequester(focusRequester),
                                             checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
                                             onCheckedChange = { checked ->
                                                 onTunnelToggle(checked, tunnel)

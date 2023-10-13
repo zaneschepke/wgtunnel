@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PowerManager
 import android.os.SystemClock
+import androidx.lifecycle.lifecycleScope
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
@@ -66,7 +67,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     override fun onCreate() {
         super.onCreate()
-        CoroutineScope(Dispatchers.Main).launch {
+        lifecycleScope.launch(Dispatchers.Main) {
             launchWatcherNotification()
         }
     }
@@ -122,6 +123,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
+                    //TODO decide what to do here with the wakelock
+                    //this is draining battery. Perhaps users only care for VPN to connect when their screen is on
+                    //and they are actively using apps
                     acquire()
                 }
             }
@@ -134,7 +138,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private fun startWatcherJob() {
-        watcherJob = CoroutineScope(Dispatchers.IO).launch {
+        watcherJob = lifecycleScope.launch(Dispatchers.IO) {
             val settings = settingsRepo.getAll();
             if(settings.isNotEmpty()) {
                 setting = settings[0]

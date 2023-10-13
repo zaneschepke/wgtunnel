@@ -55,6 +55,11 @@ class TunnelControlTile : TileService() {
         cancelJob()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
+    }
+
     override fun onClick() {
         super.onClick()
         unlockAndRun {

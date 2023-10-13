@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.common.config
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +13,7 @@ import androidx.compose.ui.unit.Dp
 
 @Composable
 fun ConfigurationToggle(label : String, enabled : Boolean, checked : Boolean, padding : Dp,
-                        onCheckChanged : () -> Unit) {
+                        onCheckChanged : () -> Unit, modifier : Modifier = Modifier) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -24,6 +23,7 @@ fun ConfigurationToggle(label : String, enabled : Boolean, checked : Boolean, pa
     ) {
         Text(label)
         Switch(
+            modifier = modifier,
             enabled = enabled,
             checked = checked,
             onCheckedChange = {

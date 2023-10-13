@@ -44,12 +44,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -71,7 +74,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(
     ExperimentalPermissionsApi::class,
-    ExperimentalLayoutApi::class
+    ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class
 )
 @Composable
 fun SettingsScreen(
@@ -84,6 +87,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val interactionSource = remember { MutableInteractionSource() }
 
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -264,7 +268,9 @@ fun SettingsScreen(
                     value = currentText,
                     onValueChange = { currentText = it },
                     label = { Text(stringResource(R.string.add_trusted_ssid)) },
-                    modifier = Modifier.padding(start = screenPadding, top = 5.dp).focusRequester(focusRequester),
+                    modifier = Modifier.padding(start = screenPadding, top = 5.dp).focusRequester(focusRequester).onFocusChanged {
+                        keyboardController?.hide()
+                    },
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,

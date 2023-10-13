@@ -13,6 +13,7 @@ import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -60,6 +61,11 @@ class ShortcutsActivity : ComponentActivity() {
             }
         }
         finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     private suspend fun getSettings() : Settings {

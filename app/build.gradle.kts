@@ -14,8 +14,8 @@ android {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 26
         targetSdk = 34
-        versionCode = 31000
-        versionName = "3.1.0"
+        versionCode = 31100
+        versionName = "3.1.1"
 
         multiDexEnabled = true
 
@@ -81,6 +81,8 @@ val generalImplementation by configurations
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    // optional - helpers for implementing LifecycleOwner in a Service
+    implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

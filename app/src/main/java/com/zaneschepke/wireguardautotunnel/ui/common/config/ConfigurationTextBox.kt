@@ -12,7 +12,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 
 @Composable
 fun
-        ConfigurationTextBox(value : String, hint : String, onValueChange : (String) -> Unit, label : String, onDone : () -> Unit, modifier: Modifier) {
+        ConfigurationTextBox(value : String, hint : String, onValueChange : (String) -> Unit, keyboardActions : KeyboardActions, label : String, modifier: Modifier) {
    OutlinedTextField(
         modifier = modifier,
         value = value,
@@ -29,10 +29,6 @@ fun
             capitalization = KeyboardCapitalization.None,
             imeAction = ImeAction.Done
         ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onDone()
-            }
-        ),
+        keyboardActions = keyboardActions,
     )
 }

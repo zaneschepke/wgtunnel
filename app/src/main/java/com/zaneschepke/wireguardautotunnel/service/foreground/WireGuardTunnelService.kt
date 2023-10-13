@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
@@ -38,7 +39,7 @@ class WireGuardTunnelService : ForegroundService() {
 
     override fun onCreate() {
         super.onCreate()
-        CoroutineScope(Dispatchers.Main).launch {
+        lifecycleScope.launch(Dispatchers.Main) {
             launchVpnStartingNotification()
         }
     }
@@ -48,7 +49,7 @@ class WireGuardTunnelService : ForegroundService() {
         launchVpnStartingNotification()
         val tunnelConfigString = extras?.getString(getString(R.string.tunnel_extras_key))
         cancelJob()
-        job = CoroutineScope(Dispatchers.IO).launch {
+        job = lifecycleScope.launch(Dispatchers.IO) {
             if(tunnelConfigString != null) {
                 try {
                     val tunnelConfig = TunnelConfig.from(tunnelConfigString)
@@ -70,32 +71,32 @@ class WireGuardTunnelService : ForegroundService() {
                     }
                 }
             }
-        }
-        CoroutineScope(job).launch {
-            var didShowConnected = false
-            var didShowFailedHandshakeNotification = false
-            vpnService.handshakeStatus.collect {
-                when(it) {
-                    HandshakeStatus.NOT_STARTED -> {
-                    }
-                    HandshakeStatus.NEVER_CONNECTED -> {
-                        if(!didShowFailedHandshakeNotification) {
-                            launchVpnConnectionFailedNotification(getString(R.string.initial_connection_failure_message))
-                            didShowFailedHandshakeNotification = true
-                            didShowConnected = false
+            launch {
+                var didShowConnected = false
+                var didShowFailedHandshakeNotification = false
+                vpnService.handshakeStatus.collect {
+                    when(it) {
+                        HandshakeStatus.NOT_STARTED -> {
                         }
-                    }
-                    HandshakeStatus.HEALTHY -> {
-                        if(!didShowConnected) {
-                            launchVpnConnectedNotification()
-                            didShowConnected = true
+                        HandshakeStatus.NEVER_CONNECTED -> {
+                            if(!didShowFailedHandshakeNotification) {
+                                launchVpnConnectionFailedNotification(getString(R.string.initial_connection_failure_message))
+                                didShowFailedHandshakeNotification = true
+                                didShowConnected = false
+                            }
                         }
-                    }
-                    HandshakeStatus.UNHEALTHY -> {
-                        if(!didShowFailedHandshakeNotification) {
-                            launchVpnConnectionFailedNotification(getString(R.string.lost_connection_failure_message))
-                            didShowFailedHandshakeNotification = true
-                            didShowConnected = false
+                        HandshakeStatus.HEALTHY -> {
+                            if(!didShowConnected) {
+                                launchVpnConnectedNotification()
+                                didShowConnected = true
+                            }
+                        }
+                        HandshakeStatus.UNHEALTHY -> {
+                            if(!didShowFailedHandshakeNotification) {
+                                launchVpnConnectionFailedNotification(getString(R.string.lost_connection_failure_message))
+                                didShowFailedHandshakeNotification = true
+                                didShowConnected = false
+                            }
                         }
                     }
                 }
@@ -105,7 +106,7 @@ class WireGuardTunnelService : ForegroundService() {
 
     override fun stopService(extras : Bundle?) {
         super.stopService(extras)
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             vpnService.stopTunnel()
         }
         cancelJob()

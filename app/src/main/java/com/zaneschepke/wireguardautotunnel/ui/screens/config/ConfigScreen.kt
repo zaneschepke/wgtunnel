@@ -60,7 +60,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -96,7 +95,6 @@ fun ConfigScreen(
 ) {
 
     val context = LocalContext.current
-    val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -111,11 +109,24 @@ fun ConfigScreen(
     val proxyPeers by viewModel.proxyPeers.collectAsStateWithLifecycle()
     val proxyInterface by viewModel.interfaceProxy.collectAsStateWithLifecycle()
     var showApplicationsDialog by remember { mutableStateOf(false) }
+    val baseTextBoxModifier = Modifier.onFocusChanged {
+        keyboardController?.hide()
+    }
 
     val keyboardActions = KeyboardActions(
         onDone = {
-            focusManager.clearFocus()
+            //focusManager.clearFocus()
             keyboardController?.hide()
+        },
+        onNext = {
+            keyboardController?.hide()
+        },
+        onPrevious = {
+            keyboardController?.hide()
+        },
+        onGo = {
+            keyboardController?.hide(
+            )
         }
     )
 
@@ -380,16 +391,13 @@ fun ConfigScreen(
                                 onValueChange = { value ->
                                     viewModel.onTunnelNameChange(value)
                                 },
-                                onDone = {
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                },
+                                keyboardActions = keyboardActions,
                                 label = stringResource(R.string.name),
                                 hint = stringResource(R.string.tunnel_name).lowercase(),
-                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester)
+                                modifier = baseTextBoxModifier.fillMaxWidth().focusRequester(focusRequester)
                             )
                             OutlinedTextField(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = baseTextBoxModifier.fillMaxWidth(),
                                 value = proxyInterface.privateKey,
                                 visualTransformation = PasswordVisualTransformation(),
                                 enabled = id == Constants.MANUAL_TUNNEL_CONFIG_ID,
@@ -416,7 +424,7 @@ fun ConfigScreen(
                                 keyboardActions = keyboardActions
                             )
                             OutlinedTextField(
-                                modifier = Modifier.fillMaxWidth().focusRequester(FocusRequester.Default),
+                                modifier = baseTextBoxModifier.fillMaxWidth().focusRequester(FocusRequester.Default),
                                 value = proxyInterface.publicKey,
                                 enabled = false,
                                 onValueChange = {},
@@ -445,52 +453,40 @@ fun ConfigScreen(
                                     onValueChange = { value ->
                                         viewModel.onAddressesChanged(value)
                                     },
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
+                                    keyboardActions = keyboardActions,
                                     label = stringResource(R.string.addresses),
                                     hint = stringResource(R.string.comma_separated_list),
-                                    modifier = Modifier
+                                    modifier = baseTextBoxModifier
                                         .fillMaxWidth(3 / 5f)
                                         .padding(end = 5.dp)
                                 )
                                 ConfigurationTextBox(
                                     value = proxyInterface.listenPort,
                                     onValueChange = { value -> viewModel.onListenPortChanged(value) },
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
+                                    keyboardActions =  keyboardActions,
                                     label = stringResource(R.string.listen_port),
                                     hint = stringResource(R.string.random),
-                                    modifier = Modifier.width(IntrinsicSize.Min)
+                                    modifier = baseTextBoxModifier.width(IntrinsicSize.Min)
                                 )
                             }
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 ConfigurationTextBox(
                                     value = proxyInterface.dnsServers,
                                     onValueChange = { value -> viewModel.onDnsServersChanged(value) },
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
+                                    keyboardActions = keyboardActions,
                                     label = stringResource(R.string.dns_servers),
                                     hint = stringResource(R.string.comma_separated_list),
-                                    modifier = Modifier
+                                    modifier = baseTextBoxModifier
                                         .fillMaxWidth(3 / 5f)
                                         .padding(end = 5.dp)
                                 )
                                 ConfigurationTextBox(
                                     value = proxyInterface.mtu,
                                     onValueChange = { value -> viewModel.onMtuChanged(value) },
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
+                                    keyboardActions = keyboardActions,
                                     label = stringResource(R.string.mtu),
                                     hint = stringResource(R.string.auto),
-                                    modifier = Modifier.width(IntrinsicSize.Min)
+                                    modifier = baseTextBoxModifier.width(IntrinsicSize.Min)
                                 )
                             }
                             Row(
@@ -556,13 +552,10 @@ fun ConfigScreen(
                                             value
                                         )
                                     },
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
+                                    keyboardActions = keyboardActions,
                                     label = stringResource(R.string.public_key),
                                     hint = stringResource(R.string.base64_key),
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = baseTextBoxModifier.fillMaxWidth()
                                 )
                                 ConfigurationTextBox(
                                     value = peer.preSharedKey,
@@ -572,16 +565,13 @@ fun ConfigScreen(
                                             value
                                         )
                                     },
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
+                                    keyboardActions = keyboardActions,
                                     label = stringResource(R.string.preshared_key),
                                     hint = stringResource(R.string.optional),
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = baseTextBoxModifier.fillMaxWidth()
                                 )
                                 OutlinedTextField(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = baseTextBoxModifier.fillMaxWidth(),
                                     value = peer.persistentKeepalive,
                                     enabled = true,
                                     onValueChange = { value ->
@@ -602,16 +592,13 @@ fun ConfigScreen(
                                             value
                                         )
                                     },
-                                    onDone = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                    },
+                                    keyboardActions = keyboardActions,
                                     label = stringResource(R.string.endpoint),
                                     hint = stringResource(R.string.endpoint).lowercase(),
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = baseTextBoxModifier.fillMaxWidth()
                                 )
                                 OutlinedTextField(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = baseTextBoxModifier.fillMaxWidth(),
                                     value = peer.allowedIps,
                                     enabled = true,
                                     onValueChange = { value ->

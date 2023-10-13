@@ -11,6 +11,7 @@ import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -46,6 +47,8 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
     override val handshakeStatus: SharedFlow<HandshakeStatus>
         get() = _handshakeStatus.asSharedFlow()
 
+    private val scope = CoroutineScope(Dispatchers.IO);
+
     private lateinit var statsJob : Job
 
 
@@ -70,11 +73,12 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
         return _tunnelName.value
     }
 
-    override suspend  fun stopTunnel() {
+    override suspend fun stopTunnel() {
         try {
             if(getState() == Tunnel.State.UP) {
                 val state = backend.setState(this, Tunnel.State.DOWN, null)
                 _state.emit(state)
+                scope.cancel()
             }
         } catch (e : BackendException) {
             Timber.e("Failed to stop tunnel with error: ${e.message}")
@@ -89,7 +93,7 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
         val tunnel = this;
         _state.tryEmit(state)
         if(state == Tunnel.State.UP) {
-            statsJob = CoroutineScope(Dispatchers.IO).launch {
+            statsJob = scope.launch {
                 val handshakeMap = HashMap<Key, Long>()
                 var neverHadHandshakeCounter = 0
                 while (true) {
@@ -128,4 +132,6 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
             _lastHandshake.tryEmit(emptyMap())
         }
     }
+
+
 }

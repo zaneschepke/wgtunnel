@@ -1,6 +1,6 @@
 [versions]
 accompanist = "0.31.2-alpha"
-activityCompose = "1.7.2"
+activityCompose = "1.8.0"
 androidx-junit = "1.1.5"
 appcompat = "1.6.1"
 coreKtx = "1.12.0"
@@ -12,18 +12,18 @@ hiltNavigationCompose = "1.0.0"
 junit = "4.13.2"
 kotlinx-serialization-json = "1.5.1"
 lifecycle-runtime-compose = "2.6.2"
-material-icons-extended = "1.5.2"
+material-icons-extended = "1.5.3"
 material3 = "1.1.2"
-navigationCompose = "2.7.3"
+navigationCompose = "2.7.4"
 roomVersion = "2.6.0-rc01"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
 androidGradlePlugin = "8.3.0-alpha06"
 kotlin="1.9.10"
 ksp="1.9.10-1.0.13"
-composeBom="2023.09.02"
+composeBom="2023.10.00"
 firebaseBom="32.3.1"
-compose="1.5.2"
+compose="1.5.3"
 crashlytics="18.4.3"
 analytics="21.3.0"
 composeCompiler="1.5.3"
@@ -40,6 +40,7 @@ accompanist-permissions = { module = "com.google.accompanist:accompanist-permiss
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 
 #room
+androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle-runtime-compose" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
