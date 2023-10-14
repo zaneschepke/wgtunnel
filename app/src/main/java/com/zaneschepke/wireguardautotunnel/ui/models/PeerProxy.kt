@@ -7,16 +7,16 @@ data class PeerProxy(
     var preSharedKey : String = "",
     var persistentKeepalive : String = "",
     var endpoint : String = "",
-    var allowedIps: String = IPV4_WILDCARD.joinToString(",")
+    var allowedIps: String = IPV4_WILDCARD.joinToString(", ").trim()
 ){
     companion object {
         fun from(peer : Peer) : PeerProxy {
             return PeerProxy(
                 publicKey = peer.publicKey.toBase64(),
-                preSharedKey = if(peer.preSharedKey.isPresent) peer.preSharedKey.get().toString() else "",
-                persistentKeepalive = if(peer.persistentKeepalive.isPresent) peer.persistentKeepalive.get().toString() else "",
-                endpoint = if(peer.endpoint.isPresent) peer.endpoint.get().toString() else "",
-                allowedIps = peer.allowedIps.joinToString(",")
+                preSharedKey = if(peer.preSharedKey.isPresent) peer.preSharedKey.get().toBase64().trim() else "",
+                persistentKeepalive = if(peer.persistentKeepalive.isPresent) peer.persistentKeepalive.get().toString().trim() else "",
+                endpoint = if(peer.endpoint.isPresent) peer.endpoint.get().toString().trim() else "",
+                allowedIps = peer.allowedIps.joinToString(", ").trim()
             )
         }
         val IPV4_PUBLIC_NETWORKS = setOf(

@@ -271,22 +271,22 @@ class ConfigViewModel @Inject constructor(private val application : Application,
     fun buildPeerListFromProxyPeers() : List<Peer> {
         return _proxyPeers.value.map {
             val builder = Peer.Builder()
-            if (it.allowedIps.isNotEmpty()) builder.parseAllowedIPs(it.allowedIps.removeWhiteSpaces())
-            if (it.publicKey.isNotEmpty()) builder.parsePublicKey(it.publicKey.removeWhiteSpaces())
-            if (it.preSharedKey.isNotEmpty()) builder.parsePreSharedKey(it.preSharedKey.removeWhiteSpaces())
-            if (it.endpoint.isNotEmpty()) builder.parseEndpoint(it.endpoint.removeWhiteSpaces())
-            if (it.persistentKeepalive.isNotEmpty()) builder.parsePersistentKeepalive(it.persistentKeepalive.removeWhiteSpaces())
+            if (it.allowedIps.isNotEmpty()) builder.parseAllowedIPs(it.allowedIps.trim())
+            if (it.publicKey.isNotEmpty()) builder.parsePublicKey(it.publicKey.trim())
+            if (it.preSharedKey.isNotEmpty()) builder.parsePreSharedKey(it.preSharedKey.trim())
+            if (it.endpoint.isNotEmpty()) builder.parseEndpoint(it.endpoint.trim())
+            if (it.persistentKeepalive.isNotEmpty()) builder.parsePersistentKeepalive(it.persistentKeepalive.trim())
             builder.build()
         }
     }
 
     fun buildInterfaceListFromProxyInterface() : Interface {
         val builder = Interface.Builder()
-        builder.parsePrivateKey(_interface.value.privateKey.removeWhiteSpaces())
-        builder.parseAddresses(_interface.value.addresses.removeWhiteSpaces())
-        builder.parseDnsServers(_interface.value.dnsServers.removeWhiteSpaces())
-        if(_interface.value.mtu.isNotEmpty()) builder.parseMtu(_interface.value.mtu.removeWhiteSpaces())
-        if(_interface.value.listenPort.isNotEmpty()) builder.parseListenPort(_interface.value.listenPort.removeWhiteSpaces())
+        builder.parsePrivateKey(_interface.value.privateKey.trim())
+        builder.parseAddresses(_interface.value.addresses.trim())
+        builder.parseDnsServers(_interface.value.dnsServers.trim())
+        if(_interface.value.mtu.isNotEmpty()) builder.parseMtu(_interface.value.mtu.trim())
+        if(_interface.value.listenPort.isNotEmpty()) builder.parseListenPort(_interface.value.listenPort.trim())
         if(isAllApplicationsEnabled()) _checkedPackages.value.clear()
         if(_include.value) builder.includeApplications(_checkedPackages.value)
         if(!_include.value) builder.excludeApplications(_checkedPackages.value)
@@ -397,6 +397,4 @@ class ConfigViewModel @Inject constructor(private val application : Application,
             onInterfacePublicKeyChange("")
         }
     }
-
-    private fun String.removeWhiteSpaces() = replace("\\s".toRegex(), "")
 }
