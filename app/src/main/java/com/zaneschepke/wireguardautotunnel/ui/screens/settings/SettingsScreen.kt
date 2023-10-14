@@ -269,7 +269,9 @@ fun SettingsScreen(
                     onValueChange = { currentText = it },
                     label = { Text(stringResource(R.string.add_trusted_ssid)) },
                     modifier = Modifier.padding(start = screenPadding, top = 5.dp).focusRequester(focusRequester).onFocusChanged {
-                        keyboardController?.hide()
+                        if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                            keyboardController?.hide()
+                        }
                     },
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(

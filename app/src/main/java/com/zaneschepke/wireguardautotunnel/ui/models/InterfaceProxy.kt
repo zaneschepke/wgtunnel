@@ -12,14 +12,15 @@ data class InterfaceProxy(
     var mtu : String = "",
 ){
     companion object {
+        private fun String.removeWhiteSpaces() = replace("\\s".toRegex(), "")
         fun from(i : Interface) : InterfaceProxy {
             return InterfaceProxy(
-                publicKey = i.keyPair.publicKey.toBase64(),
-                privateKey = i.keyPair.privateKey.toBase64(),
-                addresses = i.addresses.joinToString(","),
-                dnsServers = i.dnsServers.joinToString(",").replace("/", ""),
-                listenPort = if(i.listenPort.isPresent) i.listenPort.get().toString() else "",
-                mtu = if(i.mtu.isPresent) i.mtu.get().toString() else ""
+                publicKey = i.keyPair.publicKey.toBase64().removeWhiteSpaces(),
+                privateKey = i.keyPair.privateKey.toBase64().removeWhiteSpaces(),
+                addresses = i.addresses.joinToString(",").removeWhiteSpaces(),
+                dnsServers = i.dnsServers.joinToString(",").replace("/", "").removeWhiteSpaces(),
+                listenPort = if(i.listenPort.isPresent) i.listenPort.get().toString().removeWhiteSpaces() else "",
+                mtu = if(i.mtu.isPresent) i.mtu.get().toString().removeWhiteSpaces() else ""
             )
         }
     }

@@ -110,7 +110,9 @@ fun ConfigScreen(
     val proxyInterface by viewModel.interfaceProxy.collectAsStateWithLifecycle()
     var showApplicationsDialog by remember { mutableStateOf(false) }
     val baseTextBoxModifier = Modifier.onFocusChanged {
-        keyboardController?.hide()
+        if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+            keyboardController?.hide()
+        }
     }
 
     val keyboardActions = KeyboardActions(
