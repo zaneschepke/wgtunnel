@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.config
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -66,6 +67,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -77,6 +79,7 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.SearchBar
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
+import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -109,6 +112,8 @@ fun ConfigScreen(
     val proxyPeers by viewModel.proxyPeers.collectAsStateWithLifecycle()
     val proxyInterface by viewModel.interfaceProxy.collectAsStateWithLifecycle()
     var showApplicationsDialog by remember { mutableStateOf(false) }
+    var showAuthPrompt by remember { mutableStateOf(false) }
+    var isAuthenticated by remember { mutableStateOf(false) }
     val baseTextBoxModifier = Modifier.onFocusChanged {
         if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
             keyboardController?.hide()
@@ -117,18 +122,7 @@ fun ConfigScreen(
 
     val keyboardActions = KeyboardActions(
         onDone = {
-            //focusManager.clearFocus()
             keyboardController?.hide()
-        },
-        onNext = {
-            keyboardController?.hide()
-        },
-        onPrevious = {
-            keyboardController?.hide()
-        },
-        onGo = {
-            keyboardController?.hide(
-            )
         }
     )
 
@@ -156,6 +150,21 @@ fun ConfigScreen(
                 else "${checkedPackages.size} " + (if (include) "included" else "excluded")
 
     }
+
+    if(showAuthPrompt) {
+        AuthorizationPrompt(onSuccess = {
+            showAuthPrompt = false
+            isAuthenticated = true },
+            onError = { error ->
+                showSnackbarMessage(error)
+                showAuthPrompt = false
+                      },
+            onFailure = {
+                showAuthPrompt = false
+                showSnackbarMessage("Authentication failed")
+            })
+    }
+
     if (showApplicationsDialog) {
         val sortedPackages = remember(packages) {
             packages.sortedBy { viewModel.getPackageLabel(it) }
@@ -399,10 +408,12 @@ fun ConfigScreen(
                                 modifier = baseTextBoxModifier.fillMaxWidth().focusRequester(focusRequester)
                             )
                             OutlinedTextField(
-                                modifier = baseTextBoxModifier.fillMaxWidth(),
+                                modifier = baseTextBoxModifier.fillMaxWidth().clickable {
+                                    showAuthPrompt = true
+                                },
                                 value = proxyInterface.privateKey,
-                                visualTransformation = PasswordVisualTransformation(),
-                                enabled = id == Constants.MANUAL_TUNNEL_CONFIG_ID,
+                                visualTransformation = if((id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated) VisualTransformation.None else PasswordVisualTransformation(),
+                                enabled = (id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
                                 onValueChange = { value ->
                                     viewModel.onPrivateKeyChange(value)
                                 },

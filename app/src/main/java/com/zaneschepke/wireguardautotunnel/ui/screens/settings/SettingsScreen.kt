@@ -69,8 +69,12 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
+import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
+import com.zaneschepke.wireguardautotunnel.util.StorageUtil
 import kotlinx.coroutines.launch
+import java.io.File
+import kotlin.math.exp
 
 @OptIn(
     ExperimentalPermissionsApi::class,
@@ -98,10 +102,27 @@ fun SettingsScreen(
     val scrollState = rememberScrollState()
     var didShowLocationDisclaimer by remember { mutableStateOf(false) }
     var isBackgroundLocationGranted by remember { mutableStateOf(true) }
+    var showAuthPrompt by remember { mutableStateOf(false) }
+    var didExportFiles by remember { mutableStateOf(false) }
 
     val screenPadding = 5.dp
-    val fillMaxHeight = .85f
     val fillMaxWidth = .85f
+
+    fun exportAllConfigs() {
+        try {
+            val files = tunnels.map { File(context.cacheDir, "${it.name}.conf") }
+            files.forEachIndexed() { index, file ->
+                file.outputStream().use {
+                    it.write(tunnels[index].wgQuick.toByteArray())
+                }
+            }
+            StorageUtil.saveFilesToZip(context, files)
+            didExportFiles = true
+            showSnackbarMessage("Exported configs to downloads")
+        } catch (e : Exception) {
+            showSnackbarMessage(e.message!!)
+        }
+    }
 
 
     fun saveTrustedSSID() {
@@ -190,6 +211,20 @@ fun SettingsScreen(
         } else {
             isBackgroundLocationGranted = true
         }
+    }
+
+    if(showAuthPrompt) {
+        AuthorizationPrompt(onSuccess = {
+            showAuthPrompt = false
+            exportAllConfigs() },
+            onError = { error ->
+                showSnackbarMessage(error)
+                showAuthPrompt = false
+                },
+            onFailure = {
+                showAuthPrompt = false
+                showSnackbarMessage("Authentication failed")
+            })
     }
 
     if (tunnels.isEmpty()) {
@@ -363,6 +398,21 @@ fun SettingsScreen(
                             }
                         }
                     )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 5.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        TextButton(
+                            enabled = !didExportFiles,
+                            onClick = {
+                                showAuthPrompt = true
+                            }) {
+                            Text("Export configs")
+                        }
+                    }
                 }
             }
         }

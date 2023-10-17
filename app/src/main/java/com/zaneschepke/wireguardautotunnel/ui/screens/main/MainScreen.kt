@@ -285,7 +285,7 @@ fun MainScreen(
                         modifier = Modifier.padding(10.dp)
                     )
                     Text(
-                        stringResource(id = R.string.add_from_file),
+                        stringResource(id = R.string.add_tunnels_text),
                         modifier = Modifier.padding(10.dp)
                     )
                 }

@@ -8,7 +8,8 @@ object Constants {
     const val FADE_IN_ANIMATION_DURATION = 1000
     const val SLIDE_IN_ANIMATION_DURATION = 500
     const val SLIDE_IN_TRANSITION_OFFSET = 1000
-    const val VALID_FILE_EXTENSION = ".conf"
+    const val CONF_FILE_EXTENSION = ".conf"
+    const val ZIP_FILE_EXTENSION = ".zip"
     const val URI_CONTENT_SCHEME = "content"
     const val URI_PACKAGE_SCHEME = "package"
     const val ALLOWED_FILE_TYPES = "*/*"

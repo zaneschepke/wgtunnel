@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.service.shortcut
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
 import com.zaneschepke.wireguardautotunnel.repository.model.Settings
@@ -27,10 +28,9 @@ class ShortcutsActivity : ComponentActivity() {
     @Inject
     lateinit var tunnelConfigRepo : TunnelConfigDao
 
-    private val scope = CoroutineScope(Dispatchers.Main);
 
     private fun attemptWatcherServiceToggle(tunnelConfig : String) {
-        scope.launch {
+        lifecycleScope.launch(Dispatchers.Main) {
             val settings = getSettings()
             if(settings.isAutoTunnelEnabled) {
                 ServiceManager.toggleWatcherServiceForeground(this@ShortcutsActivity, tunnelConfig)
@@ -42,7 +42,7 @@ class ShortcutsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         if(intent.getStringExtra(CLASS_NAME_EXTRA_KEY)
             .equals(WireGuardTunnelService::class.java.simpleName)) {
-            scope.launch {
+            lifecycleScope.launch(Dispatchers.Main) {
                 try {
                     val settings = getSettings()
                     val tunnelConfig = if(settings.defaultTunnel == null) {
@@ -61,11 +61,6 @@ class ShortcutsActivity : ComponentActivity() {
             }
         }
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
     }
 
     private suspend fun getSettings() : Settings {

@@ -14,8 +14,8 @@ android {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 26
         targetSdk = 34
-        versionCode = 31300
-        versionName = "3.1.3"
+        versionCode = 31400
+        versionName = "3.1.4"
 
         multiDexEnabled = true
 
@@ -128,6 +128,9 @@ dependencies {
 
     //lifecycle
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.process)
+
 
     //icons
     implementation(libs.material.icons.extended)
@@ -142,4 +145,8 @@ dependencies {
     //barcode scanning
     implementation(libs.zxing.android.embedded)
     implementation(libs.zxing.core)
+
+    //bio
+    implementation(libs.androidx.biometric.ktx)
+
 }

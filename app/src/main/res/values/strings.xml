@@ -8,7 +8,7 @@
     <string name="foreground_file">FOREGROUND_FILE</string>
     <string name="github_url">https://github.com/zaneschepke/wgtunnel</string>
     <string name="privacy_policy_url">https://zaneschepke.github.io/wgtunnel/</string>
-    <string name="file_extension_message">File is not a .conf file</string>
+    <string name="file_extension_message">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Turn off tunnel before editing</string>
     <string name="no_tunnels">No tunnels added yet!</string>
     <string name="tunnel_exists">Tunnel name already exists</string>
@@ -38,9 +38,9 @@
     <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
     <string name="config_validation">[Interface]</string>
-    <string name="add_from_file">Add tunnel from files</string>
+    <string name="add_tunnels_text">Add from file or zip</string>
     <string name="open_file">File Open</string>
-    <string name="add_from_qr">Add tunnel from QR code</string>
+    <string name="add_from_qr">Add from QR code</string>
     <string name="qr_scan">QR Scan</string>
     <string name="tunnel_edit">Tunnel Edit</string>
     <string name="tunnel_name">Tunnel Name</string>

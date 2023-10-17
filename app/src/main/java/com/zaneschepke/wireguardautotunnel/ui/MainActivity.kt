@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -41,9 +43,9 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.common.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
+import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.detail.DetailScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
@@ -52,7 +54,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.TransparentSystemBars
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -99,10 +100,10 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 fun showSnackBarMessage(message : String) {
-                    CoroutineScope(Dispatchers.Main).launch {
+                    lifecycleScope.launch(Dispatchers.Main) {
                         val result = snackbarHostState.showSnackbar(
                             message = message,
-                            actionLabel = "Okay",
+                            actionLabel = applicationContext.getString(R.string.okay),
                             duration = SnackbarDuration.Short,
                         )
                         when (result) {
@@ -184,7 +185,10 @@ class MainActivity : AppCompatActivity() {
                                     fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
                                 }
                             }
-                        }) {
+                        }, exitTransition = {
+                            ExitTransition.None
+                        }
+                            ) {
                             MainScreen(padding = padding, showSnackbarMessage = { message -> showSnackBarMessage(message) }, navController = navController)
                         }
                         composable(Routes.Settings.name, enterTransition = {

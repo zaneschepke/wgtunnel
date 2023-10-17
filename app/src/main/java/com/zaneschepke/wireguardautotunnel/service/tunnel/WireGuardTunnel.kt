@@ -78,7 +78,6 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
             if(getState() == Tunnel.State.UP) {
                 val state = backend.setState(this, Tunnel.State.DOWN, null)
                 _state.emit(state)
-                scope.cancel()
             }
         } catch (e : BackendException) {
             Timber.e("Failed to stop tunnel with error: ${e.message}")

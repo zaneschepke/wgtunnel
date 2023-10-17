@@ -7,8 +7,6 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.wireguard.config.BadConfigException
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
@@ -31,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.io.InputStream
+import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
 
@@ -138,13 +137,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun validateFileExtension(fileName: String) {
-        val extension = getFileExtensionFromFileName(fileName)
-        if (extension != Constants.VALID_FILE_EXTENSION) {
-            throw WgTunnelException(application.getString(R.string.file_extension_message))
-        }
-    }
-
     private fun saveTunnelConfigFromStream(stream: InputStream, fileName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
@@ -160,15 +152,39 @@ class MainViewModel @Inject constructor(
             ?: throw WgTunnelException(application.getString(R.string.stream_failed))
     }
 
-    fun onTunnelFileSelected(uri: Uri) {
+    suspend fun onTunnelFileSelected(uri: Uri) {
         try {
             val fileName = getFileName(application.applicationContext, uri)
-            validateFileExtension(fileName)
-            val stream = getInputStreamFromUri(uri)
-            saveTunnelConfigFromStream(stream, fileName)
+            val fileExtension = getFileExtensionFromFileName(fileName)
+            when(fileExtension){
+                Constants.CONF_FILE_EXTENSION -> saveTunnelFromConfUri(fileName, uri)
+                Constants.ZIP_FILE_EXTENSION -> saveTunnelsFromZipUri(uri)
+                else -> throw WgTunnelException(application.getString(R.string.file_extension_message))
+            }
+
         } catch (e: Exception) {
             throw WgTunnelException(e.message ?: "Error importing file")
         }
+    }
+
+    private suspend fun saveTunnelsFromZipUri(uri: Uri) {
+        ZipInputStream(getInputStreamFromUri(uri)).use { zip ->
+            generateSequence { zip.nextEntry }
+                .filterNot { it.isDirectory ||
+                        getFileExtensionFromFileName(it.name) != Constants.CONF_FILE_EXTENSION }
+                .forEach {
+                    val name = getNameFromFileName(it.name)
+                    val config = Config.parse(zip)
+                    viewModelScope.launch(Dispatchers.IO) {
+                        addTunnel(TunnelConfig(name = name, wgQuick = config.toWgQuickString()))
+                }
+            }
+        }
+    }
+
+    private fun saveTunnelFromConfUri(name : String, uri: Uri) {
+        val stream = getInputStreamFromUri(uri)
+        saveTunnelConfigFromStream(stream, name)
     }
 
     private suspend fun addTunnel(tunnelConfig: TunnelConfig) {

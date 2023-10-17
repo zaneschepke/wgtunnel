@@ -3,6 +3,8 @@ package com.zaneschepke.wireguardautotunnel
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.repository.model.Settings
 import dagger.hilt.android.HiltAndroidApp
@@ -27,12 +29,16 @@ class WireGuardAutoTunnel : Application() {
     }
 
     private fun initSettings() {
-        CoroutineScope(Dispatchers.IO).launch {
-            if(settingsRepo.getAll().isEmpty()) {
-                settingsRepo.save(Settings())
+        with(ProcessLifecycleOwner.get()) {
+            lifecycleScope.launch {
+                if(settingsRepo.getAll().isEmpty()) {
+                    settingsRepo.save(Settings())
+                }
             }
         }
     }
+
+
 
     companion object {
         fun isRunningOnAndroidTv(context : Context) : Boolean {
