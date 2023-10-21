@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 class WireGuardNotification @Inject constructor(@ApplicationContext private val context: Context) : NotificationService {
 
-    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager;
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     override fun createNotification(
         channelId: String,

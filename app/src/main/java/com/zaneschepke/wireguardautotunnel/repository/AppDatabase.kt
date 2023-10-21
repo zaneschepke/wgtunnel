@@ -1,12 +1,15 @@
 package com.zaneschepke.wireguardautotunnel.repository
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.zaneschepke.wireguardautotunnel.repository.model.Settings
 import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 
-@Database(entities = [Settings::class, TunnelConfig::class], version = 1, exportSchema = false)
+@Database(entities = [Settings::class, TunnelConfig::class], version = 2, autoMigrations = [
+    AutoMigration(from = 1, to = 2)
+], exportSchema = true)
 @TypeConverters(DatabaseListConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun settingDao(): SettingsDoa

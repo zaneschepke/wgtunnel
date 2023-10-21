@@ -126,5 +126,16 @@
     <string name="persistent_keepalive">Persistent keepalive</string>
     <string name="cancel">Cancel</string>
     <string name="primary_tunnel_change">Primary tunnel change</string>
-    <string name="primary_tunnnel_change_question">Would you like to make this your primary tunnel?</string>
+    <string name="primary_tunnel_change_question">Would you like to make this your primary tunnel?</string>
+    <string name="authentication_failed">Authentication failed</string>
+    <string name="enabled_app_shortcuts">Enable app shortcuts</string>
+    <string name="export_configs">Export configs</string>
+    <string name="battery_saver">Battery saver (experimental)</string>
+    <string name="location_services_required">Location services required</string>
+    <string name="background_location_required">Background location required</string>
+    <string name="precise_location_required">Precise location required</string>
+    <string name="unknown_error">Unknown error occurred</string>
+    <string name="exported_configs_message">Exported configs to downloads</string>
+    <string name="no_file_explorer">No file explorer installed</string>
+    <string name="status">status</string>
 </resources>

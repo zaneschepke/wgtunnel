@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -72,9 +71,9 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.util.StorageUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.math.exp
 
 @OptIn(
     ExperimentalPermissionsApi::class,
@@ -88,7 +87,7 @@ fun SettingsScreen(
     focusRequester: FocusRequester,
 ) {
 
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { Dispatchers.IO }
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -111,14 +110,14 @@ fun SettingsScreen(
     fun exportAllConfigs() {
         try {
             val files = tunnels.map { File(context.cacheDir, "${it.name}.conf") }
-            files.forEachIndexed() { index, file ->
+            files.forEachIndexed { index, file ->
                 file.outputStream().use {
                     it.write(tunnels[index].wgQuick.toByteArray())
                 }
             }
             StorageUtil.saveFilesToZip(context, files)
             didExportFiles = true
-            showSnackbarMessage("Exported configs to downloads")
+            showSnackbarMessage(context.getString(R.string.exported_configs_message))
         } catch (e : Exception) {
             showSnackbarMessage(e.message!!)
         }
@@ -132,7 +131,7 @@ fun SettingsScreen(
                     viewModel.onSaveTrustedSSID(currentText)
                     currentText = ""
                 } catch (e : Exception) {
-                    showSnackbarMessage(e.message ?: "Unknown error")
+                    showSnackbarMessage(e.message ?: context.getString(R.string.unknown_error))
                 }
             }
         }
@@ -223,7 +222,7 @@ fun SettingsScreen(
                 },
             onFailure = {
                 showAuthPrompt = false
-                showSnackbarMessage("Authentication failed")
+                showSnackbarMessage(context.getString(R.string.authentication_failed))
             })
     }
 
@@ -350,6 +349,17 @@ fun SettingsScreen(
                         }
                     }
                 )
+                ConfigurationToggle(
+                    stringResource(R.string.battery_saver),
+                    enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
+                    checked = settings.isBatterySaverEnabled,
+                    padding = screenPadding,
+                    onCheckChanged = {
+                        scope.launch {
+                            viewModel.onToggleBatterySaver()
+                        }
+                    }
+                )
                 ConfigurationToggle(stringResource(R.string.enable_auto_tunnel),
                     enabled = !settings.isAlwaysOnVpnEnabled,
                     checked = settings.isAutoTunnelEnabled,
@@ -357,11 +367,11 @@ fun SettingsScreen(
                     onCheckChanged = {
                         if(!isAllAutoTunnelPermissionsEnabled()) {
                             val message = if(viewModel.isLocationServicesNeeded()){
-                                "Location services required"
+                                context.getString(R.string.location_services_required)
                             } else if(!isBackgroundLocationGranted){
-                                "Background location required"
+                                context.getString(R.string.background_location_required)
                             } else {
-                                "Precise location required"
+                                context.getString(R.string.precise_location_required)
                             }
                             showSnackbarMessage(message)
                         } else scope.launch {
@@ -398,6 +408,16 @@ fun SettingsScreen(
                             }
                         }
                     )
+                    ConfigurationToggle(stringResource(R.string.enabled_app_shortcuts),
+                        enabled = true,
+                        checked = settings.isShortcutsEnabled,
+                        padding = screenPadding,
+                        onCheckChanged = {
+                            scope.launch {
+                                viewModel.onToggleShortcutsEnabled()
+                            }
+                        }
+                    )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -410,7 +430,7 @@ fun SettingsScreen(
                             onClick = {
                                 showAuthPrompt = true
                             }) {
-                            Text("Export configs")
+                            Text(stringResource(R.string.export_configs))
                         }
                     }
                 }

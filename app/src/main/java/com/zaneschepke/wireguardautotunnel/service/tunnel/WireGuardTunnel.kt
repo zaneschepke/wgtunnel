@@ -11,7 +11,6 @@ import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -47,25 +46,33 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
     override val handshakeStatus: SharedFlow<HandshakeStatus>
         get() = _handshakeStatus.asSharedFlow()
 
-    private val scope = CoroutineScope(Dispatchers.IO);
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private lateinit var statsJob : Job
 
 
     override suspend fun startTunnel(tunnelConfig: TunnelConfig) : Tunnel.State{
         return try {
-            if(getState() == Tunnel.State.UP && _tunnelName.value != tunnelConfig.name) {
-                stopTunnel()
-            }
-            _tunnelName.emit(tunnelConfig.name)
+            stopTunnelOnConfigChange(tunnelConfig)
+            emitTunnelName(tunnelConfig.name)
             val config = TunnelConfig.configFromQuick(tunnelConfig.wgQuick)
             val state = backend.setState(
                 this, Tunnel.State.UP, config)
             _state.emit(state)
-            state;
+            state
         } catch (e : Exception) {
             Timber.e("Failed to start tunnel with error: ${e.message}")
             Tunnel.State.DOWN
+        }
+    }
+
+    private suspend fun emitTunnelName(name : String) {
+        _tunnelName.emit(name)
+    }
+
+    private suspend fun stopTunnelOnConfigChange(tunnelConfig: TunnelConfig) {
+        if(getState() == Tunnel.State.UP && _tunnelName.value != tunnelConfig.name) {
+            stopTunnel()
         }
     }
 
@@ -89,7 +96,7 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
     }
 
     override fun onStateChange(state : Tunnel.State) {
-        val tunnel = this;
+        val tunnel = this
         _state.tryEmit(state)
         if(state == Tunnel.State.UP) {
             statsJob = scope.launch {

@@ -84,7 +84,7 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
     }
 
     private suspend fun getFirstTunnelConfig() : TunnelConfig {
-        return tunnelRepo.getAll().first();
+        return tunnelRepo.getAll().first()
     }
 
     suspend fun onToggleAlwaysOnVPN() {
@@ -124,5 +124,17 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
 
     fun isLocationServicesNeeded() : Boolean {
         return(!isLocationServicesEnabled() && Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
+    }
+
+    suspend fun onToggleShortcutsEnabled() {
+        settingsRepo.save(_settings.value.copy(
+            isShortcutsEnabled = !_settings.value.isShortcutsEnabled
+        ))
+    }
+
+    suspend fun onToggleBatterySaver() {
+        settingsRepo.save(_settings.value.copy(
+            isBatterySaverEnabled = !_settings.value.isBatterySaverEnabled
+        ))
     }
 }

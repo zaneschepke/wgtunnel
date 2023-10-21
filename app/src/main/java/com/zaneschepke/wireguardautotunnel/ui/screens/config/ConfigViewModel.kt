@@ -27,7 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,14 +62,10 @@ class ConfigViewModel @Inject constructor(private val application : Application,
 
     private lateinit var tunnelConfig: TunnelConfig
 
-    fun onScreenLoad(id : String) {
+    suspend fun onScreenLoad(id : String) {
         if(id != Constants.MANUAL_TUNNEL_CONFIG_ID) {
-            viewModelScope.launch(Dispatchers.IO) {
-                tunnelConfig = withContext(this.coroutineContext) {
-                    getTunnelConfigById(id) ?: throw WgTunnelException("Config not found")
-                }
-                emitScreenData()
-            }
+            tunnelConfig = getTunnelConfigById(id) ?: throw WgTunnelException("Config not found")
+            emitScreenData()
         } else {
             emitEmptyScreenData()
         }

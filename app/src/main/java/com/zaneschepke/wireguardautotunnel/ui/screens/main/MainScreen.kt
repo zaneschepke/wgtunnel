@@ -106,7 +106,7 @@ fun MainScreen(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val isVisible = rememberSaveable { mutableStateOf(true) }
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { Dispatchers.IO }
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -150,7 +150,7 @@ fun MainScreen(
                     val name = it.activityInfo.packageName
                     name.startsWith(Constants.GOOGLE_TV_EXPLORER_STUB) || name.startsWith(Constants.ANDROID_TV_EXPLORER_STUB)
                 }) {
-                throw WgTunnelException("No file explorer installed")
+                throw WgTunnelException(context.getString(R.string.no_file_explorer))
             }
             return intent
         }
@@ -160,7 +160,7 @@ fun MainScreen(
             try {
                 viewModel.onTunnelFileSelected(data)
             } catch (e : Exception) {
-                showSnackbarMessage(e.message ?: "Unknown error occurred")
+                showSnackbarMessage(e.message ?: context.getString(R.string.unknown_error))
             }
         }
     }
@@ -198,7 +198,7 @@ fun MainScreen(
                 { Text(text = stringResource(R.string.cancel)) }
             },
             title = { Text(text = stringResource(R.string.primary_tunnel_change)) },
-            text = { Text(text = stringResource(R.string.primary_tunnnel_change_question)) }
+            text = { Text(text = stringResource(R.string.primary_tunnel_change_question)) }
         )
     }
 
@@ -363,12 +363,12 @@ fun MainScreen(
                     RowListItem(icon = {
                         if (settings.isTunnelConfigDefault(tunnel))
                             Icon(
-                                Icons.Rounded.Star, "status",
+                                Icons.Rounded.Star, stringResource(R.string.status),
                                 tint = leadingIconColor,
                                 modifier =  Modifier.padding(end = 10.dp).size(20.dp)
                             )
                         else Icon(
-                            Icons.Rounded.Circle, "status",
+                            Icons.Rounded.Circle, stringResource(R.string.status),
                             tint = leadingIconColor,
                             modifier =  Modifier.padding(end = 15.dp).size(15.dp)
                         )
@@ -433,7 +433,7 @@ fun MainScreen(
                                             onClick = {
                                                 navController.navigate("${Routes.Detail.name}/${tunnel.id}")
                                             }) {
-                                            Icon(Icons.Rounded.Info, "Info")
+                                            Icon(Icons.Rounded.Info, stringResource(R.string.info))
                                         }
                                         IconButton(onClick = {
                                             if (state == Tunnel.State.UP && tunnel.name == tunnelName)

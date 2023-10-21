@@ -8,7 +8,7 @@ class DatabaseListConverters {
         return value.joinToString(",")
     }
     @TypeConverter
-    fun <T> stringToList(value: String): MutableList<String> {
+    fun stringToList(value: String): MutableList<String> {
         if(value.isEmpty()) return mutableListOf()
         return value.split(",").toMutableList()
     }

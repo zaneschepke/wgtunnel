@@ -3,17 +3,15 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
+import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -23,7 +21,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class WireGuardTunnelService : ForegroundService() {
 
-    private val foregroundId = 123;
+    private val foregroundId = 123
 
     @Inject
     lateinit var vpnService : VpnService
@@ -63,7 +61,7 @@ class WireGuardTunnelService : ForegroundService() {
                     }
                 } else {
                     Timber.d("Tunnel config null, starting default tunnel")
-                    val settings = settingsRepo.getAll();
+                    val settings = settingsRepo.getAll()
                     if(settings.isNotEmpty()) {
                         val setting = settings[0]
                         if(setting.defaultTunnel != null && setting.isAlwaysOnVpnEnabled) {

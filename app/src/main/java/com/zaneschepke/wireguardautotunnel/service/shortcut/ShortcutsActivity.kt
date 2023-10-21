@@ -12,9 +12,7 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -27,7 +25,6 @@ class ShortcutsActivity : ComponentActivity() {
 
     @Inject
     lateinit var tunnelConfigRepo : TunnelConfigDao
-
 
     private fun attemptWatcherServiceToggle(tunnelConfig : String) {
         lifecycleScope.launch(Dispatchers.Main) {
@@ -43,20 +40,28 @@ class ShortcutsActivity : ComponentActivity() {
         if(intent.getStringExtra(CLASS_NAME_EXTRA_KEY)
             .equals(WireGuardTunnelService::class.java.simpleName)) {
             lifecycleScope.launch(Dispatchers.Main) {
-                try {
-                    val settings = getSettings()
-                    val tunnelConfig = if(settings.defaultTunnel == null) {
-                        tunnelConfigRepo.getAll().first()
-                    } else {
-                        TunnelConfig.from(settings.defaultTunnel!!)
+                val settings = getSettings()
+                if(settings.isShortcutsEnabled) {
+                    try {
+                        val tunnelName = intent.getStringExtra(TUNNEL_NAME_EXTRA_KEY)
+                        val tunnelConfig = if(tunnelName != null) {
+                            tunnelConfigRepo.getAll().firstOrNull { it.name == tunnelName }
+                        } else {
+                            if(settings.defaultTunnel == null) {
+                                tunnelConfigRepo.getAll().first()
+                            } else {
+                                TunnelConfig.from(settings.defaultTunnel!!)
+                            }
+                        }
+                        tunnelConfig ?: return@launch
+                        attemptWatcherServiceToggle(tunnelConfig.toString())
+                        when(intent.action){
+                            Action.STOP.name -> ServiceManager.stopVpnService(this@ShortcutsActivity)
+                            Action.START.name -> ServiceManager.startVpnService(this@ShortcutsActivity, tunnelConfig.toString())
+                        }
+                    } catch (e : Exception) {
+                        Timber.e(e.message)
                     }
-                    attemptWatcherServiceToggle(tunnelConfig.toString())
-                    when(intent.action){
-                        Action.STOP.name -> ServiceManager.stopVpnService(this@ShortcutsActivity)
-                        Action.START.name -> ServiceManager.startVpnService(this@ShortcutsActivity, tunnelConfig.toString())
-                    }
-                } catch (e : Exception) {
-                    Timber.e(e.message)
                 }
             }
         }
@@ -72,6 +77,7 @@ class ShortcutsActivity : ComponentActivity() {
         }
     }
     companion object {
+        const val TUNNEL_NAME_EXTRA_KEY = "tunnelName"
         const val CLASS_NAME_EXTRA_KEY = "className"
     }
 }

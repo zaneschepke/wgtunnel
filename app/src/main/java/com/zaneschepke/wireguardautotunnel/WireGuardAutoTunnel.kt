@@ -8,8 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.repository.model.Settings
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject

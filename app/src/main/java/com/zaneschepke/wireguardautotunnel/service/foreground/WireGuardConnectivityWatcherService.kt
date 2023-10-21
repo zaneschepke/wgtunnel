@@ -21,24 +21,24 @@ import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class WireGuardConnectivityWatcherService : ForegroundService() {
 
-    private val foregroundId = 122;
+    private val foregroundId = 122
 
     @Inject
-    lateinit var wifiService : NetworkService<WifiService>
+    lateinit var wifiService: NetworkService<WifiService>
 
     @Inject
-    lateinit var mobileDataService : NetworkService<MobileDataService>
+    lateinit var mobileDataService: NetworkService<MobileDataService>
 
     @Inject
     lateinit var ethernetService: NetworkService<EthernetService>
@@ -47,22 +47,22 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     lateinit var settingsRepo: SettingsDoa
 
     @Inject
-    lateinit var notificationService : NotificationService
+    lateinit var notificationService: NotificationService
 
     @Inject
-    lateinit var vpnService : VpnService
+    lateinit var vpnService: VpnService
 
-    private var isWifiConnected = false;
-    private var isEthernetConnected = false;
-    private var isMobileDataConnected = false;
-    private var currentNetworkSSID = "";
+    private var isWifiConnected = false
+    private var isEthernetConnected = false
+    private var isMobileDataConnected = false
+    private var currentNetworkSSID = ""
 
-    private lateinit var watcherJob : Job;
-    private lateinit var setting : Settings
+    private lateinit var watcherJob: Job
+    private lateinit var setting: Settings
     private lateinit var tunnelConfig: String
 
     private var wakeLock: PowerManager.WakeLock? = null
-    private val tag = this.javaClass.name;
+    private val tag = this.javaClass.name
 
 
     override fun onCreate() {
@@ -80,9 +80,11 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
             this.tunnelConfig = tunnelId
         }
         // we need this lock so our service gets not affected by Doze Mode
-        initWakeLock()
+        lifecycleScope.launch {
+            initWakeLock()
+        }
         cancelWatcherJob()
-        if(this::tunnelConfig.isInitialized) {
+        if (this::tunnelConfig.isInitialized) {
             startWatcherJob()
         } else {
             stopService(extras)
@@ -104,7 +106,8 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         val notification = notificationService.createNotification(
             channelId = getString(R.string.watcher_channel_id),
             channelName = getString(R.string.watcher_channel_name),
-            description = getString(R.string.watcher_notification_text))
+            description = getString(R.string.watcher_notification_text)
+        )
         super.startForeground(foregroundId, notification)
     }
 
@@ -112,46 +115,59 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     override fun onTaskRemoved(rootIntent: Intent) {
         Timber.d("Task Removed called")
         val restartServiceIntent = Intent(rootIntent)
-        val restartServicePendingIntent: PendingIntent = PendingIntent.getService(this, 1, restartServiceIntent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE);
-        applicationContext.getSystemService(Context.ALARM_SERVICE);
-        val alarmService: AlarmManager = applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager;
-        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
+        val restartServicePendingIntent: PendingIntent = PendingIntent.getService(
+            this, 1, restartServiceIntent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+        applicationContext.getSystemService(Context.ALARM_SERVICE)
+        val alarmService: AlarmManager =
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmService.set(
+            AlarmManager.ELAPSED_REALTIME,
+            SystemClock.elapsedRealtime() + 1000,
+            restartServicePendingIntent
+        )
     }
 
-    private fun initWakeLock() {
+    private suspend fun initWakeLock() {
+        val isBatterySaverOn = withContext(lifecycleScope.coroutineContext) {
+            settingsRepo.getAll().firstOrNull()?.isBatterySaverEnabled ?: false
+        }
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
-                    //TODO decide what to do here with the wakelock
-                    //this is draining battery. Perhaps users only care for VPN to connect when their screen is on
-                    //and they are actively using apps
-                    acquire()
+                    if (isBatterySaverOn) {
+                        Timber.d("Initiating wakelock with timeout")
+                        acquire(Constants.WATCHER_SERVICE_WAKE_LOCK_TIMEOUT)
+                    } else {
+                        Timber.d("Initiating wakelock with zero timeout")
+                        acquire()
+                    }
                 }
             }
     }
 
     private fun cancelWatcherJob() {
-        if(this::watcherJob.isInitialized) {
+        if (this::watcherJob.isInitialized) {
             watcherJob.cancel()
         }
     }
 
     private fun startWatcherJob() {
         watcherJob = lifecycleScope.launch(Dispatchers.IO) {
-            val settings = settingsRepo.getAll();
-            if(settings.isNotEmpty()) {
+            val settings = settingsRepo.getAll()
+            if (settings.isNotEmpty()) {
                 setting = settings[0]
             }
             launch {
                 watchForWifiConnectivityChanges()
             }
-            if(setting.isTunnelOnMobileDataEnabled) {
+            if (setting.isTunnelOnMobileDataEnabled) {
                 launch {
                     watchForMobileDataConnectivityChanges()
                 }
             }
-            if(setting.isTunnelOnEthernetEnabled) {
+            if (setting.isTunnelOnEthernetEnabled) {
                 launch {
                     watchForEthernetConnectivityChanges()
                 }
@@ -164,15 +180,17 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private suspend fun watchForMobileDataConnectivityChanges() {
         mobileDataService.networkStatus.collect {
-            when(it) {
+            when (it) {
                 is NetworkStatus.Available -> {
                     Timber.d("Gained Mobile data connection")
                     isMobileDataConnected = true
                 }
+
                 is NetworkStatus.CapabilitiesChanged -> {
                     isMobileDataConnected = true
                     Timber.d("Mobile data capabilities changed")
                 }
+
                 is NetworkStatus.Unavailable -> {
                     isMobileDataConnected = false
                     Timber.d("Lost mobile data connection")
@@ -188,10 +206,12 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     Timber.d("Gained Ethernet connection")
                     isEthernetConnected = true
                 }
+
                 is NetworkStatus.CapabilitiesChanged -> {
                     Timber.d("Ethernet capabilities changed")
                     isEthernetConnected = true
                 }
+
                 is NetworkStatus.Unavailable -> {
                     isEthernetConnected = false
                     Timber.d("Lost Ethernet connection")
@@ -202,45 +222,51 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private suspend fun watchForWifiConnectivityChanges() {
         wifiService.networkStatus.collect {
-                when (it) {
-                    is NetworkStatus.Available -> {
-                        Timber.d("Gained Wi-Fi connection")
-                        isWifiConnected = true
-                    }
-                    is NetworkStatus.CapabilitiesChanged -> {
-                        Timber.d("Wifi capabilities changed")
-                        isWifiConnected = true
-                        currentNetworkSSID = wifiService.getNetworkName(it.networkCapabilities) ?: "";
-                    }
-                    is NetworkStatus.Unavailable -> {
-                        isWifiConnected = false
-                        Timber.d("Lost Wi-Fi connection")
-                    }
+            when (it) {
+                is NetworkStatus.Available -> {
+                    Timber.d("Gained Wi-Fi connection")
+                    isWifiConnected = true
+                }
+
+                is NetworkStatus.CapabilitiesChanged -> {
+                    Timber.d("Wifi capabilities changed")
+                    isWifiConnected = true
+                    currentNetworkSSID = wifiService.getNetworkName(it.networkCapabilities) ?: ""
+                }
+
+                is NetworkStatus.Unavailable -> {
+                    isWifiConnected = false
+                    Timber.d("Lost Wi-Fi connection")
                 }
             }
         }
+    }
 
     private suspend fun manageVpn() {
-        while(true) {
-            if(isEthernetConnected && setting.isTunnelOnEthernetEnabled && vpnService.getState() == Tunnel.State.DOWN) {
+        while (true) {
+            if (isEthernetConnected && setting.isTunnelOnEthernetEnabled && vpnService.getState() == Tunnel.State.DOWN) {
                 ServiceManager.startVpnService(this, tunnelConfig)
             }
-            if(!isEthernetConnected && setting.isTunnelOnMobileDataEnabled &&
+            if (!isEthernetConnected && setting.isTunnelOnMobileDataEnabled &&
                 !isWifiConnected &&
                 isMobileDataConnected
-                && vpnService.getState() == Tunnel.State.DOWN) {
+                && vpnService.getState() == Tunnel.State.DOWN
+            ) {
                 ServiceManager.startVpnService(this, tunnelConfig)
-            } else if(!isEthernetConnected && !setting.isTunnelOnMobileDataEnabled &&
+            } else if (!isEthernetConnected && !setting.isTunnelOnMobileDataEnabled &&
                 !isWifiConnected &&
-                vpnService.getState() == Tunnel.State.UP) {
+                vpnService.getState() == Tunnel.State.UP
+            ) {
                 ServiceManager.stopVpnService(this)
-            } else if(!isEthernetConnected && isWifiConnected &&
+            } else if (!isEthernetConnected && isWifiConnected &&
                 !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
-                (vpnService.getState() != Tunnel.State.UP)) {
+                (vpnService.getState() != Tunnel.State.UP)
+            ) {
                 ServiceManager.startVpnService(this, tunnelConfig)
-            } else if(!isEthernetConnected && (isWifiConnected &&
+            } else if (!isEthernetConnected && (isWifiConnected &&
                         setting.trustedNetworkSSIDs.contains(currentNetworkSSID)) &&
-                (vpnService.getState() == Tunnel.State.UP)) {
+                (vpnService.getState() == Tunnel.State.UP)
+            ) {
                 ServiceManager.stopVpnService(this)
             }
             delay(Constants.VPN_CONNECTIVITY_CHECK_INTERVAL)

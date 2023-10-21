@@ -13,6 +13,8 @@ data class Settings(
     @ColumnInfo(name = "default_tunnel") var defaultTunnel : String? = null,
     @ColumnInfo(name = "is_always_on_vpn_enabled") var isAlwaysOnVpnEnabled : Boolean = false,
     @ColumnInfo(name = "is_tunnel_on_ethernet_enabled") var isTunnelOnEthernetEnabled : Boolean = false,
+    @ColumnInfo(name = "is_shortcuts_enabled", defaultValue = "false") var isShortcutsEnabled : Boolean = false,
+    @ColumnInfo(name = "is_battery_saver_enabled", defaultValue = "false") var isBatterySaverEnabled : Boolean = false,
 ) {
     fun isTunnelConfigDefault(tunnelConfig: TunnelConfig) : Boolean {
         return if (defaultTunnel != null) {

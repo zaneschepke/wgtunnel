@@ -91,14 +91,6 @@ object ServiceManager {
             WireGuardConnectivityWatcherService::class.java)
     }
 
-    fun toggleWatcherService(context: Context, tunnelConfig : String) {
-        when(getServiceState( context,
-            WireGuardConnectivityWatcherService::class.java,)) {
-            ServiceState.STARTED -> stopWatcherService(context)
-            ServiceState.STOPPED -> startWatcherService(context, tunnelConfig)
-        }
-    }
-
     fun toggleWatcherServiceForeground(context: Context, tunnelConfig : String) {
         when(getServiceState( context,
             WireGuardConnectivityWatcherService::class.java,)) {

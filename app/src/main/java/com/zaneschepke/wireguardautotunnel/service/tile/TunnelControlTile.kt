@@ -31,7 +31,7 @@ class TunnelControlTile : TileService() {
     @Inject
     lateinit var vpnService : VpnService
 
-    private val scope = CoroutineScope(Dispatchers.Main);
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     private lateinit var job : Job
 
@@ -46,7 +46,7 @@ class TunnelControlTile : TileService() {
         super.onTileAdded()
         qsTile.contentDescription = this.resources.getString(R.string.toggle_vpn)
         scope.launch {
-            updateTileState();
+            updateTileState()
         }
     }
 
@@ -65,7 +65,7 @@ class TunnelControlTile : TileService() {
         unlockAndRun {
             scope.launch {
                 try {
-                    val tunnel = determineTileTunnel();
+                    val tunnel = determineTileTunnel()
                     if(tunnel != null) {
                         attemptWatcherServiceToggle(tunnel.toString())
                         if(vpnService.getState() == Tunnel.State.UP) {
@@ -84,23 +84,23 @@ class TunnelControlTile : TileService() {
     }
 
     private suspend fun determineTileTunnel() : TunnelConfig? {
-        var tunnelConfig : TunnelConfig? = null;
+        var tunnelConfig : TunnelConfig? = null
         val settings = settingsRepo.getAll()
         if (settings.isNotEmpty()) {
             val setting = settings.first()
             tunnelConfig = if (setting.defaultTunnel != null) {
-                TunnelConfig.from(setting.defaultTunnel!!);
+                TunnelConfig.from(setting.defaultTunnel!!)
             } else {
-                val configs = configRepo.getAll();
+                val configs = configRepo.getAll()
                 val config  = if(configs.isNotEmpty()) {
-                    configs.first();
+                    configs.first()
                 } else {
                     null
                 }
                 config
             }
         }
-        return tunnelConfig;
+        return tunnelConfig
     }
 
 
@@ -123,13 +123,13 @@ class TunnelControlTile : TileService() {
                     qsTile.state = Tile.STATE_ACTIVE
                 }
                 Tunnel.State.DOWN -> {
-                    qsTile.state = Tile.STATE_INACTIVE;
+                    qsTile.state = Tile.STATE_INACTIVE
                 }
                 else -> {
                     qsTile.state = Tile.STATE_UNAVAILABLE
                 }
             }
-            val config = determineTileTunnel();
+            val config = determineTileTunnel()
             setTileDescription(config?.name ?: this.resources.getString(R.string.no_tunnel_available))
             qsTile.updateTile()
         }
@@ -140,13 +140,13 @@ class TunnelControlTile : TileService() {
             qsTile.subtitle = description
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            qsTile.stateDescription = description;
+            qsTile.stateDescription = description
         }
     }
 
     private fun cancelJob() {
         if(this::job.isInitialized) {
-            job.cancel();
+            job.cancel()
         }
     }
 }

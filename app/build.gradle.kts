@@ -14,10 +14,14 @@ android {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 26
         targetSdk = 34
-        versionCode = 31400
-        versionName = "3.1.4"
+        versionCode = 31500
+        versionName = "3.1.5"
 
         multiDexEnabled = true
+
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
 
         resourceConfigurations.addAll(listOf("en"))
 
@@ -149,4 +153,7 @@ dependencies {
     //bio
     implementation(libs.androidx.biometric.ktx)
 
+    //shortcuts
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.core.google.shortcuts)
 }

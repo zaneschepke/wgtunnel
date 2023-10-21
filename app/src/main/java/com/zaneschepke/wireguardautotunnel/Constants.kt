@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel
 
 object Constants {
     const val MANUAL_TUNNEL_CONFIG_ID = "0"
+    const val WATCHER_SERVICE_WAKE_LOCK_TIMEOUT = 10*60*1000L /*10 minute*/
     const val VPN_CONNECTIVITY_CHECK_INTERVAL = 3000L
     const val VPN_STATISTIC_CHECK_INTERVAL = 10000L
     const val TOGGLE_TUNNEL_DELAY = 500L

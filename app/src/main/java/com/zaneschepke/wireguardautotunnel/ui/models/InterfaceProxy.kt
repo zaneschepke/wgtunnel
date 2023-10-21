@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.models
 
 import com.wireguard.config.Interface
-import com.wireguard.config.Peer
 
 data class InterfaceProxy(
     var privateKey : String = "",

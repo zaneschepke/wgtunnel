@@ -81,6 +81,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.SearchBar
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -98,7 +99,7 @@ fun ConfigScreen(
 ) {
 
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { Dispatchers.IO }
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -136,11 +137,13 @@ fun ConfigScreen(
     val screenPadding = 5.dp
 
     LaunchedEffect(Unit) {
-        try {
-            viewModel.onScreenLoad(id)
-        } catch (e : Exception) {
-            showSnackbarMessage(e.message!!)
-            navController.navigate(Routes.Main.name)
+        scope.launch(Dispatchers.IO) {
+            try {
+                viewModel.onScreenLoad(id)
+            } catch (e : Exception) {
+                showSnackbarMessage(e.message!!)
+                navController.navigate(Routes.Main.name)
+            }
         }
     }
 
@@ -161,7 +164,7 @@ fun ConfigScreen(
                       },
             onFailure = {
                 showAuthPrompt = false
-                showSnackbarMessage("Authentication failed")
+                showSnackbarMessage(context.getString(R.string.authentication_failed))
             })
     }
 
@@ -245,7 +248,7 @@ fun ConfigScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            SearchBar(viewModel::emitQueriedPackages);
+                            SearchBar(viewModel::emitQueriedPackages)
                         }
                         Spacer(Modifier.padding(5.dp))
                         LazyColumn(
