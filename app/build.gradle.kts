@@ -14,8 +14,8 @@ android {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 26
         targetSdk = 34
-        versionCode = 31600
-        versionName = "3.1.6"
+        versionCode = 31700
+        versionName = "3.1.7"
 
         multiDexEnabled = true
 

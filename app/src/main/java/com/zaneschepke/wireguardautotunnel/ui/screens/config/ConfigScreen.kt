@@ -99,7 +99,7 @@ fun ConfigScreen(
 ) {
 
     val context = LocalContext.current
-    val scope = rememberCoroutineScope { Dispatchers.IO }
+    val scope = rememberCoroutineScope()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 

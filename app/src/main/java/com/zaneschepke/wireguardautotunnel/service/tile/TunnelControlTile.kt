@@ -42,14 +42,6 @@ class TunnelControlTile : TileService() {
         super.onStartListening()
     }
 
-    override fun onTileAdded() {
-        super.onTileAdded()
-        qsTile.contentDescription = this.resources.getString(R.string.toggle_vpn)
-        scope.launch {
-            updateTileState()
-        }
-    }
-
     override fun onTileRemoved() {
         super.onTileRemoved()
         cancelJob()
