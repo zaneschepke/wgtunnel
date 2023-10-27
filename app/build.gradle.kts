@@ -14,8 +14,8 @@ android {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 26
         targetSdk = 34
-        versionCode = 31900
-        versionName = "3.1.9"
+        versionCode = 32000
+        versionName = "3.2.0"
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")

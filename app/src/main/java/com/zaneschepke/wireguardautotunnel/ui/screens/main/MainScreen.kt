@@ -159,8 +159,8 @@ fun MainScreen(
         scope.launch(Dispatchers.IO) {
             try {
                 viewModel.onTunnelFileSelected(data)
-            } catch (e : Exception) {
-                showSnackbarMessage(e.message ?: context.getString(R.string.unknown_error))
+            } catch (e : WgTunnelException) {
+                showSnackbarMessage(e.message)
             }
         }
     }
@@ -171,8 +171,8 @@ fun MainScreen(
             scope.launch {
                 try {
                     viewModel.onTunnelQrResult(it.contents)
-                } catch (e: Exception) {
-                    showSnackbarMessage(context.getString(R.string.qr_result_failed))
+                } catch (e: WgTunnelException) {
+                    showSnackbarMessage(e.message)
                 }
             }
         }
