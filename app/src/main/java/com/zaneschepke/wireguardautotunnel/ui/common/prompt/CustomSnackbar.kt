@@ -1,10 +1,12 @@
 package com.zaneschepke.wireguardautotunnel.ui.common.prompt
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
@@ -42,14 +44,15 @@ fun CustomSnackBar(
                     if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
         ) {
             Row(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.width(IntrinsicSize.Max).height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.Start
             ) {
                 Icon(
                     Icons.Rounded.Info,
                     contentDescription = stringResource(R.string.info),
-                    tint = Color.White
+                    tint = Color.White,
+                    modifier = Modifier.padding(end = 10.dp)
                 )
                 Text(message, color = Color.White, modifier = Modifier.padding(end = 5.dp))
             }

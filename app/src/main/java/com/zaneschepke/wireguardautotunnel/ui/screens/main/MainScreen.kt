@@ -168,10 +168,12 @@ fun MainScreen(
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract(),
         onResult = {
-            try {
-                viewModel.onTunnelQrResult(it.contents)
-            } catch (e: Exception) {
-                showSnackbarMessage(context.getString(R.string.qr_result_failed))
+            scope.launch {
+                try {
+                    viewModel.onTunnelQrResult(it.contents)
+                } catch (e: Exception) {
+                    showSnackbarMessage(context.getString(R.string.qr_result_failed))
+                }
             }
         }
     )

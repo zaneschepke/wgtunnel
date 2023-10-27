@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
@@ -117,32 +118,26 @@ class MainViewModel @Inject constructor(
     }
 
     private fun validateConfigString(config: String) {
-        if (!config.contains(application.getString(R.string.config_validation))) {
-            throw WgTunnelException(application.getString(R.string.config_validation))
+        TunnelConfig.configFromQuick(config)
+    }
+
+    suspend fun onTunnelQrResult(result: String) {
+        try {
+            validateConfigString(result)
+            val tunnelConfig =
+                TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
+            addTunnel(tunnelConfig)
+        } catch (e : Exception) {
+            throw WgTunnelException(e)
         }
     }
 
-    fun onTunnelQrResult(result: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                validateConfigString(result)
-                val tunnelConfig =
-                    TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
-                addTunnel(tunnelConfig)
-            } catch (e: WgTunnelException) {
-                throw WgTunnelException(
-                    e.message ?: application.getString(R.string.unknown_error_message)
-                )
-            }
-        }
-    }
-
-    private fun saveTunnelConfigFromStream(stream: InputStream, fileName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
-            val config = Config.parse(bufferReader)
-            val tunnelName = getNameFromFileName(fileName)
-            addTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+    private suspend fun saveTunnelConfigFromStream(stream: InputStream, fileName: String) {
+        val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
+        val config = Config.parse(bufferReader)
+        val tunnelName = getNameFromFileName(fileName)
+        addTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+        withContext(Dispatchers.IO) {
             stream.close()
         }
     }
@@ -161,9 +156,8 @@ class MainViewModel @Inject constructor(
                 Constants.ZIP_FILE_EXTENSION -> saveTunnelsFromZipUri(uri)
                 else -> throw WgTunnelException(application.getString(R.string.file_extension_message))
             }
-
         } catch (e: Exception) {
-            throw WgTunnelException(e.message ?: "Error importing file")
+            throw WgTunnelException(e)
         }
     }
 
@@ -182,7 +176,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun saveTunnelFromConfUri(name : String, uri: Uri) {
+    private suspend fun saveTunnelFromConfUri(name : String, uri: Uri) {
         val stream = getInputStreamFromUri(uri)
         saveTunnelConfigFromStream(stream, name)
     }

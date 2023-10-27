@@ -14,10 +14,8 @@ android {
         applicationId = "com.zaneschepke.wireguardautotunnel"
         minSdk = 26
         targetSdk = 34
-        versionCode = 31700
-        versionName = "3.1.7"
-
-        multiDexEnabled = true
+        versionCode = 31900
+        versionName = "3.1.9"
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
@@ -49,6 +47,7 @@ android {
     productFlavors {
         create("fdroid") {
             dimension = "type"
+            proguardFile("fdroid-rules.pro")
         }
         create("general") {
             dimension = "type"
