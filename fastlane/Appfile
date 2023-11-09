@@ -1,0 +1,2 @@
+json_key_file "service_account.json"
+package_name "com.zaneschepke.wireguardautotunnel"

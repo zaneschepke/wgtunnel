@@ -9,15 +9,15 @@ plugins {
 }
 
 android {
-    namespace = "com.zaneschepke.wireguardautotunnel"
-    compileSdk = 34
+    namespace = Constants.APP_ID
+    compileSdk = Constants.TARGET_SDK
 
     defaultConfig {
-        applicationId = "com.zaneschepke.wireguardautotunnel"
-        minSdk = 26
-        targetSdk = 34
-        versionCode = 32000
-        versionName = "3.2.1"
+        applicationId = Constants.APP_ID
+        minSdk = Constants.MIN_SDK
+        targetSdk = Constants.TARGET_SDK
+        versionCode = Constants.VERSION_CODE
+        versionName = Constants.VERSION_NAME
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
@@ -41,16 +41,12 @@ android {
                     load(file("signing_template.properties").reader())
                 }
             }
-            val storePassVarName = "SIGNING_STORE_PASSWORD"
-            val keyAliasVarName = "SIGNING_KEY_ALIAS"
-            val keyPassVarName = "SIGNING_KEY_PASSWORD"
-            val keyStorePathVarName = "KEY_STORE_PATH"
 
             //try to get secrets from env first for pipeline build, then properties file for local build
-            storeFile = file(System.getenv().getOrDefault(keyStorePathVarName, properties.getProperty(keyStorePathVarName)))
-            storePassword = System.getenv().getOrDefault(storePassVarName, properties.getProperty(storePassVarName))
-            keyAlias = System.getenv().getOrDefault(keyAliasVarName, properties.getProperty(keyAliasVarName))
-            keyPassword = System.getenv().getOrDefault(keyPassVarName, properties.getProperty(keyPassVarName))
+            storeFile = file(System.getenv().getOrDefault(Constants.KEY_STORE_PATH_VAR, properties.getProperty(Constants.KEY_STORE_PATH_VAR)))
+            storePassword = System.getenv().getOrDefault(Constants.STORE_PASS_VAR, properties.getProperty(Constants.STORE_PASS_VAR))
+            keyAlias = System.getenv().getOrDefault(Constants.KEY_ALIAS_VAR, properties.getProperty(Constants.KEY_ALIAS_VAR))
+            keyPassword = System.getenv().getOrDefault(Constants.KEY_PASS_VAR, properties.getProperty(Constants.KEY_PASS_VAR))
         }
     }
 
@@ -118,6 +114,14 @@ android {
         }
     }
 }
+
+tasks.register("printVersionCode") {
+    doLast {
+        //print version code for CI
+        println(Constants.VERSION_CODE)
+    }
+}
+
 
 val generalImplementation by configurations
 dependencies {
