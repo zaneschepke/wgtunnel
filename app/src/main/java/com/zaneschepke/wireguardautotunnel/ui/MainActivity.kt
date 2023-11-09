@@ -34,9 +34,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController = rememberAnimatedNavController()
+            val navController = rememberNavController()
             val focusRequester = remember { FocusRequester() }
 
             WireguardAutoTunnelTheme {
@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                         return@Scaffold
                     }
 
-                    AnimatedNavHost(navController, startDestination = Routes.Main.name) {
+                    NavHost(navController, startDestination = Routes.Main.name) {
                         composable(Routes.Main.name, enterTransition = {
                             when (initialState.destination.route) {
                                 Routes.Settings.name, Routes.Support.name ->

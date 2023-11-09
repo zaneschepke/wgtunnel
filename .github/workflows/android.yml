@@ -37,6 +37,7 @@ jobs:
       - name: Build Fdroid Release APK
         run: ./gradlew :app:assembleFdroidRelease -x test
         env:
+          KEY_STORE_PATH: ${{ secrets.KEY_STORE_PATH }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
@@ -51,6 +52,7 @@ jobs:
         id: buildRelease
         run: ./gradlew bundleGeneralRelease
         env:
+          KEY_STORE_PATH: ${{ secrets.KEY_STORE_PATH }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
@@ -69,11 +71,11 @@ jobs:
       # upload general flavor release aab to beta track
       - name: Publish to Play Store BETA
         id: publish
-        uses: r0adkll/upload-google-play@v1
+        uses: r0adkll/upload-google-play@v1.1.2
         with:
           serviceAccountJson: service_account.json
           packageName: com.zaneschepke.wireguardautotunnel
-          releaseFile: app/build/outputs/bundle/generalRelease/app-general-release.aab
+          releaseFiles: app/build/outputs/bundle/generalRelease/app-general-release.aab
           track: beta
 
   release:

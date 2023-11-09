@@ -41,7 +41,7 @@ android {
                     load(file("signing_template.properties").reader())
                 }
             }
-            val storePassVarName = "SIGNING_STORE_PASSWORD";
+            val storePassVarName = "SIGNING_STORE_PASSWORD"
             val keyAliasVarName = "SIGNING_KEY_ALIAS"
             val keyPassVarName = "SIGNING_KEY_PASSWORD"
             val keyStorePathVarName = "KEY_STORE_PATH"
@@ -55,6 +55,9 @@ android {
     }
 
     buildTypes {
+        //don't strip
+        packaging.jniLibs.keepDebugSymbols.addAll(listOf("libwg-go.so", "libwg-quick.so", "libwg.so"))
+
         applicationVariants.all {
             val variant = this
             variant.outputs
@@ -158,7 +161,6 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.flowlayout)
-    implementation(libs.accompanist.navigation.animation)
     implementation(libs.accompanist.drawablepainter)
 
     //room
