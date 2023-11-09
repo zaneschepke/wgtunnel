@@ -1,22 +1,23 @@
 [versions]
-accompanist = "0.31.2-alpha"
+accompanist = "0.32.0"
 activityCompose = "1.8.0"
 androidx-junit = "1.1.5"
 appcompat = "1.6.1"
 biometricKtx = "1.2.0-alpha05"
 coreGoogleShortcuts = "1.1.0"
 coreKtx = "1.12.0"
+desugar_jdk_libs = "2.0.4"
 espressoCore = "3.5.1"
 firebase-crashlytics-gradle = "2.9.9"
 google-services = "4.4.0"
-hiltAndroid = "2.48"
-hiltNavigationCompose = "1.0.0"
+hiltAndroid = "2.48.1"
+hiltNavigationCompose = "1.1.0"
 junit = "4.13.2"
-kotlinx-serialization-json = "1.5.1"
+kotlinx-serialization-json = "1.6.0"
 lifecycle-runtime-compose = "2.6.2"
 material-icons-extended = "1.5.4"
 material3 = "1.1.2"
-navigationCompose = "2.7.4"
+navigationCompose = "2.7.5"
 roomVersion = "2.6.0"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
@@ -24,13 +25,13 @@ androidGradlePlugin = "8.3.0-alpha06"
 kotlin="1.9.10"
 ksp="1.9.10-1.0.13"
 composeBom="2023.10.01"
-firebaseBom="32.4.0"
+firebaseBom= "32.5.0"
 compose="1.5.4"
-crashlytics="18.5.0"
-analytics="21.4.0"
+crashlytics= "18.5.1"
+analytics="21.5.0"
 composeCompiler="1.5.3"
 zxingAndroidEmbedded = "4.3.0"
-zxingCore = "3.4.1"
+zxingCore = "3.5.2"
 
 
 [libraries]
@@ -61,6 +62,7 @@ androidx-compose-ui-tooling-preview = { module="androidx.compose.ui:ui-tooling-p
 androidx-compose-ui = { module="androidx.compose.ui:ui", version.ref="compose" }
 
 #hilt
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 
