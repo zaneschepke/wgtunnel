@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -15,7 +17,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 32000
-        versionName = "3.2.0"
+        versionName = "3.2.1"
 
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
@@ -29,7 +31,40 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val properties = Properties().apply {
+                //created local file for signing details
+                val signingDetailsFile = "signing.properties"
+                try {
+                    load(file(signingDetailsFile).reader())
+                } catch (_ : Exception) {
+                    load(File(signingDetailsFile).reader())
+                }
+            }
+            val storePassVarName = "SIGNING_STORE_PASSWORD";
+            val keyAliasVarName = "SIGNING_KEY_ALIAS"
+            val keyPassVarName = "SIGNING_KEY_PASSWORD"
+            val keyStorePathVarName = "KEY_STORE_PATH"
+
+            //try to get secrets from env first for pipeline build, then properties file for local build
+            storeFile = file(System.getenv().getOrDefault(keyStorePathVarName, properties.getProperty(keyStorePathVarName)))
+            storePassword = System.getenv().getOrDefault(storePassVarName, properties.getProperty(storePassVarName))
+            keyAlias = System.getenv().getOrDefault(keyAliasVarName, properties.getProperty(keyAliasVarName))
+            keyPassword = System.getenv().getOrDefault(keyPassVarName, properties.getProperty(keyPassVarName))
+        }
+    }
+
     buildTypes {
+        applicationVariants.all {
+            val variant = this
+            variant.outputs
+                .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+                .forEach { output ->
+                    val outputFileName = "wgtunnel-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
+                    output.outputFileName = outputFileName
+                }
+        }
         release {
             isDebuggable = false
             isMinifyEnabled = true
@@ -38,6 +73,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isDebuggable = true
@@ -61,6 +97,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "17"
@@ -105,6 +142,7 @@ dependencies {
 
     //wg
     implementation(libs.tunnel)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     //logging
     implementation(libs.timber)

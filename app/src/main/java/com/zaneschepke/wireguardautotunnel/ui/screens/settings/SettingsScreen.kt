@@ -99,7 +99,7 @@ fun SettingsScreen(
     val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var currentText by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-    var didShowLocationDisclaimer by remember { mutableStateOf(false) }
+    var isLocationDisclaimerNeeded by remember { mutableStateOf(true) }
     var isBackgroundLocationGranted by remember { mutableStateOf(true) }
     var showAuthPrompt by remember { mutableStateOf(false) }
     var didExportFiles by remember { mutableStateOf(false) }
@@ -141,6 +141,7 @@ fun SettingsScreen(
         return(isBackgroundLocationGranted && fineLocationState.status.isGranted && !viewModel.isLocationServicesNeeded())
     }
 
+
     fun openSettings() {
         scope.launch {
             val intentSettings =
@@ -156,61 +157,74 @@ fun SettingsScreen(
             rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         if(!backgroundLocationState.status.isGranted) {
             isBackgroundLocationGranted = false
-            if(!didShowLocationDisclaimer) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(padding)
-                ) {
-                    Icon(
-                        Icons.Rounded.LocationOff,
-                        contentDescription = stringResource(id = R.string.map),
-                        modifier = Modifier
-                            .padding(30.dp)
-                            .size(128.dp)
-                    )
-                    Text(
-                        stringResource(R.string.prominent_background_location_title),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(30.dp),
-                        fontSize = 20.sp
-                    )
-                    Text(
-                        stringResource(R.string.prominent_background_location_message),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(30.dp),
-                        fontSize = 15.sp
-                    )
-                    Row(
-                        modifier = if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp) else Modifier
-                            .fillMaxWidth()
-                            .padding(30.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        TextButton(onClick = {
-                            didShowLocationDisclaimer = true
-                        }) {
-                            Text(stringResource(id = R.string.no_thanks))
-                        }
-                        TextButton(modifier = Modifier.focusRequester(focusRequester), onClick = {
-                            openSettings()
-                        }) {
-                            Text(stringResource(id = R.string.turn_on))
-                        }
-                    }
-                }
-                return
-            }
         } else {
+            isLocationDisclaimerNeeded = false
             isBackgroundLocationGranted = true
         }
     }
+
+    if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+        if(!fineLocationState.status.isGranted) {
+            isBackgroundLocationGranted = false
+        } else {
+            isLocationDisclaimerNeeded = false
+            isBackgroundLocationGranted = true
+        }
+    }
+
+    if(isLocationDisclaimerNeeded) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(padding)
+        ) {
+            Icon(
+                Icons.Rounded.LocationOff,
+                contentDescription = stringResource(id = R.string.map),
+                modifier = Modifier
+                    .padding(30.dp)
+                    .size(128.dp)
+            )
+            Text(
+                stringResource(R.string.prominent_background_location_title),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(30.dp),
+                fontSize = 20.sp
+            )
+            Text(
+                stringResource(R.string.prominent_background_location_message),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(30.dp),
+                fontSize = 15.sp
+            )
+            Row(
+                modifier = if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp) else Modifier
+                    .fillMaxWidth()
+                    .padding(30.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                TextButton(onClick = {
+                    isLocationDisclaimerNeeded = false
+                }) {
+                    Text(stringResource(id = R.string.no_thanks))
+                }
+                TextButton(modifier = Modifier.focusRequester(focusRequester), onClick = {
+                    openSettings()
+                }) {
+                    Text(stringResource(id = R.string.turn_on))
+                }
+            }
+        }
+        return
+    }
+
+
 
     if(showAuthPrompt) {
         AuthorizationPrompt(onSuccess = {

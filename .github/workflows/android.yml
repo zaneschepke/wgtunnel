@@ -1,0 +1,98 @@
+# name of the workflow
+name: Android CI Tag Deployment
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build:
+    name: Build Signed APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Here we need to decode keystore.jks from base64 string and place it
+      # in the folder specified in the release signing configuration
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'android_keystore.jks'
+          fileDir: '/home/runner/work/wgtunnel/wgtunnel/app/keystore/'
+          encodedString: ${{ secrets.KEYSTORE }}
+
+      # Build and sign APK ("-x test" argument is used to skip tests)
+      # add fdroid flavor for apk upload
+      - name: Build Fdroid Release APK
+        run: ./gradlew :app:assembleFdroidRelease -x test
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+      # get fdroid flavor release apk path
+      - name: Get apk path
+        id: apk-path
+        run: echo "path=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+
+      # add general flavor for google play
+      - name: Build General Release AAB
+        id: buildRelease
+        run: ./gradlew bundleGeneralRelease
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+      # Save the APK after the Build job is complete to publish it as a Github release in the next job
+      - name: Upload APK
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: wgtunnel
+          path: ${{ steps.apk-path.outputs.path }}
+
+      - name: Create service_account.json
+        id: createServiceAccount
+        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service_account.json
+
+      # upload general flavor release aab to beta track
+      - name: Publish to Play Store BETA
+        id: publish
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: service_account.json
+          packageName: com.zaneschepke.wireguardautotunnel
+          releaseFile: app/build/outputs/bundle/generalRelease/app-general-release.aab
+          track: beta
+
+  release:
+    name: Release APK
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK from build
+        uses: actions/download-artifact@v1
+        with:
+          name: wgtunnel
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: wgtunnel/${{ steps.apk-path.outputs.path }}
