@@ -47,18 +47,19 @@ This is an alternative Android Application for [WireGuard](https://www.wireguard
 
 ## Inspiration
 
-The inspiration for this app came from the inconvenience of constantly having to turn VPN off and on while on different networks. With there being no free solution to this problem, this app was created to meet that need.
+The original inspiration for this app came from the inconvenience of having to manually turn VPN off and on while on different networks. This app was created to offer a free solution to this problem. 
 
 ## Features
 
-* Add tunnels via .conf file
+* Add tunnels via .conf file, zip, manual entry, or QR code
 * Auto connect to VPN based on Wi-Fi SSID
 * Split tunneling by application with search
 * Always-on VPN for Android support
-* Quick tile support for vpn toggling
-* Dynamic shortcuts support for automation integration
-* Configurable Trusted Network list 
-* Optional auto connect on mobile data
+* Export tunnels to zip
+* Quick tile support for VPN toggling
+* Static shortcuts support for primary tunnel for automation integration
+* Intent automation support for all tunnels
+* Optional auto connect on mobile data, ethernet
 * Automatic service restart after reboot
 * Service will stay running in background after app has been closed
 
@@ -68,7 +69,7 @@ The inspiration for this app came from the inconvenience of constantly having to
 ```
 $ git clone https://github.com/zaneschepke/wgtunnel
 $ cd wgtunnel
-$ ./gradlew assembleRelease
+$ ./gradlew assembleDebug
 ```
 
 </span>

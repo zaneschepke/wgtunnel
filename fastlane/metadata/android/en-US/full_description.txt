@@ -1,10 +1,13 @@
 Features
 
-- Add tunnels via .conf file or QR
+- Add tunnels via .conf file, zip, manual entry, or QR code
 - Auto connect to VPN based on Wi-Fi SSID
 - Split tunneling by application with search
-- Always-on VPN support
-- Configurable Trusted Network list
-- Quick tile and Shortcuts integration
-- Optional auto connect on mobile data
+- Always-on VPN for Android support
+- Export tunnels to zip
+- Quick tile support for VPN toggling
+- Static shortcuts support for primary tunnel for automation integration
+- Intent automation support for all tunnels
+- Optional auto connect on mobile data, ethernet
 - Automatic service restart after reboot
+- Service will stay running in background after app has been closed
