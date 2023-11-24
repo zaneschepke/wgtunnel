@@ -70,21 +70,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # fix hardcode changelog file name
-          body_path: ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/32100.txt
+          body_path: ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/32200.txt
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
           files: ${{ github.workspace }}/${{ steps.apk-path.outputs.path }}
-  deploy:
-    name: Deploy with fastlane
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: ruby/setup-ruby@v1
+      - name: Deploy with fastlane
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2' # Not needed with a .ruby-version file
           bundler-cache: true
 
       - name: Distribute app to Beta track 🚀
         run: (cd ${{ github.workspace }} && bundle install && bundle exec fastlane beta)
+

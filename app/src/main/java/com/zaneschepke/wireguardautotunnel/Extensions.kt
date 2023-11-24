@@ -5,6 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
+import java.text.DecimalFormat
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -21,4 +23,9 @@ fun BroadcastReceiver.goAsync(
             pendingResult.finish()
         }
     }
+}
+
+fun BigDecimal.toThreeDecimalPlaceString() : String {
+    val df = DecimalFormat("#.###")
+    return df.format(this)
 }

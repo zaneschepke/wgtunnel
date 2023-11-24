@@ -34,7 +34,7 @@
     <string name="tunnel_on_ethernet">Tunnel on ethernet</string>
     <string name="prominent_background_location_message">This feature requires background location permission to enable Wi-Fi SSID monitoring even while the application is closed. For more details, please see the Privacy Policy linked on the Support screen.</string>
     <string name="prominent_background_location_title">Background Location Disclosure</string>
-    <string name="support_text">Thank you for using WG Tunnel! If you are experiencing issues with the app, please reach out on Discord or create an issue on Github. I will try to address the issue as quickly as possible. Thank you!</string>
+    <string name="support_text">Thank you for using WG Tunnel! If you are experiencing issues with the app, please reach out on Discord or create an issue on GitHub. I will try to address the issue as quickly as possible. Thank you!</string>
     <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
     <string name="config_validation">[Interface]</string>
@@ -130,7 +130,7 @@
     <string name="authentication_failed">Authentication failed</string>
     <string name="enabled_app_shortcuts">Enable app shortcuts</string>
     <string name="export_configs">Export configs</string>
-    <string name="battery_saver">Battery saver (experimental)</string>
+    <string name="battery_saver">Battery saver (beta)</string>
     <string name="location_services_required">Location services required</string>
     <string name="background_location_required">Background location required</string>
     <string name="precise_location_required">Precise location required</string>

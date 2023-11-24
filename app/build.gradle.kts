@@ -32,7 +32,7 @@ android {
     }
 
     signingConfigs {
-        create("release") {
+        create(Constants.RELEASE) {
             val properties = Properties().apply {
                 //created local file for signing details
                 try {
@@ -59,7 +59,7 @@ android {
             variant.outputs
                 .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
                 .forEach { output ->
-                    val outputFileName = "wgtunnel-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
+                    val outputFileName = "${Constants.APP_NAME}-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
                     output.outputFileName = outputFileName
                 }
         }
@@ -71,20 +71,20 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName(Constants.RELEASE)
         }
         debug {
             isDebuggable = true
         }
     }
-    flavorDimensions.add("type")
+    flavorDimensions.add(Constants.TYPE)
     productFlavors {
         create("fdroid") {
-            dimension = "type"
+            dimension = Constants.TYPE
             proguardFile("fdroid-rules.pro")
         }
         create("general") {
-            dimension = "type"
+            dimension = Constants.TYPE
             if (BuildHelper.isReleaseBuild(gradle) && BuildHelper.isGeneralFlavor(gradle))
             {
                 apply(plugin = "com.google.gms.google-services")
@@ -98,7 +98,7 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = Constants.JVM_TARGET
     }
     buildFeatures {
         compose = true
@@ -114,14 +114,6 @@ android {
         }
     }
 }
-
-tasks.register("printVersionCode") {
-    doLast {
-        //print version code for CI
-        println(Constants.VERSION_CODE)
-    }
-}
-
 
 val generalImplementation by configurations
 dependencies {

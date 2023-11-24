@@ -276,8 +276,8 @@ fun SettingsScreen(
             modifier = (if (WireGuardAutoTunnel.isRunningOnAndroidTv(context))
                 Modifier
                     .height(IntrinsicSize.Min)
-                    .fillMaxWidth(fillMaxWidth)
-            else Modifier.fillMaxWidth(fillMaxWidth)).padding(top = 60.dp, bottom = 25.dp)
+                    .fillMaxWidth(fillMaxWidth).padding(top = 10.dp)
+            else Modifier.fillMaxWidth(fillMaxWidth).padding(top = 60.dp)).padding(bottom = 25.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -290,8 +290,10 @@ fun SettingsScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(screenPadding, bottom = 5.dp, top = 5.dp)
                 )
+                val focus = Modifier.focusRequester(focusRequester)
                 FlowRow(
-                    modifier = Modifier.padding(screenPadding),
+                    modifier = (if(trustedSSIDs.isEmpty()) Modifier else
+                        focus).padding(screenPadding),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.SpaceEvenly
                 ) {
@@ -316,7 +318,7 @@ fun SettingsScreen(
                     value = currentText,
                     onValueChange = { currentText = it },
                     label = { Text(stringResource(R.string.add_trusted_ssid)) },
-                    modifier = Modifier.padding(start = screenPadding, top = 5.dp).focusRequester(focusRequester).onFocusChanged {
+                    modifier = (if(trustedSSIDs.isEmpty()) focus else Modifier).padding(start = screenPadding, top = 5.dp).onFocusChanged {
                         if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                             keyboardController?.hide()
                         }

@@ -10,8 +10,7 @@ enum class Routes {
     Main,
     Settings,
     Support,
-    Config,
-    Detail;
+    Config;
 
 
     companion object {

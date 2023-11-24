@@ -117,6 +117,7 @@ fun MainScreen(
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val statistics by viewModel.statistics.collectAsStateWithLifecycle(null)
 
     // Nested scroll for control FAB
     val nestedScrollConnection = remember {
@@ -171,8 +172,14 @@ fun MainScreen(
             scope.launch {
                 try {
                     viewModel.onTunnelQrResult(it.contents)
-                } catch (e: WgTunnelException) {
-                    showSnackbarMessage(e.message)
+                } catch (e: Exception) {
+                    when(e) {
+                        is WgTunnelException -> {
+                            showSnackbarMessage(e.message)
+                        } else -> {
+                            showSnackbarMessage("No QR code scanned")
+                        }
+                    }
                 }
             }
         }
@@ -229,9 +236,12 @@ fun MainScreen(
                 val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
                 var fobColor by remember { mutableStateOf(secondaryColor) }
                 FloatingActionButton(
-                    modifier = Modifier.padding(bottom = 90.dp).onFocusChanged {
-                        if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
-                            fobColor = if (it.isFocused) hoverColor else secondaryColor }
+                    modifier = Modifier
+                        .padding(bottom = 90.dp)
+                        .onFocusChanged {
+                            if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                                fobColor = if (it.isFocused) hoverColor else secondaryColor
+                            }
                         }
                     ,
                     onClick = {
@@ -275,7 +285,7 @@ fun MainScreen(
                             showBottomSheet = false
                             try {
                                 tunnelFileImportResultLauncher.launch(Constants.ALLOWED_FILE_TYPES)
-                            } catch (e : Exception) {
+                            } catch (e: Exception) {
                                 showSnackbarMessage(e.message!!)
                             }
                         }
@@ -362,17 +372,24 @@ fun MainScreen(
                         HandshakeStatus.NEVER_CONNECTED -> brickRed
                     } else {Color.Gray})
                     val focusRequester = remember { FocusRequester() }
+                    val expanded = remember {
+                        mutableStateOf(false)
+                    }
                     RowListItem(icon = {
                         if (settings.isTunnelConfigDefault(tunnel))
                             Icon(
                                 Icons.Rounded.Star, stringResource(R.string.status),
                                 tint = leadingIconColor,
-                                modifier =  Modifier.padding(end = 10.dp).size(20.dp)
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(20.dp)
                             )
                         else Icon(
                             Icons.Rounded.Circle, stringResource(R.string.status),
                             tint = leadingIconColor,
-                            modifier =  Modifier.padding(end = 15.dp).size(15.dp)
+                            modifier = Modifier
+                                .padding(end = 15.dp)
+                                .size(15.dp)
                         )
                     },
                         text = tunnel.name,
@@ -386,12 +403,16 @@ fun MainScreen(
                         },
                         onClick = {
                             if (!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
-                                navController.navigate("${Routes.Detail.name}/${tunnel.id}")
+                                if(state == Tunnel.State.UP && (tunnelName == tunnel.name) ) {
+                                    expanded.value = !expanded.value
+                                }
                             } else {
                                 selectedTunnel = tunnel
                                 focusRequester.requestFocus()
                             }
                         },
+                        statistics = statistics,
+                        expanded = expanded.value,
                         rowButton = {
                             if (tunnel.id == selectedTunnel?.id && !WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                 Row {
@@ -419,6 +440,15 @@ fun MainScreen(
                                     }
                                 }
                             } else {
+                                @Composable
+                                fun TunnelSwitch() = Switch(
+                                    modifier = Modifier.focusRequester(focusRequester),
+                                    checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
+                                    onCheckedChange = { checked ->
+                                        if(!checked) expanded.value = false
+                                        onTunnelToggle(checked, tunnel)
+                                    }
+                                )
                                 if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                     Row {
                                         if(!settings.isTunnelConfigDefault(tunnel)) {
@@ -433,7 +463,9 @@ fun MainScreen(
                                         IconButton(
                                             modifier = Modifier.focusRequester(focusRequester),
                                             onClick = {
-                                                navController.navigate("${Routes.Detail.name}/${tunnel.id}")
+                                                if(state == Tunnel.State.UP && (tunnelName == tunnel.name) ) {
+                                                    expanded.value = !expanded.value
+                                                }
                                             }) {
                                             Icon(Icons.Rounded.Info, stringResource(R.string.info))
                                         }
@@ -469,21 +501,10 @@ fun MainScreen(
                                                 stringResource(id = R.string.delete)
                                             )
                                         }
-                                        Switch(
-                                            modifier = Modifier.focusRequester(focusRequester),
-                                            checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
-                                            onCheckedChange = { checked ->
-                                                onTunnelToggle(checked, tunnel)
-                                            }
-                                        )
+                                        TunnelSwitch()
                                     }
                                 } else {
-                                    Switch(
-                                        checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
-                                        onCheckedChange = { checked ->
-                                            onTunnelToggle(checked, tunnel)
-                                        }
-                                    )
+                                    TunnelSwitch()
                                 }
                             }
                         })

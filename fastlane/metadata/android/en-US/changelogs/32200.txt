@@ -1,0 +1,5 @@
+Enhancements:
+- Add tunnel statistics to main screen
+- Improve settings screen AndroidTV navigation
+- Remove notification vibration
+- Various other bug fixes

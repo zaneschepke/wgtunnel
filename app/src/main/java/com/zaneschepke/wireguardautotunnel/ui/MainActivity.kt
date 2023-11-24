@@ -47,7 +47,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScre
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.detail.DetailScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -230,14 +229,6 @@ class MainActivity : AppCompatActivity() {
                             val id = it.arguments?.getString("id")
                             if(!id.isNullOrBlank()) {
                                 ConfigScreen(navController = navController, id = id, showSnackbarMessage = { message -> showSnackBarMessage(message) }, focusRequester = focusRequester)}
-                            }
-                        composable("${Routes.Detail.name}/{id}", enterTransition = {
-                            fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
-                        }) {
-                            val id = it.arguments?.getString("id")
-                            if(!id.isNullOrBlank()) {
-                                DetailScreen(padding = padding, focusRequester = focusRequester, id = id)
-                            }
                         }
                     }
                 }

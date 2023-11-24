@@ -106,7 +106,8 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         val notification = notificationService.createNotification(
             channelId = getString(R.string.watcher_channel_id),
             channelName = getString(R.string.watcher_channel_name),
-            description = getString(R.string.watcher_notification_text)
+            description = getString(R.string.watcher_notification_text),
+            vibration = false
         )
         super.startForeground(foregroundId, notification)
     }

@@ -14,7 +14,7 @@ interface NotificationService {
         description: String,
         showTimestamp : Boolean = false,
         importance: Int = NotificationManager.IMPORTANCE_HIGH,
-        vibration: Boolean = true,
+        vibration: Boolean = false,
         onGoing: Boolean = true,
         lights: Boolean = true
     ): Notification

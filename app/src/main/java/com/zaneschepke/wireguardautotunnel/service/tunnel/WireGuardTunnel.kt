@@ -23,8 +23,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 
-class WireGuardTunnel @Inject constructor(private val backend : Backend,
-) : VpnService {
+class WireGuardTunnel @Inject constructor(private val backend : Backend) : VpnService {
 
     private val _tunnelName = MutableStateFlow("")
     override val tunnelName get() = _tunnelName.asStateFlow()
@@ -115,11 +114,11 @@ class WireGuardTunnel @Inject constructor(private val backend : Backend,
                                 _handshakeStatus.emit(HandshakeStatus.NOT_STARTED)
                             }
                             if(neverHadHandshakeCounter <= HandshakeStatus.NEVER_CONNECTED_TO_UNHEALTHY_TIME_LIMIT_SEC) {
-                                neverHadHandshakeCounter += 10
+                                neverHadHandshakeCounter += (1 * Constants.VPN_STATISTIC_CHECK_INTERVAL/1000).toInt()
                             }
                             return@forEach
                         }
-                        if(NumberUtils.getSecondsBetweenTimestampAndNow(handshakeEpoch) >= HandshakeStatus.UNHEALTHY_TIME_LIMIT_SEC) {
+                        if((NumberUtils.getSecondsBetweenTimestampAndNow(handshakeEpoch) ?: 0L) >= HandshakeStatus.UNHEALTHY_TIME_LIMIT_SEC) {
                             _handshakeStatus.emit(HandshakeStatus.UNHEALTHY)
                         } else {
                             _handshakeStatus.emit(HandshakeStatus.HEALTHY)

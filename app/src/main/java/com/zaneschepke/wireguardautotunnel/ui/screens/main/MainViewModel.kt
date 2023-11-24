@@ -49,6 +49,7 @@ class MainViewModel @Inject constructor(
     val tunnelName get() = vpnService.tunnelName
     private val _settings = MutableStateFlow(Settings())
     val settings get() = _settings.asStateFlow()
+    val statistics get() = vpnService.statistics
 
     init {
         viewModelScope.launch(Dispatchers.IO) {

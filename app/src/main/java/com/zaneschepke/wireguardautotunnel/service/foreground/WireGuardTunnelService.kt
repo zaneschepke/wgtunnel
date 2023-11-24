@@ -120,6 +120,7 @@ class WireGuardTunnelService : ForegroundService() {
             channelName = getString(R.string.vpn_channel_name),
             title = getString(R.string.tunnel_start_title),
             onGoing = false,
+            vibration = false,
             showTimestamp = true,
             description = "${getString(R.string.tunnel_start_text)} $tunnelName"
         )
@@ -132,6 +133,7 @@ class WireGuardTunnelService : ForegroundService() {
             channelName = getString(R.string.vpn_channel_name),
             title = getString(R.string.vpn_starting),
             onGoing = false,
+            vibration = false,
             showTimestamp = true,
             description = getString(R.string.attempt_connection)
         )
@@ -147,6 +149,7 @@ class WireGuardTunnelService : ForegroundService() {
             actionText = getString(R.string.restart),
             title = getString(R.string.vpn_connection_failed),
             onGoing = false,
+            vibration = true,
             showTimestamp = true,
             description = message
         )
