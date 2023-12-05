@@ -440,10 +440,12 @@ fun MainScreen(
                                     }
                                 }
                             } else {
+                                val checked = state == Tunnel.State.UP && tunnel.name == tunnelName
+                                if(!checked) expanded.value = false
                                 @Composable
                                 fun TunnelSwitch() = Switch(
                                     modifier = Modifier.focusRequester(focusRequester),
-                                    checked = (state == Tunnel.State.UP && tunnel.name == tunnelName),
+                                    checked = checked,
                                     onCheckedChange = { checked ->
                                         if(!checked) expanded.value = false
                                         onTunnelToggle(checked, tunnel)

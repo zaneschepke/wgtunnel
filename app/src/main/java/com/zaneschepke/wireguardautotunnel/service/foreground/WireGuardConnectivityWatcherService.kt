@@ -261,6 +261,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 ServiceManager.stopVpnService(this)
             } else if (!isEthernetConnected && isWifiConnected &&
                 !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
+                setting.isTunnelOnWifiEnabled &&
                 (vpnService.getState() != Tunnel.State.UP)
             ) {
                 ServiceManager.startVpnService(this, tunnelConfig)
@@ -268,6 +269,11 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         setting.trustedNetworkSSIDs.contains(currentNetworkSSID)) &&
                 (vpnService.getState() == Tunnel.State.UP)
             ) {
+                ServiceManager.stopVpnService(this)
+            } else if (!isEthernetConnected && (isWifiConnected &&
+                        !setting.isTunnelOnWifiEnabled &&
+                (vpnService.getState() == Tunnel.State.UP)
+            )) {
                 ServiceManager.stopVpnService(this)
             }
             delay(Constants.VPN_CONNECTIVITY_CHECK_INTERVAL)
