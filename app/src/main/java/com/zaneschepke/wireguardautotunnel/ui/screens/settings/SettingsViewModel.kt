@@ -137,4 +137,10 @@ class SettingsViewModel @Inject constructor(private val application : Applicatio
             isBatterySaverEnabled = !_settings.value.isBatterySaverEnabled
         ))
     }
+
+    suspend fun onToggleTunnelOnWifi() {
+        settingsRepo.save(_settings.value.copy(
+            isTunnelOnWifiEnabled = !_settings.value.isTunnelOnWifiEnabled
+        ))
+    }
 }

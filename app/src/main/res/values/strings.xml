@@ -6,8 +6,9 @@
     <string name="watcher_channel_id">Watcher Channel</string>
     <string name="watcher_channel_name">Watcher Notification Channel</string>
     <string name="foreground_file">FOREGROUND_FILE</string>
-    <string name="github_url">https://github.com/zaneschepke/wgtunnel</string>
-    <string name="privacy_policy_url">https://zaneschepke.github.io/wgtunnel/</string>
+    <string name="github_url">https://github.com/zaneschepke/wgtunnel/issues</string>
+    <string name="docs_url">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
+    <string name="privacy_policy_url">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
     <string name="file_extension_message">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Turn off tunnel before editing</string>
     <string name="no_tunnels">No tunnels added yet!</string>
@@ -20,10 +21,10 @@
     <string name="vpn_permission_required">VPN permission is required for the app to work properly. If this permission is not launching, please disable \"Always-on VPN\" in your phone settings for the official WireGuard mobile app and try again.</string>
     <string name="notification_permission_required">Notifications permission is required for the app to work properly.</string>
     <string name="open_settings">Open Settings</string>
-    <string name="add_trusted_ssid">Add Trusted SSID</string>
-    <string name="trusted_ssid">Trusted SSIDs</string>
+    <string name="add_trusted_ssid">Add trusted wifi name</string>
     <string name="tunnels">Tunnels</string>
-    <string name="enable_auto_tunnel">Enable auto-tunneling</string>
+    <string name="enable_auto_tunnel">Start auto-tunneling</string>
+    <string name="disable_auto_tunnel">Stop auto-tunneling</string>
     <string name="tunnel_mobile_data">Tunnel on mobile data</string>
     <string name="background_location_reason">\"Allow all the time\" location permission is required for retrieving Wi-Fi SSID in the background. Permission is needed for this feature.</string>
     <string name="location_permission_reason">Location permission is required for this feature to work properly.</string>
@@ -34,7 +35,7 @@
     <string name="tunnel_on_ethernet">Tunnel on ethernet</string>
     <string name="prominent_background_location_message">This feature requires background location permission to enable Wi-Fi SSID monitoring even while the application is closed. For more details, please see the Privacy Policy linked on the Support screen.</string>
     <string name="prominent_background_location_title">Background Location Disclosure</string>
-    <string name="support_text">Thank you for using WG Tunnel! If you are experiencing issues with the app, please reach out on Discord or create an issue on GitHub. I will try to address the issue as quickly as possible. Thank you!</string>
+    <string name="thank_you">Thank you for using WG Tunnel!</string>
     <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
     <string name="config_validation">[Interface]</string>
@@ -92,7 +93,7 @@
     <string name="db_name">wg-tunnel-db</string>
     <string name="scanning_qr">Scanning for QR</string>
     <string name="qr_result_failed">QR scan failed</string>
-    <string name="none">None</string>
+    <string name="none">No trusted wifi names</string>
     <string name="never">Never</string>
     <string name="stream_failed">Failed to open file stream.</string>
     <string name="unknown_error_message">An unknown error occurred.</string>
@@ -138,4 +139,18 @@
     <string name="exported_configs_message">Exported configs to downloads</string>
     <string name="no_file_explorer">No file explorer installed</string>
     <string name="status">status</string>
+    <string name="tunnel_on_wifi">Tunnel on untrusted wifi</string>
+    <string name="my_email">zanecschepke@gmail.com</string>
+    <string name="email_subject">WG Tunnel Support</string>
+    <string name="email_chooser">Send an email…</string>
+    <string name="go">go</string>
+    <string name="docs_description">Read the docs (WIP)</string>
+    <string name="discord_description">Join the community</string>
+    <string name="discord">Discord</string>
+    <string name="docs">Docs</string>
+    <string name="github">GitHub</string>
+    <string name="email">Email</string>
+    <string name="email_description">Send me an email</string>
+    <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
+
 </resources>

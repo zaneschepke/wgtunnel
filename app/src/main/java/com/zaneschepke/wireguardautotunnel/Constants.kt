@@ -16,4 +16,5 @@ object Constants {
     const val ALLOWED_FILE_TYPES = "*/*"
     const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
     const val ANDROID_TV_EXPLORER_STUB = "com.android.tv.frameworkpackagestubs"
+    const val EMAIL_MIME_TYPE = "message/rfc822"
 }

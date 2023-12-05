@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -103,6 +104,8 @@ fun SettingsScreen(
     var isBackgroundLocationGranted by remember { mutableStateOf(true) }
     var showAuthPrompt by remember { mutableStateOf(false) }
     var didExportFiles by remember { mutableStateOf(false) }
+
+
 
     val screenPadding = 5.dp
     val fillMaxWidth = .85f
@@ -276,8 +279,11 @@ fun SettingsScreen(
             modifier = (if (WireGuardAutoTunnel.isRunningOnAndroidTv(context))
                 Modifier
                     .height(IntrinsicSize.Min)
-                    .fillMaxWidth(fillMaxWidth).padding(top = 10.dp)
-            else Modifier.fillMaxWidth(fillMaxWidth).padding(top = 60.dp)).padding(bottom = 25.dp)
+                    .fillMaxWidth(fillMaxWidth)
+                    .padding(top = 10.dp)
+            else Modifier
+                .fillMaxWidth(fillMaxWidth)
+                .padding(top = 60.dp)).padding(bottom = 25.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -285,66 +291,77 @@ fun SettingsScreen(
                 modifier = Modifier.padding(15.dp)
             ) {
                 SectionTitle(title = stringResource(id = R.string.auto_tunneling), padding = screenPadding)
-                Text(
-                    stringResource(R.string.trusted_ssid),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(screenPadding, bottom = 5.dp, top = 5.dp)
+                ConfigurationToggle(
+                    stringResource(id = R.string.tunnel_on_wifi),
+                    enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
+                    checked = settings.isTunnelOnWifiEnabled,
+                    padding = screenPadding,
+                    onCheckChanged = {
+                        scope.launch {
+                            viewModel.onToggleTunnelOnWifi()
+                        }
+                    },
+                    modifier = Modifier.focusRequester(focusRequester)
                 )
-                val focus = Modifier.focusRequester(focusRequester)
-                FlowRow(
-                    modifier = (if(trustedSSIDs.isEmpty()) Modifier else
-                        focus).padding(screenPadding),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    trustedSSIDs.forEach { ssid ->
-                        ClickableIconButton(
-                            onIconClick = {
-                                scope.launch {
-                                    viewModel.onDeleteTrustedSSID(ssid)
+                AnimatedVisibility(visible = settings.isTunnelOnWifiEnabled) {
+                    Column {
+                        FlowRow(
+                            modifier = Modifier.padding(screenPadding),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            trustedSSIDs.forEach { ssid ->
+                                ClickableIconButton(
+                                    onIconClick = {
+                                        scope.launch {
+                                            viewModel.onDeleteTrustedSSID(ssid)
+                                        }
+                                    },
+                                    text = ssid,
+                                    icon = Icons.Filled.Close,
+                                    enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled)
+                                )
+                            }
+                            if(trustedSSIDs.isEmpty()) {
+                                Text(stringResource(R.string.none), fontStyle = FontStyle.Italic, color = Color.Gray)
+                            }
+                        }
+                        OutlinedTextField(
+                            enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
+                            value = currentText,
+                            onValueChange = { currentText = it },
+                            label = { Text(stringResource(R.string.add_trusted_ssid)) },
+                            modifier = Modifier
+                                .padding(start = screenPadding, top = 5.dp, bottom = 10.dp)
+                                .onFocusChanged {
+                                    if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                                        keyboardController?.hide()
+                                    }
+                                },
+                            maxLines = 1,
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.None,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    saveTrustedSSID()
+                                }
+                            ),
+                            trailingIcon = {
+                                IconButton(onClick = { saveTrustedSSID() }) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Add,
+                                        contentDescription = if (currentText == "") stringResource(id = R.string.trusted_ssid_empty_description) else stringResource(
+                                            id = R.string.trusted_ssid_value_description
+                                        ),
+                                        tint = if (currentText == "") Color.Transparent else MaterialTheme.colorScheme.primary
+                                    )
                                 }
                             },
-                            text = ssid,
-                            icon = Icons.Filled.Close,
-                            enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled)
                         )
                     }
-                    if(trustedSSIDs.isEmpty()) {
-                        Text(stringResource(R.string.none), fontStyle = FontStyle.Italic, color = Color.Gray)
-                    }
                 }
-                OutlinedTextField(
-                    enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
-                    value = currentText,
-                    onValueChange = { currentText = it },
-                    label = { Text(stringResource(R.string.add_trusted_ssid)) },
-                    modifier = (if(trustedSSIDs.isEmpty()) focus else Modifier).padding(start = screenPadding, top = 5.dp).onFocusChanged {
-                        if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
-                            keyboardController?.hide()
-                        }
-                    },
-                    maxLines = 1,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            saveTrustedSSID()
-                        }
-                    ),
-                    trailingIcon = {
-                        IconButton(onClick = { saveTrustedSSID() }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Add,
-                                contentDescription = if (currentText == "") stringResource(id = R.string.trusted_ssid_empty_description) else stringResource(
-                                    id = R.string.trusted_ssid_value_description
-                                ),
-                                tint = if (currentText == "") Color.Transparent else MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    },
-                )
                 ConfigurationToggle(stringResource(R.string.tunnel_mobile_data),
                     enabled = !(settings.isAutoTunnelEnabled || settings.isAlwaysOnVpnEnabled),
                     checked = settings.isTunnelOnMobileDataEnabled,
@@ -376,27 +393,36 @@ fun SettingsScreen(
                         }
                     }
                 )
-                ConfigurationToggle(stringResource(R.string.enable_auto_tunnel),
-                    enabled = !settings.isAlwaysOnVpnEnabled,
-                    checked = settings.isAutoTunnelEnabled,
-                    padding = screenPadding,
-                    onCheckChanged = {
-                        if(!isAllAutoTunnelPermissionsEnabled()) {
-                            val message = if(viewModel.isLocationServicesNeeded()){
-                                context.getString(R.string.location_services_required)
-                            } else if(!isBackgroundLocationGranted){
-                                context.getString(R.string.background_location_required)
-                            } else {
-                                context.getString(R.string.precise_location_required)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 5.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TextButton(
+                        enabled = !settings.isAlwaysOnVpnEnabled,
+                        onClick = {
+                            //TODO fix logic for mobile only
+                            if(!isAllAutoTunnelPermissionsEnabled() && settings.isTunnelOnWifiEnabled) {
+                                val message = if(!isBackgroundLocationGranted) {
+                                    context.getString(R.string.background_location_required)
+                                } else if(viewModel.isLocationServicesNeeded()) {
+                                    context.getString(R.string.location_services_required)
+                                } else {
+                                    context.getString(R.string.precise_location_required)
+                                }
+                                showSnackbarMessage(message)
+                            } else scope.launch {
+                                viewModel.toggleAutoTunnel()
                             }
-                            showSnackbarMessage(message)
-                        } else scope.launch {
-                            viewModel.toggleAutoTunnel()
-                        }
+                        }) {
+                        val autoTunnelButtonText = if(settings.isAutoTunnelEnabled) stringResource(R.string.disable_auto_tunnel)
+                        else stringResource(id = R.string.enable_auto_tunnel)
+                        Text(autoTunnelButtonText)
                     }
-                )
+                }
             }
-
         }
         if(!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
             Surface(
@@ -404,7 +430,8 @@ fun SettingsScreen(
                 shadowElevation = 2.dp,
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.fillMaxWidth(fillMaxWidth)
+                modifier = Modifier
+                    .fillMaxWidth(fillMaxWidth)
                     .height(IntrinsicSize.Min)
                     .padding(bottom = 180.dp)
             ) {
