@@ -245,36 +245,48 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private suspend fun manageVpn() {
         while (true) {
-            if (isEthernetConnected && setting.isTunnelOnEthernetEnabled && vpnService.getState() == Tunnel.State.DOWN) {
-                ServiceManager.startVpnService(this, tunnelConfig)
-            }
-            if (!isEthernetConnected && setting.isTunnelOnMobileDataEnabled &&
-                !isWifiConnected &&
-                isMobileDataConnected
-                && vpnService.getState() == Tunnel.State.DOWN
-            ) {
-                ServiceManager.startVpnService(this, tunnelConfig)
-            } else if (!isEthernetConnected && !setting.isTunnelOnMobileDataEnabled &&
-                !isWifiConnected &&
-                vpnService.getState() == Tunnel.State.UP
-            ) {
-                ServiceManager.stopVpnService(this)
-            } else if (!isEthernetConnected && isWifiConnected &&
-                !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
-                setting.isTunnelOnWifiEnabled &&
-                (vpnService.getState() != Tunnel.State.UP)
-            ) {
-                ServiceManager.startVpnService(this, tunnelConfig)
-            } else if (!isEthernetConnected && (isWifiConnected &&
+            when {
+                ((isEthernetConnected &&
+                        setting.isTunnelOnEthernetEnabled &&
+                        vpnService.getState() == Tunnel.State.DOWN)) ->
+                    ServiceManager.startVpnService(this, tunnelConfig)
+
+                (!isEthernetConnected &&
+                        setting.isTunnelOnMobileDataEnabled &&
+                        !isWifiConnected &&
+                        isMobileDataConnected &&
+                        vpnService.getState() == Tunnel.State.DOWN) ->
+                    ServiceManager.startVpnService(this, tunnelConfig)
+
+                (!isEthernetConnected &&
+                        !setting.isTunnelOnMobileDataEnabled &&
+                        !isWifiConnected &&
+                        vpnService.getState() == Tunnel.State.UP) ->
+                    ServiceManager.stopVpnService(this)
+
+                (!isEthernetConnected && isWifiConnected &&
+                        !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
+                        setting.isTunnelOnWifiEnabled &&
+                        (vpnService.getState() != Tunnel.State.UP)) ->
+                    ServiceManager.startVpnService(this, tunnelConfig)
+
+                (!isEthernetConnected && (isWifiConnected &&
                         setting.trustedNetworkSSIDs.contains(currentNetworkSSID)) &&
-                (vpnService.getState() == Tunnel.State.UP)
-            ) {
-                ServiceManager.stopVpnService(this)
-            } else if (!isEthernetConnected && (isWifiConnected &&
+                        (vpnService.getState() == Tunnel.State.UP)) ->
+                    ServiceManager.stopVpnService(this)
+
+                (!isEthernetConnected && (isWifiConnected &&
                         !setting.isTunnelOnWifiEnabled &&
-                (vpnService.getState() == Tunnel.State.UP)
-            )) {
-                ServiceManager.stopVpnService(this)
+                        (vpnService.getState() == Tunnel.State.UP))) ->
+                    ServiceManager.stopVpnService(this)
+
+                (!isEthernetConnected && !isWifiConnected &&
+                        !isMobileDataConnected &&
+                        (vpnService.getState() == Tunnel.State.UP)) ->
+                    ServiceManager.stopVpnService(this)
+                else -> {
+                    Timber.d("Unknown case")
+                }
             }
             delay(Constants.VPN_CONNECTIVITY_CHECK_INTERVAL)
         }
