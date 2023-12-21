@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -44,105 +45,200 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsViewModel
 
 @Composable
-fun SupportScreen(padding : PaddingValues, focusRequester: FocusRequester) {
-
+fun SupportScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    padding: PaddingValues,
+    focusRequester: FocusRequester
+) {
     val context = LocalContext.current
     val fillMaxWidth = .85f
+
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
 
     fun openWebPage(url: String) {
         val webpage: Uri = Uri.parse(url)
         val intent = Intent(Intent.ACTION_VIEW, webpage)
         context.startActivity(intent)
     }
-    
+
     fun launchEmail() {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = Constants.EMAIL_MIME_TYPE
-            putExtra(Intent.EXTRA_EMAIL, context.getString(R.string.my_email))
-            putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_subject))
-        }
-        startActivity(context,createChooser(intent, context.getString(R.string.email_chooser)),null)
+        val intent =
+            Intent(Intent.ACTION_SEND).apply {
+                type = Constants.EMAIL_MIME_TYPE
+                putExtra(Intent.EXTRA_EMAIL, context.getString(R.string.my_email))
+                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_subject))
+            }
+        startActivity(
+            context,
+            createChooser(intent, context.getString(R.string.email_chooser)),
+            null
+        )
     }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .focusable()
-                .padding(padding)) {
-            Surface(
-                tonalElevation = 2.dp,
-                shadowElevation = 2.dp,
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier = (if (WireGuardAutoTunnel.isRunningOnAndroidTv(context))
-                    Modifier
-                        .height(IntrinsicSize.Min)
-                        .fillMaxWidth(fillMaxWidth)
-                        .padding(top = 10.dp)
-                else Modifier
-                    .fillMaxWidth(fillMaxWidth)
-                    .padding(top = 20.dp)).padding(bottom = 25.dp)
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(stringResource(R.string.thank_you), textAlign = TextAlign.Start, modifier = Modifier.padding(bottom = 20.dp), fontSize = 16.sp)
-                    Text(stringResource(id = R.string.support_help_text), textAlign = TextAlign.Start, fontSize = 16.sp, modifier = Modifier.padding(bottom = 20.dp))
-                    TextButton(onClick = { openWebPage(context.resources.getString(R.string.docs_url)) }, modifier = Modifier.padding(vertical = 5.dp).focusRequester(focusRequester)) {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Row {
-                                Icon(Icons.Rounded.Book, stringResource(id = R.string.docs))
-                                Text(stringResource(id = R.string.docs_description), textAlign = TextAlign.Justify, modifier = Modifier.padding(start = 10.dp))
-                            }
-                            Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
-                        }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+        modifier =
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .focusable()
+            .padding(padding)
+    ) {
+        Surface(
+            tonalElevation = 2.dp,
+            shadowElevation = 2.dp,
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier =
+            (
+                    if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                        Modifier
+                            .height(IntrinsicSize.Min)
+                            .fillMaxWidth(fillMaxWidth)
+                            .padding(top = 10.dp)
+                    } else {
+                        Modifier
+                            .fillMaxWidth(fillMaxWidth)
+                            .padding(top = 20.dp)
                     }
-                    Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
-                    TextButton(onClick = { openWebPage(context.resources.getString(R.string.discord_url)) }, modifier = Modifier.padding(vertical = 5.dp)) {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Row {
-                                Icon(imageVector = ImageVector.vectorResource(R.drawable.discord), stringResource(
-                                    id = R.string.discord), Modifier.size(25.dp))
-                                Text(stringResource(id = R.string.discord_description), textAlign = TextAlign.Justify, modifier = Modifier.padding(start = 10.dp))
-                            }
-                            Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                    ).padding(bottom = 25.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    stringResource(R.string.thank_you),
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.padding(bottom = 20.dp),
+                    fontSize = 16.sp
+                )
+                Text(
+                    stringResource(id = R.string.support_help_text),
+                    textAlign = TextAlign.Start,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 20.dp)
+                )
+                TextButton(onClick = {
+                    openWebPage(context.resources.getString(R.string.docs_url))
+                }, modifier = Modifier.padding(vertical = 5.dp).focusRequester(focusRequester)) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row {
+                            Icon(Icons.Rounded.Book, stringResource(id = R.string.docs))
+                            Text(
+                                stringResource(id = R.string.docs_description),
+                                textAlign = TextAlign.Justify,
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
                         }
+                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
                     }
-                    Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
-                    TextButton(onClick = { openWebPage(context.resources.getString(R.string.github_url)) }, modifier = Modifier.padding(vertical = 5.dp)) {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Row {
-                                Icon(imageVector = ImageVector.vectorResource(R.drawable.github), stringResource(
+                }
+                Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
+                TextButton(
+                    onClick = { openWebPage(context.resources.getString(R.string.discord_url)) },
+                    modifier = Modifier.padding(vertical = 5.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.discord),
+                                stringResource(
+                                    id = R.string.discord
+                                ),
+                                Modifier.size(25.dp)
+                            )
+                            Text(
+                                stringResource(id = R.string.discord_description),
+                                textAlign = TextAlign.Justify,
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
+                        }
+                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                    }
+                }
+                Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
+                TextButton(
+                    onClick = { openWebPage(context.resources.getString(R.string.github_url)) },
+                    modifier = Modifier.padding(vertical = 5.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.github),
+                                stringResource(
                                     id = R.string.github
-                                ), Modifier.size(25.dp))
-                                Text("Open an issue", textAlign = TextAlign.Justify, modifier = Modifier.padding(start = 10.dp))
-                            }
-                            Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                                ),
+                                Modifier.size(25.dp)
+                            )
+                            Text(
+                                "Open an issue",
+                                textAlign = TextAlign.Justify,
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
                         }
+                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
                     }
-                    Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
-                    TextButton(onClick = { launchEmail() }, modifier = Modifier.padding(vertical = 5.dp)) {
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Row {
-                                Icon(Icons.Rounded.Mail, stringResource(id = R.string.email))
-                                Text(stringResource(id = R.string.email_description), textAlign = TextAlign.Justify, modifier = Modifier.padding(start = 10.dp))
-                            }
-                            Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                }
+                Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
+                TextButton(
+                    onClick = { launchEmail() },
+                    modifier = Modifier.padding(vertical = 5.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row {
+                            Icon(Icons.Rounded.Mail, stringResource(id = R.string.email))
+                            Text(
+                                stringResource(id = R.string.email_description),
+                                textAlign = TextAlign.Justify,
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
                         }
+                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(stringResource(id = R.string.privacy_policy), style = TextStyle(textDecoration = TextDecoration.Underline),
-                modifier = Modifier.clickable {
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            stringResource(id = R.string.privacy_policy),
+            style = TextStyle(textDecoration = TextDecoration.Underline),
+            fontSize = 16.sp,
+            modifier =
+            Modifier.clickable {
                 openWebPage(context.resources.getString(R.string.privacy_policy_url))
-            })
-            Text("App version: ${BuildConfig.VERSION_NAME}", Modifier.padding(25.dp))
+            }
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(25.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(25.dp)
+        ) {
+            Text("Version: ${BuildConfig.VERSION_NAME}")
+            Text("Mode: ${if (settings.isKernelEnabled) "Kernel" else "Userspace" }")
         }
     }
+}

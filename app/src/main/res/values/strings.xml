@@ -152,5 +152,6 @@
     <string name="email">Email</string>
     <string name="email_description">Send me an email</string>
     <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
-
+    <string name="kernel">Kernel</string>
+    <string name="use_kernel">Use kernel module</string>
 </resources>

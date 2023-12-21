@@ -12,9 +12,13 @@ import com.zaneschepke.wireguardautotunnel.ui.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class WireGuardNotification @Inject constructor(@ApplicationContext private val context: Context) : NotificationService {
-
-    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+class WireGuardNotification
+@Inject
+constructor(
+    @ApplicationContext private val context: Context
+) : NotificationService {
+    private val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     override fun createNotification(
         channelId: String,
@@ -29,18 +33,19 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
         onGoing: Boolean,
         lights: Boolean
     ): Notification {
-        val channel = NotificationChannel(
-            channelId,
-            channelName,
-            importance
-        ).let {
-            it.description = title
-            it.enableLights(lights)
-            it.lightColor = Color.RED
-            it.enableVibration(vibration)
-            it.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
-            it
-        }
+        val channel =
+            NotificationChannel(
+                channelId,
+                channelName,
+                importance
+            ).let {
+                it.description = title
+                it.enableLights(lights)
+                it.lightColor = Color.RED
+                it.enableVibration(vibration)
+                it.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+                it
+            }
         notificationManager.createNotificationChannel(channel)
         val pendingIntent: PendingIntent =
             Intent(context, MainActivity::class.java).let { notificationIntent ->
@@ -58,14 +63,15 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
                 channelId
             )
         return builder.let {
-            if(action != null && actionText != null) {
-                //TODO find a not deprecated way to do this
+            if (action != null && actionText != null) {
+                // TODO find a not deprecated way to do this
                 it.addAction(
                     Notification.Action.Builder(0, actionText, action)
-                        .build())
-                    it.setAutoCancel(true)
+                        .build()
+                )
+                it.setAutoCancel(true)
             }
-                it.setContentTitle(title)
+            it.setContentTitle(title)
                 .setContentText(description)
                 .setContentIntent(pendingIntent)
                 .setOngoing(onGoing)

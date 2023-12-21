@@ -17,6 +17,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <!--foreground service exempt android 14-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING"/>
     <!--foreground service permissions-->
@@ -102,7 +106,7 @@
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:enabled="true"
             android:persistent="true"
-            android:foregroundServiceType="remoteMessaging"
+            android:foregroundServiceType="systemExempted"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
@@ -115,8 +119,7 @@
             android:enabled="true"
             android:stopWithTask="false"
             android:persistent="true"
-            android:foregroundServiceType="location"
-            android:permission=""
+            android:foregroundServiceType="systemExempted"
             android:exported="false">
         </service>
         <receiver android:enabled="true" android:name=".receiver.BootReceiver"

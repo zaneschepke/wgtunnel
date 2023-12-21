@@ -9,8 +9,7 @@ import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface TunnelConfigDao{
-
+interface TunnelConfigDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(t: TunnelConfig)
 

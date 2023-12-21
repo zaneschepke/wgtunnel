@@ -7,16 +7,18 @@ import com.zaneschepke.wireguardautotunnel.goAsync
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.cancel
 import javax.inject.Inject
+import kotlinx.coroutines.cancel
 
 @AndroidEntryPoint
 class BootReceiver : BroadcastReceiver() {
-
     @Inject
-    lateinit var settingsRepo : SettingsDoa
+    lateinit var settingsRepo: SettingsDoa
 
-    override fun onReceive(context: Context, intent: Intent) = goAsync {
+    override fun onReceive(
+        context: Context,
+        intent: Intent
+    ) = goAsync {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             try {
                 val settings = settingsRepo.getAll()

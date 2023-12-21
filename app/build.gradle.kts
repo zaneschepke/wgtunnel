@@ -23,6 +23,10 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
 
+        sourceSets {
+            getByName("debug").assets.srcDirs(files("$projectDir/schemas")) // Room
+        }
+
         resourceConfigurations.addAll(listOf("en"))
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -33,33 +37,51 @@ android {
 
     signingConfigs {
         create(Constants.RELEASE) {
-            val properties = Properties().apply {
-                //created local file for signing details
-                try {
-                    load(file("signing.properties").reader())
-                } catch (_ : Exception) {
-                    load(file("signing_template.properties").reader())
+            val properties =
+                Properties().apply {
+                    // created local file for signing details
+                    try {
+                        load(file("signing.properties").reader())
+                    } catch (_: Exception) {
+                        load(file("signing_template.properties").reader())
+                    }
                 }
-            }
 
-            //try to get secrets from env first for pipeline build, then properties file for local build
-            storeFile = file(System.getenv().getOrDefault(Constants.KEY_STORE_PATH_VAR, properties.getProperty(Constants.KEY_STORE_PATH_VAR)))
-            storePassword = System.getenv().getOrDefault(Constants.STORE_PASS_VAR, properties.getProperty(Constants.STORE_PASS_VAR))
-            keyAlias = System.getenv().getOrDefault(Constants.KEY_ALIAS_VAR, properties.getProperty(Constants.KEY_ALIAS_VAR))
-            keyPassword = System.getenv().getOrDefault(Constants.KEY_PASS_VAR, properties.getProperty(Constants.KEY_PASS_VAR))
+            // try to get secrets from env first for pipeline build, then properties file for local build
+            storeFile = file(
+                System.getenv().getOrDefault(
+                    Constants.KEY_STORE_PATH_VAR,
+                    properties.getProperty(Constants.KEY_STORE_PATH_VAR)
+                )
+            )
+            storePassword = System.getenv().getOrDefault(
+                Constants.STORE_PASS_VAR,
+                properties.getProperty(Constants.STORE_PASS_VAR)
+            )
+            keyAlias = System.getenv().getOrDefault(
+                Constants.KEY_ALIAS_VAR,
+                properties.getProperty(Constants.KEY_ALIAS_VAR)
+            )
+            keyPassword = System.getenv().getOrDefault(
+                Constants.KEY_PASS_VAR,
+                properties.getProperty(Constants.KEY_PASS_VAR)
+            )
         }
     }
 
     buildTypes {
-        //don't strip
-        packaging.jniLibs.keepDebugSymbols.addAll(listOf("libwg-go.so", "libwg-quick.so", "libwg.so"))
+        // don't strip
+        packaging.jniLibs.keepDebugSymbols.addAll(
+            listOf("libwg-go.so", "libwg-quick.so", "libwg.so")
+        )
 
         applicationVariants.all {
             val variant = this
             variant.outputs
                 .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
                 .forEach { output ->
-                    val outputFileName = "${Constants.APP_NAME}-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
+                    val outputFileName =
+                        "${Constants.APP_NAME}-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
                     output.outputFileName = outputFileName
                 }
         }
@@ -85,8 +107,7 @@ android {
         }
         create("general") {
             dimension = Constants.TYPE
-            if (BuildHelper.isReleaseBuild(gradle) && BuildHelper.isGeneralFlavor(gradle))
-            {
+            if (BuildHelper.isReleaseBuild(gradle) && BuildHelper.isGeneralFlavor(gradle)) {
                 apply(plugin = "com.google.gms.google-services")
                 apply(plugin = "com.google.firebase.crashlytics")
             }
@@ -103,7 +124,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
@@ -129,20 +149,22 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
 
-    //test
+    // test
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test)
+    androidTestImplementation(libs.androidx.room.testing)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.manifest)
 
-    //wg
+    // wg
     implementation(libs.tunnel)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    //logging
+    // logging
     implementation(libs.timber)
 
     // compose navigation
@@ -153,41 +175,41 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
-    //accompanist
+    // accompanist
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.drawablepainter)
 
-    //room
+    // storage
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.preferences)
 
-    //lifecycle
+    // lifecycle
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.process)
 
-
-    //icons
+    // icons
     implementation(libs.material.icons.extended)
-    //serialization
+    // serialization
     implementation(libs.kotlinx.serialization.json)
 
-    //firebase crashlytics
+    // firebase crashlytics
     generalImplementation(platform(libs.firebase.bom))
     generalImplementation(libs.google.firebase.crashlytics.ktx)
     generalImplementation(libs.google.firebase.analytics.ktx)
 
-    //barcode scanning
+    // barcode scanning
     implementation(libs.zxing.android.embedded)
     implementation(libs.zxing.core)
 
-    //bio
+    // bio
     implementation(libs.androidx.biometric.ktx)
 
-    //shortcuts
+    // shortcuts
     implementation(libs.androidx.core)
     implementation(libs.androidx.core.google.shortcuts)
 }

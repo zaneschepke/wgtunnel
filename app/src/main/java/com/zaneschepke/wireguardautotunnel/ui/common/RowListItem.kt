@@ -23,12 +23,18 @@ import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RowListItem(icon : @Composable () -> Unit, text : String, onHold : () -> Unit,
-                onClick: () -> Unit, rowButton : @Composable () -> Unit,
-                expanded : Boolean, statistics: Statistics?
-                ) {
+fun RowListItem(
+    icon: @Composable () -> Unit,
+    text: String,
+    onHold: () -> Unit,
+    onClick: () -> Unit,
+    rowButton: @Composable () -> Unit,
+    expanded: Boolean,
+    statistics: Statistics?
+) {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .animateContentSize()
             .clip(RoundedCornerShape(30.dp))
             .combinedClickable(
@@ -42,22 +48,27 @@ fun RowListItem(icon : @Composable () -> Unit, text : String, onHold : () -> Uni
     ) {
         Column {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically,) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(.60f)
+                ) {
                     icon()
                     Text(text)
                 }
                 rowButton()
             }
-            if(expanded) {
+            if (expanded) {
                 statistics?.peers()?.forEach {
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(end = 10.dp, bottom = 10.dp, start = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -66,9 +77,11 @@ fun RowListItem(icon : @Composable () -> Unit, text : String, onHold : () -> Uni
                         val handshakeEpoch = statistics.peer(it)!!.latestHandshakeEpochMillis
                         val peerTx = statistics.peer(it)!!.txBytes
                         val peerRx = statistics.peer(it)!!.rxBytes
-                        val peerId = it.toBase64().subSequence(0,3).toString() + "***"
-                        val handshakeSec = NumberUtils.getSecondsBetweenTimestampAndNow(handshakeEpoch)
-                        val handshake = if(handshakeSec == null) "never" else "$handshakeSec secs ago"
+                        val peerId = it.toBase64().subSequence(0, 3).toString() + "***"
+                        val handshakeSec =
+                            NumberUtils.getSecondsBetweenTimestampAndNow(handshakeEpoch)
+                        val handshake =
+                            if (handshakeSec == null) "never" else "$handshakeSec secs ago"
                         val peerTxMB = NumberUtils.bytesToMB(peerTx).toThreeDecimalPlaceString()
                         val peerRxMB = NumberUtils.bytesToMB(peerRx).toThreeDecimalPlaceString()
                         val fontSize = 9.sp

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SettingsDoa {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun save(t: Settings)
 

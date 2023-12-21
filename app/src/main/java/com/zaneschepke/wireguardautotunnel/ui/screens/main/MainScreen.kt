@@ -88,6 +88,7 @@ import com.zaneschepke.wireguardautotunnel.ui.CaptureActivityPortrait
 import com.zaneschepke.wireguardautotunnel.ui.Routes
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.theme.brickRed
+import com.zaneschepke.wireguardautotunnel.ui.theme.corn
 import com.zaneschepke.wireguardautotunnel.ui.theme.mint
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +103,6 @@ fun MainScreen(
     showSnackbarMessage: (String) -> Unit,
     navController: NavController
 ) {
-
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val isVisible = rememberSaveable { mutableStateOf(true) }
@@ -112,7 +112,9 @@ fun MainScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showPrimaryChangeAlertDialog by remember { mutableStateOf(false) }
     val tunnels by viewModel.tunnels.collectAsStateWithLifecycle(mutableListOf())
-    val handshakeStatus by viewModel.handshakeStatus.collectAsStateWithLifecycle(HandshakeStatus.NOT_STARTED)
+    val handshakeStatus by viewModel.handshakeStatus.collectAsStateWithLifecycle(
+        HandshakeStatus.NOT_STARTED
+    )
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val state by viewModel.state.collectAsStateWithLifecycle(Tunnel.State.DOWN)
     val tunnelName by viewModel.tunnelName.collectAsStateWithLifecycle("")
@@ -120,75 +122,100 @@ fun MainScreen(
     val statistics by viewModel.statistics.collectAsStateWithLifecycle(null)
 
     // Nested scroll for control FAB
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Hide FAB
-                if (available.y < -1) {
-                    isVisible.value = false
+    val nestedScrollConnection =
+        remember {
+            object : NestedScrollConnection {
+                override fun onPreScroll(
+                    available: Offset,
+                    source: NestedScrollSource
+                ): Offset {
+                    // Hide FAB
+                    if (available.y < -1) {
+                        isVisible.value = false
+                    }
+                    // Show FAB
+                    if (available.y > 1) {
+                        isVisible.value = true
+                    }
+                    return Offset.Zero
                 }
-                // Show FAB
-                if (available.y > 1) {
-                    isVisible.value = true
+            }
+        }
+
+    val tunnelFileImportResultLauncher =
+        rememberLauncherForActivityResult(
+            object : ActivityResultContracts.GetContent() {
+                override fun createIntent(
+                    context: Context,
+                    input: String
+                ): Intent {
+                    val intent = super.createIntent(context, input)
+
+                    /* AndroidTV now comes with stubs that do nothing but display a Toast less helpful than
+                     * what we can do, so detect this and throw an exception that we can catch later. */
+                    val activitiesToResolveIntent =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            context.packageManager.queryIntentActivities(
+                                intent,
+                                PackageManager.ResolveInfoFlags.of(
+                                    PackageManager.MATCH_DEFAULT_ONLY.toLong()
+                                )
+                            )
+                        } else {
+                            context.packageManager.queryIntentActivities(
+                                intent,
+                                PackageManager.MATCH_DEFAULT_ONLY
+                            )
+                        }
+                    if (activitiesToResolveIntent.all {
+                            val name = it.activityInfo.packageName
+                            name.startsWith(Constants.GOOGLE_TV_EXPLORER_STUB) || name.startsWith(
+                                Constants.ANDROID_TV_EXPLORER_STUB
+                            )
+                        }
+                    ) {
+                        throw WgTunnelException(context.getString(R.string.no_file_explorer))
+                    }
+                    return intent
                 }
-                return Offset.Zero
             }
-        }
-    }
-
-    val tunnelFileImportResultLauncher = rememberLauncherForActivityResult(object : ActivityResultContracts.GetContent() {
-        override fun createIntent(context: Context, input: String): Intent {
-            val intent = super.createIntent(context, input)
-
-            /* AndroidTV now comes with stubs that do nothing but display a Toast less helpful than
-             * what we can do, so detect this and throw an exception that we can catch later. */
-            val activitiesToResolveIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong()))
-            } else {
-                context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-            }
-            if (activitiesToResolveIntent.all {
-                    val name = it.activityInfo.packageName
-                    name.startsWith(Constants.GOOGLE_TV_EXPLORER_STUB) || name.startsWith(Constants.ANDROID_TV_EXPLORER_STUB)
-                }) {
-                throw WgTunnelException(context.getString(R.string.no_file_explorer))
-            }
-            return intent
-        }
-    }) { data ->
-        if (data == null) return@rememberLauncherForActivityResult
-        scope.launch(Dispatchers.IO) {
-            try {
-                viewModel.onTunnelFileSelected(data)
-            } catch (e : WgTunnelException) {
-                showSnackbarMessage(e.message)
-            }
-        }
-    }
-
-    val scanLauncher = rememberLauncherForActivityResult(
-        contract = ScanContract(),
-        onResult = {
-            scope.launch {
+        ) { data ->
+            if (data == null) return@rememberLauncherForActivityResult
+            scope.launch(Dispatchers.IO) {
                 try {
-                    viewModel.onTunnelQrResult(it.contents)
-                } catch (e: Exception) {
-                    when(e) {
-                        is WgTunnelException -> {
-                            showSnackbarMessage(e.message)
-                        } else -> {
-                            showSnackbarMessage("No QR code scanned")
+                    viewModel.onTunnelFileSelected(data)
+                } catch (e: WgTunnelException) {
+                    showSnackbarMessage(e.message)
+                }
+            }
+        }
+
+    val scanLauncher =
+        rememberLauncherForActivityResult(
+            contract = ScanContract(),
+            onResult = {
+                scope.launch {
+                    try {
+                        viewModel.onTunnelQrResult(it.contents)
+                    } catch (e: Exception) {
+                        when (e) {
+                            is WgTunnelException -> {
+                                showSnackbarMessage(e.message)
+                            }
+
+                            else -> {
+                                showSnackbarMessage("No QR code scanned")
+                            }
                         }
                     }
                 }
             }
-        }
-    )
+        )
 
-    if(showPrimaryChangeAlertDialog) {
+    if (showPrimaryChangeAlertDialog) {
         AlertDialog(
             onDismissRequest = {
-               showPrimaryChangeAlertDialog = false
+                showPrimaryChangeAlertDialog = false
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -197,30 +224,32 @@ fun MainScreen(
                         showPrimaryChangeAlertDialog = false
                         selectedTunnel = null
                     }
-                })
-                { Text(text = stringResource(R.string.okay)) }
+                }) { Text(text = stringResource(R.string.okay)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showPrimaryChangeAlertDialog = false
-                })
-                { Text(text = stringResource(R.string.cancel)) }
+                }) { Text(text = stringResource(R.string.cancel)) }
             },
             title = { Text(text = stringResource(R.string.primary_tunnel_change)) },
             text = { Text(text = stringResource(R.string.primary_tunnel_change_question)) }
         )
     }
 
-    fun onTunnelToggle(checked : Boolean , tunnel : TunnelConfig) {
+    fun onTunnelToggle(
+        checked: Boolean,
+        tunnel: TunnelConfig
+    ) {
         try {
             if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             showSnackbarMessage(e.message!!)
         }
     }
 
     Scaffold(
-        modifier = Modifier.pointerInput(Unit) {
+        modifier =
+        Modifier.pointerInput(Unit) {
             detectTapGestures(onTap = {
                 selectedTunnel = null
             })
@@ -230,30 +259,30 @@ fun MainScreen(
             AnimatedVisibility(
                 visible = isVisible.value,
                 enter = slideInVertically(initialOffsetY = { it * 2 }),
-                exit = slideOutVertically(targetOffsetY = { it * 2 }),
+                exit = slideOutVertically(targetOffsetY = { it * 2 })
             ) {
                 val secondaryColor = MaterialTheme.colorScheme.secondary
                 val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
                 var fobColor by remember { mutableStateOf(secondaryColor) }
                 FloatingActionButton(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .padding(bottom = 90.dp)
                         .onFocusChanged {
                             if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                 fobColor = if (it.isFocused) hoverColor else secondaryColor
                             }
-                        }
-                    ,
+                        },
                     onClick = {
                         showBottomSheet = true
                     },
                     containerColor = fobColor,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
                         contentDescription = stringResource(id = R.string.add_tunnel),
-                        tint = Color.DarkGray,
+                        tint = Color.DarkGray
                     )
                 }
             }
@@ -263,7 +292,8 @@ fun MainScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
@@ -279,7 +309,8 @@ fun MainScreen(
             ) {
                 // Sheet content
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .clickable {
                             showBottomSheet = false
@@ -301,23 +332,26 @@ fun MainScreen(
                         modifier = Modifier.padding(10.dp)
                     )
                 }
-                if(!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                if (!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                     Divider()
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            scope.launch {
-                                showBottomSheet = false
-                                val scanOptions = ScanOptions()
-                                scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                                scanOptions.setOrientationLocked(true)
-                                scanOptions.setPrompt(context.getString(R.string.scanning_qr))
-                                scanOptions.setBeepEnabled(false)
-                                scanOptions.captureActivity = CaptureActivityPortrait::class.java
-                                scanLauncher.launch(scanOptions)
+                    Row(
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                scope.launch {
+                                    showBottomSheet = false
+                                    val scanOptions = ScanOptions()
+                                    scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                                    scanOptions.setOrientationLocked(true)
+                                    scanOptions.setPrompt(context.getString(R.string.scanning_qr))
+                                    scanOptions.setBeepEnabled(false)
+                                    scanOptions.captureActivity =
+                                        CaptureActivityPortrait::class.java
+                                    scanLauncher.launch(scanOptions)
+                                }
                             }
-                        }
-                        .padding(10.dp)
+                            .padding(10.dp)
                     ) {
                         Icon(
                             Icons.Filled.QrCode,
@@ -332,11 +366,14 @@ fun MainScreen(
                 }
                 Divider()
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .clickable {
                             showBottomSheet = false
-                            navController.navigate("${Routes.Config.name}/${Constants.MANUAL_TUNNEL_CONFIG_ID}")
+                            navController.navigate(
+                                "${Routes.Config.name}/${Constants.MANUAL_TUNNEL_CONFIG_ID}"
+                            )
                         }
                         .padding(10.dp)
                 ) {
@@ -355,47 +392,67 @@ fun MainScreen(
         Column(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
             LazyColumn(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
-                    .nestedScroll(nestedScrollConnection),
+                    .padding(top = 10.dp)
+                    .nestedScroll(nestedScrollConnection)
             ) {
                 items(tunnels, key = { tunnel -> tunnel.id }) { tunnel ->
-                   val leadingIconColor = (if (tunnelName == tunnel.name) when (handshakeStatus) {
-                        HandshakeStatus.HEALTHY -> mint
-                        HandshakeStatus.UNHEALTHY -> brickRed
-                        HandshakeStatus.NOT_STARTED -> Color.Gray
-                        HandshakeStatus.NEVER_CONNECTED -> brickRed
-                    } else {Color.Gray})
-                    val focusRequester = remember { FocusRequester() }
-                    val expanded = remember {
-                        mutableStateOf(false)
-                    }
-                    RowListItem(icon = {
-                        if (settings.isTunnelConfigDefault(tunnel))
-                            Icon(
-                                Icons.Rounded.Star, stringResource(R.string.status),
-                                tint = leadingIconColor,
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(20.dp)
+                    val leadingIconColor = (
+                            if (tunnelName == tunnel.name) {
+                                when (handshakeStatus) {
+                                    HandshakeStatus.HEALTHY -> mint
+                                    HandshakeStatus.UNHEALTHY -> brickRed
+                                    HandshakeStatus.STALE -> corn
+                                    HandshakeStatus.NOT_STARTED -> Color.Gray
+                                    HandshakeStatus.NEVER_CONNECTED -> brickRed
+                                }
+                            } else {
+                                Color.Gray
+                            }
                             )
-                        else Icon(
-                            Icons.Rounded.Circle, stringResource(R.string.status),
-                            tint = leadingIconColor,
-                            modifier = Modifier
-                                .padding(end = 15.dp)
-                                .size(15.dp)
-                        )
-                    },
+                    val focusRequester = remember { FocusRequester() }
+                    val expanded =
+                        remember {
+                            mutableStateOf(false)
+                        }
+                    RowListItem(
+                        icon = {
+                            if (settings.isTunnelConfigDefault(tunnel)) {
+                                Icon(
+                                    Icons.Rounded.Star,
+                                    stringResource(R.string.status),
+                                    tint = leadingIconColor,
+                                    modifier =
+                                    Modifier
+                                        .padding(end = 10.dp)
+                                        .size(20.dp)
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Rounded.Circle,
+                                    stringResource(R.string.status),
+                                    tint = leadingIconColor,
+                                    modifier =
+                                    Modifier
+                                        .padding(end = 15.dp)
+                                        .size(15.dp)
+                                )
+                            }
+                        },
                         text = tunnel.name,
                         onHold = {
-                            if (state == Tunnel.State.UP && tunnel.name == tunnelName) {
-                                showSnackbarMessage(context.resources.getString(R.string.turn_off_tunnel))
+                            if ((state == Tunnel.State.UP) && (tunnel.name == tunnelName)) {
+                                showSnackbarMessage(
+                                    context.resources.getString(R.string.turn_off_tunnel)
+                                )
                                 return@RowListItem
                             }
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -403,7 +460,7 @@ fun MainScreen(
                         },
                         onClick = {
                             if (!WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
-                                if(state == Tunnel.State.UP && (tunnelName == tunnel.name) ) {
+                                if (state == Tunnel.State.UP && (tunnelName == tunnel.name)) {
                                     expanded.value = !expanded.value
                                 }
                             } else {
@@ -414,25 +471,40 @@ fun MainScreen(
                         statistics = statistics,
                         expanded = expanded.value,
                         rowButton = {
-                            if (tunnel.id == selectedTunnel?.id && !WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
+                            if (tunnel.id == selectedTunnel?.id && !WireGuardAutoTunnel.isRunningOnAndroidTv(
+                                    context
+                                )
+                            ) {
                                 Row {
-                                    if(!settings.isTunnelConfigDefault(tunnel)) {
+                                    if (!settings.isTunnelConfigDefault(tunnel)) {
                                         IconButton(onClick = {
-                                            if(settings.isAutoTunnelEnabled) {
-                                                showSnackbarMessage(context.resources.getString(R.string.turn_off_auto))
-                                            } else showPrimaryChangeAlertDialog = true
+                                            if (settings.isAutoTunnelEnabled) {
+                                                showSnackbarMessage(
+                                                    context.resources.getString(
+                                                        R.string.turn_off_auto
+                                                    )
+                                                )
+                                            } else {
+                                                showPrimaryChangeAlertDialog = true
+                                            }
                                         }) {
-                                            Icon(Icons.Rounded.Star, stringResource(id = R.string.set_primary))
+                                            Icon(
+                                                Icons.Rounded.Star,
+                                                stringResource(id = R.string.set_primary)
+                                            )
                                         }
                                     }
                                     IconButton(onClick = {
-                                        navController.navigate("${Routes.Config.name}/${selectedTunnel?.id}")
+                                        navController.navigate(
+                                            "${Routes.Config.name}/${selectedTunnel?.id}"
+                                        )
                                     }) {
                                         Icon(Icons.Rounded.Edit, stringResource(id = R.string.edit))
                                     }
                                     IconButton(
                                         modifier = Modifier.focusable(),
-                                        onClick = { viewModel.onDelete(tunnel) }) {
+                                        onClick = { viewModel.onDelete(tunnel) }
+                                    ) {
                                         Icon(
                                             Icons.Rounded.Delete,
                                             stringResource(id = R.string.delete)
@@ -441,45 +513,59 @@ fun MainScreen(
                                 }
                             } else {
                                 val checked = state == Tunnel.State.UP && tunnel.name == tunnelName
-                                if(!checked) expanded.value = false
+                                if (!checked) expanded.value = false
+
                                 @Composable
-                                fun TunnelSwitch() = Switch(
-                                    modifier = Modifier.focusRequester(focusRequester),
-                                    checked = checked,
-                                    onCheckedChange = { checked ->
-                                        if(!checked) expanded.value = false
-                                        onTunnelToggle(checked, tunnel)
-                                    }
-                                )
+                                fun TunnelSwitch() =
+                                    Switch(
+                                        modifier = Modifier.focusRequester(focusRequester),
+                                        checked = checked,
+                                        onCheckedChange = { checked ->
+                                            if (!checked) expanded.value = false
+                                            onTunnelToggle(checked, tunnel)
+                                        }
+                                    )
                                 if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) {
                                     Row {
-                                        if(!settings.isTunnelConfigDefault(tunnel)) {
+                                        if (!settings.isTunnelConfigDefault(tunnel)) {
                                             IconButton(onClick = {
-                                                if(settings.isAutoTunnelEnabled) {
-                                                    showSnackbarMessage(context.resources.getString(R.string.turn_off_auto))
-                                                } else showPrimaryChangeAlertDialog = true
+                                                if (settings.isAutoTunnelEnabled) {
+                                                    showSnackbarMessage(
+                                                        context.resources.getString(
+                                                            R.string.turn_off_auto
+                                                        )
+                                                    )
+                                                } else {
+                                                    showPrimaryChangeAlertDialog = true
+                                                }
                                             }) {
-                                                Icon(Icons.Rounded.Star, stringResource(id = R.string.set_primary))
+                                                Icon(
+                                                    Icons.Rounded.Star,
+                                                    stringResource(id = R.string.set_primary)
+                                                )
                                             }
                                         }
                                         IconButton(
                                             modifier = Modifier.focusRequester(focusRequester),
                                             onClick = {
-                                                if(state == Tunnel.State.UP && (tunnelName == tunnel.name) ) {
+                                                if (state == Tunnel.State.UP && (tunnelName == tunnel.name)) {
                                                     expanded.value = !expanded.value
                                                 }
-                                            }) {
+                                            }
+                                        ) {
                                             Icon(Icons.Rounded.Info, stringResource(R.string.info))
                                         }
                                         IconButton(onClick = {
-                                            if (state == Tunnel.State.UP && tunnel.name == tunnelName)
+                                            if (state == Tunnel.State.UP && tunnel.name == tunnelName) {
                                                 showSnackbarMessage(
                                                     context.resources.getString(
                                                         R.string.turn_off_tunnel
                                                     )
                                                 )
-                                            else {
-                                                navController.navigate("${Routes.Config.name}/${tunnel.id}")
+                                            } else {
+                                                navController.navigate(
+                                                    "${Routes.Config.name}/${tunnel.id}"
+                                                )
                                             }
                                         }) {
                                             Icon(
@@ -488,13 +574,13 @@ fun MainScreen(
                                             )
                                         }
                                         IconButton(onClick = {
-                                            if (state == Tunnel.State.UP && tunnel.name == tunnelName)
+                                            if (state == Tunnel.State.UP && tunnel.name == tunnelName) {
                                                 showSnackbarMessage(
                                                     context.resources.getString(
                                                         R.string.turn_off_tunnel
                                                     )
                                                 )
-                                            else {
+                                            } else {
                                                 viewModel.onDelete(tunnel)
                                             }
                                         }) {
@@ -509,7 +595,8 @@ fun MainScreen(
                                     TunnelSwitch()
                                 }
                             }
-                        })
+                        }
+                    )
                 }
             }
         }

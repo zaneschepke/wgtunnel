@@ -9,12 +9,13 @@ class DatabaseListConverters {
     fun listToString(value: MutableList<String>): String {
         return Json.encodeToString(value)
     }
+
     @TypeConverter
     fun stringToList(value: String): MutableList<String> {
-        if(value.isEmpty()) return mutableListOf()
+        if (value.isEmpty()) return mutableListOf()
         return try {
             Json.decodeFromString<MutableList<String>>(value)
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             val list = value.split(",").toMutableList()
             val json = listToString(list)
             Json.decodeFromString<MutableList<String>>(json)

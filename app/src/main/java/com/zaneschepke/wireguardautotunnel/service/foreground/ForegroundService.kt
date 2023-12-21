@@ -6,9 +6,7 @@ import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import timber.log.Timber
 
-
 open class ForegroundService : LifecycleService() {
-
     private var isServiceStarted = false
 
     override fun onBind(intent: Intent): IBinder? {
@@ -17,7 +15,11 @@ open class ForegroundService : LifecycleService() {
         return null
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         super.onStartCommand(intent, flags, startId)
         Timber.d("onStartCommand executed with startId: $startId")
         if (intent != null) {
@@ -41,19 +43,18 @@ open class ForegroundService : LifecycleService() {
         return START_STICKY
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         Timber.d("The service has been destroyed")
     }
 
-    protected open fun startService(extras : Bundle?) {
+    protected open fun startService(extras: Bundle?) {
         if (isServiceStarted) return
         Timber.d("Starting ${this.javaClass.simpleName}")
         isServiceStarted = true
     }
 
-    protected open fun stopService(extras : Bundle?) {
+    protected open fun stopService(extras: Bundle?) {
         Timber.d("Stopping ${this.javaClass.simpleName}")
         try {
             stopForeground(STOP_FOREGROUND_REMOVE)

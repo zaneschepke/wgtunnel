@@ -2,13 +2,16 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel
 
 enum class HandshakeStatus {
     HEALTHY,
+    STALE,
     UNHEALTHY,
     NEVER_CONNECTED,
-    NOT_STARTED;
+    NOT_STARTED
+    ;
 
     companion object {
-        private const val WG_TYPICAL_HANDSHAKE_INTERVAL_WHEN_HEALTHY_SEC = 120
-        const val UNHEALTHY_TIME_LIMIT_SEC = WG_TYPICAL_HANDSHAKE_INTERVAL_WHEN_HEALTHY_SEC + 60
+        private const val WG_TYPICAL_HANDSHAKE_INTERVAL_WHEN_HEALTHY_SEC = 180
+        const val STATUS_CHANGE_TIME_BUFFER = 30
+        const val STALE_TIME_LIMIT_SEC = WG_TYPICAL_HANDSHAKE_INTERVAL_WHEN_HEALTHY_SEC + STATUS_CHANGE_TIME_BUFFER
         const val NEVER_CONNECTED_TO_UNHEALTHY_TIME_LIMIT_SEC = 30
     }
 }

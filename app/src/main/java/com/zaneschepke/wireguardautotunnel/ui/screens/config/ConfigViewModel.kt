@@ -23,18 +23,20 @@ import com.zaneschepke.wireguardautotunnel.ui.models.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
-class ConfigViewModel @Inject constructor(private val application : Application,
-                                          private val tunnelRepo : TunnelConfigDao,
-                                          private val settingsRepo : SettingsDoa
+class ConfigViewModel
+@Inject
+constructor(
+    private val application: Application,
+    private val tunnelRepo: TunnelConfigDao,
+    private val settingsRepo: SettingsDoa
 ) : ViewModel() {
-
     private val _tunnel = MutableStateFlow<TunnelConfig?>(null)
     private val _tunnelName = MutableStateFlow("")
     val tunnelName get() = _tunnelName.asStateFlow()
@@ -58,13 +60,14 @@ class ConfigViewModel @Inject constructor(private val application : Application,
     private val _isAllApplicationsEnabled = MutableStateFlow(false)
     val isAllApplicationsEnabled get() = _isAllApplicationsEnabled.asStateFlow()
     private val _isDefaultTunnel = MutableStateFlow(false)
-    val isDefaultTunnel = _isDefaultTunnel.asStateFlow()
 
     private lateinit var tunnelConfig: TunnelConfig
 
-    suspend fun onScreenLoad(id : String) {
-        if(id != Constants.MANUAL_TUNNEL_CONFIG_ID) {
-            tunnelConfig = getTunnelConfigById(id) ?: throw WgTunnelException("Config not found")
+    suspend fun onScreenLoad(id: String) {
+        if (id != Constants.MANUAL_TUNNEL_CONFIG_ID) {
+            tunnelConfig = getTunnelConfigById(id) ?: throw WgTunnelException(
+                "Config not found"
+            )
             emitScreenData()
         } else {
             emitEmptyScreenData()
@@ -84,7 +87,6 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         }
     }
 
-
     private suspend fun emitScreenData() {
         emitTunnelConfig()
         emitPeersFromConfig()
@@ -97,7 +99,7 @@ class ConfigViewModel @Inject constructor(private val application : Application,
 
     private suspend fun emitDefaultTunnelStatus() {
         val settings = settingsRepo.getAll()
-        if(settings.isNotEmpty()) {
+        if (settings.isNotEmpty()) {
             _isDefaultTunnel.value = settings.first().isTunnelConfigDefault(tunnelConfig)
         }
     }
@@ -109,7 +111,7 @@ class ConfigViewModel @Inject constructor(private val application : Application,
 
     private fun emitPeersFromConfig() {
         val config = TunnelConfig.configFromQuick(tunnelConfig.wgQuick)
-        config.peers.forEach{
+        config.peers.forEach {
             _proxyPeers.value.add(PeerProxy.from(it))
         }
     }
@@ -122,10 +124,10 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         _interface.value = interfaceProxy
     }
 
-    private suspend fun getTunnelConfigById(id : String) : TunnelConfig? {
+    private suspend fun getTunnelConfigById(id: String): TunnelConfig? {
         return try {
             tunnelRepo.getById(id.toLong())
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -134,30 +136,31 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         _tunnel.emit(tunnelConfig)
     }
 
-    private  suspend fun emitTunnelConfigName() {
+    private suspend fun emitTunnelConfigName() {
         _tunnelName.emit(tunnelConfig.name)
     }
 
-    fun onTunnelNameChange(name : String) {
+    fun onTunnelNameChange(name: String) {
         _tunnelName.value = name
     }
 
-    fun onIncludeChange(include : Boolean) {
+    fun onIncludeChange(include: Boolean) {
         _include.value = include
     }
-    fun onAddCheckedPackage(packageName : String) {
+
+    fun onAddCheckedPackage(packageName: String) {
         _checkedPackages.value.add(packageName)
     }
 
-    fun onAllApplicationsChange(isAllApplicationsEnabled : Boolean) {
+    fun onAllApplicationsChange(isAllApplicationsEnabled: Boolean) {
         _isAllApplicationsEnabled.value = isAllApplicationsEnabled
     }
 
-    fun onRemoveCheckedPackage(packageName : String) {
+    fun onRemoveCheckedPackage(packageName: String) {
         _checkedPackages.value.remove(packageName)
     }
 
-    private suspend fun emitSplitTunnelConfiguration(config : Config) {
+    private suspend fun emitSplitTunnelConfiguration(config: Config) {
         val excludedApps = config.`interface`.excludedApplications
         val includedApps = config.`interface`.includedApplications
         if (excludedApps.isNotEmpty() || includedApps.isNotEmpty()) {
@@ -168,7 +171,10 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         }
     }
 
-    private suspend fun determineAppInclusionState(excludedApps : Set<String>, includedApps : Set<String>) {
+    private suspend fun determineAppInclusionState(
+        excludedApps: Set<String>,
+        includedApps: Set<String>
+    ) {
         if (excludedApps.isEmpty()) {
             emitIncludedAppsExist()
             emitCheckedApps(includedApps)
@@ -186,7 +192,7 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         _include.emit(false)
     }
 
-    private suspend fun emitCheckedApps(apps : Set<String>) {
+    private suspend fun emitCheckedApps(apps: Set<String>) {
         _checkedPackages.emit(apps.toMutableStateList())
     }
 
@@ -205,45 +211,45 @@ class ConfigViewModel @Inject constructor(private val application : Application,
         }
     }
 
-    fun emitQueriedPackages(query : String) {
+    fun emitQueriedPackages(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val packages = getAllInternetCapablePackages().filter {
-                getPackageLabel(it).lowercase().contains(query.lowercase())
-            }
+            val packages =
+                getAllInternetCapablePackages().filter {
+                    getPackageLabel(it).lowercase().contains(query.lowercase())
+                }
             _packages.emit(packages)
         }
     }
 
-    fun getPackageLabel(packageInfo : PackageInfo) : String {
+    fun getPackageLabel(packageInfo: PackageInfo): String {
         return packageInfo.applicationInfo.loadLabel(application.packageManager).toString()
     }
 
-
-    private fun getAllInternetCapablePackages() : List<PackageInfo> {
+    private fun getAllInternetCapablePackages(): List<PackageInfo> {
         return getPackagesHoldingPermissions(arrayOf(Manifest.permission.INTERNET))
     }
 
     private fun getPackagesHoldingPermissions(permissions: Array<String>): List<PackageInfo> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            packageManager.getPackagesHoldingPermissions(permissions, PackageManager.PackageInfoFlags.of(0L))
+            packageManager.getPackagesHoldingPermissions(
+                permissions,
+                PackageManager.PackageInfoFlags.of(0L)
+            )
         } else {
             packageManager.getPackagesHoldingPermissions(permissions, 0)
         }
     }
 
-    private fun isAllApplicationsEnabled() : Boolean {
+    private fun isAllApplicationsEnabled(): Boolean {
         return _isAllApplicationsEnabled.value
-    }
-
-    private fun isIncludeApplicationsEnabled() : Boolean {
-        return _include.value
     }
 
     private suspend fun saveConfig(tunnelConfig: TunnelConfig) {
         tunnelRepo.save(tunnelConfig)
     }
+
     private suspend fun updateTunnelConfig(tunnelConfig: TunnelConfig?) {
-        if(tunnelConfig != null) {
+        if (tunnelConfig != null) {
             saveConfig(tunnelConfig)
             updateSettingsDefaultTunnel(tunnelConfig)
         }
@@ -251,88 +257,119 @@ class ConfigViewModel @Inject constructor(private val application : Application,
 
     private suspend fun updateSettingsDefaultTunnel(tunnelConfig: TunnelConfig) {
         val settings = settingsRepo.getAll()
-        if(settings.isNotEmpty()) {
+        if (settings.isNotEmpty()) {
             val setting = settings[0]
-            if(setting.defaultTunnel != null) {
-                if(tunnelConfig.id == TunnelConfig.from(setting.defaultTunnel!!).id) {
-                    settingsRepo.save(setting.copy(
-                        defaultTunnel = tunnelConfig.toString()
-                    ))
+            if (setting.defaultTunnel != null) {
+                if (tunnelConfig.id == TunnelConfig.from(setting.defaultTunnel!!).id) {
+                    settingsRepo.save(
+                        setting.copy(
+                            defaultTunnel = tunnelConfig.toString()
+                        )
+                    )
                 }
             }
         }
     }
 
-    fun buildPeerListFromProxyPeers() : List<Peer> {
+    private fun buildPeerListFromProxyPeers(): List<Peer> {
         return _proxyPeers.value.map {
             val builder = Peer.Builder()
             if (it.allowedIps.isNotEmpty()) builder.parseAllowedIPs(it.allowedIps.trim())
             if (it.publicKey.isNotEmpty()) builder.parsePublicKey(it.publicKey.trim())
             if (it.preSharedKey.isNotEmpty()) builder.parsePreSharedKey(it.preSharedKey.trim())
             if (it.endpoint.isNotEmpty()) builder.parseEndpoint(it.endpoint.trim())
-            if (it.persistentKeepalive.isNotEmpty()) builder.parsePersistentKeepalive(it.persistentKeepalive.trim())
+            if (it.persistentKeepalive.isNotEmpty()) {
+                builder.parsePersistentKeepalive(
+                    it.persistentKeepalive.trim()
+                )
+            }
             builder.build()
         }
     }
 
-    fun buildInterfaceListFromProxyInterface() : Interface {
+    private fun buildInterfaceListFromProxyInterface(): Interface {
         val builder = Interface.Builder()
         builder.parsePrivateKey(_interface.value.privateKey.trim())
         builder.parseAddresses(_interface.value.addresses.trim())
         builder.parseDnsServers(_interface.value.dnsServers.trim())
-        if(_interface.value.mtu.isNotEmpty()) builder.parseMtu(_interface.value.mtu.trim())
-        if(_interface.value.listenPort.isNotEmpty()) builder.parseListenPort(_interface.value.listenPort.trim())
-        if(isAllApplicationsEnabled()) _checkedPackages.value.clear()
-        if(_include.value) builder.includeApplications(_checkedPackages.value)
-        if(!_include.value) builder.excludeApplications(_checkedPackages.value)
+        if (_interface.value.mtu.isNotEmpty()) builder.parseMtu(_interface.value.mtu.trim())
+        if (_interface.value.listenPort.isNotEmpty()) {
+            builder.parseListenPort(
+                _interface.value.listenPort.trim()
+            )
+        }
+        if (isAllApplicationsEnabled()) _checkedPackages.value.clear()
+        if (_include.value) builder.includeApplications(_checkedPackages.value)
+        if (!_include.value) builder.excludeApplications(_checkedPackages.value)
         return builder.build()
     }
-
-
 
     suspend fun onSaveAllChanges() {
         try {
             val peerList = buildPeerListFromProxyPeers()
             val wgInterface = buildInterfaceListFromProxyInterface()
             val config = Config.Builder().addPeers(peerList).setInterface(wgInterface).build()
-            val tunnelConfig = _tunnel.value?.copy(
-                name = _tunnelName.value,
-                wgQuick = config.toWgQuickString()
-            )
+            val tunnelConfig =
+                _tunnel.value?.copy(
+                    name = _tunnelName.value,
+                    wgQuick = config.toWgQuickString()
+                )
             updateTunnelConfig(tunnelConfig)
-        } catch (e : Exception) {
-            throw WgTunnelException("Error: ${e.cause?.message?.lowercase() ?: "unknown error occurred"}")
+        } catch (e: Exception) {
+            throw WgTunnelException(
+                "Error: ${e.cause?.message?.lowercase() ?: "unknown error occurred"}"
+            )
         }
     }
 
-    fun onPeerPublicKeyChange(index: Int, publicKey: String) {
-        _proxyPeers.value[index] = _proxyPeers.value[index].copy(
-            publicKey = publicKey
-        )
+    fun onPeerPublicKeyChange(
+        index: Int,
+        publicKey: String
+    ) {
+        _proxyPeers.value[index] =
+            _proxyPeers.value[index].copy(
+                publicKey = publicKey
+            )
     }
 
-    fun onPreSharedKeyChange(index: Int, value: String) {
-        _proxyPeers.value[index] = _proxyPeers.value[index].copy(
-            preSharedKey = value
-        )
+    fun onPreSharedKeyChange(
+        index: Int,
+        value: String
+    ) {
+        _proxyPeers.value[index] =
+            _proxyPeers.value[index].copy(
+                preSharedKey = value
+            )
     }
 
-    fun onEndpointChange(index: Int, value: String) {
-        _proxyPeers.value[index] = _proxyPeers.value[index].copy(
-            endpoint = value
-        )
+    fun onEndpointChange(
+        index: Int,
+        value: String
+    ) {
+        _proxyPeers.value[index] =
+            _proxyPeers.value[index].copy(
+                endpoint = value
+            )
     }
 
-    fun onAllowedIpsChange(index: Int, value: String) {
-        _proxyPeers.value[index] = _proxyPeers.value[index].copy(
-            allowedIps = value
-        )
+    fun onAllowedIpsChange(
+        index: Int,
+        value: String
+    ) {
+        _proxyPeers.value[index] =
+            _proxyPeers.value[index].copy(
+                allowedIps = value
+            )
     }
 
-    fun onPersistentKeepaliveChanged(index : Int, value : String) {
-        _proxyPeers.value[index] = _proxyPeers.value[index].copy(
-            persistentKeepalive = value
-        )
+    fun onPersistentKeepaliveChanged(
+        index: Int,
+        value: String
+    ) {
+        _proxyPeers.value[index] =
+            _proxyPeers.value[index].copy(
+                persistentKeepalive = value
+            )
     }
 
     fun onDeletePeer(index: Int) {
@@ -345,47 +382,54 @@ class ConfigViewModel @Inject constructor(private val application : Application,
 
     fun generateKeyPair() {
         val keyPair = KeyPair()
-        _interface.value = _interface.value.copy(
-            privateKey = keyPair.privateKey.toBase64(),
-            publicKey = keyPair.publicKey.toBase64()
-        )
+        _interface.value =
+            _interface.value.copy(
+                privateKey = keyPair.privateKey.toBase64(),
+                publicKey = keyPair.publicKey.toBase64()
+            )
     }
 
     fun onAddressesChanged(value: String) {
-        _interface.value = _interface.value.copy(
-            addresses = value
-        )
+        _interface.value =
+            _interface.value.copy(
+                addresses = value
+            )
     }
 
     fun onListenPortChanged(value: String) {
-        _interface.value = _interface.value.copy(
-            listenPort = value
-        )
+        _interface.value =
+            _interface.value.copy(
+                listenPort = value
+            )
     }
 
     fun onDnsServersChanged(value: String) {
-        _interface.value = _interface.value.copy(
-            dnsServers = value
-        )
+        _interface.value =
+            _interface.value.copy(
+                dnsServers = value
+            )
     }
 
     fun onMtuChanged(value: String) {
-        _interface.value = _interface.value.copy(
-            mtu = value
-        )
+        _interface.value =
+            _interface.value.copy(
+                mtu = value
+            )
     }
 
-    private fun onInterfacePublicKeyChange(value : String) {
-        _interface.value = _interface.value.copy(
-            publicKey = value
-        )
+    private fun onInterfacePublicKeyChange(value: String) {
+        _interface.value =
+            _interface.value.copy(
+                publicKey = value
+            )
     }
 
     fun onPrivateKeyChange(value: String) {
-        _interface.value = _interface.value.copy(
-            privateKey = value
-        )
-        if(NumberUtils.isValidKey(value)) {
+        _interface.value =
+            _interface.value.copy(
+                privateKey = value
+            )
+        if (NumberUtils.isValidKey(value)) {
             val pair = KeyPair(Key.fromBase64(value))
             onInterfacePublicKeyChange(pair.publicKey.toBase64())
         } else {

@@ -12,7 +12,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SectionTitle(title : String, padding : Dp) {
+fun SectionTitle(
+    title: String,
+    padding: Dp
+) {
     Text(
         title,
         textAlign = TextAlign.Center,

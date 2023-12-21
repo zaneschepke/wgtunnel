@@ -12,7 +12,7 @@ interface NotificationService {
         action: PendingIntent? = null,
         actionText: String? = null,
         description: String,
-        showTimestamp : Boolean = false,
+        showTimestamp: Boolean = false,
         importance: Int = NotificationManager.IMPORTANCE_HIGH,
         vibration: Boolean = false,
         onGoing: Boolean = true,

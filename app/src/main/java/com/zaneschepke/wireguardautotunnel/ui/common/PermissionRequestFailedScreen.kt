@@ -16,13 +16,21 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun PermissionRequestFailedScreen(padding : PaddingValues, onRequestAgain : () -> Unit, message : String, buttonText : String ) {
+fun PermissionRequestFailedScreen(
+    padding: PaddingValues,
+    onRequestAgain: () -> Unit,
+    message: String,
+    buttonText: String
+) {
     val scope = rememberCoroutineScope()
-    Column(horizontalAlignment = Alignment.CenterHorizontally,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
-            .padding(padding)) {
+            .padding(padding)
+    ) {
         Text(message, textAlign = TextAlign.Center, modifier = Modifier.padding(15.dp))
         Button(onClick = {
             scope.launch {

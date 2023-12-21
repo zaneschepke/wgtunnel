@@ -1,8 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.ui.common
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -11,20 +13,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
-fun ClickableIconButton(onIconClick : () -> Unit, text : String, icon : ImageVector, enabled : Boolean) {
-    TextButton(onClick = {},
+fun ClickableIconButton(
+    onIconClick: () -> Unit,
+    text: String,
+    icon: ImageVector,
+    enabled: Boolean
+) {
+    TextButton(
+        onClick = {},
         enabled = enabled
     ) {
-        Text(text)
+        Text(text, Modifier.weight(1f, false))
         Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
         Icon(
             imageVector = icon,
             contentDescription = stringResource(R.string.delete),
-            modifier = Modifier.size(ButtonDefaults.IconSize).clickable {
-                if(enabled) {
+            modifier =
+            Modifier.size(ButtonDefaults.IconSize).weight(1f, false).clickable {
+                if (enabled) {
                     onIconClick()
                 }
             }

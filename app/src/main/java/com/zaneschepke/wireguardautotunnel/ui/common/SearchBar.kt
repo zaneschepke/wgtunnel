@@ -25,9 +25,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
-fun SearchBar(
-    onQuery : (queryString : String) -> Unit
-) {
+fun SearchBar(onQuery: (queryString: String) -> Unit) {
     // Immediately update and keep track of query from text field changes.
     var query: String by rememberSaveable { mutableStateOf("") }
     var showClearIcon by rememberSaveable { mutableStateOf(false) }
@@ -64,16 +62,18 @@ fun SearchBar(
             }
         },
         maxLines = 1,
-        colors = TextFieldDefaults.colors(
+        colors =
+        TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent
         ),
         placeholder = { Text(text = stringResource(R.string.hint_search_packages)) },
         textStyle = MaterialTheme.typography.bodySmall,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.background, shape = RectangleShape)
     )

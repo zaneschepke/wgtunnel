@@ -12,7 +12,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
@@ -59,13 +58,14 @@ import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
-    @OptIn(ExperimentalAnimationApi::class,
+    @OptIn(
         ExperimentalPermissionsApi::class
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // TODO move shared logic to shared viewmodel
+            // val sharedViewModel = hiltViewModel<ActivityViewModel>()
             val navController = rememberNavController()
             val focusRequester = remember { FocusRequester() }
 
@@ -84,68 +84,86 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 var vpnIntent by remember { mutableStateOf(GoBackend.VpnService.prepare(this)) }
-                val vpnActivityResultState = rememberLauncherForActivityResult(
-                    ActivityResultContracts.StartActivityForResult(),
-                    onResult = {
-                        val accepted = (it.resultCode == RESULT_OK)
-                        if (accepted) {
-                            vpnIntent = null
+                val vpnActivityResultState =
+                    rememberLauncherForActivityResult(
+                        ActivityResultContracts.StartActivityForResult(),
+                        onResult = {
+                            val accepted = (it.resultCode == RESULT_OK)
+                            if (accepted) {
+                                vpnIntent = null
+                            }
                         }
-                    })
+                    )
                 LaunchedEffect(vpnIntent) {
                     if (vpnIntent != null) {
                         vpnActivityResultState.launch(vpnIntent)
-                    } else requestNotificationPermission()
+                    } else {
+                        requestNotificationPermission()
+                    }
                 }
 
-                fun showSnackBarMessage(message : String) {
+                fun showSnackBarMessage(message: String) {
                     lifecycleScope.launch(Dispatchers.Main) {
-                        val result = snackbarHostState.showSnackbar(
-                            message = message,
-                            actionLabel = applicationContext.getString(R.string.okay),
-                            duration = SnackbarDuration.Short,
-                        )
+                        val result =
+                            snackbarHostState.showSnackbar(
+                                message = message,
+                                actionLabel = applicationContext.getString(R.string.okay),
+                                duration = SnackbarDuration.Short
+                            )
                         when (result) {
-                            SnackbarResult.ActionPerformed -> { snackbarHostState.currentSnackbarData?.dismiss() }
-                            SnackbarResult.Dismissed -> { snackbarHostState.currentSnackbarData?.dismiss() }
+                            SnackbarResult.ActionPerformed -> {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                            }
+
+                            SnackbarResult.Dismissed -> {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                            }
                         }
                     }
                 }
 
-                Scaffold(snackbarHost = {
+                Scaffold(
+                    snackbarHost = {
                         SnackbarHost(snackbarHostState) { snackbarData: SnackbarData ->
                             CustomSnackBar(
                                 snackbarData.visuals.message,
                                 isRtl = false,
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                    2.dp
+                                )
                             )
                         }
                     },
-                    modifier = Modifier.onKeyEvent {
+                    modifier =
+                    Modifier.onKeyEvent {
                         if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
                             when (it.nativeKeyEvent.keyCode) {
                                 KeyEvent.KEYCODE_DPAD_UP -> {
                                     try {
                                         focusRequester.requestFocus()
-                                    } catch(e : IllegalStateException) {
-                                        Timber.e("No D-Pad focus request modifier added to element on screen")
+                                    } catch (e: IllegalStateException) {
+                                        Timber.e(
+                                            "No D-Pad focus request modifier added to element on screen"
+                                        )
                                     }
                                     false
-                                } else -> {
-                                   false
+                                }
+
+                                else -> {
+                                    false
                                 }
                             }
                         } else {
                             false
                         }
                     },
-                    bottomBar = if (vpnIntent == null && notificationPermissionState.status.isGranted) {
+                    bottomBar =
+                    if (vpnIntent == null && notificationPermissionState.status.isGranted) {
                         { BottomNavBar(navController, Routes.navItems) }
                     } else {
                         {}
-                    },
-                )
-                { padding ->
+                    }
+                ) { padding ->
                     if (vpnIntent != null) {
                         PermissionRequestFailedScreen(
                             padding = padding,
@@ -162,7 +180,11 @@ class MainActivity : AppCompatActivity() {
                                 val intentSettings =
                                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                                 intentSettings.data =
-                                    Uri.fromParts(Constants.URI_PACKAGE_SCHEME, this.packageName, null)
+                                    Uri.fromParts(
+                                        Constants.URI_PACKAGE_SCHEME,
+                                        this.packageName,
+                                        null
+                                    )
                                 startActivity(intentSettings)
                             },
                             message = getString(R.string.notification_permission_required),
@@ -172,23 +194,36 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     NavHost(navController, startDestination = Routes.Main.name) {
-                        composable(Routes.Main.name, enterTransition = {
-                            when (initialState.destination.route) {
-                                Routes.Settings.name, Routes.Support.name ->
-                                    slideInHorizontally(
-                                        initialOffsetX = { -Constants.SLIDE_IN_TRANSITION_OFFSET },
-                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
-                                    )
+                        composable(
+                            Routes.Main.name,
+                            enterTransition = {
+                                when (initialState.destination.route) {
+                                    Routes.Settings.name, Routes.Support.name ->
+                                        slideInHorizontally(
+                                            initialOffsetX = {
+                                                -Constants.SLIDE_IN_TRANSITION_OFFSET
+                                            },
+                                            animationSpec = tween(
+                                                Constants.SLIDE_IN_ANIMATION_DURATION
+                                            )
+                                        )
 
-                                else -> {
-                                    fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
+                                    else -> {
+                                        fadeIn(
+                                            animationSpec = tween(
+                                                Constants.FADE_IN_ANIMATION_DURATION
+                                            )
+                                        )
+                                    }
                                 }
+                            },
+                            exitTransition = {
+                                ExitTransition.None
                             }
-                        }, exitTransition = {
-                            ExitTransition.None
-                        }
-                            ) {
-                            MainScreen(padding = padding, showSnackbarMessage = { message -> showSnackBarMessage(message) }, navController = navController)
+                        ) {
+                            MainScreen(padding = padding, showSnackbarMessage = { message ->
+                                showSnackBarMessage(message)
+                            }, navController = navController)
                         }
                         composable(Routes.Settings.name, enterTransition = {
                             when (initialState.destination.route) {
@@ -206,10 +241,16 @@ class MainActivity : AppCompatActivity() {
                                 }
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
+                                    fadeIn(
+                                        animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION)
+                                    )
                                 }
                             }
-                        }) { SettingsScreen(padding = padding, showSnackbarMessage = { message -> showSnackBarMessage(message) }, focusRequester = focusRequester) }
+                        }) {
+                            SettingsScreen(padding = padding, showSnackbarMessage = { message ->
+                                showSnackBarMessage(message)
+                            }, focusRequester = focusRequester)
+                        }
                         composable(Routes.Support.name, enterTransition = {
                             when (initialState.destination.route) {
                                 Routes.Settings.name, Routes.Main.name ->
@@ -219,16 +260,26 @@ class MainActivity : AppCompatActivity() {
                                     )
 
                                 else -> {
-                                    fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
+                                    fadeIn(
+                                        animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION)
+                                    )
                                 }
                             }
-                        }) { SupportScreen(padding = padding, focusRequester) }
+                        }) { SupportScreen(padding = padding, focusRequester = focusRequester) }
                         composable("${Routes.Config.name}/{id}", enterTransition = {
                             fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
-                        }) { it ->
+                        }) {
                             val id = it.arguments?.getString("id")
-                            if(!id.isNullOrBlank()) {
-                                ConfigScreen(navController = navController, id = id, showSnackbarMessage = { message -> showSnackBarMessage(message) }, focusRequester = focusRequester)}
+                            if (!id.isNullOrBlank()) {
+                                ConfigScreen(
+                                    navController = navController,
+                                    id = id,
+                                    showSnackbarMessage = { message ->
+                                        showSnackBarMessage(message)
+                                    },
+                                    focusRequester = focusRequester
+                                )
+                            }
                         }
                     }
                 }

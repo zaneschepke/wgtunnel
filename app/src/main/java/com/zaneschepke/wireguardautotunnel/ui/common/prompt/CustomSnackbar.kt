@@ -34,11 +34,14 @@ fun CustomSnackBar(
     containerColor: Color = MaterialTheme.colorScheme.surface
 ) {
     val context = LocalContext.current
-    Snackbar(containerColor = containerColor,
-        modifier = Modifier.fillMaxWidth(
-            if(WireGuardAutoTunnel.isRunningOnAndroidTv(context)) 1/3f else 2/3f).padding(bottom = 100.dp),
+    Snackbar(
+        containerColor = containerColor,
+        modifier =
+        Modifier.fillMaxWidth(
+            if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) 1 / 3f else 2 / 3f
+        ).padding(bottom = 100.dp),
         shape = RoundedCornerShape(16.dp)
-        ) {
+    ) {
         CompositionLocalProvider(
             LocalLayoutDirection provides
                     if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr

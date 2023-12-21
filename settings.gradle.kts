@@ -15,4 +15,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "WG Tunnel"
 include(":app")
- 

@@ -8,16 +8,19 @@ import com.zaneschepke.wireguardautotunnel.goAsync
 import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotificationActionReceiver : BroadcastReceiver() {
-
     @Inject
-    lateinit var settingsRepo : SettingsDoa
-    override fun onReceive(context: Context, intent: Intent?) = goAsync {
+    lateinit var settingsRepo: SettingsDoa
+
+    override fun onReceive(
+        context: Context,
+        intent: Intent?
+    ) = goAsync {
         try {
             val settings = settingsRepo.getAll()
             if (settings.isNotEmpty()) {

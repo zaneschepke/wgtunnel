@@ -10,9 +10,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 
 @Composable
-fun
-        ConfigurationTextBox(value : String, hint : String, onValueChange : (String) -> Unit, keyboardActions : KeyboardActions, label : String, modifier: Modifier) {
-   OutlinedTextField(
+fun ConfigurationTextBox(
+    value: String,
+    hint: String,
+    onValueChange: (String) -> Unit,
+    keyboardActions: KeyboardActions,
+    label: String,
+    modifier: Modifier
+) {
+    OutlinedTextField(
         modifier = modifier,
         value = value,
         singleLine = true,
@@ -24,10 +30,11 @@ fun
         placeholder = {
             Text(hint)
         },
-        keyboardOptions = KeyboardOptions(
+        keyboardOptions =
+        KeyboardOptions(
             capitalization = KeyboardCapitalization.None,
             imeAction = ImeAction.Done
         ),
-        keyboardActions = keyboardActions,
+        keyboardActions = keyboardActions
     )
 }

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PowerManager
 import android.os.SystemClock
+import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.Constants
@@ -21,17 +22,16 @@ import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class WireGuardConnectivityWatcherService : ForegroundService() {
-
     private val foregroundId = 122
 
     @Inject
@@ -64,30 +64,37 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     private var wakeLock: PowerManager.WakeLock? = null
     private val tag = this.javaClass.name
 
-
     override fun onCreate() {
         super.onCreate()
         lifecycleScope.launch(Dispatchers.Main) {
-            launchWatcherNotification()
+            try {
+                launchWatcherNotification()
+            } catch (e: Exception) {
+                Timber.e("Failed to start watcher service, not enough permissions")
+            }
         }
     }
 
     override fun startService(extras: Bundle?) {
         super.startService(extras)
-        launchWatcherNotification()
-        val tunnelId = extras?.getString(getString(R.string.tunnel_extras_key))
-        if (tunnelId != null) {
-            this.tunnelConfig = tunnelId
-        }
-        // we need this lock so our service gets not affected by Doze Mode
-        lifecycleScope.launch {
-            initWakeLock()
-        }
-        cancelWatcherJob()
-        if (this::tunnelConfig.isInitialized) {
-            startWatcherJob()
-        } else {
-            stopService(extras)
+        try {
+            launchWatcherNotification()
+            val tunnelId = extras?.getString(getString(R.string.tunnel_extras_key))
+            if (tunnelId != null) {
+                this.tunnelConfig = tunnelId
+            }
+            // we need this lock so our service gets not affected by Doze Mode
+            lifecycleScope.launch {
+                initWakeLock()
+            }
+            cancelWatcherJob()
+            if (this::tunnelConfig.isInitialized) {
+                startWatcherJob()
+            } else {
+                stopService(extras)
+            }
+        } catch (e: Exception) {
+            Timber.e("Failed to launch watcher service, no permissions")
         }
     }
 
@@ -103,23 +110,32 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private fun launchWatcherNotification() {
-        val notification = notificationService.createNotification(
-            channelId = getString(R.string.watcher_channel_id),
-            channelName = getString(R.string.watcher_channel_name),
-            description = getString(R.string.watcher_notification_text),
-            vibration = false
+        val notification =
+            notificationService.createNotification(
+                channelId = getString(R.string.watcher_channel_id),
+                channelName = getString(R.string.watcher_channel_name),
+                description = getString(R.string.watcher_notification_text),
+                vibration = false
+            )
+        ServiceCompat.startForeground(
+            this,
+            foregroundId,
+            notification,
+            Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID
         )
-        super.startForeground(foregroundId, notification)
     }
 
-    //try to start task again if killed
+    // try to start task again if killed
     override fun onTaskRemoved(rootIntent: Intent) {
         Timber.d("Task Removed called")
         val restartServiceIntent = Intent(rootIntent)
-        val restartServicePendingIntent: PendingIntent = PendingIntent.getService(
-            this, 1, restartServiceIntent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val restartServicePendingIntent: PendingIntent =
+            PendingIntent.getService(
+                this,
+                1,
+                restartServiceIntent,
+                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            )
         applicationContext.getSystemService(Context.ALARM_SERVICE)
         val alarmService: AlarmManager =
             applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -131,9 +147,10 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private suspend fun initWakeLock() {
-        val isBatterySaverOn = withContext(lifecycleScope.coroutineContext) {
-            settingsRepo.getAll().firstOrNull()?.isBatterySaverEnabled ?: false
-        }
+        val isBatterySaverOn =
+            withContext(lifecycleScope.coroutineContext) {
+                settingsRepo.getAll().firstOrNull()?.isBatterySaverEnabled ?: false
+            }
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
@@ -155,28 +172,29 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private fun startWatcherJob() {
-        watcherJob = lifecycleScope.launch(Dispatchers.IO) {
-            val settings = settingsRepo.getAll()
-            if (settings.isNotEmpty()) {
-                setting = settings[0]
-            }
-            launch {
-                watchForWifiConnectivityChanges()
-            }
-            if (setting.isTunnelOnMobileDataEnabled) {
+        watcherJob =
+            lifecycleScope.launch(Dispatchers.IO) {
+                val settings = settingsRepo.getAll()
+                if (settings.isNotEmpty()) {
+                    setting = settings[0]
+                }
                 launch {
-                    watchForMobileDataConnectivityChanges()
+                    watchForWifiConnectivityChanges()
+                }
+                if (setting.isTunnelOnMobileDataEnabled) {
+                    launch {
+                        watchForMobileDataConnectivityChanges()
+                    }
+                }
+                if (setting.isTunnelOnEthernetEnabled) {
+                    launch {
+                        watchForEthernetConnectivityChanges()
+                    }
+                }
+                launch {
+                    manageVpn()
                 }
             }
-            if (setting.isTunnelOnEthernetEnabled) {
-                launch {
-                    watchForEthernetConnectivityChanges()
-                }
-            }
-            launch {
-                manageVpn()
-            }
-        }
     }
 
     private suspend fun watchForMobileDataConnectivityChanges() {
@@ -232,7 +250,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 is NetworkStatus.CapabilitiesChanged -> {
                     Timber.d("Wifi capabilities changed")
                     isWifiConnected = true
-                    currentNetworkSSID = wifiService.getNetworkName(it.networkCapabilities) ?: ""
+                    val ssid = wifiService.getNetworkName(it.networkCapabilities) ?: ""
+                    Timber.d("Detected SSID: $ssid")
+                    currentNetworkSSID = ssid
                 }
 
                 is NetworkStatus.Unavailable -> {
@@ -246,46 +266,67 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     private suspend fun manageVpn() {
         while (true) {
             when {
-                ((isEthernetConnected &&
-                        setting.isTunnelOnEthernetEnabled &&
-                        vpnService.getState() == Tunnel.State.DOWN)) ->
+                (
+                        (
+                                isEthernetConnected &&
+                                        setting.isTunnelOnEthernetEnabled &&
+                                        vpnService.getState() == Tunnel.State.DOWN
+                                )
+                        ) ->
                     ServiceManager.startVpnService(this, tunnelConfig)
 
-                (!isEthernetConnected &&
-                        setting.isTunnelOnMobileDataEnabled &&
-                        !isWifiConnected &&
-                        isMobileDataConnected &&
-                        vpnService.getState() == Tunnel.State.DOWN) ->
+                (
+                        !isEthernetConnected &&
+                                setting.isTunnelOnMobileDataEnabled &&
+                                !isWifiConnected &&
+                                isMobileDataConnected &&
+                                vpnService.getState() == Tunnel.State.DOWN
+                        ) ->
                     ServiceManager.startVpnService(this, tunnelConfig)
 
-                (!isEthernetConnected &&
-                        !setting.isTunnelOnMobileDataEnabled &&
-                        !isWifiConnected &&
-                        vpnService.getState() == Tunnel.State.UP) ->
+                (
+                        !isEthernetConnected &&
+                                !setting.isTunnelOnMobileDataEnabled &&
+                                !isWifiConnected &&
+                                vpnService.getState() == Tunnel.State.UP
+                        ) ->
                     ServiceManager.stopVpnService(this)
 
-                (!isEthernetConnected && isWifiConnected &&
-                        !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
-                        setting.isTunnelOnWifiEnabled &&
-                        (vpnService.getState() != Tunnel.State.UP)) ->
+                (
+                        !isEthernetConnected && isWifiConnected &&
+                                !setting.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
+                                setting.isTunnelOnWifiEnabled &&
+                                (vpnService.getState() != Tunnel.State.UP)
+                        ) ->
                     ServiceManager.startVpnService(this, tunnelConfig)
 
-                (!isEthernetConnected && (isWifiConnected &&
-                        setting.trustedNetworkSSIDs.contains(currentNetworkSSID)) &&
-                        (vpnService.getState() == Tunnel.State.UP)) ->
+                (
+                        !isEthernetConnected && (
+                                isWifiConnected &&
+                                        setting.trustedNetworkSSIDs.contains(currentNetworkSSID)
+                                ) &&
+                                (vpnService.getState() == Tunnel.State.UP)
+                        ) ->
                     ServiceManager.stopVpnService(this)
 
-                (!isEthernetConnected && (isWifiConnected &&
-                        !setting.isTunnelOnWifiEnabled &&
-                        (vpnService.getState() == Tunnel.State.UP))) ->
+                (
+                        !isEthernetConnected && (
+                                isWifiConnected &&
+                                        !setting.isTunnelOnWifiEnabled &&
+                                        (vpnService.getState() == Tunnel.State.UP)
+                                )
+                        ) ->
                     ServiceManager.stopVpnService(this)
 
-                (!isEthernetConnected && !isWifiConnected &&
-                        !isMobileDataConnected &&
-                        (vpnService.getState() == Tunnel.State.UP)) ->
+                (
+                        !isEthernetConnected && !isWifiConnected &&
+                                !isMobileDataConnected &&
+                                (vpnService.getState() == Tunnel.State.UP)
+                        ) ->
                     ServiceManager.stopVpnService(this)
+
                 else -> {
-                    Timber.d("Unknown case")
+                    // Do nothing
                 }
             }
             delay(Constants.VPN_CONNECTIVITY_CHECK_INTERVAL)

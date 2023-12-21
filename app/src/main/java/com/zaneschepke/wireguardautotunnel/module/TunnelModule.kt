@@ -3,6 +3,10 @@ package com.zaneschepke.wireguardautotunnel.module
 import android.content.Context
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.GoBackend
+import com.wireguard.android.backend.WgQuickBackend
+import com.wireguard.android.util.RootShell
+import com.wireguard.android.util.ToolsInstaller
+import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
 import dagger.Module
@@ -15,16 +19,40 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class TunnelModule {
+    @Provides
+    @Singleton
+    fun provideRootShell(
+        @ApplicationContext context: Context
+    ): RootShell {
+        return RootShell(context)
+    }
 
     @Provides
     @Singleton
-    fun provideBackend(@ApplicationContext context : Context) : Backend {
+    @Userspace
+    fun provideUserspaceBackend(
+        @ApplicationContext context: Context
+    ): Backend {
         return GoBackend(context)
     }
 
     @Provides
     @Singleton
-    fun provideVpnService(backend: Backend) : VpnService {
-        return WireGuardTunnel(backend)
+    @Kernel
+    fun provideKernelBackend(
+        @ApplicationContext context: Context,
+        rootShell: RootShell
+    ): Backend {
+        return WgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell))
+    }
+
+    @Provides
+    @Singleton
+    fun provideVpnService(
+        @Userspace userspaceBackend: Backend,
+        @Kernel kernelBackend: Backend,
+        settingsDoa: SettingsDoa
+    ): VpnService {
+        return WireGuardTunnel(userspaceBackend, kernelBackend, settingsDoa)
     }
 }

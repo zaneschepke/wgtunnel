@@ -10,26 +10,27 @@ enum class Routes {
     Main,
     Settings,
     Support,
-    Config;
-
+    Config
+    ;
 
     companion object {
-        val navItems = listOf(
-            BottomNavItem(
-                name = "Tunnels",
-                route = Main.name,
-                icon = Icons.Rounded.Home,
-            ),
-            BottomNavItem(
-                name = "Settings",
-                route = Settings.name,
-                icon = Icons.Rounded.Settings,
-            ),
-            BottomNavItem(
-                name = "Support",
-                route = Support.name,
-                icon = Icons.Rounded.QuestionMark,
+        val navItems =
+            listOf(
+                BottomNavItem(
+                    name = "Tunnels",
+                    route = Main.name,
+                    icon = Icons.Rounded.Home
+                ),
+                BottomNavItem(
+                    name = "Settings",
+                    route = Settings.name,
+                    icon = Icons.Rounded.Settings
+                ),
+                BottomNavItem(
+                    name = "Support",
+                    route = Support.name,
+                    icon = Icons.Rounded.QuestionMark
+                )
             )
-        )
     }
 }
