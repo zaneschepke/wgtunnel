@@ -46,6 +46,7 @@ class WireGuardTunnelService : ForegroundService() {
 
     override fun startService(extras: Bundle?) {
         super.startService(extras)
+        // TODO fix grapheneOS calls always-on on install
         launchVpnStartingNotification()
         val tunnelConfigString = extras?.getString(getString(R.string.tunnel_extras_key))
         cancelJob()
@@ -179,7 +180,12 @@ class WireGuardTunnelService : ForegroundService() {
                 showTimestamp = true,
                 description = message
             )
-        super.startForeground(foregroundId, notification)
+        ServiceCompat.startForeground(
+            this,
+            foregroundId,
+            notification,
+            Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID
+        )
     }
 
     private fun cancelJob() {

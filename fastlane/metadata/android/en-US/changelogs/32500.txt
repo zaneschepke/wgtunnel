@@ -1,0 +1,2 @@
+Fixes:
+- Android 14 foreground permissions
