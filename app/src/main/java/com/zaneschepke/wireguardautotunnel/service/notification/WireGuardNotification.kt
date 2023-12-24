@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import androidx.core.app.NotificationCompat
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +21,16 @@ constructor(
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+    private val watcherBuilder: NotificationCompat.Builder =
+        NotificationCompat.Builder(
+            context,
+            context.getString(R.string.watcher_channel_id)
+        )
+    private val tunnelBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
+        context,
+        context.getString(R.string.vpn_channel_id)
+    )
+
     override fun createNotification(
         channelId: String,
         channelName: String,
@@ -31,7 +42,8 @@ constructor(
         importance: Int,
         vibration: Boolean,
         onGoing: Boolean,
-        lights: Boolean
+        lights: Boolean,
+        onlyAlertOnce: Boolean,
     ): Notification {
         val channel =
             NotificationChannel(
@@ -43,7 +55,7 @@ constructor(
                 it.enableLights(lights)
                 it.lightColor = Color.RED
                 it.enableVibration(vibration)
-                it.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+                it.vibrationPattern = longArrayOf(100,200,300)
                 it
             }
         notificationManager.createNotificationChannel(channel)
@@ -57,24 +69,31 @@ constructor(
                 )
             }
 
-        val builder: Notification.Builder =
-            Notification.Builder(
-                context,
-                channelId
-            )
+        val builder = when(channelId) {
+            context.getString(R.string.watcher_channel_id) -> watcherBuilder
+            context.getString(R.string.vpn_channel_id) -> tunnelBuilder
+            else -> {
+                NotificationCompat.Builder(
+                    context,
+                    channelId
+                )
+            }
+        }
+
         return builder.let {
             if (action != null && actionText != null) {
-                // TODO find a not deprecated way to do this
                 it.addAction(
-                    Notification.Action.Builder(0, actionText, action)
+                    NotificationCompat.Action.Builder(0, actionText, action)
                         .build()
                 )
                 it.setAutoCancel(true)
             }
             it.setContentTitle(title)
                 .setContentText(description)
+                .setOnlyAlertOnce(onlyAlertOnce)
                 .setContentIntent(pendingIntent)
                 .setOngoing(onGoing)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setShowWhen(showTimestamp)
                 .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .build()

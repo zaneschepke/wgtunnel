@@ -4,51 +4,67 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.wireguard.android.backend.Tunnel
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
-import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class TunnelControlTile : TileService() {
-    @Inject
-    lateinit var settingsRepo: SettingsDoa
+class TunnelControlTile() : TileService() {
 
     @Inject
-    lateinit var configRepo: TunnelConfigDao
+    lateinit var tunnelConfigRepository: TunnelConfigRepository
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
 
     @Inject
     lateinit var vpnService: VpnService
 
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
-    private lateinit var job: Job
+    private var tunnelName : String? = null
 
     override fun onStartListening() {
-        job =
-            scope.launch {
-                updateTileState()
-            }
         super.onStartListening()
+        Timber.d("On start listening called")
+        scope.launch {
+            vpnService.vpnState.collect {
+                when(it.status) {
+                    Tunnel.State.UP -> setActive()
+                    Tunnel.State.DOWN -> setInactive()
+                    else -> setInactive()
+                }
+                val tunnels = tunnelConfigRepository.getAll()
+                if(tunnels.isEmpty()) {
+                    setUnavailable()
+                    return@collect
+                }
+                tunnelName = it.name.ifBlank {
+                    val settings = settingsRepository.getSettings()
+                    if (settings.defaultTunnel != null) {
+                        TunnelConfig.from(settings.defaultTunnel!!).name
+                    } else tunnels.firstOrNull()?.name
+                }
+                setTileDescription(tunnelName ?: "")
+            }
+        }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     override fun onTileRemoved() {
         super.onTileRemoved()
-        cancelJob()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
         scope.cancel()
     }
 
@@ -57,17 +73,15 @@ class TunnelControlTile : TileService() {
         unlockAndRun {
             scope.launch {
                 try {
-                    val tunnel = determineTileTunnel()
-                    if (tunnel != null) {
-                        attemptWatcherServiceToggle(tunnel.toString())
-                        if (vpnService.getState() == Tunnel.State.UP) {
-                            ServiceManager.stopVpnService(this@TunnelControlTile)
-                        } else {
-                            ServiceManager.startVpnServiceForeground(
-                                this@TunnelControlTile,
-                                tunnel.toString()
-                            )
-                        }
+                    val tunnelConfig = tunnelConfigRepository.getAll().first { it.name == tunnelName }
+                    toggleWatcherServicePause()
+                    if (vpnService.getState() == Tunnel.State.UP) {
+                        ServiceManager.stopVpnService(this@TunnelControlTile)
+                    } else {
+                        ServiceManager.startVpnServiceForeground(
+                            this@TunnelControlTile,
+                            tunnelConfig.toString()
+                        )
                     }
                 } catch (e: Exception) {
                     Timber.e(e.message)
@@ -78,68 +92,31 @@ class TunnelControlTile : TileService() {
         }
     }
 
-    private suspend fun determineTileTunnel(): TunnelConfig? {
-        var tunnelConfig: TunnelConfig? = null
-        val settings = settingsRepo.getAll()
-        if (settings.isNotEmpty()) {
-            val setting = settings.first()
-            tunnelConfig =
-                if (setting.defaultTunnel != null) {
-                    TunnelConfig.from(setting.defaultTunnel!!)
-                } else {
-                    val configs = configRepo.getAll()
-                    val config =
-                        if (configs.isNotEmpty()) {
-                            configs.first()
-                        } else {
-                            null
-                        }
-                    config
-                }
-        }
-        return tunnelConfig
-    }
-
-    private fun attemptWatcherServiceToggle(tunnelConfig: String) {
+    private fun toggleWatcherServicePause() {
         scope.launch {
-            val settings = settingsRepo.getAll()
-            if (settings.isNotEmpty()) {
-                val setting = settings.first()
-                if (setting.isAutoTunnelEnabled) {
-                    ServiceManager.toggleWatcherServiceForeground(
-                        this@TunnelControlTile,
-                        tunnelConfig
-                    )
-                }
+            val settings = settingsRepository.getSettings()
+            if (settings.isAutoTunnelEnabled) {
+                val pauseAutoTunnel = !settings.isAutoTunnelPaused
+                settingsRepository.save(settings.copy(
+                    isAutoTunnelPaused = pauseAutoTunnel
+                ))
             }
         }
     }
 
-    private suspend fun updateTileState() {
-        vpnService.state.collect {
-            try {
-                when (it) {
-                    Tunnel.State.UP -> {
-                        qsTile.state = Tile.STATE_ACTIVE
-                    }
+    private fun setActive() {
+        qsTile.state = Tile.STATE_ACTIVE
+        qsTile.updateTile()
+    }
 
-                    Tunnel.State.DOWN -> {
-                        qsTile.state = Tile.STATE_INACTIVE
-                    }
+    private fun setInactive() {
+        qsTile.state = Tile.STATE_INACTIVE
+        qsTile.updateTile()
+    }
 
-                    else -> {
-                        qsTile.state = Tile.STATE_UNAVAILABLE
-                    }
-                }
-                val config = determineTileTunnel()
-                setTileDescription(
-                    config?.name ?: this.resources.getString(R.string.no_tunnel_available)
-                )
-                qsTile.updateTile()
-            } catch (e: Exception) {
-                Timber.e("Unable to update tile state")
-            }
-        }
+    private fun setUnavailable() {
+        qsTile.state = Tile.STATE_UNAVAILABLE
+        qsTile.updateTile()
     }
 
     private fun setTileDescription(description: String) {
@@ -149,11 +126,6 @@ class TunnelControlTile : TileService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             qsTile.stateDescription = description
         }
-    }
-
-    private fun cancelJob() {
-        if (this::job.isInitialized) {
-            job.cancel()
-        }
+        qsTile.updateTile()
     }
 }

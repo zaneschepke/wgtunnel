@@ -8,267 +8,254 @@ import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.config.Config
-import com.zaneschepke.wireguardautotunnel.Constants
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
-import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.repository.model.Settings
-import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceState
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
+import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.Event
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
-import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
+import com.zaneschepke.wireguardautotunnel.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class MainViewModel
 @Inject
 constructor(
     private val application: Application,
-    private val tunnelRepo: TunnelConfigDao,
-    private val settingsRepo: SettingsDoa,
+    private val tunnelConfigRepository: TunnelConfigRepository,
+    private val settingsRepository: SettingsRepository,
     private val vpnService: VpnService
 ) : ViewModel() {
-    val tunnels get() = tunnelRepo.getAllFlow()
-    val state get() = vpnService.state
 
-    val handshakeStatus get() = vpnService.handshakeStatus
-    val tunnelName get() = vpnService.tunnelName
-    private val _settings = MutableStateFlow(Settings())
-    val settings get() = _settings.asStateFlow()
-    val statistics get() = vpnService.statistics
+  val uiState =
+      combine(
+              settingsRepository.getSettingsFlow(),
+              tunnelConfigRepository.getTunnelConfigsFlow(),
+              vpnService.vpnState,
+          ) { settings, tunnels, vpnState ->
+            validateWatcherServiceState(settings)
+            MainUiState(settings, tunnels, vpnState, false)
+          }
+          .stateIn(
+              viewModelScope,
+              SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+              MainUiState())
 
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            settingsRepo.getAllFlow().filter { it.isNotEmpty() }.collect {
-                val settings = it.first()
-                validateWatcherServiceState(settings)
-                _settings.emit(settings)
-            }
-        }
+  private fun validateWatcherServiceState(settings: Settings) = viewModelScope.launch(Dispatchers.IO) {
+    val watcherState =
+        ServiceManager.getServiceState(
+            application.applicationContext, WireGuardConnectivityWatcherService::class.java)
+    if (settings.isAutoTunnelEnabled &&
+        watcherState == ServiceState.STOPPED) {
+      ServiceManager.startWatcherService(application.applicationContext)
     }
+  }
 
-    private fun validateWatcherServiceState(settings: Settings) {
-        val watcherState =
-            ServiceManager.getServiceState(
-                application.applicationContext,
-                WireGuardConnectivityWatcherService::class.java
-            )
-        if (settings.isAutoTunnelEnabled && watcherState == ServiceState.STOPPED && settings.defaultTunnel != null) {
-            ServiceManager.startWatcherService(
-                application.applicationContext,
-                settings.defaultTunnel!!
-            )
-        }
+    private fun stopWatcherService() = viewModelScope.launch(Dispatchers.IO) {
+        ServiceManager.stopWatcherService(application.applicationContext)
     }
-
-    fun onDelete(tunnel: TunnelConfig) {
-        viewModelScope.launch {
-            if (tunnelRepo.count() == 1L) {
-                ServiceManager.stopWatcherService(application.applicationContext)
-                val settings = settingsRepo.getAll()
-                if (settings.isNotEmpty()) {
-                    val setting = settings[0]
-                    setting.defaultTunnel = null
-                    setting.isAutoTunnelEnabled = false
-                    setting.isAlwaysOnVpnEnabled = false
-                    settingsRepo.save(setting)
-                }
-            }
-            tunnelRepo.delete(tunnel)
-        }
+  fun onDelete(tunnel: TunnelConfig) {
+    viewModelScope.launch(Dispatchers.IO) {
+      if (tunnelConfigRepository.count() == 1) {
+        stopWatcherService()
+        val settings = settingsRepository.getSettings()
+          settings.defaultTunnel = null
+          settings.isAutoTunnelEnabled = false
+          settings.isAlwaysOnVpnEnabled = false
+          saveSettings(settings)
+      }
+      tunnelConfigRepository.delete(tunnel)
+      WireGuardAutoTunnel.requestTileServiceStateUpdate()
     }
+  }
 
-    fun onTunnelStart(tunnelConfig: TunnelConfig) {
-        viewModelScope.launch {
-            stopActiveTunnel()
-            startTunnel(tunnelConfig)
-        }
-    }
+  fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch(Dispatchers.IO) {
+        stopActiveTunnel().await()
+        startTunnel(tunnelConfig)
+  }
 
-    private fun startTunnel(tunnelConfig: TunnelConfig) {
-        ServiceManager.startVpnService(application.applicationContext, tunnelConfig.toString())
-    }
+  private fun startTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch(Dispatchers.IO) {
+      ServiceManager.startVpnService(application.applicationContext, tunnelConfig.toString())
+  }
 
-    private suspend fun stopActiveTunnel() {
+  private fun stopActiveTunnel() =
+      viewModelScope.async(Dispatchers.IO) {
         if (ServiceManager.getServiceState(
-                application.applicationContext,
-                WireGuardTunnelService::class.java
-            ) == ServiceState.STARTED
-        ) {
-            onTunnelStop()
-            delay(Constants.TOGGLE_TUNNEL_DELAY)
+            application.applicationContext, WireGuardTunnelService::class.java) ==
+            ServiceState.STARTED) {
+          onTunnelStop()
+          delay(Constants.TOGGLE_TUNNEL_DELAY)
         }
-    }
+      }
 
-    fun onTunnelStop() {
-        ServiceManager.stopVpnService(application.applicationContext)
-    }
+  fun onTunnelStop() = viewModelScope.launch(Dispatchers.IO) {
+    ServiceManager.stopVpnService(application.applicationContext)
+  }
 
-    private fun validateConfigString(config: String) {
-        TunnelConfig.configFromQuick(config)
-    }
+  private fun validateConfigString(config: String) {
+    TunnelConfig.configFromQuick(config)
+  }
 
-    suspend fun onTunnelQrResult(result: String) {
-        try {
-            validateConfigString(result)
-            val tunnelConfig =
-                TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
-            addTunnel(tunnelConfig)
+  suspend fun onTunnelQrResult(result: String) : Result<Unit> {
+        return try {
+          validateConfigString(result)
+          val tunnelConfig =
+              TunnelConfig(name = NumberUtils.generateRandomTunnelName(), wgQuick = result)
+          addTunnel(tunnelConfig)
+            Result.Success(Unit)
         } catch (e: Exception) {
-            throw WgTunnelException(e)
+            Result.Error(Event.Error.InvalidQrCode)
         }
-    }
+      }
 
-    private suspend fun saveTunnelConfigFromStream(
-        stream: InputStream,
-        fileName: String
-    ) {
-        val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
-        val config = Config.parse(bufferReader)
-        val tunnelName = getNameFromFileName(fileName)
-        addTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
-        withContext(Dispatchers.IO) {
-            stream.close()
-        }
-    }
+  private suspend fun saveTunnelConfigFromStream(stream: InputStream, fileName: String) {
+    val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
+    val config = Config.parse(bufferReader)
+    val tunnelName = getNameFromFileName(fileName)
+    addTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+    withContext(Dispatchers.IO) { stream.close() }
+  }
 
-    private fun getInputStreamFromUri(uri: Uri): InputStream {
-        return application.applicationContext.contentResolver.openInputStream(uri)
-            ?: throw WgTunnelException(application.getString(R.string.stream_failed))
-    }
+  private fun getInputStreamFromUri(uri: Uri): InputStream? {
+    return application.applicationContext.contentResolver.openInputStream(uri)
+  }
 
-    suspend fun onTunnelFileSelected(uri: Uri) {
+  suspend fun onTunnelFileSelected(uri: Uri) : Result<Unit> {
         try {
-            val fileName = getFileName(application.applicationContext, uri)
-            val fileExtension = getFileExtensionFromFileName(fileName)
-            when (fileExtension) {
-                Constants.CONF_FILE_EXTENSION -> saveTunnelFromConfUri(fileName, uri)
-                Constants.ZIP_FILE_EXTENSION -> saveTunnelsFromZipUri(uri)
-                else -> throw WgTunnelException(
-                    application.getString(R.string.file_extension_message)
-                )
-            }
-        } catch (e: Exception) {
-            throw WgTunnelException(e)
-        }
-    }
-
-    private suspend fun saveTunnelsFromZipUri(uri: Uri) {
-        ZipInputStream(getInputStreamFromUri(uri)).use { zip ->
-            generateSequence { zip.nextEntry }
-                .filterNot {
-                    it.isDirectory ||
-                            getFileExtensionFromFileName(it.name) != Constants.CONF_FILE_EXTENSION
-                }
-                .forEach {
-                    val name = getNameFromFileName(it.name)
-                    val config = Config.parse(zip)
-                    viewModelScope.launch(Dispatchers.IO) {
-                        addTunnel(TunnelConfig(name = name, wgQuick = config.toWgQuickString()))
+            if(isValidUriContentScheme(uri)){
+                val fileName = getFileName(application.applicationContext, uri)
+                when (getFileExtensionFromFileName(fileName)) {
+                    Constants.CONF_FILE_EXTENSION -> saveTunnelFromConfUri(fileName, uri).let {
+                        when(it) {
+                            is Result.Error -> return Result.Error(Event.Error.FileReadFailed)
+                            is Result.Success -> return it
+                        }
                     }
+                    Constants.ZIP_FILE_EXTENSION -> saveTunnelsFromZipUri(uri)
+                    else -> return Result.Error(Event.Error.InvalidFileExtension)
                 }
-        }
-    }
-
-    private suspend fun saveTunnelFromConfUri(
-        name: String,
-        uri: Uri
-    ) {
-        val stream = getInputStreamFromUri(uri)
-        saveTunnelConfigFromStream(stream, name)
-    }
-
-    private suspend fun addTunnel(tunnelConfig: TunnelConfig) {
-        saveTunnel(tunnelConfig)
-    }
-
-    private suspend fun saveTunnel(tunnelConfig: TunnelConfig) {
-        tunnelRepo.save(tunnelConfig)
-    }
-
-    private fun getFileNameByCursor(
-        context: Context,
-        uri: Uri
-    ): String {
-        val cursor = context.contentResolver.query(uri, null, null, null, null)
-        if (cursor != null) {
-            cursor.use {
-                return getDisplayNameByCursor(it)
+                return Result.Success(Unit)
+          } else {
+             return Result.Error(Event.Error.InvalidFileExtension)
             }
-        } else {
-            throw WgTunnelException("Failed to initialize cursor")
-        }
-    }
-
-    private fun getDisplayNameColumnIndex(cursor: Cursor): Int {
-        val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        if (columnIndex == -1) {
-            throw WgTunnelException("Cursor out of bounds")
-        }
-        return columnIndex
-    }
-
-    private fun getDisplayNameByCursor(cursor: Cursor): String {
-        if (cursor.moveToFirst()) {
-            val index = getDisplayNameColumnIndex(cursor)
-            return cursor.getString(index)
-        } else {
-            throw WgTunnelException("Cursor failed to move to first")
-        }
-    }
-
-    private fun validateUriContentScheme(uri: Uri) {
-        if (uri.scheme != Constants.URI_CONTENT_SCHEME) {
-            throw WgTunnelException(application.getString(R.string.file_extension_message))
-        }
-    }
-
-    private fun getFileName(
-        context: Context,
-        uri: Uri
-    ): String {
-        validateUriContentScheme(uri)
-        return try {
-            getFileNameByCursor(context, uri)
-        } catch (_: Exception) {
-            NumberUtils.generateRandomTunnelName()
-        }
-    }
-
-    private fun getNameFromFileName(fileName: String): String {
-        return fileName.substring(0, fileName.lastIndexOf('.'))
-    }
-
-    private fun getFileExtensionFromFileName(fileName: String): String {
-        return try {
-            fileName.substring(fileName.lastIndexOf('.'))
         } catch (e: Exception) {
-            ""
+            return Result.Error(Event.Error.FileReadFailed)
         }
+      }
+
+  private suspend fun saveTunnelsFromZipUri(uri: Uri) {
+    ZipInputStream(getInputStreamFromUri(uri)).use { zip ->
+      generateSequence { zip.nextEntry }
+          .filterNot {
+            it.isDirectory || getFileExtensionFromFileName(it.name) != Constants.CONF_FILE_EXTENSION
+          }
+          .forEach {
+            val name = getNameFromFileName(it.name)
+            val config = Config.parse(zip)
+            viewModelScope.launch(Dispatchers.IO) {
+              addTunnel(TunnelConfig(name = name, wgQuick = config.toWgQuickString()))
+            }
+          }
+    }
+  }
+
+  private suspend fun saveTunnelFromConfUri(name: String, uri: Uri) : Result<Unit> {
+      val stream = getInputStreamFromUri(uri)
+      return if(stream != null) {
+          saveTunnelConfigFromStream(stream, name)
+          Result.Success(Unit)
+      } else {
+          Result.Error(Event.Error.FileReadFailed)
+      }
+  }
+
+  private suspend fun addTunnel(tunnelConfig: TunnelConfig) {
+    saveTunnel(tunnelConfig)
+    WireGuardAutoTunnel.requestTileServiceStateUpdate()
+  }
+
+    fun pauseAutoTunneling() = viewModelScope.launch {
+        settingsRepository.save(uiState.value.settings.copy(isAutoTunnelPaused = true))
     }
 
-    suspend fun onDefaultTunnelChange(selectedTunnel: TunnelConfig?) {
-        if (selectedTunnel != null) {
-            _settings.emit(
-                _settings.value.copy(
-                    defaultTunnel = selectedTunnel.toString()
-                )
-            )
-            settingsRepo.save(_settings.value)
-        }
+    fun resumeAutoTunneling() = viewModelScope.launch {
+        settingsRepository.save(uiState.value.settings.copy(isAutoTunnelPaused = false))
     }
+
+  private suspend fun saveTunnel(tunnelConfig: TunnelConfig) {
+    tunnelConfigRepository.save(tunnelConfig)
+  }
+
+  private fun getFileNameByCursor(context: Context, uri: Uri): String? {
+    context.contentResolver.query(uri, null, null, null, null)?.use {
+      return getDisplayNameByCursor(it)
+    }
+      return null
+  }
+
+  private fun getDisplayNameColumnIndex(cursor: Cursor): Int? {
+    val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+    return if (columnIndex != -1) {
+      return columnIndex
+    } else {
+      null
+    }
+  }
+
+  private fun getDisplayNameByCursor(cursor: Cursor): String? {
+    return if (cursor.moveToFirst()) {
+      val index = getDisplayNameColumnIndex(cursor)
+      if (index != null) {
+        cursor.getString(index)
+      } else null
+    } else null
+  }
+
+  private fun isValidUriContentScheme(uri: Uri): Boolean {
+    return uri.scheme == Constants.URI_CONTENT_SCHEME
+  }
+  private fun getFileName(context: Context, uri: Uri): String {
+        return getFileNameByCursor(context, uri) ?: NumberUtils.generateRandomTunnelName()
+  }
+
+  private fun getNameFromFileName(fileName: String): String {
+    return fileName.substring(0, fileName.lastIndexOf('.'))
+  }
+
+  private fun getFileExtensionFromFileName(fileName: String): String {
+    return try {
+      fileName.substring(fileName.lastIndexOf('.'))
+    } catch (e: Exception) {
+      ""
+    }
+  }
+
+  private fun saveSettings(settings: Settings) =
+      viewModelScope.launch(Dispatchers.IO) { settingsRepository.save(settings) }
+
+  fun onDefaultTunnelChange(selectedTunnel: TunnelConfig?) = viewModelScope.launch {
+    if (selectedTunnel != null) {
+      saveSettings(uiState.value.settings.copy(defaultTunnel = selectedTunnel.toString())).join()
+      WireGuardAutoTunnel.requestTileServiceStateUpdate()
+    }
+  }
 }

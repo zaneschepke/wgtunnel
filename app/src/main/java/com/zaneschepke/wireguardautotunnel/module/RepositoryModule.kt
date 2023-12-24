@@ -1,10 +1,14 @@
 package com.zaneschepke.wireguardautotunnel.module
 
 import android.content.Context
-import com.zaneschepke.wireguardautotunnel.repository.AppDatabase
-import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
-import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.repository.datastore.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.data.AppDatabase
+import com.zaneschepke.wireguardautotunnel.data.SettingsDao
+import com.zaneschepke.wireguardautotunnel.data.TunnelConfigDao
+import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepositoryImpl
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,14 +21,26 @@ import javax.inject.Singleton
 class RepositoryModule {
     @Singleton
     @Provides
-    fun provideSettingsRepository(appDatabase: AppDatabase): SettingsDoa {
+    fun provideSettingsDoa(appDatabase: AppDatabase): SettingsDao {
         return appDatabase.settingDao()
     }
 
     @Singleton
     @Provides
-    fun provideTunnelConfigRepository(appDatabase: AppDatabase): TunnelConfigDao {
+    fun provideTunnelConfigDoa(appDatabase: AppDatabase): TunnelConfigDao {
         return appDatabase.tunnelConfigDoa()
+    }
+
+    @Singleton
+    @Provides
+    fun provideTunnelConfigRepository(tunnelConfigDao: TunnelConfigDao): TunnelConfigRepository {
+        return TunnelConfigRepositoryImpl(tunnelConfigDao)
+    }
+
+    @Singleton
+    @Provides
+    fun provideSettingsRepository(settingsDao: SettingsDao): SettingsRepository {
+        return SettingsRepositoryImpl(settingsDao)
     }
 
     @Singleton

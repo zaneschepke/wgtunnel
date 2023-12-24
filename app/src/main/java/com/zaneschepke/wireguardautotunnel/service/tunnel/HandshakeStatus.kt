@@ -3,8 +3,7 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel
 enum class HandshakeStatus {
     HEALTHY,
     STALE,
-    UNHEALTHY,
-    NEVER_CONNECTED,
+    UNKNOWN,
     NOT_STARTED
     ;
 

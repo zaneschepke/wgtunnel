@@ -38,7 +38,7 @@ fun CustomSnackBar(
         containerColor = containerColor,
         modifier =
         Modifier.fillMaxWidth(
-            if (WireGuardAutoTunnel.isRunningOnAndroidTv(context)) 1 / 3f else 2 / 3f
+            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) 1 / 3f else 2 / 3f
         ).padding(bottom = 100.dp),
         shape = RoundedCornerShape(16.dp)
     ) {

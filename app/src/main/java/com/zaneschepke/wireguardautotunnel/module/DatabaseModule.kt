@@ -3,7 +3,7 @@ package com.zaneschepke.wireguardautotunnel.module
 import android.content.Context
 import androidx.room.Room
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.repository.AppDatabase
+import com.zaneschepke.wireguardautotunnel.data.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

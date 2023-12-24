@@ -3,195 +3,171 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 import android.app.Application
 import android.content.Context
 import android.location.LocationManager
-import android.os.Build
+import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.util.RootShell
-import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
-import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.repository.datastore.DataStoreManager
-import com.zaneschepke.wireguardautotunnel.repository.model.Settings
-import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
-import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
+import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.Event
+import com.zaneschepke.wireguardautotunnel.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel
 @Inject
 constructor(
     private val application: Application,
-    private val tunnelRepo: TunnelConfigDao,
-    private val settingsRepo: SettingsDoa,
-    val dataStoreManager: DataStoreManager,
+    private val tunnelConfigRepository: TunnelConfigRepository,
+    private val settingsRepository: SettingsRepository,
+    private val dataStoreManager: DataStoreManager,
     private val rootShell: RootShell,
     private val vpnService: VpnService
 ) : ViewModel() {
 
-    private val _trustedSSIDs = MutableStateFlow(emptyList<String>())
-    val trustedSSIDs = _trustedSSIDs.asStateFlow()
-    private val _settings = MutableStateFlow(Settings())
-    val settings get() = _settings.asStateFlow()
-    val vpnState get() = vpnService.state
-    val tunnels get() = tunnelRepo.getAllFlow()
-    val disclosureShown = dataStoreManager.locationDisclosureFlow
+    val uiState = combine(
+        settingsRepository.getSettingsFlow(),
+        tunnelConfigRepository.getTunnelConfigsFlow(),
+        vpnService.vpnState,
+        dataStoreManager.locationDisclosureFlow,
+    ){ settings, tunnels, tunnelState, locationDisclosure ->
+        SettingsUiState(settings, tunnels, tunnelState, locationDisclosure
+            ?: false, false)
+    }.stateIn(viewModelScope,
+        SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT), SettingsUiState())
 
-    init {
-        isLocationServicesEnabled()
-        viewModelScope.launch(Dispatchers.IO) {
-            settingsRepo.getAllFlow().filter { it.isNotEmpty() }.collect {
-                val settings = it.first()
-                _settings.emit(settings)
-                _trustedSSIDs.emit(settings.trustedNetworkSSIDs.toList())
-            }
-        }
-    }
-    suspend fun onSaveTrustedSSID(ssid: String) {
+    fun onSaveTrustedSSID(ssid: String) : Result<Unit>{
         val trimmed = ssid.trim()
-        if (!_settings.value.trustedNetworkSSIDs.contains(trimmed)) {
-            _settings.value.trustedNetworkSSIDs.add(trimmed)
-            settingsRepo.save(_settings.value)
+        return if (!uiState.value.settings.trustedNetworkSSIDs.contains(trimmed)) {
+            uiState.value.settings.trustedNetworkSSIDs.add(trimmed)
+            saveSettings(uiState.value.settings)
+            Result.Success(Unit)
         } else {
-            throw WgTunnelException("SSID already exists.")
+            Result.Error(Event.Error.SsidConflict)
         }
     }
 
-    suspend fun onToggleTunnelOnMobileData() {
-        settingsRepo.save(
-            _settings.value.copy(
-                isTunnelOnMobileDataEnabled = !_settings.value.isTunnelOnMobileDataEnabled
+    fun setLocationDisclosureShown() = viewModelScope.launch {
+            dataStoreManager.saveToDataStore(DataStoreManager.LOCATION_DISCLOSURE_SHOWN, true)
+    }
+
+    fun onToggleTunnelOnMobileData() {
+        saveSettings(
+            uiState.value.settings.copy(
+                isTunnelOnMobileDataEnabled = !uiState.value.settings.isTunnelOnMobileDataEnabled
             )
         )
     }
 
-    suspend fun onDeleteTrustedSSID(ssid: String) {
-        _settings.value.trustedNetworkSSIDs.remove(ssid)
-        settingsRepo.save(_settings.value)
+    fun onDeleteTrustedSSID(ssid: String) {
+        saveSettings(uiState.value.settings.copy(
+            trustedNetworkSSIDs = (uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList()
+        ))
     }
 
-    private fun emitFirstTunnelAsDefault() =
-        viewModelScope.async {
-            _settings.emit(_settings.value.copy(defaultTunnel = getFirstTunnelConfig().toString()))
-        }
+    private suspend fun getDefaultTunnelOrFirst() : String {
+        return uiState.value.settings.defaultTunnel ?: tunnelConfigRepository.getAll().first().toString()
+    }
 
-    suspend fun toggleAutoTunnel() {
-        if (_settings.value.isAutoTunnelEnabled) {
+    fun toggleAutoTunnel() = viewModelScope.launch {
+        val isAutoTunnelEnabled = uiState.value.settings.isAutoTunnelEnabled
+        var isAutoTunnelPaused = uiState.value.settings.isAutoTunnelPaused
+
+        if (isAutoTunnelEnabled) {
             ServiceManager.stopWatcherService(application)
         } else {
-            if (_settings.value.defaultTunnel == null) {
-                emitFirstTunnelAsDefault().await()
-            }
-            val defaultTunnel = _settings.value.defaultTunnel
-            ServiceManager.startWatcherService(application, defaultTunnel!!)
+            ServiceManager.startWatcherService(application)
+            isAutoTunnelPaused = false
         }
-        settingsRepo.save(
-            _settings.value.copy(
-                isAutoTunnelEnabled = !_settings.value.isAutoTunnelEnabled
+        saveSettings(
+            uiState.value.settings.copy(
+                isAutoTunnelEnabled = !isAutoTunnelEnabled,
+                isAutoTunnelPaused = isAutoTunnelPaused,
+                defaultTunnel = getDefaultTunnelOrFirst()
             )
         )
     }
 
-    private suspend fun getFirstTunnelConfig(): TunnelConfig {
-        return tunnelRepo.getAll().first()
-    }
 
-    suspend fun onToggleAlwaysOnVPN() {
-        if (_settings.value.defaultTunnel == null) {
-            emitFirstTunnelAsDefault().await()
-        }
-        val updatedSettings =
-            _settings.value.copy(
-                isAlwaysOnVpnEnabled = !_settings.value.isAlwaysOnVpnEnabled
+    fun onToggleAlwaysOnVPN() = viewModelScope.launch {
+        val updatedSettings = uiState.value.settings.copy(
+                isAlwaysOnVpnEnabled = !uiState.value.settings.isAlwaysOnVpnEnabled,
+                defaultTunnel = getDefaultTunnelOrFirst()
             )
-        emitSettings(updatedSettings)
         saveSettings(updatedSettings)
     }
 
-    private suspend fun emitSettings(settings: Settings) {
-        _settings.emit(
-            settings
-        )
+    private fun saveSettings(settings: Settings) = viewModelScope.launch {
+        settingsRepository.save(settings)
     }
 
-    private suspend fun saveSettings(settings: Settings) {
-        settingsRepo.save(settings)
+    fun onToggleTunnelOnEthernet() {
+        saveSettings(uiState.value.settings.copy(
+            isTunnelOnEthernetEnabled = !uiState.value.settings.isTunnelOnEthernetEnabled
+        ))
     }
 
-    suspend fun onToggleTunnelOnEthernet() {
-        if (_settings.value.defaultTunnel == null) {
-            emitFirstTunnelAsDefault().await()
-        }
-        _settings.emit(
-            _settings.value.copy(
-                isTunnelOnEthernetEnabled = !_settings.value.isTunnelOnEthernetEnabled
-            )
-        )
-        settingsRepo.save(_settings.value)
+    fun isLocationEnabled(context: Context): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return LocationManagerCompat.isLocationEnabled(locationManager)
     }
 
-    private fun isLocationServicesEnabled(): Boolean {
-        val locationManager =
-            application.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-    }
-
-    fun isLocationServicesNeeded(): Boolean {
-        return (!isLocationServicesEnabled() && Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
-    }
-
-    suspend fun onToggleShortcutsEnabled() {
-        settingsRepo.save(
-            _settings.value.copy(
-                isShortcutsEnabled = !_settings.value.isShortcutsEnabled
+    fun onToggleShortcutsEnabled() {
+        saveSettings(
+            uiState.value.settings.copy(
+                isShortcutsEnabled = !uiState.value.settings.isShortcutsEnabled
             )
         )
     }
 
-    suspend fun onToggleBatterySaver() {
-        settingsRepo.save(
-            _settings.value.copy(
-                isBatterySaverEnabled = !_settings.value.isBatterySaverEnabled
+    fun onToggleBatterySaver() {
+        saveSettings(
+            uiState.value.settings.copy(
+                isBatterySaverEnabled = !uiState.value.settings.isBatterySaverEnabled
             )
         )
     }
 
-    private suspend fun saveKernelMode(on: Boolean) {
-        settingsRepo.save(
-            _settings.value.copy(
+    private fun saveKernelMode(on: Boolean) {
+        saveSettings(
+            uiState.value.settings.copy(
                 isKernelEnabled = on
             )
         )
     }
 
-    suspend fun onToggleKernelMode() {
-        if (!_settings.value.isKernelEnabled) {
+    fun onToggleTunnelOnWifi() {
+        saveSettings(
+            uiState.value.settings.copy(
+                isTunnelOnWifiEnabled = !uiState.value.settings.isTunnelOnWifiEnabled
+            )
+        )
+    }
+
+    fun onToggleKernelMode() : Result<Unit> {
+        if (!uiState.value.settings.isKernelEnabled) {
             try {
                 rootShell.start()
                 Timber.d("Root shell accepted!")
                 saveKernelMode(on = true)
             } catch (e: RootShell.RootShellException) {
                 saveKernelMode(on = false)
-                throw WgTunnelException("Root shell denied!")
+                return Result.Error(Event.Error.RootDenied)
             }
         } else {
             saveKernelMode(on = false)
         }
-    }
-
-    suspend fun onToggleTunnelOnWifi() {
-        settingsRepo.save(
-            _settings.value.copy(
-                isTunnelOnWifiEnabled = !_settings.value.isTunnelOnWifiEnabled
-            )
-        )
+        return Result.Success(Unit)
     }
 }

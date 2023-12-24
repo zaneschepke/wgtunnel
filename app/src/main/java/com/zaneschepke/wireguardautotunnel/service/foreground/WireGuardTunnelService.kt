@@ -5,20 +5,24 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
-import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
-import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
-import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
+import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.handshakeStatus
+import com.zaneschepke.wireguardautotunnel.util.mapPeerStats
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class WireGuardTunnelService : ForegroundService() {
@@ -28,7 +32,10 @@ class WireGuardTunnelService : ForegroundService() {
     lateinit var vpnService: VpnService
 
     @Inject
-    lateinit var settingsRepo: SettingsDoa
+    lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    lateinit var tunnelConfigRepository: TunnelConfigRepository
 
     @Inject
     lateinit var notificationService: NotificationService
@@ -36,26 +43,29 @@ class WireGuardTunnelService : ForegroundService() {
     private lateinit var job: Job
 
     private var tunnelName: String = ""
+    private var didShowConnected = false
 
     override fun onCreate() {
         super.onCreate()
         lifecycleScope.launch(Dispatchers.Main) {
-            launchVpnStartingNotification()
+            if(tunnelConfigRepository.getAll().isNotEmpty()) {
+                launchVpnNotification()
+            }
         }
     }
 
     override fun startService(extras: Bundle?) {
         super.startService(extras)
-        // TODO fix grapheneOS calls always-on on install
-        launchVpnStartingNotification()
-        val tunnelConfigString = extras?.getString(getString(R.string.tunnel_extras_key))
         cancelJob()
-        job =
-            lifecycleScope.launch(Dispatchers.IO) {
+        val tunnelConfigString = extras?.getString(getString(R.string.tunnel_extras_key))
+        val tunnelConfig = tunnelConfigString?.let {
+            TunnelConfig.from(it)
+        }
+        tunnelName = tunnelConfig?.name ?: ""
+        job = lifecycleScope.launch(Dispatchers.IO) {
                 launch {
-                    if (tunnelConfigString != null) {
+                    if (tunnelConfig != null) {
                         try {
-                            val tunnelConfig = TunnelConfig.from(tunnelConfigString)
                             tunnelName = tunnelConfig.name
                             vpnService.startTunnel(tunnelConfig)
                         } catch (e: Exception) {
@@ -63,52 +73,45 @@ class WireGuardTunnelService : ForegroundService() {
                             stopService(extras)
                         }
                     } else {
-                        Timber.d("Tunnel config null, starting default tunnel")
-                        val settings = settingsRepo.getAll()
-                        if (settings.isNotEmpty()) {
-                            val setting = settings[0]
-                            if (setting.defaultTunnel != null && setting.isAlwaysOnVpnEnabled) {
-                                val tunnelConfig = TunnelConfig.from(setting.defaultTunnel!!)
-                                tunnelName = tunnelConfig.name
-                                vpnService.startTunnel(tunnelConfig)
+                        Timber.d("Tunnel config null, starting default tunnel or first")
+                        val settings = settingsRepository.getSettings()
+                        val tunnels = tunnelConfigRepository.getAll()
+                        if (settings.isAlwaysOnVpnEnabled) {
+                            val tunnel = if(settings.defaultTunnel != null) {
+                                TunnelConfig.from(settings.defaultTunnel!!)
+                            } else if(tunnels.isNotEmpty()) {
+                                tunnels.first()
+                            } else {
+                                null
                             }
+                            if(tunnel != null) {
+                                tunnelName = tunnel.name
+                                vpnService.startTunnel(tunnel)
+                            }
+
                         }
                     }
                 }
+                //TODO add failed to connect notification
                 launch {
-                    var didShowConnected = false
-                    var didShowFailedHandshakeNotification = false
-                    vpnService.handshakeStatus.collect {
-                        when (it) {
-                            HandshakeStatus.NOT_STARTED -> {
-                            }
-                            HandshakeStatus.NEVER_CONNECTED -> {
-                                if (!didShowFailedHandshakeNotification) {
-                                    launchVpnConnectionFailedNotification(
-                                        getString(R.string.initial_connection_failure_message)
-                                    )
-                                    didShowFailedHandshakeNotification = true
-                                    didShowConnected = false
+                    vpnService.vpnState.collect { state ->
+                        state.statistics
+                            ?.mapPeerStats()
+                            ?.map { it.value?.handshakeStatus() }
+                            .let { statuses ->
+                                when {
+                                    statuses?.all { it == HandshakeStatus.HEALTHY } == true -> {
+                                        if(!didShowConnected){
+                                            delay(Constants.VPN_CONNECTED_NOTIFICATION_DELAY)
+                                            launchVpnNotification(getString(R.string.tunnel_start_title),"${getString(R.string.tunnel_start_text)} $tunnelName")
+                                            didShowConnected = true
+                                        }
+                                    }
+                                    statuses?.any { it == HandshakeStatus.STALE } == true -> {}
+                                    statuses?.all { it == HandshakeStatus.NOT_STARTED } == true -> {}
+                                    else -> {}
                                 }
                             }
-
-                            HandshakeStatus.HEALTHY -> {
-                                if (!didShowConnected) {
-                                    launchVpnConnectedNotification()
-                                    didShowConnected = true
-                                }
-                            }
-                            HandshakeStatus.STALE -> {}
-                            HandshakeStatus.UNHEALTHY -> {
-                                if (!didShowFailedHandshakeNotification) {
-                                    launchVpnConnectionFailedNotification(
-                                        getString(R.string.lost_connection_failure_message)
-                                    )
-                                    didShowFailedHandshakeNotification = true
-                                    didShowConnected = false
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -118,40 +121,22 @@ class WireGuardTunnelService : ForegroundService() {
         super.stopService(extras)
         lifecycleScope.launch(Dispatchers.IO) {
             vpnService.stopTunnel()
+            didShowConnected = false
         }
         cancelJob()
         stopSelf()
     }
 
-    private fun launchVpnConnectedNotification() {
+    private fun launchVpnNotification(title : String = getString(R.string.vpn_starting),description : String = getString(R.string.attempt_connection)) {
         val notification =
             notificationService.createNotification(
                 channelId = getString(R.string.vpn_channel_id),
                 channelName = getString(R.string.vpn_channel_name),
-                title = getString(R.string.tunnel_start_title),
+                title = title,
                 onGoing = false,
                 vibration = false,
                 showTimestamp = true,
-                description = "${getString(R.string.tunnel_start_text)} $tunnelName"
-            )
-        ServiceCompat.startForeground(
-            this,
-            foregroundId,
-            notification,
-            Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID
-        )
-    }
-
-    private fun launchVpnStartingNotification() {
-        val notification =
-            notificationService.createNotification(
-                channelId = getString(R.string.vpn_channel_id),
-                channelName = getString(R.string.vpn_channel_name),
-                title = getString(R.string.vpn_starting),
-                onGoing = false,
-                vibration = false,
-                showTimestamp = true,
-                description = getString(R.string.attempt_connection)
+                description = description
             )
         ServiceCompat.startForeground(
             this,

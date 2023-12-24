@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.repository.datastore
+package com.zaneschepke.wireguardautotunnel.data.datastore
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -27,11 +27,11 @@ class DataStoreManager(private val context: Context) {
         context.dataStore.edit {
         it[key] = value
     }
-
-    fun <T> getFromStore(key: Preferences.Key<T>) =
-        context.dataStore.data.map {
+    fun <T> getFromStoreFlow(key: Preferences.Key<T>) = context.dataStore.data.map {
         it[key]
     }
+
+    suspend fun <T> getFromStore(key: Preferences.Key<T>) = context.dataStore.data.first { it.contains(key) }[key]
 
     val locationDisclosureFlow: Flow<Boolean?> = context.dataStore.data.map {
         it[LOCATION_DISCLOSURE_SHOWN]

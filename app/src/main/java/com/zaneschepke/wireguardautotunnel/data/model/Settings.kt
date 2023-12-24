@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.repository.model
+package com.zaneschepke.wireguardautotunnel.data.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -36,7 +36,11 @@ data class Settings(
     @ColumnInfo(
     name = "is_multi_tunnel_enabled",
     defaultValue = "false"
-    ) var isMultiTunnelEnabled: Boolean = false
+    ) var isMultiTunnelEnabled: Boolean = false,
+    @ColumnInfo(
+        name = "is_auto_tunnel_paused",
+        defaultValue = "false"
+    ) var isAutoTunnelPaused: Boolean = false,
 ) {
     fun isTunnelConfigDefault(tunnelConfig: TunnelConfig): Boolean {
         return if (defaultTunnel != null) {

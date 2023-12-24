@@ -9,13 +9,14 @@
     <string name="github_url">https://github.com/zaneschepke/wgtunnel/issues</string>
     <string name="docs_url">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
     <string name="privacy_policy_url">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
-    <string name="file_extension_message">File is not a .conf or .zip</string>
-    <string name="turn_off_tunnel">Turn off tunnel before editing</string>
+    <string name="error_file_extension">File is not a .conf or .zip</string>
+    <string name="turn_off_tunnel">Action requires tunnel off</string>
     <string name="no_tunnels">No tunnels added yet!</string>
     <string name="tunnel_exists">Tunnel name already exists</string>
     <string name="discord_url">https://discord.gg/rbRRNh6H7V</string>
     <string name="watcher_notification_title">Watcher Service</string>
-    <string name="watcher_notification_text">Monitoring network state changes</string>
+    <string name="watcher_notification_text_active">Monitoring network state changes: active</string>
+    <string name="watcher_notification_text_paused">Monitoring network state changes: paused</string>
     <string name="tunnel_start_title">VPN Connected</string>
     <string name="tunnel_start_text">Connected to tunnel -</string>
     <string name="vpn_permission_required">VPN permission is required for the app to work properly. If this permission is not launching, please disable \"Always-on VPN\" in your phone settings for the official WireGuard mobile app and try again.</string>
@@ -78,7 +79,7 @@
     <string name="lost_connection_failure_message">Attempting to reconnect to server after more than one minute of no response.</string>
     <string name="always_on_vpn_support">Allow Always-On VPN </string>
     <string name="select_tunnel_message">Please select a tunnel first</string>
-    <string name="location_services_not_detected">Unable to detect Location Services which are required for this feature. Please enable Location Services.</string>
+    <string name="location_services_not_detected">Location Services Not Detected</string>
     <string name="check_again">Check again</string>
     <string name="detecting_location_services_disabled">Detecting Location Services disabled</string>
     <string name="precise_location_message">This feature requires precise location to access Wi-Fi SSID name. Please enable precise location here or in the app settings.</string>
@@ -96,8 +97,6 @@
     <string name="none">No trusted wifi names</string>
     <string name="never">Never</string>
     <string name="stream_failed">Failed to open file stream.</string>
-    <string name="unknown_error_message">An unknown error occurred.</string>
-    <string name="no_file_app">No file app installed.</string>
     <string name="other">Other</string>
     <string name="auto_tunneling">Auto-tunneling</string>
     <string name="select_tunnel">Select tunnel to use</string>
@@ -108,6 +107,7 @@
     <string name="create_import">Create from scratch</string>
     <string name="set_primary">Set primary</string>
     <string name="turn_off_auto">Action requires auto-tunnel disabled</string>
+    <string name="turn_on_tunnel">Action requires active tunnel</string>
     <string name="add_peer">Add peer</string>
     <string name="info">Info</string>
     <string name="done">Done</string>
@@ -128,7 +128,8 @@
     <string name="cancel">Cancel</string>
     <string name="primary_tunnel_change">Primary tunnel change</string>
     <string name="primary_tunnel_change_question">Would you like to make this your primary tunnel?</string>
-    <string name="authentication_failed">Authentication failed</string>
+    <string name="error_authentication_failed">Authentication failed</string>
+    <string name="error_authorization_failed">Failed to authorize</string>
     <string name="enabled_app_shortcuts">Enable app shortcuts</string>
     <string name="export_configs">Export configs</string>
     <string name="battery_saver">Battery saver (beta)</string>
@@ -137,7 +138,6 @@
     <string name="precise_location_required">Precise location required</string>
     <string name="unknown_error">Unknown error occurred</string>
     <string name="exported_configs_message">Exported configs to downloads</string>
-    <string name="no_file_explorer">No file explorer installed</string>
     <string name="status">status</string>
     <string name="tunnel_on_wifi">Tunnel on untrusted wifi</string>
     <string name="my_email">zanecschepke@gmail.com</string>
@@ -154,4 +154,14 @@
     <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
     <string name="kernel">Kernel</string>
     <string name="use_kernel">Use kernel module</string>
+    <string name="error_ssid_exists">SSID already exists</string>
+    <string name="error_root_denied">Root shell denied</string>
+    <string name="error_no_file_explorer">No file explorer installed</string>
+    <string name="error_no_scan">No code scanned</string>
+    <string name="error_invalid_code">Invalid QR code</string>
+    <string name="error_none">No error</string>
+    <string name="error_file_read">Failed to read file</string>
+    <string name="location_service_missing">Location Services Not Detected</string>
+    <string name="location_services_missing_message">The app is not detecting any location services enabled on your device. Depending on the device, this could cause the untrusted wifi feature to fail to read the wifi name. Would you like to continue anyways?</string>
+    <string name="auto_tunnel_title">Auto-tunnel Service</string>
 </resources>

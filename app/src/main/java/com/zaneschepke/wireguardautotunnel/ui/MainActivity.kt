@@ -6,15 +6,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.KeyEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.focusable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarData
@@ -30,7 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
@@ -40,7 +36,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.wireguard.android.backend.GoBackend
-import com.zaneschepke.wireguardautotunnel.Constants
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
@@ -51,10 +46,10 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.TransparentSystemBars
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -64,10 +59,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // TODO move shared logic to shared viewmodel
-            // val sharedViewModel = hiltViewModel<ActivityViewModel>()
+//            val activityViewModel = hiltViewModel<ActivityViewModel>()
+
             val navController = rememberNavController()
-            val focusRequester = remember { FocusRequester() }
+            val focusRequester = remember { FocusRequester()}
 
             WireguardAutoTunnelTheme {
                 TransparentSystemBars()
@@ -104,18 +99,13 @@ class MainActivity : AppCompatActivity() {
 
                 fun showSnackBarMessage(message: String) {
                     lifecycleScope.launch(Dispatchers.Main) {
-                        val result =
-                            snackbarHostState.showSnackbar(
+                        val result = snackbarHostState.showSnackbar(
                                 message = message,
                                 actionLabel = applicationContext.getString(R.string.okay),
                                 duration = SnackbarDuration.Short
                             )
                         when (result) {
-                            SnackbarResult.ActionPerformed -> {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                            }
-
-                            SnackbarResult.Dismissed -> {
+                            SnackbarResult.ActionPerformed, SnackbarResult.Dismissed -> {
                                 snackbarHostState.currentSnackbarData?.dismiss()
                             }
                         }
@@ -134,32 +124,13 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
                     },
-                    modifier =
-                    Modifier.onKeyEvent {
-                        if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                            when (it.nativeKeyEvent.keyCode) {
-                                KeyEvent.KEYCODE_DPAD_UP -> {
-                                    try {
-                                        focusRequester.requestFocus()
-                                    } catch (e: IllegalStateException) {
-                                        Timber.e(
-                                            "No D-Pad focus request modifier added to element on screen"
-                                        )
-                                    }
-                                    false
-                                }
-
-                                else -> {
-                                    false
-                                }
-                            }
-                        } else {
-                            false
-                        }
-                    },
+                    modifier = Modifier.focusable().focusProperties { up = focusRequester },
                     bottomBar =
                     if (vpnIntent == null && notificationPermissionState.status.isGranted) {
-                        { BottomNavBar(navController, Routes.navItems) }
+                        { BottomNavBar(navController, listOf(
+                            Screen.Main.navItem,
+                            Screen.Settings.navItem,
+                            Screen.Support.navItem)) }
                     } else {
                         {}
                     }
@@ -192,85 +163,31 @@ class MainActivity : AppCompatActivity() {
                         )
                         return@Scaffold
                     }
-
-                    NavHost(navController, startDestination = Routes.Main.name) {
+                    NavHost(navController, startDestination = Screen.Main.route) {
                         composable(
-                            Routes.Main.name,
-                            enterTransition = {
-                                when (initialState.destination.route) {
-                                    Routes.Settings.name, Routes.Support.name ->
-                                        slideInHorizontally(
-                                            initialOffsetX = {
-                                                -Constants.SLIDE_IN_TRANSITION_OFFSET
-                                            },
-                                            animationSpec = tween(
-                                                Constants.SLIDE_IN_ANIMATION_DURATION
-                                            )
-                                        )
-
-                                    else -> {
-                                        fadeIn(
-                                            animationSpec = tween(
-                                                Constants.FADE_IN_ANIMATION_DURATION
-                                            )
-                                        )
-                                    }
-                                }
-                            },
-                            exitTransition = {
-                                ExitTransition.None
-                            }
+                            Screen.Main.route,
                         ) {
-                            MainScreen(padding = padding, showSnackbarMessage = { message ->
+                            MainScreen(padding = padding, focusRequester = focusRequester, showSnackbarMessage = { message ->
                                 showSnackBarMessage(message)
                             }, navController = navController)
                         }
-                        composable(Routes.Settings.name, enterTransition = {
-                            when (initialState.destination.route) {
-                                Routes.Main.name ->
-                                    slideInHorizontally(
-                                        initialOffsetX = { Constants.SLIDE_IN_TRANSITION_OFFSET },
-                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
-                                    )
-
-                                Routes.Support.name -> {
-                                    slideInHorizontally(
-                                        initialOffsetX = { -Constants.SLIDE_IN_TRANSITION_OFFSET },
-                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
-                                    )
-                                }
-
-                                else -> {
-                                    fadeIn(
-                                        animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION)
-                                    )
-                                }
-                            }
-                        }) {
+                        composable(Screen.Settings.route,
+                        ) {
                             SettingsScreen(padding = padding, showSnackbarMessage = { message ->
                                 showSnackBarMessage(message)
                             }, focusRequester = focusRequester)
                         }
-                        composable(Routes.Support.name, enterTransition = {
-                            when (initialState.destination.route) {
-                                Routes.Settings.name, Routes.Main.name ->
-                                    slideInHorizontally(
-                                        initialOffsetX = { Constants.SLIDE_IN_ANIMATION_DURATION },
-                                        animationSpec = tween(Constants.SLIDE_IN_ANIMATION_DURATION)
-                                    )
-
-                                else -> {
-                                    fadeIn(
-                                        animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION)
-                                    )
-                                }
-                            }
-                        }) { SupportScreen(padding = padding, focusRequester = focusRequester) }
-                        composable("${Routes.Config.name}/{id}", enterTransition = {
-                            fadeIn(animationSpec = tween(Constants.FADE_IN_ANIMATION_DURATION))
-                        }) {
+                        composable(Screen.Support.route,
+                        ) {
+                            SupportScreen(padding = padding, focusRequester = focusRequester,
+                                showSnackbarMessage = { message ->
+                                    showSnackBarMessage(message)
+                                })
+                        }
+                        composable("${Screen.Config.route}/{id}") {
                             val id = it.arguments?.getString("id")
                             if (!id.isNullOrBlank()) {
+                                //https://dagger.dev/hilt/view-model#assisted-injection
                                 ConfigScreen(
                                     navController = navController,
                                     id = id,

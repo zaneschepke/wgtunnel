@@ -89,35 +89,23 @@ object ServiceManager {
         )
     }
 
-    private fun startWatcherServiceForeground(
+    fun startWatcherServiceForeground(
         context: Context,
-        tunnelConfig: String
     ) {
         actionOnService(
-            Action.START,
+            Action.START_FOREGROUND,
             context,
-            WireGuardConnectivityWatcherService::class.java,
-            mapOf(
-                context
-                    .getString(R.string.tunnel_extras_key) to
-                        tunnelConfig
-            )
+            WireGuardConnectivityWatcherService::class.java
         )
     }
 
     fun startWatcherService(
-        context: Context,
-        tunnelConfig: String
+        context: Context
     ) {
         actionOnService(
             Action.START,
             context,
-            WireGuardConnectivityWatcherService::class.java,
-            mapOf(
-                context
-                    .getString(R.string.tunnel_extras_key) to
-                        tunnelConfig
-            )
+            WireGuardConnectivityWatcherService::class.java
         )
     }
 
@@ -127,20 +115,5 @@ object ServiceManager {
             context,
             WireGuardConnectivityWatcherService::class.java
         )
-    }
-
-    fun toggleWatcherServiceForeground(
-        context: Context,
-        tunnelConfig: String
-    ) {
-        when (
-            getServiceState(
-                context,
-                WireGuardConnectivityWatcherService::class.java
-            )
-        ) {
-            ServiceState.STARTED -> stopWatcherService(context)
-            ServiceState.STOPPED -> startWatcherServiceForeground(context, tunnelConfig)
-        }
     }
 }

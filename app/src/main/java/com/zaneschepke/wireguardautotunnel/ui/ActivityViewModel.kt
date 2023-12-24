@@ -1,8 +1,13 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
 import androidx.lifecycle.ViewModel
+import com.zaneschepke.wireguardautotunnel.data.SettingsDao
+import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-class ActivityViewModel @Inject constructor() : ViewModel() {
-    // TODO move shared logic to shared viewmodel
+@HiltViewModel
+class ActivityViewModel @Inject constructor(
+    private val settingsRepo: SettingsDao,
+) : ViewModel() {
+
 }

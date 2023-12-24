@@ -18,8 +18,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wireguard.android.backend.Statistics
-import com.zaneschepke.wireguardautotunnel.toThreeDecimalPlaceString
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
+import com.zaneschepke.wireguardautotunnel.util.toThreeDecimalPlaceString
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -51,7 +51,7 @@ fun RowListItem(
                 modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 5.dp),
+                    .padding(horizontal = 15.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {

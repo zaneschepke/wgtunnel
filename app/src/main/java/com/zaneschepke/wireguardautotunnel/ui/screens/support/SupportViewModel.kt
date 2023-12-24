@@ -2,24 +2,24 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.support
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
-import com.zaneschepke.wireguardautotunnel.repository.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SupportViewModel @Inject constructor(
-    private val settingsRepo: SettingsDoa
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
-    private val _settings = MutableStateFlow(Settings())
-    val settings get() = _settings.asStateFlow()
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            _settings.value = settingsRepo.getAll().first()
-        }
-    }
+
+    val uiState = settingsRepository.getSettingsFlow().map {
+        SupportUiState(it, false)
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+        SupportUiState()
+    )
 }

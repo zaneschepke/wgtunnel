@@ -1,13 +1,13 @@
-package com.zaneschepke.wireguardautotunnel.repository.model
+package com.zaneschepke.wireguardautotunnel.data.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.wireguard.config.Config
-import java.io.InputStream
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.io.InputStream
 
 @Entity(indices = [Index(value = ["name"], unique = true)])
 @Serializable

@@ -1,61 +1,63 @@
 package com.zaneschepke.wireguardautotunnel.service.shortcut
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
-import com.zaneschepke.wireguardautotunnel.repository.SettingsDoa
-import com.zaneschepke.wireguardautotunnel.repository.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.repository.model.Settings
-import com.zaneschepke.wireguardautotunnel.repository.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
-import com.zaneschepke.wireguardautotunnel.util.WgTunnelException
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ShortcutsActivity : ComponentActivity() {
     @Inject
-    lateinit var settingsRepo: SettingsDoa
+    lateinit var settingsRepository: SettingsRepository
 
     @Inject
-    lateinit var tunnelConfigRepo: TunnelConfigDao
+    lateinit var tunnelConfigRepository: TunnelConfigRepository
 
-    private fun attemptWatcherServiceToggle(tunnelConfig: String) {
-        lifecycleScope.launch(Dispatchers.Main) {
-            val settings = getSettings()
+    private suspend fun toggleWatcherServicePause() {
+            val settings = settingsRepository.getSettings()
             if (settings.isAutoTunnelEnabled) {
-                ServiceManager.toggleWatcherServiceForeground(this@ShortcutsActivity, tunnelConfig)
+                val pauseAutoTunnel = !settings.isAutoTunnelPaused
+                settingsRepository.save(settings.copy(
+                    isAutoTunnelPaused = pauseAutoTunnel
+                ))
             }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(View(this))
         if (intent.getStringExtra(CLASS_NAME_EXTRA_KEY)
                 .equals(WireGuardTunnelService::class.java.simpleName)
         ) {
             lifecycleScope.launch(Dispatchers.Main) {
-                val settings = getSettings()
+                val settings = settingsRepository.getSettings()
                 if (settings.isShortcutsEnabled) {
                     try {
                         val tunnelName = intent.getStringExtra(TUNNEL_NAME_EXTRA_KEY)
                         val tunnelConfig =
                             if (tunnelName != null) {
-                                tunnelConfigRepo.getAll().firstOrNull { it.name == tunnelName }
+                                tunnelConfigRepository.getAll().firstOrNull { it.name == tunnelName }
                             } else {
                                 if (settings.defaultTunnel == null) {
-                                    tunnelConfigRepo.getAll().first()
+                                    tunnelConfigRepository.getAll().first()
                                 } else {
                                     TunnelConfig.from(settings.defaultTunnel!!)
                                 }
                             }
                         tunnelConfig ?: return@launch
-                        attemptWatcherServiceToggle(tunnelConfig.toString())
+                        toggleWatcherServicePause()
                         when (intent.action) {
                             Action.STOP.name -> ServiceManager.stopVpnService(
                                 this@ShortcutsActivity
@@ -67,20 +69,12 @@ class ShortcutsActivity : ComponentActivity() {
                         }
                     } catch (e: Exception) {
                         Timber.e(e.message)
+                        finish()
                     }
                 }
             }
         }
         finish()
-    }
-
-    private suspend fun getSettings(): Settings {
-        val settings = settingsRepo.getAll()
-        return if (settings.isNotEmpty()) {
-            settings.first()
-        } else {
-            throw WgTunnelException("Settings empty")
-        }
     }
 
     companion object {

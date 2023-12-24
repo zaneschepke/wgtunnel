@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.repository
+package com.zaneschepke.wireguardautotunnel.data
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.encodeToString
