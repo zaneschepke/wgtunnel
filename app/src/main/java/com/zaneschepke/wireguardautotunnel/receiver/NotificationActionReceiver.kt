@@ -26,7 +26,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             if (settings.defaultTunnel != null) {
                 ServiceManager.stopVpnService(context)
                 delay(Constants.TOGGLE_TUNNEL_DELAY)
-                ServiceManager.startVpnService(context, settings.defaultTunnel.toString())
+                ServiceManager.startVpnServiceForeground(context, settings.defaultTunnel.toString())
             }
         } finally {
             cancel()

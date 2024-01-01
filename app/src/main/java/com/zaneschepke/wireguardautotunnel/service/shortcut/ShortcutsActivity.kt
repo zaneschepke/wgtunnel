@@ -62,7 +62,7 @@ class ShortcutsActivity : ComponentActivity() {
                             Action.STOP.name -> ServiceManager.stopVpnService(
                                 this@ShortcutsActivity
                             )
-                            Action.START.name -> ServiceManager.startVpnService(
+                            Action.START.name -> ServiceManager.startVpnServiceForeground(
                                 this@ShortcutsActivity,
                                 tunnelConfig.toString()
                             )

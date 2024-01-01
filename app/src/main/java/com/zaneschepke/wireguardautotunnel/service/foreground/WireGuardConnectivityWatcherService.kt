@@ -311,7 +311,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 ((it.isEthernetConnected &&
                         it.settings.isTunnelOnEthernetEnabled &&
                         !it.isVpnConnected)) -> {
-                    ServiceManager.startVpnService(this, it.settings.defaultTunnel!!)
+                    ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
                     Timber.i("Condition 1 met")
                 }
                 (!it.isEthernetConnected &&
@@ -319,7 +319,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         !it.isWifiConnected &&
                         it.isMobileDataConnected &&
                         !it.isVpnConnected) -> {
-                    ServiceManager.startVpnService(this, it.settings.defaultTunnel!!)
+                    ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
                     Timber.i("Condition 2 met")
                 }
                 (!it.isEthernetConnected &&
@@ -334,7 +334,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         !it.settings.trustedNetworkSSIDs.contains(it.currentNetworkSSID) &&
                         it.settings.isTunnelOnWifiEnabled &&
                         (!it.isVpnConnected)) -> {
-                    ServiceManager.startVpnService(this, it.settings.defaultTunnel!!)
+                    ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
                     Timber.i("Condition 4 met")
                 }
                 (!it.isEthernetConnected &&
