@@ -37,10 +37,10 @@ This is an alternative Android Application for [WireGuard](https://www.wireguard
 ## Screenshots
 
 <p float="center">
-  <img label="Main" style="padding-right:25px" src="asset/main_screen.png" width="200" />
-  <img label="Config" style="padding-left:25px" src="asset/config_screen.png" width="200" />
-  <img label="Settings" style="padding-left:25px" src="asset/settings_screen.png" width="200" />
-  <img label="Support" style="padding-left:25px" src="asset/support_screen.png" width="200" />
+  <img label="Main" style="padding-right:25px" src="fastlane/metadata/android/en-US/images/phoneScreenshots/main_screen.png" width="200" />
+  <img label="Config" style="padding-left:25px" src="fastlane/metadata/android/en-US/images/phoneScreenshots/config_screen.png" width="200" />
+  <img label="Settings" style="padding-left:25px" src="fastlane/metadata/android/en-US/images/phoneScreenshots/settings_screen.png" width="200" />
+  <img label="Support" style="padding-left:25px" src="fastlane/metadata/android/en-US/images/phoneScreenshots/support_screen.png" width="200" />
 </p>
 
 <div align="left">
@@ -52,16 +52,16 @@ The original inspiration for this app came from the inconvenience of having to m
 ## Features
 
 * Add tunnels via .conf file, zip, manual entry, or QR code
-* Auto connect to VPN based on Wi-Fi SSID
+* Auto connect to VPN based on Wi-Fi SSID, ethernet, or mobile data
 * Split tunneling by application with search
-* Always-on VPN for Android support
+* WireGuard support for kernel and userspace modes
+* Always-On VPN support
 * Export tunnels to zip
 * Quick tile support for VPN toggling
 * Static shortcuts support for primary tunnel for automation integration
 * Intent automation support for all tunnels
-* Optional auto connect on mobile data, ethernet
 * Automatic service restart after reboot
-* Service will stay running in background after app has been closed
+* Battery preservation measures
 
 
 ## Building
