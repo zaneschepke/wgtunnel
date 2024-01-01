@@ -15,7 +15,6 @@ android {
     defaultConfig {
         applicationId = Constants.APP_ID
         minSdk = Constants.MIN_SDK
-        compileSdk = Constants.COMPILE_SDK
         targetSdk = Constants.TARGET_SDK
         versionCode = Constants.VERSION_CODE
         versionName = Constants.VERSION_NAME
