@@ -60,7 +60,7 @@ jobs:
           name: wgtunnel
           path: ${{ steps.apk-path.outputs.path }}
       - name: Download APK from build
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: wgtunnel
       - name: Create Release with Fastlane changelog notes
