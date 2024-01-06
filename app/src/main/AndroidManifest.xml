@@ -1,56 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
         tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE"
         android:maxSdkVersion="30"
         tools:ignore="LeanbackUsesWifi" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <!--foreground service exempt android 14-->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!--foreground service permissions-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!--start service on boot permission-->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!--android tv support-->
-    <uses-feature android:name="android.software.leanback"
+    <uses-feature
+        android:name="android.software.leanback"
         android:required="false" />
-    <uses-feature android:name="android.hardware.touchscreen"
+    <uses-feature
+        android:name="android.hardware.touchscreen"
         android:required="false" />
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
     <uses-feature
-    android:name="android.hardware.screen.portrait"
-    android:required="false" />
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
         </intent>
     </queries>
     <application
-        android:allowBackup="true"
-        android:enableOnBackInvokedCallback="true"
         android:name=".WireGuardAutoTunnel"
+        android:allowBackup="true"
+        android:banner="@mipmap/ic_banner"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:banner="@mipmap/ic_banner"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -62,11 +69,14 @@
             android:theme="@style/Theme.WireguardAutoTunnel">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES"/>
+
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
-            <meta-data android:name="android.app.shortcuts"
+            <meta-data
+                android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
@@ -76,65 +86,74 @@
             android:theme="@style/zxing_CaptureTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
-            android:finishOnTaskLaunch="true"
+            android:name=".service.shortcut.ShortcutsActivity"
             android:enabled="true"
             android:exported="true"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:name=".service.shortcut.ShortcutsActivity"/>
+            android:finishOnTaskLaunch="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+
         <service
             android:name=".service.foreground.ForegroundService"
             android:enabled="true"
+            android:exported="false"
             android:foregroundServiceType="systemExempted|specialUse"
-            tools:node="merge"
-            android:exported="false">
-        </service>
+            tools:node="merge" />
         <service
-            android:exported="true"
             android:name=".service.tile.TunnelControlTile"
+            android:exported="true"
             android:icon="@drawable/shield"
             android:label="WG Tunnel"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
                 android:value="true" />
-            <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
                 android:value="true" />
+
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
         <service
             android:name=".service.foreground.WireGuardTunnelService"
-            android:permission="android.permission.BIND_VPN_SERVICE"
             android:enabled="true"
-            android:persistent="true"
+            android:exported="false"
             android:foregroundServiceType="systemExempted|specialUse"
-            tools:node="merge"
-            android:exported="false">
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:persistent="true"
+            tools:node="merge">
             <intent-filter>
-                <action android:name="android.net.VpnService"/>
+                <action android:name="android.net.VpnService" />
             </intent-filter>
-            <meta-data android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
+            <meta-data
+                android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
                 android:value="true" />
         </service>
         <service
             android:name=".service.foreground.WireGuardConnectivityWatcherService"
             android:enabled="true"
-            android:stopWithTask="false"
-            android:persistent="true"
+            android:exported="false"
             android:foregroundServiceType="systemExempted|specialUse"
-            tools:node="merge"
-            android:exported="false">
-        </service>
-        <receiver android:enabled="true" android:name=".receiver.BootReceiver"
+            android:persistent="true"
+            android:stopWithTask="false"
+            tools:node="merge" />
+
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
-        <receiver android:exported="false" android:name=".receiver.NotificationActionReceiver"/>
+        <receiver
+            android:name=".receiver.NotificationActionReceiver"
+            android:exported="false" />
     </application>
 </manifest>

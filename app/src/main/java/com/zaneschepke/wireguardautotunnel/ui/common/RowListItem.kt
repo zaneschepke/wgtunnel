@@ -34,30 +34,22 @@ fun RowListItem(
 ) {
     Box(
         modifier =
-        Modifier
-            .animateContentSize()
-            .clip(RoundedCornerShape(30.dp))
-            .combinedClickable(
-                onClick = {
-                    onClick()
-                },
-                onLongClick = {
-                    onHold()
-                }
-            )
+            Modifier.animateContentSize()
+                .clip(RoundedCornerShape(30.dp))
+                .combinedClickable(
+                    onClick = { onClick() },
+                    onLongClick = { onHold() },
+                ),
     ) {
         Column {
             Row(
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 15.dp, vertical = 5.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(.60f)
+                    modifier = Modifier.fillMaxWidth(.60f),
                 ) {
                     icon()
                     Text(text)
@@ -68,11 +60,10 @@ fun RowListItem(
                 statistics?.peers()?.forEach {
                     Row(
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(end = 10.dp, bottom = 10.dp, start = 10.dp),
+                            Modifier.fillMaxWidth()
+                                .padding(end = 10.dp, bottom = 10.dp, start = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
                         val handshakeEpoch = statistics.peer(it)!!.latestHandshakeEpochMillis
                         val peerTx = statistics.peer(it)!!.txBytes

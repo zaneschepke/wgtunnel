@@ -14,10 +14,11 @@ class MigrationTest {
     private val dbName = "migration-test"
 
     @get:Rule
-    val helper: MigrationTestHelper = MigrationTestHelper(
-        InstrumentationRegistry.getInstrumentation(),
-        AppDatabase::class.java
-    )
+    val helper: MigrationTestHelper =
+        MigrationTestHelper(
+            InstrumentationRegistry.getInstrumentation(),
+            AppDatabase::class.java,
+        )
 
     @Test
     @Throws(IOException::class)
@@ -27,34 +28,33 @@ class MigrationTest {
             // You can't use DAO classes because they expect the latest schema.
             execSQL(
                 "INSERT INTO Settings (is_tunnel_enabled," +
-                        "is_tunnel_on_mobile_data_enabled," +
-                        "trusted_network_ssids," +
-                        "default_tunnel," +
-                        "is_always_on_vpn_enabled," +
-                        "is_tunnel_on_ethernet_enabled," +
-                        "is_shortcuts_enabled," +
-                        "is_battery_saver_enabled," +
-                        "is_tunnel_on_wifi_enabled," +
-                        "is_kernel_enabled," +
-                        "is_restore_on_boot_enabled," +
-                        "is_multi_tunnel_enabled)" +
-                        " VALUES " +
-                        "('false'," +
-                        "'false'," +
-                        "'[trustedSSID1,trustedSSID2]'," +
-                        "'defaultTunnel'," +
-                        "'false'," +
-                        "'false'," +
-                        "'false'," +
-                        "'false'," +
-                        "'false'," +
-                        "'false'," +
-                        "'false'," +
-                        "'false')"
+                    "is_tunnel_on_mobile_data_enabled," +
+                    "trusted_network_ssids," +
+                    "default_tunnel," +
+                    "is_always_on_vpn_enabled," +
+                    "is_tunnel_on_ethernet_enabled," +
+                    "is_shortcuts_enabled," +
+                    "is_battery_saver_enabled," +
+                    "is_tunnel_on_wifi_enabled," +
+                    "is_kernel_enabled," +
+                    "is_restore_on_boot_enabled," +
+                    "is_multi_tunnel_enabled)" +
+                    " VALUES " +
+                    "('false'," +
+                    "'false'," +
+                    "'[trustedSSID1,trustedSSID2]'," +
+                    "'defaultTunnel'," +
+                    "'false'," +
+                    "'false'," +
+                    "'false'," +
+                    "'false'," +
+                    "'false'," +
+                    "'false'," +
+                    "'false'," +
+                    "'false')",
             )
             execSQL(
-                "INSERT INTO TunnelConfig (name, wg_quick)" +
-                        " VALUES ('hello', 'hello')"
+                "INSERT INTO TunnelConfig (name, wg_quick)" + " VALUES ('hello', 'hello')",
             )
             // Prepare for the next version.
             close()

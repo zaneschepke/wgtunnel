@@ -21,28 +21,21 @@ import javax.inject.Singleton
 class TunnelModule {
     @Provides
     @Singleton
-    fun provideRootShell(
-        @ApplicationContext context: Context
-    ): RootShell {
+    fun provideRootShell(@ApplicationContext context: Context): RootShell {
         return RootShell(context)
     }
 
     @Provides
     @Singleton
     @Userspace
-    fun provideUserspaceBackend(
-        @ApplicationContext context: Context
-    ): Backend {
+    fun provideUserspaceBackend(@ApplicationContext context: Context): Backend {
         return GoBackend(context)
     }
 
     @Provides
     @Singleton
     @Kernel
-    fun provideKernelBackend(
-        @ApplicationContext context: Context,
-        rootShell: RootShell
-    ): Backend {
+    fun provideKernelBackend(@ApplicationContext context: Context, rootShell: RootShell): Backend {
         return WgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell))
     }
 
@@ -51,7 +44,7 @@ class TunnelModule {
     fun provideVpnService(
         @Userspace userspaceBackend: Backend,
         @Kernel kernelBackend: Backend,
-        settingsRepository : SettingsRepository
+        settingsRepository: SettingsRepository
     ): VpnService {
         return WireGuardTunnel(userspaceBackend, kernelBackend, settingsRepository)
     }

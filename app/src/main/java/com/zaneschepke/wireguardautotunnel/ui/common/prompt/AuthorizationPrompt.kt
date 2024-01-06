@@ -11,51 +11,40 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 
 @Composable
-fun AuthorizationPrompt(
-    onSuccess: () -> Unit,
-    onFailure: () -> Unit,
-    onError: (String) -> Unit
-) {
+fun AuthorizationPrompt(onSuccess: () -> Unit, onFailure: () -> Unit, onError: (String) -> Unit) {
     val context = LocalContext.current
     val biometricManager = BiometricManager.from(context)
     val bio = biometricManager.canAuthenticate(BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-    val isBiometricAvailable =
-        remember {
-            when (bio) {
-                BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
-                    onError("Biometrics not available")
-                    false
-                }
-
-                BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                    onError("Biometrics not created")
-                    false
-                }
-
-                BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
-                    onError("Biometric hardware not found")
-                    false
-                }
-
-                BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> {
-                    onError("Biometric security update required")
-                    false
-                }
-
-                BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> {
-                    onError("Biometrics not supported")
-                    false
-                }
-
-                BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> {
-                    onError("Biometrics status unknown")
-                    false
-                }
-
-                BiometricManager.BIOMETRIC_SUCCESS -> true
-                else -> false
+    val isBiometricAvailable = remember {
+        when (bio) {
+            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
+                onError("Biometrics not available")
+                false
             }
+            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+                onError("Biometrics not created")
+                false
+            }
+            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
+                onError("Biometric hardware not found")
+                false
+            }
+            BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> {
+                onError("Biometric security update required")
+                false
+            }
+            BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> {
+                onError("Biometrics not supported")
+                false
+            }
+            BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> {
+                onError("Biometrics status unknown")
+                false
+            }
+            BiometricManager.BIOMETRIC_SUCCESS -> true
+            else -> false
         }
+    }
     if (isBiometricAvailable) {
         val executor = remember { ContextCompat.getMainExecutor(context) }
 
@@ -71,10 +60,7 @@ fun AuthorizationPrompt(
                 context as FragmentActivity,
                 executor,
                 object : BiometricPrompt.AuthenticationCallback() {
-                    override fun onAuthenticationError(
-                        errorCode: Int,
-                        errString: CharSequence
-                    ) {
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                         super.onAuthenticationError(errorCode, errString)
                         onFailure()
                     }
@@ -90,7 +76,7 @@ fun AuthorizationPrompt(
                         super.onAuthenticationFailed()
                         onFailure()
                     }
-                }
+                },
             )
         biometricPrompt.authenticate(promptInfo)
     }

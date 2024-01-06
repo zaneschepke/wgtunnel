@@ -15,18 +15,14 @@ open class ForegroundService : LifecycleService() {
         return null
     }
 
-    override fun onStartCommand(
-        intent: Intent?,
-        flags: Int,
-        startId: Int
-    ): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Timber.d("onStartCommand executed with startId: $startId")
         if (intent != null) {
             val action = intent.action
-            Timber.d("using an intent with action $action")
             when (action) {
-                Action.START.name, Action.START_FOREGROUND.name -> startService(intent.extras)
+                Action.START.name,
+                Action.START_FOREGROUND.name -> startService(intent.extras)
                 Action.STOP.name -> stopService(intent.extras)
                 "android.net.VpnService" -> {
                     Timber.d("Always-on VPN starting service")
@@ -36,7 +32,7 @@ open class ForegroundService : LifecycleService() {
             }
         } else {
             Timber.d(
-                "with a null intent. It has been probably restarted by the system."
+                "with a null intent. It has been probably restarted by the system.",
             )
         }
         // by returning this we make sure the service is restarted if the system kills the service

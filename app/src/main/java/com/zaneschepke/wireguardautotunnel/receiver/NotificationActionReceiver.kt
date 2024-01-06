@@ -14,13 +14,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotificationActionReceiver : BroadcastReceiver() {
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var settingsRepository: SettingsRepository
 
-    override fun onReceive(
-        context: Context,
-        intent: Intent?
-    ) = goAsync {
+    override fun onReceive(context: Context, intent: Intent?) = goAsync {
         try {
             val settings = settingsRepository.getSettings()
             if (settings.defaultTunnel != null) {

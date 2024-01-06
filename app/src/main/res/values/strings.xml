@@ -164,4 +164,7 @@
     <string name="location_service_missing">Location Services Not Detected</string>
     <string name="location_services_missing_message">The app is not detecting any location services enabled on your device. Depending on the device, this could cause the untrusted wifi feature to fail to read the wifi name. Would you like to continue anyways?</string>
     <string name="auto_tunnel_title">Auto-tunnel Service</string>
+    <string name="delete_tunnel">Delete tunnel</string>
+    <string name="delete_tunnel_message">Are you sure you would like to delete this tunnel?</string>
+    <string name="yes">Yes</string>
 </resources>

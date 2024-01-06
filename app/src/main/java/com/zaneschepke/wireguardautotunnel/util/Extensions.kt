@@ -37,23 +37,23 @@ fun BigDecimal.toThreeDecimalPlaceString(): String {
 }
 
 fun <T> List<T>.update(index: Int, item: T): List<T> = toMutableList().apply { this[index] = item }
+
 fun <T> List<T>.removeAt(index: Int): List<T> = toMutableList().apply { this.removeAt(index) }
 
 typealias TunnelConfigs = List<TunnelConfig>
+
 typealias Packages = List<PackageInfo>
 
 fun Statistics.mapPeerStats(): Map<Key, PeerStats?> {
-    return this.peers().associateWith { key ->
-        (this.peer(key))
-    }
+    return this.peers().associateWith { key -> (this.peer(key)) }
 }
 
-fun PeerStats.latestHandshakeSeconds() : Long? {
+fun PeerStats.latestHandshakeSeconds(): Long? {
     return NumberUtils.getSecondsBetweenTimestampAndNow(this.latestHandshakeEpochMillis)
 }
 
-fun PeerStats.handshakeStatus() : HandshakeStatus {
-    //TODO add never connected status after duration
+fun PeerStats.handshakeStatus(): HandshakeStatus {
+    // TODO add never connected status after duration
     return this.latestHandshakeSeconds().let {
         when {
             it == null -> HandshakeStatus.NOT_STARTED
@@ -65,4 +65,3 @@ fun PeerStats.handshakeStatus() : HandshakeStatus {
         }
     }
 }
-

@@ -26,11 +26,9 @@ object BuildHelper {
     }
 
     fun isReleaseBuild(gradle: Gradle): Boolean {
-        return (
-            gradle.startParameter.taskNames.size > 0 &&
-                gradle.startParameter.taskNames[0].contains(
-                    "Release",
-                )
-        )
+        return (gradle.startParameter.taskNames.size > 0 &&
+            gradle.startParameter.taskNames[0].contains(
+                "Release",
+            ))
     }
 }

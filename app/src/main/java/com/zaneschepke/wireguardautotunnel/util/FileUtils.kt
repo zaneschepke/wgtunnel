@@ -36,22 +36,20 @@ object FileUtils {
             val target =
                 File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    fileName
+                    fileName,
                 )
             return target.outputStream()
         }
         return null
     }
 
-    fun saveFilesToZip(
-        context: Context,
-        files: List<File>
-    ) {
-        val zipOutputStream = createDownloadsFileOutputStream(
-            context,
-            "wg-export_${Instant.now().epochSecond}.zip",
-            ZIP_FILE_MIME_TYPE
-        )
+    fun saveFilesToZip(context: Context, files: List<File>) {
+        val zipOutputStream =
+            createDownloadsFileOutputStream(
+                context,
+                "wg-export_${Instant.now().epochSecond}.zip",
+                ZIP_FILE_MIME_TYPE,
+            )
         ZipOutputStream(zipOutputStream).use { zos ->
             files.forEach { file ->
                 val entry = ZipEntry(file.name)

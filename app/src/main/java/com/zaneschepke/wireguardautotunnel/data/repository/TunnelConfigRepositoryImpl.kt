@@ -5,7 +5,8 @@ import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.util.TunnelConfigs
 import kotlinx.coroutines.flow.Flow
 
-class TunnelConfigRepositoryImpl(private val tunnelConfigDao: TunnelConfigDao) : TunnelConfigRepository {
+class TunnelConfigRepositoryImpl(private val tunnelConfigDao: TunnelConfigDao) :
+    TunnelConfigRepository {
     override fun getTunnelConfigsFlow(): Flow<TunnelConfigs> {
         return tunnelConfigDao.getAllFlow()
     }

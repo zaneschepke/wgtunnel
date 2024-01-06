@@ -11,12 +11,14 @@ assignees: zaneschepke
 A clear and concise description of what the bug is.
 
 **Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - Android Version: [e.g. iOS8.1]
- - App Version [e.g. 22]
+
+- Device: [e.g. Pixel 4a]
+- Android Version: [e.g. Android 13]
+- App Version [e.g. 3.3.3]
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'

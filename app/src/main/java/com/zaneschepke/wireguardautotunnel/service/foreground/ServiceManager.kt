@@ -1,28 +1,27 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
-import android.app.ActivityManager
 import android.app.Service
 import android.content.Context
-import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import com.zaneschepke.wireguardautotunnel.R
 import timber.log.Timber
 
 object ServiceManager {
-    @Suppress("DEPRECATION")
-    private // Deprecated for third party Services.
-    fun <T> Context.isServiceRunning(service: Class<T>) =
-        (getSystemService(ACTIVITY_SERVICE) as ActivityManager)
-            .getRunningServices(Integer.MAX_VALUE)
-            .any { it.service.className == service.name }
 
-    fun <T : Service> getServiceState(
-        context: Context,
-        cls: Class<T>
-    ): ServiceState {
-        val isServiceRunning = context.isServiceRunning(cls)
-        return if (isServiceRunning) ServiceState.STARTED else ServiceState.STOPPED
-    }
+    //    private
+    //    fun <T> Context.isServiceRunning(service: Class<T>) =
+    //        (getSystemService(ACTIVITY_SERVICE) as ActivityManager)
+    //            .runningAppProcesses.any {
+    //                it.processName == service.name
+    //            }
+    //
+    //    fun <T : Service> getServiceState(
+    //        context: Context,
+    //        cls: Class<T>
+    //    ): ServiceState {
+    //        val isServiceRunning = context.isServiceRunning(cls)
+    //        return if (isServiceRunning) ServiceState.STARTED else ServiceState.STOPPED
+    //    }
 
     private fun <T : Service> actionOnService(
         action: Action,
@@ -30,14 +29,10 @@ object ServiceManager {
         cls: Class<T>,
         extras: Map<String, String>? = null
     ) {
-        if (getServiceState(context, cls) == ServiceState.STOPPED && action == Action.STOP) return
-        if (getServiceState(context, cls) == ServiceState.STARTED && action == Action.START) return
         val intent =
             Intent(context, cls).also {
                 it.action = action.name
-                extras?.forEach { (k, v) ->
-                    it.putExtra(k, v)
-                }
+                extras?.forEach { (k, v) -> it.putExtra(k, v) }
             }
         intent.component?.javaClass
         try {
@@ -45,11 +40,9 @@ object ServiceManager {
                 Action.START_FOREGROUND -> {
                     context.startForegroundService(intent)
                 }
-
                 Action.START -> {
                     context.startService(intent)
                 }
-
                 Action.STOP -> context.startService(intent)
             }
         } catch (e: Exception) {
@@ -57,35 +50,30 @@ object ServiceManager {
         }
     }
 
-    fun startVpnService(
-        context: Context,
-        tunnelConfig: String
-    ) {
+    fun startVpnService(context: Context, tunnelConfig: String) {
         actionOnService(
             Action.START,
             context,
             WireGuardTunnelService::class.java,
-            mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig)
+            mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig),
         )
     }
 
     fun stopVpnService(context: Context) {
+        Timber.d("Stopping vpn service action")
         actionOnService(
             Action.STOP,
             context,
-            WireGuardTunnelService::class.java
+            WireGuardTunnelService::class.java,
         )
     }
 
-    fun startVpnServiceForeground(
-        context: Context,
-        tunnelConfig: String
-    ) {
+    fun startVpnServiceForeground(context: Context, tunnelConfig: String) {
         actionOnService(
             Action.START_FOREGROUND,
             context,
             WireGuardTunnelService::class.java,
-            mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig)
+            mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig),
         )
     }
 
@@ -95,17 +83,15 @@ object ServiceManager {
         actionOnService(
             Action.START_FOREGROUND,
             context,
-            WireGuardConnectivityWatcherService::class.java
+            WireGuardConnectivityWatcherService::class.java,
         )
     }
 
-    fun startWatcherService(
-        context: Context
-    ) {
+    fun startWatcherService(context: Context) {
         actionOnService(
             Action.START,
             context,
-            WireGuardConnectivityWatcherService::class.java
+            WireGuardConnectivityWatcherService::class.java,
         )
     }
 
@@ -113,7 +99,7 @@ object ServiceManager {
         actionOnService(
             Action.STOP,
             context,
-            WireGuardConnectivityWatcherService::class.java
+            WireGuardConnectivityWatcherService::class.java,
         )
     }
 }

@@ -24,72 +24,69 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
     private val wifiManager =
         context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-    override val networkStatus =
-        callbackFlow {
-            val networkStatusCallback =
-                when (Build.VERSION.SDK_INT) {
-                    in Build.VERSION_CODES.S..Int.MAX_VALUE -> {
-                        object : ConnectivityManager.NetworkCallback(
-                            FLAG_INCLUDE_LOCATION_INFO
+    override val networkStatus = callbackFlow {
+        val networkStatusCallback =
+            when (Build.VERSION.SDK_INT) {
+                in Build.VERSION_CODES.S..Int.MAX_VALUE -> {
+                    object :
+                        ConnectivityManager.NetworkCallback(
+                            FLAG_INCLUDE_LOCATION_INFO,
                         ) {
-                            override fun onAvailable(network: Network) {
-                                trySend(NetworkStatus.Available(network))
-                            }
-
-                            override fun onLost(network: Network) {
-                                trySend(NetworkStatus.Unavailable(network))
-                            }
-
-                            override fun onCapabilitiesChanged(
-                                network: Network,
-                                networkCapabilities: NetworkCapabilities
-                            ) {
-                                trySend(
-                                    NetworkStatus.CapabilitiesChanged(
-                                        network,
-                                        networkCapabilities
-                                    )
-                                )
-                            }
+                        override fun onAvailable(network: Network) {
+                            trySend(NetworkStatus.Available(network))
                         }
-                    }
 
-                    else -> {
-                        object : ConnectivityManager.NetworkCallback() {
-                            override fun onAvailable(network: Network) {
-                                trySend(NetworkStatus.Available(network))
-                            }
+                        override fun onLost(network: Network) {
+                            trySend(NetworkStatus.Unavailable(network))
+                        }
 
-                            override fun onLost(network: Network) {
-                                trySend(NetworkStatus.Unavailable(network))
-                            }
-
-                            override fun onCapabilitiesChanged(
-                                network: Network,
-                                networkCapabilities: NetworkCapabilities
-                            ) {
-                                trySend(
-                                    NetworkStatus.CapabilitiesChanged(
-                                        network,
-                                        networkCapabilities
-                                    )
-                                )
-                            }
+                        override fun onCapabilitiesChanged(
+                            network: Network,
+                            networkCapabilities: NetworkCapabilities
+                        ) {
+                            trySend(
+                                NetworkStatus.CapabilitiesChanged(
+                                    network,
+                                    networkCapabilities,
+                                ),
+                            )
                         }
                     }
                 }
-            val request =
-                NetworkRequest.Builder()
-                    .addTransportType(networkCapability)
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-                    .build()
-            connectivityManager.registerNetworkCallback(request, networkStatusCallback)
+                else -> {
+                    object : ConnectivityManager.NetworkCallback() {
+                        override fun onAvailable(network: Network) {
+                            trySend(NetworkStatus.Available(network))
+                        }
 
-            awaitClose {
-                connectivityManager.unregisterNetworkCallback(networkStatusCallback)
+                        override fun onLost(network: Network) {
+                            trySend(NetworkStatus.Unavailable(network))
+                        }
+
+                        override fun onCapabilitiesChanged(
+                            network: Network,
+                            networkCapabilities: NetworkCapabilities
+                        ) {
+                            trySend(
+                                NetworkStatus.CapabilitiesChanged(
+                                    network,
+                                    networkCapabilities,
+                                ),
+                            )
+                        }
+                    }
+                }
             }
-        }
+        val request =
+            NetworkRequest.Builder()
+                .addTransportType(networkCapability)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                .build()
+        connectivityManager.registerNetworkCallback(request, networkStatusCallback)
+
+        awaitClose { connectivityManager.unregisterNetworkCallback(networkStatusCallback) }
+    }
 
     override fun getNetworkName(networkCapabilities: NetworkCapabilities): String? {
         var ssid: String? = getWifiNameFromCapabilities(networkCapabilities)
@@ -119,18 +116,16 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
 inline fun <Result> Flow<NetworkStatus>.map(
     crossinline onUnavailable: suspend (network: Network) -> Result,
     crossinline onAvailable: suspend (network: Network) -> Result,
-    crossinline onCapabilitiesChanged: suspend (
-        network: Network,
-        networkCapabilities: NetworkCapabilities
-    ) -> Result
-): Flow<Result> =
-    map { status ->
-        when (status) {
-            is NetworkStatus.Unavailable -> onUnavailable(status.network)
-            is NetworkStatus.Available -> onAvailable(status.network)
-            is NetworkStatus.CapabilitiesChanged -> onCapabilitiesChanged(
+    crossinline onCapabilitiesChanged:
+        suspend (network: Network, networkCapabilities: NetworkCapabilities) -> Result
+): Flow<Result> = map { status ->
+    when (status) {
+        is NetworkStatus.Unavailable -> onUnavailable(status.network)
+        is NetworkStatus.Available -> onAvailable(status.network)
+        is NetworkStatus.CapabilitiesChanged ->
+            onCapabilitiesChanged(
                 status.network,
-                status.networkCapabilities
+                status.networkCapabilities,
             )
-        }
     }
+}

@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,6 +38,9 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.ui.common.PermissionRequestFailedScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
@@ -50,19 +54,40 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.io.IOException
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var dataStoreManager: DataStoreManager
+
+    @Inject lateinit var settingsRepository: SettingsRepository
     @OptIn(
-        ExperimentalPermissionsApi::class
+        ExperimentalPermissionsApi::class,
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // load preferences into memory and init data
+        lifecycleScope.launch {
+            try {
+                dataStoreManager.init()
+                if (settingsRepository.getAll().isEmpty()) {
+                    settingsRepository.save(com.zaneschepke.wireguardautotunnel.data.model.Settings())
+                }
+                WireGuardAutoTunnel.requestTileServiceStateUpdate()
+            } catch (e: IOException) {
+                Timber.e("Failed to load preferences")
+            }
+        }
         setContent {
-//            val activityViewModel = hiltViewModel<ActivityViewModel>()
+            //            val activityViewModel = hiltViewModel<ActivityViewModel>()
 
             val navController = rememberNavController()
-            val focusRequester = remember { FocusRequester()}
+            val focusRequester = remember { FocusRequester() }
 
             WireguardAutoTunnelTheme {
                 TransparentSystemBars()
@@ -73,7 +98,10 @@ class MainActivity : AppCompatActivity() {
                     rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
 
                 fun requestNotificationPermission() {
-                    if (!notificationPermissionState.status.isGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (
+                        !notificationPermissionState.status.isGranted &&
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                    ) {
                         notificationPermissionState.launchPermissionRequest()
                     }
                 }
@@ -87,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                             if (accepted) {
                                 vpnIntent = null
                             }
-                        }
+                        },
                     )
                 LaunchedEffect(vpnIntent) {
                     if (vpnIntent != null) {
@@ -99,13 +127,15 @@ class MainActivity : AppCompatActivity() {
 
                 fun showSnackBarMessage(message: String) {
                     lifecycleScope.launch(Dispatchers.Main) {
-                        val result = snackbarHostState.showSnackbar(
+                        val result =
+                            snackbarHostState.showSnackbar(
                                 message = message,
                                 actionLabel = applicationContext.getString(R.string.okay),
-                                duration = SnackbarDuration.Short
+                                duration = SnackbarDuration.Short,
                             )
                         when (result) {
-                            SnackbarResult.ActionPerformed, SnackbarResult.Dismissed -> {
+                            SnackbarResult.ActionPerformed,
+                            SnackbarResult.Dismissed -> {
                                 snackbarHostState.currentSnackbarData?.dismiss()
                             }
                         }
@@ -118,29 +148,36 @@ class MainActivity : AppCompatActivity() {
                             CustomSnackBar(
                                 snackbarData.visuals.message,
                                 isRtl = false,
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                    2.dp
-                                )
+                                containerColor =
+                                    MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                        2.dp,
+                                    ),
                             )
                         }
                     },
                     modifier = Modifier.focusable().focusProperties { up = focusRequester },
                     bottomBar =
-                    if (vpnIntent == null && notificationPermissionState.status.isGranted) {
-                        { BottomNavBar(navController, listOf(
-                            Screen.Main.navItem,
-                            Screen.Settings.navItem,
-                            Screen.Support.navItem)) }
-                    } else {
-                        {}
-                    }
+                        if (vpnIntent == null && notificationPermissionState.status.isGranted) {
+                            {
+                                BottomNavBar(
+                                    navController,
+                                    listOf(
+                                        Screen.Main.navItem,
+                                        Screen.Settings.navItem,
+                                        Screen.Support.navItem,
+                                    ),
+                                )
+                            }
+                        } else {
+                            {}
+                        },
                 ) { padding ->
                     if (vpnIntent != null) {
                         PermissionRequestFailedScreen(
                             padding = padding,
                             onRequestAgain = { vpnActivityResultState.launch(vpnIntent) },
                             message = getString(R.string.vpn_permission_required),
-                            getString(R.string.retry)
+                            getString(R.string.retry),
                         )
                         return@Scaffold
                     }
@@ -154,12 +191,12 @@ class MainActivity : AppCompatActivity() {
                                     Uri.fromParts(
                                         Constants.URI_PACKAGE_SCHEME,
                                         this.packageName,
-                                        null
+                                        null,
                                     )
                                 startActivity(intentSettings)
                             },
                             message = getString(R.string.notification_permission_required),
-                            getString(R.string.open_settings)
+                            getString(R.string.open_settings),
                         )
                         return@Scaffold
                     }
@@ -167,34 +204,42 @@ class MainActivity : AppCompatActivity() {
                         composable(
                             Screen.Main.route,
                         ) {
-                            MainScreen(padding = padding, focusRequester = focusRequester, showSnackbarMessage = { message ->
-                                showSnackBarMessage(message)
-                            }, navController = navController)
+                            MainScreen(
+                                padding = padding,
+                                focusRequester = focusRequester,
+                                showSnackbarMessage = { message -> showSnackBarMessage(message) },
+                                navController = navController,
+                            )
                         }
-                        composable(Screen.Settings.route,
+                        composable(
+                            Screen.Settings.route,
                         ) {
-                            SettingsScreen(padding = padding, showSnackbarMessage = { message ->
-                                showSnackBarMessage(message)
-                            }, focusRequester = focusRequester)
+                            SettingsScreen(
+                                padding = padding,
+                                showSnackbarMessage = { message -> showSnackBarMessage(message) },
+                                focusRequester = focusRequester,
+                            )
                         }
-                        composable(Screen.Support.route,
+                        composable(
+                            Screen.Support.route,
                         ) {
-                            SupportScreen(padding = padding, focusRequester = focusRequester,
-                                showSnackbarMessage = { message ->
-                                    showSnackBarMessage(message)
-                                })
+                            SupportScreen(
+                                padding = padding,
+                                focusRequester = focusRequester,
+                                showSnackbarMessage = { message -> showSnackBarMessage(message) },
+                            )
                         }
                         composable("${Screen.Config.route}/{id}") {
                             val id = it.arguments?.getString("id")
                             if (!id.isNullOrBlank()) {
-                                //https://dagger.dev/hilt/view-model#assisted-injection
+                                // https://dagger.dev/hilt/view-model#assisted-injection
                                 ConfigScreen(
                                     navController = navController,
                                     id = id,
                                     showSnackbarMessage = { message ->
                                         showSnackBarMessage(message)
                                     },
-                                    focusRequester = focusRequester
+                                    focusRequester = focusRequester,
                                 )
                             }
                         }

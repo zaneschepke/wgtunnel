@@ -22,19 +22,15 @@ fun ConfigurationTextBox(
         modifier = modifier,
         value = value,
         singleLine = true,
-        onValueChange = {
-            onValueChange(it)
-        },
+        onValueChange = { onValueChange(it) },
         label = { Text(label) },
         maxLines = 1,
-        placeholder = {
-            Text(hint)
-        },
+        placeholder = { Text(hint) },
         keyboardOptions =
-        KeyboardOptions(
-            capitalization = KeyboardCapitalization.None,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = keyboardActions
+            KeyboardOptions(
+                capitalization = KeyboardCapitalization.None,
+                imeAction = ImeAction.Done,
+            ),
+        keyboardActions = keyboardActions,
     )
 }

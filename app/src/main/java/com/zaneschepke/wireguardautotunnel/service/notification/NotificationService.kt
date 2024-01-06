@@ -3,7 +3,6 @@ package com.zaneschepke.wireguardautotunnel.service.notification
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import androidx.core.app.NotificationCompat
 
 interface NotificationService {
     fun createNotification(

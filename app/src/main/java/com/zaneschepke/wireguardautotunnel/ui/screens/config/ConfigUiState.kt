@@ -11,7 +11,7 @@ data class ConfigUiState(
     val packages: Packages = emptyList(),
     val checkedPackageNames: List<String> = emptyList(),
     val include: Boolean = true,
-    val isAllApplicationsEnabled : Boolean = false,
+    val isAllApplicationsEnabled: Boolean = false,
     val loading: Boolean = true,
     val tunnel: TunnelConfig? = null,
     val tunnelName: String = ""

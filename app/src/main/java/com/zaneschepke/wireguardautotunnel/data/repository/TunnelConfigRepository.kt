@@ -6,9 +6,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface TunnelConfigRepository {
 
-    fun getTunnelConfigsFlow() : Flow<TunnelConfigs>
-    suspend fun getAll() : TunnelConfigs
+    fun getTunnelConfigsFlow(): Flow<TunnelConfigs>
+
+    suspend fun getAll(): TunnelConfigs
+
     suspend fun save(tunnelConfig: TunnelConfig)
+
     suspend fun delete(tunnelConfig: TunnelConfig)
-    suspend fun count() : Int
+
+    suspend fun count(): Int
 }

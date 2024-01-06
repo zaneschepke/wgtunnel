@@ -23,7 +23,7 @@ fun ClickableIconButton(
 ) {
     TextButton(
         onClick = onClick,
-        enabled = enabled
+        enabled = enabled,
     ) {
         Text(text, Modifier.weight(1f, false))
         Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
@@ -31,11 +31,11 @@ fun ClickableIconButton(
             imageVector = icon,
             contentDescription = stringResource(R.string.delete),
             modifier =
-            Modifier.size(ButtonDefaults.IconSize).weight(1f, false).clickable {
-                if (enabled) {
-                    onIconClick()
-                }
-            }
+                Modifier.size(ButtonDefaults.IconSize).weight(1f, false).clickable {
+                    if (enabled) {
+                        onIconClick()
+                    }
+                },
         )
     }
 }

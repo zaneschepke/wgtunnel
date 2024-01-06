@@ -28,7 +28,10 @@ WG Tunnel
 
 <div align="left">
 
-This is an alternative Android Application for [WireGuard](https://www.wireguard.com/) with added features. Built using the [wireguard-android](https://github.com/WireGuard/wireguard-android) library and [Jetpack Compose](https://developer.android.com/jetpack/compose), this application was inspired by the official [WireGuard Android](https://github.com/WireGuard/wireguard-android) app.
+This is an alternative Android Application for [WireGuard](https://www.wireguard.com/) with added
+features. Built using the [wireguard-android](https://github.com/WireGuard/wireguard-android)
+library and [Jetpack Compose](https://developer.android.com/jetpack/compose), this application was
+inspired by the official [WireGuard Android](https://github.com/WireGuard/wireguard-android) app.
 
 </div>
 
@@ -47,7 +50,8 @@ This is an alternative Android Application for [WireGuard](https://www.wireguard
 
 ## Inspiration
 
-The original inspiration for this app came from the inconvenience of having to manually turn VPN off and on while on different networks. This app was created to offer a free solution to this problem. 
+The original inspiration for this app came from the inconvenience of having to manually turn VPN off
+and on while on different networks. This app was created to offer a free solution to this problem.
 
 ## Features
 
@@ -63,9 +67,8 @@ The original inspiration for this app came from the inconvenience of having to m
 * Automatic service restart after reboot
 * Battery preservation measures
 
-
 ## Building
-    
+
 ```
 $ git clone https://github.com/zaneschepke/wgtunnel
 $ cd wgtunnel

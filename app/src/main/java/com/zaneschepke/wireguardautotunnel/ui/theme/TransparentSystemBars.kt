@@ -14,7 +14,7 @@ fun TransparentSystemBars() {
     DisposableEffect(systemUiController, useDarkIcons) {
         systemUiController.setSystemBarsColor(
             color = Color.Transparent,
-            darkIcons = useDarkIcons
+            darkIcons = useDarkIcons,
         )
 
         onDispose {}

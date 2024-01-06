@@ -19,9 +19,7 @@ android {
         versionCode = Constants.VERSION_CODE
         versionName = Constants.VERSION_NAME
 
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
+        ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
         sourceSets {
             getByName("debug").assets.srcDirs(files("$projectDir/schemas")) // Room
@@ -30,9 +28,7 @@ android {
         resourceConfigurations.addAll(listOf("en"))
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        vectorDrawables { useSupportLibrary = true }
     }
 
     signingConfigs {
@@ -47,32 +43,41 @@ android {
                     }
                 }
 
-            // try to get secrets from env first for pipeline build, then properties file for local build
-            storeFile = file(
-                System.getenv().getOrDefault(
-                    Constants.KEY_STORE_PATH_VAR,
-                    properties.getProperty(Constants.KEY_STORE_PATH_VAR)
+            // try to get secrets from env first for pipeline build, then properties file for local
+            // build
+            storeFile =
+                file(
+                    System.getenv()
+                        .getOrDefault(
+                            Constants.KEY_STORE_PATH_VAR,
+                            properties.getProperty(Constants.KEY_STORE_PATH_VAR),
+                        ),
                 )
-            )
-            storePassword = System.getenv().getOrDefault(
-                Constants.STORE_PASS_VAR,
-                properties.getProperty(Constants.STORE_PASS_VAR)
-            )
-            keyAlias = System.getenv().getOrDefault(
-                Constants.KEY_ALIAS_VAR,
-                properties.getProperty(Constants.KEY_ALIAS_VAR)
-            )
-            keyPassword = System.getenv().getOrDefault(
-                Constants.KEY_PASS_VAR,
-                properties.getProperty(Constants.KEY_PASS_VAR)
-            )
+            storePassword =
+                System.getenv()
+                    .getOrDefault(
+                        Constants.STORE_PASS_VAR,
+                        properties.getProperty(Constants.STORE_PASS_VAR),
+                    )
+            keyAlias =
+                System.getenv()
+                    .getOrDefault(
+                        Constants.KEY_ALIAS_VAR,
+                        properties.getProperty(Constants.KEY_ALIAS_VAR),
+                    )
+            keyPassword =
+                System.getenv()
+                    .getOrDefault(
+                        Constants.KEY_PASS_VAR,
+                        properties.getProperty(Constants.KEY_PASS_VAR),
+                    )
         }
     }
 
     buildTypes {
         // don't strip
         packaging.jniLibs.keepDebugSymbols.addAll(
-            listOf("libwg-go.so", "libwg-quick.so", "libwg.so")
+            listOf("libwg-go.so", "libwg-quick.so", "libwg.so"),
         )
 
         applicationVariants.all {
@@ -91,13 +96,11 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName(Constants.RELEASE)
         }
-        debug {
-            isDebuggable = true
-        }
+        debug { isDebuggable = true }
     }
     flavorDimensions.add(Constants.TYPE)
     productFlavors {
@@ -118,24 +121,17 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
-    kotlinOptions {
-        jvmTarget = Constants.JVM_TARGET
-    }
+    kotlinOptions { jvmTarget = Constants.JVM_TARGET }
     buildFeatures {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
+    composeOptions { kotlinCompilerExtensionVersion = Constants.COMPOSE_COMPILER_EXTENSION_VERSION }
+    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 val generalImplementation by configurations
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

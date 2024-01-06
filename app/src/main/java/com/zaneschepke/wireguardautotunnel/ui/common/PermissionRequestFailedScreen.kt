@@ -26,17 +26,12 @@ fun PermissionRequestFailedScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier =
-        Modifier
-            .fillMaxSize()
-            .padding(padding)
+        modifier = Modifier.fillMaxSize().padding(padding),
     ) {
         Text(message, textAlign = TextAlign.Center, modifier = Modifier.padding(15.dp))
-        Button(onClick = {
-            scope.launch {
-                onRequestAgain()
-            }
-        }) {
+        Button(
+            onClick = { scope.launch { onRequestAgain() } },
+        ) {
             Text(buttonText)
         }
     }

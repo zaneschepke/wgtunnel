@@ -6,8 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ActivityViewModel @Inject constructor(
+class ActivityViewModel
+@Inject
+constructor(
     private val settingsRepo: SettingsDao,
-) : ViewModel() {
-
-}
+) : ViewModel() {}

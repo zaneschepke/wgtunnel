@@ -21,21 +21,16 @@ fun ConfigurationToggle(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier =
-        Modifier
-            .fillMaxWidth()
-            .padding(padding),
+        modifier = Modifier.fillMaxWidth().padding(padding),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(label)
         Switch(
             modifier = modifier,
             enabled = enabled,
             checked = checked,
-            onCheckedChange = {
-                onCheckChanged()
-            }
+            onCheckedChange = { onCheckChanged() },
         )
     }
 }

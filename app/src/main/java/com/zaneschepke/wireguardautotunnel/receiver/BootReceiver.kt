@@ -9,17 +9,15 @@ import com.zaneschepke.wireguardautotunnel.util.goAsync
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
 @AndroidEntryPoint
 class BootReceiver : BroadcastReceiver() {
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var settingsRepository: SettingsRepository
+
     override fun onReceive(context: Context?, intent: Intent?) = goAsync {
         if (Intent.ACTION_BOOT_COMPLETED != intent?.action) return@goAsync
-        if(settingsRepository.getSettings().isAutoTunnelEnabled) {
+        if (settingsRepository.getSettings().isAutoTunnelEnabled) {
             ServiceManager.startWatcherServiceForeground(context!!)
         }
     }
-
 }
