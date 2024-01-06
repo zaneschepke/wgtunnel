@@ -10,16 +10,20 @@ import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 @Database(
     entities = [Settings::class, TunnelConfig::class],
     version = 5,
-    autoMigrations = [
-        AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(
-            from = 3,
-            to = 4
-        ),AutoMigration(
-            from = 4,
-            to = 5
-        )
-    ],
-    exportSchema = true
+    autoMigrations =
+        [
+            AutoMigration(from = 1, to = 2),
+            AutoMigration(from = 2, to = 3),
+            AutoMigration(
+                from = 3,
+                to = 4,
+            ),
+            AutoMigration(
+                from = 4,
+                to = 5,
+            ),
+        ],
+    exportSchema = true,
 )
 @TypeConverters(DatabaseListConverters::class)
 abstract class AppDatabase : RoomDatabase() {

@@ -67,7 +67,7 @@ constructor(
                 backend.setState(
                     this,
                     State.UP,
-                    config
+                    config,
                 )
             emitTunnelState(state)
             state
@@ -80,24 +80,24 @@ constructor(
     private fun emitTunnelState(state: State) {
         _vpnState.tryEmit(
             _vpnState.value.copy(
-                status = state
-            )
+                status = state,
+            ),
         )
     }
 
     private fun emitBackendStatistics(statistics: Statistics) {
         _vpnState.tryEmit(
             _vpnState.value.copy(
-                statistics = statistics
-            )
+                statistics = statistics,
+            ),
         )
     }
 
     private suspend fun emitTunnelName(name: String) {
         _vpnState.emit(
             _vpnState.value.copy(
-                name = name
-            )
+                name = name,
+            ),
         )
     }
 

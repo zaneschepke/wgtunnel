@@ -17,13 +17,13 @@ data class InterfaceProxy(
                 privateKey = i.keyPair.privateKey.toBase64().trim(),
                 addresses = i.addresses.joinToString(", ").trim(),
                 dnsServers = i.dnsServers.joinToString(", ").replace("/", "").trim(),
-                listenPort = if (i.listenPort.isPresent) {
-                    i.listenPort.get().toString()
-                    .trim()
-                } else {
-                    ""
-                },
-                mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else ""
+                listenPort =
+                    if (i.listenPort.isPresent) {
+                        i.listenPort.get().toString().trim()
+                    } else {
+                        ""
+                    },
+                mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
             )
         }
     }

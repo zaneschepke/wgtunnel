@@ -37,25 +37,25 @@ fun CustomSnackBar(
     Snackbar(
         containerColor = containerColor,
         modifier =
-        Modifier.fillMaxWidth(
-            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) 1 / 3f else 2 / 3f
-        ).padding(bottom = 100.dp),
-        shape = RoundedCornerShape(16.dp)
+            Modifier.fillMaxWidth(
+                    if (WireGuardAutoTunnel.isRunningOnAndroidTv()) 1 / 3f else 2 / 3f,
+                )
+                .padding(bottom = 100.dp),
+        shape = RoundedCornerShape(16.dp),
     ) {
         CompositionLocalProvider(
-            LocalLayoutDirection provides
-                    if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+            LocalLayoutDirection provides if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
         ) {
             Row(
                 modifier = Modifier.width(IntrinsicSize.Max).height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.Start,
             ) {
                 Icon(
                     Icons.Rounded.Info,
                     contentDescription = stringResource(R.string.info),
                     tint = Color.White,
-                    modifier = Modifier.padding(end = 10.dp)
+                    modifier = Modifier.padding(end = 10.dp),
                 )
                 Text(message, color = Color.White, modifier = Modifier.padding(end = 5.dp))
             }

@@ -1,6 +1,6 @@
 # Support
 
-If you are experiencing issues with the app, the following resources are available to help you. 
+If you are experiencing issues with the app, the following resources are available to help you.
 
 <ol>
   <li>

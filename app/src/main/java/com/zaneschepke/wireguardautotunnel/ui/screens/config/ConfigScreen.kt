@@ -88,7 +88,8 @@ import kotlinx.coroutines.delay
 @OptIn(
     ExperimentalComposeUiApi::class,
     ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class)
+    ExperimentalFoundationApi::class,
+)
 @Composable
 fun ConfigScreen(
     viewModel: ConfigViewModel = hiltViewModel(),
@@ -97,347 +98,374 @@ fun ConfigScreen(
     showSnackbarMessage: (String) -> Unit,
     id: String
 ) {
-  val context = LocalContext.current
-  val clipboardManager: ClipboardManager = LocalClipboardManager.current
-  val keyboardController = LocalSoftwareKeyboardController.current
-  var showApplicationsDialog by remember { mutableStateOf(false) }
-  var showAuthPrompt by remember { mutableStateOf(false) }
-  var isAuthenticated by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var showApplicationsDialog by remember { mutableStateOf(false) }
+    var showAuthPrompt by remember { mutableStateOf(false) }
+    var isAuthenticated by remember { mutableStateOf(false) }
 
-  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.init(id)
-    }
+    LaunchedEffect(Unit) { viewModel.init(id) }
 
-  LaunchedEffect(uiState.loading) {
-    if(!uiState.loading && WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-        delay(Constants.FOCUS_REQUEST_DELAY)
-        focusRequester.requestFocus()
-    }
-  }
-
-  if (uiState.loading) {
-    LoadingScreen()
-      return
-  }
-
-  val keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
-
-  val keyboardOptions =
-      KeyboardOptions(imeAction = ImeAction.Done)
-
-  val fillMaxHeight = .85f
-  val fillMaxWidth = .85f
-  val screenPadding = 5.dp
-
-  val applicationButtonText = {
-    "Tunneling apps: " +
-        if (uiState.isAllApplicationsEnabled) {
-          "all"
-        } else {
-          "${uiState.checkedPackageNames.size} " + (if (uiState.include) "included" else "excluded")
+    LaunchedEffect(uiState.loading) {
+        if (!uiState.loading && WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+            delay(Constants.FOCUS_REQUEST_DELAY)
+            focusRequester.requestFocus()
         }
-  }
+    }
 
-  if (showAuthPrompt) {
-    AuthorizationPrompt(
-        onSuccess = {
-          showAuthPrompt = false
-          isAuthenticated = true
-        },
-        onError = { error ->
-          showAuthPrompt = false
-          showSnackbarMessage(Event.Error.AuthenticationFailed.message)
-        },
-        onFailure = {
-          showAuthPrompt = false
-          showSnackbarMessage(Event.Error.AuthorizationFailed.message)
-        })
-  }
+    if (uiState.loading) {
+        LoadingScreen()
+        return
+    }
 
-  if (showApplicationsDialog) {
-    val sortedPackages =
-        remember(uiState.packages) { uiState.packages.sortedBy { viewModel.getPackageLabel(it) } }
-    AlertDialog(onDismissRequest = { showApplicationsDialog = false }) {
-      Surface(
-          tonalElevation = 2.dp,
-          shadowElevation = 2.dp,
-          shape = RoundedCornerShape(12.dp),
-          color = MaterialTheme.colorScheme.surface,
-          modifier =
-              Modifier.fillMaxWidth()
-                  .fillMaxHeight(if (uiState.isAllApplicationsEnabled) 1 / 5f else 4 / 5f)) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-              Row(
-                  modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 7.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stringResource(id = R.string.tunnel_all))
-                    Switch(
-                        checked = uiState.isAllApplicationsEnabled,
-                        onCheckedChange = { viewModel.onAllApplicationsChange(it) })
-                  }
-              if (!uiState.isAllApplicationsEnabled) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(id = R.string.include))
-                            Checkbox(
-                                checked = uiState.include,
-                                onCheckedChange = { viewModel.onIncludeChange(!uiState.include) })
-                          }
-                      Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(id = R.string.exclude))
-                            Checkbox(
-                                checked = !uiState.include,
-                                onCheckedChange = { viewModel.onIncludeChange(!uiState.include) })
-                          }
+    val keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
+
+    val keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+
+    val fillMaxHeight = .85f
+    val fillMaxWidth = .85f
+    val screenPadding = 5.dp
+
+    val applicationButtonText = {
+        "Tunneling apps: " +
+            if (uiState.isAllApplicationsEnabled) {
+                "all"
+            } else {
+                "${uiState.checkedPackageNames.size} " +
+                    (if (uiState.include) "included" else "excluded")
+            }
+    }
+
+    if (showAuthPrompt) {
+        AuthorizationPrompt(
+            onSuccess = {
+                showAuthPrompt = false
+                isAuthenticated = true
+            },
+            onError = { error ->
+                showAuthPrompt = false
+                showSnackbarMessage(Event.Error.AuthenticationFailed.message)
+            },
+            onFailure = {
+                showAuthPrompt = false
+                showSnackbarMessage(Event.Error.AuthorizationFailed.message)
+            },
+        )
+    }
+
+    if (showApplicationsDialog) {
+        val sortedPackages =
+            remember(uiState.packages) {
+                uiState.packages.sortedBy { viewModel.getPackageLabel(it) }
+            }
+        AlertDialog(onDismissRequest = { showApplicationsDialog = false }) {
+            Surface(
+                tonalElevation = 2.dp,
+                shadowElevation = 2.dp,
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .fillMaxHeight(if (uiState.isAllApplicationsEnabled) 1 / 5f else 4 / 5f),
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(stringResource(id = R.string.tunnel_all))
+                        Switch(
+                            checked = uiState.isAllApplicationsEnabled,
+                            onCheckedChange = { viewModel.onAllApplicationsChange(it) },
+                        )
                     }
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      SearchBar(viewModel::emitQueriedPackages)
-                    }
-                Spacer(Modifier.padding(5.dp))
-                LazyColumn(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top,
-                    modifier = Modifier.fillMaxHeight(4 / 5f)) {
-                      items(sortedPackages, key = { it.packageName }) { pack ->
+                    if (!uiState.isAllApplicationsEnabled) {
                         Row(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 7.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxSize().padding(5.dp)) {
-                              Row(modifier = Modifier.fillMaxWidth(fillMaxWidth)) {
-                                val drawable =
-                                    pack.applicationInfo?.loadIcon(context.packageManager)
-                                if (drawable != null) {
-                                  Image(
-                                      painter = DrawablePainter(drawable),
-                                      stringResource(id = R.string.icon),
-                                      modifier = Modifier.size(50.dp, 50.dp))
-                                } else {
-                                  Icon(
-                                      Icons.Rounded.Android,
-                                      stringResource(id = R.string.edit),
-                                      modifier = Modifier.size(50.dp, 50.dp))
-                                }
-                                Text(
-                                    viewModel.getPackageLabel(pack),
-                                    modifier = Modifier.padding(5.dp))
-                              }
-                              Checkbox(
-                                  modifier = Modifier.fillMaxSize(),
-                                  checked =
-                                      (uiState.checkedPackageNames.contains(pack.packageName)),
-                                  onCheckedChange = {
-                                    if (it) {
-                                      viewModel.onAddCheckedPackage(pack.packageName)
-                                    } else {
-                                      viewModel.onRemoveCheckedPackage(pack.packageName)
-                                    }
-                                  })
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(stringResource(id = R.string.include))
+                                Checkbox(
+                                    checked = uiState.include,
+                                    onCheckedChange = {
+                                        viewModel.onIncludeChange(!uiState.include)
+                                    },
+                                )
                             }
-                      }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(stringResource(id = R.string.exclude))
+                                Checkbox(
+                                    checked = !uiState.include,
+                                    onCheckedChange = {
+                                        viewModel.onIncludeChange(!uiState.include)
+                                    },
+                                )
+                            }
+                        }
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            SearchBar(viewModel::emitQueriedPackages)
+                        }
+                        Spacer(Modifier.padding(5.dp))
+                        LazyColumn(
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Top,
+                            modifier = Modifier.fillMaxHeight(4 / 5f),
+                        ) {
+                            items(sortedPackages, key = { it.packageName }) { pack ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxSize().padding(5.dp),
+                                ) {
+                                    Row(modifier = Modifier.fillMaxWidth(fillMaxWidth)) {
+                                        val drawable =
+                                            pack.applicationInfo?.loadIcon(context.packageManager)
+                                        if (drawable != null) {
+                                            Image(
+                                                painter = DrawablePainter(drawable),
+                                                stringResource(id = R.string.icon),
+                                                modifier = Modifier.size(50.dp, 50.dp),
+                                            )
+                                        } else {
+                                            Icon(
+                                                Icons.Rounded.Android,
+                                                stringResource(id = R.string.edit),
+                                                modifier = Modifier.size(50.dp, 50.dp),
+                                            )
+                                        }
+                                        Text(
+                                            viewModel.getPackageLabel(pack),
+                                            modifier = Modifier.padding(5.dp),
+                                        )
+                                    }
+                                    Checkbox(
+                                        modifier = Modifier.fillMaxSize(),
+                                        checked =
+                                            (uiState.checkedPackageNames.contains(
+                                                pack.packageName
+                                            )),
+                                        onCheckedChange = {
+                                            if (it) {
+                                                viewModel.onAddCheckedPackage(pack.packageName)
+                                            } else {
+                                                viewModel.onRemoveCheckedPackage(pack.packageName)
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                        }
                     }
-              }
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.fillMaxSize().padding(top = 5.dp),
-                  horizontalArrangement = Arrangement.Center) {
-                    TextButton(onClick = { showApplicationsDialog = false }) {
-                      Text(stringResource(R.string.done))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxSize().padding(top = 5.dp),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        TextButton(onClick = { showApplicationsDialog = false }) {
+                            Text(stringResource(R.string.done))
+                        }
                     }
-                  }
+                }
             }
-          }
+        }
     }
-  }
 
     Scaffold(
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-          val secondaryColor = MaterialTheme.colorScheme.secondary
-          val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-          var fobColor by remember { mutableStateOf(secondaryColor) }
-          FloatingActionButton(
-              modifier =
-                  Modifier.padding(bottom = 90.dp).onFocusChanged {
-                    if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                      fobColor = if (it.isFocused) hoverColor else secondaryColor
+            val secondaryColor = MaterialTheme.colorScheme.secondary
+            val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+            var fobColor by remember { mutableStateOf(secondaryColor) }
+            FloatingActionButton(
+                modifier =
+                    Modifier.padding(bottom = 90.dp).onFocusChanged {
+                        if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                            fobColor = if (it.isFocused) hoverColor else secondaryColor
+                        }
+                    },
+                onClick = {
+                    viewModel.onSaveAllChanges().let {
+                        when (it) {
+                            is Result.Success -> {
+                                showSnackbarMessage(it.data.message)
+                                navController.navigate(Screen.Main.route)
+                            }
+                            is Result.Error -> showSnackbarMessage(it.error.message)
+                        }
                     }
-                  },
-              onClick = {
-                viewModel.onSaveAllChanges().let {
-                  when (it) {
-                    is Result.Success -> {
-                      showSnackbarMessage(it.data.message)
-                      navController.navigate(Screen.Main.route)
-                    }
-                    is Result.Error -> showSnackbarMessage(it.error.message)
-                  }
-                }
-              },
-              containerColor = fobColor,
-              shape = RoundedCornerShape(16.dp)) {
+                },
+                containerColor = fobColor,
+                shape = RoundedCornerShape(16.dp),
+            ) {
                 Icon(
                     imageVector = Icons.Rounded.Save,
                     contentDescription = stringResource(id = R.string.save_changes),
-                    tint = Color.DarkGray)
-              }
-        }) {
-          Column {
+                    tint = Color.DarkGray,
+                )
+            }
+        },
+    ) {
+        Column {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
                 modifier =
-                    Modifier.verticalScroll(rememberScrollState()).weight(1f, true).fillMaxSize()) {
-                  Surface(
-                      tonalElevation = 2.dp,
-                      shadowElevation = 2.dp,
-                      shape = RoundedCornerShape(12.dp),
-                      color = MaterialTheme.colorScheme.surface,
-                      modifier =
-                          (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                    Modifier.verticalScroll(rememberScrollState()).weight(1f, true).fillMaxSize(),
+            ) {
+                Surface(
+                    tonalElevation = 2.dp,
+                    shadowElevation = 2.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier =
+                        (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                                 Modifier.fillMaxHeight(fillMaxHeight).fillMaxWidth(fillMaxWidth)
-                              } else {
+                            } else {
                                 Modifier.fillMaxWidth(fillMaxWidth)
-                              })
-                              .padding(top = 50.dp, bottom = 10.dp)) {
-                        Column(
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.Top,
-                            modifier = Modifier.padding(15.dp).focusGroup()) {
-                              SectionTitle(
-                                  stringResource(R.string.interface_), padding = screenPadding)
-                              ConfigurationTextBox(
-                                  value = uiState.tunnelName,
-                                  onValueChange = { value -> viewModel.onTunnelNameChange(value) },
-                                  keyboardActions = keyboardActions,
-                                  label = stringResource(R.string.name),
-                                  hint = stringResource(R.string.tunnel_name).lowercase(),
-                                  modifier =
-                                      Modifier
-                                          .fillMaxWidth()
-                                          .focusRequester(focusRequester))
-                              OutlinedTextField(
-                                  modifier =
-                                      Modifier.fillMaxWidth().clickable {
-                                        showAuthPrompt = true
-                                      },
-                                  value = uiState.interfaceProxy.privateKey,
-                                  visualTransformation =
-                                      if ((id == Constants.MANUAL_TUNNEL_CONFIG_ID) ||
-                                          isAuthenticated)
-                                          VisualTransformation.None
-                                      else PasswordVisualTransformation(),
-                                  enabled =
-                                      (id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
-                                  onValueChange = { value -> viewModel.onPrivateKeyChange(value) },
-                                  trailingIcon = {
-                                    IconButton(
-                                        modifier = Modifier.focusRequester(FocusRequester.Default),
-                                        onClick = { viewModel.generateKeyPair() }) {
-                                          Icon(
-                                              Icons.Rounded.Refresh,
-                                              stringResource(R.string.rotate_keys),
-                                              tint = Color.White)
-                                        }
-                                  },
-                                  label = { Text(stringResource(R.string.private_key)) },
-                                  singleLine = true,
-                                  placeholder = { Text(stringResource(R.string.base64_key)) },
-                                  keyboardOptions = keyboardOptions,
-                                  keyboardActions = keyboardActions)
-                              OutlinedTextField(
-                                  modifier =
-                                      Modifier
-                                          .fillMaxWidth()
-                                          .focusRequester(FocusRequester.Default),
-                                  value = uiState.interfaceProxy.publicKey,
-                                  enabled = false,
-                                  onValueChange = {},
-                                  trailingIcon = {
-                                    IconButton(
-                                        modifier = Modifier.focusRequester(FocusRequester.Default),
-                                        onClick = {
-                                          clipboardManager.setText(
-                                              AnnotatedString(uiState.interfaceProxy.publicKey))
-                                        }) {
-                                          Icon(
-                                              Icons.Rounded.ContentCopy,
-                                              stringResource(R.string.copy_public_key),
-                                              tint = Color.White)
-                                        }
-                                  },
-                                  label = { Text(stringResource(R.string.public_key)) },
-                                  singleLine = true,
-                                  placeholder = { Text(stringResource(R.string.base64_key)) },
-                                  keyboardOptions = keyboardOptions,
-                                  keyboardActions = keyboardActions)
-                              Row(modifier = Modifier.fillMaxWidth()) {
-                                ConfigurationTextBox(
-                                    value = uiState.interfaceProxy.addresses,
-                                    onValueChange = { value ->
-                                      viewModel.onAddressesChanged(value)
+                            })
+                            .padding(top = 50.dp, bottom = 10.dp),
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Top,
+                        modifier = Modifier.padding(15.dp).focusGroup(),
+                    ) {
+                        SectionTitle(
+                            stringResource(R.string.interface_),
+                            padding = screenPadding,
+                        )
+                        ConfigurationTextBox(
+                            value = uiState.tunnelName,
+                            onValueChange = { value -> viewModel.onTunnelNameChange(value) },
+                            keyboardActions = keyboardActions,
+                            label = stringResource(R.string.name),
+                            hint = stringResource(R.string.tunnel_name).lowercase(),
+                            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth().clickable { showAuthPrompt = true },
+                            value = uiState.interfaceProxy.privateKey,
+                            visualTransformation =
+                                if ((id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated)
+                                    VisualTransformation.None
+                                else PasswordVisualTransformation(),
+                            enabled = (id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
+                            onValueChange = { value -> viewModel.onPrivateKeyChange(value) },
+                            trailingIcon = {
+                                IconButton(
+                                    modifier = Modifier.focusRequester(FocusRequester.Default),
+                                    onClick = { viewModel.generateKeyPair() },
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.Refresh,
+                                        stringResource(R.string.rotate_keys),
+                                        tint = Color.White,
+                                    )
+                                }
+                            },
+                            label = { Text(stringResource(R.string.private_key)) },
+                            singleLine = true,
+                            placeholder = { Text(stringResource(R.string.base64_key)) },
+                            keyboardOptions = keyboardOptions,
+                            keyboardActions = keyboardActions,
+                        )
+                        OutlinedTextField(
+                            modifier =
+                                Modifier.fillMaxWidth().focusRequester(FocusRequester.Default),
+                            value = uiState.interfaceProxy.publicKey,
+                            enabled = false,
+                            onValueChange = {},
+                            trailingIcon = {
+                                IconButton(
+                                    modifier = Modifier.focusRequester(FocusRequester.Default),
+                                    onClick = {
+                                        clipboardManager.setText(
+                                            AnnotatedString(uiState.interfaceProxy.publicKey),
+                                        )
                                     },
-                                    keyboardActions = keyboardActions,
-                                    label = stringResource(R.string.addresses),
-                                    hint = stringResource(R.string.comma_separated_list),
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth(3 / 5f)
-                                            .padding(end = 5.dp))
-                                ConfigurationTextBox(
-                                    value = uiState.interfaceProxy.listenPort,
-                                    onValueChange = { value ->
-                                      viewModel.onListenPortChanged(value)
-                                    },
-                                    keyboardActions = keyboardActions,
-                                    label = stringResource(R.string.listen_port),
-                                    hint = stringResource(R.string.random),
-                                    modifier = Modifier.width(IntrinsicSize.Min))
-                              }
-                              Row(modifier = Modifier.fillMaxWidth()) {
-                                ConfigurationTextBox(
-                                    value = uiState.interfaceProxy.dnsServers,
-                                    onValueChange = { value ->
-                                      viewModel.onDnsServersChanged(value)
-                                    },
-                                    keyboardActions = keyboardActions,
-                                    label = stringResource(R.string.dns_servers),
-                                    hint = stringResource(R.string.comma_separated_list),
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth(3 / 5f)
-                                            .padding(end = 5.dp))
-                                ConfigurationTextBox(
-                                    value = uiState.interfaceProxy.mtu,
-                                    onValueChange = { value -> viewModel.onMtuChanged(value) },
-                                    keyboardActions = keyboardActions,
-                                    label = stringResource(R.string.mtu),
-                                    hint = stringResource(R.string.auto),
-                                    modifier = Modifier.width(IntrinsicSize.Min))
-                              }
-                              Row(
-                                  verticalAlignment = Alignment.CenterVertically,
-                                  modifier = Modifier.fillMaxSize().padding(top = 5.dp),
-                                  horizontalArrangement = Arrangement.Center) {
-                                    TextButton(onClick = { showApplicationsDialog = true }) {
-                                      Text(applicationButtonText())
-                                    }
-                                  }
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.ContentCopy,
+                                        stringResource(R.string.copy_public_key),
+                                        tint = Color.White,
+                                    )
+                                }
+                            },
+                            label = { Text(stringResource(R.string.public_key)) },
+                            singleLine = true,
+                            placeholder = { Text(stringResource(R.string.base64_key)) },
+                            keyboardOptions = keyboardOptions,
+                            keyboardActions = keyboardActions,
+                        )
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            ConfigurationTextBox(
+                                value = uiState.interfaceProxy.addresses,
+                                onValueChange = { value -> viewModel.onAddressesChanged(value) },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.addresses),
+                                hint = stringResource(R.string.comma_separated_list),
+                                modifier = Modifier.fillMaxWidth(3 / 5f).padding(end = 5.dp),
+                            )
+                            ConfigurationTextBox(
+                                value = uiState.interfaceProxy.listenPort,
+                                onValueChange = { value -> viewModel.onListenPortChanged(value) },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.listen_port),
+                                hint = stringResource(R.string.random),
+                                modifier = Modifier.width(IntrinsicSize.Min),
+                            )
+                        }
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            ConfigurationTextBox(
+                                value = uiState.interfaceProxy.dnsServers,
+                                onValueChange = { value -> viewModel.onDnsServersChanged(value) },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.dns_servers),
+                                hint = stringResource(R.string.comma_separated_list),
+                                modifier = Modifier.fillMaxWidth(3 / 5f).padding(end = 5.dp),
+                            )
+                            ConfigurationTextBox(
+                                value = uiState.interfaceProxy.mtu,
+                                onValueChange = { value -> viewModel.onMtuChanged(value) },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.mtu),
+                                hint = stringResource(R.string.auto),
+                                modifier = Modifier.width(IntrinsicSize.Min),
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxSize().padding(top = 5.dp),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            TextButton(onClick = { showApplicationsDialog = true }) {
+                                Text(applicationButtonText())
                             }
-                      }
-                  uiState.proxyPeers.forEachIndexed { index, peer ->
+                        }
+                    }
+                }
+                uiState.proxyPeers.forEachIndexed { index, peer ->
                     Surface(
                         tonalElevation = 2.dp,
                         shadowElevation = 2.dp,
@@ -445,106 +473,118 @@ fun ConfigScreen(
                         color = MaterialTheme.colorScheme.surface,
                         modifier =
                             (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                                  Modifier.fillMaxHeight(fillMaxHeight).fillMaxWidth(fillMaxWidth)
+                                    Modifier.fillMaxHeight(fillMaxHeight).fillMaxWidth(fillMaxWidth)
                                 } else {
-                                  Modifier.fillMaxWidth(fillMaxWidth)
+                                    Modifier.fillMaxWidth(fillMaxWidth)
                                 })
-                                .padding(top = 10.dp, bottom = 10.dp)) {
-                          Column(
-                              horizontalAlignment = Alignment.Start,
-                              verticalArrangement = Arrangement.Top,
-                              modifier =
-                                  Modifier.padding(horizontal = 15.dp).padding(bottom = 10.dp)) {
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp)) {
-                                      SectionTitle(
-                                          stringResource(R.string.peer), padding = screenPadding)
-                                      IconButton(onClick = { viewModel.onDeletePeer(index) }) {
-                                        Icon(Icons.Rounded.Delete, stringResource(R.string.delete))
-                                      }
-                                    }
-
-                                ConfigurationTextBox(
-                                    value = peer.publicKey,
-                                    onValueChange = { value ->
-                                      viewModel.onPeerPublicKeyChange(index, value)
-                                    },
-                                    keyboardActions = keyboardActions,
-                                    label = stringResource(R.string.public_key),
-                                    hint = stringResource(R.string.base64_key),
-                                    modifier = Modifier.fillMaxWidth())
-                                ConfigurationTextBox(
-                                    value = peer.preSharedKey,
-                                    onValueChange = { value ->
-                                      viewModel.onPreSharedKeyChange(index, value)
-                                    },
-                                    keyboardActions = keyboardActions,
-                                    label = stringResource(R.string.preshared_key),
-                                    hint = stringResource(R.string.optional),
-                                    modifier = Modifier.fillMaxWidth())
-                                OutlinedTextField(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    value = peer.persistentKeepalive,
-                                    enabled = true,
-                                    onValueChange = { value ->
-                                      viewModel.onPersistentKeepaliveChanged(index, value)
-                                    },
-                                    trailingIcon = {
-                                      Text(
-                                          stringResource(R.string.seconds),
-                                          modifier = Modifier.padding(end = 10.dp))
-                                    },
-                                    label = { Text(stringResource(R.string.persistent_keepalive)) },
-                                    singleLine = true,
-                                    placeholder = {
-                                      Text(stringResource(R.string.optional_no_recommend))
-                                    },
-                                    keyboardOptions = keyboardOptions,
-                                    keyboardActions = keyboardActions)
-                                ConfigurationTextBox(
-                                    value = peer.endpoint,
-                                    onValueChange = { value ->
-                                      viewModel.onEndpointChange(index, value)
-                                    },
-                                    keyboardActions = keyboardActions,
-                                    label = stringResource(R.string.endpoint),
-                                    hint = stringResource(R.string.endpoint).lowercase(),
-                                    modifier = Modifier.fillMaxWidth())
-                                OutlinedTextField(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    value = peer.allowedIps,
-                                    enabled = true,
-                                    onValueChange = { value ->
-                                      viewModel.onAllowedIpsChange(index, value)
-                                    },
-                                    label = { Text(stringResource(R.string.allowed_ips)) },
-                                    singleLine = true,
-                                    placeholder = {
-                                      Text(stringResource(R.string.comma_separated_list))
-                                    },
-                                    keyboardOptions = keyboardOptions,
-                                    keyboardActions = keyboardActions)
-                              }
-                        }
-                  }
-                  Row(
-                      horizontalArrangement = Arrangement.SpaceEvenly,
-                      verticalAlignment = Alignment.CenterVertically,
-                      modifier = Modifier.fillMaxSize().padding(bottom = 140.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center) {
-                              TextButton(onClick = { viewModel.addEmptyPeer() }) {
-                                Text(stringResource(R.string.add_peer))
-                              }
+                                .padding(top = 10.dp, bottom = 10.dp),
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Top,
+                            modifier = Modifier.padding(horizontal = 15.dp).padding(bottom = 10.dp),
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp),
+                            ) {
+                                SectionTitle(
+                                    stringResource(R.string.peer),
+                                    padding = screenPadding,
+                                )
+                                IconButton(onClick = { viewModel.onDeletePeer(index) }) {
+                                    Icon(Icons.Rounded.Delete, stringResource(R.string.delete))
+                                }
                             }
-                      }
+
+                            ConfigurationTextBox(
+                                value = peer.publicKey,
+                                onValueChange = { value ->
+                                    viewModel.onPeerPublicKeyChange(index, value)
+                                },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.public_key),
+                                hint = stringResource(R.string.base64_key),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            ConfigurationTextBox(
+                                value = peer.preSharedKey,
+                                onValueChange = { value ->
+                                    viewModel.onPreSharedKeyChange(index, value)
+                                },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.preshared_key),
+                                hint = stringResource(R.string.optional),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            OutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = peer.persistentKeepalive,
+                                enabled = true,
+                                onValueChange = { value ->
+                                    viewModel.onPersistentKeepaliveChanged(index, value)
+                                },
+                                trailingIcon = {
+                                    Text(
+                                        stringResource(R.string.seconds),
+                                        modifier = Modifier.padding(end = 10.dp),
+                                    )
+                                },
+                                label = { Text(stringResource(R.string.persistent_keepalive)) },
+                                singleLine = true,
+                                placeholder = {
+                                    Text(stringResource(R.string.optional_no_recommend))
+                                },
+                                keyboardOptions = keyboardOptions,
+                                keyboardActions = keyboardActions,
+                            )
+                            ConfigurationTextBox(
+                                value = peer.endpoint,
+                                onValueChange = { value ->
+                                    viewModel.onEndpointChange(index, value)
+                                },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.endpoint),
+                                hint = stringResource(R.string.endpoint).lowercase(),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            OutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = peer.allowedIps,
+                                enabled = true,
+                                onValueChange = { value ->
+                                    viewModel.onAllowedIpsChange(index, value)
+                                },
+                                label = { Text(stringResource(R.string.allowed_ips)) },
+                                singleLine = true,
+                                placeholder = {
+                                    Text(stringResource(R.string.comma_separated_list))
+                                },
+                                keyboardOptions = keyboardOptions,
+                                keyboardActions = keyboardActions,
+                            )
+                        }
+                    }
                 }
-            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-              Spacer(modifier = Modifier.weight(.17f))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxSize().padding(bottom = 140.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        TextButton(onClick = { viewModel.addEmptyPeer() }) {
+                            Text(stringResource(R.string.add_peer))
+                        }
+                    }
+                }
             }
-          }
+            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                Spacer(modifier = Modifier.weight(.17f))
+            }
         }
+    }
 }

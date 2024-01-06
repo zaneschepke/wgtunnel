@@ -11,14 +11,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-fun BottomNavBar(
-    navController: NavController,
-    bottomNavItems: List<BottomNavItem>
-) {
+fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavItem>) {
     val backStackEntry = navController.currentBackStackEntryAsState()
 
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
     ) {
         bottomNavItems.forEach { item ->
             val selected = item.route == backStackEntry.value?.destination?.route
@@ -29,15 +26,15 @@ fun BottomNavBar(
                 label = {
                     Text(
                         text = item.name,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = "${item.name} Icon"
+                        contentDescription = "${item.name} Icon",
                     )
-                }
+                },
             )
         }
     }

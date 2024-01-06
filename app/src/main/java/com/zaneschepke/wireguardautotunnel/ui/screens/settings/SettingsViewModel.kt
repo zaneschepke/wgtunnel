@@ -36,18 +36,29 @@ constructor(
     private val vpnService: VpnService
 ) : ViewModel() {
 
-    val uiState = combine(
-        settingsRepository.getSettingsFlow(),
-        tunnelConfigRepository.getTunnelConfigsFlow(),
-        vpnService.vpnState,
-        dataStoreManager.locationDisclosureFlow,
-    ){ settings, tunnels, tunnelState, locationDisclosure ->
-        SettingsUiState(settings, tunnels, tunnelState, locationDisclosure
-            ?: false, false)
-    }.stateIn(viewModelScope,
-        SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT), SettingsUiState())
+    val uiState =
+        combine(
+                settingsRepository.getSettingsFlow(),
+                tunnelConfigRepository.getTunnelConfigsFlow(),
+                vpnService.vpnState,
+                dataStoreManager.preferencesFlow,
+            ) { settings, tunnels, tunnelState, preferences ->
+                SettingsUiState(
+                    settings,
+                    tunnels,
+                    tunnelState,
+                    preferences?.get(DataStoreManager.LOCATION_DISCLOSURE_SHOWN) ?: false,
+                    preferences?.get(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN) ?: false,
+                    false
+                )
+            }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+                SettingsUiState(),
+            )
 
-    fun onSaveTrustedSSID(ssid: String) : Result<Unit>{
+    fun onSaveTrustedSSID(ssid: String): Result<Unit> {
         val trimmed = ssid.trim()
         return if (!uiState.value.settings.trustedNetworkSSIDs.contains(trimmed)) {
             uiState.value.settings.trustedNetworkSSIDs.add(trimmed)
@@ -58,64 +69,77 @@ constructor(
         }
     }
 
-    fun setLocationDisclosureShown() = viewModelScope.launch {
+    fun setLocationDisclosureShown() =
+        viewModelScope.launch {
             dataStoreManager.saveToDataStore(DataStoreManager.LOCATION_DISCLOSURE_SHOWN, true)
-    }
+        }
+
+    fun setBatteryOptimizeDisableShown() =
+        viewModelScope.launch {
+            dataStoreManager.saveToDataStore(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN, true)
+        }
 
     fun onToggleTunnelOnMobileData() {
         saveSettings(
             uiState.value.settings.copy(
-                isTunnelOnMobileDataEnabled = !uiState.value.settings.isTunnelOnMobileDataEnabled
-            )
+                isTunnelOnMobileDataEnabled = !uiState.value.settings.isTunnelOnMobileDataEnabled,
+            ),
         )
     }
 
     fun onDeleteTrustedSSID(ssid: String) {
-        saveSettings(uiState.value.settings.copy(
-            trustedNetworkSSIDs = (uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList()
-        ))
-    }
-
-    private suspend fun getDefaultTunnelOrFirst() : String {
-        return uiState.value.settings.defaultTunnel ?: tunnelConfigRepository.getAll().first().toString()
-    }
-
-    fun toggleAutoTunnel() = viewModelScope.launch {
-        val isAutoTunnelEnabled = uiState.value.settings.isAutoTunnelEnabled
-        var isAutoTunnelPaused = uiState.value.settings.isAutoTunnelPaused
-
-        if (isAutoTunnelEnabled) {
-            ServiceManager.stopWatcherService(application)
-        } else {
-            ServiceManager.startWatcherService(application)
-            isAutoTunnelPaused = false
-        }
         saveSettings(
             uiState.value.settings.copy(
-                isAutoTunnelEnabled = !isAutoTunnelEnabled,
-                isAutoTunnelPaused = isAutoTunnelPaused,
-                defaultTunnel = getDefaultTunnelOrFirst()
-            )
+                trustedNetworkSSIDs =
+                    (uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList(),
+            ),
         )
     }
 
+    private suspend fun getDefaultTunnelOrFirst(): String {
+        return uiState.value.settings.defaultTunnel
+            ?: tunnelConfigRepository.getAll().first().toString()
+    }
 
-    fun onToggleAlwaysOnVPN() = viewModelScope.launch {
-        val updatedSettings = uiState.value.settings.copy(
-                isAlwaysOnVpnEnabled = !uiState.value.settings.isAlwaysOnVpnEnabled,
-                defaultTunnel = getDefaultTunnelOrFirst()
+    fun toggleAutoTunnel() =
+        viewModelScope.launch {
+            val isAutoTunnelEnabled = uiState.value.settings.isAutoTunnelEnabled
+            var isAutoTunnelPaused = uiState.value.settings.isAutoTunnelPaused
+
+            if (isAutoTunnelEnabled) {
+                ServiceManager.stopWatcherService(application)
+            } else {
+                ServiceManager.startWatcherService(application)
+                isAutoTunnelPaused = false
+            }
+            saveSettings(
+                uiState.value.settings.copy(
+                    isAutoTunnelEnabled = !isAutoTunnelEnabled,
+                    isAutoTunnelPaused = isAutoTunnelPaused,
+                    defaultTunnel = getDefaultTunnelOrFirst(),
+                ),
             )
-        saveSettings(updatedSettings)
-    }
+        }
 
-    private fun saveSettings(settings: Settings) = viewModelScope.launch {
-        settingsRepository.save(settings)
-    }
+    fun onToggleAlwaysOnVPN() =
+        viewModelScope.launch {
+            val updatedSettings =
+                uiState.value.settings.copy(
+                    isAlwaysOnVpnEnabled = !uiState.value.settings.isAlwaysOnVpnEnabled,
+                    defaultTunnel = getDefaultTunnelOrFirst(),
+                )
+            saveSettings(updatedSettings)
+        }
+
+    private fun saveSettings(settings: Settings) =
+        viewModelScope.launch { settingsRepository.save(settings) }
 
     fun onToggleTunnelOnEthernet() {
-        saveSettings(uiState.value.settings.copy(
-            isTunnelOnEthernetEnabled = !uiState.value.settings.isTunnelOnEthernetEnabled
-        ))
+        saveSettings(
+            uiState.value.settings.copy(
+                isTunnelOnEthernetEnabled = !uiState.value.settings.isTunnelOnEthernetEnabled,
+            ),
+        )
     }
 
     fun isLocationEnabled(context: Context): Boolean {
@@ -126,36 +150,36 @@ constructor(
     fun onToggleShortcutsEnabled() {
         saveSettings(
             uiState.value.settings.copy(
-                isShortcutsEnabled = !uiState.value.settings.isShortcutsEnabled
-            )
+                isShortcutsEnabled = !uiState.value.settings.isShortcutsEnabled,
+            ),
         )
     }
 
     fun onToggleBatterySaver() {
         saveSettings(
             uiState.value.settings.copy(
-                isBatterySaverEnabled = !uiState.value.settings.isBatterySaverEnabled
-            )
+                isBatterySaverEnabled = !uiState.value.settings.isBatterySaverEnabled,
+            ),
         )
     }
 
     private fun saveKernelMode(on: Boolean) {
         saveSettings(
             uiState.value.settings.copy(
-                isKernelEnabled = on
-            )
+                isKernelEnabled = on,
+            ),
         )
     }
 
     fun onToggleTunnelOnWifi() {
         saveSettings(
             uiState.value.settings.copy(
-                isTunnelOnWifiEnabled = !uiState.value.settings.isTunnelOnWifiEnabled
-            )
+                isTunnelOnWifiEnabled = !uiState.value.settings.isTunnelOnWifiEnabled,
+            ),
         )
     }
 
-    fun onToggleKernelMode() : Result<Unit> {
+    fun onToggleKernelMode(): Result<Unit> {
         if (!uiState.value.settings.isKernelEnabled) {
             try {
                 rootShell.start()

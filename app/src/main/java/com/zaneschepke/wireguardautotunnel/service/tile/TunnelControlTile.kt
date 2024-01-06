@@ -20,44 +20,43 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class TunnelControlTile() : TileService() {
 
-    @Inject
-    lateinit var tunnelConfigRepository: TunnelConfigRepository
+    @Inject lateinit var tunnelConfigRepository: TunnelConfigRepository
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var settingsRepository: SettingsRepository
 
-    @Inject
-    lateinit var vpnService: VpnService
+    @Inject lateinit var vpnService: VpnService
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private var tunnelName : String? = null
+    private var tunnelName: String? = null
 
     override fun onStartListening() {
         super.onStartListening()
         Timber.d("On start listening called")
         scope.launch {
             vpnService.vpnState.collect {
-                when(it.status) {
+                when (it.status) {
                     Tunnel.State.UP -> setActive()
                     Tunnel.State.DOWN -> setInactive()
                     else -> setInactive()
                 }
                 val tunnels = tunnelConfigRepository.getAll()
-                if(tunnels.isEmpty()) {
+                if (tunnels.isEmpty()) {
                     setUnavailable()
                     return@collect
                 }
-                tunnelName = it.name.ifBlank {
-                    val settings = settingsRepository.getSettings()
-                    if (settings.defaultTunnel != null) {
-                        TunnelConfig.from(settings.defaultTunnel!!).name
-                    } else tunnels.firstOrNull()?.name
-                }
+                tunnelName =
+                    it.name.ifBlank {
+                        val settings = settingsRepository.getSettings()
+                        if (settings.defaultTunnel != null) {
+                            TunnelConfig.from(settings.defaultTunnel!!).name
+                        } else tunnels.firstOrNull()?.name
+                    }
                 setTileDescription(tunnelName ?: "")
             }
         }
     }
+
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
@@ -73,14 +72,15 @@ class TunnelControlTile() : TileService() {
         unlockAndRun {
             scope.launch {
                 try {
-                    val tunnelConfig = tunnelConfigRepository.getAll().first { it.name == tunnelName }
+                    val tunnelConfig =
+                        tunnelConfigRepository.getAll().first { it.name == tunnelName }
                     toggleWatcherServicePause()
                     if (vpnService.getState() == Tunnel.State.UP) {
                         ServiceManager.stopVpnService(this@TunnelControlTile)
                     } else {
                         ServiceManager.startVpnServiceForeground(
                             this@TunnelControlTile,
-                            tunnelConfig.toString()
+                            tunnelConfig.toString(),
                         )
                     }
                 } catch (e: Exception) {
@@ -97,9 +97,11 @@ class TunnelControlTile() : TileService() {
             val settings = settingsRepository.getSettings()
             if (settings.isAutoTunnelEnabled) {
                 val pauseAutoTunnel = !settings.isAutoTunnelPaused
-                settingsRepository.save(settings.copy(
-                    isAutoTunnelPaused = pauseAutoTunnel
-                ))
+                settingsRepository.save(
+                    settings.copy(
+                        isAutoTunnelPaused = pauseAutoTunnel,
+                    ),
+                )
             }
         }
     }

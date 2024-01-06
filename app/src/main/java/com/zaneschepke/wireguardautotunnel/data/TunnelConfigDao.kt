@@ -10,24 +10,17 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TunnelConfigDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun save(t: TunnelConfig)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun save(t: TunnelConfig)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveAll(t: List<TunnelConfig>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun saveAll(t: List<TunnelConfig>)
 
-    @Query("SELECT * FROM TunnelConfig WHERE id=:id")
-    suspend fun getById(id: Long): TunnelConfig?
+    @Query("SELECT * FROM TunnelConfig WHERE id=:id") suspend fun getById(id: Long): TunnelConfig?
 
-    @Query("SELECT * FROM TunnelConfig")
-    suspend fun getAll(): List<TunnelConfig>
+    @Query("SELECT * FROM TunnelConfig") suspend fun getAll(): List<TunnelConfig>
 
-    @Delete
-    suspend fun delete(t: TunnelConfig)
+    @Delete suspend fun delete(t: TunnelConfig)
 
-    @Query("SELECT COUNT('id') FROM TunnelConfig")
-    suspend fun count(): Long
+    @Query("SELECT COUNT('id') FROM TunnelConfig") suspend fun count(): Long
 
-    @Query("SELECT * FROM tunnelconfig")
-    fun getAllFlow(): Flow<MutableList<TunnelConfig>>
+    @Query("SELECT * FROM tunnelconfig") fun getAllFlow(): Flow<MutableList<TunnelConfig>>
 }

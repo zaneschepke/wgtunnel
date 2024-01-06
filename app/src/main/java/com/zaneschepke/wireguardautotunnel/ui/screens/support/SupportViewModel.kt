@@ -11,15 +11,16 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class SupportViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
-) : ViewModel() {
+class SupportViewModel @Inject constructor(private val settingsRepository: SettingsRepository) :
+    ViewModel() {
 
-    val uiState = settingsRepository.getSettingsFlow().map {
-        SupportUiState(it, false)
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
-        SupportUiState()
-    )
+    val uiState =
+        settingsRepository
+            .getSettingsFlow()
+            .map { SupportUiState(it, false) }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+                SupportUiState(),
+            )
 }

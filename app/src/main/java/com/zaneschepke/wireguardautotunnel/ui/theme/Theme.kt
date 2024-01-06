@@ -21,7 +21,7 @@ private val DarkColorScheme =
         primary = virdigris,
         secondary = virdigris,
         // secondary = PurpleGrey80,
-        tertiary = virdigris
+        tertiary = virdigris,
         // tertiary = Pink80
     )
 
@@ -29,7 +29,7 @@ private val LightColorScheme =
     lightColorScheme(
         primary = Purple40,
         secondary = PurpleGrey40,
-        tertiary = Pink40
+        tertiary = Pink40,
         /* Other default colors to override
         background = Color(0xFFFFFBFE),
         surface = Color(0xFFFFFBFE),
@@ -57,7 +57,6 @@ fun WireguardAutoTunnelTheme(
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
-
             darkTheme -> DarkColorScheme
             else -> LightColorScheme
         }
@@ -68,14 +67,19 @@ fun WireguardAutoTunnelTheme(
             WindowCompat.setDecorFitsSystemWindows(window, false)
             window.statusBarColor = Color.Transparent.toArgb()
             window.navigationBarColor = Color.Transparent.toArgb()
-            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = !darkTheme
+            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+                !darkTheme
+            WindowCompat.getInsetsController(
+                    window,
+                    window.decorView,
+                )
+                .isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }
