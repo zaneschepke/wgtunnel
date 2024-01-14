@@ -67,6 +67,12 @@ and on while on different networks. This app was created to offer a free solutio
 * Automatic service restart after reboot
 * Battery preservation measures
 
+## Docs (WIP)
+
+Basic documentation of the feature and behaviors of this app can be found [here](https://zaneschepke.com/wgtunnel-docs/overview.html).
+
+The repository for these docs can be found [here](https://github.com/zaneschepke/wgtunnel-docs).
+
 ## Building
 
 ```
