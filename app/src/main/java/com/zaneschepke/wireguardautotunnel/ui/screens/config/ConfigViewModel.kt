@@ -206,11 +206,13 @@ constructor(
             val peerList = buildPeerListFromProxyPeers()
             val wgInterface = buildInterfaceListFromProxyInterface()
             val config = Config.Builder().addPeers(peerList).setInterface(wgInterface).build()
-            val tunnelConfig =
-                _uiState.value.tunnel?.copy(
+            val tunnelConfig = when(uiState.value.tunnel) {
+                null -> TunnelConfig(name = _uiState.value.tunnelName, wgQuick = config.toWgQuickString())
+                else -> uiState.value.tunnel!!.copy(
                     name = _uiState.value.tunnelName,
                     wgQuick = config.toWgQuickString(),
                 )
+            }
             updateTunnelConfig(tunnelConfig)
             Result.Success(Event.Message.ConfigSaved)
         } catch (e: Exception) {

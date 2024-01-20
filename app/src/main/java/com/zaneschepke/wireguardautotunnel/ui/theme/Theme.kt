@@ -69,11 +69,6 @@ fun WireguardAutoTunnelTheme(
             window.navigationBarColor = Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
                 !darkTheme
-            WindowCompat.getInsetsController(
-                    window,
-                    window.decorView,
-                )
-                .isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
