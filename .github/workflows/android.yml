@@ -70,7 +70,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # fix hardcode changelog file name
-          body_path: ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/33300.txt
+          body_path: ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/33400.txt
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           draft: false
