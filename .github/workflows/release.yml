@@ -1,0 +1,92 @@
+# name of the workflow
+name: Android CI Tag Deployment (Release)
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build:
+    name: Build Signed APK
+
+    runs-on: ubuntu-latest
+
+    env:
+      KEY_STORE_PATH: ${{ secrets.KEY_STORE_PATH }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Here we need to decode keystore.jks from base64 string and place it
+      # in the folder specified in the release signing configuration
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'android_keystore.jks'
+          fileDir: ${{ github.workspace }}/app/keystore/
+          encodedString: ${{ secrets.KEYSTORE }}
+
+      - name: Create service_account.json
+        id: createServiceAccount
+        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service_account.json
+
+      # Build and sign APK ("-x test" argument is used to skip tests)
+      # add fdroid flavor for apk upload
+      - name: Build Fdroid Release APK
+        run: ./gradlew :app:assembleFdroidRelease -x test
+
+      # get fdroid flavor release apk path
+      - name: Get apk path
+        id: apk-path
+        run: echo "path=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+
+      # Save the APK after the Build job is complete to publish it as a Github release in the next job
+      - name: Upload APK
+        uses: actions/upload-artifact@v4.2.0
+        with:
+          name: wgtunnel
+          path: ${{ steps.apk-path.outputs.path }}
+      - name: Download APK from build
+        uses: actions/download-artifact@v4
+        with:
+          name: wgtunnel
+      - name: Repository Dispatch for my F-Droid repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.PAT }}
+          repository: zaneschepke/fdroid
+          event-type: fdroid-update
+      - name: Create Release with Fastlane changelog notes
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # fix hardcode changelog file name
+          body_path: ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/33400.txt
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: ${{ github.workspace }}/${{ steps.apk-path.outputs.path }}
+      - name: Deploy with fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2' # Not needed with a .ruby-version file
+          bundler-cache: true
+      - name: Distribute app to Beta track 🚀
+        run: (cd ${{ github.workspace }} && bundle install && bundle exec fastlane production)
+

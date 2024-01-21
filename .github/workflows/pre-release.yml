@@ -1,10 +1,10 @@
 # name of the workflow
-name: Android CI Tag Deployment
+name: Android CI Tag Deployment (Pre-release)
 
 on:
   push:
     tags:
-      - '*.*.*'
+      - '*.*.*-**'
 
 jobs:
   build:
@@ -63,12 +63,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: wgtunnel
-      - name: Repository Dispatch for my F-Droid repo
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.PAT }}
-          repository: zaneschepke/fdroid
-          event-type: fdroid-update
       - name: Create Release with Fastlane changelog notes
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -78,16 +72,15 @@ jobs:
           # fix hardcode changelog file name
           body_path: ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/33400.txt
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           draft: false
-          prerelease: false
+          prerelease: true
           files: ${{ github.workspace }}/${{ steps.apk-path.outputs.path }}
       - name: Deploy with fastlane
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2' # Not needed with a .ruby-version file
           bundler-cache: true
-
       - name: Distribute app to Beta track 🚀
         run: (cd ${{ github.workspace }} && bundle install && bundle exec fastlane beta)
 
