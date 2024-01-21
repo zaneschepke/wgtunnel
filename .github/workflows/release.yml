@@ -2,9 +2,11 @@
 name: Android CI Tag Deployment (Release)
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - '*.*.*'
+      - '!*.*.*-**'
 
 jobs:
   build:
@@ -54,7 +56,7 @@ jobs:
         run: echo "path=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
       - name: Get version code
         run: |
-          version_code=$(grep "VERSION_CODE" buildSrc/src/main/kotlin/Constants.kt | awk '{print $2}' | tr -d '\n')
+          version_code=$(grep "VERSION_CODE" buildSrc/src/main/kotlin/Constants.kt | awk '{print $5}' | tr -d '\n')
           echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
       # Save the APK after the Build job is complete to publish it as a Github release in the next job
       - name: Upload APK
