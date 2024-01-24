@@ -60,7 +60,7 @@ jobs:
           echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
       # Save the APK after the Build job is complete to publish it as a Github release in the next job
       - name: Upload APK
-        uses: actions/upload-artifact@v4.2.0
+        uses: actions/upload-artifact@v4.3.0
         with:
           name: wgtunnel
           path: ${{ steps.apk-path.outputs.path }}
