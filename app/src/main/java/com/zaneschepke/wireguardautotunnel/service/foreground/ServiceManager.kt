@@ -4,6 +4,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import timber.log.Timber
 
 object ServiceManager {
@@ -75,6 +77,15 @@ object ServiceManager {
             WireGuardTunnelService::class.java,
             mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig),
         )
+    }
+
+    fun startVpnServicePrimaryTunnel(context: Context, settings: Settings, fallbackTunnel: TunnelConfig? = null) {
+        if(settings.defaultTunnel != null) {
+            return startVpnServiceForeground(context, settings.defaultTunnel!!)
+        }
+        if(fallbackTunnel != null) {
+            startVpnServiceForeground(context, fallbackTunnel.toString())
+        }
     }
 
     fun startWatcherServiceForeground(

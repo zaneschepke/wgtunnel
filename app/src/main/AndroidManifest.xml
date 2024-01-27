@@ -101,7 +101,7 @@
         <service
             android:name=".service.tile.TunnelControlTile"
             android:exported="true"
-            android:icon="@drawable/shield"
+            android:icon="@drawable/ic_launcher"
             android:label="WG Tunnel"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <meta-data

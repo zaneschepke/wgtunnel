@@ -15,10 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      KEY_STORE_PATH: ${{ secrets.KEY_STORE_PATH }}
       SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
       SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
       SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+      KEY_STORE_FILE: 'android_keystore.jks'
+      KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
 
     steps:
       - uses: actions/checkout@v4
@@ -37,9 +38,15 @@ jobs:
         id: decode_keystore
         uses: timheuer/base64-to-file@v1.2
         with:
-          fileName: 'android_keystore.jks'
-          fileDir: ${{ github.workspace }}/app/keystore/
+          fileName: ${{ env.KEY_STORE_FILE }}
+          fileDir: ${{ env.KEY_STORE_LOCATION }}
           encodedString: ${{ secrets.KEYSTORE }}
+
+      # create keystore path for gradle to read
+      - name: Create keystore path env var
+        run: |
+          store_path=${{ env.KEY_STORE_LOCATION }}${{ env.KEY_STORE_FILE }}
+          echo "KEY_STORE_PATH=$store_path" >> $GITHUB_ENV
 
       - name: Create service_account.json
         id: createServiceAccount
@@ -92,6 +99,6 @@ jobs:
         with:
           ruby-version: '3.2' # Not needed with a .ruby-version file
           bundler-cache: true
-      - name: Distribute app to Beta track 🚀
+      - name: Distribute app to Prod track 🚀
         run: (cd ${{ github.workspace }} && bundle install && bundle exec fastlane production)
 

@@ -94,7 +94,7 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
                 .setOngoing(onGoing)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setShowWhen(showTimestamp)
-                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.ic_launcher)
                 .build()
         }
     }

@@ -1,5 +1,5 @@
 [versions]
-accompanist = "0.32.0"
+accompanist = "0.34.0"
 activityCompose = "1.8.2"
 androidx-junit = "1.1.5"
 appcompat = "1.6.1"
@@ -16,19 +16,18 @@ hiltNavigationCompose = "1.1.0"
 junit = "4.13.2"
 kotlinx-serialization-json = "1.6.2"
 lifecycle-runtime-compose = "2.7.0"
-material-icons-extended = "1.5.4"
-material3 = "1.1.2"
+material3 = "1.2.0-rc01"
 navigationCompose = "2.7.6"
 roomVersion = "2.6.1"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
-androidGradlePlugin = "8.2.1"
+androidGradlePlugin = "8.2.2"
 kotlin = "1.9.22"
 ksp = "1.9.22-1.0.16"
-composeBom = "2023.10.01"
-firebaseBom = "32.7.0"
-compose = "1.5.4"
-crashlytics = "18.6.0"
+composeBom = "2024.01.00"
+firebaseBom = "32.7.1"
+compose = "1.6.0"
+crashlytics = "18.6.1"
 analytics = "21.5.0"
 zxingAndroidEmbedded = "4.3.0"
 zxingCore = "3.5.2"
@@ -80,7 +79,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material-icons-extended" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 tunnel = { module = "com.wireguard.android:tunnel", version.ref = "tunnel" }

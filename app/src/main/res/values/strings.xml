@@ -6,14 +6,14 @@
     <string name="watcher_channel_id">Watcher Channel</string>
     <string name="watcher_channel_name">Watcher Notification Channel</string>
     <string name="foreground_file">FOREGROUND_FILE</string>
-    <string name="github_url">https://github.com/zaneschepke/wgtunnel/issues</string>
-    <string name="docs_url">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
-    <string name="privacy_policy_url">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
+    <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
+    <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
+    <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
     <string name="error_file_extension">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Action requires tunnel off</string>
     <string name="no_tunnels">No tunnels added yet!</string>
     <string name="tunnel_exists">Tunnel name already exists</string>
-    <string name="discord_url">https://discord.gg/rbRRNh6H7V</string>
+    <string name="discord_url" translatable="false">https://discord.gg/rbRRNh6H7V</string>
     <string name="watcher_notification_title">Watcher Service</string>
     <string name="watcher_notification_text_active">Monitoring network state changes: active</string>
     <string name="watcher_notification_text_paused">Monitoring network state changes: paused</string>
@@ -39,7 +39,7 @@
     <string name="thank_you">Thank you for using WG Tunnel!</string>
     <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
-    <string name="config_validation">[Interface]</string>
+    <string name="config_validation" translatable="false">[Interface]</string>
     <string name="add_tunnels_text">Add from file or zip</string>
     <string name="open_file">File Open</string>
     <string name="add_from_qr">Add from QR code</string>
@@ -140,15 +140,15 @@
     <string name="exported_configs_message">Exported configs to downloads</string>
     <string name="status">status</string>
     <string name="tunnel_on_wifi">Tunnel on untrusted wifi</string>
-    <string name="my_email">zanecschepke@gmail.com</string>
+    <string name="my_email" translatable="false">zanecschepke@gmail.com</string>
     <string name="email_subject">WG Tunnel Support</string>
     <string name="email_chooser">Send an email…</string>
     <string name="go">go</string>
     <string name="docs_description">Read the docs (WIP)</string>
     <string name="discord_description">Join the community</string>
-    <string name="discord">Discord</string>
+    <string name="discord" translatable="false">Discord</string>
     <string name="docs">Docs</string>
-    <string name="github">GitHub</string>
+    <string name="github" translatable="false">GitHub</string>
     <string name="email">Email</string>
     <string name="email_description">Send me an email</string>
     <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
