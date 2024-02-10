@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -88,6 +89,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
@@ -131,6 +133,17 @@ fun MainScreen(
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    var vpnIntent by remember { mutableStateOf(GoBackend.VpnService.prepare(WireGuardAutoTunnel.instance)) }
+    val vpnActivityResultState =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            onResult = {
+                val accepted = (it.resultCode == AppCompatActivity.RESULT_OK)
+                if (accepted) {
+                    vpnIntent = null
+                }
+            },
+        )
     LaunchedEffect(uiState.loading) {
         if (!uiState.loading && WireGuardAutoTunnel.isRunningOnAndroidTv()) {
             delay(Constants.FOCUS_REQUEST_DELAY)
@@ -254,6 +267,9 @@ fun MainScreen(
     }
 
     fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
+        if (vpnIntent != null) {
+            return vpnActivityResultState.launch(vpnIntent)
+        }
         if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
     }
 

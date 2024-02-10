@@ -74,9 +74,6 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 dataStoreManager.init()
-                if (settingsRepository.getAll().isEmpty()) {
-                    settingsRepository.save(com.zaneschepke.wireguardautotunnel.data.model.Settings())
-                }
                 WireGuardAutoTunnel.requestTileServiceStateUpdate()
             } catch (e: IOException) {
                 Timber.e("Failed to load preferences")
@@ -93,35 +90,18 @@ class MainActivity : AppCompatActivity() {
 
                 val snackbarHostState = remember { SnackbarHostState() }
 
-                val notificationPermissionState =
-                    rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+                val notificationPermissionState = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS) else null
 
                 fun requestNotificationPermission() {
-                    if (
-                        !notificationPermissionState.status.isGranted &&
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                    if (notificationPermissionState != null && !notificationPermissionState.status.isGranted
                     ) {
                         notificationPermissionState.launchPermissionRequest()
                     }
                 }
 
-                var vpnIntent by remember { mutableStateOf(GoBackend.VpnService.prepare(this)) }
-                val vpnActivityResultState =
-                    rememberLauncherForActivityResult(
-                        ActivityResultContracts.StartActivityForResult(),
-                        onResult = {
-                            val accepted = (it.resultCode == RESULT_OK)
-                            if (accepted) {
-                                vpnIntent = null
-                            }
-                        },
-                    )
-                LaunchedEffect(vpnIntent) {
-                    if (vpnIntent != null) {
-                        vpnActivityResultState.launch(vpnIntent)
-                    } else {
-                        requestNotificationPermission()
-                    }
+                LaunchedEffect(Unit) {
+                    requestNotificationPermission()
                 }
 
                 fun showSnackBarMessage(message: String) {
@@ -156,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                     },
                     modifier = Modifier.focusable().focusProperties { up = focusRequester },
                     bottomBar =
-                        if (vpnIntent == null && notificationPermissionState.status.isGranted) {
+                        if (notificationPermissionState != null && notificationPermissionState.status.isGranted) {
                             {
                                 BottomNavBar(
                                     navController,
@@ -171,16 +151,7 @@ class MainActivity : AppCompatActivity() {
                             {}
                         },
                 ) { padding ->
-                    if (vpnIntent != null) {
-                        PermissionRequestFailedScreen(
-                            padding = padding,
-                            onRequestAgain = { vpnActivityResultState.launch(vpnIntent) },
-                            message = getString(R.string.vpn_permission_required),
-                            getString(R.string.retry),
-                        )
-                        return@Scaffold
-                    }
-                    if (!notificationPermissionState.status.isGranted) {
+                    if (notificationPermissionState != null && !notificationPermissionState.status.isGranted) {
                         PermissionRequestFailedScreen(
                             padding = padding,
                             onRequestAgain = {
@@ -231,7 +202,6 @@ class MainActivity : AppCompatActivity() {
                         composable("${Screen.Config.route}/{id}") {
                             val id = it.arguments?.getString("id")
                             if (!id.isNullOrBlank()) {
-                                // https://dagger.dev/hilt/view-model#assisted-injection
                                 ConfigScreen(
                                     navController = navController,
                                     id = id,
