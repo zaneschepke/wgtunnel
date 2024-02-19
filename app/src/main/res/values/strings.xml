@@ -167,4 +167,12 @@
     <string name="delete_tunnel">Delete tunnel</string>
     <string name="delete_tunnel_message">Are you sure you would like to delete this tunnel?</string>
     <string name="yes">Yes</string>
+    <string name="resume">Resume</string>
+    <string name="pause">Pause</string>
+    <string name="paused">paused</string>
+    <string name="active">active</string>
+    <string name="tunneling_apps">Tunneling apps</string>
+    <string name="included">included</string>
+    <string name="excluded">excluded</string>
+    <string name="all">all</string>
 </resources>

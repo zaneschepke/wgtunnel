@@ -153,24 +153,25 @@ class MainActivity : AppCompatActivity() {
                             {}
                         },
                 ) { padding ->
-                    Column(modifier = Modifier.padding(padding)) {
                         if (notificationPermissionState != null && !notificationPermissionState.status.isGranted) {
-                            PermissionRequestFailedScreen(
-                                onRequestAgain = {
-                                    val intentSettings =
-                                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                    intentSettings.data =
-                                        Uri.fromParts(
-                                            Constants.URI_PACKAGE_SCHEME,
-                                            this@MainActivity.packageName,
-                                            null,
-                                        )
-                                    startActivity(intentSettings)
-                                },
-                                message = getString(R.string.notification_permission_required),
-                                getString(R.string.open_settings),
-                            )
-                            return@Scaffold
+                            Column(modifier = Modifier.padding(padding)) {
+                                PermissionRequestFailedScreen(
+                                    onRequestAgain = {
+                                        val intentSettings =
+                                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                        intentSettings.data =
+                                            Uri.fromParts(
+                                                Constants.URI_PACKAGE_SCHEME,
+                                                this@MainActivity.packageName,
+                                                null,
+                                            )
+                                        startActivity(intentSettings)
+                                    },
+                                    message = getString(R.string.notification_permission_required),
+                                    getString(R.string.open_settings),
+                                )
+                                return@Scaffold
+                            }
                         }
                         NavHost(navController, startDestination = Screen.Main.route) {
                             composable(
@@ -186,14 +187,17 @@ class MainActivity : AppCompatActivity() {
                                 Screen.Settings.route,
                             ) {
                                 SettingsScreen(
+                                    padding = padding,
                                     showSnackbarMessage = { message -> showSnackBarMessage(message) },
                                     focusRequester = focusRequester,
                                 )
+//
                             }
                             composable(
                                 Screen.Support.route,
                             ) {
                                 SupportScreen(
+                                    padding = padding,
                                     focusRequester = focusRequester,
                                     showSnackbarMessage = { message -> showSnackBarMessage(message) },
                                 )
@@ -202,6 +206,7 @@ class MainActivity : AppCompatActivity() {
                                 val id = it.arguments?.getString("id")
                                 if (!id.isNullOrBlank()) {
                                     ConfigScreen(
+                                        padding = padding,
                                         navController = navController,
                                         id = id,
                                         showSnackbarMessage = { message ->
@@ -212,7 +217,6 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         }
-                    }
                 }
             }
         }

@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.ScrollableDefaults
@@ -80,6 +81,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -287,8 +289,9 @@ fun MainScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
-                                Modifier.requiredWidth(LocalConfiguration.current.screenWidthDp.dp)
-                                    .padding(end = 5.dp),
+                            Modifier
+                                .requiredWidth(LocalConfiguration.current.screenWidthDp.dp)
+                                .padding(end = 5.dp)
                         ) {
                             Row {
                                 Icon(
@@ -299,8 +302,15 @@ fun MainScreen(
                                         if (uiState.settings.isAutoTunnelPaused) Color.Gray
                                         else mint,
                                 )
+                                val autoTunnelingLabel = buildAnnotatedString {
+                                    append(stringResource(id = R.string.auto_tunneling))
+                                    append(": ")
+                                    if(uiState.settings.isAutoTunnelPaused) append(stringResource(id = R.string.paused)) else append(
+                                        stringResource(id = R.string.active),
+                                    )
+                                }
                                 Text(
-                                    "Auto-tunneling: ${if (uiState.settings.isAutoTunnelPaused) "paused" else "active"}",
+                                    autoTunnelingLabel.text,
                                     style = typography.bodyLarge,
                                     modifier = Modifier.padding(start = 10.dp),
                                 )
@@ -310,14 +320,14 @@ fun MainScreen(
                                     onClick = { viewModel.resumeAutoTunneling() },
                                     modifier = Modifier.padding(end = 10.dp),
                                 ) {
-                                    Text("Resume")
+                                    Text(stringResource(id = R.string.resume))
                                 }
                             else
                                 TextButton(
                                     onClick = { viewModel.pauseAutoTunneling() },
                                     modifier = Modifier.padding(end = 10.dp),
                                 ) {
-                                    Text("Pause")
+                                    Text(stringResource(id = R.string.pause))
                                 }
                         }
                     },
@@ -334,17 +344,18 @@ fun MainScreen(
                 var fobColor by remember { mutableStateOf(secondaryColor) }
                 FloatingActionButton(
                     modifier =
-                        (if (
-                                WireGuardAutoTunnel.isRunningOnAndroidTv() &&
-                                    uiState.tunnels.isEmpty()
-                            )
-                                Modifier.focusRequester(focusRequester)
-                            else Modifier)
-                            .onFocusChanged {
-                                if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                                    fobColor = if (it.isFocused) hoverColor else secondaryColor
-                                }
-                            },
+                    (if (
+                        WireGuardAutoTunnel.isRunningOnAndroidTv() &&
+                        uiState.tunnels.isEmpty()
+                    )
+                        Modifier.focusRequester(focusRequester)
+                    else Modifier)
+                        .padding(bottom = 90.dp)
+                        .onFocusChanged {
+                            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                                fobColor = if (it.isFocused) hoverColor else secondaryColor
+                            }
+                        },
                     onClick = { showBottomSheet = true },
                     containerColor = fobColor,
                     shape = RoundedCornerShape(16.dp),
@@ -362,7 +373,9 @@ fun MainScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
             ) {
                 Text(text = stringResource(R.string.no_tunnels), fontStyle = FontStyle.Italic)
             }
@@ -375,12 +388,13 @@ fun MainScreen(
                 // Sheet content
                 Row(
                     modifier =
-                        Modifier.fillMaxWidth()
-                            .clickable {
-                                showBottomSheet = false
-                                tunnelFileImportResultLauncher.launch(Constants.ALLOWED_FILE_TYPES)
-                            }
-                            .padding(10.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showBottomSheet = false
+                            tunnelFileImportResultLauncher.launch(Constants.ALLOWED_FILE_TYPES)
+                        }
+                        .padding(10.dp),
                 ) {
                     Icon(
                         Icons.Filled.FileOpen,
@@ -396,23 +410,24 @@ fun MainScreen(
                     HorizontalDivider()
                     Row(
                         modifier =
-                            Modifier.fillMaxWidth()
-                                .clickable {
-                                    scope.launch {
-                                        showBottomSheet = false
-                                        val scanOptions = ScanOptions()
-                                        scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                                        scanOptions.setOrientationLocked(true)
-                                        scanOptions.setPrompt(
-                                            context.getString(R.string.scanning_qr)
-                                        )
-                                        scanOptions.setBeepEnabled(false)
-                                        scanOptions.captureActivity =
-                                            CaptureActivityPortrait::class.java
-                                        scanLauncher.launch(scanOptions)
-                                    }
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                scope.launch {
+                                    showBottomSheet = false
+                                    val scanOptions = ScanOptions()
+                                    scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                                    scanOptions.setOrientationLocked(true)
+                                    scanOptions.setPrompt(
+                                        context.getString(R.string.scanning_qr)
+                                    )
+                                    scanOptions.setBeepEnabled(false)
+                                    scanOptions.captureActivity =
+                                        CaptureActivityPortrait::class.java
+                                    scanLauncher.launch(scanOptions)
                                 }
-                                .padding(10.dp),
+                            }
+                            .padding(10.dp),
                     ) {
                         Icon(
                             Icons.Filled.QrCode,
@@ -428,14 +443,15 @@ fun MainScreen(
                 HorizontalDivider()
                 Row(
                     modifier =
-                        Modifier.fillMaxWidth()
-                            .clickable {
-                                showBottomSheet = false
-                                navController.navigate(
-                                    "${Screen.Config.route}/${Constants.MANUAL_TUNNEL_CONFIG_ID}",
-                                )
-                            }
-                            .padding(10.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showBottomSheet = false
+                            navController.navigate(
+                                "${Screen.Config.route}/${Constants.MANUAL_TUNNEL_CONFIG_ID}",
+                            )
+                        }
+                        .padding(10.dp),
                 ) {
                     Icon(
                         Icons.Filled.Create,
@@ -454,9 +470,11 @@ fun MainScreen(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
             modifier =
-                Modifier.fillMaxWidth()
-                    .fillMaxHeight(.90f)
-                    .overscroll(ScrollableDefaults.overscrollEffect()),
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(.90f)
+                .overscroll(ScrollableDefaults.overscrollEffect())
+                .padding(innerPadding),
             state = rememberLazyListState(0, uiState.tunnels.count()),
             userScrollEnabled = true,
             reverseLayout = true,
@@ -496,14 +514,18 @@ fun MainScreen(
                                 Icons.Rounded.Star,
                                 stringResource(R.string.status),
                                 tint = leadingIconColor,
-                                modifier = Modifier.padding(end = 10.dp).size(20.dp),
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(20.dp),
                             )
                         } else {
                             Icon(
                                 Icons.Rounded.Circle,
                                 stringResource(R.string.status),
                                 tint = leadingIconColor,
-                                modifier = Modifier.padding(end = 15.dp).size(15.dp),
+                                modifier = Modifier
+                                    .padding(end = 15.dp)
+                                    .size(15.dp),
                             )
                         }
                     },

@@ -8,6 +8,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +57,7 @@ import com.zaneschepke.wireguardautotunnel.util.Event
 
 @Composable
 fun SupportScreen(
+    padding: PaddingValues,
     viewModel: SupportViewModel = hiltViewModel(),
     showSnackbarMessage: (String) -> Unit,
     focusRequester: FocusRequester
@@ -102,7 +104,7 @@ fun SupportScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier =
-            Modifier.fillMaxSize()
+            Modifier.fillMaxSize().padding(padding)
                 .verticalScroll(rememberScrollState())
                 .focusable()
     ) {

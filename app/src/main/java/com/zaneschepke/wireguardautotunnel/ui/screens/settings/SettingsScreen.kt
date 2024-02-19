@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -93,6 +94,7 @@ import java.io.File
 )
 @Composable
 fun SettingsScreen(
+    padding: PaddingValues,
     viewModel: SettingsViewModel = hiltViewModel(),
     showSnackbarMessage: (String) -> Unit,
     focusRequester: FocusRequester
@@ -246,7 +248,7 @@ fun SettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(padding),
         ) {
             Icon(
                 Icons.Rounded.LocationOff,
@@ -312,7 +314,7 @@ fun SettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(padding),
         ) {
             Text(
                 stringResource(R.string.one_tunnel_required),
@@ -327,7 +329,7 @@ fun SettingsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
             modifier =
-                Modifier.fillMaxSize().verticalScroll(scrollState).clickable(
+                Modifier.fillMaxSize().padding(padding).verticalScroll(scrollState).clickable(
                     indication = null,
                     interactionSource = interactionSource,
                 ) {

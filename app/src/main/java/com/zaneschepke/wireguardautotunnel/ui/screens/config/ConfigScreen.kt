@@ -7,6 +7,7 @@ import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -61,6 +62,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -88,6 +90,7 @@ import kotlinx.coroutines.delay
 )
 @Composable
 fun ConfigScreen(
+    padding: PaddingValues,
     viewModel: ConfigViewModel = hiltViewModel(),
     focusRequester: FocusRequester,
     navController: NavController,
@@ -125,13 +128,16 @@ fun ConfigScreen(
     val fillMaxWidth = .85f
     val screenPadding = 5.dp
 
-    val applicationButtonText = {
-        "Tunneling apps: " +
+    val applicationButtonText = buildAnnotatedString {
+        append(stringResource(id = R.string.tunneling_apps))
+        append(": ")
             if (uiState.isAllApplicationsEnabled) {
-                "all"
+                append(stringResource(id = R.string.all))
             } else {
-                "${uiState.checkedPackageNames.size} " +
-                    (if (uiState.include) "included" else "excluded")
+                append("${uiState.checkedPackageNames.size} ")
+                    (if (uiState.include) append(stringResource(id = R.string.included)) else append(
+                        stringResource(id = R.string.excluded),
+                    ))
             }
     }
 
@@ -164,13 +170,17 @@ fun ConfigScreen(
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surface,
                 modifier =
-                Modifier.fillMaxWidth()
+                Modifier
+                    .fillMaxWidth()
                     .fillMaxHeight(if (uiState.isAllApplicationsEnabled) 1 / 5f else 4 / 5f),
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()) {
                     Row(
                         modifier =
-                        Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 7.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
@@ -183,7 +193,8 @@ fun ConfigScreen(
                     if (!uiState.isAllApplicationsEnabled) {
                         Row(
                             modifier =
-                            Modifier.fillMaxWidth()
+                            Modifier
+                                .fillMaxWidth()
                                 .padding(horizontal = 20.dp, vertical = 7.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -215,7 +226,8 @@ fun ConfigScreen(
                         }
                         Row(
                             modifier =
-                            Modifier.fillMaxWidth()
+                            Modifier
+                                .fillMaxWidth()
                                 .padding(horizontal = 20.dp, vertical = 7.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -232,7 +244,9 @@ fun ConfigScreen(
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxSize().padding(5.dp),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(5.dp),
                                 ) {
                                     Row(modifier = Modifier.fillMaxWidth(fillMaxWidth)) {
                                         val drawable =
@@ -275,7 +289,9 @@ fun ConfigScreen(
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxSize().padding(top = 5.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 5.dp),
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         TextButton(onClick = { showApplicationsDialog = false }) {
@@ -327,7 +343,11 @@ fun ConfigScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
                 modifier =
-                    Modifier.verticalScroll(rememberScrollState()).weight(1f, true).fillMaxSize(),
+                Modifier
+                    .verticalScroll(rememberScrollState())
+                    .weight(1f, true)
+                    .fillMaxSize()
+                    .padding(padding),
             ) {
                 Surface(
                     tonalElevation = 2.dp,
@@ -336,16 +356,20 @@ fun ConfigScreen(
                     color = MaterialTheme.colorScheme.surface,
                     modifier =
                         (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                                Modifier.fillMaxHeight(fillMaxHeight).fillMaxWidth(fillMaxWidth)
+                            Modifier
+                                .fillMaxHeight(fillMaxHeight)
+                                .fillMaxWidth(fillMaxWidth)
                             } else {
                                 Modifier.fillMaxWidth(fillMaxWidth)
                             })
-                            .padding(top = 50.dp, bottom = 10.dp),
+                            .padding(bottom = 10.dp),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.Top,
-                        modifier = Modifier.padding(15.dp).focusGroup(),
+                        modifier = Modifier
+                            .padding(15.dp)
+                            .focusGroup(),
                     ) {
                         SectionTitle(
                             stringResource(R.string.interface_),
@@ -357,10 +381,14 @@ fun ConfigScreen(
                             keyboardActions = keyboardActions,
                             label = stringResource(R.string.name),
                             hint = stringResource(R.string.tunnel_name).lowercase(),
-                            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
                         )
                         OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth().clickable { showAuthPrompt = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showAuthPrompt = true },
                             value = uiState.interfaceProxy.privateKey,
                             visualTransformation =
                                 if ((id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated)
@@ -388,7 +416,9 @@ fun ConfigScreen(
                         )
                         OutlinedTextField(
                             modifier =
-                                Modifier.fillMaxWidth().focusRequester(FocusRequester.Default),
+                            Modifier
+                                .fillMaxWidth()
+                                .focusRequester(FocusRequester.Default),
                             value = uiState.interfaceProxy.publicKey,
                             enabled = false,
                             onValueChange = {},
@@ -421,7 +451,9 @@ fun ConfigScreen(
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.addresses),
                                 hint = stringResource(R.string.comma_separated_list),
-                                modifier = Modifier.fillMaxWidth(3 / 5f).padding(end = 5.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth(3 / 5f)
+                                    .padding(end = 5.dp),
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.listenPort,
@@ -439,7 +471,9 @@ fun ConfigScreen(
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.dns_servers),
                                 hint = stringResource(R.string.comma_separated_list),
-                                modifier = Modifier.fillMaxWidth(3 / 5f).padding(end = 5.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth(3 / 5f)
+                                    .padding(end = 5.dp),
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.mtu,
@@ -452,11 +486,13 @@ fun ConfigScreen(
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxSize().padding(top = 5.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 5.dp),
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             TextButton(onClick = { showApplicationsDialog = true }) {
-                                Text(applicationButtonText())
+                                Text(applicationButtonText.text)
                             }
                         }
                     }
@@ -469,7 +505,9 @@ fun ConfigScreen(
                         color = MaterialTheme.colorScheme.surface,
                         modifier =
                             (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                                    Modifier.fillMaxHeight(fillMaxHeight).fillMaxWidth(fillMaxWidth)
+                                Modifier
+                                    .fillMaxHeight(fillMaxHeight)
+                                    .fillMaxWidth(fillMaxWidth)
                                 } else {
                                     Modifier.fillMaxWidth(fillMaxWidth)
                                 })
@@ -478,12 +516,16 @@ fun ConfigScreen(
                         Column(
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Top,
-                            modifier = Modifier.padding(horizontal = 15.dp).padding(bottom = 10.dp),
+                            modifier = Modifier
+                                .padding(horizontal = 15.dp)
+                                .padding(bottom = 10.dp),
                         ) {
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 5.dp),
                             ) {
                                 SectionTitle(
                                     stringResource(R.string.peer),
@@ -566,7 +608,9 @@ fun ConfigScreen(
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxSize().padding(bottom = 140.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 140.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
