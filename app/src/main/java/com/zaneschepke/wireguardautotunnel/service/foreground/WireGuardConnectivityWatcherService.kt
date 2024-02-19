@@ -152,12 +152,16 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
-                    if (isBatterySaverOn) {
-                        Timber.d("Initiating wakelock with timeout")
-                        acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
-                    } else {
-                        Timber.d("Initiating wakelock with zero timeout")
-                        acquire(Constants.DEFAULT_WATCHER_WAKE_LOCK_TIMEOUT)
+                    try {
+                        if (isBatterySaverOn) {
+                            Timber.d("Initiating wakelock with timeout")
+                            acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
+                        } else {
+                            Timber.d("Initiating wakelock with zero timeout")
+                            acquire(Constants.DEFAULT_WATCHER_WAKE_LOCK_TIMEOUT)
+                        }
+                    } finally {
+                        release()
                     }
                 }
             }

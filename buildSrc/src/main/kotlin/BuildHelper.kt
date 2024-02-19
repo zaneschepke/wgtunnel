@@ -1,4 +1,5 @@
 import org.gradle.api.invocation.Gradle
+import java.io.File
 
 object BuildHelper {
     private fun getCurrentFlavor(gradle: Gradle): String {
@@ -19,6 +20,17 @@ object BuildHelper {
                 ""
             }
         return flavor
+    }
+
+    fun getLocalProperty(key: String, file: String = "local.properties"): String? {
+        val properties = java.util.Properties()
+        val localProperties = File(file)
+        if (localProperties.isFile) {
+            java.io.InputStreamReader(java.io.FileInputStream(localProperties), Charsets.UTF_8).use { reader ->
+                properties.load(reader)
+            }
+        } else return null
+        return properties.getProperty(key)
     }
 
     fun isGeneralFlavor(gradle: Gradle): Boolean {

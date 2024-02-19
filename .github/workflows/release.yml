@@ -20,6 +20,8 @@ jobs:
       SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
       KEY_STORE_FILE: 'android_keystore.jks'
       KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
+      GH_USER: ${{ secrets.GH_USER }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4

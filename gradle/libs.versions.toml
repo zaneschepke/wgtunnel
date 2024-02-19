@@ -10,35 +10,35 @@ datastorePreferences = "1.0.0"
 desugar_jdk_libs = "2.0.4"
 espressoCore = "3.5.1"
 firebase-crashlytics-gradle = "2.9.9"
-google-services = "4.4.0"
+google-services = "4.4.1"
 hiltAndroid = "2.50"
 hiltNavigationCompose = "1.1.0"
 junit = "4.13.2"
 kotlinx-serialization-json = "1.6.2"
 lifecycle-runtime-compose = "2.7.0"
-material3 = "1.2.0-rc01"
-navigationCompose = "2.7.6"
+material3 = "1.2.0"
+navigationCompose = "2.7.7"
 roomVersion = "2.6.1"
 timber = "5.0.1"
-tunnel = "1.0.20230706"
-androidGradlePlugin = "8.3.0-rc01"
+tunnel = "1.1.0"
+androidGradlePlugin = "8.3.0-rc02"
 kotlin = "1.9.22"
 ksp = "1.9.22-1.0.16"
-composeBom = "2024.01.00"
-firebaseBom = "32.7.1"
-compose = "1.6.0"
-crashlytics = "18.6.1"
-analytics = "21.5.0"
+composeBom = "2024.02.00"
+firebaseBom = "32.7.2"
+compose = "1.6.1"
+crashlytics = "18.6.2"
+analytics = "21.5.1"
 zxingAndroidEmbedded = "4.3.0"
-zxingCore = "3.5.2"
+zxingCore = "3.5.3"
 
 
 [libraries]
+
 # accompanist
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist" }
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 
 #room
 androidx-biometric-ktx = { module = "androidx.biometric:biometric-ktx", version.ref = "biometricKtx" }
@@ -82,7 +82,7 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
-tunnel = { module = "com.wireguard.android:tunnel", version.ref = "tunnel" }
+tunnel = { module = "com.zaneschepke:wireguard-android", version.ref = "tunnel" }
 
 #firebase
 google-firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "crashlytics" }
@@ -93,9 +93,9 @@ google-services = { module = "com.google.gms:google-services", version.ref = "go
 
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxingCore" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
-
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }

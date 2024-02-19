@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,7 +19,6 @@ import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,10 +43,10 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -110,12 +108,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
-    padding: PaddingValues,
     focusRequester: FocusRequester,
     showSnackbarMessage: (String) -> Unit,
     navController: NavController
@@ -344,7 +340,6 @@ fun MainScreen(
                             )
                                 Modifier.focusRequester(focusRequester)
                             else Modifier)
-                            .padding(bottom = 90.dp)
                             .onFocusChanged {
                                 if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                                     fobColor = if (it.isFocused) hoverColor else secondaryColor
@@ -367,7 +362,7 @@ fun MainScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
             ) {
                 Text(text = stringResource(R.string.no_tunnels), fontStyle = FontStyle.Italic)
             }
@@ -398,7 +393,7 @@ fun MainScreen(
                     )
                 }
                 if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                    Divider()
+                    HorizontalDivider()
                     Row(
                         modifier =
                             Modifier.fillMaxWidth()
@@ -430,7 +425,7 @@ fun MainScreen(
                         )
                     }
                 }
-                Divider()
+                HorizontalDivider()
                 Row(
                     modifier =
                         Modifier.fillMaxWidth()
@@ -461,8 +456,7 @@ fun MainScreen(
             modifier =
                 Modifier.fillMaxWidth()
                     .fillMaxHeight(.90f)
-                    .overscroll(ScrollableDefaults.overscrollEffect())
-                    .padding(innerPadding),
+                    .overscroll(ScrollableDefaults.overscrollEffect()),
             state = rememberLazyListState(0, uiState.tunnels.count()),
             userScrollEnabled = true,
             reverseLayout = true,

@@ -71,6 +71,31 @@ The repository for these docs can be found [here](https://github.com/zaneschepke
 ```
 $ git clone https://github.com/zaneschepke/wgtunnel
 $ cd wgtunnel
+```
+
+Create a personal access token (classic) in GitHuv to be able to pull the wireguard-android github dependencies from GitHub packages
+as documented [here](https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages).
+
+Alternatively, you can clone [wireguard-android](https://github.com/zaneschepke/wireguard-android) and run the following command to publish the dependency to your local maven repository (requires you have maven installed). This is the ideal approach
+if you intent to make changes to this lib.
+
+```
+$ git clone https://github.com/zaneschepke/wireguard-android
+$ cd wireguard-android
+$ brew install maven
+$ ./gradlew publishToMavenLocal
+```
+
+The [wireguard-android](https://github.com/zaneschepke/wireguard-android) dependency is a fork of the official [wireguard-android](https://github.com/WireGuard/wireguard-android) library. 
+
+Add the following lines to local.properties file:
+```
+GH_USER=<your github username>
+GH_TOKEN=<the personal access token with read package permission you just created>
+```
+
+And then build the app:
+```
 $ ./gradlew assembleDebug
 ```
 

@@ -140,7 +140,7 @@
     <string name="exported_configs_message">Exported configs to downloads</string>
     <string name="status">status</string>
     <string name="tunnel_on_wifi">Tunnel on untrusted wifi</string>
-    <string name="my_email" translatable="false">zanecschepke@gmail.com</string>
+    <string name="my_email" translatable="false">support@zaneschepke.com</string>
     <string name="email_subject">WG Tunnel Support</string>
     <string name="email_chooser">Send an email…</string>
     <string name="go">go</string>

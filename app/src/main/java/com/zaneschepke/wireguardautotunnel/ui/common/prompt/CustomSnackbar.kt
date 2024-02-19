@@ -19,7 +19,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
@@ -33,7 +32,6 @@ fun CustomSnackBar(
     isRtl: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.surface
 ) {
-    val context = LocalContext.current
     Snackbar(
         containerColor = containerColor,
         modifier =

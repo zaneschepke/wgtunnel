@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.AppDatabase
+import com.zaneschepke.wireguardautotunnel.data.DatabaseCallback
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +24,7 @@ class DatabaseModule {
                 context.getString(R.string.db_name),
             )
             .fallbackToDestructiveMigration()
+            .addCallback(DatabaseCallback())
             .build()
     }
 }

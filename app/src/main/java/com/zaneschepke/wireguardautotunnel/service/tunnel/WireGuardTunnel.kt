@@ -25,7 +25,7 @@ import javax.inject.Inject
 class WireGuardTunnel
 @Inject
 constructor(
-    @Userspace private val userspaceBackend: Backend,
+    @Userspace private val userspaceBackend : Backend,
     @Kernel private val kernelBackend: Backend,
     private val settingsRepository: SettingsRepository
 ) : VpnService {

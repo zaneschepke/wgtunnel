@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -95,7 +94,6 @@ import java.io.File
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    padding: PaddingValues,
     showSnackbarMessage: (String) -> Unit,
     focusRequester: FocusRequester
 ) {
@@ -127,7 +125,7 @@ fun SettingsScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val intent = result.data
+                result.data
                 // Handle the Intent
             }
             viewModel.setBatteryOptimizeDisableShown()
@@ -248,7 +246,7 @@ fun SettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(padding),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
         ) {
             Icon(
                 Icons.Rounded.LocationOff,
@@ -314,7 +312,7 @@ fun SettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize(),
         ) {
             Text(
                 stringResource(R.string.one_tunnel_required),
@@ -347,7 +345,7 @@ fun SettingsScreen(
                                 .fillMaxWidth(fillMaxWidth)
                                 .padding(top = 10.dp)
                         } else {
-                            Modifier.fillMaxWidth(fillMaxWidth).padding(top = 60.dp)
+                            Modifier.fillMaxWidth(fillMaxWidth).padding(top = 20.dp)
                         })
                         .padding(bottom = 10.dp),
             ) {

@@ -2,7 +2,6 @@ package com.zaneschepke.wireguardautotunnel.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -17,7 +16,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PermissionRequestFailedScreen(
-    padding: PaddingValues,
     onRequestAgain: () -> Unit,
     message: String,
     buttonText: String
@@ -26,7 +24,7 @@ fun PermissionRequestFailedScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(padding),
+        modifier = Modifier.fillMaxSize(),
     ) {
         Text(message, textAlign = TextAlign.Center, modifier = Modifier.padding(15.dp))
         Button(

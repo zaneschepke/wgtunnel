@@ -8,7 +8,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,10 +19,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Mail
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -58,7 +57,6 @@ import com.zaneschepke.wireguardautotunnel.util.Event
 @Composable
 fun SupportScreen(
     viewModel: SupportViewModel = hiltViewModel(),
-    padding: PaddingValues,
     showSnackbarMessage: (String) -> Unit,
     focusRequester: FocusRequester
 ) {
@@ -107,7 +105,6 @@ fun SupportScreen(
             Modifier.fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .focusable()
-                .padding(padding),
     ) {
         Surface(
             tonalElevation = 2.dp,
@@ -155,10 +152,16 @@ fun SupportScreen(
                                 modifier = Modifier.padding(start = 10.dp),
                             )
                         }
-                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowForward,
+                            stringResource(id = R.string.go)
+                        )
                     }
                 }
-                Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
                 TextButton(
                     onClick = { openWebPage(context.resources.getString(R.string.discord_url)) },
                     modifier = Modifier.padding(vertical = 5.dp),
@@ -180,10 +183,16 @@ fun SupportScreen(
                                 modifier = Modifier.padding(start = 10.dp),
                             )
                         }
-                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowForward,
+                            stringResource(id = R.string.go)
+                        )
                     }
                 }
-                Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
                 TextButton(
                     onClick = { openWebPage(context.resources.getString(R.string.github_url)) },
                     modifier = Modifier.padding(vertical = 5.dp),
@@ -205,10 +214,16 @@ fun SupportScreen(
                                 modifier = Modifier.padding(start = 10.dp),
                             )
                         }
-                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowForward,
+                            stringResource(id = R.string.go)
+                        )
                     }
                 }
-                Divider(color = MaterialTheme.colorScheme.onBackground, thickness = 0.5.dp)
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
                 TextButton(
                     onClick = { launchEmail() },
                     modifier = Modifier.padding(vertical = 5.dp),
@@ -226,7 +241,10 @@ fun SupportScreen(
                                 modifier = Modifier.padding(start = 10.dp),
                             )
                         }
-                        Icon(Icons.Rounded.ArrowForward, stringResource(id = R.string.go))
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowForward,
+                            stringResource(id = R.string.go)
+                        )
                     }
                 }
             }

@@ -8,6 +8,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepositor
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.util.goAsync
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -21,8 +22,10 @@ class BootReceiver : BroadcastReceiver() {
         if (Intent.ACTION_BOOT_COMPLETED != intent?.action) return@goAsync
         val settings = settingsRepository.getSettings()
         if (settings.isAutoTunnelEnabled) {
+            Timber.i("Starting watcher service from boot")
             ServiceManager.startWatcherServiceForeground(context!!)
         } else if(settings.isAlwaysOnVpnEnabled) {
+            Timber.i("Starting tunnel from boot")
             ServiceManager.startVpnServicePrimaryTunnel(context!!, settings, tunnelConfigRepository.getAll().firstOrNull())
         }
     }

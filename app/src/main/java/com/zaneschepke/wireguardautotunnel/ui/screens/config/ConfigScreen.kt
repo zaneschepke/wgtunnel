@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.config
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
@@ -29,7 +28,7 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -51,7 +50,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -86,9 +84,7 @@ import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(
-    ExperimentalComposeUiApi::class,
     ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class,
 )
 @Composable
 fun ConfigScreen(
@@ -145,7 +141,7 @@ fun ConfigScreen(
                 showAuthPrompt = false
                 isAuthenticated = true
             },
-            onError = { error ->
+            onError = {
                 showAuthPrompt = false
                 showSnackbarMessage(Event.Error.AuthenticationFailed.message)
             },
@@ -161,20 +157,20 @@ fun ConfigScreen(
             remember(uiState.packages) {
                 uiState.packages.sortedBy { viewModel.getPackageLabel(it) }
             }
-        AlertDialog(onDismissRequest = { showApplicationsDialog = false }) {
+        BasicAlertDialog(onDismissRequest = { showApplicationsDialog = false }) {
             Surface(
                 tonalElevation = 2.dp,
                 shadowElevation = 2.dp,
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surface,
                 modifier =
-                    Modifier.fillMaxWidth()
-                        .fillMaxHeight(if (uiState.isAllApplicationsEnabled) 1 / 5f else 4 / 5f),
+                Modifier.fillMaxWidth()
+                    .fillMaxHeight(if (uiState.isAllApplicationsEnabled) 1 / 5f else 4 / 5f),
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier =
-                            Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 7.dp),
+                        Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
@@ -187,8 +183,8 @@ fun ConfigScreen(
                     if (!uiState.isAllApplicationsEnabled) {
                         Row(
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(horizontal = 20.dp, vertical = 7.dp),
+                            Modifier.fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 7.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
@@ -219,8 +215,8 @@ fun ConfigScreen(
                         }
                         Row(
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(horizontal = 20.dp, vertical = 7.dp),
+                            Modifier.fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 7.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
@@ -262,9 +258,9 @@ fun ConfigScreen(
                                     Checkbox(
                                         modifier = Modifier.fillMaxSize(),
                                         checked =
-                                            (uiState.checkedPackageNames.contains(
-                                                pack.packageName
-                                            )),
+                                        (uiState.checkedPackageNames.contains(
+                                            pack.packageName
+                                        )),
                                         onCheckedChange = {
                                             if (it) {
                                                 viewModel.onAddCheckedPackage(pack.packageName)
@@ -299,7 +295,7 @@ fun ConfigScreen(
             var fobColor by remember { mutableStateOf(secondaryColor) }
             FloatingActionButton(
                 modifier =
-                    Modifier.padding(bottom = 90.dp).onFocusChanged {
+                    Modifier.onFocusChanged {
                         if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                             fobColor = if (it.isFocused) hoverColor else secondaryColor
                         }

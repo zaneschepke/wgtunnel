@@ -156,12 +156,13 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.manifest)
 
-    // wg
+    // get tunnel lib from github packages or mavenLocal
     implementation(libs.tunnel)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // logging
     implementation(libs.timber)
+
 
     // compose navigation
     implementation(libs.androidx.navigation.compose)
@@ -172,7 +173,6 @@ dependencies {
     ksp(libs.hilt.android.compiler)
 
     // accompanist
-    implementation(libs.accompanist.systemuicontroller)
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.drawablepainter)
