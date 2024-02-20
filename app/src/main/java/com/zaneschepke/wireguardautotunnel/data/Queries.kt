@@ -18,7 +18,7 @@ object Queries {
                     VALUES
                     ('false',
                     'false',
-                    '[trustedSSID1,trustedSSID2]',
+                    'sampleSSID1,sampleSSID2',
                      NULL,
                     'false',
                     'false',

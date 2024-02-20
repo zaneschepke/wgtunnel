@@ -84,6 +84,8 @@ class WireGuardTunnelService : ForegroundService() {
                                 tunnelName = tunnel.name
                                 vpnService.startTunnel(tunnel)
                             }
+                        } else {
+                            launchAlwaysOnDisabledNotification()
                         }
                     }
                 }
@@ -114,6 +116,11 @@ class WireGuardTunnelService : ForegroundService() {
                     }
                 }
             }
+    }
+
+    private fun launchAlwaysOnDisabledNotification() {
+        launchVpnNotification(title = this.getString(R.string.vpn_connection_failed),
+            description = this.getString(R.string.always_on_disabled))
     }
 
     override fun stopService(extras: Bundle?) {

@@ -73,7 +73,7 @@
     <string name="last_handshake">Last handshake</string>
     <string name="name">Name</string>
     <string name="restart">Restart Tunnel</string>
-    <string name="vpn_connection_failed">VPN Connection Failed</string>
+    <string name="vpn_connection_failed">Connection failed</string>
     <string name="failed_connection_to">Failed connection to -</string>
     <string name="initial_connection_failure_message">Attempting to connect to server after 30 seconds of no response.</string>
     <string name="lost_connection_failure_message">Attempting to reconnect to server after more than one minute of no response.</string>
@@ -90,7 +90,7 @@
     <string name="clear_icon">Clear Icon</string>
     <string name="search_icon">Search Icon</string>
     <string name="attempt_connection">Attempting connection..</string>
-    <string name="vpn_starting">VPN Starting</string>
+    <string name="vpn_starting">VPN starting</string>
     <string name="db_name">wg-tunnel-db</string>
     <string name="scanning_qr">Scanning for QR</string>
     <string name="qr_result_failed">QR scan failed</string>
@@ -175,4 +175,5 @@
     <string name="included">included</string>
     <string name="excluded">excluded</string>
     <string name="all">all</string>
+    <string name="always_on_disabled">Always-on VPN attempted to start a tunnel, but this feature is disabled in settings.</string>
 </resources>

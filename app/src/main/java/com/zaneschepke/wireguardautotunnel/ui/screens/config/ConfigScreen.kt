@@ -311,7 +311,7 @@ fun ConfigScreen(
             var fobColor by remember { mutableStateOf(secondaryColor) }
             FloatingActionButton(
                 modifier =
-                    Modifier.onFocusChanged {
+                    Modifier.padding(bottom = 90.dp).onFocusChanged {
                         if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                             fobColor = if (it.isFocused) hoverColor else secondaryColor
                         }
