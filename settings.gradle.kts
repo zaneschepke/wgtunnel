@@ -1,8 +1,8 @@
 pluginManagement {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
-        mavenLocal()
         gradlePluginPortal()
     }
 }
@@ -13,6 +13,7 @@ val GITHUB_TOKEN_VAR = "GH_TOKEN"
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        mavenLocal()
         maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/zaneschepke/wireguard-android")
@@ -23,7 +24,6 @@ dependencyResolutionManagement {
         }
         google()
         mavenCentral()
-        mavenLocal()
     }
 }
 

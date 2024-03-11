@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt.android)
-    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
 }
 
@@ -111,8 +111,7 @@ android {
         create("general") {
             dimension = Constants.TYPE
             if (BuildHelper.isReleaseBuild(gradle) && BuildHelper.isGeneralFlavor(gradle)) {
-                apply(plugin = "com.google.gms.google-services")
-                apply(plugin = "com.google.firebase.crashlytics")
+                //any plugins general specific
             }
         }
     }
@@ -192,11 +191,6 @@ dependencies {
     implementation(libs.material.icons.extended)
     // serialization
     implementation(libs.kotlinx.serialization.json)
-
-    // firebase crashlytics
-    generalImplementation(platform(libs.firebase.bom))
-    generalImplementation(libs.google.firebase.crashlytics.ktx)
-    generalImplementation(libs.google.firebase.analytics.ktx)
 
     // barcode scanning
     implementation(libs.zxing.android.embedded)

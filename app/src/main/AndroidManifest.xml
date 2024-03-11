@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -23,7 +22,6 @@
     <!--foreground service exempt android 14-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!--foreground service permissions-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -84,7 +82,8 @@
             android:screenOrientation="fullSensor"
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme"
-            android:windowSoftInputMode="stateAlwaysHidden" />
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:ignore="DiscouragedApi" />
         <activity
             android:name=".service.shortcut.ShortcutsActivity"
             android:enabled="true"
@@ -96,7 +95,7 @@
             android:name=".service.foreground.ForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="systemExempted|specialUse"
+            android:foregroundServiceType="systemExempted"
             tools:node="merge" />
         <service
             android:name=".service.tile.TunnelControlTile"
@@ -119,7 +118,7 @@
             android:name=".service.foreground.WireGuardTunnelService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="systemExempted|specialUse"
+            android:foregroundServiceType="systemExempted"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:persistent="true"
             tools:node="merge">
@@ -134,7 +133,7 @@
             android:name=".service.foreground.WireGuardConnectivityWatcherService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="systemExempted|specialUse"
+            android:foregroundServiceType="systemExempted"
             android:persistent="true"
             android:stopWithTask="false"
             tools:node="merge" />
@@ -145,7 +144,6 @@
             android:exported="false">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
