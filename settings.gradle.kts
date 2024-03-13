@@ -41,3 +41,4 @@ fun getLocalProperty(key: String, file: String = "local.properties"): String? {
 rootProject.name = "WG Tunnel"
 
 include(":app")
+include(":logcatter")

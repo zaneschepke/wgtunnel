@@ -132,6 +132,9 @@ android {
 val generalImplementation by configurations
 
 dependencies {
+
+    implementation(project(":logcatter"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     // optional - helpers for implementing LifecycleOwner in a Service

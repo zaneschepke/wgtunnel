@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,11 +21,9 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,13 +49,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -76,7 +73,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -94,6 +90,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.CaptureActivityPortrait
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
@@ -109,12 +106,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
+    appViewModel: AppViewModel,
     focusRequester: FocusRequester,
-    showSnackbarMessage: (String) -> Unit,
     navController: NavController
 ) {
     val haptic = LocalHapticFeedback.current
@@ -182,7 +180,7 @@ fun MainScreen(
                                 name.startsWith(Constants.ANDROID_TV_EXPLORER_STUB)
                         }
                     ) {
-                        showSnackbarMessage(Event.Error.FileExplorerRequired.message)
+                        appViewModel.showSnackbarMessage(Event.Error.FileExplorerRequired.message)
                     }
                     return intent
                 }
@@ -192,7 +190,7 @@ fun MainScreen(
             scope.launch {
                 viewModel.onTunnelFileSelected(data).let {
                     when (it) {
-                        is Result.Error -> showSnackbarMessage(it.error.message)
+                        is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
                         is Result.Success -> {}
                     }
                 }
@@ -207,7 +205,7 @@ fun MainScreen(
                         viewModel.onTunnelQrResult(it.contents).let { result ->
                             when (result) {
                                 is Result.Success -> {}
-                                is Result.Error -> showSnackbarMessage(result.error.message)
+                                is Result.Error -> appViewModel.showSnackbarMessage(result.error.message)
                             }
                         }
                     }
@@ -280,58 +278,6 @@ fun MainScreen(
                 )
             },
         floatingActionButtonPosition = FabPosition.End,
-        topBar = {
-            if (uiState.settings.isAutoTunnelEnabled)
-                TopAppBar(
-                    title = {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier =
-                            Modifier
-                                .requiredWidth(LocalConfiguration.current.screenWidthDp.dp)
-                                .padding(end = 5.dp)
-                        ) {
-                            Row {
-                                Icon(
-                                    Icons.Rounded.Bolt,
-                                    stringResource(id = R.string.auto),
-                                    modifier = Modifier.size(25.dp),
-                                    tint =
-                                        if (uiState.settings.isAutoTunnelPaused) Color.Gray
-                                        else mint,
-                                )
-                                val autoTunnelingLabel = buildAnnotatedString {
-                                    append(stringResource(id = R.string.auto_tunneling))
-                                    append(": ")
-                                    if(uiState.settings.isAutoTunnelPaused) append(stringResource(id = R.string.paused)) else append(
-                                        stringResource(id = R.string.active),
-                                    )
-                                }
-                                Text(
-                                    autoTunnelingLabel.text,
-                                    style = typography.bodyLarge,
-                                    modifier = Modifier.padding(start = 10.dp),
-                                )
-                            }
-                            if (uiState.settings.isAutoTunnelPaused)
-                                TextButton(
-                                    onClick = { viewModel.resumeAutoTunneling() },
-                                    modifier = Modifier.padding(end = 10.dp),
-                                ) {
-                                    Text(stringResource(id = R.string.resume))
-                                }
-                            else
-                                TextButton(
-                                    onClick = { viewModel.pauseAutoTunneling() },
-                                    modifier = Modifier.padding(end = 10.dp),
-                                ) {
-                                    Text(stringResource(id = R.string.pause))
-                                }
-                        }
-                    },
-                )
-        },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = isVisible.value,
@@ -349,7 +295,6 @@ fun MainScreen(
                     )
                         Modifier.focusRequester(focusRequester)
                     else Modifier)
-                        .padding(bottom = 90.dp)
                         .onFocusChanged {
                             if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                                 fobColor = if (it.isFocused) hoverColor else secondaryColor
@@ -367,14 +312,13 @@ fun MainScreen(
                 }
             }
         },
-    ) { innerPadding ->
+    ) {
         AnimatedVisibility(uiState.tunnels.isEmpty(), exit = fadeOut(), enter = fadeIn()) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
             ) {
                 Text(text = stringResource(R.string.no_tunnels), fontStyle = FontStyle.Italic)
             }
@@ -471,14 +415,57 @@ fun MainScreen(
             modifier =
             Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(.90f)
-                .overscroll(ScrollableDefaults.overscrollEffect())
-                .padding(innerPadding),
+                .overscroll(ScrollableDefaults.overscrollEffect()),
             state = rememberLazyListState(0, uiState.tunnels.count()),
             userScrollEnabled = true,
-            reverseLayout = true,
+            reverseLayout = false,
             flingBehavior = ScrollableDefaults.flingBehavior(),
         ) {
+            item {
+                if(uiState.settings.isAutoTunnelEnabled){
+                    val autoTunnelingLabel = buildAnnotatedString {
+                        append(stringResource(id = R.string.auto_tunneling))
+                        append(": ")
+                        if(uiState.settings.isAutoTunnelPaused) append(
+                            stringResource(id = R.string.paused)
+                        ) else append(
+                            stringResource(id = R.string.active),
+                        )
+                    }
+                    RowListItem(
+                        icon = { Icon(
+                            Icons.Rounded.Bolt,
+                            stringResource(id = R.string.auto),
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .size(25.dp),
+                            tint =
+                            if (uiState.settings.isAutoTunnelPaused) Color.Gray
+                            else mint,
+                        ) },
+                        text = autoTunnelingLabel.text,
+                        rowButton = {
+                            if (uiState.settings.isAutoTunnelPaused) {
+                                TextButton(
+                                    onClick = { viewModel.resumeAutoTunneling() },
+                                ) {
+                                    Text(stringResource(id = R.string.resume))
+                                }
+                            } else {
+                                TextButton(
+                                    onClick = { viewModel.pauseAutoTunneling() },
+                                ) {
+                                    Text(stringResource(id = R.string.pause))
+                                }
+                        }
+                        },
+                        onClick = {},
+                        onHold = {},
+                        expanded = false,
+                        statistics = null,
+                    )
+                }
+            }
             items(
                 uiState.tunnels,
                 key = { tunnel -> tunnel.id },
@@ -534,7 +521,7 @@ fun MainScreen(
                             (uiState.vpnState.status == Tunnel.State.UP) &&
                                 (tunnel.name == uiState.vpnState.name)
                         ) {
-                            showSnackbarMessage(Event.Message.TunnelOffAction.message)
+                            appViewModel.showSnackbarMessage(Event.Message.TunnelOffAction.message)
                             return@RowListItem
                         }
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -568,7 +555,7 @@ fun MainScreen(
                                                 uiState.settings.isAutoTunnelEnabled &&
                                                     !uiState.settings.isAutoTunnelPaused
                                             ) {
-                                                showSnackbarMessage(
+                                                appViewModel.showSnackbarMessage(
                                                     Event.Message.AutoTunnelOffAction.message,
                                                 )
                                             } else {
@@ -591,7 +578,7 @@ fun MainScreen(
                                                 ) &&
                                                 !uiState.settings.isAutoTunnelPaused
                                         ) {
-                                            showSnackbarMessage(
+                                            appViewModel.showSnackbarMessage(
                                                 Event.Message.AutoTunnelOffAction.message,
                                             )
                                         } else
@@ -634,7 +621,7 @@ fun MainScreen(
                                         IconButton(
                                             onClick = {
                                                 if (uiState.settings.isAutoTunnelEnabled) {
-                                                    showSnackbarMessage(
+                                                    appViewModel.showSnackbarMessage(
                                                         Event.Message.AutoTunnelOffAction.message,
                                                     )
                                                 } else {
@@ -658,7 +645,7 @@ fun MainScreen(
                                             ) {
                                                 expanded.value = !expanded.value
                                             } else {
-                                                showSnackbarMessage(
+                                                appViewModel.showSnackbarMessage(
                                                     Event.Message.TunnelOnAction.message
                                                 )
                                             }
@@ -672,7 +659,7 @@ fun MainScreen(
                                                 uiState.vpnState.status == Tunnel.State.UP &&
                                                     tunnel.name == uiState.vpnState.name
                                             ) {
-                                                showSnackbarMessage(
+                                                appViewModel.showSnackbarMessage(
                                                     Event.Message.TunnelOffAction.message
                                                 )
                                             } else {
@@ -690,7 +677,7 @@ fun MainScreen(
                                                 uiState.vpnState.status == Tunnel.State.UP &&
                                                     tunnel.name == uiState.vpnState.name
                                             ) {
-                                                showSnackbarMessage(
+                                                appViewModel.showSnackbarMessage(
                                                     Event.Message.TunnelOffAction.message
                                                 )
                                             } else {

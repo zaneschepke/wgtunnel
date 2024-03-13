@@ -7,7 +7,6 @@ import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -73,6 +72,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.DrawablePainter
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.SearchBar
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
@@ -90,11 +90,10 @@ import kotlinx.coroutines.delay
 )
 @Composable
 fun ConfigScreen(
-    padding: PaddingValues,
     viewModel: ConfigViewModel = hiltViewModel(),
     focusRequester: FocusRequester,
     navController: NavController,
-    showSnackbarMessage: (String) -> Unit,
+    appViewModel: AppViewModel,
     id: String
 ) {
     val context = LocalContext.current
@@ -149,11 +148,11 @@ fun ConfigScreen(
             },
             onError = {
                 showAuthPrompt = false
-                showSnackbarMessage(Event.Error.AuthenticationFailed.message)
+                appViewModel.showSnackbarMessage(Event.Error.AuthenticationFailed.message)
             },
             onFailure = {
                 showAuthPrompt = false
-                showSnackbarMessage(Event.Error.AuthorizationFailed.message)
+                appViewModel.showSnackbarMessage(Event.Error.AuthorizationFailed.message)
             },
         )
     }
@@ -311,7 +310,7 @@ fun ConfigScreen(
             var fobColor by remember { mutableStateOf(secondaryColor) }
             FloatingActionButton(
                 modifier =
-                    Modifier.padding(bottom = 90.dp).onFocusChanged {
+                    Modifier.onFocusChanged {
                         if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                             fobColor = if (it.isFocused) hoverColor else secondaryColor
                         }
@@ -320,10 +319,10 @@ fun ConfigScreen(
                     viewModel.onSaveAllChanges().let {
                         when (it) {
                             is Result.Success -> {
-                                showSnackbarMessage(it.data.message)
+                                appViewModel.showSnackbarMessage(it.data.message)
                                 navController.navigate(Screen.Main.route)
                             }
-                            is Result.Error -> showSnackbarMessage(it.error.message)
+                            is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
                         }
                     }
                 },
@@ -346,8 +345,7 @@ fun ConfigScreen(
                 Modifier
                     .verticalScroll(rememberScrollState())
                     .weight(1f, true)
-                    .fillMaxSize()
-                    .padding(padding),
+                    .fillMaxSize(),
             ) {
                 Surface(
                     tonalElevation = 2.dp,

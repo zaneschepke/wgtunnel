@@ -56,7 +56,7 @@ open class ForegroundService : LifecycleService() {
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         } catch (e: Exception) {
-            Timber.d("Service stopped without being started: ${e.message}")
+            Timber.e(e)
         }
         isServiceStarted = false
     }

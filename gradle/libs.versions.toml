@@ -29,6 +29,7 @@ zxingCore = "3.5.3"
 
 #plugins
 gradlePlugins-kotlinxSerialization = "1.8.21"
+material = "1.10.0"
 
 
 [libraries]
@@ -84,6 +85,7 @@ tunnel = { module = "com.zaneschepke:wireguard-android", version.ref = "tunnel" 
 
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxingCore" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -91,3 +93,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "gradlePlugins-kotlinxSerialization" }
+androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }

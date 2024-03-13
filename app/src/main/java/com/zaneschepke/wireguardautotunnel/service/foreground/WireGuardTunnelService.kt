@@ -68,7 +68,7 @@ class WireGuardTunnelService : ForegroundService() {
                             stopService(extras)
                         }
                     } else {
-                        Timber.d("Tunnel config null, starting default tunnel or first")
+                        Timber.i("Tunnel config null, starting default tunnel or first")
                         val settings = settingsRepository.getSettings()
                         val tunnels = tunnelConfigRepository.getAll()
                         if (settings.isAlwaysOnVpnEnabled) {

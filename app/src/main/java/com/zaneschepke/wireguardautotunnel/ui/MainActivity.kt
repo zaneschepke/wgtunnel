@@ -22,6 +22,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -29,6 +30,8 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,8 +50,10 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,7 +69,7 @@ class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var settingsRepository: SettingsRepository
     @OptIn(
-        ExperimentalPermissionsApi::class,
+        ExperimentalPermissionsApi::class
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,8 +86,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         setContent {
-            //val activityViewModel = hiltViewModel<ActivityViewModel>()
-
+            val appViewModel = hiltViewModel<AppViewModel>()
+            val snackBarState by appViewModel.snackBarState.collectAsStateWithLifecycle()
             val navController = rememberNavController()
             val focusRequester = remember { FocusRequester() }
 
@@ -104,12 +109,11 @@ class MainActivity : AppCompatActivity() {
                     requestNotificationPermission()
                 }
 
-                fun showSnackBarMessage(message: String) {
+                fun showSnackBarMessage(message: StringValue) {
                     lifecycleScope.launch(Dispatchers.Main) {
                         val result =
                             snackbarHostState.showSnackbar(
-                                message = message,
-                                actionLabel = applicationContext.getString(R.string.okay),
+                                message = message.asString(this@MainActivity),
                                 duration = SnackbarDuration.Short,
                             )
                         when (result) {
@@ -118,6 +122,13 @@ class MainActivity : AppCompatActivity() {
                                 snackbarHostState.currentSnackbarData?.dismiss()
                             }
                         }
+                    }
+                }
+
+                LaunchedEffect(snackBarState.snackbarMessageConsumed) {
+                    if(!snackBarState.snackbarMessageConsumed) {
+                        showSnackBarMessage(StringValue.DynamicString(snackBarState.snackbarMessage))
+                        appViewModel.snackbarMessageConsumed()
                     }
                 }
 
@@ -173,47 +184,47 @@ class MainActivity : AppCompatActivity() {
                                 return@Scaffold
                             }
                         }
-                        NavHost(navController, startDestination = Screen.Main.route) {
-                            composable(
-                                Screen.Main.route,
-                            ) {
-                                MainScreen(
-                                    focusRequester = focusRequester,
-                                    showSnackbarMessage = { message -> showSnackBarMessage(message) },
-                                    navController = navController,
-                                )
-                            }
-                            composable(
-                                Screen.Settings.route,
-                            ) {
-                                SettingsScreen(
-                                    padding = padding,
-                                    showSnackbarMessage = { message -> showSnackBarMessage(message) },
-                                    focusRequester = focusRequester,
-                                )
-//
-                            }
-                            composable(
-                                Screen.Support.route,
-                            ) {
-                                SupportScreen(
-                                    padding = padding,
-                                    focusRequester = focusRequester,
-                                    showSnackbarMessage = { message -> showSnackBarMessage(message) },
-                                )
-                            }
-                            composable("${Screen.Config.route}/{id}") {
-                                val id = it.arguments?.getString("id")
-                                if (!id.isNullOrBlank()) {
-                                    ConfigScreen(
-                                        padding = padding,
+                        Column(modifier = Modifier.padding(padding)) {
+                            NavHost(navController, startDestination = Screen.Main.route) {
+                                composable(
+                                    Screen.Main.route,
+                                ) {
+                                    MainScreen(
+                                        focusRequester = focusRequester,
+                                        appViewModel = appViewModel,
                                         navController = navController,
-                                        id = id,
-                                        showSnackbarMessage = { message ->
-                                            showSnackBarMessage(message)
-                                        },
+                                    )
+                                }
+                                composable(
+                                    Screen.Settings.route,
+                                ) {
+                                    SettingsScreen(
+                                        appViewModel = appViewModel,
                                         focusRequester = focusRequester,
                                     )
+                                }
+                                composable(
+                                    Screen.Support.route,
+                                ) {
+                                    SupportScreen(
+                                        focusRequester = focusRequester,
+                                        appViewModel = appViewModel,
+                                        navController = navController
+                                    )
+                                }
+                                composable(Screen.Support.Logs.route,) {
+                                    LogsScreen()
+                                }
+                                composable("${Screen.Config.route}/{id}") {
+                                    val id = it.arguments?.getString("id")
+                                    if (!id.isNullOrBlank()) {
+                                        ConfigScreen(
+                                            navController = navController,
+                                            id = id,
+                                            appViewModel = appViewModel,
+                                            focusRequester = focusRequester,
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,6 +75,7 @@ import com.wireguard.android.backend.Tunnel
 import com.wireguard.android.backend.WgQuickBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
@@ -86,6 +86,7 @@ import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.File
 
 @OptIn(
@@ -94,9 +95,8 @@ import java.io.File
 )
 @Composable
 fun SettingsScreen(
-    padding: PaddingValues,
     viewModel: SettingsViewModel = hiltViewModel(),
-    showSnackbarMessage: (String) -> Unit,
+    appViewModel: AppViewModel,
     focusRequester: FocusRequester
 ) {
     val scope = rememberCoroutineScope { Dispatchers.IO }
@@ -141,9 +141,10 @@ fun SettingsScreen(
             }
             FileUtils.saveFilesToZip(context, files)
             didExportFiles = true
-            showSnackbarMessage(Event.Message.ConfigsExported.message)
+            appViewModel.showSnackbarMessage(Event.Message.ConfigsExported.message)
         } catch (e: Exception) {
-            showSnackbarMessage(Event.Error.Exception(e).message)
+            Timber.e(e)
+            appViewModel.showSnackbarMessage(Event.Error.Exception(e).message)
         }
     }
 
@@ -174,7 +175,7 @@ fun SettingsScreen(
             viewModel.onSaveTrustedSSID(currentText).let {
                 when (it) {
                     is Result.Success -> currentText = ""
-                    is Result.Error -> showSnackbarMessage(it.error.message)
+                    is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
                 }
             }
         }
@@ -248,7 +249,7 @@ fun SettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(padding),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
         ) {
             Icon(
                 Icons.Rounded.LocationOff,
@@ -301,11 +302,11 @@ fun SettingsScreen(
             },
             onError = { _ ->
                 showAuthPrompt = false
-                showSnackbarMessage(Event.Error.AuthenticationFailed.message)
+                appViewModel.showSnackbarMessage(Event.Error.AuthenticationFailed.message)
             },
             onFailure = {
                 showAuthPrompt = false
-                showSnackbarMessage(Event.Error.AuthorizationFailed.message)
+                appViewModel.showSnackbarMessage(Event.Error.AuthorizationFailed.message)
             },
         )
     }
@@ -314,7 +315,7 @@ fun SettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize(),
         ) {
             Text(
                 stringResource(R.string.one_tunnel_required),
@@ -329,7 +330,7 @@ fun SettingsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
             modifier =
-                Modifier.fillMaxSize().padding(padding).verticalScroll(scrollState).clickable(
+                Modifier.fillMaxSize().verticalScroll(scrollState).clickable(
                     indication = null,
                     interactionSource = interactionSource,
                 ) {
@@ -501,11 +502,11 @@ fun SettingsScreen(
                                 ) {
                                     when (false) {
                                         isBackgroundLocationGranted ->
-                                            showSnackbarMessage(
+                                            appViewModel.showSnackbarMessage(
                                                 Event.Error.BackgroundLocationRequired.message
                                             )
                                         fineLocationState.status.isGranted ->
-                                            showSnackbarMessage(
+                                            appViewModel.showSnackbarMessage(
                                                 Event.Error.PreciseLocationRequired.message
                                             )
                                         viewModel.isLocationEnabled(context) ->
@@ -558,7 +559,7 @@ fun SettingsScreen(
                             onCheckChanged = {
                                 viewModel.onToggleKernelMode().let {
                                     when (it) {
-                                        is Result.Error -> showSnackbarMessage(it.error.message)
+                                        is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
                                         is Result.Success -> {}
                                     }
                                 }

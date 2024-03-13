@@ -146,10 +146,6 @@
     <string name="go">go</string>
     <string name="docs_description">Read the docs (WIP)</string>
     <string name="discord_description">Join the community</string>
-    <string name="discord" translatable="false">Discord</string>
-    <string name="docs">Docs</string>
-    <string name="github" translatable="false">GitHub</string>
-    <string name="email">Email</string>
     <string name="email_description">Send me an email</string>
     <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
     <string name="kernel">Kernel</string>
@@ -176,4 +172,9 @@
     <string name="excluded">excluded</string>
     <string name="all">all</string>
     <string name="always_on_disabled">Always-on VPN attempted to start a tunnel, but this feature is disabled in settings.</string>
+    <string name="no_email_detected">No email app detected</string>
+    <string name="no_browser_detected">No browser detected</string>
+    <string name="logs_saved">Logs saved to downloads</string>
+    <string name="open_issue">Open an issue</string>
+    <string name="read_logs">Read the logs</string>
 </resources>

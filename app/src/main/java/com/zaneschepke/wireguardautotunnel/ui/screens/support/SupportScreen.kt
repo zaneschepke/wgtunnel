@@ -1,14 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support
 
-import android.content.Intent
-import android.content.Intent.createChooser
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Book
+import androidx.compose.material.icons.rounded.FormatListNumbered
 import androidx.compose.material.icons.rounded.Mail
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,55 +42,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
+import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
-import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.Event
 
 @Composable
 fun SupportScreen(
-    padding: PaddingValues,
     viewModel: SupportViewModel = hiltViewModel(),
-    showSnackbarMessage: (String) -> Unit,
+    appViewModel: AppViewModel,
+    navController: NavController,
     focusRequester: FocusRequester
 ) {
     val context = LocalContext.current
     val fillMaxWidth = .85f
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    fun openWebPage(url: String) {
-        try {
-            val webpage: Uri = Uri.parse(url)
-            val intent = Intent(Intent.ACTION_VIEW, webpage)
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            showSnackbarMessage(Event.Error.Exception(e).message)
-        }
-    }
-
-    fun launchEmail() {
-        try {
-            val intent =
-                Intent(Intent.ACTION_SENDTO).apply {
-                    type = Constants.EMAIL_MIME_TYPE
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf(context.getString(R.string.my_email)))
-                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_subject))
-                }
-            startActivity(
-                context,
-                createChooser(intent, context.getString(R.string.email_chooser)),
-                null,
-            )
-        } catch (e: Exception) {
-            showSnackbarMessage(Event.Error.Exception(e).message)
-        }
-    }
 
     if (uiState.loading) {
         LoadingScreen()
@@ -104,9 +73,10 @@ fun SupportScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier =
-            Modifier.fillMaxSize().padding(padding)
-                .verticalScroll(rememberScrollState())
-                .focusable()
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .focusable()
     ) {
         Surface(
             tonalElevation = 2.dp,
@@ -115,15 +85,19 @@ fun SupportScreen(
             color = MaterialTheme.colorScheme.surface,
             modifier =
                 (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                        Modifier.height(IntrinsicSize.Min)
-                            .fillMaxWidth(fillMaxWidth)
-                            .padding(top = 10.dp)
+                    Modifier
+                        .height(IntrinsicSize.Min)
+                        .fillMaxWidth(fillMaxWidth)
+                        .padding(top = 10.dp)
                     } else {
-                        Modifier.fillMaxWidth(fillMaxWidth).padding(top = 20.dp)
+                    Modifier
+                        .fillMaxWidth(fillMaxWidth)
+                        .padding(top = 20.dp)
                     })
                     .padding(bottom = 25.dp),
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
+                val forwardIcon = Icons.AutoMirrored.Rounded.ArrowForward
                 Text(
                     stringResource(R.string.thank_you),
                     textAlign = TextAlign.Start,
@@ -138,8 +112,10 @@ fun SupportScreen(
                     modifier = Modifier.padding(bottom = 20.dp),
                 )
                 TextButton(
-                    onClick = { openWebPage(context.resources.getString(R.string.docs_url)) },
-                    modifier = Modifier.padding(vertical = 5.dp).focusRequester(focusRequester),
+                    onClick = { appViewModel.openWebPage(context.resources.getString(R.string.docs_url)) },
+                    modifier = Modifier
+                        .padding(vertical = 5.dp)
+                        .focusRequester(focusRequester),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -147,7 +123,8 @@ fun SupportScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row {
-                            Icon(Icons.Rounded.Book, stringResource(id = R.string.docs))
+                            val icon = Icons.Rounded.Book
+                            Icon(icon, icon.name)
                             Text(
                                 stringResource(id = R.string.docs_description),
                                 textAlign = TextAlign.Justify,
@@ -155,8 +132,8 @@ fun SupportScreen(
                             )
                         }
                         Icon(
-                            Icons.AutoMirrored.Rounded.ArrowForward,
-                            stringResource(id = R.string.go)
+                            forwardIcon,
+                            forwardIcon.name
                         )
                     }
                 }
@@ -165,7 +142,7 @@ fun SupportScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 TextButton(
-                    onClick = { openWebPage(context.resources.getString(R.string.discord_url)) },
+                    onClick = { appViewModel.openWebPage(context.resources.getString(R.string.discord_url)) },
                     modifier = Modifier.padding(vertical = 5.dp),
                 ) {
                     Row(
@@ -174,9 +151,10 @@ fun SupportScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row {
+                            val icon = ImageVector.vectorResource(R.drawable.discord)
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.discord),
-                                stringResource(id = R.string.discord),
+                                icon,
+                                icon.name,
                                 Modifier.size(25.dp),
                             )
                             Text(
@@ -186,8 +164,8 @@ fun SupportScreen(
                             )
                         }
                         Icon(
-                            Icons.AutoMirrored.Rounded.ArrowForward,
-                            stringResource(id = R.string.go)
+                            forwardIcon,
+                            forwardIcon.name
                         )
                     }
                 }
@@ -196,7 +174,7 @@ fun SupportScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 TextButton(
-                    onClick = { openWebPage(context.resources.getString(R.string.github_url)) },
+                    onClick = { appViewModel.openWebPage(context.resources.getString(R.string.github_url)) },
                     modifier = Modifier.padding(vertical = 5.dp),
                 ) {
                     Row(
@@ -205,20 +183,21 @@ fun SupportScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row {
+                            val icon = ImageVector.vectorResource(R.drawable.github)
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.github),
-                                stringResource(id = R.string.github),
+                                imageVector = icon,
+                                icon.name,
                                 Modifier.size(25.dp),
                             )
                             Text(
-                                "Open an issue",
+                                stringResource(id = R.string.open_issue),
                                 textAlign = TextAlign.Justify,
                                 modifier = Modifier.padding(start = 10.dp),
                             )
                         }
                         Icon(
-                            Icons.AutoMirrored.Rounded.ArrowForward,
-                            stringResource(id = R.string.go)
+                            forwardIcon,
+                            forwardIcon.name
                         )
                     }
                 }
@@ -227,7 +206,7 @@ fun SupportScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 TextButton(
-                    onClick = { launchEmail() },
+                    onClick = { appViewModel.launchEmail() },
                     modifier = Modifier.padding(vertical = 5.dp),
                 ) {
                     Row(
@@ -236,9 +215,38 @@ fun SupportScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row {
-                            Icon(Icons.Rounded.Mail, stringResource(id = R.string.email))
+                            val icon = Icons.Rounded.Mail
+                            Icon(icon, icon.name)
                             Text(
                                 stringResource(id = R.string.email_description),
+                                textAlign = TextAlign.Justify,
+                                modifier = Modifier.padding(start = 10.dp),
+                            )
+                        }
+                        Icon(
+                            forwardIcon,
+                            forwardIcon.name
+                        )
+                    }
+                }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                TextButton(
+                    onClick = { navController.navigate(Screen.Support.Logs.route) },
+                    modifier = Modifier.padding(vertical = 5.dp),
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row {
+                            val icon = Icons.Rounded.FormatListNumbered
+                            Icon(icon, icon.name)
+                            Text(
+                                stringResource(id = R.string.read_logs),
                                 textAlign = TextAlign.Justify,
                                 modifier = Modifier.padding(start = 10.dp),
                             )
@@ -258,7 +266,7 @@ fun SupportScreen(
             fontSize = 16.sp,
             modifier =
                 Modifier.clickable {
-                    openWebPage(context.resources.getString(R.string.privacy_policy_url))
+                    appViewModel.openWebPage(context.resources.getString(R.string.privacy_policy_url))
                 },
         )
         Row(

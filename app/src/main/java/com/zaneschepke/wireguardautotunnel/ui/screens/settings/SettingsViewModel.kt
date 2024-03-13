@@ -183,9 +183,10 @@ constructor(
         if (!uiState.value.settings.isKernelEnabled) {
             try {
                 rootShell.start()
-                Timber.d("Root shell accepted!")
+                Timber.i("Root shell accepted!")
                 saveKernelMode(on = true)
             } catch (e: RootShell.RootShellException) {
+                Timber.e(e)
                 saveKernelMode(on = false)
                 return Result.Error(Event.Error.RootDenied)
             }

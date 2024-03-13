@@ -154,10 +154,10 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
                     try {
                         if (isBatterySaverOn) {
-                            Timber.d("Initiating wakelock with timeout")
+                            Timber.i("Initiating wakelock with 10 min timeout")
                             acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
                         } else {
-                            Timber.d("Initiating wakelock with zero timeout")
+                            Timber.i("Initiating wakelock with 30 min timeout")
                             acquire(Constants.DEFAULT_WATCHER_WAKE_LOCK_TIMEOUT)
                         }
                     } finally {
@@ -178,31 +178,31 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
             lifecycleScope.launch(Dispatchers.IO) {
                 val setting = settingsRepository.getSettings()
                 launch {
-                    Timber.d("Starting wifi watcher")
+                    Timber.i("Starting wifi watcher")
                     watchForWifiConnectivityChanges()
                 }
                 if (setting.isTunnelOnMobileDataEnabled) {
                     launch {
-                        Timber.d("Starting mobile data watcher")
+                        Timber.i("Starting mobile data watcher")
                         watchForMobileDataConnectivityChanges()
                     }
                 }
                 if (setting.isTunnelOnEthernetEnabled) {
                     launch {
-                        Timber.d("Starting ethernet data watcher")
+                        Timber.i("Starting ethernet data watcher")
                         watchForEthernetConnectivityChanges()
                     }
                 }
                 launch {
-                    Timber.d("Starting vpn state watcher")
+                    Timber.i("Starting vpn state watcher")
                     watchForVpnConnectivityChanges()
                 }
                 launch {
-                    Timber.d("Starting settings watcher")
+                    Timber.i("Starting settings watcher")
                     watchForSettingsChanges()
                 }
                 launch {
-                    Timber.d("Starting management watcher")
+                    Timber.i("Starting management watcher")
                     manageVpn()
                 }
             }
@@ -212,7 +212,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         mobileDataService.networkStatus.collect {
             when (it) {
                 is NetworkStatus.Available -> {
-                    Timber.d("Gained Mobile data connection")
+                    Timber.i("Gained Mobile data connection")
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             isMobileDataConnected = true,
@@ -223,14 +223,14 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         networkEventsFlow.value.copy(
                             isMobileDataConnected = true,
                         )
-                    Timber.d("Mobile data capabilities changed")
+                    Timber.i("Mobile data capabilities changed")
                 }
                 is NetworkStatus.Unavailable -> {
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             isMobileDataConnected = false,
                         )
-                    Timber.d("Lost mobile data connection")
+                    Timber.i("Lost mobile data connection")
                 }
             }
         }
@@ -273,14 +273,14 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         ethernetService.networkStatus.collect {
             when (it) {
                 is NetworkStatus.Available -> {
-                    Timber.d("Gained Ethernet connection")
+                    Timber.i("Gained Ethernet connection")
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             isEthernetConnected = true,
                         )
                 }
                 is NetworkStatus.CapabilitiesChanged -> {
-                    Timber.d("Ethernet capabilities changed")
+                    Timber.i("Ethernet capabilities changed")
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             isEthernetConnected = true,
@@ -291,7 +291,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         networkEventsFlow.value.copy(
                             isEthernetConnected = false,
                         )
-                    Timber.d("Lost Ethernet connection")
+                    Timber.i("Lost Ethernet connection")
                 }
             }
         }
@@ -301,20 +301,20 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         wifiService.networkStatus.collect {
             when (it) {
                 is NetworkStatus.Available -> {
-                    Timber.d("Gained Wi-Fi connection")
+                    Timber.i("Gained Wi-Fi connection")
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             isWifiConnected = true,
                         )
                 }
                 is NetworkStatus.CapabilitiesChanged -> {
-                    Timber.d("Wifi capabilities changed")
+                    Timber.i("Wifi capabilities changed")
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             isWifiConnected = true,
                         )
                     val ssid = wifiService.getNetworkName(it.networkCapabilities) ?: ""
-                    Timber.d("Detected SSID: $ssid")
+                    Timber.i("Detected SSID: $ssid")
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             currentNetworkSSID = ssid,
@@ -325,7 +325,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         networkEventsFlow.value.copy(
                             isWifiConnected = false,
                         )
-                    Timber.d("Lost Wi-Fi connection")
+                    Timber.i("Lost Wi-Fi connection")
                 }
             }
         }

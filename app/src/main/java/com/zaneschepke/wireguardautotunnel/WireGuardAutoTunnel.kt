@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.service.quicksettings.TileService
 import com.zaneschepke.wireguardautotunnel.service.tile.TunnelControlTile
+import com.zaneschepke.wireguardautotunnel.util.ReleaseTree
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -13,7 +14,7 @@ class WireGuardAutoTunnel : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree()) else Timber.plant(ReleaseTree())
     }
 
     companion object {

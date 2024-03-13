@@ -122,6 +122,7 @@ constructor(
             addTunnel(tunnelConfig)
             Result.Success(Unit)
         } catch (e: Exception) {
+            Timber.e(e)
             Result.Error(Event.Error.InvalidQrCode)
         }
     }
@@ -158,6 +159,7 @@ constructor(
                 return Result.Error(Event.Error.InvalidFileExtension)
             }
         } catch (e: Exception) {
+            Timber.e(e)
             return Result.Error(Event.Error.FileReadFailed)
         }
     }
@@ -249,6 +251,7 @@ constructor(
         return try {
             fileName.substring(fileName.lastIndexOf('.'))
         } catch (e: Exception) {
+            Timber.e(e)
             ""
         }
     }

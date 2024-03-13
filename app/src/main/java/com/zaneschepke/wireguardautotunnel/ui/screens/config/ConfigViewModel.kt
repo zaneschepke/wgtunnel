@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -216,6 +217,7 @@ constructor(
             updateTunnelConfig(tunnelConfig)
             Result.Success(Event.Message.ConfigSaved)
         } catch (e: Exception) {
+            Timber.e(e)
             Result.Error(Event.Error.Exception(e))
         }
     }
