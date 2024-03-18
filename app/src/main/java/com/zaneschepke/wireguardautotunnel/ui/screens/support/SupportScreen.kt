@@ -64,11 +64,6 @@ fun SupportScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.loading) {
-        LoadingScreen()
-        return
-    }
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -229,32 +224,34 @@ fun SupportScreen(
                         )
                     }
                 }
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                TextButton(
-                    onClick = { navController.navigate(Screen.Support.Logs.route) },
-                    modifier = Modifier.padding(vertical = 5.dp),
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
+                if(!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    TextButton(
+                        onClick = { navController.navigate(Screen.Support.Logs.route) },
+                        modifier = Modifier.padding(vertical = 5.dp),
                     ) {
-                        Row {
-                            val icon = Icons.Rounded.FormatListNumbered
-                            Icon(icon, icon.name)
-                            Text(
-                                stringResource(id = R.string.read_logs),
-                                textAlign = TextAlign.Justify,
-                                modifier = Modifier.padding(start = 10.dp),
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row {
+                                val icon = Icons.Rounded.FormatListNumbered
+                                Icon(icon, icon.name)
+                                Text(
+                                    stringResource(id = R.string.read_logs),
+                                    textAlign = TextAlign.Justify,
+                                    modifier = Modifier.padding(start = 10.dp),
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Rounded.ArrowForward,
+                                stringResource(id = R.string.go)
                             )
                         }
-                        Icon(
-                            Icons.AutoMirrored.Rounded.ArrowForward,
-                            stringResource(id = R.string.go)
-                        )
                     }
                 }
             }

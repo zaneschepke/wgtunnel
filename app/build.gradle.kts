@@ -137,7 +137,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    // optional - helpers for implementing LifecycleOwner in a Service
+    // helpers for implementing LifecycleOwner in a Service
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -201,6 +201,7 @@ dependencies {
 
     // bio
     implementation(libs.androidx.biometric.ktx)
+    implementation(libs.pin.lock.compose)
 
     // shortcuts
     implementation(libs.androidx.core)

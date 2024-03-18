@@ -63,6 +63,7 @@ constructor(
             stopTunnelOnConfigChange(tunnelConfig)
             emitTunnelName(tunnelConfig.name)
             config = TunnelConfig.configFromQuick(tunnelConfig.wgQuick)
+            emitTunnelConfig(config)
             val state =
                 backend.setState(
                     this,
@@ -71,7 +72,7 @@ constructor(
                 )
             emitTunnelState(state)
             state
-        } catch (e: Exception) {
+        } catch (e: BackendException) {
             Timber.e("Failed to start tunnel with error: ${e.message}")
             State.DOWN
         }
@@ -97,6 +98,14 @@ constructor(
         _vpnState.emit(
             _vpnState.value.copy(
                 name = name,
+            ),
+        )
+    }
+
+    private suspend fun emitTunnelConfig(config : Config?) {
+        _vpnState.emit(
+            _vpnState.value.copy(
+                config = config,
             ),
         )
     }
@@ -129,7 +138,7 @@ constructor(
     override fun onStateChange(state: State) {
         val tunnel = this
         emitTunnelState(state)
-        WireGuardAutoTunnel.requestTileServiceStateUpdate()
+        WireGuardAutoTunnel.requestTileServiceStateUpdate(WireGuardAutoTunnel.instance)
         if (state == State.UP) {
             statsJob =
                 scope.launch {

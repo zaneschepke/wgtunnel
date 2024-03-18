@@ -49,7 +49,6 @@ fun RowListItem(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(.60f),
                 ) {
                     icon()
                     Text(text)
@@ -65,6 +64,7 @@ fun RowListItem(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
+                        //TODO change these to string resources
                         val handshakeEpoch = statistics.peer(it)!!.latestHandshakeEpochMillis
                         val peerTx = statistics.peer(it)!!.txBytes
                         val peerRx = statistics.peer(it)!!.rxBytes

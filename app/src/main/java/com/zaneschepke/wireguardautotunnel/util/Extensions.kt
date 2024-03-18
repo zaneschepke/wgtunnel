@@ -31,6 +31,12 @@ fun BroadcastReceiver.goAsync(
     }
 }
 
+fun String.truncateWithEllipsis(allowedLength : Int) : String {
+    return if(this.length > allowedLength + 3) {
+        this.substring(0, allowedLength) + "***"
+    } else this
+}
+
 fun BigDecimal.toThreeDecimalPlaceString(): String {
     val df = DecimalFormat("#.###")
     return df.format(this)

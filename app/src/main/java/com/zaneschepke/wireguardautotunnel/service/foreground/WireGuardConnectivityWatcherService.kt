@@ -1,12 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.os.PowerManager
-import android.os.SystemClock
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
 import com.wireguard.android.backend.Tunnel
@@ -28,9 +24,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.net.InetAddress
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class WireGuardConnectivityWatcherService : ForegroundService() {
@@ -122,49 +119,18 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         launchWatcherNotification(getString(R.string.watcher_notification_text_paused))
     }
 
-    // TODO could this be restarting service in a bad state?
-    // try to start task again if killed
-    override fun onTaskRemoved(rootIntent: Intent) {
-        Timber.d("Task Removed called")
-        val restartServiceIntent = Intent(rootIntent)
-        val restartServicePendingIntent: PendingIntent =
-            PendingIntent.getService(
-                this,
-                1,
-                restartServiceIntent,
-                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
-            )
-        applicationContext.getSystemService(Context.ALARM_SERVICE)
-        val alarmService: AlarmManager =
-            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmService.set(
-            AlarmManager.ELAPSED_REALTIME,
-            SystemClock.elapsedRealtime() + 1000,
-            restartServicePendingIntent,
-        )
-    }
-
-    private suspend fun initWakeLock() {
-        val isBatterySaverOn =
-            withContext(lifecycleScope.coroutineContext) {
-                settingsRepository.getSettings().isBatterySaverEnabled
-            }
+    private fun initWakeLock() {
         wakeLock =
-            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
-                    try {
-                        if (isBatterySaverOn) {
-                            Timber.i("Initiating wakelock with 10 min timeout")
-                            acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
-                        } else {
-                            Timber.i("Initiating wakelock with 30 min timeout")
-                            acquire(Constants.DEFAULT_WATCHER_WAKE_LOCK_TIMEOUT)
-                        }
-                    } finally {
-                        release()
-                    }
+        (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+            newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
+                try {
+                    Timber.i("Initiating wakelock with 10 min timeout")
+                    acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
+                } finally {
+                    release()
                 }
             }
+        }
     }
 
     private fun cancelWatcherJob() {
@@ -201,10 +167,17 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     Timber.i("Starting settings watcher")
                     watchForSettingsChanges()
                 }
+                if(setting.isPingEnabled) {
+                    launch {
+                        Timber.i("Starting ping watcher")
+                        watchForPingFailure()
+                    }
+                }
                 launch {
                     Timber.i("Starting management watcher")
                     manageVpn()
                 }
+
             }
     }
 
@@ -233,6 +206,40 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     Timber.i("Lost mobile data connection")
                 }
             }
+        }
+    }
+
+    private suspend fun watchForPingFailure() {
+        try {
+            do {
+                if(vpnService.vpnState.value.status == Tunnel.State.UP) {
+                    val config = vpnService.vpnState.value.config
+                    config?.let {
+                        val results = it.peers.map { peer ->
+                            val host = if(peer.endpoint.isPresent &&
+                                peer.endpoint.get().resolved.isPresent)
+                                peer.endpoint.get().resolved.get().host
+                            else Constants.BACKUP_PING_HOST
+                            Timber.i("Checking reachability of: $host")
+                            val reachable = InetAddress.getByName(host).isReachable(Constants.PING_TIMEOUT.toInt())
+                            Timber.i("Result: reachable - $reachable")
+                            reachable
+                        }
+                        if(results.contains(false)) {
+                            Timber.i("Restarting VPN for ping failure")
+                            ServiceManager.stopVpnService(this)
+                            delay(Constants.VPN_RESTART_DELAY)
+                            val tunnel = networkEventsFlow.value.settings.defaultTunnel
+                            ServiceManager.startVpnServiceForeground(this, tunnel!!)
+                            delay(Constants.PING_COOLDOWN)
+                        }
+                    }
+                }
+                delay(Constants.PING_INTERVAL)
+            } while (true)
+
+        } catch (e: Exception) {
+            Timber.e(e)
         }
     }
 
@@ -331,10 +338,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         }
     }
 
-    // TODO clean this up
     private suspend fun manageVpn() {
         networkEventsFlow.collectLatest {
-            Timber.i("New watcher state: $it")
+            val autoTunnel = "Auto-tunnel watcher"
             if (!it.settings.isAutoTunnelPaused && it.settings.defaultTunnel != null) {
                 delay(Constants.TOGGLE_TUNNEL_DELAY)
                 when {
@@ -342,7 +348,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         it.settings.isTunnelOnEthernetEnabled &&
                         !it.isVpnConnected)) -> {
                         ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
-                        Timber.i("Condition 1 met")
+                        Timber.i("$autoTunnel condition 1 met")
                     }
                     (!it.isEthernetConnected &&
                         it.settings.isTunnelOnMobileDataEnabled &&
@@ -350,14 +356,14 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         it.isMobileDataConnected &&
                         !it.isVpnConnected) -> {
                         ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
-                        Timber.i("Condition 2 met")
+                        Timber.i("$autoTunnel condition 2 met")
                     }
                     (!it.isEthernetConnected &&
                         !it.settings.isTunnelOnMobileDataEnabled &&
                         !it.isWifiConnected &&
                         it.isVpnConnected) -> {
                         ServiceManager.stopVpnService(this)
-                        Timber.i("Condition 3 met")
+                        Timber.i("$autoTunnel condition 3 met")
                     }
                     (!it.isEthernetConnected &&
                         it.isWifiConnected &&
@@ -365,31 +371,31 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         it.settings.isTunnelOnWifiEnabled &&
                         (!it.isVpnConnected)) -> {
                         ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
-                        Timber.i("Condition 4 met")
+                        Timber.i("$autoTunnel condition 4 met")
                     }
                     (!it.isEthernetConnected &&
                         (it.isWifiConnected &&
                             it.settings.trustedNetworkSSIDs.contains(it.currentNetworkSSID)) &&
                         (it.isVpnConnected)) -> {
                         ServiceManager.stopVpnService(this)
-                        Timber.i("Condition 5 met")
+                        Timber.i("$autoTunnel condition 5 met")
                     }
                     (!it.isEthernetConnected &&
                         (it.isWifiConnected &&
                             !it.settings.isTunnelOnWifiEnabled &&
                             (it.isVpnConnected))) -> {
                         ServiceManager.stopVpnService(this)
-                        Timber.i("Condition 6 met")
+                        Timber.i("$autoTunnel condition 6 met")
                     }
                     (!it.isEthernetConnected &&
                         !it.isWifiConnected &&
                         !it.isMobileDataConnected &&
                         (it.isVpnConnected)) -> {
                         ServiceManager.stopVpnService(this)
-                        Timber.i("Condition 7 met")
+                        Timber.i("$autoTunnel condition 7 met")
                     }
                     else -> {
-                        Timber.i("No condition met")
+                        Timber.i("$autoTunnel no condition met")
                     }
                 }
             }

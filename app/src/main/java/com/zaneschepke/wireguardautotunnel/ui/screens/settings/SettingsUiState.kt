@@ -9,6 +9,5 @@ data class SettingsUiState(
     val tunnels: List<TunnelConfig> = emptyList(),
     val vpnState: VpnState = VpnState(),
     val isLocationDisclosureShown: Boolean = true,
-    val isBatteryOptimizeDisableShown: Boolean = false,
-    val loading: Boolean = true
+    val isBatteryOptimizeDisableShown: Boolean = false
 )

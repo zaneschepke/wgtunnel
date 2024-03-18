@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 class DataStoreManager(private val context: Context) {
     companion object {
@@ -32,7 +33,11 @@ class DataStoreManager(private val context: Context) {
     fun <T> getFromStoreFlow(key: Preferences.Key<T>) = context.dataStore.data.map { it[key] }
 
     suspend fun <T> getFromStore(key: Preferences.Key<T>) =
-        context.dataStore.data.first { it.contains(key) }[key]
+        context.dataStore.data.map{ it[key] }.first()
+
+    fun <T> getFromStoreBlocking(key: Preferences.Key<T>) = runBlocking {
+        context.dataStore.data.map{ it[key] }.first()
+    }
 
     val preferencesFlow: Flow<Preferences?> = context.dataStore.data
 }

@@ -20,7 +20,7 @@
     <string name="tunnel_start_title">VPN Connected</string>
     <string name="tunnel_start_text">Connected to tunnel -</string>
     <string name="vpn_permission_required">VPN permission is required for the app to work properly. If this permission is not launching, please disable \"Always-on VPN\" in your phone settings for the official WireGuard mobile app and try again.</string>
-    <string name="notification_permission_required">Notifications permission is required for the app to work properly.</string>
+    <string name="notification_permission_required">Notifications permission required.</string>
     <string name="open_settings">Open Settings</string>
     <string name="add_trusted_ssid">Add trusted wifi name</string>
     <string name="tunnels">Tunnels</string>
@@ -46,8 +46,6 @@
     <string name="qr_scan">QR Scan</string>
     <string name="tunnel_edit">Tunnel Edit</string>
     <string name="tunnel_name">Tunnel Name</string>
-    <string name="edit">Edit</string>
-    <string name="delete">Delete</string>
     <string name="add_tunnel">Add Tunnel</string>
     <string name="exclude">Exclude</string>
     <string name="include">Include</string>
@@ -105,11 +103,9 @@
     <string name="default_vpn_on">Primary VPN on</string>
     <string name="default_vpn_off">Primary VPN off</string>
     <string name="create_import">Create from scratch</string>
-    <string name="set_primary">Set primary</string>
     <string name="turn_off_auto">Action requires auto-tunnel disabled</string>
     <string name="turn_on_tunnel">Action requires active tunnel</string>
     <string name="add_peer">Add peer</string>
-    <string name="info">Info</string>
     <string name="done">Done</string>
     <string name="interface_">Interface</string>
     <string name="rotate_keys">Rotate keys</string>
@@ -119,7 +115,6 @@
     <string name="comma_separated_list">comma separated list</string>
     <string name="listen_port">Listen port</string>
     <string name="random">(random)</string>
-    <string name="auto">(auto)</string>
     <string name="optional">(optional)</string>
     <string name="optional_no_recommend">(optional, not recommended)</string>
     <string name="preshared_key">Pre-shared key</string>
@@ -177,4 +172,12 @@
     <string name="logs_saved">Logs saved to downloads</string>
     <string name="open_issue">Open an issue</string>
     <string name="read_logs">Read the logs</string>
+    <string name="auto">(auto)</string>
+    <string name="config_parse_error">Failed to parse config</string>
+    <string name="incorrect_pin">Pin is incorrect</string>
+    <string name="pin_created">Pin successfully created</string>
+    <string name="enter_pin">Enter your pin</string>
+    <string name="create_pin">Create pin</string>
+    <string name="enable_app_lock">Enabled app lock</string>
+    <string name="restart_on_ping">Restart on ping fail</string>
 </resources>

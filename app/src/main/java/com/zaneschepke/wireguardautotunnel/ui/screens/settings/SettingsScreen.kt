@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -68,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -76,10 +75,10 @@ import com.wireguard.android.backend.WgQuickBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
+import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
-import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.util.Event
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
@@ -87,6 +86,7 @@ import com.zaneschepke.wireguardautotunnel.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import xyz.teamgravity.pin_lock_compose.PinManager
 import java.io.File
 
 @OptIn(
@@ -97,13 +97,15 @@ import java.io.File
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     appViewModel: AppViewModel,
-    focusRequester: FocusRequester
+    navController: NavController,
+    focusRequester: FocusRequester,
 ) {
     val scope = rememberCoroutineScope { Dispatchers.IO }
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
     val interactionSource = remember { MutableInteractionSource() }
+    val pinExists = remember { mutableStateOf(PinManager.pinExists()) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -113,19 +115,12 @@ fun SettingsScreen(
     var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
     var didExportFiles by remember { mutableStateOf(false) }
     var showAuthPrompt by remember { mutableStateOf(false) }
-    val focusRequester2 = remember { FocusRequester() }
 
     val screenPadding = 5.dp
     val fillMaxWidth = .85f
 
-    if (uiState.loading) {
-        LoadingScreen()
-        return
-    }
-
     val startForResult =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            result: ActivityResult ->
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data
                 // Handle the Intent
@@ -164,7 +159,9 @@ fun SettingsScreen(
 
     fun handleAutoTunnelToggle() {
         if (uiState.isBatteryOptimizeDisableShown || isBatteryOptimizationsDisabled()) {
-            viewModel.toggleAutoTunnel()
+            if (appViewModel.isRequiredPermissionGranted()) {
+                viewModel.toggleAutoTunnel()
+            }
         } else {
             requestBatteryOptimizationsDisabled()
         }
@@ -202,7 +199,7 @@ fun SettingsScreen(
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         if (
             WireGuardAutoTunnel.isRunningOnAndroidTv() &&
-                Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
+            Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
         ) {
             checkFineLocationGranted()
         } else {
@@ -249,12 +246,16 @@ fun SettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
         ) {
             Icon(
                 Icons.Rounded.LocationOff,
                 contentDescription = stringResource(id = R.string.map),
-                modifier = Modifier.padding(30.dp).size(128.dp),
+                modifier = Modifier
+                        .padding(30.dp)
+                        .size(128.dp),
             )
             Text(
                 stringResource(R.string.prominent_background_location_title),
@@ -270,11 +271,15 @@ fun SettingsScreen(
             )
             Row(
                 modifier =
-                    if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                        Modifier.fillMaxWidth().padding(10.dp)
-                    } else {
-                        Modifier.fillMaxWidth().padding(30.dp)
-                    },
+                if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                    Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                } else {
+                    Modifier
+                            .fillMaxWidth()
+                            .padding(30.dp)
+                },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
@@ -330,12 +335,15 @@ fun SettingsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
             modifier =
-                Modifier.fillMaxSize().verticalScroll(scrollState).clickable(
-                    indication = null,
-                    interactionSource = interactionSource,
-                ) {
-                    focusManager.clearFocus()
-                },
+            Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .clickable(
+                            indication = null,
+                            interactionSource = interactionSource,
+                    ) {
+                        focusManager.clearFocus()
+                    },
         ) {
             Surface(
                 tonalElevation = 2.dp,
@@ -343,14 +351,17 @@ fun SettingsScreen(
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surface,
                 modifier =
-                    (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                            Modifier.height(IntrinsicSize.Min)
-                                .fillMaxWidth(fillMaxWidth)
-                                .padding(top = 10.dp)
-                        } else {
-                            Modifier.fillMaxWidth(fillMaxWidth).padding(top = 20.dp)
-                        })
-                        .padding(bottom = 10.dp),
+                (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                    Modifier
+                            .height(IntrinsicSize.Min)
+                            .fillMaxWidth(fillMaxWidth)
+                            .padding(top = 10.dp)
+                } else {
+                    Modifier
+                            .fillMaxWidth(fillMaxWidth)
+                            .padding(top = 20.dp)
+                })
+                    .padding(bottom = 10.dp),
             ) {
                 Column(
                     horizontalAlignment = Alignment.Start,
@@ -364,38 +375,43 @@ fun SettingsScreen(
                     ConfigurationToggle(
                         stringResource(id = R.string.tunnel_on_wifi),
                         enabled =
-                            !(uiState.settings.isAutoTunnelEnabled ||
-                                uiState.settings.isAlwaysOnVpnEnabled),
+                        !(uiState.settings.isAutoTunnelEnabled ||
+                            uiState.settings.isAlwaysOnVpnEnabled),
                         checked = uiState.settings.isTunnelOnWifiEnabled,
                         padding = screenPadding,
                         onCheckChanged = { viewModel.onToggleTunnelOnWifi() },
                         modifier =
-                            if (uiState.settings.isAutoTunnelEnabled) Modifier
-                            else
-                                Modifier.focusRequester(focusRequester).focusProperties {
-                                    down = focusRequester2
-                                },
+                        if (uiState.settings.isAutoTunnelEnabled) Modifier
+                        else
+                            Modifier
+                                .focusRequester(focusRequester),
                     )
                     AnimatedVisibility(visible = uiState.settings.isTunnelOnWifiEnabled) {
                         Column {
                             FlowRow(
-                                modifier = Modifier.padding(screenPadding).fillMaxWidth(),
+                                modifier = Modifier
+                                        .padding(screenPadding)
+                                        .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                             ) {
                                 uiState.settings.trustedNetworkSSIDs.forEach { ssid ->
                                     ClickableIconButton(
                                         onClick = {
                                             if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                                                focusRequester.requestFocus()
                                                 viewModel.onDeleteTrustedSSID(ssid)
-                                                focusRequester2.requestFocus()
                                             }
                                         },
-                                        onIconClick = { viewModel.onDeleteTrustedSSID(ssid) },
+                                        onIconClick = {
+                                            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) focusRequester.requestFocus()
+                                            viewModel.onDeleteTrustedSSID(ssid)
+
+                                        },
                                         text = ssid,
                                         icon = Icons.Filled.Close,
                                         enabled =
-                                            !(uiState.settings.isAutoTunnelEnabled ||
-                                                uiState.settings.isAlwaysOnVpnEnabled),
+                                        !(uiState.settings.isAutoTunnelEnabled ||
+                                            uiState.settings.isAlwaysOnVpnEnabled),
                                     )
                                 }
                                 if (uiState.settings.trustedNetworkSSIDs.isEmpty()) {
@@ -408,24 +424,24 @@ fun SettingsScreen(
                             }
                             OutlinedTextField(
                                 enabled =
-                                    !(uiState.settings.isAutoTunnelEnabled ||
-                                        uiState.settings.isAlwaysOnVpnEnabled),
+                                !(uiState.settings.isAutoTunnelEnabled ||
+                                    uiState.settings.isAlwaysOnVpnEnabled),
                                 value = currentText,
                                 onValueChange = { currentText = it },
                                 label = { Text(stringResource(R.string.add_trusted_ssid)) },
                                 modifier =
-                                    Modifier.padding(
-                                            start = screenPadding,
-                                            top = 5.dp,
-                                            bottom = 10.dp,
-                                        )
-                                        .focusRequester(focusRequester2),
+                                Modifier
+                                    .padding(
+                                        start = screenPadding,
+                                        top = 5.dp,
+                                        bottom = 10.dp,
+                                    ),
                                 maxLines = 1,
                                 keyboardOptions =
-                                    KeyboardOptions(
-                                        capitalization = KeyboardCapitalization.None,
-                                        imeAction = ImeAction.Done,
-                                    ),
+                                KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.None,
+                                    imeAction = ImeAction.Done,
+                                ),
                                 keyboardActions = KeyboardActions(onDone = { saveTrustedSSID() }),
                                 trailingIcon = {
                                     if (currentText != "") {
@@ -433,19 +449,19 @@ fun SettingsScreen(
                                             Icon(
                                                 imageVector = Icons.Outlined.Add,
                                                 contentDescription =
-                                                    if (currentText == "") {
-                                                        stringResource(
-                                                            id =
-                                                                R.string
-                                                                    .trusted_ssid_empty_description,
-                                                        )
-                                                    } else {
-                                                        stringResource(
-                                                            id =
-                                                                R.string
-                                                                    .trusted_ssid_value_description,
-                                                        )
-                                                    },
+                                                if (currentText == "") {
+                                                    stringResource(
+                                                        id =
+                                                        R.string
+                                                            .trusted_ssid_empty_description,
+                                                    )
+                                                } else {
+                                                    stringResource(
+                                                        id =
+                                                        R.string
+                                                            .trusted_ssid_value_description,
+                                                    )
+                                                },
                                                 tint = MaterialTheme.colorScheme.primary,
                                             )
                                         }
@@ -457,8 +473,8 @@ fun SettingsScreen(
                     ConfigurationToggle(
                         stringResource(R.string.tunnel_mobile_data),
                         enabled =
-                            !(uiState.settings.isAutoTunnelEnabled ||
-                                uiState.settings.isAlwaysOnVpnEnabled),
+                        !(uiState.settings.isAutoTunnelEnabled ||
+                            uiState.settings.isAlwaysOnVpnEnabled),
                         checked = uiState.settings.isTunnelOnMobileDataEnabled,
                         padding = screenPadding,
                         onCheckChanged = { viewModel.onToggleTunnelOnMobileData() },
@@ -466,29 +482,29 @@ fun SettingsScreen(
                     ConfigurationToggle(
                         stringResource(id = R.string.tunnel_on_ethernet),
                         enabled =
-                            !(uiState.settings.isAutoTunnelEnabled ||
-                                uiState.settings.isAlwaysOnVpnEnabled),
+                        !(uiState.settings.isAutoTunnelEnabled ||
+                            uiState.settings.isAlwaysOnVpnEnabled),
                         checked = uiState.settings.isTunnelOnEthernetEnabled,
                         padding = screenPadding,
                         onCheckChanged = { viewModel.onToggleTunnelOnEthernet() },
                     )
                     ConfigurationToggle(
-                        stringResource(R.string.battery_saver),
+                        stringResource(R.string.restart_on_ping),
                         enabled =
-                            !(uiState.settings.isAutoTunnelEnabled ||
-                                uiState.settings.isAlwaysOnVpnEnabled),
-                        checked = uiState.settings.isBatterySaverEnabled,
+                        !(uiState.settings.isAutoTunnelEnabled ||
+                            uiState.settings.isAlwaysOnVpnEnabled),
+                        checked = uiState.settings.isPingEnabled,
                         padding = screenPadding,
-                        onCheckChanged = { viewModel.onToggleBatterySaver() },
+                        onCheckChanged = { viewModel.onToggleRestartOnPing() },
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier =
-                            (if (!uiState.settings.isAutoTunnelEnabled) Modifier
-                                else
-                                    Modifier.focusRequester(
-                                        focusRequester,
-                                    ))
+                        (if (!uiState.settings.isAutoTunnelEnabled) Modifier
+                        else
+                            Modifier.focusRequester(
+                                    focusRequester,
+                            ))
                                 .fillMaxSize()
                                 .padding(top = 5.dp),
                         horizontalArrangement = Arrangement.Center,
@@ -498,19 +514,22 @@ fun SettingsScreen(
                             onClick = {
                                 if (
                                     uiState.settings.isTunnelOnWifiEnabled &&
-                                        !uiState.settings.isAutoTunnelEnabled
+                                    !uiState.settings.isAutoTunnelEnabled
                                 ) {
                                     when (false) {
                                         isBackgroundLocationGranted ->
                                             appViewModel.showSnackbarMessage(
-                                                Event.Error.BackgroundLocationRequired.message
+                                                Event.Error.BackgroundLocationRequired.message,
                                             )
+
                                         fineLocationState.status.isGranted ->
                                             appViewModel.showSnackbarMessage(
-                                                Event.Error.PreciseLocationRequired.message
+                                                Event.Error.PreciseLocationRequired.message,
                                             )
+
                                         viewModel.isLocationEnabled(context) ->
                                             showLocationServicesAlertDialog = true
+
                                         else -> {
                                             handleAutoTunnelToggle()
                                         }
@@ -537,7 +556,9 @@ fun SettingsScreen(
                     shadowElevation = 2.dp,
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.fillMaxWidth(fillMaxWidth).padding(vertical = 10.dp),
+                    modifier = Modifier
+                            .fillMaxWidth(fillMaxWidth)
+                            .padding(vertical = 10.dp),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.Start,
@@ -551,9 +572,9 @@ fun SettingsScreen(
                         ConfigurationToggle(
                             stringResource(R.string.use_kernel),
                             enabled =
-                                !(uiState.settings.isAutoTunnelEnabled ||
-                                    uiState.settings.isAlwaysOnVpnEnabled ||
-                                    (uiState.vpnState.status == Tunnel.State.UP)),
+                            !(uiState.settings.isAutoTunnelEnabled ||
+                                uiState.settings.isAlwaysOnVpnEnabled ||
+                                (uiState.vpnState.status == Tunnel.State.UP)),
                             checked = uiState.settings.isKernelEnabled,
                             padding = screenPadding,
                             onCheckChanged = {
@@ -568,26 +589,27 @@ fun SettingsScreen(
                     }
                 }
             }
-            if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                Surface(
-                    tonalElevation = 2.dp,
-                    shadowElevation = 2.dp,
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier =
-                        Modifier.fillMaxWidth(fillMaxWidth)
-                            .padding(vertical = 10.dp)
-                            .padding(bottom = 140.dp),
+            Surface(
+                tonalElevation = 2.dp,
+                shadowElevation = 2.dp,
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier =
+                Modifier
+                        .fillMaxWidth(fillMaxWidth)
+                        .padding(vertical = 10.dp)
+                        .padding(bottom = 140.dp),
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.padding(15.dp),
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Top,
-                        modifier = Modifier.padding(15.dp),
-                    ) {
-                        SectionTitle(
-                            title = stringResource(id = R.string.other),
-                            padding = screenPadding,
-                        )
+                    SectionTitle(
+                        title = stringResource(id = R.string.other),
+                        padding = screenPadding,
+                    )
+                    if(!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                         ConfigurationToggle(
                             stringResource(R.string.always_on_vpn_support),
                             enabled = !uiState.settings.isAutoTunnelEnabled,
@@ -602,9 +624,27 @@ fun SettingsScreen(
                             padding = screenPadding,
                             onCheckChanged = { viewModel.onToggleShortcutsEnabled() },
                         )
+                    }
+                    ConfigurationToggle(
+                        stringResource(R.string.enable_app_lock),
+                        enabled = true,
+                        checked = pinExists.value,
+                        padding = screenPadding,
+                        onCheckChanged = {
+                            if (pinExists.value) {
+                                PinManager.clearPin()
+                                pinExists.value = PinManager.pinExists()
+                            } else {
+                                navController.navigate(Screen.Lock.route)
+                            }
+                        },
+                    )
+                    if(!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxSize().padding(top = 5.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 5.dp),
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             TextButton(
@@ -616,9 +656,6 @@ fun SettingsScreen(
                         }
                     }
                 }
-            }
-            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                Spacer(modifier = Modifier.weight(.17f))
             }
         }
     }

@@ -49,7 +49,6 @@ constructor(
                     tunnelState,
                     preferences?.get(DataStoreManager.LOCATION_DISCLOSURE_SHOWN) ?: false,
                     preferences?.get(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN) ?: false,
-                    false
                 )
             }
             .stateIn(
@@ -194,5 +193,13 @@ constructor(
             saveKernelMode(on = false)
         }
         return Result.Success(Unit)
+    }
+
+    fun onToggleRestartOnPing() = viewModelScope.launch {
+        saveSettings(
+            uiState.value.settings.copy(
+                isPingEnabled = !uiState.value.settings.isPingEnabled,
+            ),
+        )
     }
 }

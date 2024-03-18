@@ -7,8 +7,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wireguard.config.BadConfigException
 import com.wireguard.config.Config
 import com.wireguard.config.Interface
+import com.wireguard.config.ParseException
 import com.wireguard.config.Peer
 import com.wireguard.crypto.Key
 import com.wireguard.crypto.KeyPair
@@ -152,7 +154,7 @@ constructor(
         viewModelScope.launch {
             if (tunnelConfig != null) {
                 saveConfig(tunnelConfig).join()
-                WireGuardAutoTunnel.requestTileServiceStateUpdate()
+                WireGuardAutoTunnel.requestTileServiceStateUpdate(application)
                 updateSettingsDefaultTunnel(tunnelConfig)
             }
         }
@@ -218,7 +220,8 @@ constructor(
             Result.Success(Event.Message.ConfigSaved)
         } catch (e: Exception) {
             Timber.e(e)
-            Result.Error(Event.Error.Exception(e))
+            val message = e.message?.substringAfter(":", missingDelimiterValue = "")
+            Result.Error(Event.Error.ConfigParseError(message ?: ""))
         }
     }
 

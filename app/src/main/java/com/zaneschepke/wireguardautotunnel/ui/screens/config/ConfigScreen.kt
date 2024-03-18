@@ -257,9 +257,10 @@ fun ConfigScreen(
                                                 modifier = Modifier.size(50.dp, 50.dp),
                                             )
                                         } else {
+                                            val icon = Icons.Rounded.Android
                                             Icon(
-                                                Icons.Rounded.Android,
-                                                stringResource(id = R.string.edit),
+                                                icon,
+                                                icon.name,
                                                 modifier = Modifier.size(50.dp, 50.dp),
                                             )
                                         }
@@ -530,7 +531,8 @@ fun ConfigScreen(
                                     padding = screenPadding,
                                 )
                                 IconButton(onClick = { viewModel.onDeletePeer(index) }) {
-                                    Icon(Icons.Rounded.Delete, stringResource(R.string.delete))
+                                    val icon = Icons.Rounded.Delete
+                                    Icon(icon, icon.name)
                                 }
                             }
 

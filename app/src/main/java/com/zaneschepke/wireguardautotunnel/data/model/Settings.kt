@@ -51,6 +51,11 @@ data class Settings(
         defaultValue = "false",
     )
     var isAutoTunnelPaused: Boolean = false,
+    @ColumnInfo(
+        name = "is_ping_enabled",
+        defaultValue = "false",
+    )
+    var isPingEnabled: Boolean = false,
 ) {
     fun isTunnelConfigDefault(tunnelConfig: TunnelConfig): Boolean {
         return if (defaultTunnel != null) {

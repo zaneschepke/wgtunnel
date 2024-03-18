@@ -19,7 +19,15 @@ object NumberUtils {
     }
 
     fun generateRandomTunnelName(): String {
-        return "tunnel${(Math.random() * 100000).toInt()}"
+        return "tunnel${randomFive()}"
+    }
+
+    private fun randomFive() : Int {
+        return (Math.random() * 100000).toInt()
+    }
+
+    fun randomThree() : Int {
+        return (Math.random() * 1000).toInt()
     }
 
     fun getSecondsBetweenTimestampAndNow(epoch: Long): Long? {

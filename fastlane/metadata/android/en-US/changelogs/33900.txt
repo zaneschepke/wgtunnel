@@ -1,0 +1,5 @@
+What's new:
+- Add logs screen
+- Add local app lock
+- Add restart vpn on failed ping
+- Various bug fixes

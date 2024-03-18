@@ -32,25 +32,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LogsScreen(logsViewModel: LogsViewModel = hiltViewModel()) {
+fun LogsScreen(appViewModel: AppViewModel) {
 
     val logs = remember {
-        logsViewModel.logs
+        appViewModel.logs
     }
 
     val lazyColumnListState = rememberLazyListState()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        logsViewModel.readLogCatOutput()
-    }
-
 
     LaunchedEffect(logs.size){
         scope.launch {
@@ -62,7 +58,7 @@ fun LogsScreen(logsViewModel: LogsViewModel = hiltViewModel()) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    logsViewModel.saveLogsToFile()
+                    appViewModel.saveLogsToFile()
                 },
                 shape = RoundedCornerShape(16.dp),
                 containerColor = MaterialTheme.colorScheme.primary

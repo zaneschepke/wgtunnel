@@ -36,4 +36,5 @@ sealed class Screen(val route: String) {
     }
 
     data object Config : Screen("config")
+    data object Lock : Screen("lock")
 }

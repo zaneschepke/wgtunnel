@@ -49,9 +49,10 @@ fun CustomSnackBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {
+                val icon = Icons.Rounded.Info
                 Icon(
-                    Icons.Rounded.Info,
-                    contentDescription = stringResource(R.string.info),
+                    icon,
+                    contentDescription = icon.name,
                     tint = Color.White,
                     modifier = Modifier.padding(end = 10.dp),
                 )

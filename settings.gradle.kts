@@ -7,21 +7,11 @@ pluginManagement {
     }
 }
 
-val GITHUB_USER_VAR = "GH_USER"
-val GITHUB_TOKEN_VAR = "GH_TOKEN"
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenLocal()
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/zaneschepke/wireguard-android")
-            credentials {
-                username = getLocalProperty(GITHUB_USER_VAR) ?: System.getenv(GITHUB_USER_VAR)
-                password = getLocalProperty(GITHUB_TOKEN_VAR) ?: System.getenv(GITHUB_TOKEN_VAR)
-            }
-        }
+        maven("https://gitea.zaneschepke.com/api/packages/zane/maven")
         google()
         mavenCentral()
     }

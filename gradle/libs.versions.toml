@@ -9,27 +9,28 @@ coreKtx = "1.12.0"
 datastorePreferences = "1.0.0"
 desugar_jdk_libs = "2.0.4"
 espressoCore = "3.5.1"
-hiltAndroid = "2.50"
+hiltAndroid = "2.51"
 hiltNavigationCompose = "1.2.0"
 junit = "4.13.2"
 kotlinx-serialization-json = "1.6.3"
 lifecycle-runtime-compose = "2.7.0"
-material3 = "1.2.0"
+material3 = "1.2.1"
 navigationCompose = "2.7.7"
+pinLockCompose = "1.0.3"
 roomVersion = "2.6.1"
 timber = "5.0.1"
-tunnel = "1.1.0"
-androidGradlePlugin = "8.3.0"
+tunnel = "1.0.20230706"
+androidGradlePlugin = "8.3.1"
 kotlin = "1.9.22"
 ksp = "1.9.22-1.0.17"
-composeBom = "2024.02.01"
+composeBom = "2024.02.02"
 compose = "1.6.3"
 zxingAndroidEmbedded = "4.3.0"
 zxingCore = "3.5.3"
 
 #plugins
 gradlePlugins-kotlinxSerialization = "1.8.21"
-material = "1.10.0"
+material = "1.11.0"
 
 
 [libraries]
@@ -80,8 +81,9 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 
+pin-lock-compose = { module = "com.zaneschepke:pin_lock_compose", version.ref = "pinLockCompose" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
-tunnel = { module = "com.zaneschepke:wireguard-android", version.ref = "tunnel" }
+tunnel = { module = "com.wireguard.android:tunnel", version.ref = "tunnel" }
 
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxingCore" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }

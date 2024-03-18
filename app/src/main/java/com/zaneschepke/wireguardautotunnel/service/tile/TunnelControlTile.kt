@@ -45,8 +45,7 @@ class TunnelControlTile() : TileService() {
                     setUnavailable()
                     return@collect
                 }
-                tunnelName =
-                    it.name.ifBlank {
+                tunnelName = it.name.run {
                         val settings = settingsRepository.getSettings()
                         if (settings.defaultTunnel != null) {
                             TunnelConfig.from(settings.defaultTunnel!!).name
@@ -72,15 +71,18 @@ class TunnelControlTile() : TileService() {
         unlockAndRun {
             scope.launch {
                 try {
-                    val tunnelConfig =
-                        tunnelConfigRepository.getAll().first { it.name == tunnelName }
+                    val defaultTunnel = settingsRepository.getSettings().defaultTunnel
+                    val config = defaultTunnel ?: run {
+                        val tunnelConfigs = tunnelConfigRepository.getAll()
+                        return@run tunnelConfigs.find { it.name == tunnelName }
+                    }
                     toggleWatcherServicePause()
                     if (vpnService.getState() == Tunnel.State.UP) {
                         ServiceManager.stopVpnService(this@TunnelControlTile)
                     } else {
                         ServiceManager.startVpnServiceForeground(
                             this@TunnelControlTile,
-                            tunnelConfig.toString(),
+                            config.toString(),
                         )
                     }
                 } catch (e: Exception) {

@@ -6,18 +6,33 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.zaneschepke.wireguardautotunnel.ui.Screen
 
 @Composable
 fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavItem>) {
     val backStackEntry = navController.currentBackStackEntryAsState()
 
+    var showBottomBar by rememberSaveable { mutableStateOf(true) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    //TODO find a better way to hide nav bar
+    showBottomBar = when (navBackStackEntry?.destination?.route) {
+        Screen.Lock.route -> false
+        else -> true
+    }
+
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = if(!showBottomBar) Color.Transparent else MaterialTheme.colorScheme.background,
     ) {
-        bottomNavItems.forEach { item ->
+       if(showBottomBar) bottomNavItems.forEach { item ->
             val selected = item.route == backStackEntry.value?.destination?.route
 
             NavigationBarItem(

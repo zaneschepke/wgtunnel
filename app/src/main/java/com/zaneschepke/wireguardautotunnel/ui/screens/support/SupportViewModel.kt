@@ -17,7 +17,7 @@ class SupportViewModel @Inject constructor(private val settingsRepository: Setti
     val uiState =
         settingsRepository
             .getSettingsFlow()
-            .map { SupportUiState(it, false) }
+            .map { SupportUiState(it) }
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),

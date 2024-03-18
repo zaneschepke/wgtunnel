@@ -89,7 +89,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # fix hardcode changelog file name
           body_path: ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/${{ env.VERSION_CODE }}.txt
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}

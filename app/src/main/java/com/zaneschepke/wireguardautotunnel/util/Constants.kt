@@ -7,14 +7,12 @@ object Constants {
 
     const val MANUAL_TUNNEL_CONFIG_ID = "0"
     const val BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT = 10 * 60 * 1_000L // 10 minutes
-    const val DEFAULT_WATCHER_WAKE_LOCK_TIMEOUT = 30 * 60 * 1_000L // 30 minutes
     const val VPN_STATISTIC_CHECK_INTERVAL = 1_000L
     const val VPN_CONNECTED_NOTIFICATION_DELAY = 3_000L
     const val TOGGLE_TUNNEL_DELAY = 300L
     const val CONF_FILE_EXTENSION = ".conf"
     const val ZIP_FILE_EXTENSION = ".zip"
     const val URI_CONTENT_SCHEME = "content"
-    const val URI_PACKAGE_SCHEME = "package"
     const val ALLOWED_FILE_TYPES = "*/*"
     const val TEXT_MIME_TYPE = "text/plain"
     const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
@@ -24,4 +22,11 @@ object Constants {
 
     const val SUBSCRIPTION_TIMEOUT = 5_000L
     const val FOCUS_REQUEST_DELAY = 500L
+
+    const val BACKUP_PING_HOST = "1.1.1.1"
+    const val PING_TIMEOUT = 5_000L
+    const val VPN_RESTART_DELAY = 1_000L
+    const val PING_INTERVAL = 60_000L
+    const val PING_COOLDOWN = PING_INTERVAL * 60 //one hour
+
 }
