@@ -24,7 +24,7 @@ androidGradlePlugin = "8.3.1"
 kotlin = "1.9.22"
 ksp = "1.9.22-1.0.17"
 composeBom = "2024.02.02"
-compose = "1.6.3"
+compose = "1.6.4"
 zxingAndroidEmbedded = "4.3.0"
 zxingCore = "3.5.3"
 
