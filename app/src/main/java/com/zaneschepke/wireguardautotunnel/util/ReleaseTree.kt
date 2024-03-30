@@ -1,13 +1,17 @@
 package com.zaneschepke.wireguardautotunnel.util
 
-import android.util.Log
 import timber.log.Timber
 
-class ReleaseTree : Timber.Tree() {
-    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        when(priority) {
-            Log.DEBUG -> return
-        }
-        super.log(priority,tag,message,t)
+class ReleaseTree : Timber.DebugTree() {
+    override fun d(t: Throwable?) {
+        return
+    }
+
+    override fun d(t: Throwable?, message: String?, vararg args: Any?) {
+        return
+    }
+
+    override fun d(message: String?, vararg args: Any?) {
+        return
     }
 }

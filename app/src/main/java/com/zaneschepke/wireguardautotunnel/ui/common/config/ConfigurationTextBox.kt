@@ -27,10 +27,10 @@ fun ConfigurationTextBox(
         maxLines = 1,
         placeholder = { Text(hint) },
         keyboardOptions =
-            KeyboardOptions(
-                capitalization = KeyboardCapitalization.None,
-                imeAction = ImeAction.Done,
-            ),
+        KeyboardOptions(
+            capitalization = KeyboardCapitalization.None,
+            imeAction = ImeAction.Done,
+        ),
         keyboardActions = keyboardActions,
     )
 }

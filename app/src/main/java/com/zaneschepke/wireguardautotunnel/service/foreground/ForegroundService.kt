@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
 import androidx.lifecycle.LifecycleService
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import timber.log.Timber
 
 open class ForegroundService : LifecycleService() {
@@ -23,11 +24,13 @@ open class ForegroundService : LifecycleService() {
             when (action) {
                 Action.START.name,
                 Action.START_FOREGROUND.name -> startService(intent.extras)
+
                 Action.STOP.name -> stopService(intent.extras)
-                "android.net.VpnService" -> {
-                    Timber.d("Always-on VPN starting service")
+                Constants.ALWAYS_ON_VPN_ACTION -> {
+                    Timber.i("Always-on VPN starting service")
                     startService(intent.extras)
                 }
+
                 else -> Timber.d("This should never happen. No action in the received intent")
             }
         } else {

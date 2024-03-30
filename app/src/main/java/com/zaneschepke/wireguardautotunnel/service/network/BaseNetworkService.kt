@@ -53,6 +53,7 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
                         }
                     }
                 }
+
                 else -> {
                     object : ConnectivityManager.NetworkCallback() {
                         override fun onAvailable(network: Network) {
@@ -117,7 +118,7 @@ inline fun <Result> Flow<NetworkStatus>.map(
     crossinline onUnavailable: suspend (network: Network) -> Result,
     crossinline onAvailable: suspend (network: Network) -> Result,
     crossinline onCapabilitiesChanged:
-        suspend (network: Network, networkCapabilities: NetworkCapabilities) -> Result
+    suspend (network: Network, networkCapabilities: NetworkCapabilities) -> Result
 ): Flow<Result> = map { status ->
     when (status) {
         is NetworkStatus.Unavailable -> onUnavailable(status.network)

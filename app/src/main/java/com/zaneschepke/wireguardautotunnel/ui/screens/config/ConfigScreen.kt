@@ -94,7 +94,7 @@ fun ConfigScreen(
     focusRequester: FocusRequester,
     navController: NavController,
     appViewModel: AppViewModel,
-    id: String
+    tunnelId: String
 ) {
     val context = LocalContext.current
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
@@ -105,7 +105,7 @@ fun ConfigScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) { viewModel.init(id) }
+    LaunchedEffect(Unit) { viewModel.init(tunnelId) }
 
     LaunchedEffect(uiState.loading) {
         if (!uiState.loading && WireGuardAutoTunnel.isRunningOnAndroidTv()) {
@@ -130,14 +130,14 @@ fun ConfigScreen(
     val applicationButtonText = buildAnnotatedString {
         append(stringResource(id = R.string.tunneling_apps))
         append(": ")
-            if (uiState.isAllApplicationsEnabled) {
-                append(stringResource(id = R.string.all))
-            } else {
-                append("${uiState.checkedPackageNames.size} ")
-                    (if (uiState.include) append(stringResource(id = R.string.included)) else append(
-                        stringResource(id = R.string.excluded),
-                    ))
-            }
+        if (uiState.isAllApplicationsEnabled) {
+            append(stringResource(id = R.string.all))
+        } else {
+            append("${uiState.checkedPackageNames.size} ")
+            (if (uiState.include) append(stringResource(id = R.string.included)) else append(
+                stringResource(id = R.string.excluded),
+            ))
+        }
     }
 
     if (showAuthPrompt) {
@@ -173,8 +173,10 @@ fun ConfigScreen(
                     .fillMaxWidth()
                     .fillMaxHeight(if (uiState.isAllApplicationsEnabled) 1 / 5f else 4 / 5f),
             ) {
-                Column(modifier = Modifier
-                    .fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
                     Row(
                         modifier =
                         Modifier
@@ -273,7 +275,7 @@ fun ConfigScreen(
                                         modifier = Modifier.fillMaxSize(),
                                         checked =
                                         (uiState.checkedPackageNames.contains(
-                                            pack.packageName
+                                            pack.packageName,
                                         )),
                                         onCheckedChange = {
                                             if (it) {
@@ -311,11 +313,11 @@ fun ConfigScreen(
             var fobColor by remember { mutableStateOf(secondaryColor) }
             FloatingActionButton(
                 modifier =
-                    Modifier.onFocusChanged {
-                        if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                            fobColor = if (it.isFocused) hoverColor else secondaryColor
-                        }
-                    },
+                Modifier.onFocusChanged {
+                    if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                        fobColor = if (it.isFocused) hoverColor else secondaryColor
+                    }
+                },
                 onClick = {
                     viewModel.onSaveAllChanges().let {
                         when (it) {
@@ -323,6 +325,7 @@ fun ConfigScreen(
                                 appViewModel.showSnackbarMessage(it.data.message)
                                 navController.navigate(Screen.Main.route)
                             }
+
                             is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
                         }
                     }
@@ -354,14 +357,14 @@ fun ConfigScreen(
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.surface,
                     modifier =
-                        (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                            Modifier
-                                .fillMaxHeight(fillMaxHeight)
-                                .fillMaxWidth(fillMaxWidth)
-                            } else {
-                                Modifier.fillMaxWidth(fillMaxWidth)
-                            })
-                            .padding(bottom = 10.dp),
+                    (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                        Modifier
+                            .fillMaxHeight(fillMaxHeight)
+                            .fillMaxWidth(fillMaxWidth)
+                    } else {
+                        Modifier.fillMaxWidth(fillMaxWidth)
+                    })
+                        .padding(bottom = 10.dp),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.Start,
@@ -390,10 +393,10 @@ fun ConfigScreen(
                                 .clickable { showAuthPrompt = true },
                             value = uiState.interfaceProxy.privateKey,
                             visualTransformation =
-                                if ((id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated)
-                                    VisualTransformation.None
-                                else PasswordVisualTransformation(),
-                            enabled = (id == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
+                            if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated)
+                                VisualTransformation.None
+                            else PasswordVisualTransformation(),
+                            enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
                             onValueChange = { value -> viewModel.onPrivateKeyChange(value) },
                             trailingIcon = {
                                 IconButton(
@@ -503,14 +506,14 @@ fun ConfigScreen(
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.surface,
                         modifier =
-                            (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                                Modifier
-                                    .fillMaxHeight(fillMaxHeight)
-                                    .fillMaxWidth(fillMaxWidth)
-                                } else {
-                                    Modifier.fillMaxWidth(fillMaxWidth)
-                                })
-                                .padding(top = 10.dp, bottom = 10.dp),
+                        (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                            Modifier
+                                .fillMaxHeight(fillMaxHeight)
+                                .fillMaxWidth(fillMaxWidth)
+                        } else {
+                            Modifier.fillMaxWidth(fillMaxWidth)
+                        })
+                            .padding(top = 10.dp, bottom = 10.dp),
                     ) {
                         Column(
                             horizontalAlignment = Alignment.Start,

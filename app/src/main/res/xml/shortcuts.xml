@@ -33,4 +33,36 @@
         </intent>
         <capability-binding android:key="actions.intent.STOP" />
     </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/auto_play"
+        android:shortcutId="autoOn1"
+        android:shortcutLongLabel="@string/auto_on"
+        android:shortcutShortLabel="@string/auto_tun_on">
+        <intent
+            android:action="START"
+            android:targetClass="com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsActivity"
+            android:targetPackage="com.zaneschepke.wireguardautotunnel">
+            <extra
+                android:name="className"
+                android:value="WireGuardConnectivityWatcherService" />
+        </intent>
+        <capability-binding android:key="actions.intent.STOP" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/auto_pause"
+        android:shortcutId="autoOff1"
+        android:shortcutLongLabel="@string/auto_off"
+        android:shortcutShortLabel="@string/auto_tun_off">
+        <intent
+            android:action="STOP"
+            android:targetClass="com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutsActivity"
+            android:targetPackage="com.zaneschepke.wireguardautotunnel">
+            <extra
+                android:name="className"
+                android:value="WireGuardConnectivityWatcherService" />
+        </intent>
+        <capability-binding android:key="actions.intent.STOP" />
+    </shortcut>
 </shortcuts>

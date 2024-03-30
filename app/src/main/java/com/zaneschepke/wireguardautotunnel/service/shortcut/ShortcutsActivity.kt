@@ -1,80 +1,66 @@
 package com.zaneschepke.wireguardautotunnel.service.shortcut
 
 import android.os.Bundle
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
-import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
 import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class ShortcutsActivity : ComponentActivity() {
-    @Inject lateinit var settingsRepository: SettingsRepository
 
-    @Inject lateinit var tunnelConfigRepository: TunnelConfigRepository
+    @Inject
+    lateinit var appDataRepository: AppDataRepository
 
-    private suspend fun toggleWatcherServicePause() {
-        val settings = settingsRepository.getSettings()
-        if (settings.isAutoTunnelEnabled) {
-            val pauseAutoTunnel = !settings.isAutoTunnelPaused
-            settingsRepository.save(
-                settings.copy(
-                    isAutoTunnelPaused = pauseAutoTunnel,
-                ),
-            )
-        }
-    }
+    @Inject
+    lateinit var serviceManager: ServiceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(View(this))
-        if (
-            intent
-                .getStringExtra(CLASS_NAME_EXTRA_KEY)
-                .equals(WireGuardTunnelService::class.java.simpleName)
-        ) {
-            lifecycleScope.launch(Dispatchers.Main) {
-                val settings = settingsRepository.getSettings()
-                if (settings.isShortcutsEnabled) {
-                    try {
+        lifecycleScope.launch(Dispatchers.Main) {
+            val settings = appDataRepository.settings.getSettings()
+            if (settings.isShortcutsEnabled) {
+                when (intent.getStringExtra(CLASS_NAME_EXTRA_KEY)) {
+                    WireGuardTunnelService::class.java.simpleName -> {
                         val tunnelName = intent.getStringExtra(TUNNEL_NAME_EXTRA_KEY)
-                        val tunnelConfig =
-                            if (tunnelName != null) {
-                                tunnelConfigRepository.getAll().firstOrNull {
-                                    it.name == tunnelName
-                                }
-                            } else {
-                                if (settings.defaultTunnel == null) {
-                                    tunnelConfigRepository.getAll().first()
-                                } else {
-                                    TunnelConfig.from(settings.defaultTunnel!!)
-                                }
+                        val tunnelConfig = tunnelName?.let {
+                            appDataRepository.tunnels.getAll().firstOrNull {
+                                it.name == tunnelName
                             }
-                        tunnelConfig ?: return@launch
-                        toggleWatcherServicePause()
-                        when (intent.action) {
-                            Action.STOP.name ->
-                                ServiceManager.stopVpnService(
-                                    this@ShortcutsActivity,
-                                )
-                            Action.START.name ->
-                                ServiceManager.startVpnServiceForeground(
-                                    this@ShortcutsActivity,
-                                    tunnelConfig.toString(),
-                                )
                         }
-                    } catch (e: Exception) {
-                        Timber.e(e.message)
-                        finish()
+                        when (intent.action) {
+                            Action.START.name -> serviceManager.startVpnServiceForeground(
+                                this@ShortcutsActivity, tunnelConfig?.id, isManualStart = true,
+                            )
+
+                            Action.STOP.name -> serviceManager.stopVpnService(
+                                this@ShortcutsActivity,
+                                isManualStop = true,
+                            )
+                        }
+                    }
+
+                    WireGuardConnectivityWatcherService::class.java.simpleName -> {
+                        when (intent.action) {
+                            Action.START.name -> appDataRepository.settings.save(
+                                settings.copy(
+                                    isAutoTunnelPaused = false,
+                                ),
+                            )
+
+                            Action.STOP.name -> appDataRepository.settings.save(
+                                settings.copy(
+                                    isAutoTunnelPaused = true,
+                                ),
+                            )
+                        }
                     }
                 }
             }

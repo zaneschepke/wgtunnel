@@ -18,7 +18,7 @@ sealed class Event {
                 get() = WireGuardAutoTunnel.instance.getString(R.string.error_ssid_exists)
         }
 
-        data class ConfigParseError(val appendedMessage : String) : Error() {
+        data class ConfigParseError(val appendedMessage: String) : Error() {
             override val message: String =
                 WireGuardAutoTunnel.instance.getString(R.string.config_parse_error) + (
                     if (appendedMessage != "") ": ${appendedMessage.trim()}" else "")

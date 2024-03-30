@@ -5,10 +5,14 @@ import com.zaneschepke.wireguardautotunnel.data.AppDatabase
 import com.zaneschepke.wireguardautotunnel.data.SettingsDao
 import com.zaneschepke.wireguardautotunnel.data.TunnelConfigDao
 import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRoomRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.DataStoreAppStateRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.RoomSettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.RoomTunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepositoryImpl
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
-import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,13 +38,13 @@ class RepositoryModule {
     @Singleton
     @Provides
     fun provideTunnelConfigRepository(tunnelConfigDao: TunnelConfigDao): TunnelConfigRepository {
-        return TunnelConfigRepositoryImpl(tunnelConfigDao)
+        return RoomTunnelConfigRepository(tunnelConfigDao)
     }
 
     @Singleton
     @Provides
     fun provideSettingsRepository(settingsDao: SettingsDao): SettingsRepository {
-        return SettingsRepositoryImpl(settingsDao)
+        return RoomSettingsRepository(settingsDao)
     }
 
     @Singleton
@@ -48,4 +52,22 @@ class RepositoryModule {
     fun providePreferencesDataStore(@ApplicationContext context: Context): DataStoreManager {
         return DataStoreManager(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideGeneralStateRepository(dataStoreManager: DataStoreManager): AppStateRepository {
+        return DataStoreAppStateRepository(dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppDataRepository(
+        settingsRepository: SettingsRepository,
+        tunnelConfigRepository: TunnelConfigRepository,
+        appStateRepository: AppStateRepository
+    ): AppDataRepository {
+        return AppDataRoomRepository(settingsRepository, tunnelConfigRepository, appStateRepository)
+    }
+
+
 }

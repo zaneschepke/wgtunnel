@@ -160,7 +160,7 @@ fun SettingsScreen(
     fun handleAutoTunnelToggle() {
         if (uiState.isBatteryOptimizeDisableShown || isBatteryOptimizationsDisabled()) {
             if (appViewModel.isRequiredPermissionGranted()) {
-                viewModel.toggleAutoTunnel()
+                viewModel.onToggleAutoTunnel()
             }
         } else {
             requestBatteryOptimizationsDisabled()
@@ -247,15 +247,15 @@ fun SettingsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState),
+                .fillMaxSize()
+                .verticalScroll(scrollState),
         ) {
             Icon(
                 Icons.Rounded.LocationOff,
                 contentDescription = stringResource(id = R.string.map),
                 modifier = Modifier
-                        .padding(30.dp)
-                        .size(128.dp),
+                    .padding(30.dp)
+                    .size(128.dp),
             )
             Text(
                 stringResource(R.string.prominent_background_location_title),
@@ -273,12 +273,12 @@ fun SettingsScreen(
                 modifier =
                 if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                     Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
+                        .fillMaxWidth()
+                        .padding(10.dp)
                 } else {
                     Modifier
-                            .fillMaxWidth()
-                            .padding(30.dp)
+                        .fillMaxWidth()
+                        .padding(30.dp)
                 },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -336,14 +336,14 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.Top,
             modifier =
             Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .clickable(
-                            indication = null,
-                            interactionSource = interactionSource,
-                    ) {
-                        focusManager.clearFocus()
-                    },
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .clickable(
+                    indication = null,
+                    interactionSource = interactionSource,
+                ) {
+                    focusManager.clearFocus()
+                },
         ) {
             Surface(
                 tonalElevation = 2.dp,
@@ -353,13 +353,13 @@ fun SettingsScreen(
                 modifier =
                 (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                     Modifier
-                            .height(IntrinsicSize.Min)
-                            .fillMaxWidth(fillMaxWidth)
-                            .padding(top = 10.dp)
+                        .height(IntrinsicSize.Min)
+                        .fillMaxWidth(fillMaxWidth)
+                        .padding(top = 10.dp)
                 } else {
                     Modifier
-                            .fillMaxWidth(fillMaxWidth)
-                            .padding(top = 20.dp)
+                        .fillMaxWidth(fillMaxWidth)
+                        .padding(top = 20.dp)
                 })
                     .padding(bottom = 10.dp),
             ) {
@@ -390,8 +390,8 @@ fun SettingsScreen(
                         Column {
                             FlowRow(
                                 modifier = Modifier
-                                        .padding(screenPadding)
-                                        .fillMaxWidth(),
+                                    .padding(screenPadding)
+                                    .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                             ) {
                                 uiState.settings.trustedNetworkSSIDs.forEach { ssid ->
@@ -503,10 +503,10 @@ fun SettingsScreen(
                         (if (!uiState.settings.isAutoTunnelEnabled) Modifier
                         else
                             Modifier.focusRequester(
-                                    focusRequester,
+                                focusRequester,
                             ))
-                                .fillMaxSize()
-                                .padding(top = 5.dp),
+                            .fillMaxSize()
+                            .padding(top = 5.dp),
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         TextButton(
@@ -557,8 +557,8 @@ fun SettingsScreen(
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier
-                            .fillMaxWidth(fillMaxWidth)
-                            .padding(vertical = 10.dp),
+                        .fillMaxWidth(fillMaxWidth)
+                        .padding(vertical = 10.dp),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.Start,
@@ -596,9 +596,9 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.surface,
                 modifier =
                 Modifier
-                        .fillMaxWidth(fillMaxWidth)
-                        .padding(vertical = 10.dp)
-                        .padding(bottom = 140.dp),
+                    .fillMaxWidth(fillMaxWidth)
+                    .padding(vertical = 10.dp)
+                    .padding(bottom = 140.dp),
             ) {
                 Column(
                     horizontalAlignment = Alignment.Start,
@@ -609,7 +609,7 @@ fun SettingsScreen(
                         title = stringResource(id = R.string.other),
                         padding = screenPadding,
                     )
-                    if(!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                    if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                         ConfigurationToggle(
                             stringResource(R.string.always_on_vpn_support),
                             enabled = !uiState.settings.isAutoTunnelEnabled,
@@ -639,7 +639,7 @@ fun SettingsScreen(
                             }
                         },
                     )
-                    if(!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                    if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier

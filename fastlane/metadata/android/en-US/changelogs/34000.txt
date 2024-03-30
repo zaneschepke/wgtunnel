@@ -1,0 +1,6 @@
+What's new:
+- Auto tunnel to specific tunnels by wifi name
+- Auto tunnel control from tile and shortcuts
+- Auto start manual tunnel if it was on before reboot
+- Various bug fixes and performance improvements
+

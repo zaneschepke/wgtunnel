@@ -4,7 +4,7 @@ import com.zaneschepke.wireguardautotunnel.data.SettingsDao
 import com.zaneschepke.wireguardautotunnel.data.model.Settings
 import kotlinx.coroutines.flow.Flow
 
-class SettingsRepositoryImpl(private val settingsDoa: SettingsDao) : SettingsRepository {
+class RoomSettingsRepository(private val settingsDoa: SettingsDao) : SettingsRepository {
 
     override suspend fun save(settings: Settings) {
         settingsDoa.save(settings)

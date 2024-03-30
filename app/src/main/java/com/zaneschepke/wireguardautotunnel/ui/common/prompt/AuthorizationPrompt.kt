@@ -21,26 +21,32 @@ fun AuthorizationPrompt(onSuccess: () -> Unit, onFailure: () -> Unit, onError: (
                 onError("Biometrics not available")
                 false
             }
+
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
                 onError("Biometrics not created")
                 false
             }
+
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
                 onError("Biometric hardware not found")
                 false
             }
+
             BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> {
                 onError("Biometric security update required")
                 false
             }
+
             BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> {
                 onError("Biometrics not supported")
                 false
             }
+
             BiometricManager.BIOMETRIC_STATUS_UNKNOWN -> {
                 onError("Biometrics status unknown")
                 false
             }
+
             BiometricManager.BIOMETRIC_SUCCESS -> true
             else -> false
         }

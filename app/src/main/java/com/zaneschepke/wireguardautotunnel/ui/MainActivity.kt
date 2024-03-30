@@ -19,14 +19,10 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -52,6 +48,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.options.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.pinlock.PinLockScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -61,7 +58,6 @@ import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import xyz.teamgravity.pin_lock_compose.PinLock
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 
@@ -74,6 +70,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var settingsRepository: SettingsRepository
 
+    @Inject
+    lateinit var serviceManager: ServiceManager
+
     @OptIn(
         ExperimentalPermissionsApi::class,
     )
@@ -85,10 +84,10 @@ class MainActivity : AppCompatActivity() {
         // load preferences into memory and init data
         lifecycleScope.launch {
             dataStoreManager.init()
-            WireGuardAutoTunnel.requestTileServiceStateUpdate(this@MainActivity)
+            WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate(this@MainActivity)
             val settings = settingsRepository.getSettings()
             if (settings.isAutoTunnelEnabled) {
-                ServiceManager.startWatcherService(application.applicationContext)
+                serviceManager.startWatcherService(application.applicationContext)
             }
         }
         setContent {
@@ -101,7 +100,6 @@ class MainActivity : AppCompatActivity() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                     rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS) else null
 
-            val focusRequester = remember { FocusRequester() }
             val snackbarHostState = remember { SnackbarHostState() }
 
             val vpnActivityResultState =
@@ -150,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                     appViewModel.setNotificationPermissionAccepted(
                         notificationPermissionState?.status?.isGranted ?: true,
                     )
-                    if(!WireGuardAutoTunnel.isRunningOnAndroidTv()) appViewModel.readLogCatOutput()
+                    if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) appViewModel.readLogCatOutput()
                 }
 
                 LaunchedEffect(appUiState.snackbarMessageConsumed) {
@@ -159,6 +157,8 @@ class MainActivity : AppCompatActivity() {
                         appViewModel.snackbarMessageConsumed()
                     }
                 }
+
+                val focusRequester = remember { FocusRequester() }
 
                 Scaffold(
                     snackbarHost = {
@@ -176,19 +176,21 @@ class MainActivity : AppCompatActivity() {
                     //TODO refactor
                     modifier = Modifier
                         .focusable()
-                        .focusProperties { when(navBackStackEntry?.destination?.route) {
-                            Screen.Lock.route -> Unit
-                            else -> up = focusRequester }
-                         },
+                        .focusProperties {
+                            when (navBackStackEntry?.destination?.route) {
+                                Screen.Lock.route -> Unit
+                                else -> up = focusRequester
+                            }
+                        },
                     bottomBar = {
-                            BottomNavBar(
-                                navController,
-                                listOf(
-                                    Screen.Main.navItem,
-                                    Screen.Settings.navItem,
-                                    Screen.Support.navItem,
-                                ),
-                            )
+                        BottomNavBar(
+                            navController,
+                            listOf(
+                                Screen.Main.navItem,
+                                Screen.Settings.navItem,
+                                Screen.Support.navItem,
+                            ),
+                        )
                     },
                 ) { padding ->
                     NavHost(
@@ -215,7 +217,7 @@ class MainActivity : AppCompatActivity() {
                             SettingsScreen(
                                 appViewModel = appViewModel,
                                 navController = navController,
-                                focusRequester = focusRequester
+                                focusRequester = focusRequester,
                             )
                         }
                         composable(
@@ -235,14 +237,28 @@ class MainActivity : AppCompatActivity() {
                             if (!id.isNullOrBlank()) {
                                 ConfigScreen(
                                     navController = navController,
-                                    id = id,
+                                    tunnelId = id,
+                                    appViewModel = appViewModel,
+                                    focusRequester = focusRequester,
+                                )
+                            }
+                        }
+                        composable("${Screen.Option.route}/{id}") {
+                            val id = it.arguments?.getString("id")
+                            if (!id.isNullOrBlank()) {
+                                OptionsScreen(
+                                    navController = navController,
+                                    tunnelId = id,
                                     appViewModel = appViewModel,
                                     focusRequester = focusRequester,
                                 )
                             }
                         }
                         composable(Screen.Lock.route) {
-                            PinLockScreen(navController = navController, appViewModel = appViewModel)
+                            PinLockScreen(
+                                navController = navController,
+                                appViewModel = appViewModel,
+                            )
                         }
                     }
                 }

@@ -63,17 +63,18 @@ fun SearchBar(onQuery: (queryString: String) -> Unit) {
         },
         maxLines = 1,
         colors =
-            TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-            ),
+        TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+        ),
         placeholder = { Text(text = stringResource(R.string.hint_search_packages)) },
         textStyle = MaterialTheme.typography.bodySmall,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         modifier =
-            Modifier.fillMaxWidth()
-                .background(color = MaterialTheme.colorScheme.background, shape = RectangleShape),
+        Modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.background, shape = RectangleShape),
     )
 }

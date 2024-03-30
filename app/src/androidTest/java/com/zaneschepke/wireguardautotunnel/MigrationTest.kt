@@ -23,13 +23,13 @@ class MigrationTest {
 
     @Test
     @Throws(IOException::class)
-    fun migrate4To5() {
-        helper.createDatabase(dbName, 4).apply {
+    fun migrate6To7() {
+        helper.createDatabase(dbName, 6).apply {
             // Database has schema version 1. Insert some data using SQL queries.
             // You can't use DAO classes because they expect the latest schema.
             execSQL(Queries.createDefaultSettings())
             execSQL(
-                "INSERT INTO TunnelConfig (name, wg_quick)" + " VALUES ('hello', 'hello')",
+                Queries.createTunnelConfig(),
             )
             // Prepare for the next version.
             close()
@@ -37,7 +37,7 @@ class MigrationTest {
 
         // Re-open the database with version 2 and provide
         // MIGRATION_1_2 as the migration process.
-        helper.runMigrationsAndValidate(dbName, 5, true)
+        helper.runMigrationsAndValidate(dbName, 7, true)
         // MigrationTestHelper automatically verifies the schema changes,
         // but you need to validate that the data was migrated properly.
     }

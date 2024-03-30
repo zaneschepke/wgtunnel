@@ -5,8 +5,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
-import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,40 +17,44 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TunnelControlTile() : TileService() {
+class TunnelControlTile : TileService() {
 
-    @Inject lateinit var tunnelConfigRepository: TunnelConfigRepository
+    @Inject
+    lateinit var appDataRepository: AppDataRepository
 
-    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject
+    lateinit var vpnService: VpnService
 
-    @Inject lateinit var vpnService: VpnService
+    @Inject
+    lateinit var serviceManager: ServiceManager
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private var tunnelName: String? = null
+    private var manualStartConfig: TunnelConfig? = null
 
     override fun onStartListening() {
         super.onStartListening()
         Timber.d("On start listening called")
         scope.launch {
-            vpnService.vpnState.collect {
+            vpnService.vpnState.collect { it ->
                 when (it.status) {
-                    Tunnel.State.UP -> setActive()
-                    Tunnel.State.DOWN -> setInactive()
+                    Tunnel.State.UP -> {
+                        setActive()
+                        it.tunnelConfig?.name?.let { name -> setTileDescription(name) }
+                    }
+
+                    Tunnel.State.DOWN -> {
+                        setInactive()
+                        val config = appDataRepository.getStartTunnelConfig()?.also { config ->
+                            manualStartConfig = config
+                        } ?: appDataRepository.getPrimaryOrFirstTunnel()
+                        config?.let {
+                            setTileDescription(it.name)
+                        } ?: setUnavailable()
+                    }
+
                     else -> setInactive()
                 }
-                val tunnels = tunnelConfigRepository.getAll()
-                if (tunnels.isEmpty()) {
-                    setUnavailable()
-                    return@collect
-                }
-                tunnelName = it.name.run {
-                        val settings = settingsRepository.getSettings()
-                        if (settings.defaultTunnel != null) {
-                            TunnelConfig.from(settings.defaultTunnel!!).name
-                        } else tunnels.firstOrNull()?.name
-                    }
-                setTileDescription(tunnelName ?: "")
             }
         }
     }
@@ -71,18 +74,11 @@ class TunnelControlTile() : TileService() {
         unlockAndRun {
             scope.launch {
                 try {
-                    val defaultTunnel = settingsRepository.getSettings().defaultTunnel
-                    val config = defaultTunnel ?: run {
-                        val tunnelConfigs = tunnelConfigRepository.getAll()
-                        return@run tunnelConfigs.find { it.name == tunnelName }
-                    }
-                    toggleWatcherServicePause()
                     if (vpnService.getState() == Tunnel.State.UP) {
-                        ServiceManager.stopVpnService(this@TunnelControlTile)
+                        serviceManager.stopVpnService(this@TunnelControlTile, isManualStop = true)
                     } else {
-                        ServiceManager.startVpnServiceForeground(
-                            this@TunnelControlTile,
-                            config.toString(),
+                        serviceManager.startVpnServiceForeground(
+                            this@TunnelControlTile, manualStartConfig?.id, isManualStart = true,
                         )
                     }
                 } catch (e: Exception) {
@@ -90,20 +86,6 @@ class TunnelControlTile() : TileService() {
                 } finally {
                     cancel()
                 }
-            }
-        }
-    }
-
-    private fun toggleWatcherServicePause() {
-        scope.launch {
-            val settings = settingsRepository.getSettings()
-            if (settings.isAutoTunnelEnabled) {
-                val pauseAutoTunnel = !settings.isAutoTunnelPaused
-                settingsRepository.save(
-                    settings.copy(
-                        isAutoTunnelPaused = pauseAutoTunnel,
-                    ),
-                )
             }
         }
     }
@@ -119,6 +101,7 @@ class TunnelControlTile() : TileService() {
     }
 
     private fun setUnavailable() {
+        manualStartConfig = null
         qsTile.state = Tile.STATE_UNAVAILABLE
         qsTile.updateTile()
     }

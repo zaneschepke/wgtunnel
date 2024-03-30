@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class SupportViewModel @Inject constructor(private val settingsRepository: SettingsRepository) :
+class SupportViewModel @Inject constructor(settingsRepository: SettingsRepository) :
     ViewModel() {
 
     val uiState =

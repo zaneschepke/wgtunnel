@@ -50,7 +50,6 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
-import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 
 @Composable
 fun SupportScreen(
@@ -71,7 +70,7 @@ fun SupportScreen(
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .focusable()
+            .focusable(),
     ) {
         Surface(
             tonalElevation = 2.dp,
@@ -79,17 +78,17 @@ fun SupportScreen(
             shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surface,
             modifier =
-                (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                    Modifier
-                        .height(IntrinsicSize.Min)
-                        .fillMaxWidth(fillMaxWidth)
-                        .padding(top = 10.dp)
-                    } else {
-                    Modifier
-                        .fillMaxWidth(fillMaxWidth)
-                        .padding(top = 20.dp)
-                    })
-                    .padding(bottom = 25.dp),
+            (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                Modifier
+                    .height(IntrinsicSize.Min)
+                    .fillMaxWidth(fillMaxWidth)
+                    .padding(top = 10.dp)
+            } else {
+                Modifier
+                    .fillMaxWidth(fillMaxWidth)
+                    .padding(top = 20.dp)
+            })
+                .padding(bottom = 25.dp),
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 val forwardIcon = Icons.AutoMirrored.Rounded.ArrowForward
@@ -128,13 +127,13 @@ fun SupportScreen(
                         }
                         Icon(
                             forwardIcon,
-                            forwardIcon.name
+                            forwardIcon.name,
                         )
                     }
                 }
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 TextButton(
                     onClick = { appViewModel.openWebPage(context.resources.getString(R.string.discord_url)) },
@@ -160,13 +159,13 @@ fun SupportScreen(
                         }
                         Icon(
                             forwardIcon,
-                            forwardIcon.name
+                            forwardIcon.name,
                         )
                     }
                 }
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 TextButton(
                     onClick = { appViewModel.openWebPage(context.resources.getString(R.string.github_url)) },
@@ -192,13 +191,13 @@ fun SupportScreen(
                         }
                         Icon(
                             forwardIcon,
-                            forwardIcon.name
+                            forwardIcon.name,
                         )
                     }
                 }
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 TextButton(
                     onClick = { appViewModel.launchEmail() },
@@ -220,14 +219,14 @@ fun SupportScreen(
                         }
                         Icon(
                             forwardIcon,
-                            forwardIcon.name
+                            forwardIcon.name,
                         )
                     }
                 }
-                if(!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                     HorizontalDivider(
                         thickness = 0.5.dp,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     TextButton(
                         onClick = { navController.navigate(Screen.Support.Logs.route) },
@@ -249,7 +248,7 @@ fun SupportScreen(
                             }
                             Icon(
                                 Icons.AutoMirrored.Rounded.ArrowForward,
-                                stringResource(id = R.string.go)
+                                stringResource(id = R.string.go),
                             )
                         }
                     }
@@ -262,9 +261,9 @@ fun SupportScreen(
             style = TextStyle(textDecoration = TextDecoration.Underline),
             fontSize = 16.sp,
             modifier =
-                Modifier.clickable {
-                    appViewModel.openWebPage(context.resources.getString(R.string.privacy_policy_url))
-                },
+            Modifier.clickable {
+                appViewModel.openWebPage(context.resources.getString(R.string.privacy_policy_url))
+            },
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(25.dp),

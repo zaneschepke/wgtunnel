@@ -21,15 +21,15 @@ roomVersion = "2.6.1"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
 androidGradlePlugin = "8.3.1"
-kotlin = "1.9.22"
-ksp = "1.9.22-1.0.17"
-composeBom = "2024.02.02"
-compose = "1.6.3"
+kotlin = "1.9.23"
+ksp = "1.9.23-1.0.19"
+composeBom = "2024.03.00"
+compose = "1.6.4"
 zxingAndroidEmbedded = "4.3.0"
 zxingCore = "3.5.3"
 
 #plugins
-gradlePlugins-kotlinxSerialization = "1.8.21"
+gradlePlugins-kotlinxSerialization = "1.9.23"
 material = "1.11.0"
 
 
