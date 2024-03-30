@@ -12,9 +12,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LogTypeLabel(color : Color, content: @Composable () -> Unit,) {
+fun LogTypeLabel(color: Color, content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier.size(20.dp).clip(RoundedCornerShape(2.dp)).background(color), contentAlignment = Alignment.Center) {
+        modifier = Modifier
+            .size(20.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(color),
+        contentAlignment = Alignment.Center,
+    ) {
         content()
     }
 }

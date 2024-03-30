@@ -5,7 +5,7 @@ import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import kotlinx.coroutines.flow.StateFlow
 
 interface VpnService : Tunnel {
-    suspend fun startTunnel(tunnelConfig: TunnelConfig): Tunnel.State
+    suspend fun startTunnel(tunnelConfig: TunnelConfig? = null): Tunnel.State
 
     suspend fun stopTunnel()
 

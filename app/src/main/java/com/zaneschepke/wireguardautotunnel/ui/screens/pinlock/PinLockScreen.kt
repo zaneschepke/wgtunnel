@@ -27,11 +27,11 @@ fun PinLockScreen(navController: NavController, appViewModel: AppViewModel) {
         color = MaterialTheme.colorScheme.surface,
         onPinCorrect = {
             // pin is correct, navigate or hide pin lock
-            if(WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                 navController.navigate(Screen.Main.route)
             } else {
                 val isPopped = navController.popBackStack()
-                if(!isPopped) {
+                if (!isPopped) {
                     navController.navigate(Screen.Main.route)
                 }
             }
@@ -39,11 +39,15 @@ fun PinLockScreen(navController: NavController, appViewModel: AppViewModel) {
         },
         onPinIncorrect = {
             // pin is incorrect, show error
-            appViewModel.showSnackbarMessage(StringValue.StringResource(R.string.incorrect_pin).asString(context))
+            appViewModel.showSnackbarMessage(
+                StringValue.StringResource(R.string.incorrect_pin).asString(context),
+            )
         },
         onPinCreated = {
             // pin created for the first time, navigate or hide pin lock
-            appViewModel.showSnackbarMessage(StringValue.StringResource(R.string.pin_created).asString(context))
+            appViewModel.showSnackbarMessage(
+                StringValue.StringResource(R.string.pin_created).asString(context),
+            )
         },
     )
 }

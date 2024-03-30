@@ -22,11 +22,11 @@ object NumberUtils {
         return "tunnel${randomFive()}"
     }
 
-    private fun randomFive() : Int {
+    private fun randomFive(): Int {
         return (Math.random() * 100000).toInt()
     }
 
-    fun randomThree() : Int {
+    fun randomThree(): Int {
         return (Math.random() * 1000).toInt()
     }
 

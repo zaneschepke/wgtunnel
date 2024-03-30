@@ -7,10 +7,9 @@ import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.util.RootShell
-import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.model.Settings
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
-import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -29,28 +28,27 @@ class SettingsViewModel
 @Inject
 constructor(
     private val application: Application,
-    private val tunnelConfigRepository: TunnelConfigRepository,
-    private val settingsRepository: SettingsRepository,
-    private val dataStoreManager: DataStoreManager,
+    private val appDataRepository: AppDataRepository,
+    private val serviceManager: ServiceManager,
     private val rootShell: RootShell,
-    private val vpnService: VpnService
+    vpnService: VpnService
 ) : ViewModel() {
 
     val uiState =
         combine(
-                settingsRepository.getSettingsFlow(),
-                tunnelConfigRepository.getTunnelConfigsFlow(),
-                vpnService.vpnState,
-                dataStoreManager.preferencesFlow,
-            ) { settings, tunnels, tunnelState, preferences ->
-                SettingsUiState(
-                    settings,
-                    tunnels,
-                    tunnelState,
-                    preferences?.get(DataStoreManager.LOCATION_DISCLOSURE_SHOWN) ?: false,
-                    preferences?.get(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN) ?: false,
-                )
-            }
+            appDataRepository.settings.getSettingsFlow(),
+            appDataRepository.tunnels.getTunnelConfigsFlow(),
+            vpnService.vpnState,
+            appDataRepository.appState.generalStateFlow,
+        ) { settings, tunnels, tunnelState, generalState ->
+            SettingsUiState(
+                settings,
+                tunnels,
+                tunnelState,
+                generalState.locationDisclosureShown,
+                generalState.batteryOptimizationDisableShown,
+            )
+        }
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
@@ -70,12 +68,12 @@ constructor(
 
     fun setLocationDisclosureShown() =
         viewModelScope.launch {
-            dataStoreManager.saveToDataStore(DataStoreManager.LOCATION_DISCLOSURE_SHOWN, true)
+            appDataRepository.appState.setLocationDisclosureShown(true)
         }
 
     fun setBatteryOptimizeDisableShown() =
         viewModelScope.launch {
-            dataStoreManager.saveToDataStore(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN, true)
+            appDataRepository.appState.setBatteryOptimizationDisableShown(true)
         }
 
     fun onToggleTunnelOnMobileData() {
@@ -90,48 +88,42 @@ constructor(
         saveSettings(
             uiState.value.settings.copy(
                 trustedNetworkSSIDs =
-                    (uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList(),
+                (uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList(),
             ),
         )
     }
 
-    private suspend fun getDefaultTunnelOrFirst(): String {
-        return uiState.value.settings.defaultTunnel
-            ?: tunnelConfigRepository.getAll().first().toString()
-    }
-
-    fun toggleAutoTunnel() =
+    fun onToggleAutoTunnel() =
         viewModelScope.launch {
             val isAutoTunnelEnabled = uiState.value.settings.isAutoTunnelEnabled
             var isAutoTunnelPaused = uiState.value.settings.isAutoTunnelPaused
 
             if (isAutoTunnelEnabled) {
-                ServiceManager.stopWatcherService(application)
+                serviceManager.stopWatcherService(application)
             } else {
-                ServiceManager.startWatcherService(application)
+                serviceManager.startWatcherService(application)
                 isAutoTunnelPaused = false
             }
             saveSettings(
                 uiState.value.settings.copy(
                     isAutoTunnelEnabled = !isAutoTunnelEnabled,
                     isAutoTunnelPaused = isAutoTunnelPaused,
-                    defaultTunnel = getDefaultTunnelOrFirst(),
                 ),
             )
+            WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate(application)
         }
 
     fun onToggleAlwaysOnVPN() =
         viewModelScope.launch {
-            val updatedSettings =
+            saveSettings(
                 uiState.value.settings.copy(
                     isAlwaysOnVpnEnabled = !uiState.value.settings.isAlwaysOnVpnEnabled,
-                    defaultTunnel = getDefaultTunnelOrFirst(),
-                )
-            saveSettings(updatedSettings)
+                ),
+            )
         }
 
     private fun saveSettings(settings: Settings) =
-        viewModelScope.launch { settingsRepository.save(settings) }
+        viewModelScope.launch { appDataRepository.settings.save(settings) }
 
     fun onToggleTunnelOnEthernet() {
         saveSettings(
@@ -150,14 +142,6 @@ constructor(
         saveSettings(
             uiState.value.settings.copy(
                 isShortcutsEnabled = !uiState.value.settings.isShortcutsEnabled,
-            ),
-        )
-    }
-
-    fun onToggleBatterySaver() {
-        saveSettings(
-            uiState.value.settings.copy(
-                isBatterySaverEnabled = !uiState.value.settings.isBatterySaverEnabled,
             ),
         )
     }

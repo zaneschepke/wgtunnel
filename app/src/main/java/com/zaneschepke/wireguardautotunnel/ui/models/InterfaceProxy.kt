@@ -18,11 +18,11 @@ data class InterfaceProxy(
                 addresses = i.addresses.joinToString(", ").trim(),
                 dnsServers = i.dnsServers.joinToString(", ").replace("/", "").trim(),
                 listenPort =
-                    if (i.listenPort.isPresent) {
-                        i.listenPort.get().toString().trim()
-                    } else {
-                        ""
-                    },
+                if (i.listenPort.isPresent) {
+                    i.listenPort.get().toString().trim()
+                } else {
+                    ""
+                },
                 mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
             )
         }

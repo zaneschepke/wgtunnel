@@ -45,10 +45,10 @@ class WireGuardNotification @Inject constructor(@ApplicationContext private val 
     ): Notification {
         val channel =
             NotificationChannel(
-                    channelId,
-                    channelName,
-                    importance,
-                )
+                channelId,
+                channelName,
+                importance,
+            )
                 .let {
                     it.description = title
                     it.enableLights(lights)

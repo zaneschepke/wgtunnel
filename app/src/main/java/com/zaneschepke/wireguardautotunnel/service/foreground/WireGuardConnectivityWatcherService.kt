@@ -7,8 +7,8 @@ import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.model.Settings
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.network.EthernetService
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
@@ -33,28 +33,28 @@ import javax.inject.Inject
 class WireGuardConnectivityWatcherService : ForegroundService() {
     private val foregroundId = 122
 
-    @Inject lateinit var wifiService: NetworkService<WifiService>
+    @Inject
+    lateinit var wifiService: NetworkService<WifiService>
 
-    @Inject lateinit var mobileDataService: NetworkService<MobileDataService>
+    @Inject
+    lateinit var mobileDataService: NetworkService<MobileDataService>
 
-    @Inject lateinit var ethernetService: NetworkService<EthernetService>
+    @Inject
+    lateinit var ethernetService: NetworkService<EthernetService>
 
-    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject
+    lateinit var appDataRepository: AppDataRepository
 
-    @Inject lateinit var notificationService: NotificationService
+    @Inject
+    lateinit var notificationService: NotificationService
 
-    @Inject lateinit var vpnService: VpnService
+    @Inject
+    lateinit var vpnService: VpnService
+
+    @Inject
+    lateinit var serviceManager: ServiceManager
 
     private val networkEventsFlow = MutableStateFlow(WatcherState())
-
-    data class WatcherState(
-        val isWifiConnected: Boolean = false,
-        val isVpnConnected: Boolean = false,
-        val isEthernetConnected: Boolean = false,
-        val isMobileDataConnected: Boolean = false,
-        val currentNetworkSSID: String = "",
-        val settings: Settings = Settings()
-    )
 
     private lateinit var watcherJob: Job
 
@@ -65,7 +65,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         super.onCreate()
         lifecycleScope.launch(Dispatchers.Main) {
             try {
-                if (settingsRepository.getSettings().isAutoTunnelPaused) {
+                if (appDataRepository.settings.getSettings().isAutoTunnelPaused) {
                     launchWatcherPausedNotification()
                 } else launchWatcherNotification()
             } catch (e: Exception) {
@@ -121,16 +121,16 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private fun initWakeLock() {
         wakeLock =
-        (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-            newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
-                try {
-                    Timber.i("Initiating wakelock with 10 min timeout")
-                    acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
-                } finally {
-                    release()
+            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
+                    try {
+                        Timber.i("Initiating wakelock with 10 min timeout")
+                        acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
+                    } finally {
+                        release()
+                    }
                 }
             }
-        }
     }
 
     private fun cancelWatcherJob() {
@@ -142,7 +142,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     private fun startWatcherJob() {
         watcherJob =
             lifecycleScope.launch(Dispatchers.IO) {
-                val setting = settingsRepository.getSettings()
+                val setting = appDataRepository.settings.getSettings()
                 launch {
                     Timber.i("Starting wifi watcher")
                     watchForWifiConnectivityChanges()
@@ -167,7 +167,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     Timber.i("Starting settings watcher")
                     watchForSettingsChanges()
                 }
-                if(setting.isPingEnabled) {
+                if (setting.isPingEnabled) {
                     launch {
                         Timber.i("Starting ping watcher")
                         watchForPingFailure()
@@ -191,6 +191,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             isMobileDataConnected = true,
                         )
                 }
+
                 is NetworkStatus.CapabilitiesChanged -> {
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
@@ -198,6 +199,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         )
                     Timber.i("Mobile data capabilities changed")
                 }
+
                 is NetworkStatus.Unavailable -> {
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
@@ -212,39 +214,39 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     private suspend fun watchForPingFailure() {
         try {
             do {
-                if(vpnService.vpnState.value.status == Tunnel.State.UP) {
-                    val config = vpnService.vpnState.value.config
-                    config?.let {
-                        val results = it.peers.map { peer ->
-                            val host = if(peer.endpoint.isPresent &&
+                if (vpnService.vpnState.value.status == Tunnel.State.UP) {
+                    val tunnelConfig = vpnService.vpnState.value.tunnelConfig
+                    tunnelConfig?.let {
+                        val config = TunnelConfig.configFromQuick(it.wgQuick)
+                        val results = config.peers.map { peer ->
+                            val host = if (peer.endpoint.isPresent &&
                                 peer.endpoint.get().resolved.isPresent)
                                 peer.endpoint.get().resolved.get().host
                             else Constants.BACKUP_PING_HOST
                             Timber.i("Checking reachability of: $host")
-                            val reachable = InetAddress.getByName(host).isReachable(Constants.PING_TIMEOUT.toInt())
+                            val reachable = InetAddress.getByName(host)
+                                .isReachable(Constants.PING_TIMEOUT.toInt())
                             Timber.i("Result: reachable - $reachable")
                             reachable
                         }
-                        if(results.contains(false)) {
+                        if (results.contains(false)) {
                             Timber.i("Restarting VPN for ping failure")
-                            ServiceManager.stopVpnService(this)
+                            serviceManager.stopVpnService(this)
                             delay(Constants.VPN_RESTART_DELAY)
-                            val tunnel = networkEventsFlow.value.settings.defaultTunnel
-                            ServiceManager.startVpnServiceForeground(this, tunnel!!)
+                            serviceManager.startVpnServiceForeground(this)
                             delay(Constants.PING_COOLDOWN)
                         }
                     }
                 }
                 delay(Constants.PING_INTERVAL)
             } while (true)
-
         } catch (e: Exception) {
             Timber.e(e)
         }
     }
 
     private suspend fun watchForSettingsChanges() {
-        settingsRepository.getSettingsFlow().collect {
+        appDataRepository.settings.getSettingsFlow().collect {
             if (networkEventsFlow.value.settings.isAutoTunnelPaused != it.isAutoTunnelPaused) {
                 when (it.isAutoTunnelPaused) {
                     true -> launchWatcherPausedNotification()
@@ -260,19 +262,11 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private suspend fun watchForVpnConnectivityChanges() {
         vpnService.vpnState.collect {
-            when (it.status) {
-                Tunnel.State.DOWN ->
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
-                            isVpnConnected = false,
-                        )
-                Tunnel.State.UP ->
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
-                            isVpnConnected = true,
-                        )
-                else -> {}
-            }
+            networkEventsFlow.value =
+                networkEventsFlow.value.copy(
+                    vpnStatus = it.status,
+                    config = it.tunnelConfig,
+                )
         }
     }
 
@@ -286,6 +280,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             isEthernetConnected = true,
                         )
                 }
+
                 is NetworkStatus.CapabilitiesChanged -> {
                     Timber.i("Ethernet capabilities changed")
                     networkEventsFlow.value =
@@ -293,6 +288,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             isEthernetConnected = true,
                         )
                 }
+
                 is NetworkStatus.Unavailable -> {
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
@@ -314,19 +310,24 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             isWifiConnected = true,
                         )
                 }
+
                 is NetworkStatus.CapabilitiesChanged -> {
                     Timber.i("Wifi capabilities changed")
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
                             isWifiConnected = true,
                         )
-                    val ssid = wifiService.getNetworkName(it.networkCapabilities) ?: ""
-                    Timber.i("Detected SSID: $ssid")
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
-                            currentNetworkSSID = ssid,
-                        )
+                    val ssid = wifiService.getNetworkName(it.networkCapabilities)
+                    ssid?.let {
+                        Timber.i("Detected SSID: $ssid")
+                        appDataRepository.appState.setCurrentSsid(ssid)
+                        networkEventsFlow.value =
+                            networkEventsFlow.value.copy(
+                                currentNetworkSSID = ssid,
+                            )
+                    } ?: Timber.w("Failed to read ssid")
                 }
+
                 is NetworkStatus.Unavailable -> {
                     networkEventsFlow.value =
                         networkEventsFlow.value.copy(
@@ -338,64 +339,84 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         }
     }
 
+    private suspend fun getMobileDataTunnel(): TunnelConfig? {
+        return appDataRepository.tunnels.findByMobileDataTunnel().firstOrNull()
+    }
+
+    private suspend fun getSsidTunnel(ssid: String): TunnelConfig? {
+        return appDataRepository.tunnels.findByTunnelNetworksName(ssid).firstOrNull()
+    }
+
     private suspend fun manageVpn() {
-        networkEventsFlow.collectLatest {
+        networkEventsFlow.collectLatest { watcherState ->
             val autoTunnel = "Auto-tunnel watcher"
-            if (!it.settings.isAutoTunnelPaused && it.settings.defaultTunnel != null) {
-                delay(Constants.TOGGLE_TUNNEL_DELAY)
+            if (!watcherState.settings.isAutoTunnelPaused) {
+                //delay for rapid network state changes and then collect latest
+                delay(Constants.WATCHER_COLLECTION_DELAY)
                 when {
-                    ((it.isEthernetConnected &&
-                        it.settings.isTunnelOnEthernetEnabled &&
-                        !it.isVpnConnected)) -> {
-                        ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
-                        Timber.i("$autoTunnel condition 1 met")
+                    watcherState.isEthernetConditionMet() -> {
+                        Timber.i("$autoTunnel - tunnel on on ethernet condition met")
+                        serviceManager.startVpnServiceForeground(this)
                     }
-                    (!it.isEthernetConnected &&
-                        it.settings.isTunnelOnMobileDataEnabled &&
-                        !it.isWifiConnected &&
-                        it.isMobileDataConnected &&
-                        !it.isVpnConnected) -> {
-                        ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
-                        Timber.i("$autoTunnel condition 2 met")
+
+                    watcherState.isMobileDataConditionMet() -> {
+                        Timber.i("$autoTunnel - tunnel on on mobile data condition met")
+                        serviceManager.startVpnServiceForeground(this, getMobileDataTunnel()?.id)
                     }
-                    (!it.isEthernetConnected &&
-                        !it.settings.isTunnelOnMobileDataEnabled &&
-                        !it.isWifiConnected &&
-                        it.isVpnConnected) -> {
-                        ServiceManager.stopVpnService(this)
-                        Timber.i("$autoTunnel condition 3 met")
+
+                    watcherState.isTunnelNotMobileDataPreferredConditionMet() -> {
+                        getMobileDataTunnel()?.let {
+                            Timber.i("$autoTunnel - tunnel connected on mobile data is not preferred condition met, switching to preferred")
+                            serviceManager.startVpnServiceForeground(
+                                this,
+                                getMobileDataTunnel()?.id,
+                            )
+                        }
                     }
-                    (!it.isEthernetConnected &&
-                        it.isWifiConnected &&
-                        !it.settings.trustedNetworkSSIDs.contains(it.currentNetworkSSID) &&
-                        it.settings.isTunnelOnWifiEnabled &&
-                        (!it.isVpnConnected)) -> {
-                        ServiceManager.startVpnServiceForeground(this, it.settings.defaultTunnel!!)
-                        Timber.i("$autoTunnel condition 4 met")
+
+                    watcherState.isTunnelOffOnMobileDataConditionMet() -> {
+                        Timber.i("$autoTunnel - tunnel off on mobile data met, turning vpn off")
+                        serviceManager.stopVpnService(this)
                     }
-                    (!it.isEthernetConnected &&
-                        (it.isWifiConnected &&
-                            it.settings.trustedNetworkSSIDs.contains(it.currentNetworkSSID)) &&
-                        (it.isVpnConnected)) -> {
-                        ServiceManager.stopVpnService(this)
-                        Timber.i("$autoTunnel condition 5 met")
+
+                    watcherState.isTunnelNotWifiNamePreferredMet(watcherState.currentNetworkSSID) -> {
+                        Timber.i("$autoTunnel - tunnel on ssid not associated with current tunnel condition met")
+                        getSsidTunnel(watcherState.currentNetworkSSID)?.let {
+                            Timber.i("Found tunnel associated with this SSID, bringing tunnel up")
+                            serviceManager.startVpnServiceForeground(this, it.id)
+                        } ?: suspend {
+                            Timber.i("No tunnel associated with this SSID, using defaults")
+                            if (appDataRepository.getPrimaryOrFirstTunnel()?.name != vpnService.name) {
+                                serviceManager.startVpnServiceForeground(this)
+                            }
+                        }.invoke()
                     }
-                    (!it.isEthernetConnected &&
-                        (it.isWifiConnected &&
-                            !it.settings.isTunnelOnWifiEnabled &&
-                            (it.isVpnConnected))) -> {
-                        ServiceManager.stopVpnService(this)
-                        Timber.i("$autoTunnel condition 6 met")
+
+                    watcherState.isUntrustedWifiConditionMet() -> {
+                        Timber.i("$autoTunnel - tunnel on untrusted wifi condition met")
+                        serviceManager.startVpnServiceForeground(
+                            this,
+                            getSsidTunnel(watcherState.currentNetworkSSID)?.id,
+                        )
                     }
-                    (!it.isEthernetConnected &&
-                        !it.isWifiConnected &&
-                        !it.isMobileDataConnected &&
-                        (it.isVpnConnected)) -> {
-                        ServiceManager.stopVpnService(this)
-                        Timber.i("$autoTunnel condition 7 met")
+
+                    watcherState.isTrustedWifiConditionMet() -> {
+                        Timber.i("$autoTunnel - tunnel off on trusted wifi condition met, turning vpn off")
+                        serviceManager.stopVpnService(this)
                     }
+
+                    watcherState.isTunnelOffOnWifiConditionMet() -> {
+                        Timber.i("$autoTunnel - tunnel off on wifi condition met, turning vpn off")
+                        serviceManager.stopVpnService(this)
+                    }
+
+                    watcherState.isTunnelOffOnNoConnectivityMet() -> {
+                        Timber.i("$autoTunnel - tunnel off on no connectivity met, turning vpn off")
+                        serviceManager.stopVpnService(this)
+                    }
+
                     else -> {
-                        Timber.i("$autoTunnel no condition met")
+                        Timber.i("$autoTunnel - no condition met")
                     }
                 }
             }

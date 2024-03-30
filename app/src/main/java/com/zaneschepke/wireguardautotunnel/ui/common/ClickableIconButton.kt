@@ -10,8 +10,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun ClickableIconButton(
@@ -31,7 +29,10 @@ fun ClickableIconButton(
             imageVector = icon,
             contentDescription = icon.name,
             modifier =
-                Modifier.size(ButtonDefaults.IconSize).weight(1f, false).clickable {
+            Modifier
+                .size(ButtonDefaults.IconSize)
+                .weight(1f, false)
+                .clickable {
                     if (enabled) {
                         onIconClick()
                     }

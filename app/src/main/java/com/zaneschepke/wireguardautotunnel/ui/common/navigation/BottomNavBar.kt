@@ -30,9 +30,9 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
     }
 
     NavigationBar(
-        containerColor = if(!showBottomBar) Color.Transparent else MaterialTheme.colorScheme.background,
+        containerColor = if (!showBottomBar) Color.Transparent else MaterialTheme.colorScheme.background,
     ) {
-       if(showBottomBar) bottomNavItems.forEach { item ->
+        if (showBottomBar) bottomNavItems.forEach { item ->
             val selected = item.route == backStackEntry.value?.destination?.route
 
             NavigationBarItem(

@@ -10,20 +10,25 @@ import com.zaneschepke.wireguardautotunnel.util.goAsync
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotificationActionReceiver : BroadcastReceiver() {
-    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    lateinit var serviceManager: ServiceManager
 
     override fun onReceive(context: Context, intent: Intent?) = goAsync {
         try {
-            val settings = settingsRepository.getSettings()
-            if (settings.defaultTunnel != null) {
-                ServiceManager.stopVpnService(context)
-                delay(Constants.TOGGLE_TUNNEL_DELAY)
-                ServiceManager.startVpnServiceForeground(context, settings.defaultTunnel.toString())
-            }
+            //TODO fix for manual start changes when enabled
+            serviceManager.stopVpnService(context)
+            delay(Constants.TOGGLE_TUNNEL_DELAY)
+            serviceManager.startVpnServiceForeground(context)
+        } catch (e: Exception) {
+            Timber.e(e)
         } finally {
             cancel()
         }

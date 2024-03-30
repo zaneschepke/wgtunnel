@@ -12,7 +12,7 @@ class DatabaseCallback : RoomDatabase.Callback() {
             execSQL(Queries.createDefaultSettings())
             Timber.i("Bootstrapping settings data")
             setTransactionSuccessful()
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             Timber.e(e)
         } finally {
             endTransaction()

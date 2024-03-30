@@ -16,6 +16,7 @@ import java.util.zip.ZipOutputStream
 object FileUtils {
     private const val ZIP_FILE_MIME_TYPE = "application/zip"
 
+    //TODO issue with android 9
     private fun createDownloadsFileOutputStream(
         context: Context,
         fileName: String,
@@ -45,11 +46,11 @@ object FileUtils {
     }
 
     fun saveFileToDownloads(context: Context, content: String, fileName: String) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                put(MediaStore.MediaColumns.MIME_TYPE, Constants.TEXT_MIME_TYPE)
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                put(MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaColumns.MIME_TYPE, Constants.TEXT_MIME_TYPE)
+                put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
             }
             val resolver = context.contentResolver
             val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
@@ -61,7 +62,7 @@ object FileUtils {
         } else {
             val target = File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                fileName
+                fileName,
             )
             FileOutputStream(target).use { output ->
                 output.write(content.toByteArray())

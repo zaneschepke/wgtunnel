@@ -16,7 +16,10 @@ fun LoadingScreen() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
-        modifier = Modifier.fillMaxSize().focusable().padding(),
+        modifier = Modifier
+            .fillMaxSize()
+            .focusable()
+            .padding(),
     ) {
         Column(modifier = Modifier.padding(120.dp)) { CircularProgressIndicator() }
     }

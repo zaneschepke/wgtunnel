@@ -32,9 +32,12 @@ sealed class Screen(val route: String) {
                 route = route,
                 icon = Icons.Rounded.QuestionMark,
             )
+
         data object Logs : Screen("support/logs")
     }
 
     data object Config : Screen("config")
     data object Lock : Screen("lock")
+
+    data object Option : Screen("option")
 }

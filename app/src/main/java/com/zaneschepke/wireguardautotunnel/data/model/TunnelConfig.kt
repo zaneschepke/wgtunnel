@@ -5,26 +5,30 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.wireguard.config.Config
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.io.InputStream
 
 @Entity(indices = [Index(value = ["name"], unique = true)])
-@Serializable
 data class TunnelConfig(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    @ColumnInfo(name = "name") var name: String,
-    @ColumnInfo(name = "wg_quick") var wgQuick: String
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "wg_quick") val wgQuick: String,
+    @ColumnInfo(
+        name = "tunnel_networks",
+        defaultValue = "",
+    )
+    val tunnelNetworks: MutableList<String> = mutableListOf(),
+    @ColumnInfo(
+        name = "is_mobile_data_tunnel",
+        defaultValue = "false",
+    )
+    val isMobileDataTunnel: Boolean = false,
+    @ColumnInfo(
+        name = "is_primary_tunnel",
+        defaultValue = "false",
+    )
+    val isPrimaryTunnel: Boolean = false,
 ) {
-    override fun toString(): String {
-        return Json.encodeToString(serializer(), this)
-    }
-
     companion object {
-        fun from(string: String): TunnelConfig {
-            return Json.decodeFromString<TunnelConfig>(string)
-        }
-
         fun configFromQuick(wgQuick: String): Config {
             val inputStream: InputStream = wgQuick.byteInputStream()
             val reader = inputStream.bufferedReader(Charsets.UTF_8)

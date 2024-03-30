@@ -62,7 +62,8 @@ and on while on different networks. This app was created to offer a free solutio
 
 ## Docs (WIP)
 
-Basic documentation of the feature and behaviors of this app can be found [here](https://zaneschepke.com/wgtunnel-docs/overview.html).
+Basic documentation of the feature and behaviors of this app can be
+found [here](https://zaneschepke.com/wgtunnel-docs/overview.html).
 
 The repository for these docs can be found [here](https://github.com/zaneschepke/wgtunnel-docs).
 
@@ -74,6 +75,7 @@ $ cd wgtunnel
 ```
 
 And then build the app:
+
 ```
 $ ./gradlew assembleDebug
 ```

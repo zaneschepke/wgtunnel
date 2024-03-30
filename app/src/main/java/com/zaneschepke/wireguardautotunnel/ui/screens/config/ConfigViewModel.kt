@@ -7,17 +7,14 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.config.BadConfigException
 import com.wireguard.config.Config
 import com.wireguard.config.Interface
-import com.wireguard.config.ParseException
 import com.wireguard.config.Peer
 import com.wireguard.crypto.Key
 import com.wireguard.crypto.KeyPair
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
-import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.ui.models.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.models.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -30,7 +27,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -40,8 +36,7 @@ class ConfigViewModel
 @Inject
 constructor(
     private val application: Application,
-    private val tunnelConfigRepository: TunnelConfigRepository,
-    private val settingsRepository: SettingsRepository,
+    private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
     private val packageManager = application.packageManager
@@ -55,7 +50,8 @@ constructor(
             val state =
                 if (tunnelId != Constants.MANUAL_TUNNEL_CONFIG_ID) {
                     val tunnelConfig =
-                        tunnelConfigRepository.getAll().firstOrNull { it.id.toString() == tunnelId }
+                        appDataRepository.tunnels.getAll()
+                            .firstOrNull { it.id.toString() == tunnelId }
                     if (tunnelConfig != null) {
                         val config = TunnelConfig.configFromQuick(tunnelConfig.wgQuick)
                         val proxyPeers = config.peers.map { PeerProxy.from(it) }
@@ -103,7 +99,7 @@ constructor(
     fun onAddCheckedPackage(packageName: String) {
         _uiState.value =
             _uiState.value.copy(
-                checkedPackageNames = _uiState.value.checkedPackageNames + packageName
+                checkedPackageNames = _uiState.value.checkedPackageNames + packageName,
             )
     }
 
@@ -114,7 +110,7 @@ constructor(
     fun onRemoveCheckedPackage(packageName: String) {
         _uiState.value =
             _uiState.value.copy(
-                checkedPackageNames = _uiState.value.checkedPackageNames - packageName
+                checkedPackageNames = _uiState.value.checkedPackageNames - packageName,
             )
     }
 
@@ -148,25 +144,15 @@ constructor(
     }
 
     private fun saveConfig(tunnelConfig: TunnelConfig) =
-        viewModelScope.launch { tunnelConfigRepository.save(tunnelConfig) }
+        viewModelScope.launch { appDataRepository.tunnels.save(tunnelConfig) }
 
     private fun updateTunnelConfig(tunnelConfig: TunnelConfig?) =
         viewModelScope.launch {
             if (tunnelConfig != null) {
                 saveConfig(tunnelConfig).join()
-                WireGuardAutoTunnel.requestTileServiceStateUpdate(application)
-                updateSettingsDefaultTunnel(tunnelConfig)
+                WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate(application)
             }
         }
-
-    private suspend fun updateSettingsDefaultTunnel(tunnelConfig: TunnelConfig) {
-        val settings = settingsRepository.getSettingsFlow().first()
-        if (settings.defaultTunnel != null) {
-            if (tunnelConfig.id == TunnelConfig.from(settings.defaultTunnel!!).id) {
-                settingsRepository.save(settings.copy(defaultTunnel = tunnelConfig.toString()))
-            }
-        }
-    }
 
     private fun buildPeerListFromProxyPeers(): List<Peer> {
         return _uiState.value.proxyPeers.map {
@@ -209,8 +195,12 @@ constructor(
             val peerList = buildPeerListFromProxyPeers()
             val wgInterface = buildInterfaceListFromProxyInterface()
             val config = Config.Builder().addPeers(peerList).setInterface(wgInterface).build()
-            val tunnelConfig = when(uiState.value.tunnel) {
-                null -> TunnelConfig(name = _uiState.value.tunnelName, wgQuick = config.toWgQuickString())
+            val tunnelConfig = when (uiState.value.tunnel) {
+                null -> TunnelConfig(
+                    name = _uiState.value.tunnelName,
+                    wgQuick = config.toWgQuickString(),
+                )
+
                 else -> uiState.value.tunnel!!.copy(
                     name = _uiState.value.tunnelName,
                     wgQuick = config.toWgQuickString(),
@@ -229,10 +219,10 @@ constructor(
         _uiState.value =
             _uiState.value.copy(
                 proxyPeers =
-                    _uiState.value.proxyPeers.update(
-                        index,
-                        _uiState.value.proxyPeers[index].copy(publicKey = value),
-                    ),
+                _uiState.value.proxyPeers.update(
+                    index,
+                    _uiState.value.proxyPeers[index].copy(publicKey = value),
+                ),
             )
     }
 
@@ -240,10 +230,10 @@ constructor(
         _uiState.value =
             _uiState.value.copy(
                 proxyPeers =
-                    _uiState.value.proxyPeers.update(
-                        index,
-                        _uiState.value.proxyPeers[index].copy(preSharedKey = value),
-                    ),
+                _uiState.value.proxyPeers.update(
+                    index,
+                    _uiState.value.proxyPeers[index].copy(preSharedKey = value),
+                ),
             )
     }
 
@@ -251,10 +241,10 @@ constructor(
         _uiState.value =
             _uiState.value.copy(
                 proxyPeers =
-                    _uiState.value.proxyPeers.update(
-                        index,
-                        _uiState.value.proxyPeers[index].copy(endpoint = value),
-                    ),
+                _uiState.value.proxyPeers.update(
+                    index,
+                    _uiState.value.proxyPeers[index].copy(endpoint = value),
+                ),
             )
     }
 
@@ -262,10 +252,10 @@ constructor(
         _uiState.value =
             _uiState.value.copy(
                 proxyPeers =
-                    _uiState.value.proxyPeers.update(
-                        index,
-                        _uiState.value.proxyPeers[index].copy(allowedIps = value),
-                    ),
+                _uiState.value.proxyPeers.update(
+                    index,
+                    _uiState.value.proxyPeers[index].copy(allowedIps = value),
+                ),
             )
     }
 
@@ -273,10 +263,10 @@ constructor(
         _uiState.value =
             _uiState.value.copy(
                 proxyPeers =
-                    _uiState.value.proxyPeers.update(
-                        index,
-                        _uiState.value.proxyPeers[index].copy(persistentKeepalive = value),
-                    ),
+                _uiState.value.proxyPeers.update(
+                    index,
+                    _uiState.value.proxyPeers[index].copy(persistentKeepalive = value),
+                ),
             )
     }
 
@@ -296,31 +286,31 @@ constructor(
         _uiState.value =
             _uiState.value.copy(
                 interfaceProxy =
-                    _uiState.value.interfaceProxy.copy(
-                        privateKey = keyPair.privateKey.toBase64(),
-                        publicKey = keyPair.publicKey.toBase64(),
-                    ),
+                _uiState.value.interfaceProxy.copy(
+                    privateKey = keyPair.privateKey.toBase64(),
+                    publicKey = keyPair.publicKey.toBase64(),
+                ),
             )
     }
 
     fun onAddressesChanged(value: String) {
         _uiState.value =
             _uiState.value.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(addresses = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(addresses = value),
             )
     }
 
     fun onListenPortChanged(value: String) {
         _uiState.value =
             _uiState.value.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(listenPort = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(listenPort = value),
             )
     }
 
     fun onDnsServersChanged(value: String) {
         _uiState.value =
             _uiState.value.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(dnsServers = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(dnsServers = value),
             )
     }
 
@@ -332,14 +322,14 @@ constructor(
     private fun onInterfacePublicKeyChange(value: String) {
         _uiState.value =
             _uiState.value.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(publicKey = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(publicKey = value),
             )
     }
 
     fun onPrivateKeyChange(value: String) {
         _uiState.value =
             _uiState.value.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(privateKey = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(privateKey = value),
             )
         if (NumberUtils.isValidKey(value)) {
             val pair = KeyPair(Key.fromBase64(value))

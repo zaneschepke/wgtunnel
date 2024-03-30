@@ -10,6 +10,7 @@ object Constants {
     const val VPN_STATISTIC_CHECK_INTERVAL = 1_000L
     const val VPN_CONNECTED_NOTIFICATION_DELAY = 3_000L
     const val TOGGLE_TUNNEL_DELAY = 300L
+    const val WATCHER_COLLECTION_DELAY = 1_000L
     const val CONF_FILE_EXTENSION = ".conf"
     const val ZIP_FILE_EXTENSION = ".zip"
     const val URI_CONTENT_SCHEME = "content"
@@ -17,6 +18,7 @@ object Constants {
     const val TEXT_MIME_TYPE = "text/plain"
     const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
     const val ANDROID_TV_EXPLORER_STUB = "com.android.tv.frameworkpackagestubs"
+    const val ALWAYS_ON_VPN_ACTION = "android.net.VpnService"
     const val EMAIL_MIME_TYPE = "message/rfc822"
     const val SYSTEM_EXEMPT_SERVICE_TYPE_ID = 1024
 
@@ -28,5 +30,9 @@ object Constants {
     const val VPN_RESTART_DELAY = 1_000L
     const val PING_INTERVAL = 60_000L
     const val PING_COOLDOWN = PING_INTERVAL * 60 //one hour
+
+    const val ALLOWED_DISPLAY_NAME_LENGTH = 20
+
+    const val TUNNEL_EXTRA_KEY = "tunnelId"
 
 }

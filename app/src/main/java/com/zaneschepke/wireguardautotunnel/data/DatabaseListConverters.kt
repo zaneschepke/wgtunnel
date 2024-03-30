@@ -12,7 +12,7 @@ class DatabaseListConverters {
 
     @TypeConverter
     fun stringToList(value: String): MutableList<String> {
-        if (value.isEmpty()) return mutableListOf()
+        if (value.isBlank() || value.isEmpty()) return mutableListOf()
         return try {
             Json.decodeFromString<MutableList<String>>(value)
         } catch (e: Exception) {

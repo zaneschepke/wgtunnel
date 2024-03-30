@@ -6,7 +6,8 @@ import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.wireguard.android.util.ToolsInstaller
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
 import dagger.Module
@@ -44,8 +45,14 @@ class TunnelModule {
     fun provideVpnService(
         @Userspace userspaceBackend: Backend,
         @Kernel kernelBackend: Backend,
-        settingsRepository: SettingsRepository
+        appDataRepository: AppDataRepository
     ): VpnService {
-        return WireGuardTunnel(userspaceBackend, kernelBackend, settingsRepository)
+        return WireGuardTunnel(userspaceBackend, kernelBackend, appDataRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideServiceManager(appDataRepository: AppDataRepository): ServiceManager {
+        return ServiceManager(appDataRepository)
     }
 }

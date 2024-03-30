@@ -31,7 +31,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
 import kotlinx.coroutines.launch
@@ -48,7 +47,7 @@ fun LogsScreen(appViewModel: AppViewModel) {
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(logs.size){
+    LaunchedEffect(logs.size) {
         scope.launch {
             lazyColumnListState.animateScrollToItem(logs.size)
         }
@@ -61,16 +60,16 @@ fun LogsScreen(appViewModel: AppViewModel) {
                     appViewModel.saveLogsToFile()
                 },
                 shape = RoundedCornerShape(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
             ) {
                 val icon = Icons.Filled.Save
                 Icon(
                     imageVector = icon,
                     contentDescription = icon.name,
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }
-        }
+        },
     ) {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,9 +77,12 @@ fun LogsScreen(appViewModel: AppViewModel) {
             state = lazyColumnListState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)) {
+                .padding(horizontal = 24.dp),
+        ) {
             items(logs) {
-                Row(horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start), verticalAlignment = Alignment.Top,
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
+                    verticalAlignment = Alignment.Top,
                     modifier = Modifier
                         .fillMaxSize()
                         .clickable(
@@ -88,13 +90,17 @@ fun LogsScreen(appViewModel: AppViewModel) {
                             indication = null,
                             onClick = {
                                 clipboardManager.setText(annotatedString = AnnotatedString(it.toString()))
-                            }
-                        )
+                            },
+                        ),
                 ) {
                     val fontSize = 10.sp
                     Text(text = it.tag, modifier = Modifier.fillMaxSize(0.3f), fontSize = fontSize)
                     LogTypeLabel(color = Color(it.level.color())) {
-                        Text(text = it.level.signifier, textAlign = TextAlign.Center, fontSize = fontSize)
+                        Text(
+                            text = it.level.signifier,
+                            textAlign = TextAlign.Center,
+                            fontSize = fontSize,
+                        )
                     }
                     Text("${it.message} - ${it.time}", fontSize = fontSize)
                 }

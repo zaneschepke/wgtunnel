@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">WG Tunnel</string>
-    <string name="tunnel_extras_key">tunnelConfig</string>
     <string name="vpn_channel_id">VPN Channel</string>
     <string name="vpn_channel_name">VPN Notification Channel</string>
     <string name="watcher_channel_id">Watcher Channel</string>
@@ -17,8 +16,8 @@
     <string name="watcher_notification_title">Watcher Service</string>
     <string name="watcher_notification_text_active">Monitoring network state changes: active</string>
     <string name="watcher_notification_text_paused">Monitoring network state changes: paused</string>
-    <string name="tunnel_start_title">VPN Connected</string>
-    <string name="tunnel_start_text">Connected to tunnel -</string>
+    <string name="tunnel_start_title">VPN connected</string>
+    <string name="tunnel_start_text">Connected to tunnel</string>
     <string name="vpn_permission_required">VPN permission is required for the app to work properly. If this permission is not launching, please disable \"Always-on VPN\" in your phone settings for the official WireGuard mobile app and try again.</string>
     <string name="notification_permission_required">Notifications permission required.</string>
     <string name="open_settings">Open Settings</string>
@@ -103,7 +102,7 @@
     <string name="default_vpn_on">Primary VPN on</string>
     <string name="default_vpn_off">Primary VPN off</string>
     <string name="create_import">Create from scratch</string>
-    <string name="turn_off_auto">Action requires auto-tunnel disabled</string>
+    <string name="turn_off_auto">Action requires auto-tunnel disabled or paused</string>
     <string name="turn_on_tunnel">Action requires active tunnel</string>
     <string name="add_peer">Add peer</string>
     <string name="done">Done</string>
@@ -121,8 +120,6 @@
     <string name="seconds">seconds</string>
     <string name="persistent_keepalive">Persistent keepalive</string>
     <string name="cancel">Cancel</string>
-    <string name="primary_tunnel_change">Primary tunnel change</string>
-    <string name="primary_tunnel_change_question">Would you like to make this your primary tunnel?</string>
     <string name="error_authentication_failed">Authentication failed</string>
     <string name="error_authorization_failed">Failed to authorize</string>
     <string name="enabled_app_shortcuts">Enable app shortcuts</string>
@@ -133,7 +130,6 @@
     <string name="precise_location_required">Precise location required</string>
     <string name="unknown_error">Unknown error occurred</string>
     <string name="exported_configs_message">Exported configs to downloads</string>
-    <string name="status">status</string>
     <string name="tunnel_on_wifi">Tunnel on untrusted wifi</string>
     <string name="my_email" translatable="false">support@zaneschepke.com</string>
     <string name="email_subject">WG Tunnel Support</string>
@@ -179,5 +175,17 @@
     <string name="enter_pin">Enter your pin</string>
     <string name="create_pin">Create pin</string>
     <string name="enable_app_lock">Enabled app lock</string>
-    <string name="restart_on_ping">Restart on ping fail</string>
+    <string name="restart_on_ping">Restart on ping fail (beta)</string>
+    <string name="mobile_data_tunnel">Set as mobile data tunnel</string>
+    <string name="set_primary_tunnel">Set as primary tunnel</string>
+    <string name="use_tunnel_on_wifi_name">Use tunnel on wifi name</string>
+    <string name="no_wifi_names_configured">No wifi names configured for this tunnel</string>
+    <string name="general">General</string>
+    <string name="edit_tunnel">Edit tunnel</string>
+    <string name="tunnel">Tunnel</string>
+    <string name="disabled">disabled</string>
+    <string name="auto_on">Resume auto tun</string>
+    <string name="auto_off">Pause auto tun</string>
+    <string name="auto_tun_on">Resume auto-tunnel</string>
+    <string name="auto_tun_off">Pause auto-tunnel</string>
 </resources>

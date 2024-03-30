@@ -38,8 +38,9 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.CopyAll
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -123,7 +124,6 @@ fun MainScreen(
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    var showPrimaryChangeAlertDialog by remember { mutableStateOf(false) }
     var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -197,30 +197,6 @@ fun MainScreen(
             },
         )
 
-    AnimatedVisibility(showPrimaryChangeAlertDialog) {
-        AlertDialog(
-            onDismissRequest = { showPrimaryChangeAlertDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.onDefaultTunnelChange(selectedTunnel)
-                        showPrimaryChangeAlertDialog = false
-                        selectedTunnel = null
-                    },
-                ) {
-                    Text(text = stringResource(R.string.okay))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPrimaryChangeAlertDialog = false }) {
-                    Text(text = stringResource(R.string.cancel))
-                }
-            },
-            title = { Text(text = stringResource(R.string.primary_tunnel_change)) },
-            text = { Text(text = stringResource(R.string.primary_tunnel_change_question)) },
-        )
-    }
-
     AnimatedVisibility(showDeleteTunnelAlertDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteTunnelAlertDialog = false },
@@ -246,12 +222,12 @@ fun MainScreen(
     }
 
     fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
-        if(appViewModel.isRequiredPermissionGranted()) {
+        if (appViewModel.isRequiredPermissionGranted()) {
             if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
         }
     }
 
-    if(uiState.loading) {
+    if (uiState.loading) {
         return LoadingScreen()
     }
 
@@ -426,7 +402,7 @@ fun MainScreen(
                                 icon,
                                 icon.name,
                                 modifier = Modifier
-                                    .padding(end = 10.dp)
+                                    .padding(end = 8.5.dp)
                                     .size(25.dp),
                                 tint =
                                 if (uiState.settings.isAutoTunnelPaused) Color.Gray
@@ -462,7 +438,7 @@ fun MainScreen(
             ) { tunnel ->
                 val leadingIconColor =
                     (if (
-                        uiState.vpnState.name == tunnel.name &&
+                        uiState.vpnState.tunnelConfig?.name == tunnel.name &&
                         uiState.vpnState.status == Tunnel.State.UP
                     ) {
                         uiState.vpnState.statistics
@@ -486,31 +462,31 @@ fun MainScreen(
                 val expanded = remember { mutableStateOf(false) }
                 RowListItem(
                     icon = {
-                        if (uiState.settings.isTunnelConfigDefault(tunnel)) {
-                            Icon(
-                                Icons.Rounded.Star,
-                                stringResource(R.string.status),
-                                tint = leadingIconColor,
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(20.dp),
-                            )
+                        val circleIcon = Icons.Rounded.Circle
+                        val icon = if (tunnel.isPrimaryTunnel) {
+                            Icons.Rounded.Star
+                        } else if (tunnel.isMobileDataTunnel) {
+                            Icons.Rounded.Smartphone
                         } else {
-                            Icon(
-                                Icons.Rounded.Circle,
-                                stringResource(R.string.status),
-                                tint = leadingIconColor,
-                                modifier = Modifier
-                                    .padding(end = 15.dp)
-                                    .size(15.dp),
-                            )
+                            circleIcon
                         }
+                        Icon(
+                            icon,
+                            icon.name,
+                            tint = leadingIconColor,
+                            modifier = Modifier
+                                .padding(
+                                    end = if (icon == circleIcon) 12.5.dp else 10.dp,
+                                    start = if (icon == circleIcon) 2.5.dp else 0.dp,
+                                )
+                                .size(if (icon == circleIcon) 15.dp else 20.dp),
+                        )
                     },
-                    text = tunnel.name.truncateWithEllipsis(15),
+                    text = tunnel.name.truncateWithEllipsis(Constants.ALLOWED_DISPLAY_NAME_LENGTH),
                     onHold = {
                         if (
                             (uiState.vpnState.status == Tunnel.State.UP) &&
-                            (tunnel.name == uiState.vpnState.name)
+                            (tunnel.name == uiState.vpnState.tunnelConfig?.name)
                         ) {
                             appViewModel.showSnackbarMessage(Event.Message.TunnelOffAction.message)
                             return@RowListItem
@@ -522,7 +498,7 @@ fun MainScreen(
                         if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                             if (
                                 uiState.vpnState.status == Tunnel.State.UP &&
-                                (uiState.vpnState.name == tunnel.name)
+                                (uiState.vpnState.tunnelConfig?.name == tunnel.name)
                             ) {
                                 expanded.value = !expanded.value
                             }
@@ -539,48 +515,27 @@ fun MainScreen(
                             !WireGuardAutoTunnel.isRunningOnAndroidTv()
                         ) {
                             Row {
-                                if (!uiState.settings.isTunnelConfigDefault(tunnel)) {
-                                    IconButton(
-                                        onClick = {
-                                            if (
-                                                uiState.settings.isAutoTunnelEnabled &&
-                                                !uiState.settings.isAutoTunnelPaused
-                                            ) {
-                                                appViewModel.showSnackbarMessage(
-                                                    Event.Message.AutoTunnelOffAction.message,
-                                                )
-                                            } else {
-                                                showPrimaryChangeAlertDialog = true
-                                            }
-                                        },
-                                    ) {
-                                        val icon = Icons.Rounded.Star
-                                        Icon(
-                                            icon,
-                                            icon.name,
-                                        )
-                                    }
-                                }
                                 IconButton(
                                     onClick = {
                                         if (
                                             uiState.settings.isAutoTunnelEnabled &&
-                                            uiState.settings.isTunnelConfigDefault(
-                                                tunnel,
-                                            ) &&
                                             !uiState.settings.isAutoTunnelPaused
                                         ) {
                                             appViewModel.showSnackbarMessage(
                                                 Event.Message.AutoTunnelOffAction.message,
                                             )
-                                        } else
+                                        } else {
                                             navController.navigate(
-                                                "${Screen.Config.route}/${selectedTunnel?.id}",
+                                                "${Screen.Option.route}/${selectedTunnel?.id}",
                                             )
+                                        }
                                     },
                                 ) {
-                                    val icon = Icons.Rounded.Edit
-                                    Icon(icon, icon.name)
+                                    val icon = Icons.Rounded.Settings
+                                    Icon(
+                                        icon,
+                                        icon.name,
+                                    )
                                 }
                                 IconButton(
                                     modifier = Modifier.focusable(),
@@ -601,7 +556,7 @@ fun MainScreen(
                             val checked by remember {
                                 derivedStateOf {
                                     (uiState.vpnState.status == Tunnel.State.UP &&
-                                        tunnel.name == uiState.vpnState.name)
+                                        tunnel.name == uiState.vpnState.tunnelConfig?.name)
                                 }
                             }
                             if (!checked) expanded.value = false
@@ -618,32 +573,32 @@ fun MainScreen(
                                 )
                             if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                                 Row {
-                                    if (!uiState.settings.isTunnelConfigDefault(tunnel)) {
-                                        IconButton(
-                                            onClick = {
-                                                if (uiState.settings.isAutoTunnelEnabled) {
-                                                    appViewModel.showSnackbarMessage(
-                                                        Event.Message.AutoTunnelOffAction.message,
-                                                    )
-                                                } else {
-                                                    selectedTunnel = tunnel
-                                                    showPrimaryChangeAlertDialog = true
-                                                }
-                                            },
-                                        ) {
-                                            val icon = Icons.Rounded.Star
-                                            Icon(
-                                                icon,
-                                                icon.name,
-                                            )
-                                        }
+                                    IconButton(
+                                        onClick = {
+                                            if (uiState.settings.isAutoTunnelEnabled) {
+                                                appViewModel.showSnackbarMessage(
+                                                    Event.Message.AutoTunnelOffAction.message,
+                                                )
+                                            } else {
+                                                selectedTunnel = tunnel
+                                                navController.navigate(
+                                                    "${Screen.Option.route}/${selectedTunnel?.id}",
+                                                )
+                                            }
+                                        },
+                                    ) {
+                                        val icon = Icons.Rounded.Settings
+                                        Icon(
+                                            icon,
+                                            icon.name,
+                                        )
                                     }
                                     IconButton(
                                         modifier = Modifier.focusRequester(focusRequester),
                                         onClick = {
                                             if (
                                                 uiState.vpnState.status == Tunnel.State.UP &&
-                                                (uiState.vpnState.name == tunnel.name)
+                                                (uiState.vpnState.tunnelConfig?.name == tunnel.name)
                                             ) {
                                                 expanded.value = !expanded.value
                                             } else {
@@ -657,25 +612,6 @@ fun MainScreen(
                                         Icon(icon, icon.name)
                                     }
                                     IconButton(
-                                        onClick = {
-                                            if (
-                                                uiState.vpnState.status == Tunnel.State.UP &&
-                                                tunnel.name == uiState.vpnState.name
-                                            ) {
-                                                appViewModel.showSnackbarMessage(
-                                                    Event.Message.TunnelOffAction.message,
-                                                )
-                                            } else {
-                                                navController.navigate(
-                                                    "${Screen.Config.route}/${tunnel.id}",
-                                                )
-                                            }
-                                        },
-                                    ) {
-                                        val icon = Icons.Rounded.Edit
-                                        Icon(icon, icon.name)
-                                    }
-                                    IconButton(
                                         onClick = { viewModel.onCopyTunnel(tunnel) },
                                     ) {
                                         val icon = Icons.Rounded.CopyAll
@@ -685,7 +621,7 @@ fun MainScreen(
                                         onClick = {
                                             if (
                                                 uiState.vpnState.status == Tunnel.State.UP &&
-                                                tunnel.name == uiState.vpnState.name
+                                                tunnel.name == uiState.vpnState.tunnelConfig?.name
                                             ) {
                                                 appViewModel.showSnackbarMessage(
                                                     Event.Message.TunnelOffAction.message,
@@ -699,7 +635,7 @@ fun MainScreen(
                                         val icon = Icons.Rounded.Delete
                                         Icon(
                                             icon,
-                                            icon.name
+                                            icon.name,
                                         )
                                     }
                                     TunnelSwitch()

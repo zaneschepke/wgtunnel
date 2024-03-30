@@ -20,10 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 
 @Composable
@@ -35,17 +33,20 @@ fun CustomSnackBar(
     Snackbar(
         containerColor = containerColor,
         modifier =
-            Modifier.fillMaxWidth(
-                    if (WireGuardAutoTunnel.isRunningOnAndroidTv()) 1 / 3f else 2 / 3f,
-                )
-                .padding(bottom = 100.dp),
+        Modifier
+            .fillMaxWidth(
+                if (WireGuardAutoTunnel.isRunningOnAndroidTv()) 1 / 3f else 2 / 3f,
+            )
+            .padding(bottom = 100.dp),
         shape = RoundedCornerShape(16.dp),
     ) {
         CompositionLocalProvider(
             LocalLayoutDirection provides if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
         ) {
             Row(
-                modifier = Modifier.width(IntrinsicSize.Max).height(IntrinsicSize.Min),
+                modifier = Modifier
+                    .width(IntrinsicSize.Max)
+                    .height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {

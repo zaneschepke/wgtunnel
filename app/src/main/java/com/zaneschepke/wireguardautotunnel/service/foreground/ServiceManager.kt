@@ -3,33 +3,17 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.model.Settings
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import timber.log.Timber
 
-object ServiceManager {
-
-    //    private
-    //    fun <T> Context.isServiceRunning(service: Class<T>) =
-    //        (getSystemService(ACTIVITY_SERVICE) as ActivityManager)
-    //            .runningAppProcesses.any {
-    //                it.processName == service.name
-    //            }
-    //
-    //    fun <T : Service> getServiceState(
-    //        context: Context,
-    //        cls: Class<T>
-    //    ): ServiceState {
-    //        val isServiceRunning = context.isServiceRunning(cls)
-    //        return if (isServiceRunning) ServiceState.STARTED else ServiceState.STOPPED
-    //    }
+class ServiceManager(private val appDataRepository: AppDataRepository) {
 
     private fun <T : Service> actionOnService(
         action: Action,
         context: Context,
         cls: Class<T>,
-        extras: Map<String, String>? = null
+        extras: Map<String, Int>? = null
     ) {
         val intent =
             Intent(context, cls).also {
@@ -42,9 +26,11 @@ object ServiceManager {
                 Action.START_FOREGROUND -> {
                     context.startForegroundService(intent)
                 }
+
                 Action.START -> {
                     context.startService(intent)
                 }
+
                 Action.STOP -> context.startService(intent)
             }
         } catch (e: Exception) {
@@ -52,16 +38,22 @@ object ServiceManager {
         }
     }
 
-    fun startVpnService(context: Context, tunnelConfig: String) {
+    suspend fun startVpnService(
+        context: Context,
+        tunnelId: Int? = null,
+        isManualStart: Boolean = false
+    ) {
+        if (isManualStart) onManualStart(tunnelId)
         actionOnService(
             Action.START,
             context,
             WireGuardTunnelService::class.java,
-            mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig),
+            tunnelId?.let { mapOf(Constants.TUNNEL_EXTRA_KEY to it) },
         )
     }
 
-    fun stopVpnService(context: Context) {
+    suspend fun stopVpnService(context: Context, isManualStop: Boolean = false) {
+        if (isManualStop) onManualStop()
         Timber.d("Stopping vpn service action")
         actionOnService(
             Action.STOP,
@@ -70,22 +62,28 @@ object ServiceManager {
         )
     }
 
-    fun startVpnServiceForeground(context: Context, tunnelConfig: String) {
+    private suspend fun onManualStop() {
+        appDataRepository.appState.setManualStop()
+    }
+
+    private suspend fun onManualStart(tunnelId: Int?) {
+        tunnelId?.let {
+            appDataRepository.appState.setTunnelRunningFromManualStart(it)
+        }
+    }
+
+    suspend fun startVpnServiceForeground(
+        context: Context,
+        tunnelId: Int? = null,
+        isManualStart: Boolean = false
+    ) {
+        if (isManualStart) onManualStart(tunnelId)
         actionOnService(
             Action.START_FOREGROUND,
             context,
             WireGuardTunnelService::class.java,
-            mapOf(context.getString(R.string.tunnel_extras_key) to tunnelConfig),
+            tunnelId?.let { mapOf(Constants.TUNNEL_EXTRA_KEY to it) },
         )
-    }
-
-    fun startVpnServicePrimaryTunnel(context: Context, settings: Settings, fallbackTunnel: TunnelConfig? = null) {
-        if(settings.defaultTunnel != null) {
-            return startVpnServiceForeground(context, settings.defaultTunnel!!)
-        }
-        if(fallbackTunnel != null) {
-            startVpnServiceForeground(context, fallbackTunnel.toString())
-        }
     }
 
     fun startWatcherServiceForeground(
