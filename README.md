@@ -49,16 +49,18 @@ and on while on different networks. This app was created to offer a free solutio
 ## Features
 
 * Add tunnels via .conf file, zip, manual entry, or QR code
-* Auto connect to VPN based on Wi-Fi SSID, ethernet, or mobile data
+* Auto connect to tunnels based on Wi-Fi SSID, ethernet, or mobile data
 * Split tunneling by application with search
 * WireGuard support for kernel and userspace modes
 * Always-On VPN support
 * Export tunnels to zip
-* Quick tile support for VPN toggling
-* Static shortcuts support for primary tunnel for automation integration
+* Quick tile support for tunnel toggling, auto-tunneling
+* Static shortcuts support for tunnel toggling, auto-tunneling
 * Intent automation support for all tunnels
-* Automatic service restart after reboot
+* Automatic auto-tunneling service restart after reboot
+* Automatic tunnel restart after reboot
 * Battery preservation measures
+* Restart tunnel on ping failure (beta)
 
 ## Docs (WIP)
 
