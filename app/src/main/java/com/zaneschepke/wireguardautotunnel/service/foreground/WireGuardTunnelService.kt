@@ -49,6 +49,11 @@ class WireGuardTunnelService : ForegroundService() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+    }
+
     override fun startService(extras: Bundle?) {
         super.startService(extras)
         cancelJob()
@@ -117,8 +122,8 @@ class WireGuardTunnelService : ForegroundService() {
         )
     }
 
-    override fun stopService(extras: Bundle?) {
-        super.stopService(extras)
+    override fun stopService() {
+        super.stopService()
         lifecycleScope.launch(Dispatchers.IO) {
             vpnService.stopTunnel()
             didShowConnected = false

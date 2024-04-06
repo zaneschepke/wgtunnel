@@ -95,6 +95,30 @@ jobs:
           draft: false
           prerelease: false
           files: ${{ github.workspace }}/${{ steps.apk-path.outputs.path }}
+
+      - name: Install apksigner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apksigner
+
+      - name: Get checksum
+        id: checksum
+        run: echo "checksum=$(apksigner verify -print-certs ${{ steps.apk-path.outputs.path }} | grep -Po "(?<=SHA-256 digest:) .*")" | awk '{$1=$1};1' >> $GITHUB_OUTPUT
+
+      - name: Append checksum
+        id: append_checksum
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body: >
+            <br /> SHA256 Checksum: <br /> ```${{ steps.checksum.outputs.checksum }}```
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          append_body: true
+
       - name: Deploy with fastlane
         uses: ruby/setup-ruby@v1
         with:

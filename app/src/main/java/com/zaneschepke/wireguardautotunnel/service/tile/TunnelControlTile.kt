@@ -69,13 +69,21 @@ class TunnelControlTile : TileService() {
         scope.cancel()
     }
 
+    override fun onTileAdded() {
+        super.onTileAdded()
+        onStartListening()
+    }
+
     override fun onClick() {
         super.onClick()
         unlockAndRun {
             scope.launch {
                 try {
                     if (vpnService.getState() == Tunnel.State.UP) {
-                        serviceManager.stopVpnService(this@TunnelControlTile, isManualStop = true)
+                        serviceManager.stopVpnService(
+                            this@TunnelControlTile,
+                            isManualStop = true,
+                        )
                     } else {
                         serviceManager.startVpnServiceForeground(
                             this@TunnelControlTile, manualStartConfig?.id, isManualStart = true,

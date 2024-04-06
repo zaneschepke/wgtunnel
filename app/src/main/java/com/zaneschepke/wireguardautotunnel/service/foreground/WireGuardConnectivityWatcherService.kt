@@ -74,6 +74,11 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopService()
+    }
+
     override fun startService(extras: Bundle?) {
         super.startService(extras)
         try {
@@ -86,8 +91,8 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
         }
     }
 
-    override fun stopService(extras: Bundle?) {
-        super.stopService(extras)
+    override fun stopService() {
+        super.stopService()
         wakeLock?.let {
             if (it.isHeld) {
                 it.release()

@@ -53,6 +53,11 @@ class AutoTunnelControlTile : TileService() {
         }
     }
 
+    override fun onTileAdded() {
+        super.onTileAdded()
+        onStartListening()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
