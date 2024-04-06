@@ -112,7 +112,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body: >
-            <br /> SHA256 Checksum: <br /> ```${{ steps.checksum.outputs.checksum }}```
+            <br /> SHA256 fingerprint: <br /> ```${{ steps.checksum.outputs.checksum }}```
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           draft: false
