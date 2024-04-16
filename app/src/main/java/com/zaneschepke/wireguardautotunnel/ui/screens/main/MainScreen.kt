@@ -71,8 +71,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -123,6 +127,25 @@ fun MainScreen(
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
+
+    // Nested scroll for control FAB
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Hide FAB
+                if (available.y < -1) {
+                    isVisible.value = false
+                }
+                // Show FAB
+                if (available.y > 1) {
+                    isVisible.value = true
+                }
+
+                return Offset.Zero
+            }
+        }
+    }
+
 
     var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
     var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
@@ -377,8 +400,8 @@ fun MainScreen(
             verticalArrangement = Arrangement.Top,
             modifier =
             Modifier
-                .fillMaxWidth()
-                .overscroll(ScrollableDefaults.overscrollEffect()),
+                .fillMaxSize()
+                .overscroll(ScrollableDefaults.overscrollEffect()).nestedScroll(nestedScrollConnection),
             state = rememberLazyListState(0, uiState.tunnels.count()),
             userScrollEnabled = true,
             reverseLayout = false,

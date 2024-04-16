@@ -24,7 +24,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) = goAsync {
         try {
             //TODO fix for manual start changes when enabled
-            serviceManager.stopVpnService(context)
+            serviceManager.stopVpnServiceForeground(context)
             delay(Constants.TOGGLE_TUNNEL_DELAY)
             serviceManager.startVpnServiceForeground(context)
         } catch (e: Exception) {

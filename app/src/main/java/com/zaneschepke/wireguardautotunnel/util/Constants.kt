@@ -35,4 +35,6 @@ object Constants {
 
     const val TUNNEL_EXTRA_KEY = "tunnelId"
 
+    const val UNREADABLE_SSID = "<unknown ssid>"
+
 }

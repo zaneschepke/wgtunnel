@@ -118,12 +118,12 @@ constructor(
     fun readLogCatOutput() =
         viewModelScope.launch(viewModelScope.coroutineContext + Dispatchers.IO) {
             launch {
-                Logcatter.logs {
+                Logcatter.logs(callback = {
                     logs.add(it)
                     if (logs.size > Constants.LOG_BUFFER_SIZE) {
                         logs.removeRange(0, (logs.size - Constants.LOG_BUFFER_SIZE).toInt())
                     }
-                }
+                })
             }
         }
 

@@ -10,6 +10,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.Kernel
 import com.zaneschepke.wireguardautotunnel.module.Userspace
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,7 +34,7 @@ constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private lateinit var statsJob: Job
+    private var statsJob: Job? = null
 
     private var backend: Backend = userspaceBackend
 
@@ -134,8 +135,10 @@ constructor(
                 }
         }
         if (state == State.DOWN) {
-            if (this::statsJob.isInitialized) {
-                statsJob.cancel()
+            try {
+                statsJob?.cancel()
+            } catch (e : CancellationException) {
+                Timber.i("Stats job cancelled")
             }
         }
     }

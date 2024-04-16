@@ -16,10 +16,12 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.handshakeStatus
 import com.zaneschepke.wireguardautotunnel.util.mapPeerStats
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -35,7 +37,7 @@ class WireGuardTunnelService : ForegroundService() {
     @Inject
     lateinit var notificationService: NotificationService
 
-    private lateinit var job: Job
+    private var job: Job? = null
 
     private var didShowConnected = false
 
@@ -47,11 +49,6 @@ class WireGuardTunnelService : ForegroundService() {
                 launchVpnNotification()
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
     }
 
     override fun startService(extras: Bundle?) {
@@ -182,8 +179,10 @@ class WireGuardTunnelService : ForegroundService() {
     }
 
     private fun cancelJob() {
-        if (this::job.isInitialized) {
-            job.cancel()
+        try {
+            job?.cancel()
+        } catch (e : CancellationException) {
+            Timber.i("Tunnel job cancelled")
         }
     }
 }

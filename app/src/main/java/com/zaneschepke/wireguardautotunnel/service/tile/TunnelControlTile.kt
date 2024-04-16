@@ -80,7 +80,7 @@ class TunnelControlTile : TileService() {
             scope.launch {
                 try {
                     if (vpnService.getState() == Tunnel.State.UP) {
-                        serviceManager.stopVpnService(
+                        serviceManager.stopVpnServiceForeground(
                             this@TunnelControlTile,
                             isManualStop = true,
                         )

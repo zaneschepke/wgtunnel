@@ -23,9 +23,8 @@ class ServiceManager(private val appDataRepository: AppDataRepository) {
         intent.component?.javaClass
         try {
             when (action) {
-                Action.START_FOREGROUND -> context.startForegroundService(intent)
-                Action.START -> context.startService(intent)
-                Action.STOP -> context.stopService(intent)
+                Action.START_FOREGROUND, Action.STOP_FOREGROUND -> context.startForegroundService(intent)
+                Action.START, Action.STOP -> context.startService(intent)
             }
         } catch (e: Exception) {
             Timber.e(e.message)
@@ -43,6 +42,16 @@ class ServiceManager(private val appDataRepository: AppDataRepository) {
             context,
             WireGuardTunnelService::class.java,
             tunnelId?.let { mapOf(Constants.TUNNEL_EXTRA_KEY to it) },
+        )
+    }
+
+    suspend fun stopVpnServiceForeground(context: Context, isManualStop: Boolean = false) {
+        if (isManualStop) onManualStop()
+        Timber.i("Stopping vpn service")
+        actionOnService(
+            Action.STOP_FOREGROUND,
+            context,
+            WireGuardTunnelService::class.java,
         )
     }
 

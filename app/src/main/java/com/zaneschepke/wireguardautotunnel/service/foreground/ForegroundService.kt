@@ -24,7 +24,7 @@ open class ForegroundService : LifecycleService() {
             when (action) {
                 Action.START.name,
                 Action.START_FOREGROUND.name -> startService(intent.extras)
-
+                Action.STOP.name, Action.STOP_FOREGROUND.name -> stopService()
                 Constants.ALWAYS_ON_VPN_ACTION -> {
                     Timber.i("Always-on VPN starting service")
                     startService(intent.extras)
@@ -37,14 +37,7 @@ open class ForegroundService : LifecycleService() {
                 "with a null intent. It has been probably restarted by the system.",
             )
         }
-        // by returning this we make sure the service is restarted if the system kills the service
         return START_STICKY
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Timber.d("The service has been destroyed")
-        stopService()
     }
 
     protected open fun startService(extras: Bundle?) {
@@ -55,12 +48,8 @@ open class ForegroundService : LifecycleService() {
 
     protected open fun stopService() {
         Timber.d("Stopping ${this.javaClass.simpleName}")
-        try {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            stopSelf()
-        } catch (e: Exception) {
-            Timber.e(e)
-        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
         isServiceStarted = false
     }
 }

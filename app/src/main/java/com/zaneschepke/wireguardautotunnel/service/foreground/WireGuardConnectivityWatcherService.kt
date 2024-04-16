@@ -18,6 +18,7 @@ import com.zaneschepke.wireguardautotunnel.service.notification.NotificationServ
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -56,7 +57,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
     private val networkEventsFlow = MutableStateFlow(WatcherState())
 
-    private lateinit var watcherJob: Job
+    private var watcherJob: Job? = null
 
     private var wakeLock: PowerManager.WakeLock? = null
     private val tag = this.javaClass.name
@@ -72,11 +73,6 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                 Timber.e("Failed to start watcher service, not enough permissions")
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopService()
     }
 
     override fun startService(extras: Bundle?) {
@@ -139,8 +135,10 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private fun cancelWatcherJob() {
-        if (this::watcherJob.isInitialized) {
-            watcherJob.cancel()
+        try {
+            watcherJob?.cancel()
+        } catch (e : CancellationException) {
+            Timber.i("Watcher job cancelled")
         }
     }
 
@@ -236,7 +234,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         }
                         if (results.contains(false)) {
                             Timber.i("Restarting VPN for ping failure")
-                            serviceManager.stopVpnService(this)
+                            serviceManager.stopVpnServiceForeground(this)
                             delay(Constants.VPN_RESTART_DELAY)
                             serviceManager.startVpnServiceForeground(this)
                             delay(Constants.PING_COOLDOWN)
@@ -324,7 +322,9 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         )
                     val ssid = wifiService.getNetworkName(it.networkCapabilities)
                     ssid?.let {
-                        Timber.i("Detected SSID: $ssid")
+                        if(it.contains(Constants.UNREADABLE_SSID)) {
+                            Timber.w("SSID unreadable: missing permissions")
+                        } else Timber.i("Detected valid SSID")
                         appDataRepository.appState.setCurrentSsid(ssid)
                         networkEventsFlow.value =
                             networkEventsFlow.value.copy(
@@ -381,7 +381,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
                     watcherState.isTunnelOffOnMobileDataConditionMet() -> {
                         Timber.i("$autoTunnel - tunnel off on mobile data met, turning vpn off")
-                        serviceManager.stopVpnService(this)
+                        serviceManager.stopVpnServiceForeground(this)
                     }
 
                     watcherState.isTunnelNotWifiNamePreferredMet(watcherState.currentNetworkSSID) -> {
@@ -407,17 +407,17 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
 
                     watcherState.isTrustedWifiConditionMet() -> {
                         Timber.i("$autoTunnel - tunnel off on trusted wifi condition met, turning vpn off")
-                        serviceManager.stopVpnService(this)
+                        serviceManager.stopVpnServiceForeground(this)
                     }
 
                     watcherState.isTunnelOffOnWifiConditionMet() -> {
                         Timber.i("$autoTunnel - tunnel off on wifi condition met, turning vpn off")
-                        serviceManager.stopVpnService(this)
+                        serviceManager.stopVpnServiceForeground(this)
                     }
 
                     watcherState.isTunnelOffOnNoConnectivityMet() -> {
                         Timber.i("$autoTunnel - tunnel off on no connectivity met, turning vpn off")
-                        serviceManager.stopVpnService(this)
+                        serviceManager.stopVpnServiceForeground(this)
                     }
 
                     else -> {

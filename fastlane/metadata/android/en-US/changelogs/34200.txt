@@ -1,0 +1,4 @@
+What's new:
+- Fix stop tunnel regression
+- Add logs obfuscation
+- Add hide FAB on scroll

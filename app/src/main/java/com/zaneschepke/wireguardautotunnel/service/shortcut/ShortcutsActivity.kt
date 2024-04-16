@@ -40,7 +40,7 @@ class ShortcutsActivity : ComponentActivity() {
                                 this@ShortcutsActivity, tunnelConfig?.id, isManualStart = true,
                             )
 
-                            Action.STOP.name -> serviceManager.stopVpnService(
+                            Action.STOP.name -> serviceManager.stopVpnServiceForeground(
                                 this@ShortcutsActivity,
                                 isManualStop = true,
                             )
