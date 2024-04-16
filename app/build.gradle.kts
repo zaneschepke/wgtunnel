@@ -12,6 +12,10 @@ android {
     namespace = Constants.APP_ID
     compileSdk = Constants.TARGET_SDK
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     defaultConfig {
         applicationId = Constants.APP_ID
         minSdk = Constants.MIN_SDK
@@ -24,8 +28,6 @@ android {
         sourceSets {
             getByName("debug").assets.srcDirs(files("$projectDir/schemas")) // Room
         }
-
-        resourceConfigurations.addAll(listOf("en"))
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }

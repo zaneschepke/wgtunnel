@@ -135,7 +135,7 @@
     <string name="email_subject">WG Tunnel Support</string>
     <string name="email_chooser">Send an email…</string>
     <string name="go">go</string>
-    <string name="docs_description">Read the docs (WIP)</string>
+    <string name="docs_description">Read the docs</string>
     <string name="discord_description">Join the community</string>
     <string name="email_description">Send me an email</string>
     <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
@@ -188,4 +188,9 @@
     <string name="auto_off">Pause auto tun</string>
     <string name="auto_tun_on">Resume auto-tunnel</string>
     <string name="auto_tun_off">Pause auto-tunnel</string>
+    <string name="version">Version</string>
+    <string name="mode">Mode</string>
+    <string name="userspace">Userspace</string>
+    <string name="settings">Settings</string>
+    <string name="support">Support</string>
 </resources>

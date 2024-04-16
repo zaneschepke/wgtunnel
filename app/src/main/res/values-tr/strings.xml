@@ -135,7 +135,7 @@
     <string name="email_subject">WG Tunnel Desteği</string>
     <string name="email_chooser">Bir e-posta gönderin…</string>
     <string name="go">git</string>
-    <string name="docs_description">Belgeleri okuyun (Devam Eden Çalışma)</string>
+    <string name="docs_description">Belgeleri okuyun</string>
     <string name="discord_description">Topluluğa katılın</string>
     <string name="email_description">Bana e-posta gönder</string>
     <string name="support_help_text">Sorun yaşıyorsanız, iyileştirme fikirleriniz varsa veya sadece etkileşimde bulunmak istiyorsanız, aşağıdaki kaynaklar mevcuttur:</string>

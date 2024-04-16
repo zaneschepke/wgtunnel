@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -122,7 +123,13 @@ fun SupportScreen(
                             Text(
                                 stringResource(id = R.string.docs_description),
                                 textAlign = TextAlign.Justify,
-                                modifier = Modifier.padding(start = 10.dp),
+                                modifier = Modifier
+                                    .padding(start = 10.dp)
+                                    .weight(
+                                        weight = 1.0f,
+                                        fill = false,
+                                    ),
+                                softWrap = true
                             )
                         }
                         Icon(
@@ -270,8 +277,21 @@ fun SupportScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(25.dp),
         ) {
-            Text("Version: ${BuildConfig.VERSION_NAME}", modifier = Modifier.focusable())
-            Text("Mode: ${if (uiState.settings.isKernelEnabled) "Kernel" else "Userspace"}")
+            val version = buildAnnotatedString {
+                append(stringResource(id = R.string.version))
+                append(": ")
+                append(BuildConfig.VERSION_NAME)
+            }
+            val mode = buildAnnotatedString {
+                append(stringResource(R.string.mode))
+                append(": ")
+                when(uiState.settings.isKernelEnabled){
+                    true -> append(stringResource(id = R.string.kernel))
+                    false -> append(stringResource(id = R.string.userspace))
+                }
+            }
+            Text(version.text, modifier = Modifier.focusable())
+            Text(mode.text)
         }
     }
 }
