@@ -21,7 +21,7 @@
     <string name="vpn_permission_required">Uygulamanın düzgün çalışması için VPN izni gereklidir. Bu izin başlatılmıyorsa, lütfen resmi WireGuard mobil uygulaması için telefon ayarlarınızda \"Her zaman açık VPN\" i devre dışı bırakın ve tekrar deneyin.</string>
     <string name="notification_permission_required">Bildirim izni gerekli.</string>
     <string name="open_settings">Ayarları Aç</string>
-    <string name="add_trusted_ssid">Güvenilir wifi adı ekle</string>
+    <string name="add_trusted_ssid">Güvenilir Wi-Fi adı ekle</string>
     <string name="tunnels">Tüneller</string>
     <string name="enable_auto_tunnel">Otomatik tünellemeyi başlat</string>
     <string name="disable_auto_tunnel">Otomatik tünellemeyi durdur</string>
@@ -91,7 +91,7 @@
     <string name="db_name">wg-tunnel-db</string>
     <string name="scanning_qr">QR taranıyor</string>
     <string name="qr_result_failed">QR taraması başarısız oldu</string>
-    <string name="none">Güvenilir wifi adı yok</string>
+    <string name="none">Güvenilir Wi-Fi adı yok</string>
     <string name="never">Asla</string>
     <string name="stream_failed">Dosya akışı açılamadı.</string>
     <string name="other">Diğer</string>
@@ -149,7 +149,7 @@
     <string name="error_none">Hata yok</string>
     <string name="error_file_read">Dosya okunamadı</string>
     <string name="location_service_missing">Konum Hizmetleri Algılanmadı</string>
-    <string name="location_services_missing_message">Uygulama, cihazınızda etkinleştirilen herhangi bir konum hizmeti algılamıyor. Cihaza bağlı olarak bu, güvenilmeyen wifi özelliğinin wifi adını okuyamamasına neden olabilir. Yine de devam etmek ister misiniz?</string>
+    <string name="location_services_missing_message">Uygulama, cihazınızda etkinleştirilen herhangi bir konum hizmeti algılamıyor. Cihaza bağlı olarak bu, güvenilmeyen Wi-Fi özelliğinin Wi-Fi adını okuyamamasına neden olabilir. Yine de devam etmek ister misiniz?</string>
     <string name="auto_tunnel_title">Otomatik Tünel Hizmeti</string>
     <string name="delete_tunnel">Tüneli sil</string>
     <string name="delete_tunnel_message">Bu tüneli silmek istediğinizden emin misiniz?</string>
@@ -174,12 +174,12 @@
     <string name="pin_created">Pin başarıyla oluşturuldu</string>
     <string name="enter_pin">PIN kodunuzu girin</string>
     <string name="create_pin">PIN kodu oluştur</string>
-    <string name="enable_app_lock">Uygulama kilidi etkinleştirildi</string>
+    <string name="enable_app_lock">Uygulama kilidini etkinleştir</string>
     <string name="restart_on_ping">Ping başarısız olduğunda yeniden başlat (beta)</string>
     <string name="mobile_data_tunnel">Mobil veri tüneli olarak ayarla</string>
     <string name="set_primary_tunnel">Birincil tünel olarak ayarla</string>
-    <string name="use_tunnel_on_wifi_name">Wifi adında tünel kullan</string>
-    <string name="no_wifi_names_configured">Bu tünel için yapılandırılmış wifi adı yok</string>
+    <string name="use_tunnel_on_wifi_name">Wi-Fi adında tünel kullan</string>
+    <string name="no_wifi_names_configured">Bu tünel için yapılandırılmış Wi-Fi adı yok</string>
     <string name="general">Genel</string>
     <string name="edit_tunnel">Tüneli düzenle</string>
     <string name="tunnel">Tünel</string>
