@@ -42,10 +42,10 @@
     <string name="add_tunnels_text">Dosyadan veya ZIP\'ten ekle</string>
     <string name="open_file">Dosya Aç</string>
     <string name="add_from_qr">QR kodundan ekle</string>
-    <string name="qr_scan">QR Tarama</string>
-    <string name="tunnel_edit">Tünel Düzenleme</string>
-    <string name="tunnel_name">Tünel Adı</string>
-    <string name="add_tunnel">Tünel Ekle</string>
+    <string name="qr_scan">QR kodu tarat</string>
+    <string name="tunnel_edit">Tüneli düzenle</string>
+    <string name="tunnel_name">Tünel adı</string>
+    <string name="add_tunnel">Tünel ekle</string>
     <string name="exclude">Hariç tut</string>
     <string name="include">Dahil et</string>
     <string name="tunnel_all">Tüm uygulamaları dahil et</string>
@@ -83,7 +83,7 @@
     <string name="request">İstek</string>
     <string name="toggle_vpn">VPN\'i aç/kapat</string>
     <string name="no_tunnel_available">Tünel yok</string>
-    <string name="hint_search_packages">Paket ara</string>
+    <string name="hint_search_packages">Uygulama arayın</string>
     <string name="clear_icon">Simgeyi Temizle</string>
     <string name="search_icon">Simge Ara</string>
     <string name="attempt_connection">Bağlantı kurulmaya çalışılıyor..</string>
@@ -105,7 +105,7 @@
     <string name="turn_off_auto">Eylem, otomatik tünelin devre dışı bırakılmasını veya duraklatılmasını gerektirir</string>
     <string name="turn_on_tunnel">Eylem aktif tünel gerektirir</string>
     <string name="add_peer">Eş (peer) ekle</string>
-    <string name="done">Tamamlandı</string>
+    <string name="done">Tamam</string>
     <string name="interface_">Arayüz</string>
     <string name="rotate_keys">Tuşları döndür</string>
     <string name="private_key">Özel anahtar</string>
@@ -129,7 +129,7 @@
     <string name="background_location_required">Arka plan konumu gerekli</string>
     <string name="precise_location_required">Kesin konum gerekli</string>
     <string name="unknown_error">Bilinmeyen bir hata oluştu</string>
-    <string name="exported_configs_message">Yapılandırmalar indirmelere aktarıldı</string>
+    <string name="exported_configs_message">Yapılandırmalar indirilenler\'e aktarıldı</string>
     <string name="tunnel_on_wifi">Güvenilmeyen kablosuz internet bağlantısında tünel</string>
     <string name="my_email" translatable="false">support@zaneschepke.com</string>
     <string name="email_subject">WG Tunnel Desteği</string>
@@ -169,7 +169,7 @@
     <string name="open_issue">Bir sorun bildir</string>
     <string name="read_logs">Günlükleri oku</string>
     <string name="auto">(Otomatik)</string>
-    <string name="config_parse_error">Yapılandırma ayrıştırılamadı</string>
+    <string name="config_parse_error">Yapılandırma kaydedilemedi</string>
     <string name="incorrect_pin">PIN kodu yanlış</string>
     <string name="pin_created">Pin başarıyla oluşturuldu</string>
     <string name="enter_pin">PIN kodunuzu girin</string>
