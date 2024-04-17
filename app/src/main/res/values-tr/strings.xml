@@ -111,7 +111,7 @@
     <string name="private_key">Özel anahtar</string>
     <string name="copy_public_key">Genel anahtarı kopyala</string>
     <string name="base64_key">Base64 anahtarı</string>
-    <string name="comma_separated_list">Virgül ile ayrılmış liste</string>
+    <string name="comma_separated_list">Virgül ile ayrılmış liste ekleyin</string>
     <string name="listen_port">Bağlantı noktası</string>
     <string name="random">(Rastgele)</string>
     <string name="optional">(İsteğe bağlı)</string>
