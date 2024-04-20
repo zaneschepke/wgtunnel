@@ -62,12 +62,16 @@ and on while on different networks. This app was created to offer a free solutio
 * Battery preservation measures
 * Restart tunnel on ping failure (beta)
 
-## Docs (WIP)
+## Docs
 
 Basic documentation of the feature and behaviors of this app can be
 found [here](https://zaneschepke.com/wgtunnel-docs/overview.html).
 
 The repository for these docs can be found [here](https://github.com/zaneschepke/wgtunnel-docs).
+
+## Contributing
+
+Any contributions in the form of feedback, issues, code, or translations are welcome and much appreciated! 
 
 ## Building
 
