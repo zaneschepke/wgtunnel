@@ -4,32 +4,24 @@
     <string name="vpn_channel_name">VPN Notification Channel</string>
     <string name="watcher_channel_id">Watcher Channel</string>
     <string name="watcher_channel_name">Watcher Notification Channel</string>
-    <string name="foreground_file">FOREGROUND_FILE</string>
     <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
     <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
     <string name="error_file_extension">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Action requires tunnel off</string>
     <string name="no_tunnels">No tunnels added yet!</string>
-    <string name="tunnel_exists">Tunnel name already exists</string>
     <string name="discord_url" translatable="false">https://discord.gg/rbRRNh6H7V</string>
-    <string name="watcher_notification_title">Watcher Service</string>
     <string name="watcher_notification_text_active">Monitoring network state changes: active</string>
     <string name="watcher_notification_text_paused">Monitoring network state changes: paused</string>
     <string name="tunnel_start_title">VPN connected</string>
     <string name="tunnel_start_text">Connected to tunnel</string>
-    <string name="vpn_permission_required">VPN permission is required for the app to work properly. If this permission is not launching, please disable \"Always-on VPN\" in your phone settings for the official WireGuard mobile app and try again.</string>
     <string name="notification_permission_required">Notifications permission required.</string>
-    <string name="open_settings">Open Settings</string>
     <string name="add_trusted_ssid">Add trusted wifi name</string>
     <string name="tunnels">Tunnels</string>
     <string name="enable_auto_tunnel">Start auto-tunneling</string>
     <string name="disable_auto_tunnel">Stop auto-tunneling</string>
     <string name="tunnel_mobile_data">Tunnel on mobile data</string>
-    <string name="background_location_reason">\"Allow all the time\" location permission is required for retrieving Wi-Fi SSID in the background. Permission is needed for this feature.</string>
-    <string name="location_permission_reason">Location permission is required for this feature to work properly.</string>
     <string name="one_tunnel_required">At least one tunnel required to use this feature</string>
-    <string name="retry">"Retry"</string>
     <string name="privacy_policy">View Privacy Policy</string>
     <string name="okay">Okay</string>
     <string name="tunnel_on_ethernet">Tunnel on ethernet</string>
@@ -38,12 +30,10 @@
     <string name="thank_you">Thank you for using WG Tunnel!</string>
     <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
-    <string name="config_validation" translatable="false">[Interface]</string>
     <string name="add_tunnels_text">Add from file or zip</string>
     <string name="open_file">File Open</string>
     <string name="add_from_qr">Add from QR code</string>
     <string name="qr_scan">QR Scan</string>
-    <string name="tunnel_edit">Tunnel Edit</string>
     <string name="tunnel_name">Tunnel Name</string>
     <string name="add_tunnel">Add Tunnel</string>
     <string name="exclude">Exclude</string>
@@ -55,34 +45,18 @@
     <string name="no_thanks">No thanks</string>
     <string name="turn_on">Turn on</string>
     <string name="map">Map</string>
-    <string name="bad_config">Bad config. Please try again.</string>
-    <string name="config_interface">Interface</string>
     <string name="public_key">Public key</string>
-    <string name="barcode_downloading">Waiting for the Barcode UI module to be downloaded.</string>
-    <string name="barcode_downloading_message">Barcode module downloading. Try again.</string>
     <string name="addresses">Addresses</string>
     <string name="dns_servers">DNS servers</string>
     <string name="mtu">MTU</string>
     <string name="peer">Peer</string>
     <string name="allowed_ips">Allowed IPs</string>
     <string name="endpoint">Endpoint</string>
-    <string name="transfer">Transfer</string>
-    <string name="last_handshake">Last handshake</string>
     <string name="name">Name</string>
     <string name="restart">Restart Tunnel</string>
     <string name="vpn_connection_failed">Connection failed</string>
-    <string name="failed_connection_to">Failed connection to -</string>
-    <string name="initial_connection_failure_message">Attempting to connect to server after 30 seconds of no response.</string>
-    <string name="lost_connection_failure_message">Attempting to reconnect to server after more than one minute of no response.</string>
     <string name="always_on_vpn_support">Allow Always-On VPN </string>
-    <string name="select_tunnel_message">Please select a tunnel first</string>
     <string name="location_services_not_detected">Location Services Not Detected</string>
-    <string name="check_again">Check again</string>
-    <string name="detecting_location_services_disabled">Detecting Location Services disabled</string>
-    <string name="precise_location_message">This feature requires precise location to access Wi-Fi SSID name. Please enable precise location here or in the app settings.</string>
-    <string name="request">Request</string>
-    <string name="toggle_vpn">Toggle VPN</string>
-    <string name="no_tunnel_available">No tunnels available</string>
     <string name="hint_search_packages">Search packages</string>
     <string name="clear_icon">Clear Icon</string>
     <string name="search_icon">Search Icon</string>
@@ -90,13 +64,9 @@
     <string name="vpn_starting">VPN starting</string>
     <string name="db_name">wg-tunnel-db</string>
     <string name="scanning_qr">Scanning for QR</string>
-    <string name="qr_result_failed">QR scan failed</string>
     <string name="none">No trusted wifi names</string>
-    <string name="never">Never</string>
-    <string name="stream_failed">Failed to open file stream.</string>
     <string name="other">Other</string>
     <string name="auto_tunneling">Auto-tunneling</string>
-    <string name="select_tunnel">Select tunnel to use</string>
     <string name="vpn_on">VPN on</string>
     <string name="vpn_off">VPN off</string>
     <string name="default_vpn_on">Primary VPN on</string>
@@ -124,7 +94,6 @@
     <string name="error_authorization_failed">Failed to authorize</string>
     <string name="enabled_app_shortcuts">Enable app shortcuts</string>
     <string name="export_configs">Export configs</string>
-    <string name="battery_saver">Battery saver (beta)</string>
     <string name="location_services_required">Location services required</string>
     <string name="background_location_required">Background location required</string>
     <string name="precise_location_required">Precise location required</string>
@@ -144,11 +113,8 @@
     <string name="error_ssid_exists">SSID already exists</string>
     <string name="error_root_denied">Root shell denied</string>
     <string name="error_no_file_explorer">No file explorer installed</string>
-    <string name="error_no_scan">No code scanned</string>
     <string name="error_invalid_code">Invalid QR code</string>
     <string name="error_none">No error</string>
-    <string name="error_file_read">Failed to read file</string>
-    <string name="location_service_missing">Location Services Not Detected</string>
     <string name="location_services_missing_message">The app is not detecting any location services enabled on your device. Depending on the device, this could cause the untrusted wifi feature to fail to read the wifi name. Would you like to continue anyways?</string>
     <string name="auto_tunnel_title">Auto-tunnel Service</string>
     <string name="delete_tunnel">Delete tunnel</string>
@@ -182,7 +148,6 @@
     <string name="no_wifi_names_configured">No wifi names configured for this tunnel</string>
     <string name="general">General</string>
     <string name="edit_tunnel">Edit tunnel</string>
-    <string name="tunnel">Tunnel</string>
     <string name="disabled">disabled</string>
     <string name="auto_on">Resume auto tun</string>
     <string name="auto_off">Pause auto tun</string>

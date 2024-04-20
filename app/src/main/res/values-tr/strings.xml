@@ -4,32 +4,24 @@
     <string name="vpn_channel_name">VPN Bildirim Kanalı</string>
     <string name="watcher_channel_id">İzleyici Kanalı</string>
     <string name="watcher_channel_name">İzleyici Bildirim Kanalı</string>
-    <string name="foreground_file">FOREGROUND_FILE</string>
     <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
     <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
     <string name="error_file_extension">Dosya bir .conf veya .zip değil</string>
     <string name="turn_off_tunnel">Eylem tünelin kapalı olmasını gerektiriyor</string>
     <string name="no_tunnels">Henüz bir tünel ekli değil!</string>
-    <string name="tunnel_exists">Tünel adı zaten var</string>
     <string name="discord_url" translatable="false">https://discord.gg/rbRRNh6H7V</string>
-    <string name="watcher_notification_title">Bildirim Hizmeti</string>
     <string name="watcher_notification_text_active">Ağ durumu değişikliklerini izleme: etkin</string>
     <string name="watcher_notification_text_paused">Ağ durumu değişikliklerini izleme: duraklatıldı</string>
     <string name="tunnel_start_title">VPN bağlandı</string>
     <string name="tunnel_start_text">Tünele bağlı</string>
-    <string name="vpn_permission_required">Uygulamanın düzgün çalışması için VPN izni gereklidir. Bu izin başlatılmıyorsa, lütfen resmi WireGuard mobil uygulaması için telefon ayarlarınızda \"Her zaman açık VPN\" i devre dışı bırakın ve tekrar deneyin.</string>
     <string name="notification_permission_required">Bildirim izni gerekli.</string>
-    <string name="open_settings">Ayarları Aç</string>
     <string name="add_trusted_ssid">Güvenilir Wi-Fi adı ekle</string>
     <string name="tunnels">Tüneller</string>
     <string name="enable_auto_tunnel">Otomatik tünellemeyi başlat</string>
     <string name="disable_auto_tunnel">Otomatik tünellemeyi durdur</string>
     <string name="tunnel_mobile_data">Mobil veri üzerinde tünel</string>
-    <string name="background_location_reason">Wi-Fi SSID\'sini arka planda almak için konum iznini \"Her zaman izin ver\" olarak ayarlayın. Bu özellik için izin gereklidir.</string>
-    <string name="location_permission_reason">Bu özelliğin düzgün çalışması için konum izni gereklidir.</string>
     <string name="one_tunnel_required">Bu özelliği kullanabilmek için en az bir tünel gereklidir.</string>
-    <string name="retry">"Yeniden dene"</string>
     <string name="privacy_policy">Gizlilik Politikası</string>
     <string name="okay">Tamam</string>
     <string name="tunnel_on_ethernet">Ethernet üzerinde tünel</string>
@@ -38,12 +30,10 @@
     <string name="thank_you">WG Tunnel\'i kullandığınız için teşekkür ederiz!</string>
     <string name="trusted_ssid_empty_description">SSID\'yi gir</string>
     <string name="trusted_ssid_value_description">SSID\'yi gönder</string>
-    <string name="config_validation" translatable="false">[Interface]</string>
     <string name="add_tunnels_text">Dosyadan veya ZIP\'ten ekle</string>
     <string name="open_file">Dosya Aç</string>
     <string name="add_from_qr">QR kodundan ekle</string>
     <string name="qr_scan">QR kodu tarat</string>
-    <string name="tunnel_edit">Tüneli düzenle</string>
     <string name="tunnel_name">Tünel adı</string>
     <string name="add_tunnel">Tünel ekle</string>
     <string name="exclude">Hariç tut</string>
@@ -55,34 +45,18 @@
     <string name="no_thanks">Hayır, teşekkürler</string>
     <string name="turn_on">Aç</string>
     <string name="map">Harita</string>
-    <string name="bad_config">Hatalı yapılandırma. Lütfen tekrar deneyin.</string>
-    <string name="config_interface">Arayüz</string>
     <string name="public_key">Genel anahtar</string>
-    <string name="barcode_downloading">Barkod UI modülünün indirilmesi bekleniyor.</string>
-    <string name="barcode_downloading_message">Barkod modülü indiriliyor. Tekrar deneyin.</string>
     <string name="addresses">Adresler</string>
     <string name="dns_servers">DNS sunucuları</string>
     <string name="mtu">MTU</string>
     <string name="peer">Eş (peer)</string>
     <string name="allowed_ips">İzin verilen IP\'ler</string>
     <string name="endpoint">Uç nokta (endpoint)</string>
-    <string name="transfer">Aktar</string>
-    <string name="last_handshake">Son tokalaşma</string>
     <string name="name">Ad</string>
     <string name="restart">Tüneli Yeniden Başlat</string>
     <string name="vpn_connection_failed">Bağlantı kurulamadı</string>
-    <string name="failed_connection_to">- ile bağlantı kurulamadı</string>
-    <string name="initial_connection_failure_message">30 saniye boyunca yanıt alınamadıktan sonra sunucuya bağlanmaya çalışılıyor.</string>
-    <string name="lost_connection_failure_message">Bir dakikadan fazla yanıt alınamadıktan sonra sunucuya yeniden bağlanmaya çalışılıyor.</string>
     <string name="always_on_vpn_support">Her Zaman Açık VPN\'e İzin Ver</string>
-    <string name="select_tunnel_message">Lütfen önce bir tünel seçin</string>
     <string name="location_services_not_detected">Konum Hizmetleri Algılanmadı</string>
-    <string name="check_again">Tekrar kontrol et</string>
-    <string name="detecting_location_services_disabled">Konum Hizmetlerini Algılama devre dışı</string>
-    <string name="precise_location_message">Bu özellik, Wi-Fi SSID adına erişmek için kesin konum gerektirir. Lütfen kesin konumu buradan veya uygulama ayarlarından etkinleştirin.</string>
-    <string name="request">İstek</string>
-    <string name="toggle_vpn">VPN\'i aç/kapat</string>
-    <string name="no_tunnel_available">Tünel yok</string>
     <string name="hint_search_packages">Uygulama arayın</string>
     <string name="clear_icon">Simgeyi Temizle</string>
     <string name="search_icon">Simge Ara</string>
@@ -90,13 +64,9 @@
     <string name="vpn_starting">VPN başlatılıyor</string>
     <string name="db_name">wg-tunnel-db</string>
     <string name="scanning_qr">QR taranıyor</string>
-    <string name="qr_result_failed">QR taraması başarısız oldu</string>
     <string name="none">Güvenilir Wi-Fi adı yok</string>
-    <string name="never">Asla</string>
-    <string name="stream_failed">Dosya akışı açılamadı.</string>
     <string name="other">Diğer</string>
     <string name="auto_tunneling">Otomatik tünelleme</string>
-    <string name="select_tunnel">Kullanılacak tüneli seçin</string>
     <string name="vpn_on">VPN açık</string>
     <string name="vpn_off">VPN kapalı</string>
     <string name="default_vpn_on">Birincil VPN açık</string>
@@ -124,7 +94,6 @@
     <string name="error_authorization_failed">Yetkilendirilemedi</string>
     <string name="enabled_app_shortcuts">Uygulama kısayollarını etkinleştir</string>
     <string name="export_configs">Yapılandırmaları dışa aktar</string>
-    <string name="battery_saver">Pil tasarrufu (beta)</string>
     <string name="location_services_required">Gerekli konum hizmetleri</string>
     <string name="background_location_required">Arka plan konumu gerekli</string>
     <string name="precise_location_required">Kesin konum gerekli</string>
@@ -144,11 +113,8 @@
     <string name="error_ssid_exists">SSID zaten var</string>
     <string name="error_root_denied">Kök kabuğu reddedildi</string>
     <string name="error_no_file_explorer">Yüklü dosya gezgini yok</string>
-    <string name="error_no_scan">Kod taranmadı</string>
     <string name="error_invalid_code">Geçersiz QR kodu</string>
     <string name="error_none">Hata yok</string>
-    <string name="error_file_read">Dosya okunamadı</string>
-    <string name="location_service_missing">Konum Hizmetleri Algılanmadı</string>
     <string name="location_services_missing_message">Uygulama, cihazınızda etkinleştirilen herhangi bir konum hizmeti algılamıyor. Cihaza bağlı olarak bu, güvenilmeyen Wi-Fi özelliğinin Wi-Fi adını okuyamamasına neden olabilir. Yine de devam etmek ister misiniz?</string>
     <string name="auto_tunnel_title">Otomatik Tünel Hizmeti</string>
     <string name="delete_tunnel">Tüneli sil</string>
@@ -182,7 +148,6 @@
     <string name="no_wifi_names_configured">Bu tünel için yapılandırılmış Wi-Fi adı yok</string>
     <string name="general">Genel</string>
     <string name="edit_tunnel">Tüneli düzenle</string>
-    <string name="tunnel">Tünel</string>
     <string name="disabled">Devre dışı</string>
     <string name="auto_on">Otomatik ayarlamayı sürdür</string>
     <string name="auto_off">Otomatik ayarlamayı duraklat</string>
