@@ -75,11 +75,13 @@ Any contributions in the form of feedback, issues, code, or translations are wel
 
 Please read the [code of conduct](https://github.com/zaneschepke/wgtunnel?tab=coc-ov-file#contributor-code-of-conduct) before contributing.
 
-### Translation
+## Translation
 
 This app is using [Weblate](https://weblate.org) to assist with translations. 
 
-The [Weblate](https://weblate.org) project for this app can be found [here](https://hosted.weblate.org/projects/wg-tunnel/).
+Help translate WG Tunnel into your language at [Hosted Weblate](https://hosted.weblate.org/engage/wg-tunnel/).\
+[![Translation status](https://hosted.weblate.org/widgets/wg-tunnel/-/multi-auto.svg)](https://hosted.weblate.org/engage/wg-tunnel/)
+
 
 ## Building
 
