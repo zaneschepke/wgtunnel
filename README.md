@@ -71,7 +71,9 @@ The repository for these docs can be found [here](https://github.com/zaneschepke
 
 ## Contributing
 
-Any contributions in the form of feedback, issues, code, or translations are welcome and much appreciated! 
+Any contributions in the form of feedback, issues, code, or translations are welcome and much appreciated!
+
+Please read the [code of conduct](https://github.com/zaneschepke/wgtunnel?tab=coc-ov-file#contributor-code-of-conduct) before contributing.
 
 ## Building
 
