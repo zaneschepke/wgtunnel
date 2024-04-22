@@ -1,0 +1,13 @@
+Özellikler
+
+- .conf dosyası, zip, manuel giriş veya QR kodu aracılığıyla tüneller ekleme
+- Wi-Fi SSID'ye, ethernet'e veya mobil veriye dayalı VPN'ye otomatik bağlanma
+- Uygulama bazında split tunneling ve arama desteği
+- Kernel ve kullanıcı alanı modları için WireGuard desteği
+- Her zaman açık VPN desteği
+- Tünelleri zip olarak dışa aktarma
+- VPN geçişleri için hızlı kısayol desteği
+- Otomasyon entegrasyonu için birincil tünel için statik kısayollar desteği
+- Tüm tüneller için Intent otomasyon desteği
+- Yeniden başlatma sonrası otomatik olarak servisi yeniden başlatma
+- Batarya koruma önlemleri
