@@ -1,0 +1,2 @@
+Fehlerbehebungen:
+- Android 14 Vordergrundberechtigungen

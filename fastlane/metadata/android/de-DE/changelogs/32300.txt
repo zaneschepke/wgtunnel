@@ -1,0 +1,5 @@
+Verbesserungen:
+- Unterstützung für Tunnelung nur bei Verwendung von Mobilen Daten
+- Verbesserungen der Support Oberfläche
+- Aktualisierung der Ressourcenlinks
+- Verschiedene andere Fehlerbehebungen

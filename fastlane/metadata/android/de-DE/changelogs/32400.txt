@@ -1,0 +1,5 @@
+Verbesserungen:
+- Grundlegende Unterstützung für WireGuard Kernelmodus hinzugefügt
+- Verbesserung des Positionsanfrage
+- Behebung eines Berechtigungsfehlers bei Auto-Tunneln
+- Verschiedene andere GUI Fehlerbehebungen
