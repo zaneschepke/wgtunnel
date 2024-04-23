@@ -23,7 +23,7 @@
     <string name="use_tunnel_on_wifi_name">Usar tunnel en nombre Wi-Fi</string>
     <string name="disabled">desactivado</string>
     <string name="version">Versión</string>
-    <string name="userspace">Userspace</string>
+    <string name="userspace">Espacio del usuario</string>
     <string name="mode">Modo</string>
     <string name="support">Ayuda</string>
     <string name="private_key">Clave privada</string>
@@ -104,7 +104,7 @@
     <string name="email_subject">Ayuda WG Tunnel</string>
     <string name="interface_">Interfaz</string>
     <string name="listen_port">Puerto de escucha</string>
-    <string name="preshared_key">Clave pre-compartida</string>
+    <string name="preshared_key">Clave previamente compartida</string>
     <string name="persistent_keepalive">Keepalive persistente</string>
     <string name="search_icon">Icono de búsqueda</string>
     <string name="docs_description">Leer documentación</string>
@@ -145,8 +145,8 @@
     <string name="edit_tunnel">Editar túnel</string>
     <string name="auto_on">Reanudar túnel-automático</string>
     <string name="auto_off">Pausar túnel-automático</string>
-    <string name="auto_tun_on">Reanudar túnel-automático</string>
-    <string name="auto_tun_off">Pausar túnnel-automático</string>
+    <string name="auto_tun_on">Reanudar el túnel automático</string>
+    <string name="auto_tun_off">Pausa del túnel automático</string>
     <string name="settings">Ajustes</string>
     <string name="app_name">WG Tunnel</string>
     <string name="vpn_channel_id">Canal VPN</string>
