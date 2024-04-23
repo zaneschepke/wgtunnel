@@ -1,0 +1,5 @@
+Mejoras:
+- Añadidas estadísticas del túnel a la pantalla principal
+- Navegación mejorada en la pantalla de ajustes para AndroidTV
+- Vibración de notificación quitada
+- Otras correcciones
