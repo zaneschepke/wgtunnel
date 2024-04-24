@@ -1,0 +1,2 @@
+Mejoras:
+- Añadida compatiblidad básica de Kernel WireGuard

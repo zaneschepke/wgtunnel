@@ -1,0 +1,2 @@
+Correcciones:
+- Permisos en primer plano en Android 14
