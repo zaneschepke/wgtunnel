@@ -1,0 +1,5 @@
+Was ist neu:
+- Automatischer Start des Always-On VPN im Kernelmodus nach einem Systemneustart
+- Unterstützung für adaptive Designicons
+- Benachrichtigungs- und Kachelicons korrigiert
+- AndroidTV icons korrigiert
