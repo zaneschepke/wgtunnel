@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
-import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
@@ -21,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import javax.inject.Inject
 

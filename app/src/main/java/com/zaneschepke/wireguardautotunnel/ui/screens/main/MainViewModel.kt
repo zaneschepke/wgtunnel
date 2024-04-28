@@ -7,7 +7,6 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.model.Settings
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
@@ -25,6 +24,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.amnezia.awg.config.Config
 import timber.log.Timber
 import java.io.InputStream
 import java.util.zip.ZipInputStream
@@ -119,7 +119,7 @@ constructor(
         val bufferReader = stream.bufferedReader(charset = Charsets.UTF_8)
         val config = Config.parse(bufferReader)
         val tunnelName = getNameFromFileName(fileName)
-        addTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toWgQuickString()))
+        addTunnel(TunnelConfig(name = tunnelName, wgQuick = config.toAwgQuickString()))
         withContext(Dispatchers.IO) { stream.close() }
     }
 
@@ -164,7 +164,7 @@ constructor(
                     val name = getNameFromFileName(it.name)
                     val config = Config.parse(zip)
                     viewModelScope.launch(Dispatchers.IO) {
-                        addTunnel(TunnelConfig(name = name, wgQuick = config.toWgQuickString()))
+                        addTunnel(TunnelConfig(name = name, wgQuick = config.toAwgQuickString()))
                     }
                 }
         }

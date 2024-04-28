@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.models
 
-import com.wireguard.config.Peer
+import org.amnezia.awg.config.Peer
 
 data class PeerProxy(
     var publicKey: String = "",

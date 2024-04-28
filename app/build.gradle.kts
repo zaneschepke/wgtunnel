@@ -160,8 +160,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.manifest)
 
-    // get tunnel lib from github packages or mavenLocal
-    implementation(libs.tunnel)
+    // tunnel
+    implementation(libs.amneziawg.android)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // logging

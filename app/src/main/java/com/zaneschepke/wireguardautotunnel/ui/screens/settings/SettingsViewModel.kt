@@ -6,7 +6,6 @@ import android.location.LocationManager
 import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.model.Settings
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
@@ -20,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.amnezia.awg.util.RootShell
 import timber.log.Timber
 import javax.inject.Inject
 

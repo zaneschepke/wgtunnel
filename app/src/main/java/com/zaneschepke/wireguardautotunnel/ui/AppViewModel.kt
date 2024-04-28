@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.logcatter.Logcatter
 import com.zaneschepke.logcatter.model.LogMessage
 import com.zaneschepke.wireguardautotunnel.R
@@ -20,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.amnezia.awg.backend.GoBackend
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject

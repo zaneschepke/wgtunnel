@@ -1,8 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
-import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.data.model.Settings
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import org.amnezia.awg.backend.Tunnel
 
 data class WatcherState(
     val isWifiConnected: Boolean = false,

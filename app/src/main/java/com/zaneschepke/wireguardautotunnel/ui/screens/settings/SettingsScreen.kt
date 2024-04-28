@@ -71,8 +71,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.wireguard.android.backend.Tunnel
-import com.wireguard.android.backend.WgQuickBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
@@ -86,6 +84,8 @@ import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.amnezia.awg.backend.AwgQuickBackend
+import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
 import java.io.File
@@ -551,7 +551,7 @@ fun SettingsScreen(
                     }
                 }
             }
-            if (WgQuickBackend.hasKernelSupport()) {
+            if (AwgQuickBackend.hasKernelSupport()) {
                 Surface(
                     tonalElevation = 2.dp,
                     shadowElevation = 2.dp,

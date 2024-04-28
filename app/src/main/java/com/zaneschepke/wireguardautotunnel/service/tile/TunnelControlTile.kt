@@ -3,7 +3,6 @@ package com.zaneschepke.wireguardautotunnel.service.tile
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
@@ -13,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import javax.inject.Inject
 

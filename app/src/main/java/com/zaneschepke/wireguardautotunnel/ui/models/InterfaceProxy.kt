@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.models
 
-import com.wireguard.config.Interface
+import org.amnezia.awg.config.Interface
 
 data class InterfaceProxy(
     var privateKey: String = "",

@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.wireguard.android.backend.Statistics
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.toThreeDecimalPlaceString
+import org.amnezia.awg.backend.Statistics
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

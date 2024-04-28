@@ -1,9 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.service.tunnel
 
-import com.wireguard.android.backend.Backend
-import com.wireguard.android.backend.BackendException
-import com.wireguard.android.backend.Statistics
-import com.wireguard.android.backend.Tunnel.State
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
@@ -19,6 +15,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.amnezia.awg.backend.Backend
+import org.amnezia.awg.backend.BackendException
+import org.amnezia.awg.backend.Statistics
+import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -56,7 +56,7 @@ constructor(
         }
     }
 
-    override suspend fun startTunnel(tunnelConfig: TunnelConfig?): State {
+    override suspend fun startTunnel(tunnelConfig: TunnelConfig?): Tunnel.State {
         return try {
             //TODO we need better error handling here
             val config = tunnelConfig ?: appDataRepository.getPrimaryOrFirstTunnel()
@@ -66,18 +66,18 @@ constructor(
                 val state =
                     backend.setState(
                         this,
-                        State.UP,
+                        Tunnel.State.UP,
                         wgConfig,
                     )
                 state
             } else throw Exception("No tunnels")
         } catch (e: BackendException) {
             Timber.e("Failed to start tunnel with error: ${e.message}")
-            State.DOWN
+            Tunnel.State.DOWN
         }
     }
 
-    private fun emitTunnelState(state: State) {
+    private fun emitTunnelState(state: Tunnel.State) {
         _vpnState.tryEmit(
             _vpnState.value.copy(
                 status = state,
@@ -103,8 +103,8 @@ constructor(
 
     override suspend fun stopTunnel() {
         try {
-            if (getState() == State.UP) {
-                val state = backend.setState(this, State.DOWN, null)
+            if (getState() == Tunnel.State.UP) {
+                val state = backend.setState(this, Tunnel.State.DOWN, null)
                 emitTunnelState(state)
             }
         } catch (e: BackendException) {
@@ -112,7 +112,7 @@ constructor(
         }
     }
 
-    override fun getState(): State {
+    override fun getState(): Tunnel.State {
         return backend.getState(this)
     }
 
@@ -120,11 +120,11 @@ constructor(
         return _vpnState.value.tunnelConfig?.name ?: ""
     }
 
-    override fun onStateChange(state: State) {
+    override fun onStateChange(state: Tunnel.State) {
         val tunnel = this
         emitTunnelState(state)
         WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate(WireGuardAutoTunnel.instance)
-        if (state == State.UP) {
+        if (state == Tunnel.State.UP) {
             statsJob =
                 scope.launch {
                     while (true) {
@@ -134,7 +134,7 @@ constructor(
                     }
                 }
         }
-        if (state == State.DOWN) {
+        if (state == Tunnel.State.DOWN) {
             try {
                 statsJob?.cancel()
             } catch (e : CancellationException) {

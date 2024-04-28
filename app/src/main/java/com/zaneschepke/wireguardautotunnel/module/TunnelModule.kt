@@ -1,11 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.module
 
 import android.content.Context
-import com.wireguard.android.backend.Backend
-import com.wireguard.android.backend.GoBackend
-import com.wireguard.android.backend.WgQuickBackend
-import com.wireguard.android.util.RootShell
-import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
@@ -15,6 +10,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.amnezia.awg.backend.AwgQuickBackend
+import org.amnezia.awg.backend.Backend
+import org.amnezia.awg.backend.GoBackend
+import org.amnezia.awg.util.RootShell
+import org.amnezia.awg.util.ToolsInstaller
 import javax.inject.Singleton
 
 @Module
@@ -37,7 +37,7 @@ class TunnelModule {
     @Singleton
     @Kernel
     fun provideKernelBackend(@ApplicationContext context: Context, rootShell: RootShell): Backend {
-        return WgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell))
+        return AwgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell))
     }
 
     @Provides

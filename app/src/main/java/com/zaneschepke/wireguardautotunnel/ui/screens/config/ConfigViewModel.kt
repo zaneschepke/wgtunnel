@@ -7,11 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.config.Config
-import com.wireguard.config.Interface
-import com.wireguard.config.Peer
-import com.wireguard.crypto.Key
-import com.wireguard.crypto.KeyPair
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
@@ -28,6 +23,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.amnezia.awg.config.Config
+import org.amnezia.awg.config.Interface
+import org.amnezia.awg.config.Peer
+import org.amnezia.awg.crypto.Key
+import org.amnezia.awg.crypto.KeyPair
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -198,12 +198,12 @@ constructor(
             val tunnelConfig = when (uiState.value.tunnel) {
                 null -> TunnelConfig(
                     name = _uiState.value.tunnelName,
-                    wgQuick = config.toWgQuickString(),
+                    wgQuick = config.toAwgQuickString(),
                 )
 
                 else -> uiState.value.tunnel!!.copy(
                     name = _uiState.value.tunnelName,
-                    wgQuick = config.toWgQuickString(),
+                    wgQuick = config.toAwgQuickString(),
                 )
             }
             updateTunnelConfig(tunnelConfig)

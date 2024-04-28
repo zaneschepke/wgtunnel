@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
-import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
@@ -25,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import java.net.InetAddress
 import javax.inject.Inject

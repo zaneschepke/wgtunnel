@@ -2,15 +2,14 @@ package com.zaneschepke.wireguardautotunnel.util
 
 import android.content.BroadcastReceiver
 import android.content.pm.PackageInfo
-import com.wireguard.android.backend.Statistics
-import com.wireguard.android.backend.Statistics.PeerStats
-import com.wireguard.crypto.Key
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.amnezia.awg.backend.Statistics
+import org.amnezia.awg.crypto.Key
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import kotlin.coroutines.CoroutineContext
@@ -50,15 +49,15 @@ typealias TunnelConfigs = List<TunnelConfig>
 
 typealias Packages = List<PackageInfo>
 
-fun Statistics.mapPeerStats(): Map<Key, PeerStats?> {
+fun Statistics.mapPeerStats(): Map<Key, Statistics.PeerStats?> {
     return this.peers().associateWith { key -> (this.peer(key)) }
 }
 
-fun PeerStats.latestHandshakeSeconds(): Long? {
+fun Statistics.PeerStats.latestHandshakeSeconds(): Long? {
     return NumberUtils.getSecondsBetweenTimestampAndNow(this.latestHandshakeEpochMillis)
 }
 
-fun PeerStats.handshakeStatus(): HandshakeStatus {
+fun Statistics.PeerStats.handshakeStatus(): HandshakeStatus {
     // TODO add never connected status after duration
     return this.latestHandshakeSeconds().let {
         when {

@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.wireguard.config.Config
+import org.amnezia.awg.config.Config
 import java.io.InputStream
 
 @Entity(indices = [Index(value = ["name"], unique = true)])
