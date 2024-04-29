@@ -1,0 +1,3 @@
+Verbesserungen:
+- Erstellte Konfiguration wurde nicht gespeichert
+- Version angehoben

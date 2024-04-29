@@ -1,0 +1,4 @@
+Was ist neu:
+- GUI Fix für Konfigurationseditor
+- AOVPN Benachrichtung für ersten Start auf GrapheneOS hinzugefügt
+- Version angehoben

@@ -1,0 +1,7 @@
+Verbesserungen:
+- Bestätigung beim Tunnel löschen hinzugefügt
+- Hintergrundberechtigung für Energiesparmodus hinzugefügt
+Fehlerbehebungen:
+- Einfrieren der App bei Tunnel deaktivierung
+- Fehler im E-Mail Empfängerfeld
+- Konfigurationsbearbeitung mit leerem DNS Feld

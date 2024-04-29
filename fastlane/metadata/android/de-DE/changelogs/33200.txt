@@ -1,0 +1,8 @@
+Verbesserungen:
+- Refaktorisierung des Zustandsmanagements
+- Verbesserung der AndroidTV Navigation
+- Verbesserung der Auto-Tunnel Effizienz
+- Verbesserung der Navigation
+- Auto-Tunnel Pause Funktion
+- Reparatur des Auto-Tunnel starts im Vordergrund
+- Viele Fehlerbehebungen
