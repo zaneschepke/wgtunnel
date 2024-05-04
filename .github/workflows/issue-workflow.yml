@@ -14,6 +14,7 @@ jobs:
       - name: Send Telegram Message
         run: |
           msg_text='${{ github.actor }} updated an issue:
-            status: ${{ github.event.issue.state }} - #${{ github.event.issue.number }} ${{ github.event.issue.title }}'
+            status: ${{ github.event.issue.state }} - #${{ github.event.issue.number }} ${{ github.event.issue.title }}
+            ${{ github.event.issue.url }}'
           curl -s -X POST 'https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage' \
           -d "chat_id=${{ secrets.TELEGRAM_TO }}&text=${msg_text}&message_thread_id=${{ secrets.TELEGRAM_TOPIC }}"
