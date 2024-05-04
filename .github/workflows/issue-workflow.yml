@@ -16,4 +16,4 @@ jobs:
           msg_text='${{ github.actor }} updated an issue:
             status: ${{ github.event.issue.state }} - #${{ github.event.issue.number }} ${{ github.event.issue.title }}'
           curl -s -X POST 'https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage' \
-          -d "chat_id=${{ secrets.TELEGRAM_TO }}&text=${msg_text}&reply_to_message_id=${{ secrets.TELEGRAM_TOPIC }}"
+          -d "chat_id=${{ secrets.TELEGRAM_TO }}&text=${msg_text}&message_thread_id=${{ secrets.TELEGRAM_TOPIC }}"
