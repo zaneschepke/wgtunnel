@@ -1,0 +1,21 @@
+name: Release Updates Workflow
+
+on:
+  release:
+    types: [published]
+
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram Message
+        run: |
+          msg_text='${{ github.actor }} published a new release:
+            Release: ${{ github.event.release.tag_name }}
+            ${{ github.event.release.body }}
+            ${{ github.event.release.url }}'
+          curl -s -X POST 'https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage' \
+          -d "chat_id=${{ secrets.TELEGRAM_TO }}&text=${msg_text}&message_thread_id=${{ secrets.TELEGRAM_TOPIC }}"
