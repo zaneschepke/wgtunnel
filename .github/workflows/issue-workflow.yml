@@ -1,0 +1,21 @@
+name: Issue Updates Workflow
+
+on:
+  issues:
+    types: [opened, closed, reopened]
+
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: send telegram message on push
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.actor }} updated an issue:
+            ${{ github.event.issue.state }}: ${{ github.event.issue.number }} ${{ github.event.issue.title }}
