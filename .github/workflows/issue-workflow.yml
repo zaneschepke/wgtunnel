@@ -11,11 +11,9 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: send telegram message on push
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            ${{ github.actor }} updated an issue:
-            ${{ github.event.issue.state }}: ${{ github.event.issue.number }} ${{ github.event.issue.title }}
+      - name: Send Telegram Message
+        run: |
+          msg_text='${{ github.actor }} updated an issue:
+            status: ${{ github.event.issue.state }} - #${{ github.event.issue.number }} ${{ github.event.issue.title }}'
+          curl -s -X POST 'https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage' \
+          -d "chat_id=${{ secrets.TELEGRAM_TO }}&text=${msg_text}&reply_to_message_id=${{ secrets.TELEGRAM_TOPIC }}"
