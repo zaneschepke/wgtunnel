@@ -5,9 +5,8 @@ import android.os.Bundle
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
-import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.network.EthernetService
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
@@ -15,6 +14,7 @@ import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
@@ -217,10 +217,10 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     private suspend fun watchForPingFailure() {
         try {
             do {
-                if (vpnService.vpnState.value.status == Tunnel.State.UP) {
+                if (vpnService.vpnState.value.status == TunnelState.UP) {
                     val tunnelConfig = vpnService.vpnState.value.tunnelConfig
                     tunnelConfig?.let {
-                        val config = TunnelConfig.configFromQuick(it.wgQuick)
+                        val config = TunnelConfig.configFromWgQuick(it.wgQuick)
                         val results = config.peers.map { peer ->
                             val host = if (peer.endpoint.isPresent &&
                                 peer.endpoint.get().resolved.isPresent)
@@ -321,14 +321,14 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             isWifiConnected = true,
                         )
                     val ssid = wifiService.getNetworkName(it.networkCapabilities)
-                    ssid?.let {
-                        if(it.contains(Constants.UNREADABLE_SSID)) {
+                    ssid?.let { name ->
+                        if(name.contains(Constants.UNREADABLE_SSID)) {
                             Timber.w("SSID unreadable: missing permissions")
                         } else Timber.i("Detected valid SSID")
-                        appDataRepository.appState.setCurrentSsid(ssid)
+                        appDataRepository.appState.setCurrentSsid(name)
                         networkEventsFlow.value =
                             networkEventsFlow.value.copy(
-                                currentNetworkSSID = ssid,
+                                currentNetworkSSID = name,
                             )
                     } ?: Timber.w("Failed to read ssid")
                 }

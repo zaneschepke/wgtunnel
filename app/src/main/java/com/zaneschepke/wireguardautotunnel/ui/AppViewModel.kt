@@ -2,12 +2,14 @@ package com.zaneschepke.wireguardautotunnel.ui
 
 import android.app.Application
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.logcatter.Logcatter
 import com.zaneschepke.logcatter.model.LogMessage
@@ -19,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.Instant
@@ -27,9 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AppViewModel
 @Inject
-constructor(
-    private val application: Application,
-) : ViewModel() {
+constructor() : ViewModel() {
 
     val vpnIntent: Intent? = GoBackend.VpnService.prepare(WireGuardAutoTunnel.instance)
 
@@ -49,68 +50,78 @@ constructor(
     }
 
     private fun requestPermissions() {
-        _appUiState.value = _appUiState.value.copy(
-            requestPermissions = true,
-        )
+        _appUiState.update {
+            it.copy(
+                requestPermissions = true
+            )
+        }
     }
 
     fun permissionsRequested() {
-        _appUiState.value = _appUiState.value.copy(
-            requestPermissions = false,
-        )
+        _appUiState.update {
+            it.copy(
+                requestPermissions = false
+            )
+        }
     }
 
-    fun openWebPage(url: String) {
+    fun openWebPage(url: String, context : Context) {
         try {
             val webpage: Uri = Uri.parse(url)
             val intent = Intent(Intent.ACTION_VIEW, webpage).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            application.startActivity(intent)
+            context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Timber.e(e)
-            showSnackbarMessage(application.getString(R.string.no_browser_detected))
+            showSnackbarMessage(context.getString(R.string.no_browser_detected))
         }
     }
 
     fun onVpnPermissionAccepted() {
-        _appUiState.value = _appUiState.value.copy(
-            vpnPermissionAccepted = true,
-        )
+        _appUiState.update {
+            it.copy(
+                vpnPermissionAccepted = true
+            )
+        }
     }
 
-    fun launchEmail() {
+    fun launchEmail(context: Context) {
         try {
             val intent =
                 Intent(Intent.ACTION_SENDTO).apply {
                     type = Constants.EMAIL_MIME_TYPE
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf(application.getString(R.string.my_email)))
-                    putExtra(Intent.EXTRA_SUBJECT, application.getString(R.string.email_subject))
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf(context.getString(R.string.my_email)))
+                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_subject))
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-            application.startActivity(
-                Intent.createChooser(intent, application.getString(R.string.email_chooser)).apply {
+            context.startActivity(
+                Intent.createChooser(intent, context.getString(R.string.email_chooser)).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 },
             )
         } catch (e: ActivityNotFoundException) {
             Timber.e(e)
-            showSnackbarMessage(application.getString(R.string.no_email_detected))
+            showSnackbarMessage(context.getString(R.string.no_email_detected))
         }
     }
 
     fun showSnackbarMessage(message: String) {
-        _appUiState.value = _appUiState.value.copy(
-            snackbarMessage = message,
-            snackbarMessageConsumed = false,
-        )
+        _appUiState.update {
+            it.copy(
+                snackbarMessage = message,
+                snackbarMessageConsumed = false,
+            )
+        }
     }
 
     fun snackbarMessageConsumed() {
-        _appUiState.value = _appUiState.value.copy(
-            snackbarMessage = "",
-            snackbarMessageConsumed = true,
-        )
+        _appUiState.update {
+            it.copy(
+                snackbarMessage = "",
+                snackbarMessageConsumed = true,
+            )
+        }
     }
 
     val logs = mutableStateListOf<LogMessage>()
@@ -132,17 +143,19 @@ constructor(
         Logcatter.clear()
     }
 
-    fun saveLogsToFile() {
+    fun saveLogsToFile(context: Context) {
         val fileName = "${Constants.BASE_LOG_FILE_NAME}-${Instant.now().epochSecond}.txt"
         val content = logs.joinToString(separator = "\n")
-        FileUtils.saveFileToDownloads(application.applicationContext, content, fileName)
-        Toast.makeText(application, application.getString(R.string.logs_saved), Toast.LENGTH_SHORT)
+        FileUtils.saveFileToDownloads(context.applicationContext, content, fileName)
+        Toast.makeText(context, context.getString(R.string.logs_saved), Toast.LENGTH_SHORT)
             .show()
     }
 
     fun setNotificationPermissionAccepted(accepted: Boolean) {
-        _appUiState.value = _appUiState.value.copy(
-            notificationPermissionAccepted = accepted,
-        )
+        _appUiState.update {
+            it.copy(
+                notificationPermissionAccepted = accepted,
+            )
+        }
     }
 }

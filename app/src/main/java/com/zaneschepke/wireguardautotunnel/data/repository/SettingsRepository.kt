@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
-import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {

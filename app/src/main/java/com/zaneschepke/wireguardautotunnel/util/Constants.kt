@@ -2,7 +2,7 @@ package com.zaneschepke.wireguardautotunnel.util
 
 object Constants {
 
-    const val BASE_LOG_FILE_NAME = "wgtunnel-logs"
+    const val BASE_LOG_FILE_NAME = "wg_tunnel_logs"
     const val LOG_BUFFER_SIZE = 3_000L
 
     const val MANUAL_TUNNEL_CONFIG_ID = "0"

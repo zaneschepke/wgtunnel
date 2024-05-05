@@ -1,4 +1,3 @@
-# name of the workflow
 name: Android CI Tag Deployment (Pre-release)
 
 on:

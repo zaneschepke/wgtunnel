@@ -2,7 +2,7 @@ package com.zaneschepke.wireguardautotunnel.service.shortcut
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.lifecycleScope
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
@@ -24,7 +24,7 @@ class ShortcutsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launch(Dispatchers.Main) {
+        WireGuardAutoTunnel.applicationScope.launch(Dispatchers.IO) {
             val settings = appDataRepository.settings.getSettings()
             if (settings.isShortcutsEnabled) {
                 when (intent.getStringExtra(CLASS_NAME_EXTRA_KEY)) {

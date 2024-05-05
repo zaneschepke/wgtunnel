@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
-import com.zaneschepke.wireguardautotunnel.data.model.GeneralState
+import com.zaneschepke.wireguardautotunnel.data.domain.GeneralState
 import kotlinx.coroutines.flow.Flow
 
 interface AppStateRepository {

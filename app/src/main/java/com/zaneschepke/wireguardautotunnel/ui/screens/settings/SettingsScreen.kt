@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -75,6 +74,7 @@ import com.wireguard.android.backend.Tunnel
 import com.wireguard.android.backend.WgQuickBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
@@ -551,31 +551,43 @@ fun SettingsScreen(
                     }
                 }
             }
-            if (WgQuickBackend.hasKernelSupport()) {
-                Surface(
-                    tonalElevation = 2.dp,
-                    shadowElevation = 2.dp,
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier
-                        .fillMaxWidth(fillMaxWidth)
-                        .padding(vertical = 10.dp),
+            Surface(
+                tonalElevation = 2.dp,
+                shadowElevation = 2.dp,
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier
+                    .fillMaxWidth(fillMaxWidth)
+                    .padding(vertical = 10.dp),
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.padding(15.dp),
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Top,
-                        modifier = Modifier.padding(15.dp),
-                    ) {
-                        SectionTitle(
-                            title = stringResource(id = R.string.kernel),
-                            padding = screenPadding,
-                        )
+                    SectionTitle(
+                        title = stringResource(id = R.string.backend),
+                        padding = screenPadding,
+                    )
+                    ConfigurationToggle(
+                        stringResource(R.string.use_amnezia),
+                        enabled =
+                        !(uiState.settings.isAutoTunnelEnabled ||
+                            uiState.settings.isAlwaysOnVpnEnabled ||
+                            (uiState.vpnState.status == TunnelState.UP) || uiState.settings.isKernelEnabled),
+                        checked = uiState.settings.isAmneziaEnabled,
+                        padding = screenPadding,
+                        onCheckChanged = {
+                            viewModel.onToggleAmnezia()
+                        },
+                    )
+                    if (WgQuickBackend.hasKernelSupport()) {
                         ConfigurationToggle(
                             stringResource(R.string.use_kernel),
                             enabled =
                             !(uiState.settings.isAutoTunnelEnabled ||
                                 uiState.settings.isAlwaysOnVpnEnabled ||
-                                (uiState.vpnState.status == Tunnel.State.UP)),
+                                (uiState.vpnState.status == TunnelState.UP)),
                             checked = uiState.settings.isKernelEnabled,
                             padding = screenPadding,
                             onCheckChanged = {

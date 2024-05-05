@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import javax.inject.Inject
 
 class AppDataRoomRepository @Inject constructor(

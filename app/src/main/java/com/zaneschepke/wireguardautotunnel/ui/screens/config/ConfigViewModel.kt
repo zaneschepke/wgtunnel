@@ -13,10 +13,10 @@ import com.wireguard.config.Peer
 import com.wireguard.crypto.Key
 import com.wireguard.crypto.KeyPair
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.ui.models.InterfaceProxy
-import com.zaneschepke.wireguardautotunnel.ui.models.PeerProxy
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.Event
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
@@ -27,6 +27,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -36,6 +37,7 @@ class ConfigViewModel
 @Inject
 constructor(
     private val application: Application,
+    private val settingsRepository: SettingsRepository,
     private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
@@ -52,32 +54,17 @@ constructor(
                     val tunnelConfig =
                         appDataRepository.tunnels.getAll()
                             .firstOrNull { it.id.toString() == tunnelId }
+                    val isAmneziaEnabled = settingsRepository.getSettings().isAmneziaEnabled
                     if (tunnelConfig != null) {
-                        val config = TunnelConfig.configFromQuick(tunnelConfig.wgQuick)
-                        val proxyPeers = config.peers.map { PeerProxy.from(it) }
-                        val proxyInterface = InterfaceProxy.from(config.`interface`)
-                        var include = true
-                        var isAllApplicationsEnabled = false
-                        val checkedPackages =
-                            if (config.`interface`.includedApplications.isNotEmpty()) {
-                                config.`interface`.includedApplications
-                            } else if (config.`interface`.excludedApplications.isNotEmpty()) {
-                                include = false
-                                config.`interface`.excludedApplications
-                            } else {
-                                isAllApplicationsEnabled = true
-                                emptySet()
-                            }
-                        ConfigUiState(
-                            proxyPeers,
-                            proxyInterface,
-                            packages,
-                            checkedPackages.toList(),
-                            include,
-                            isAllApplicationsEnabled,
-                            false,
-                            tunnelConfig,
-                            tunnelConfig.name,
+                        (if(isAmneziaEnabled) {
+                            val amConfig = if(tunnelConfig.amQuick == "") tunnelConfig.wgQuick else tunnelConfig.amQuick
+                            ConfigUiState.from(TunnelConfig.configFromAmQuick(amConfig))
+                        } else ConfigUiState.from(TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick))).copy(
+                            packages = packages,
+                            loading = false,
+                            tunnel = tunnelConfig,
+                            tunnelName = tunnelConfig.name,
+                            isAmneziaEnabled = isAmneziaEnabled
                         )
                     } else {
                         ConfigUiState(loading = false, packages = packages)
@@ -168,6 +155,20 @@ constructor(
         }
     }
 
+    private fun buildAmPeerListFromProxyPeers(): List<org.amnezia.awg.config.Peer> {
+        return _uiState.value.proxyPeers.map {
+            val builder = org.amnezia.awg.config.Peer.Builder()
+            if (it.allowedIps.isNotEmpty()) builder.parseAllowedIPs(it.allowedIps.trim())
+            if (it.publicKey.isNotEmpty()) builder.parsePublicKey(it.publicKey.trim())
+            if (it.preSharedKey.isNotEmpty()) builder.parsePreSharedKey(it.preSharedKey.trim())
+            if (it.endpoint.isNotEmpty()) builder.parseEndpoint(it.endpoint.trim())
+            if (it.persistentKeepalive.isNotEmpty()) {
+                builder.parsePersistentKeepalive(it.persistentKeepalive.trim())
+            }
+            builder.build()
+        }
+    }
+
     private fun emptyCheckedPackagesList() {
         _uiState.value = _uiState.value.copy(checkedPackageNames = emptyList())
     }
@@ -190,20 +191,76 @@ constructor(
         return builder.build()
     }
 
+    private fun buildAmInterfaceListFromProxyInterface(): org.amnezia.awg.config.Interface {
+        val builder = org.amnezia.awg.config.Interface.Builder()
+        builder.parsePrivateKey(_uiState.value.interfaceProxy.privateKey.trim())
+        builder.parseAddresses(_uiState.value.interfaceProxy.addresses.trim())
+        if (_uiState.value.interfaceProxy.dnsServers.isNotEmpty()) {
+            builder.parseDnsServers(_uiState.value.interfaceProxy.dnsServers.trim())
+        }
+        if (_uiState.value.interfaceProxy.mtu.isNotEmpty())
+            builder.parseMtu(_uiState.value.interfaceProxy.mtu.trim())
+        if (_uiState.value.interfaceProxy.listenPort.isNotEmpty()) {
+            builder.parseListenPort(_uiState.value.interfaceProxy.listenPort.trim())
+        }
+        if (isAllApplicationsEnabled()) emptyCheckedPackagesList()
+        if (_uiState.value.include) builder.includeApplications(_uiState.value.checkedPackageNames)
+        if (!_uiState.value.include) builder.excludeApplications(_uiState.value.checkedPackageNames)
+        if(_uiState.value.interfaceProxy.junkPacketCount.isNotEmpty()) {
+            builder.setJunkPacketCount(_uiState.value.interfaceProxy.junkPacketCount.trim().toInt())
+        }
+        if(_uiState.value.interfaceProxy.junkPacketMinSize.isNotEmpty()) {
+            builder.setJunkPacketMinSize(_uiState.value.interfaceProxy.junkPacketMinSize.trim().toInt())
+        }
+        if(_uiState.value.interfaceProxy.junkPacketMaxSize.isNotEmpty()) {
+            builder.setJunkPacketMaxSize(_uiState.value.interfaceProxy.junkPacketMaxSize.trim().toInt())
+        }
+        if(_uiState.value.interfaceProxy.initPacketJunkSize.isNotEmpty()) {
+            builder.setInitPacketJunkSize(_uiState.value.interfaceProxy.initPacketJunkSize.trim().toInt())
+        }
+        if(_uiState.value.interfaceProxy.responsePacketJunkSize.isNotEmpty()) {
+            builder.setResponsePacketJunkSize(_uiState.value.interfaceProxy.responsePacketJunkSize.trim().toInt())
+        }
+        if(_uiState.value.interfaceProxy.initPacketMagicHeader.isNotEmpty()) {
+            builder.setInitPacketMagicHeader(_uiState.value.interfaceProxy.initPacketMagicHeader.trim().toLong())
+        }
+        if(_uiState.value.interfaceProxy.responsePacketMagicHeader.isNotEmpty()) {
+            builder.setResponsePacketMagicHeader(_uiState.value.interfaceProxy.responsePacketMagicHeader.trim().toLong())
+        }
+        if(_uiState.value.interfaceProxy.transportPacketMagicHeader.isNotEmpty()) {
+            builder.setTransportPacketMagicHeader(_uiState.value.interfaceProxy.transportPacketMagicHeader.trim().toLong())
+        }
+        if(_uiState.value.interfaceProxy.underloadPacketMagicHeader.isNotEmpty()) {
+            builder.setUnderloadPacketMagicHeader(_uiState.value.interfaceProxy.underloadPacketMagicHeader.trim().toLong())
+        }
+        return builder.build()
+    }
+
+    private fun buildConfig() : Config {
+        val peerList = buildPeerListFromProxyPeers()
+        val wgInterface = buildInterfaceListFromProxyInterface()
+        return  Config.Builder().addPeers(peerList).setInterface(wgInterface).build()
+    }
+
+    private fun buildAmConfig() : org.amnezia.awg.config.Config {
+        val peerList = buildAmPeerListFromProxyPeers()
+        val amInterface = buildAmInterfaceListFromProxyInterface()
+        return org.amnezia.awg.config.Config.Builder().addPeers(peerList).setInterface(amInterface).build()
+    }
+
     fun onSaveAllChanges(): Result<Event> {
         return try {
-            val peerList = buildPeerListFromProxyPeers()
-            val wgInterface = buildInterfaceListFromProxyInterface()
-            val config = Config.Builder().addPeers(peerList).setInterface(wgInterface).build()
+            val config = buildConfig()
             val tunnelConfig = when (uiState.value.tunnel) {
                 null -> TunnelConfig(
                     name = _uiState.value.tunnelName,
                     wgQuick = config.toWgQuickString(),
                 )
-
                 else -> uiState.value.tunnel!!.copy(
                     name = _uiState.value.tunnelName,
                     wgQuick = config.toWgQuickString(),
+                    amQuick = if(uiState.value.isAmneziaEnabled) buildAmConfig().toAwgQuickString()
+                    else _uiState.value.tunnel?.amQuick ?: ""
                 )
             }
             updateTunnelConfig(tunnelConfig)
@@ -216,121 +273,138 @@ constructor(
     }
 
     fun onPeerPublicKeyChange(index: Int, value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 proxyPeers =
                 _uiState.value.proxyPeers.update(
                     index,
                     _uiState.value.proxyPeers[index].copy(publicKey = value),
                 ),
             )
+        }
     }
 
     fun onPreSharedKeyChange(index: Int, value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 proxyPeers =
                 _uiState.value.proxyPeers.update(
                     index,
                     _uiState.value.proxyPeers[index].copy(preSharedKey = value),
                 ),
             )
+        }
     }
 
     fun onEndpointChange(index: Int, value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 proxyPeers =
                 _uiState.value.proxyPeers.update(
                     index,
                     _uiState.value.proxyPeers[index].copy(endpoint = value),
                 ),
             )
+        }
     }
 
     fun onAllowedIpsChange(index: Int, value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 proxyPeers =
                 _uiState.value.proxyPeers.update(
                     index,
                     _uiState.value.proxyPeers[index].copy(allowedIps = value),
                 ),
             )
+        }
     }
 
     fun onPersistentKeepaliveChanged(index: Int, value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 proxyPeers =
                 _uiState.value.proxyPeers.update(
                     index,
                     _uiState.value.proxyPeers[index].copy(persistentKeepalive = value),
                 ),
             )
+        }
     }
 
     fun onDeletePeer(index: Int) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 proxyPeers = _uiState.value.proxyPeers.removeAt(index),
             )
+        }
     }
 
     fun addEmptyPeer() {
-        _uiState.value = _uiState.value.copy(proxyPeers = _uiState.value.proxyPeers + PeerProxy())
+        _uiState.update {
+            it.copy(proxyPeers = _uiState.value.proxyPeers + PeerProxy())
+        }
     }
 
     fun generateKeyPair() {
         val keyPair = KeyPair()
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 interfaceProxy =
                 _uiState.value.interfaceProxy.copy(
                     privateKey = keyPair.privateKey.toBase64(),
                     publicKey = keyPair.publicKey.toBase64(),
                 ),
             )
+        }
     }
 
     fun onAddressesChanged(value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 interfaceProxy = _uiState.value.interfaceProxy.copy(addresses = value),
             )
+        }
+
     }
 
     fun onListenPortChanged(value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 interfaceProxy = _uiState.value.interfaceProxy.copy(listenPort = value),
             )
+        }
     }
 
     fun onDnsServersChanged(value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 interfaceProxy = _uiState.value.interfaceProxy.copy(dnsServers = value),
             )
+        }
     }
 
     fun onMtuChanged(value: String) {
-        _uiState.value =
-            _uiState.value.copy(interfaceProxy = _uiState.value.interfaceProxy.copy(mtu = value))
+        _uiState.update {
+            it.copy(interfaceProxy = _uiState.value.interfaceProxy.copy(mtu = value))
+        }
     }
 
     private fun onInterfacePublicKeyChange(value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 interfaceProxy = _uiState.value.interfaceProxy.copy(publicKey = value),
             )
+        }
+
     }
 
     fun onPrivateKeyChange(value: String) {
-        _uiState.value =
-            _uiState.value.copy(
+        _uiState.update {
+            it.copy(
                 interfaceProxy = _uiState.value.interfaceProxy.copy(privateKey = value),
             )
+        }
         if (NumberUtils.isValidKey(value)) {
             val pair = KeyPair(Key.fromBase64(value))
             onInterfacePublicKeyChange(pair.publicKey.toBase64())
@@ -344,6 +418,77 @@ constructor(
             getAllInternetCapablePackages().filter {
                 getPackageLabel(it).lowercase().contains(query.lowercase())
             }
-        _uiState.value = _uiState.value.copy(packages = packages)
+        _uiState.update { it.copy(packages = packages) }
+    }
+
+    fun onJunkPacketCountChanged(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketCount = value)
+            )
+        }
+    }
+    fun onJunkPacketMinSizeChanged(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMinSize = value)
+            )
+        }
+    }
+
+    fun onJunkPacketMaxSizeChanged(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMaxSize = value)
+            )
+        }
+    }
+
+    fun onInitPacketJunkSizeChanged(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(initPacketJunkSize = value)
+            )
+        }
+    }
+
+    fun onResponsePacketJunkSize(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(responsePacketJunkSize = value)
+            )
+        }
+    }
+
+    fun onInitPacketMagicHeader(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(initPacketMagicHeader = value)
+            )
+        }
+    }
+
+    fun onResponsePacketMagicHeader(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(responsePacketMagicHeader = value)
+            )
+        }
+    }
+
+    fun onTransportPacketMagicHeader(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(transportPacketMagicHeader = value)
+            )
+        }
+    }
+
+    fun onUnderloadPacketMagicHeader(value: String) {
+        _uiState.update {
+            it.copy(
+                interfaceProxy = _uiState.value.interfaceProxy.copy(underloadPacketMagicHeader = value)
+            )
+        }
     }
 }

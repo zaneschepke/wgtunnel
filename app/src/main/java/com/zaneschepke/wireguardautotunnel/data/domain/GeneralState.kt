@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.data.model
+package com.zaneschepke.wireguardautotunnel.data.domain
 
 data class GeneralState(
     val locationDisclosureShown: Boolean = LOCATION_DISCLOSURE_SHOWN_DEFAULT,

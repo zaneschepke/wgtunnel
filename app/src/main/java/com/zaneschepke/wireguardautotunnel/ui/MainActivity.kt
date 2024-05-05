@@ -138,7 +138,11 @@ class MainActivity : AppCompatActivity() {
                         return@LaunchedEffect notificationPermissionState.launchPermissionRequest()
                     }
                     if (!appUiState.vpnPermissionAccepted) {
-                        return@LaunchedEffect vpnActivityResultState.launch(appViewModel.vpnIntent)
+                        return@LaunchedEffect appViewModel.vpnIntent?.let {
+                            vpnActivityResultState.launch(
+                                it
+                            )
+                        }!!
                     }
                 }
             }

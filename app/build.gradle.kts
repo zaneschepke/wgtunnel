@@ -162,6 +162,7 @@ dependencies {
 
     // get tunnel lib from github packages or mavenLocal
     implementation(libs.tunnel)
+    implementation(libs.amneziawg.android)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // logging

@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.data.model
+package com.zaneschepke.wireguardautotunnel.data.domain
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -50,4 +50,9 @@ data class Settings(
         defaultValue = "false",
     )
     val isPingEnabled: Boolean = false,
+    @ColumnInfo(
+        name = "is_amnezia_enabled",
+        defaultValue = "false",
+    )
+    val isAmneziaEnabled: Boolean = false,
 )

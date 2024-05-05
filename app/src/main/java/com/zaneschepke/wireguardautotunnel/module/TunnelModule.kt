@@ -42,12 +42,19 @@ class TunnelModule {
 
     @Provides
     @Singleton
+    fun provideAmneziaBackend(@ApplicationContext context: Context) : org.amnezia.awg.backend.Backend {
+        return org.amnezia.awg.backend.GoBackend(context)
+    }
+
+    @Provides
+    @Singleton
     fun provideVpnService(
+        amneziaBackend: org.amnezia.awg.backend.Backend,
         @Userspace userspaceBackend: Backend,
         @Kernel kernelBackend: Backend,
         appDataRepository: AppDataRepository
     ): VpnService {
-        return WireGuardTunnel(userspaceBackend, kernelBackend, appDataRepository)
+        return WireGuardTunnel(amneziaBackend,userspaceBackend, kernelBackend, appDataRepository)
     }
 
     @Provides

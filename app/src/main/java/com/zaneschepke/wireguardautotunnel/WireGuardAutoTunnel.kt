@@ -9,6 +9,8 @@ import com.zaneschepke.wireguardautotunnel.service.tile.AutoTunnelControlTile
 import com.zaneschepke.wireguardautotunnel.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.util.ReleaseTree
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
 
@@ -21,7 +23,16 @@ class WireGuardAutoTunnel : Application() {
         PinManager.initialize(this)
     }
 
+    override fun onLowMemory() {
+        super.onLowMemory()
+        applicationScope.cancel("onLowMemory() called by system")
+        applicationScope = MainScope()
+    }
+
     companion object {
+
+        var applicationScope = MainScope()
+
         lateinit var instance: WireGuardAutoTunnel
             private set
 

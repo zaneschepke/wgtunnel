@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.FileOpen
@@ -81,19 +82,22 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.CaptureActivityPortrait
 import com.zaneschepke.wireguardautotunnel.ui.Screen
@@ -110,6 +114,8 @@ import com.zaneschepke.wireguardautotunnel.util.truncateWithEllipsis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.Timer
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -257,11 +263,14 @@ fun MainScreen(
     Scaffold(
         modifier =
         Modifier.pointerInput(Unit) {
-            detectTapGestures(
-                onTap = {
-                    selectedTunnel = null
-                },
-            )
+            if(uiState.tunnels.isNotEmpty()) {
+                detectTapGestures(
+                    onTap = {
+                        selectedTunnel = null
+                    },
+                )
+            }
+
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
@@ -299,16 +308,6 @@ fun MainScreen(
             }
         },
     ) {
-        AnimatedVisibility(uiState.tunnels.isEmpty(), exit = fadeOut(), enter = fadeIn()) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize(),
-            ) {
-                Text(text = stringResource(R.string.no_tunnels), fontStyle = FontStyle.Italic)
-            }
-        }
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showBottomSheet = false },
@@ -401,12 +400,46 @@ fun MainScreen(
             modifier =
             Modifier
                 .fillMaxSize()
-                .overscroll(ScrollableDefaults.overscrollEffect()).nestedScroll(nestedScrollConnection),
+                .overscroll(ScrollableDefaults.overscrollEffect())
+                .nestedScroll(nestedScrollConnection),
             state = rememberLazyListState(0, uiState.tunnels.count()),
             userScrollEnabled = true,
             reverseLayout = false,
             flingBehavior = ScrollableDefaults.flingBehavior(),
         ) {
+            item {
+                val gettingStarted = buildAnnotatedString {
+                    append(stringResource(id = R.string.see_the))
+                    append(" ")
+                    pushStringAnnotation(tag = "gettingStarted", annotation = stringResource(id = R.string.getting_started_url))
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                        append(stringResource(id = R.string.getting_started_guide))
+                    }
+                    pop()
+                    append(" ")
+                    append(stringResource(R.string.unsure_how))
+                    append(".")
+                }
+                AnimatedVisibility(
+                    uiState.tunnels.isEmpty(), exit = fadeOut(), enter = fadeIn()) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(top = 100.dp)
+                    ) {
+                        Text(text = stringResource(R.string.no_tunnels), fontStyle = FontStyle.Italic)
+                        ClickableText(
+                            modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
+                            text = gettingStarted,
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center),
+                        ) {
+                            gettingStarted.getStringAnnotations(tag = "gettingStarted", it, it).firstOrNull()?.let { annotation ->
+                                appViewModel.openWebPage(annotation.item, context)
+                            }
+                        }
+                    }
+                }
+            }
             item {
                 if (uiState.settings.isAutoTunnelEnabled) {
                     val autoTunnelingLabel = buildAnnotatedString {
@@ -462,7 +495,7 @@ fun MainScreen(
                 val leadingIconColor =
                     (if (
                         uiState.vpnState.tunnelConfig?.name == tunnel.name &&
-                        uiState.vpnState.status == Tunnel.State.UP
+                        uiState.vpnState.status == TunnelState.UP
                     ) {
                         uiState.vpnState.statistics
                             ?.mapPeerStats()
@@ -508,7 +541,7 @@ fun MainScreen(
                     text = tunnel.name.truncateWithEllipsis(Constants.ALLOWED_DISPLAY_NAME_LENGTH),
                     onHold = {
                         if (
-                            (uiState.vpnState.status == Tunnel.State.UP) &&
+                            (uiState.vpnState.status == TunnelState.UP) &&
                             (tunnel.name == uiState.vpnState.tunnelConfig?.name)
                         ) {
                             appViewModel.showSnackbarMessage(Event.Message.TunnelOffAction.message)
@@ -520,7 +553,7 @@ fun MainScreen(
                     onClick = {
                         if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                             if (
-                                uiState.vpnState.status == Tunnel.State.UP &&
+                                uiState.vpnState.status == TunnelState.UP &&
                                 (uiState.vpnState.tunnelConfig?.name == tunnel.name)
                             ) {
                                 expanded.value = !expanded.value
@@ -578,7 +611,7 @@ fun MainScreen(
                         } else {
                             val checked by remember {
                                 derivedStateOf {
-                                    (uiState.vpnState.status == Tunnel.State.UP &&
+                                    (uiState.vpnState.status == TunnelState.UP &&
                                         tunnel.name == uiState.vpnState.tunnelConfig?.name)
                                 }
                             }
@@ -620,7 +653,7 @@ fun MainScreen(
                                         modifier = Modifier.focusRequester(focusRequester),
                                         onClick = {
                                             if (
-                                                uiState.vpnState.status == Tunnel.State.UP &&
+                                                uiState.vpnState.status == TunnelState.UP &&
                                                 (uiState.vpnState.tunnelConfig?.name == tunnel.name)
                                             ) {
                                                 expanded.value = !expanded.value
@@ -643,7 +676,7 @@ fun MainScreen(
                                     IconButton(
                                         onClick = {
                                             if (
-                                                uiState.vpnState.status == Tunnel.State.UP &&
+                                                uiState.vpnState.status == TunnelState.UP &&
                                                 tunnel.name == uiState.vpnState.tunnelConfig?.name
                                             ) {
                                                 appViewModel.showSnackbarMessage(

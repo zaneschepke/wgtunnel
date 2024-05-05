@@ -1,20 +1,20 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
-import com.wireguard.android.backend.Tunnel
-import com.zaneschepke.wireguardautotunnel.data.model.Settings
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 
 data class WatcherState(
     val isWifiConnected: Boolean = false,
     val config: TunnelConfig? = null,
-    val vpnStatus: Tunnel.State = Tunnel.State.DOWN,
+    val vpnStatus: TunnelState = TunnelState.DOWN,
     val isEthernetConnected: Boolean = false,
     val isMobileDataConnected: Boolean = false,
     val currentNetworkSSID: String = "",
     val settings: Settings = Settings()
 ) {
 
-    private fun isVpnConnected() = vpnStatus == Tunnel.State.UP
+    private fun isVpnConnected() = vpnStatus == TunnelState.UP
     fun isEthernetConditionMet(): Boolean {
         return (isEthernetConnected &&
             settings.isTunnelOnEthernetEnabled &&

@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
@@ -162,12 +162,29 @@ constructor(
         )
     }
 
+    fun onToggleAmnezia() = viewModelScope.launch {
+        if(uiState.value.settings.isKernelEnabled) {
+            saveKernelMode(false)
+        }
+        saveAmneziaMode(!uiState.value.settings.isAmneziaEnabled)
+    }
+
+    private fun saveAmneziaMode(on: Boolean) {
+        saveSettings(
+            uiState.value.settings.copy(
+                isAmneziaEnabled = on
+            )
+        )
+    }
+
     fun onToggleKernelMode(): Result<Unit> {
         if (!uiState.value.settings.isKernelEnabled) {
             try {
                 rootShell.start()
                 Timber.i("Root shell accepted!")
                 saveKernelMode(on = true)
+                saveAmneziaMode(false)
+
             } catch (e: RootShell.RootShellException) {
                 Timber.e(e)
                 saveKernelMode(on = false)

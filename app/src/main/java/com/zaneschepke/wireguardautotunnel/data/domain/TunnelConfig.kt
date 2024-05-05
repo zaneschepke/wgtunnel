@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.data.model
+package com.zaneschepke.wireguardautotunnel.data.domain
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -27,12 +27,24 @@ data class TunnelConfig(
         defaultValue = "false",
     )
     val isPrimaryTunnel: Boolean = false,
+    @ColumnInfo(
+        name = "am_quick",
+        defaultValue = "",
+    )
+    val amQuick: String = "",
 ) {
     companion object {
-        fun configFromQuick(wgQuick: String): Config {
+        fun configFromWgQuick(wgQuick: String): Config {
             val inputStream: InputStream = wgQuick.byteInputStream()
-            val reader = inputStream.bufferedReader(Charsets.UTF_8)
-            return Config.parse(reader)
+            return inputStream.bufferedReader(Charsets.UTF_8).use {
+                Config.parse(it)
+            }
+        }
+        fun configFromAmQuick(amQuick: String) : org.amnezia.awg.config.Config {
+            val inputStream: InputStream = amQuick.byteInputStream()
+            return inputStream.bufferedReader(Charsets.UTF_8).use {
+                org.amnezia.awg.config.Config.parse(it)
+            }
         }
     }
 }

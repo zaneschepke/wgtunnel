@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,8 @@ fun LogsScreen(appViewModel: AppViewModel) {
         appViewModel.logs
     }
 
+    val context = LocalContext.current
+
     val lazyColumnListState = rememberLazyListState()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
@@ -57,7 +60,7 @@ fun LogsScreen(appViewModel: AppViewModel) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    appViewModel.saveLogsToFile()
+                    appViewModel.saveLogsToFile(context)
                 },
                 shape = RoundedCornerShape(16.dp),
                 containerColor = MaterialTheme.colorScheme.primary,

@@ -1,0 +1,3 @@
+What's new:
+- Add Amnezia side-by-side with WireGuard
+- Fix app shortcuts bug

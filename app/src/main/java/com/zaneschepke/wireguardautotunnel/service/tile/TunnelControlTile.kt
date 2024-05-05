@@ -3,10 +3,10 @@ package com.zaneschepke.wireguardautotunnel.service.tile
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import com.wireguard.android.backend.Tunnel
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -38,12 +38,12 @@ class TunnelControlTile : TileService() {
         scope.launch {
             vpnService.vpnState.collect { it ->
                 when (it.status) {
-                    Tunnel.State.UP -> {
+                    TunnelState.UP -> {
                         setActive()
                         it.tunnelConfig?.name?.let { name -> setTileDescription(name) }
                     }
 
-                    Tunnel.State.DOWN -> {
+                    TunnelState.DOWN -> {
                         setInactive()
                         val config = appDataRepository.getStartTunnelConfig()?.also { config ->
                             manualStartConfig = config
@@ -79,7 +79,7 @@ class TunnelControlTile : TileService() {
         unlockAndRun {
             scope.launch {
                 try {
-                    if (vpnService.getState() == Tunnel.State.UP) {
+                    if (vpnService.getState() == TunnelState.UP) {
                         serviceManager.stopVpnServiceForeground(
                             this@TunnelControlTile,
                             isManualStop = true,

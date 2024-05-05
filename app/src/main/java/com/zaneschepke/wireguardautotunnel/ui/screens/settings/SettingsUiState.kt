@@ -1,7 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 
-import com.zaneschepke.wireguardautotunnel.data.model.Settings
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
 
 data class SettingsUiState(

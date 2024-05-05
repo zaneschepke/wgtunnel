@@ -11,6 +11,8 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.handshakeStatus
@@ -58,7 +60,7 @@ class WireGuardTunnelService : ForegroundService() {
             lifecycleScope.launch(Dispatchers.IO) {
                 launch {
                     val tunnelId = extras?.getInt(Constants.TUNNEL_EXTRA_KEY)
-                    if (vpnService.getState() == Tunnel.State.UP) {
+                    if (vpnService.getState() == TunnelState.UP) {
                         vpnService.stopTunnel()
                     }
                     vpnService.startTunnel(
@@ -77,7 +79,7 @@ class WireGuardTunnelService : ForegroundService() {
     private suspend fun handshakeNotifications() {
         var tunnelName: String? = null
         vpnService.vpnState.collect { state ->
-            state.statistics
+                state.statistics
                 ?.mapPeerStats()
                 ?.map { it.value?.handshakeStatus() }
                 .let { statuses ->
@@ -102,7 +104,7 @@ class WireGuardTunnelService : ForegroundService() {
                         else -> {}
                     }
                 }
-            if (state.status == Tunnel.State.UP && state.tunnelConfig?.name != tunnelName) {
+            if (state.status == TunnelState.UP && state.tunnelConfig?.name != tunnelName) {
                 tunnelName = state.tunnelConfig?.name
                 launchVpnNotification(
                     getString(R.string.tunnel_start_title),
