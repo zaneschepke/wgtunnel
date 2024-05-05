@@ -22,8 +22,8 @@ WG Tunnel
 
 <div align="left">
 
-This is an alternative Android Application for [WireGuard](https://www.wireguard.com/) with added
-features. Built using the [wireguard-android](https://github.com/WireGuard/wireguard-android)
+This is an alternative Android Application for [WireGuard](https://www.wireguard.com/) and [Amnezia Wireguard](https://github.com/amnezia-vpn/amneziawg-go) with added
+features. Built using the [wireguard-android](https://github.com/WireGuard/wireguard-android) and
 library and [Jetpack Compose](https://developer.android.com/jetpack/compose), this application was
 inspired by the official [WireGuard Android](https://github.com/WireGuard/wireguard-android) app.
 
@@ -49,6 +49,7 @@ and on while on different networks. This app was created to offer a free solutio
 
 ## Features
 
+* Add support obfuscation through AmneziaWG
 * Add tunnels via .conf file, zip, manual entry, or QR code
 * Auto connect to tunnels based on Wi-Fi SSID, ethernet, or mobile data
 * Split tunneling by application with search
