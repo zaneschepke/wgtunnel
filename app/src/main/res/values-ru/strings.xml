@@ -1,3 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    </resources>
+    <string name="turn_off_tunnel">Действие требует отключения туннеля</string>
+    <string name="add_tunnel">Добавить туннель</string>
+    <string name="mtu">MTU</string>
+    <string name="tunnel_name">Имя туннеля</string>
+    <string name="public_key">Публичный ключ</string>
+    <string name="name">Имя</string>
+    <string name="peer">Пир</string>
+    <string name="privacy_policy">Посмотреть политику конфиденциальности</string>
+    <string name="icon">Иконка</string>
+    <string name="turn_on">Включить</string>
+    <string name="add_from_qr">Добавить из QR</string>
+    <string name="qr_scan">Сканер QR</string>
+    <string name="auto_tunneling">Авто-туннелирование</string>
+    <string name="no_tunnels">Туннели еще не добавлены!</string>
+    <string name="open_file">Открыть файл</string>
+    <string name="exclude">Исключить</string>
+    <string name="include">Включить</string>
+    <string name="tunnel_all">Туннель для всех приложений</string>
+    <string name="config_changes_saved">Изменения конфигурации сохранены.</string>
+    <string name="save_changes">Сохранить</string>
+    <string name="no_thanks">Нет, спасибо</string>
+    <string name="map">Карта</string>
+    <string name="addresses">Адреса</string>
+    <string name="dns_servers">DNS сервера</string>
+    <string name="allowed_ips">Разрешенные IP</string>
+    <string name="endpoint">Конечная точка</string>
+    <string name="restart">Перезагрузить туннель</string>
+    <string name="vpn_connection_failed">Ошибка соединения</string>
+    <string name="always_on_vpn_support">Разрешить постоянный VPN</string>
+    <string name="hint_search_packages">Поиск приложений</string>
+    <string name="other">Другое</string>
+    <string name="vpn_on">VPN вкл.</string>
+    <string name="vpn_off">VPN откл.</string>
+    <string name="interface_">Интерфейс</string>
+    <string name="optional">(необязательно)</string>
+    <string name="optional_no_recommend">(необязательно, не рекомендуется)</string>
+</resources>
