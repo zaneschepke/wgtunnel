@@ -1,0 +1,3 @@
+Was ist neu:
+- Amnezia seite-zu-seite mit WireGuard hinzugefügt 
+- App Shortcut Bug behoben
