@@ -182,8 +182,12 @@ constructor(
             try {
                 rootShell.start()
                 Timber.i("Root shell accepted!")
-                saveKernelMode(on = true)
-                saveAmneziaMode(false)
+                saveSettings(
+                    uiState.value.settings.copy(
+                        isKernelEnabled = true,
+                        isAmneziaEnabled = false,
+                    ),
+                )
 
             } catch (e: RootShell.RootShellException) {
                 Timber.e(e)
