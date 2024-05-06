@@ -558,21 +558,21 @@ fun ConfigScreen(
                                     .focusRequester(focusRequester),
                             )
                             ConfigurationTextBox(
-                                value = uiState.interfaceProxy.transportPacketMagicHeader,
-                                onValueChange = { value -> viewModel.onTransportPacketMagicHeader(value) },
-                                keyboardActions = keyboardActions,
-                                label = stringResource(R.string.transport_packet_magic_header),
-                                hint = stringResource(R.string.transport_packet_magic_header).lowercase(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(focusRequester),
-                            )
-                            ConfigurationTextBox(
                                 value = uiState.interfaceProxy.underloadPacketMagicHeader,
                                 onValueChange = { value -> viewModel.onUnderloadPacketMagicHeader(value) },
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.underload_packet_magic_header),
                                 hint = stringResource(R.string.underload_packet_magic_header).lowercase(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
+                            )
+                            ConfigurationTextBox(
+                                value = uiState.interfaceProxy.transportPacketMagicHeader,
+                                onValueChange = { value -> viewModel.onTransportPacketMagicHeader(value) },
+                                keyboardActions = keyboardActions,
+                                label = stringResource(R.string.transport_packet_magic_header),
+                                hint = stringResource(R.string.transport_packet_magic_header).lowercase(),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(focusRequester),

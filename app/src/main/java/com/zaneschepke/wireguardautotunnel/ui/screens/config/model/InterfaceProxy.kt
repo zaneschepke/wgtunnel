@@ -55,8 +55,8 @@ data class InterfaceProxy(
                 responsePacketJunkSize = if(i.responsePacketJunkSize.isPresent) i.responsePacketJunkSize.get().toString() else "",
                 initPacketMagicHeader = if(i.initPacketMagicHeader.isPresent) i.initPacketMagicHeader.get().toString() else "",
                 responsePacketMagicHeader = if(i.responsePacketMagicHeader.isPresent) i.responsePacketMagicHeader.get().toString() else "",
-                underloadPacketMagicHeader = if(i.underloadPacketMagicHeader.isPresent) i.underloadPacketMagicHeader.get().toString() else "",
                 transportPacketMagicHeader = if(i.transportPacketMagicHeader.isPresent) i.transportPacketMagicHeader.get().toString() else "",
+                underloadPacketMagicHeader = if(i.underloadPacketMagicHeader.isPresent) i.underloadPacketMagicHeader.get().toString() else "",
             )
         }
     }

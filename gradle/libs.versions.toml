@@ -31,7 +31,7 @@ zxingCore = "3.5.3"
 
 #plugins
 gradlePlugins-kotlinxSerialization = "1.9.23"
-material = "1.11.0"
+material = "1.12.0"
 
 
 [libraries]
