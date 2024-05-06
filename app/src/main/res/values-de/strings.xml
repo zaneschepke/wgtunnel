@@ -154,4 +154,11 @@
     <string name="kernel">Kernel</string>
     <string name="use_kernel">Verwende das Kernel Modul</string>
     <string name="error_ssid_exists">SSID existiert bereits</string>
+    <string name="use_amnezia">"Benutze Amnezia Benuzterumgebung "</string>
+    <string name="junk_packet_count">Müll Packet Anzahk</string>
+    <string name="junk_packet_maximum_size">Müll Packet maximale Grösse</string>
+    <string name="init_packet_junk_size">Erstes Packet Müllgrösse</string>
+    <string name="backend">Backend</string>
+    <string name="junk_packet_minimum_size">Müll Packet minimale Grösse</string>
+    <string name="response_packet_junk_size">Antwortpaket Müllgrösse</string>
 </resources>
