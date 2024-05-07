@@ -30,7 +30,7 @@ zxingAndroidEmbedded = "4.3.0"
 zxingCore = "3.5.3"
 
 #plugins
-gradlePlugins-kotlinxSerialization = "1.9.23"
+gradlePlugins-kotlinxSerialization = "1.9.24"
 material = "1.12.0"
 
 
