@@ -1,0 +1,7 @@
+Mejoras:
+- Se agregó confirmación al eliminar el túnel.
+- Se agregó permiso en segundo plano para el modo de ahorro de energía.
+Corrección de errores:
+- La aplicación se congela cuando el túnel está desactivado.
+- Error en el campo del destinatario del correo electrónico
+- Edición de configuración con campo DNS vacío
