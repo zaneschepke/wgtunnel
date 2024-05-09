@@ -1,0 +1,5 @@
+Qué hay de nuevo:
+- Inicio automático al reiniciar para el modo kernel de VPN siempre activo
+- Soporte para íconos de temas adaptables
+- Arreglar íconos de notificación, ícono de mosaico
+- Reparar iconos de AndroidTV
