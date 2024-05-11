@@ -6,14 +6,11 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 data class WatcherState(
     val isWifiConnected: Boolean = false,
     val config: TunnelConfig? = null,
-    //val vpnStatus: TunnelState = TunnelState.DOWN,
     val isEthernetConnected: Boolean = false,
     val isMobileDataConnected: Boolean = false,
     val currentNetworkSSID: String = "",
     val settings: Settings = Settings()
 ) {
-
-    //private fun isVpnConnected() = vpnStatus == TunnelState.UP
     fun isEthernetConditionMet(): Boolean {
         return (isEthernetConnected &&
             settings.isTunnelOnEthernetEnabled)
