@@ -4,8 +4,9 @@ Features
 - Auto connect to VPN based on Wi-Fi SSID, ethernet, or mobile data
 - Split tunneling by application with search
 - WireGuard support for kernel and userspace modes
+- Amnezia support for userspace mode for DPI/censorship protection
 - Always-On VPN support
-- Export tunnels to zip
+- Export Amnezia and WireGuard tunnels to zip
 - Quick tile support for VPN toggling
 - Static shortcuts support for primary tunnel for automation integration
 - Intent automation support for all tunnels
