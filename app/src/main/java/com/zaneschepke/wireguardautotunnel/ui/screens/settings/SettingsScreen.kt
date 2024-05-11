@@ -74,6 +74,7 @@ import com.wireguard.android.backend.Tunnel
 import com.wireguard.android.backend.WgQuickBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
@@ -131,11 +132,21 @@ fun SettingsScreen(
 
     fun exportAllConfigs() {
         try {
-            val files = uiState.tunnels.map { File(context.cacheDir, "${it.name}.conf") }
-            files.forEachIndexed { index, file ->
-                file.outputStream().use { it.write(uiState.tunnels[index].wgQuick.toByteArray()) }
+            val wgFiles = uiState.tunnels.map { config ->
+                val file = File(context.cacheDir, "${config.name}-wg.conf")
+                file.outputStream().use {
+                    it.write(config.wgQuick.toByteArray())
+                }
+                file
             }
-            FileUtils.saveFilesToZip(context, files)
+            val amFiles = uiState.tunnels.mapNotNull { config -> if(config.amQuick != TunnelConfig.AM_QUICK_DEFAULT) {
+                val file = File(context.cacheDir, "${config.name}-am.conf")
+                file.outputStream().use {
+                    it.write(config.amQuick.toByteArray())
+                }
+                file
+            } else null }
+            FileUtils.saveFilesToZip(context, wgFiles + amFiles)
             didExportFiles = true
             appViewModel.showSnackbarMessage(Event.Message.ConfigsExported.message)
         } catch (e: Exception) {

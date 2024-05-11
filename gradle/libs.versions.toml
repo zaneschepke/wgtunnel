@@ -16,12 +16,13 @@ junit = "4.13.2"
 kotlinx-serialization-json = "1.6.3"
 lifecycle-runtime-compose = "2.7.0"
 material3 = "1.2.1"
+multifabVersion = "1.0.9"
 navigationCompose = "2.7.7"
 pinLockCompose = "1.0.3"
 roomVersion = "2.6.1"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
-androidGradlePlugin = "8.4.0-rc02"
+androidGradlePlugin = "8.4.0"
 kotlin = "1.9.23"
 ksp = "1.9.23-1.0.19"
 composeBom = "2024.05.00"
@@ -87,6 +88,7 @@ pin-lock-compose = { module = "com.zaneschepke:pin_lock_compose", version.ref = 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 tunnel = { module = "com.wireguard.android:tunnel", version.ref = "tunnel" }
 
+zaneschepke-multifab = { module = "com.zaneschepke:multifab", version.ref = "multifabVersion" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxingCore" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }

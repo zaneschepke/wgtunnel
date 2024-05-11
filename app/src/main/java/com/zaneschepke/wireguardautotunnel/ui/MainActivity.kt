@@ -32,10 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -47,6 +49,7 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.options.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.pinlock.PinLockScreen
@@ -236,14 +239,28 @@ class MainActivity : AppCompatActivity() {
                         composable(Screen.Support.Logs.route) {
                             LogsScreen(appViewModel)
                         }
-                        composable("${Screen.Config.route}/{id}") {
+                            //TODO fix navigation for amnezia
+                        composable("${Screen.Config.route}/{id}?configType={configType}", arguments =
+                        listOf(
+                            navArgument("id") {
+                                type = NavType.StringType
+                                defaultValue = "0"
+                            },
+                            navArgument("configType") {
+                                type = NavType.StringType
+                                defaultValue = ConfigType.WIREGUARD.name
+                            }
+                        )
+                        ) {
                             val id = it.arguments?.getString("id")
+                            val configType = ConfigType.valueOf( it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name)
                             if (!id.isNullOrBlank()) {
                                 ConfigScreen(
                                     navController = navController,
                                     tunnelId = id,
                                     appViewModel = appViewModel,
                                     focusRequester = focusRequester,
+                                    configType = configType
                                 )
                             }
                         }

@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.util
 
 import android.content.BroadcastReceiver
 import android.content.pm.PackageInfo
+import com.wireguard.config.Peer
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
@@ -9,6 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.amnezia.awg.config.Config
+import timber.log.Timber
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import kotlin.coroutines.CoroutineContext
@@ -68,4 +71,19 @@ fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
             }
         }
     }
+}
+
+fun Config.toWgQuickString() : String {
+    val amQuick = toAwgQuickString()
+    val lines = amQuick.lines().toMutableList()
+    val linesIterator = lines.iterator()
+    while(linesIterator.hasNext()) {
+        val next = linesIterator.next()
+        Constants.amneziaProperties.forEach {
+            if(next.startsWith(it, ignoreCase = true)) {
+                linesIterator.remove()
+            }
+        }
+    }
+    return lines.joinToString(System.lineSeparator())
 }

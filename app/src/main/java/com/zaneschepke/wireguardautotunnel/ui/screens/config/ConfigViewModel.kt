@@ -17,6 +17,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.Event
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
@@ -248,19 +249,22 @@ constructor(
         return org.amnezia.awg.config.Config.Builder().addPeers(peerList).setInterface(amInterface).build()
     }
 
-    fun onSaveAllChanges(): Result<Event> {
+    fun onSaveAllChanges(configType: ConfigType): Result<Event> {
         return try {
-            val config = buildConfig()
+            val wgQuick = buildConfig().toWgQuickString()
+            val amQuick = if(configType == ConfigType.AMNEZIA) {
+                buildAmConfig().toAwgQuickString()
+            } else TunnelConfig.AM_QUICK_DEFAULT
             val tunnelConfig = when (uiState.value.tunnel) {
                 null -> TunnelConfig(
                     name = _uiState.value.tunnelName,
-                    wgQuick = config.toWgQuickString(),
+                    wgQuick = wgQuick,
+                    amQuick = amQuick
                 )
                 else -> uiState.value.tunnel!!.copy(
                     name = _uiState.value.tunnelName,
-                    wgQuick = config.toWgQuickString(),
-                    amQuick = if(uiState.value.isAmneziaEnabled) buildAmConfig().toAwgQuickString()
-                    else _uiState.value.tunnel?.amQuick ?: ""
+                    wgQuick = wgQuick,
+                    amQuick = amQuick
                 )
             }
             updateTunnelConfig(tunnelConfig)

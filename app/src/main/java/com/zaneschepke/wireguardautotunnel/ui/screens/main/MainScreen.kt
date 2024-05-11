@@ -34,7 +34,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.CopyAll
@@ -46,7 +45,6 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -91,6 +89,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.iamageo.multifablibrary.FabIcon
+import com.iamageo.multifablibrary.FabOption
+import com.iamageo.multifablibrary.MultiFabItem
+import com.iamageo.multifablibrary.MultiFloatingActionButton
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.zaneschepke.wireguardautotunnel.R
@@ -114,8 +116,6 @@ import com.zaneschepke.wireguardautotunnel.util.truncateWithEllipsis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import timber.log.Timber
-import java.util.Timer
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -133,6 +133,7 @@ fun MainScreen(
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
+    var configType by remember { mutableStateOf(ConfigType.WIREGUARD) }
 
     // Nested scroll for control FAB
     val nestedScrollConnection = remember {
@@ -201,7 +202,7 @@ fun MainScreen(
         ) { data ->
             if (data == null) return@rememberLauncherForActivityResult
             scope.launch {
-                viewModel.onTunnelFileSelected(data).let {
+                viewModel.onTunnelFileSelected(data, configType).let {
                     when (it) {
                         is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
                         is Result.Success -> {}
@@ -215,7 +216,7 @@ fun MainScreen(
             onResult = {
                 if (it.contents != null) {
                     scope.launch {
-                        viewModel.onTunnelQrResult(it.contents).let { result ->
+                        viewModel.onTunnelQrResult(it.contents, configType).let { result ->
                             when (result) {
                                 is Result.Success -> {}
                                 is Result.Error -> appViewModel.showSnackbarMessage(result.error.message)
@@ -260,6 +261,19 @@ fun MainScreen(
         return LoadingScreen()
     }
 
+    fun launchQrScanner() {
+        val scanOptions = ScanOptions()
+        scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        scanOptions.setOrientationLocked(true)
+        scanOptions.setPrompt(
+            context.getString(R.string.scanning_qr),
+        )
+        scanOptions.setBeepEnabled(false)
+        scanOptions.captureActivity =
+            CaptureActivityPortrait::class.java
+        scanLauncher.launch(scanOptions)
+    }
+
     Scaffold(
         modifier =
         Modifier.pointerInput(Unit) {
@@ -282,7 +296,7 @@ fun MainScreen(
                 val secondaryColor = MaterialTheme.colorScheme.secondary
                 val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
                 var fobColor by remember { mutableStateOf(secondaryColor) }
-                FloatingActionButton(
+                MultiFloatingActionButton(
                     modifier =
                     (if (
                         WireGuardAutoTunnel.isRunningOnAndroidTv() &&
@@ -295,16 +309,42 @@ fun MainScreen(
                                 fobColor = if (it.isFocused) hoverColor else secondaryColor
                             }
                         },
-                    onClick = { showBottomSheet = true },
-                    containerColor = fobColor,
+                    fabIcon = FabIcon(
+                        iconRes = R.drawable.add,
+                        iconResAfterRotate = R.drawable.close,
+                        iconRotate = 180f
+                    ),
+                    fabOption = FabOption(
+                        iconTint = MaterialTheme.colorScheme.background,
+                        backgroundTint = MaterialTheme.colorScheme.primary,
+                    ),
+                    itemsMultiFab = listOf(
+                        MultiFabItem(
+                            label = {
+                                Text(
+                                    stringResource(id = R.string.amnezia),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(end = 10.dp)
+                                )
+                            },
+                            icon = R.drawable.add,
+                            value = ConfigType.AMNEZIA.name,
+                        ),
+                        MultiFabItem(
+                            label = {
+                                Text(stringResource(id = R.string.wireguard), color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(end = 10.dp))
+                            },
+                            icon = R.drawable.add,
+                            value = ConfigType.WIREGUARD.name
+                        ),
+                    ),
+                    onFabItemClicked = {
+                        showBottomSheet = true
+                        configType = ConfigType.valueOf(it.value)
+                       },
                     shape = RoundedCornerShape(16.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = stringResource(id = R.string.add_tunnel),
-                        tint = Color.DarkGray,
-                    )
-                }
+                )
             }
         },
     ) {
@@ -343,16 +383,7 @@ fun MainScreen(
                             .clickable {
                                 scope.launch {
                                     showBottomSheet = false
-                                    val scanOptions = ScanOptions()
-                                    scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                                    scanOptions.setOrientationLocked(true)
-                                    scanOptions.setPrompt(
-                                        context.getString(R.string.scanning_qr),
-                                    )
-                                    scanOptions.setBeepEnabled(false)
-                                    scanOptions.captureActivity =
-                                        CaptureActivityPortrait::class.java
-                                    scanLauncher.launch(scanOptions)
+                                    launchQrScanner()
                                 }
                             }
                             .padding(10.dp),
@@ -376,7 +407,7 @@ fun MainScreen(
                         .clickable {
                             showBottomSheet = false
                             navController.navigate(
-                                "${Screen.Config.route}/${Constants.MANUAL_TUNNEL_CONFIG_ID}",
+                                "${Screen.Config.route}/${Constants.MANUAL_TUNNEL_CONFIG_ID}?configType=${configType}",
                             )
                         }
                         .padding(10.dp),

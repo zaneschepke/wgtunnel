@@ -173,5 +173,8 @@
     <string name="unsure_how">if you are unsure how to proceed</string>
     <string name="see_the">See the</string>
     <string name="getting_started_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/getting-started.html</string>
-    <string name="getting_started_guide">Getting started guide</string>
+    <string name="getting_started_guide">getting started guide</string>
+    <string name="amnezia" translatable="false">Amnezia</string>
+    <string name="wireguard" translatable="false">WireGuard</string>
+    <string name="error_file_format">Invalid tunnel config format</string>
 </resources>

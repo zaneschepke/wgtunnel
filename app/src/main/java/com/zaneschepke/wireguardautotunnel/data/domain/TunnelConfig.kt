@@ -31,7 +31,7 @@ data class TunnelConfig(
         name = "am_quick",
         defaultValue = "",
     )
-    val amQuick: String = "",
+    val amQuick: String = AM_QUICK_DEFAULT,
 ) {
     companion object {
         fun configFromWgQuick(wgQuick: String): Config {
@@ -46,5 +46,6 @@ data class TunnelConfig(
                 org.amnezia.awg.config.Config.parse(it)
             }
         }
+        const val AM_QUICK_DEFAULT = ""
     }
 }

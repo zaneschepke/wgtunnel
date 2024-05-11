@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.net.InetAddress
 import javax.inject.Inject
@@ -225,7 +226,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                             val host = if (peer.endpoint.isPresent &&
                                 peer.endpoint.get().resolved.isPresent)
                                 peer.endpoint.get().resolved.get().host
-                            else Constants.BACKUP_PING_HOST
+                            else Constants.DEFAULT_PING_IP
                             Timber.i("Checking reachability of: $host")
                             val reachable = InetAddress.getByName(host)
                                 .isReachable(Constants.PING_TIMEOUT.toInt())

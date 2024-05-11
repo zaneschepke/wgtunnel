@@ -25,7 +25,7 @@ object Constants {
     const val SUBSCRIPTION_TIMEOUT = 5_000L
     const val FOCUS_REQUEST_DELAY = 500L
 
-    const val BACKUP_PING_HOST = "1.1.1.1"
+    const val DEFAULT_PING_IP = "1.1.1.1"
     const val PING_TIMEOUT = 5_000L
     const val VPN_RESTART_DELAY = 1_000L
     const val PING_INTERVAL = 60_000L
@@ -36,5 +36,7 @@ object Constants {
     const val TUNNEL_EXTRA_KEY = "tunnelId"
 
     const val UNREADABLE_SSID = "<unknown ssid>"
+
+    val amneziaProperties = listOf("Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4")
 
 }

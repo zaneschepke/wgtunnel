@@ -53,7 +53,7 @@ sealed class Event {
 
         data object FileReadFailed : Error() {
             override val message: String
-                get() = WireGuardAutoTunnel.instance.getString(R.string.error_file_extension)
+                get() = WireGuardAutoTunnel.instance.getString(R.string.error_file_format)
         }
 
         data object AuthenticationFailed : Error() {

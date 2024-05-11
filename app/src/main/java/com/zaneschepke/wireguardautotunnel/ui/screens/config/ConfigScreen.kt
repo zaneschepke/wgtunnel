@@ -79,6 +79,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.Event
 import com.zaneschepke.wireguardautotunnel.util.Result
@@ -94,7 +95,8 @@ fun ConfigScreen(
     focusRequester: FocusRequester,
     navController: NavController,
     appViewModel: AppViewModel,
-    tunnelId: String
+    tunnelId: String,
+    configType: ConfigType
 ) {
     val context = LocalContext.current
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
@@ -319,7 +321,7 @@ fun ConfigScreen(
                     }
                 },
                 onClick = {
-                    viewModel.onSaveAllChanges().let {
+                    viewModel.onSaveAllChanges(configType).let {
                         when (it) {
                             is Result.Success -> {
                                 appViewModel.showSnackbarMessage(it.data.message)
@@ -486,7 +488,7 @@ fun ConfigScreen(
                                 modifier = Modifier.width(IntrinsicSize.Min),
                             )
                         }
-                        if(uiState.isAmneziaEnabled) {
+                        if(configType == ConfigType.AMNEZIA) {
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.junkPacketCount,
                                 onValueChange = { value -> viewModel.onJunkPacketCountChanged(value) },

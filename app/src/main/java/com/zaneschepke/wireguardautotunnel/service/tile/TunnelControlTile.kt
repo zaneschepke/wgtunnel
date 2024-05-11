@@ -52,7 +52,6 @@ class TunnelControlTile : TileService() {
                             setTileDescription(it.name)
                         } ?: setUnavailable()
                     }
-
                     else -> setInactive()
                 }
             }

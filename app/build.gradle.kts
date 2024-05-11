@@ -139,6 +139,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
     // helpers for implementing LifecycleOwner in a Service
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.activity.compose)
@@ -172,6 +173,8 @@ dependencies {
     // compose navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation(libs.zaneschepke.multifab)
 
     // hilt
     implementation(libs.hilt.android)
