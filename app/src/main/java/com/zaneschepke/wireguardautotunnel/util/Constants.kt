@@ -38,5 +38,6 @@ object Constants {
     const val UNREADABLE_SSID = "<unknown ssid>"
 
     val amneziaProperties = listOf("Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4")
+    const val QR_CODE_NAME_PROPERTY = "# Name ="
 
 }

@@ -54,6 +54,10 @@ class RoomTunnelConfigRepository(private val tunnelConfigDao: TunnelConfigDao) :
         return tunnelConfigDao.count().toInt()
     }
 
+    override suspend fun findByTunnelName(name: String): TunnelConfig? {
+        return tunnelConfigDao.getByName(name)
+    }
+
     override suspend fun findByTunnelNetworksName(name: String): TunnelConfigs {
         return tunnelConfigDao.findByTunnelNetworkName(name)
     }

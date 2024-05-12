@@ -22,6 +22,8 @@ interface TunnelConfigRepository {
 
     suspend fun count(): Int
 
+    suspend fun findByTunnelName(name : String) : TunnelConfig?
+
     suspend fun findByTunnelNetworksName(name: String): TunnelConfigs
 
     suspend fun findByMobileDataTunnel(): TunnelConfigs

@@ -94,6 +94,7 @@
     <string name="error_authorization_failed">Failed to authorize</string>
     <string name="enabled_app_shortcuts">Enable app shortcuts</string>
     <string name="export_configs">Export configs</string>
+    <string name="export_configs_failed">Failed to export configs</string>
     <string name="location_services_required">Location services required</string>
     <string name="background_location_required">Background location required</string>
     <string name="precise_location_required">Precise location required</string>

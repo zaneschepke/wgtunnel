@@ -5,14 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
-import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
-import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.handshakeStatus

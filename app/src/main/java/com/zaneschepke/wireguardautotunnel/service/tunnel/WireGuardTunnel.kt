@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.amnezia.awg.backend.Tunnel
-import org.amnezia.awg.config.Config
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -130,10 +129,15 @@ constructor(
         )
     }
 
+    private fun resetVpnState() {
+        _vpnState.tryEmit(VpnState())
+    }
+
     override suspend fun stopTunnel() {
         try {
             if (getState() == TunnelState.UP) {
                 val state = setState(null, TunnelState.DOWN)
+                resetVpnState()
                 emitTunnelState(state)
             }
         } catch (e: BackendException) {
@@ -160,7 +164,7 @@ constructor(
     private fun handleStateChange(state: TunnelState) {
         val tunnel = this
         emitTunnelState(state)
-        WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate(WireGuardAutoTunnel.instance)
+        WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
         if (state == TunnelState.UP) {
             statsJob =
                 scope.launch {

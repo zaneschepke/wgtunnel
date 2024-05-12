@@ -1,0 +1,5 @@
+What's new:
+- Improve tunnel import naming
+- Fix auto tunneling init state bug
+- Improved error handling
+- Fix Amnezia zip import bug

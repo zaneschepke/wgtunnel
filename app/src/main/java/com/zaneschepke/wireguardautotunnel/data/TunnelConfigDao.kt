@@ -20,6 +20,9 @@ interface TunnelConfigDao {
     @Query("SELECT * FROM TunnelConfig WHERE id=:id")
     suspend fun getById(id: Long): TunnelConfig?
 
+    @Query("SELECT * FROM TunnelConfig WHERE name=:name")
+    suspend fun getByName(name: String) : TunnelConfig?
+
     @Query("SELECT * FROM TunnelConfig")
     suspend fun getAll(): TunnelConfigs
 

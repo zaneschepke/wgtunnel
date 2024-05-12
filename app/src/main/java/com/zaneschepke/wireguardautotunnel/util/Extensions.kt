@@ -1,8 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.util
 
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.pm.PackageInfo
-import com.wireguard.config.Peer
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
@@ -11,7 +12,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.amnezia.awg.config.Config
-import timber.log.Timber
 import java.math.BigDecimal
 import java.text.DecimalFormat
 import kotlin.coroutines.CoroutineContext
@@ -86,4 +86,11 @@ fun Config.toWgQuickString() : String {
         }
     }
     return lines.joinToString(System.lineSeparator())
+}
+
+fun Throwable.getMessage(context: Context) : String {
+    return when(this) {
+        is WgTunnelExceptions -> this.getMessage(context)
+        else -> this.message ?: StringValue.StringResource(R.string.unknown_error).asString(context)
+    }
 }

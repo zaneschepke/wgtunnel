@@ -4,11 +4,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.ui.res.stringResource
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
-import com.zaneschepke.wireguardautotunnel.util.StringValue
 
 sealed class Screen(val route: String) {
     data object Main : Screen("main") {

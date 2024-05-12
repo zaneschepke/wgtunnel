@@ -81,8 +81,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.Event
-import com.zaneschepke.wireguardautotunnel.util.Result
+import com.zaneschepke.wireguardautotunnel.util.getMessage
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -150,11 +149,11 @@ fun ConfigScreen(
             },
             onError = {
                 showAuthPrompt = false
-                appViewModel.showSnackbarMessage(Event.Error.AuthenticationFailed.message)
+                appViewModel.showSnackbarMessage(context.getString(R.string.error_authentication_failed))
             },
             onFailure = {
                 showAuthPrompt = false
-                appViewModel.showSnackbarMessage(Event.Error.AuthorizationFailed.message)
+                appViewModel.showSnackbarMessage(context.getString(R.string.error_authorization_failed))
             },
         )
     }
@@ -321,15 +320,11 @@ fun ConfigScreen(
                     }
                 },
                 onClick = {
-                    viewModel.onSaveAllChanges(configType).let {
-                        when (it) {
-                            is Result.Success -> {
-                                appViewModel.showSnackbarMessage(it.data.message)
-                                navController.navigate(Screen.Main.route)
-                            }
-
-                            is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
-                        }
+                    viewModel.onSaveAllChanges(configType).onSuccess {
+                        appViewModel.showSnackbarMessage(context.getString(R.string.config_changes_saved))
+                        navController.navigate(Screen.Main.route)
+                    }.onFailure {
+                        appViewModel.showSnackbarMessage(it.getMessage(context))
                     }
                 },
                 containerColor = fobColor,

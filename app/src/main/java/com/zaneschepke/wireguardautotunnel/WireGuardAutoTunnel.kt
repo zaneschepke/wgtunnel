@@ -2,7 +2,6 @@ package com.zaneschepke.wireguardautotunnel
 
 import android.app.Application
 import android.content.ComponentName
-import android.content.Context
 import android.content.pm.PackageManager
 import android.service.quicksettings.TileService
 import com.zaneschepke.wireguardautotunnel.service.tile.AutoTunnelControlTile
@@ -40,16 +39,16 @@ class WireGuardAutoTunnel : Application() {
             return instance.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
         }
 
-        fun requestTunnelTileServiceStateUpdate(context: Context) {
+        fun requestTunnelTileServiceStateUpdate() {
             TileService.requestListeningState(
-                context,
+                instance,
                 ComponentName(instance, TunnelControlTile::class.java),
             )
         }
 
-        fun requestAutoTunnelTileServiceUpdate(context: Context) {
+        fun requestAutoTunnelTileServiceUpdate() {
             TileService.requestListeningState(
-                context,
+                instance,
                 ComponentName(instance, AutoTunnelControlTile::class.java),
             )
         }

@@ -1,11 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 
 data class WatcherState(
     val isWifiConnected: Boolean = false,
-    val config: TunnelConfig? = null,
     val isEthernetConnected: Boolean = false,
     val isMobileDataConnected: Boolean = false,
     val currentNetworkSSID: String = "",
@@ -27,8 +25,7 @@ data class WatcherState(
         return (!isEthernetConnected &&
             settings.isTunnelOnMobileDataEnabled &&
             !isWifiConnected &&
-            isMobileDataConnected &&
-            config?.isMobileDataTunnel == false)
+            isMobileDataConnected)
     }
 
     fun isTunnelOffOnMobileDataConditionMet(): Boolean {
@@ -43,13 +40,6 @@ data class WatcherState(
             isWifiConnected &&
             !settings.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
             settings.isTunnelOnWifiEnabled)
-    }
-
-    fun isTunnelNotWifiNamePreferredMet(ssid: String): Boolean {
-        return (!isEthernetConnected &&
-            isWifiConnected &&
-            !settings.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
-            settings.isTunnelOnWifiEnabled && config?.tunnelNetworks?.contains(ssid) == false)
     }
 
     fun isTrustedWifiConditionMet(): Boolean {

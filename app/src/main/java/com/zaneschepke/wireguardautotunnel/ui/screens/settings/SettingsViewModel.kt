@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 
-import android.app.Application
 import android.content.Context
 import android.location.LocationManager
 import androidx.core.location.LocationManagerCompat
@@ -13,8 +12,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.Event
-import com.zaneschepke.wireguardautotunnel.util.Result
+import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -27,7 +25,6 @@ import javax.inject.Inject
 class SettingsViewModel
 @Inject
 constructor(
-    private val application: Application,
     private val appDataRepository: AppDataRepository,
     private val serviceManager: ServiceManager,
     private val rootShell: RootShell,
@@ -60,9 +57,9 @@ constructor(
         return if (!uiState.value.settings.trustedNetworkSSIDs.contains(trimmed)) {
             uiState.value.settings.trustedNetworkSSIDs.add(trimmed)
             saveSettings(uiState.value.settings)
-            Result.Success(Unit)
+            Result.success(Unit)
         } else {
-            Result.Error(Event.Error.SsidConflict)
+            Result.failure(WgTunnelExceptions.SsidConflict())
         }
     }
 
@@ -93,15 +90,15 @@ constructor(
         )
     }
 
-    fun onToggleAutoTunnel() =
+    fun onToggleAutoTunnel(context: Context) =
         viewModelScope.launch {
             val isAutoTunnelEnabled = uiState.value.settings.isAutoTunnelEnabled
             var isAutoTunnelPaused = uiState.value.settings.isAutoTunnelPaused
 
             if (isAutoTunnelEnabled) {
-                serviceManager.stopWatcherService(application)
+                serviceManager.stopWatcherService(context)
             } else {
-                serviceManager.startWatcherService(application)
+                serviceManager.startWatcherService(context)
                 isAutoTunnelPaused = false
             }
             saveSettings(
@@ -110,7 +107,7 @@ constructor(
                     isAutoTunnelPaused = isAutoTunnelPaused,
                 ),
             )
-            WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate(application)
+            WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate()
         }
 
     fun onToggleAlwaysOnVPN() =
@@ -192,12 +189,12 @@ constructor(
             } catch (e: RootShell.RootShellException) {
                 Timber.e(e)
                 saveKernelMode(on = false)
-                return Result.Error(Event.Error.RootDenied)
+                return Result.failure(WgTunnelExceptions.RootDenied())
             }
         } else {
             saveKernelMode(on = false)
         }
-        return Result.Success(Unit)
+        return Result.success(Unit)
     }
 
     fun onToggleRestartOnPing() = viewModelScope.launch {

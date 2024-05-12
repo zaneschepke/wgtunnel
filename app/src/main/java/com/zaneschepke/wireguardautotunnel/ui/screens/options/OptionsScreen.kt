@@ -27,7 +27,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +41,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -65,7 +65,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.Result
+import com.zaneschepke.wireguardautotunnel.util.getMessage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -81,6 +81,8 @@ fun OptionsScreen(
 ) {
     val scrollState = rememberScrollState()
     val uiState by optionsViewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -100,11 +102,10 @@ fun OptionsScreen(
     fun saveTrustedSSID() {
         if (currentText.isNotEmpty()) {
             scope.launch {
-                optionsViewModel.onSaveRunSSID(currentText).let {
-                    when (it) {
-                        is Result.Success -> currentText = ""
-                        is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
-                    }
+                optionsViewModel.onSaveRunSSID(currentText).onSuccess {
+                    currentText = ""
+                }.onFailure {
+                    appViewModel.showSnackbarMessage(it.getMessage(context))
                 }
             }
         }

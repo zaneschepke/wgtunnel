@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
-import android.app.Application
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -9,7 +8,6 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.logcatter.Logcatter
 import com.zaneschepke.logcatter.model.LogMessage

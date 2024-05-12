@@ -7,8 +7,7 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.Event
-import com.zaneschepke.wireguardautotunnel.util.Result
+import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,9 +75,9 @@ constructor(
             tunnelsWithName.isEmpty()) {
             uiState.value.tunnel?.tunnelNetworks?.add(trimmed)
             saveTunnel(uiState.value.tunnel)
-            Result.Success(Unit)
+            Result.success(Unit)
         } else {
-            Result.Error(Event.Error.SsidConflict)
+            Result.failure(WgTunnelExceptions.SsidConflict())
         }
     }
 
@@ -98,7 +97,7 @@ constructor(
                     false -> uiState.value.tunnel
                 },
             )
-            WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate(WireGuardAutoTunnel.instance)
+            WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
         }
     }
 }

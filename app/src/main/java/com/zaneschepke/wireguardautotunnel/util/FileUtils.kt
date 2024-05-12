@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.MediaStore.MediaColumns
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -70,21 +71,27 @@ object FileUtils {
         }
     }
 
-    fun saveFilesToZip(context: Context, files: List<File>) {
-        val zipOutputStream =
-            createDownloadsFileOutputStream(
-                context,
-                "wg-export_${Instant.now().epochSecond}.zip",
-                ZIP_FILE_MIME_TYPE,
-            )
-        ZipOutputStream(zipOutputStream).use { zos ->
-            files.forEach { file ->
-                val entry = ZipEntry(file.name)
-                zos.putNextEntry(entry)
-                if (file.isFile) {
-                    file.inputStream().use { fis -> fis.copyTo(zos) }
+    fun saveFilesToZip(context: Context, files: List<File>) : Result<Unit> {
+        return try {
+            val zipOutputStream =
+                createDownloadsFileOutputStream(
+                    context,
+                    "wg-export_${Instant.now().epochSecond}.zip",
+                    ZIP_FILE_MIME_TYPE,
+                )
+            ZipOutputStream(zipOutputStream).use { zos ->
+                files.forEach { file ->
+                    val entry = ZipEntry(file.name)
+                    zos.putNextEntry(entry)
+                    if (file.isFile) {
+                        file.inputStream().use { fis -> fis.copyTo(zos) }
+                    }
                 }
+                return Result.success(Unit)
             }
+        } catch (e : Exception) {
+            Timber.e(e)
+            Result.failure(WgTunnelExceptions.ConfigExportFailed())
         }
     }
 }

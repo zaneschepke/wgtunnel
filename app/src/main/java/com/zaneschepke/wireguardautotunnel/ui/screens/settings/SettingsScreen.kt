@@ -70,7 +70,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.wireguard.android.backend.Tunnel
 import com.wireguard.android.backend.WgQuickBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
@@ -82,9 +81,8 @@ import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
-import com.zaneschepke.wireguardautotunnel.util.Event
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
-import com.zaneschepke.wireguardautotunnel.util.Result
+import com.zaneschepke.wireguardautotunnel.util.getMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -146,12 +144,14 @@ fun SettingsScreen(
                 }
                 file
             } else null }
-            FileUtils.saveFilesToZip(context, wgFiles + amFiles)
-            didExportFiles = true
-            appViewModel.showSnackbarMessage(Event.Message.ConfigsExported.message)
+            FileUtils.saveFilesToZip(context, wgFiles + amFiles).onFailure {
+                appViewModel.showSnackbarMessage(it.getMessage(context))
+            }.onSuccess {
+                didExportFiles = true
+                appViewModel.showSnackbarMessage(context.getString(R.string.exported_configs_message))
+            }
         } catch (e: Exception) {
             Timber.e(e)
-            appViewModel.showSnackbarMessage(Event.Error.Exception(e).message)
         }
     }
 
@@ -172,7 +172,7 @@ fun SettingsScreen(
     fun handleAutoTunnelToggle() {
         if (uiState.isBatteryOptimizeDisableShown || isBatteryOptimizationsDisabled()) {
             if (appViewModel.isRequiredPermissionGranted()) {
-                viewModel.onToggleAutoTunnel()
+                viewModel.onToggleAutoTunnel(context)
             }
         } else {
             requestBatteryOptimizationsDisabled()
@@ -181,11 +181,10 @@ fun SettingsScreen(
 
     fun saveTrustedSSID() {
         if (currentText.isNotEmpty()) {
-            viewModel.onSaveTrustedSSID(currentText).let {
-                when (it) {
-                    is Result.Success -> currentText = ""
-                    is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
-                }
+            viewModel.onSaveTrustedSSID(currentText).onSuccess {
+                currentText = ""
+            }.onFailure {
+                appViewModel.showSnackbarMessage(it.getMessage(context))
             }
         }
     }
@@ -319,11 +318,11 @@ fun SettingsScreen(
             },
             onError = { _ ->
                 showAuthPrompt = false
-                appViewModel.showSnackbarMessage(Event.Error.AuthenticationFailed.message)
+                appViewModel.showSnackbarMessage(context.getString(R.string.error_authentication_failed))
             },
             onFailure = {
                 showAuthPrompt = false
-                appViewModel.showSnackbarMessage(Event.Error.AuthorizationFailed.message)
+                appViewModel.showSnackbarMessage(context.getString(R.string.error_authorization_failed))
             },
         )
     }
@@ -531,12 +530,12 @@ fun SettingsScreen(
                                     when (false) {
                                         isBackgroundLocationGranted ->
                                             appViewModel.showSnackbarMessage(
-                                                Event.Error.BackgroundLocationRequired.message,
+                                                context.getString(R.string.background_location_required),
                                             )
 
                                         fineLocationState.status.isGranted ->
                                             appViewModel.showSnackbarMessage(
-                                                Event.Error.PreciseLocationRequired.message,
+                                                context.getString(R.string.precise_location_required),
                                             )
 
                                         viewModel.isLocationEnabled(context) ->
@@ -602,11 +601,8 @@ fun SettingsScreen(
                             checked = uiState.settings.isKernelEnabled,
                             padding = screenPadding,
                             onCheckChanged = {
-                                viewModel.onToggleKernelMode().let {
-                                    when (it) {
-                                        is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
-                                        is Result.Success -> {}
-                                    }
+                                viewModel.onToggleKernelMode().onFailure {
+                                    appViewModel.showSnackbarMessage(it.getMessage(context))
                                 }
                             },
                         )

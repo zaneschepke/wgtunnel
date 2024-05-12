@@ -108,8 +108,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.corn
 import com.zaneschepke.wireguardautotunnel.ui.theme.mint
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.Event
-import com.zaneschepke.wireguardautotunnel.util.Result
+import com.zaneschepke.wireguardautotunnel.util.getMessage
 import com.zaneschepke.wireguardautotunnel.util.handshakeStatus
 import com.zaneschepke.wireguardautotunnel.util.mapPeerStats
 import com.zaneschepke.wireguardautotunnel.util.truncateWithEllipsis
@@ -194,7 +193,7 @@ fun MainScreen(
                                 name.startsWith(Constants.ANDROID_TV_EXPLORER_STUB)
                         }
                     ) {
-                        appViewModel.showSnackbarMessage(Event.Error.FileExplorerRequired.message)
+                        appViewModel.showSnackbarMessage(context.getString(R.string.error_no_file_explorer))
                     }
                     return intent
                 }
@@ -202,11 +201,8 @@ fun MainScreen(
         ) { data ->
             if (data == null) return@rememberLauncherForActivityResult
             scope.launch {
-                viewModel.onTunnelFileSelected(data, configType).let {
-                    when (it) {
-                        is Result.Error -> appViewModel.showSnackbarMessage(it.error.message)
-                        is Result.Success -> {}
-                    }
+                viewModel.onTunnelFileSelected(data, configType, context).onFailure {
+                    appViewModel.showSnackbarMessage(it.getMessage(context))
                 }
             }
         }
@@ -216,11 +212,8 @@ fun MainScreen(
             onResult = {
                 if (it.contents != null) {
                     scope.launch {
-                        viewModel.onTunnelQrResult(it.contents, configType).let { result ->
-                            when (result) {
-                                is Result.Success -> {}
-                                is Result.Error -> appViewModel.showSnackbarMessage(result.error.message)
-                            }
+                        viewModel.onTunnelQrResult(it.contents, configType).onFailure {
+                            appViewModel.showSnackbarMessage(it.getMessage(context))
                         }
                     }
                 }
@@ -233,7 +226,7 @@ fun MainScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        selectedTunnel?.let { viewModel.onDelete(it) }
+                        selectedTunnel?.let { viewModel.onDelete(it, context) }
                         showDeleteTunnelAlertDialog = false
                         selectedTunnel = null
                     },
@@ -253,7 +246,7 @@ fun MainScreen(
 
     fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
         if (appViewModel.isRequiredPermissionGranted()) {
-            if (checked) viewModel.onTunnelStart(tunnel) else viewModel.onTunnelStop()
+            if (checked) viewModel.onTunnelStart(tunnel, context) else viewModel.onTunnelStop(context)
         }
     }
 
@@ -575,7 +568,7 @@ fun MainScreen(
                             (uiState.vpnState.status == TunnelState.UP) &&
                             (tunnel.name == uiState.vpnState.tunnelConfig?.name)
                         ) {
-                            appViewModel.showSnackbarMessage(Event.Message.TunnelOffAction.message)
+                            appViewModel.showSnackbarMessage(context.getString(R.string.turn_off_tunnel))
                             return@RowListItem
                         }
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -609,7 +602,7 @@ fun MainScreen(
                                             !uiState.settings.isAutoTunnelPaused
                                         ) {
                                             appViewModel.showSnackbarMessage(
-                                                Event.Message.AutoTunnelOffAction.message,
+                                                context.getString(R.string.turn_off_tunnel),
                                             )
                                         } else {
                                             navController.navigate(
@@ -664,7 +657,7 @@ fun MainScreen(
                                         onClick = {
                                             if (uiState.settings.isAutoTunnelEnabled) {
                                                 appViewModel.showSnackbarMessage(
-                                                    Event.Message.AutoTunnelOffAction.message,
+                                                    context.getString(R.string.turn_off_auto),
                                                 )
                                             } else {
                                                 selectedTunnel = tunnel
@@ -690,7 +683,7 @@ fun MainScreen(
                                                 expanded.value = !expanded.value
                                             } else {
                                                 appViewModel.showSnackbarMessage(
-                                                    Event.Message.TunnelOnAction.message,
+                                                    context.getString(R.string.turn_on_tunnel),
                                                 )
                                             }
                                         },
@@ -711,7 +704,7 @@ fun MainScreen(
                                                 tunnel.name == uiState.vpnState.tunnelConfig?.name
                                             ) {
                                                 appViewModel.showSnackbarMessage(
-                                                    Event.Message.TunnelOffAction.message,
+                                                    context.getString(R.string.turn_off_tunnel),
                                                 )
                                             } else {
                                                 selectedTunnel = tunnel

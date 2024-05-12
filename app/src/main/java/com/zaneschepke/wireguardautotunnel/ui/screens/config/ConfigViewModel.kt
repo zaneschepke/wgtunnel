@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.config
 
 import android.Manifest
-import android.app.Application
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -12,6 +11,7 @@ import com.wireguard.config.Interface
 import com.wireguard.config.Peer
 import com.wireguard.crypto.Key
 import com.wireguard.crypto.KeyPair
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
@@ -19,9 +19,9 @@ import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.Event
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
-import com.zaneschepke.wireguardautotunnel.util.Result
+import com.zaneschepke.wireguardautotunnel.util.StringValue
+import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import com.zaneschepke.wireguardautotunnel.util.removeAt
 import com.zaneschepke.wireguardautotunnel.util.update
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,12 +37,11 @@ import javax.inject.Inject
 class ConfigViewModel
 @Inject
 constructor(
-    private val application: Application,
     private val settingsRepository: SettingsRepository,
     private val appDataRepository: AppDataRepository
 ) : ViewModel() {
 
-    private val packageManager = application.packageManager
+    private val packageManager = WireGuardAutoTunnel.instance.packageManager
 
     private val _uiState = MutableStateFlow(ConfigUiState())
     val uiState = _uiState.asStateFlow()
@@ -109,7 +108,7 @@ constructor(
     }
 
     fun getPackageLabel(packageInfo: PackageInfo): String {
-        return packageInfo.applicationInfo.loadLabel(application.packageManager).toString()
+        return packageInfo.applicationInfo.loadLabel(packageManager).toString()
     }
 
     private fun getAllInternetCapablePackages(): List<PackageInfo> {
@@ -138,7 +137,7 @@ constructor(
         viewModelScope.launch {
             if (tunnelConfig != null) {
                 saveConfig(tunnelConfig).join()
-                WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate(application)
+                WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
             }
         }
 
@@ -249,7 +248,7 @@ constructor(
         return org.amnezia.awg.config.Config.Builder().addPeers(peerList).setInterface(amInterface).build()
     }
 
-    fun onSaveAllChanges(configType: ConfigType): Result<Event> {
+    fun onSaveAllChanges(configType: ConfigType): Result<Unit> {
         return try {
             val wgQuick = buildConfig().toWgQuickString()
             val amQuick = if(configType == ConfigType.AMNEZIA) {
@@ -268,11 +267,14 @@ constructor(
                 )
             }
             updateTunnelConfig(tunnelConfig)
-            Result.Success(Event.Message.ConfigSaved)
+            Result.success(Unit)
         } catch (e: Exception) {
             Timber.e(e)
             val message = e.message?.substringAfter(":", missingDelimiterValue = "")
-            Result.Error(Event.Error.ConfigParseError(message ?: ""))
+            val stringValue = message?.let {
+                StringValue.DynamicString(message)
+            } ?: StringValue.StringResource(R.string.unknown_error)
+            Result.failure(WgTunnelExceptions.ConfigParseError(stringValue))
         }
     }
 

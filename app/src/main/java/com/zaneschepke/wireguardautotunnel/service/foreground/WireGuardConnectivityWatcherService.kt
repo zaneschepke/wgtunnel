@@ -24,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.net.InetAddress
@@ -163,10 +164,6 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     }
                 }
                 launch {
-                    Timber.i("Starting vpn state watcher")
-                    watchForVpnConnectivityChanges()
-                }
-                launch {
                     Timber.i("Starting settings watcher")
                     watchForSettingsChanges()
                 }
@@ -185,29 +182,32 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private suspend fun watchForMobileDataConnectivityChanges() {
-        mobileDataService.networkStatus.collect {
-            when (it) {
+        mobileDataService.networkStatus.collect { status ->
+            when (status) {
                 is NetworkStatus.Available -> {
                     Timber.i("Gained Mobile data connection")
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isMobileDataConnected = true,
                         )
+                    }
                 }
 
                 is NetworkStatus.CapabilitiesChanged -> {
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isMobileDataConnected = true,
                         )
+                    }
                     Timber.i("Mobile data capabilities changed")
                 }
 
                 is NetworkStatus.Unavailable -> {
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isMobileDataConnected = false,
                         )
+                    }
                     Timber.i("Lost mobile data connection")
                 }
             }
@@ -249,53 +249,48 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private suspend fun watchForSettingsChanges() {
-        appDataRepository.settings.getSettingsFlow().collect {
-            if (networkEventsFlow.value.settings.isAutoTunnelPaused != it.isAutoTunnelPaused) {
-                when (it.isAutoTunnelPaused) {
+        appDataRepository.settings.getSettingsFlow().collect { settings ->
+            if (networkEventsFlow.value.settings.isAutoTunnelPaused != settings.isAutoTunnelPaused) {
+                when (settings.isAutoTunnelPaused) {
                     true -> launchWatcherPausedNotification()
                     false -> launchWatcherNotification()
                 }
             }
-            networkEventsFlow.value =
-                networkEventsFlow.value.copy(
-                    settings = it,
+            networkEventsFlow.update {
+                it.copy(
+                    settings = settings,
                 )
-        }
-    }
-
-    private suspend fun watchForVpnConnectivityChanges() {
-        vpnService.vpnState.collect {
-            networkEventsFlow.value =
-                networkEventsFlow.value.copy(
-                    config = it.tunnelConfig,
-                )
+            }
         }
     }
 
     private suspend fun watchForEthernetConnectivityChanges() {
-        ethernetService.networkStatus.collect {
-            when (it) {
+        ethernetService.networkStatus.collect { status ->
+            when (status) {
                 is NetworkStatus.Available -> {
                     Timber.i("Gained Ethernet connection")
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isEthernetConnected = true,
                         )
+                    }
                 }
 
                 is NetworkStatus.CapabilitiesChanged -> {
                     Timber.i("Ethernet capabilities changed")
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isEthernetConnected = true,
                         )
+                    }
                 }
 
                 is NetworkStatus.Unavailable -> {
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isEthernetConnected = false,
                         )
+                    }
                     Timber.i("Lost Ethernet connection")
                 }
             }
@@ -303,40 +298,43 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
     }
 
     private suspend fun watchForWifiConnectivityChanges() {
-        wifiService.networkStatus.collect {
-            when (it) {
+        wifiService.networkStatus.collect { status ->
+            when (status) {
                 is NetworkStatus.Available -> {
                     Timber.i("Gained Wi-Fi connection")
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isWifiConnected = true,
                         )
+                    }
                 }
-
                 is NetworkStatus.CapabilitiesChanged -> {
                     Timber.i("Wifi capabilities changed")
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isWifiConnected = true,
                         )
-                    val ssid = wifiService.getNetworkName(it.networkCapabilities)
+                    }
+                    val ssid = wifiService.getNetworkName(status.networkCapabilities)
                     ssid?.let { name ->
                         if(name.contains(Constants.UNREADABLE_SSID)) {
                             Timber.w("SSID unreadable: missing permissions")
                         } else Timber.i("Detected valid SSID")
                         appDataRepository.appState.setCurrentSsid(name)
-                        networkEventsFlow.value =
-                            networkEventsFlow.value.copy(
+                        networkEventsFlow.update {
+                            it.copy(
                                 currentNetworkSSID = name,
                             )
+                        }
                     } ?: Timber.w("Failed to read ssid")
                 }
 
                 is NetworkStatus.Unavailable -> {
-                    networkEventsFlow.value =
-                        networkEventsFlow.value.copy(
+                    networkEventsFlow.update {
+                        it.copy(
                             isWifiConnected = false,
                         )
+                    }
                     Timber.i("Lost Wi-Fi connection")
                 }
             }
@@ -361,6 +359,7 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
             if (!watcherState.settings.isAutoTunnelPaused) {
                 //delay for rapid network state changes and then collect latest
                 delay(Constants.WATCHER_COLLECTION_DELAY)
+                val tunnelConfig = vpnService.vpnState.value.tunnelConfig
                 when {
                     watcherState.isEthernetConditionMet() -> {
                         Timber.i("$autoTunnel - tunnel on on ethernet condition met")
@@ -373,12 +372,14 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                     }
 
                     watcherState.isTunnelOnMobileDataPreferredConditionMet() -> {
-                        getMobileDataTunnel()?.let {
-                            Timber.i("$autoTunnel - tunnel connected on mobile data is not preferred condition met, switching to preferred")
-                            if(isTunnelDown()) serviceManager.startVpnServiceForeground(
-                                this,
-                                getMobileDataTunnel()?.id,
-                            )
+                        if(tunnelConfig?.isMobileDataTunnel == false) {
+                            getMobileDataTunnel()?.let {
+                                Timber.i("$autoTunnel - tunnel connected on mobile data is not preferred condition met, switching to preferred")
+                                if(isTunnelDown()) serviceManager.startVpnServiceForeground(
+                                    this,
+                                    getMobileDataTunnel()?.id,
+                                )
+                            }
                         }
                     }
 
@@ -387,25 +388,20 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         if(!isTunnelDown()) serviceManager.stopVpnServiceForeground(this)
                     }
 
-                    watcherState.isTunnelNotWifiNamePreferredMet(watcherState.currentNetworkSSID) -> {
-                        Timber.i("$autoTunnel - tunnel on ssid not associated with current tunnel condition met")
-                        getSsidTunnel(watcherState.currentNetworkSSID)?.let {
-                            Timber.i("Found tunnel associated with this SSID, bringing tunnel up")
-                            if(isTunnelDown()) serviceManager.startVpnServiceForeground(this, it.id)
-                        } ?: suspend {
-                            Timber.i("No tunnel associated with this SSID, using defaults")
-                            if (appDataRepository.getPrimaryOrFirstTunnel()?.name != vpnService.name) {
-                                if(isTunnelDown()) serviceManager.startVpnServiceForeground(this)
-                            }
-                        }.invoke()
-                    }
-
                     watcherState.isUntrustedWifiConditionMet() -> {
-                        Timber.i("$autoTunnel - tunnel on untrusted wifi condition met")
-                        if(isTunnelDown()) serviceManager.startVpnServiceForeground(
-                            this,
-                            getSsidTunnel(watcherState.currentNetworkSSID)?.id,
-                        )
+                        if(tunnelConfig?.tunnelNetworks?.contains(watcherState.currentNetworkSSID) == false ||
+                            tunnelConfig == null) {
+                            Timber.i("$autoTunnel - tunnel on ssid not associated with current tunnel condition met")
+                            getSsidTunnel(watcherState.currentNetworkSSID)?.let {
+                                Timber.i("Found tunnel associated with this SSID, bringing tunnel up")
+                                if(isTunnelDown()) serviceManager.startVpnServiceForeground(this, it.id)
+                            } ?: suspend {
+                                Timber.i("No tunnel associated with this SSID, using defaults")
+                                if (appDataRepository.getPrimaryOrFirstTunnel()?.name != vpnService.name) {
+                                    if(isTunnelDown()) serviceManager.startVpnServiceForeground(this)
+                                }
+                            }.invoke()
+                        }
                     }
 
                     watcherState.isTrustedWifiConditionMet() -> {

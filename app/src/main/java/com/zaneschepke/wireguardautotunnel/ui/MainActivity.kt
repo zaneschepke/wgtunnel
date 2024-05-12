@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         // load preferences into memory and init data
         lifecycleScope.launch {
             dataStoreManager.init()
-            WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate(this@MainActivity)
+            WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
             val settings = settingsRepository.getSettings()
             if (settings.isAutoTunnelEnabled) {
                 serviceManager.startWatcherService(application.applicationContext)
