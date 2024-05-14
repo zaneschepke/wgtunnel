@@ -4,10 +4,11 @@ Funktionen
 - Automatische Verbindung zum VPN basierend auf der Wifi-SSID, Ethernet und mobilen Daten
 - Geteilter Tunnel für Anwendungen mit Suche
 - Unterstützung für Wireguard Userspace- und Kernel-modus
+- Amnezia Unterstützung für Benutzeroberflächen-Modus zur DPI/Zensurschutz
 - Always-On VPN Unterstützung
-- Export von Tunneln ins Zip Format
+- Export von Amnezia- und WireGuard-Tunnel ins Zip Format
 - Quicktiles zum aktivieren/deaktivieren der VPN Verbindung
 - Feste Shortcuts für den Haupttunnel für automatische Integration
-- Intent basierten Automationssupport für alle Tunnel
+- Absichtlicher Automationssupport für alle Tunnel
 - Automatischer Servicestart nach Geräteneustart
 - Akkuerhaltungsfunktionen

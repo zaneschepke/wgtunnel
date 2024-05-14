@@ -1,0 +1,6 @@
+Was ist neu:
+- Offizielle Unterstützung für AmneziaWG
+- Import/Export von Amnezia Konfigurationen
+- Auto-Tunnel, um nur einmal pro Netzwerkänderung umzuschalten
+- Unterstützung für zusätzliche Sprachen
+- Weitere Fehlerbehebungen und Verbesserungen
