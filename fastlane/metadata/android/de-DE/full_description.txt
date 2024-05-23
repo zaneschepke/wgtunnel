@@ -1,7 +1,7 @@
 Funktionen
 
 - Hinzufügen von Tunneln über .conf Dateien, Zip, Manuelle Eingabe oder QR Codes
-- Automatische Verbindung zum VPN basierend auf der Wifi-SSID, Ethernet und mobilen Daten
+- Automatische Verbindung zum VPN basierend auf der WLAN-SSID, Ethernet und mobilen Daten
 - Geteilter Tunnel für Anwendungen mit Suche
 - Unterstützung für Wireguard Userspace- und Kernel-modus
 - Amnezia Unterstützung für Benutzeroberflächen-Modus zur DPI/Zensurschutz
