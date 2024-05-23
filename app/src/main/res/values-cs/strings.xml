@@ -10,8 +10,6 @@
     <string name="privacy_policy">Otevřít zásady soukromí</string>
     <string name="okay">OK</string>
     <string name="thank_you">Děkujeme za používání WG Tunnel!</string>
-    <string name="trusted_ssid_value_description"></string>
-    <string name="trusted_ssid_empty_description"></string>
     <string name="add_tunnels_text">Přidat ze souboru nebo zipu</string>
     <string name="open_file">Otevřít soubor</string>
     <string name="add_from_qr">Přidat z QR kódu</string>
