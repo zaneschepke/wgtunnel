@@ -1,0 +1,6 @@
+Funkcje
+
+-Dodawanie tuneli za pomocą pliku .conf, zip, ręcznego wprowadzania lub kodu QR
+-Automatyczne łączenie się z VPN na podstawie SSID Wi-Fi, sieci Ethernet lub danych mobilnych
+-Dzielenie tuneli w aplikacji z wyszukiwaniem
+-

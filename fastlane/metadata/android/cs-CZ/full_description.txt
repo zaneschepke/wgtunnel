@@ -1,0 +1,14 @@
+Funkce
+
+- Přidání tunelů pomocí .conf souboru, zipu, ručního zadávání nebo QR kódu
+- Automatické připojení k VPN dle Wi-Fi SSID, ethernetu či mobilních dat
+- Rozdělené tunelování dle aplikací s vyhledáváním
+- WireGuard podpora pro kernel a userspace módy
+- Amnezia podpora pro userspace mód pro ochranu před cenzurou
+- Always-On VPN podpora
+- Exportování Amnezia a WireGuard tunelů do zipu
+- Podpora pro přepínání VPN pomocí rychlých dlaždic
+- Podpora statických zkratek u hlavního tunelu pro automatickou integraci
+- Podpora Intent automatizace pro všechny tunely
+- Automatický restart služby po restartu systému
+- Opatření pro úsporu baterie
