@@ -24,6 +24,7 @@ open class ForegroundService : LifecycleService() {
             when (action) {
                 Action.START.name,
                 Action.START_FOREGROUND.name -> startService(intent.extras)
+
                 Action.STOP.name, Action.STOP_FOREGROUND.name -> stopService()
                 Constants.ALWAYS_ON_VPN_ACTION -> {
                     Timber.i("Always-on VPN starting service")

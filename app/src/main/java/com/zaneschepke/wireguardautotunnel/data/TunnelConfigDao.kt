@@ -21,7 +21,7 @@ interface TunnelConfigDao {
     suspend fun getById(id: Long): TunnelConfig?
 
     @Query("SELECT * FROM TunnelConfig WHERE name=:name")
-    suspend fun getByName(name: String) : TunnelConfig?
+    suspend fun getByName(name: String): TunnelConfig?
 
     @Query("SELECT * FROM TunnelConfig")
     suspend fun getAll(): TunnelConfigs
@@ -36,10 +36,10 @@ interface TunnelConfigDao {
     suspend fun findByTunnelNetworkName(name: String): TunnelConfigs
 
     @Query("UPDATE TunnelConfig SET is_primary_tunnel = 0 WHERE is_primary_tunnel =1")
-    fun resetPrimaryTunnel()
+    suspend fun resetPrimaryTunnel()
 
     @Query("UPDATE TunnelConfig SET is_mobile_data_tunnel = 0 WHERE is_mobile_data_tunnel =1")
-    fun resetMobileDataTunnel()
+    suspend fun resetMobileDataTunnel()
 
     @Query("SELECT * FROM TUNNELCONFIG WHERE is_primary_tunnel=1")
     suspend fun findByPrimary(): TunnelConfigs

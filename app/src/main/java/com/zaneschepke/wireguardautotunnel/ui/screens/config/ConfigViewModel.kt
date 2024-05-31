@@ -16,6 +16,7 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -25,7 +26,7 @@ import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import com.zaneschepke.wireguardautotunnel.util.removeAt
 import com.zaneschepke.wireguardautotunnel.util.update
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -38,7 +39,8 @@ class ConfigViewModel
 @Inject
 constructor(
     private val settingsRepository: SettingsRepository,
-    private val appDataRepository: AppDataRepository
+    private val appDataRepository: AppDataRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val packageManager = WireGuardAutoTunnel.instance.packageManager
@@ -47,7 +49,7 @@ constructor(
     val uiState = _uiState.asStateFlow()
 
     fun init(tunnelId: String) =
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             val packages = getQueriedPackages("")
             val state =
                 if (tunnelId != Constants.MANUAL_TUNNEL_CONFIG_ID) {
@@ -56,15 +58,16 @@ constructor(
                             .firstOrNull { it.id.toString() == tunnelId }
                     val isAmneziaEnabled = settingsRepository.getSettings().isAmneziaEnabled
                     if (tunnelConfig != null) {
-                        (if(isAmneziaEnabled) {
-                            val amConfig = if(tunnelConfig.amQuick == "") tunnelConfig.wgQuick else tunnelConfig.amQuick
+                        (if (isAmneziaEnabled) {
+                            val amConfig =
+                                if (tunnelConfig.amQuick == "") tunnelConfig.wgQuick else tunnelConfig.amQuick
                             ConfigUiState.from(TunnelConfig.configFromAmQuick(amConfig))
                         } else ConfigUiState.from(TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick))).copy(
                             packages = packages,
                             loading = false,
                             tunnel = tunnelConfig,
                             tunnelName = tunnelConfig.name,
-                            isAmneziaEnabled = isAmneziaEnabled
+                            isAmneziaEnabled = isAmneziaEnabled,
                         )
                     } else {
                         ConfigUiState(loading = false, packages = packages)
@@ -206,64 +209,82 @@ constructor(
         if (isAllApplicationsEnabled()) emptyCheckedPackagesList()
         if (_uiState.value.include) builder.includeApplications(_uiState.value.checkedPackageNames)
         if (!_uiState.value.include) builder.excludeApplications(_uiState.value.checkedPackageNames)
-        if(_uiState.value.interfaceProxy.junkPacketCount.isNotEmpty()) {
+        if (_uiState.value.interfaceProxy.junkPacketCount.isNotEmpty()) {
             builder.setJunkPacketCount(_uiState.value.interfaceProxy.junkPacketCount.trim().toInt())
         }
-        if(_uiState.value.interfaceProxy.junkPacketMinSize.isNotEmpty()) {
-            builder.setJunkPacketMinSize(_uiState.value.interfaceProxy.junkPacketMinSize.trim().toInt())
+        if (_uiState.value.interfaceProxy.junkPacketMinSize.isNotEmpty()) {
+            builder.setJunkPacketMinSize(
+                _uiState.value.interfaceProxy.junkPacketMinSize.trim().toInt(),
+            )
         }
-        if(_uiState.value.interfaceProxy.junkPacketMaxSize.isNotEmpty()) {
-            builder.setJunkPacketMaxSize(_uiState.value.interfaceProxy.junkPacketMaxSize.trim().toInt())
+        if (_uiState.value.interfaceProxy.junkPacketMaxSize.isNotEmpty()) {
+            builder.setJunkPacketMaxSize(
+                _uiState.value.interfaceProxy.junkPacketMaxSize.trim().toInt(),
+            )
         }
-        if(_uiState.value.interfaceProxy.initPacketJunkSize.isNotEmpty()) {
-            builder.setInitPacketJunkSize(_uiState.value.interfaceProxy.initPacketJunkSize.trim().toInt())
+        if (_uiState.value.interfaceProxy.initPacketJunkSize.isNotEmpty()) {
+            builder.setInitPacketJunkSize(
+                _uiState.value.interfaceProxy.initPacketJunkSize.trim().toInt(),
+            )
         }
-        if(_uiState.value.interfaceProxy.responsePacketJunkSize.isNotEmpty()) {
-            builder.setResponsePacketJunkSize(_uiState.value.interfaceProxy.responsePacketJunkSize.trim().toInt())
+        if (_uiState.value.interfaceProxy.responsePacketJunkSize.isNotEmpty()) {
+            builder.setResponsePacketJunkSize(
+                _uiState.value.interfaceProxy.responsePacketJunkSize.trim().toInt(),
+            )
         }
-        if(_uiState.value.interfaceProxy.initPacketMagicHeader.isNotEmpty()) {
-            builder.setInitPacketMagicHeader(_uiState.value.interfaceProxy.initPacketMagicHeader.trim().toLong())
+        if (_uiState.value.interfaceProxy.initPacketMagicHeader.isNotEmpty()) {
+            builder.setInitPacketMagicHeader(
+                _uiState.value.interfaceProxy.initPacketMagicHeader.trim().toLong(),
+            )
         }
-        if(_uiState.value.interfaceProxy.responsePacketMagicHeader.isNotEmpty()) {
-            builder.setResponsePacketMagicHeader(_uiState.value.interfaceProxy.responsePacketMagicHeader.trim().toLong())
+        if (_uiState.value.interfaceProxy.responsePacketMagicHeader.isNotEmpty()) {
+            builder.setResponsePacketMagicHeader(
+                _uiState.value.interfaceProxy.responsePacketMagicHeader.trim().toLong(),
+            )
         }
-        if(_uiState.value.interfaceProxy.transportPacketMagicHeader.isNotEmpty()) {
-            builder.setTransportPacketMagicHeader(_uiState.value.interfaceProxy.transportPacketMagicHeader.trim().toLong())
+        if (_uiState.value.interfaceProxy.transportPacketMagicHeader.isNotEmpty()) {
+            builder.setTransportPacketMagicHeader(
+                _uiState.value.interfaceProxy.transportPacketMagicHeader.trim().toLong(),
+            )
         }
-        if(_uiState.value.interfaceProxy.underloadPacketMagicHeader.isNotEmpty()) {
-            builder.setUnderloadPacketMagicHeader(_uiState.value.interfaceProxy.underloadPacketMagicHeader.trim().toLong())
+        if (_uiState.value.interfaceProxy.underloadPacketMagicHeader.isNotEmpty()) {
+            builder.setUnderloadPacketMagicHeader(
+                _uiState.value.interfaceProxy.underloadPacketMagicHeader.trim().toLong(),
+            )
         }
         return builder.build()
     }
 
-    private fun buildConfig() : Config {
+    private fun buildConfig(): Config {
         val peerList = buildPeerListFromProxyPeers()
         val wgInterface = buildInterfaceListFromProxyInterface()
-        return  Config.Builder().addPeers(peerList).setInterface(wgInterface).build()
+        return Config.Builder().addPeers(peerList).setInterface(wgInterface).build()
     }
 
-    private fun buildAmConfig() : org.amnezia.awg.config.Config {
+    private fun buildAmConfig(): org.amnezia.awg.config.Config {
         val peerList = buildAmPeerListFromProxyPeers()
         val amInterface = buildAmInterfaceListFromProxyInterface()
-        return org.amnezia.awg.config.Config.Builder().addPeers(peerList).setInterface(amInterface).build()
+        return org.amnezia.awg.config.Config.Builder().addPeers(peerList).setInterface(amInterface)
+            .build()
     }
 
     fun onSaveAllChanges(configType: ConfigType): Result<Unit> {
         return try {
             val wgQuick = buildConfig().toWgQuickString()
-            val amQuick = if(configType == ConfigType.AMNEZIA) {
+            val amQuick = if (configType == ConfigType.AMNEZIA) {
                 buildAmConfig().toAwgQuickString()
             } else TunnelConfig.AM_QUICK_DEFAULT
             val tunnelConfig = when (uiState.value.tunnel) {
                 null -> TunnelConfig(
                     name = _uiState.value.tunnelName,
                     wgQuick = wgQuick,
-                    amQuick = amQuick
+                    amQuick = amQuick,
                 )
+
                 else -> uiState.value.tunnel!!.copy(
                     name = _uiState.value.tunnelName,
                     wgQuick = wgQuick,
-                    amQuick = amQuick
+                    amQuick = amQuick,
                 )
             }
             updateTunnelConfig(tunnelConfig)
@@ -430,14 +451,15 @@ constructor(
     fun onJunkPacketCountChanged(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketCount = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketCount = value),
             )
         }
     }
+
     fun onJunkPacketMinSizeChanged(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMinSize = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMinSize = value),
             )
         }
     }
@@ -445,7 +467,7 @@ constructor(
     fun onJunkPacketMaxSizeChanged(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMaxSize = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMaxSize = value),
             )
         }
     }
@@ -453,7 +475,7 @@ constructor(
     fun onInitPacketJunkSizeChanged(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(initPacketJunkSize = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(initPacketJunkSize = value),
             )
         }
     }
@@ -461,7 +483,7 @@ constructor(
     fun onResponsePacketJunkSize(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(responsePacketJunkSize = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(responsePacketJunkSize = value),
             )
         }
     }
@@ -469,7 +491,7 @@ constructor(
     fun onInitPacketMagicHeader(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(initPacketMagicHeader = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(initPacketMagicHeader = value),
             )
         }
     }
@@ -477,7 +499,7 @@ constructor(
     fun onResponsePacketMagicHeader(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(responsePacketMagicHeader = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(responsePacketMagicHeader = value),
             )
         }
     }
@@ -485,7 +507,7 @@ constructor(
     fun onTransportPacketMagicHeader(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(transportPacketMagicHeader = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(transportPacketMagicHeader = value),
             )
         }
     }
@@ -493,7 +515,7 @@ constructor(
     fun onUnderloadPacketMagicHeader(value: String) {
         _uiState.update {
             it.copy(
-                interfaceProxy = _uiState.value.interfaceProxy.copy(underloadPacketMagicHeader = value)
+                interfaceProxy = _uiState.value.interfaceProxy.copy(underloadPacketMagicHeader = value),
             )
         }
     }

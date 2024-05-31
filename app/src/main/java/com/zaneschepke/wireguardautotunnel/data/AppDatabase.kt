@@ -33,7 +33,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
             to = 7,
             spec = RemoveLegacySettingColumnsMigration::class,
         ),
-        AutoMigration(7, 8)
+        AutoMigration(7, 8),
     ],
     exportSchema = true,
 )

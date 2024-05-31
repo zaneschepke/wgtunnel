@@ -483,7 +483,7 @@ fun ConfigScreen(
                                 modifier = Modifier.width(IntrinsicSize.Min),
                             )
                         }
-                        if(configType == ConfigType.AMNEZIA) {
+                        if (configType == ConfigType.AMNEZIA) {
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.junkPacketCount,
                                 onValueChange = { value -> viewModel.onJunkPacketCountChanged(value) },
@@ -496,7 +496,11 @@ fun ConfigScreen(
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.junkPacketMinSize,
-                                onValueChange = { value -> viewModel.onJunkPacketMinSizeChanged(value) },
+                                onValueChange = { value ->
+                                    viewModel.onJunkPacketMinSizeChanged(
+                                        value,
+                                    )
+                                },
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.junk_packet_minimum_size),
                                 hint = stringResource(R.string.junk_packet_minimum_size).lowercase(),
@@ -506,7 +510,11 @@ fun ConfigScreen(
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.junkPacketMaxSize,
-                                onValueChange = { value -> viewModel.onJunkPacketMaxSizeChanged(value) },
+                                onValueChange = { value ->
+                                    viewModel.onJunkPacketMaxSizeChanged(
+                                        value,
+                                    )
+                                },
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.junk_packet_maximum_size),
                                 hint = stringResource(R.string.junk_packet_maximum_size).lowercase(),
@@ -516,7 +524,11 @@ fun ConfigScreen(
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.initPacketJunkSize,
-                                onValueChange = { value -> viewModel.onInitPacketJunkSizeChanged(value) },
+                                onValueChange = { value ->
+                                    viewModel.onInitPacketJunkSizeChanged(
+                                        value,
+                                    )
+                                },
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.init_packet_junk_size),
                                 hint = stringResource(R.string.init_packet_junk_size).lowercase(),
@@ -546,7 +558,11 @@ fun ConfigScreen(
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.responsePacketMagicHeader,
-                                onValueChange = { value -> viewModel.onResponsePacketMagicHeader(value) },
+                                onValueChange = { value ->
+                                    viewModel.onResponsePacketMagicHeader(
+                                        value,
+                                    )
+                                },
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.response_packet_magic_header),
                                 hint = stringResource(R.string.response_packet_magic_header).lowercase(),
@@ -556,7 +572,11 @@ fun ConfigScreen(
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.underloadPacketMagicHeader,
-                                onValueChange = { value -> viewModel.onUnderloadPacketMagicHeader(value) },
+                                onValueChange = { value ->
+                                    viewModel.onUnderloadPacketMagicHeader(
+                                        value,
+                                    )
+                                },
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.underload_packet_magic_header),
                                 hint = stringResource(R.string.underload_packet_magic_header).lowercase(),
@@ -566,7 +586,11 @@ fun ConfigScreen(
                             )
                             ConfigurationTextBox(
                                 value = uiState.interfaceProxy.transportPacketMagicHeader,
-                                onValueChange = { value -> viewModel.onTransportPacketMagicHeader(value) },
+                                onValueChange = { value ->
+                                    viewModel.onTransportPacketMagicHeader(
+                                        value,
+                                    )
+                                },
                                 keyboardActions = keyboardActions,
                                 label = stringResource(R.string.transport_packet_magic_header),
                                 hint = stringResource(R.string.transport_packet_magic_header).lowercase(),

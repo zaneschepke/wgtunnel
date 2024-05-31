@@ -4,7 +4,7 @@
 
 We as individuals involved in this project, pledge to participate in this
 community in a respectful, constructive, and civil manner as we work towards a common goal
-of delivering free, open source, and value adding software for all. 
+of delivering free, open source, and value adding software for all.
 
 ## Standard
 

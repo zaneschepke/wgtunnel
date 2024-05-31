@@ -6,6 +6,8 @@ import com.wireguard.android.backend.Tunnel.State
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.Kernel
 import com.zaneschepke.wireguardautotunnel.module.Userspace
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
@@ -13,14 +15,15 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStati
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import javax.inject.Inject
@@ -28,15 +31,16 @@ import javax.inject.Inject
 class WireGuardTunnel
 @Inject
 constructor(
-    private val userspaceAmneziaBackend : org.amnezia.awg.backend.Backend,
+    private val userspaceAmneziaBackend: org.amnezia.awg.backend.Backend,
     @Userspace private val userspaceBackend: Backend,
     @Kernel private val kernelBackend: Backend,
     private val appDataRepository: AppDataRepository,
+    @ApplicationScope private val applicationScope: CoroutineScope,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : VpnService {
     private val _vpnState = MutableStateFlow(VpnState())
     override val vpnState: StateFlow<VpnState> = _vpnState.asStateFlow()
 
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     private var statsJob: Job? = null
 
@@ -47,20 +51,20 @@ constructor(
     private var backendIsAmneziaUserspace = false
 
     init {
-        scope.launch {
+        applicationScope.launch(ioDispatcher) {
             appDataRepository.settings.getSettingsFlow().collect {
                 if (it.isKernelEnabled && (backendIsWgUserspace || backendIsAmneziaUserspace)) {
-                    Timber.d("Setting kernel backend")
+                    Timber.i("Setting kernel backend")
                     backend = kernelBackend
                     backendIsWgUserspace = false
                     backendIsAmneziaUserspace = false
                 } else if (!it.isKernelEnabled && !it.isAmneziaEnabled && !backendIsWgUserspace) {
-                    Timber.d("Setting WireGuard userspace backend")
+                    Timber.i("Setting WireGuard userspace backend")
                     backend = userspaceBackend
                     backendIsWgUserspace = true
                     backendIsAmneziaUserspace = false
                 } else if (it.isAmneziaEnabled && !backendIsAmneziaUserspace) {
-                    Timber.d("Setting Amnezia userspace backend")
+                    Timber.i("Setting Amnezia userspace backend")
                     backendIsAmneziaUserspace = true
                     backendIsWgUserspace = false
                 }
@@ -68,11 +72,11 @@ constructor(
         }
     }
 
-    private fun setState(tunnelConfig: TunnelConfig?, tunnelState: TunnelState) : TunnelState {
-        return if(backendIsAmneziaUserspace) {
+    private fun setState(tunnelConfig: TunnelConfig?, tunnelState: TunnelState): TunnelState {
+        return if (backendIsAmneziaUserspace) {
             Timber.i("Using Amnezia backend")
             val config = tunnelConfig?.let {
-                if(it.amQuick != "") TunnelConfig.configFromAmQuick(it.amQuick) else {
+                if (it.amQuick != "") TunnelConfig.configFromAmQuick(it.amQuick) else {
                     Timber.w("Using backwards compatible wg config, amnezia specific config not found.")
                     TunnelConfig.configFromAmQuick(it.wgQuick)
                 }
@@ -92,20 +96,22 @@ constructor(
     }
 
     override suspend fun startTunnel(tunnelConfig: TunnelConfig?): TunnelState {
-        return try {
-            //TODO we need better error handling here
-            val config = tunnelConfig ?: appDataRepository.getPrimaryOrFirstTunnel()
-            if (config != null) {
-                emitTunnelConfig(config)
-                setState(config, TunnelState.UP)
-            } else throw Exception("No tunnels")
-        } catch (e: BackendException) {
-            Timber.e("Failed to start tunnel with error: ${e.message}")
-            TunnelState.from(State.DOWN)
+        return withContext(ioDispatcher) {
+            try {
+                //TODO we need better error handling here
+                val config = tunnelConfig ?: appDataRepository.getPrimaryOrFirstTunnel()
+                if (config != null) {
+                    emitTunnelConfig(config)
+                    setState(config, TunnelState.UP)
+                } else throw Exception("No tunnels")
+            } catch (e: BackendException) {
+                Timber.e("Failed to start tunnel with error: ${e.message}")
+                TunnelState.from(State.DOWN)
+            }
         }
     }
 
-    private fun emitTunnelState(state : TunnelState) {
+    private fun emitTunnelState(state: TunnelState) {
         _vpnState.tryEmit(
             _vpnState.value.copy(
                 status = state,
@@ -134,21 +140,23 @@ constructor(
     }
 
     override suspend fun stopTunnel() {
-        try {
-            if (getState() == TunnelState.UP) {
-                val state = setState(null, TunnelState.DOWN)
-                resetVpnState()
-                emitTunnelState(state)
+        withContext(ioDispatcher) {
+            try {
+                if (getState() == TunnelState.UP) {
+                    val state = setState(null, TunnelState.DOWN)
+                    resetVpnState()
+                    emitTunnelState(state)
+                }
+            } catch (e: BackendException) {
+                Timber.e("Failed to stop wireguard tunnel with error: ${e.message}")
+            } catch (e: org.amnezia.awg.backend.BackendException) {
+                Timber.e("Failed to stop amnezia tunnel with error: ${e.message}")
             }
-        } catch (e: BackendException) {
-            Timber.e("Failed to stop wireguard tunnel with error: ${e.message}")
-        } catch (e: org.amnezia.awg.backend.BackendException) {
-            Timber.e("Failed to stop amnezia tunnel with error: ${e.message}")
         }
     }
 
     override fun getState(): TunnelState {
-        return if(backendIsAmneziaUserspace) TunnelState.from(userspaceAmneziaBackend.getState(this))
+        return if (backendIsAmneziaUserspace) TunnelState.from(userspaceAmneziaBackend.getState(this))
         else TunnelState.from(backend.getState(this))
     }
 
@@ -162,28 +170,28 @@ constructor(
     }
 
     private fun handleStateChange(state: TunnelState) {
-        val tunnel = this
         emitTunnelState(state)
         WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
         if (state == TunnelState.UP) {
-            statsJob =
-                scope.launch {
-                    while (true) {
-                        if(backendIsAmneziaUserspace) {
-                            emitBackendStatistics(AmneziaStatistics(userspaceAmneziaBackend.getStatistics(tunnel)))
-                        } else {
-                            emitBackendStatistics(WireGuardStatistics(backend.getStatistics(tunnel)))
-                        }
-                        delay(Constants.VPN_STATISTIC_CHECK_INTERVAL)
-                    }
-                }
+            statsJob = startTunnelStatisticsJob()
         }
         if (state == TunnelState.DOWN) {
             try {
                 statsJob?.cancel()
-            } catch (e : CancellationException) {
+            } catch (e: CancellationException) {
                 Timber.i("Stats job cancelled")
             }
+        }
+    }
+
+    private fun startTunnelStatisticsJob() = applicationScope.launch(ioDispatcher) {
+        while (true) {
+            if (backendIsAmneziaUserspace) {
+                emitBackendStatistics(AmneziaStatistics(userspaceAmneziaBackend.getStatistics(this@WireGuardTunnel)))
+            } else {
+                emitBackendStatistics(WireGuardStatistics(backend.getStatistics(this@WireGuardTunnel)))
+            }
+            delay(Constants.VPN_STATISTIC_CHECK_INTERVAL)
         }
     }
 

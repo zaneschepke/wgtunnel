@@ -22,7 +22,8 @@ WG Tunnel
 
 <div align="left">
 
-This is an alternative Android Application for [WireGuard](https://www.wireguard.com/) and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) with added
+This is an alternative Android Application for [WireGuard](https://www.wireguard.com/)
+and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) with added
 features. Built using the [wireguard-android](https://github.com/WireGuard/wireguard-android)
 library and [Jetpack Compose](https://developer.android.com/jetpack/compose), this application was
 inspired by the official [WireGuard Android](https://github.com/WireGuard/wireguard-android) app.
@@ -73,17 +74,20 @@ The repository for these docs can be found [here](https://github.com/zaneschepke
 
 ## Contributing
 
-Any contributions in the form of feedback, issues, code, or translations are welcome and much appreciated!
+Any contributions in the form of feedback, issues, code, or translations are welcome and much
+appreciated!
 
-Please read the [code of conduct](https://github.com/zaneschepke/wgtunnel?tab=coc-ov-file#contributor-code-of-conduct) before contributing.
+Please read
+the [code of conduct](https://github.com/zaneschepke/wgtunnel?tab=coc-ov-file#contributor-code-of-conduct)
+before contributing.
 
 ## Translation
 
-This app is using [Weblate](https://weblate.org) to assist with translations. 
+This app is using [Weblate](https://weblate.org) to assist with translations.
 
-Help translate WG Tunnel into your language at [Hosted Weblate](https://hosted.weblate.org/engage/wg-tunnel/).\
+Help translate WG Tunnel into your language
+at [Hosted Weblate](https://hosted.weblate.org/engage/wg-tunnel/).\
 [![Translation status](https://hosted.weblate.org/widgets/wg-tunnel/-/multi-auto.svg)](https://hosted.weblate.org/engage/wg-tunnel/)
-
 
 ## Building
 

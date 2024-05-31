@@ -11,7 +11,7 @@ class AmneziaStatistics(private val statistics: Statistics) : TunnelStatistics()
             PeerStats(
                 rxBytes = stats.rxBytes,
                 txBytes = stats.txBytes,
-                latestHandshakeEpochMillis = stats.latestHandshakeEpochMillis
+                latestHandshakeEpochMillis = stats.latestHandshakeEpochMillis,
             )
         }
     }

@@ -35,7 +35,7 @@ data class PeerProxy(
             )
         }
 
-        fun from(peer: org.amnezia.awg.config.Peer) : PeerProxy {
+        fun from(peer: org.amnezia.awg.config.Peer): PeerProxy {
             return PeerProxy(
                 publicKey = peer.publicKey.toBase64(),
                 preSharedKey =

@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
@@ -52,9 +53,10 @@ fun RowListItem(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(13 / 20f),
                 ) {
                     icon()
-                    Text(text)
+                    Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 rowButton()
             }

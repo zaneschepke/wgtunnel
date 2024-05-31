@@ -11,6 +11,7 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -18,7 +19,7 @@ import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import com.zaneschepke.wireguardautotunnel.util.toWgQuickString
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -35,7 +36,8 @@ class MainViewModel
 constructor(
     private val appDataRepository: AppDataRepository,
     private val serviceManager: ServiceManager,
-    val vpnService: VpnService
+    val vpnService: VpnService,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     val uiState =
@@ -52,13 +54,12 @@ constructor(
                 MainUiState(),
             )
 
-    private fun stopWatcherService(context: Context) =
-        viewModelScope.launch(Dispatchers.IO) {
-            serviceManager.stopWatcherService(context)
-        }
+    private fun stopWatcherService(context: Context) {
+        serviceManager.stopWatcherService(context)
+    }
 
     fun onDelete(tunnel: TunnelConfig, context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val settings = appDataRepository.settings.getSettings()
             val isPrimary = tunnel.isPrimaryTunnel
             if (appDataRepository.tunnels.count() == 1 || isPrimary) {
@@ -80,7 +81,7 @@ constructor(
     }
 
     fun onTunnelStart(tunnelConfig: TunnelConfig, context: Context) =
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             Timber.d("On start called!")
             serviceManager.startVpnService(
                 context,
@@ -91,41 +92,42 @@ constructor(
 
 
     fun onTunnelStop(context: Context) =
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             Timber.i("Stopping active tunnel")
             serviceManager.stopVpnService(context, isManualStop = true)
         }
 
     private fun validateConfigString(config: String, configType: ConfigType) {
-        when(configType) {
+        when (configType) {
             ConfigType.AMNEZIA -> TunnelConfig.configFromAmQuick(config)
             ConfigType.WIREGUARD -> TunnelConfig.configFromWgQuick(config)
         }
     }
 
-    private fun generateQrCodeDefaultName(config : String, configType: ConfigType) : String {
+    private fun generateQrCodeDefaultName(config: String, configType: ConfigType): String {
         return try {
-            when(configType) {
+            when (configType) {
                 ConfigType.AMNEZIA -> {
                     TunnelConfig.configFromAmQuick(config).peers[0].endpoint.get().host
                 }
+
                 ConfigType.WIREGUARD -> {
                     TunnelConfig.configFromWgQuick(config).peers[0].endpoint.get().host
                 }
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             Timber.e(e)
             NumberUtils.generateRandomTunnelName()
         }
     }
 
-    private fun generateQrCodeTunnelName(config : String, configType: ConfigType) : String {
+    private fun generateQrCodeTunnelName(config: String, configType: ConfigType): String {
         var defaultName = generateQrCodeDefaultName(config, configType)
         val lines = config.lines().toMutableList()
         val linesIterator = lines.iterator()
-        while(linesIterator.hasNext()) {
+        while (linesIterator.hasNext()) {
             val next = linesIterator.next()
-            if(next.contains(Constants.QR_CODE_NAME_PROPERTY)) {
+            if (next.contains(Constants.QR_CODE_NAME_PROPERTY)) {
                 defaultName = next.substringAfter(Constants.QR_CODE_NAME_PROPERTY).trim()
                 break
             }
@@ -134,121 +136,177 @@ constructor(
     }
 
     suspend fun onTunnelQrResult(result: String, configType: ConfigType): Result<Unit> {
-        return try {
-            validateConfigString(result, configType)
-            val tunnelName = makeTunnelNameUnique(generateQrCodeTunnelName(result, configType))
-            val tunnelConfig = when(configType) {
-                ConfigType.AMNEZIA ->{
-                    TunnelConfig(name = tunnelName, amQuick = result,
-                        wgQuick = TunnelConfig.configFromAmQuick(result).toWgQuickString())
+        return withContext(ioDispatcher) {
+            try {
+                validateConfigString(result, configType)
+                val tunnelName = makeTunnelNameUnique(generateQrCodeTunnelName(result, configType))
+                val tunnelConfig = when (configType) {
+                    ConfigType.AMNEZIA -> {
+                        TunnelConfig(
+                            name = tunnelName, amQuick = result,
+                            wgQuick = TunnelConfig.configFromAmQuick(result).toWgQuickString(),
+                        )
+                    }
+
+                    ConfigType.WIREGUARD -> TunnelConfig(name = tunnelName, wgQuick = result)
                 }
-                ConfigType.WIREGUARD -> TunnelConfig(name = tunnelName, wgQuick = result)
+                addTunnel(tunnelConfig)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Timber.e(e)
+                Result.failure(WgTunnelExceptions.InvalidQrCode())
             }
-            addTunnel(tunnelConfig)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Timber.e(e)
-            Result.failure(WgTunnelExceptions.InvalidQrCode())
         }
     }
 
-    private suspend fun makeTunnelNameUnique(name : String) : String {
-        val tunnels = appDataRepository.tunnels.getAll()
-        var tunnelName = name
-        var num = 1
-        while (tunnels.any { it.name == tunnelName }) {
-            tunnelName = name + "(${num})"
-            num++
+    private suspend fun makeTunnelNameUnique(name: String): String {
+        return withContext(ioDispatcher) {
+            val tunnels = appDataRepository.tunnels.getAll()
+            var tunnelName = name
+            var num = 1
+            while (tunnels.any { it.name == tunnelName }) {
+                tunnelName = name + "(${num})"
+                num++
+            }
+            tunnelName
         }
-        return tunnelName
     }
 
-    private suspend fun saveTunnelConfigFromStream(stream: InputStream, fileName: String, type: ConfigType) {
-        var amQuick : String? = null
+    private fun saveTunnelConfigFromStream(
+        stream: InputStream,
+        fileName: String,
+        type: ConfigType
+    ) {
+        var amQuick: String? = null
         val wgQuick = stream.use {
-            when(type) {
+            when (type) {
                 ConfigType.AMNEZIA -> {
                     val config = org.amnezia.awg.config.Config.parse(it)
                     amQuick = config.toAwgQuickString()
                     config.toWgQuickString()
                 }
+
                 ConfigType.WIREGUARD -> {
                     Config.parse(it).toWgQuickString()
                 }
             }
         }
-        val tunnelName = makeTunnelNameUnique(getNameFromFileName(fileName))
-        addTunnel(TunnelConfig(name = tunnelName, wgQuick = wgQuick, amQuick = amQuick ?: TunnelConfig.AM_QUICK_DEFAULT))
+        viewModelScope.launch {
+            val tunnelName = makeTunnelNameUnique(getNameFromFileName(fileName))
+            addTunnel(
+                TunnelConfig(
+                    name = tunnelName,
+                    wgQuick = wgQuick,
+                    amQuick = amQuick ?: TunnelConfig.AM_QUICK_DEFAULT,
+                ),
+            )
+        }
     }
 
     private fun getInputStreamFromUri(uri: Uri, context: Context): InputStream? {
         return context.applicationContext.contentResolver.openInputStream(uri)
     }
 
-    suspend fun onTunnelFileSelected(uri: Uri, configType: ConfigType, context: Context): Result<Unit> {
-        return try {
-            if (isValidUriContentScheme(uri)) {
-                val fileName = getFileName(context, uri)
-                return when (getFileExtensionFromFileName(fileName)) {
-                    Constants.CONF_FILE_EXTENSION ->
-                        saveTunnelFromConfUri(fileName, uri, configType, context)
-                    Constants.ZIP_FILE_EXTENSION -> saveTunnelsFromZipUri(uri, configType, context)
-                    else -> Result.failure(WgTunnelExceptions.InvalidFileExtension())
+    suspend fun onTunnelFileSelected(
+        uri: Uri,
+        configType: ConfigType,
+        context: Context
+    ): Result<Unit> {
+        return withContext(ioDispatcher) {
+            try {
+                if (isValidUriContentScheme(uri)) {
+                    val fileName = getFileName(context, uri)
+                    return@withContext when (getFileExtensionFromFileName(fileName)) {
+                        Constants.CONF_FILE_EXTENSION ->
+                            saveTunnelFromConfUri(fileName, uri, configType, context)
+
+                        Constants.ZIP_FILE_EXTENSION -> saveTunnelsFromZipUri(
+                            uri,
+                            configType,
+                            context,
+                        )
+
+                        else -> Result.failure(WgTunnelExceptions.InvalidFileExtension())
+                    }
+                } else {
+                    Result.failure(WgTunnelExceptions.InvalidFileExtension())
                 }
-            } else {
-                Result.failure(WgTunnelExceptions.InvalidFileExtension())
+            } catch (e: Exception) {
+                Timber.e(e)
+                Result.failure(WgTunnelExceptions.FileReadFailed())
             }
-        } catch (e: Exception) {
-            Timber.e(e)
-            Result.failure(WgTunnelExceptions.FileReadFailed())
         }
     }
 
-    private suspend fun saveTunnelsFromZipUri(uri: Uri, configType: ConfigType, context: Context) : Result<Unit> {
-        return ZipInputStream(getInputStreamFromUri(uri, context)).use { zip ->
-            generateSequence { zip.nextEntry }
-                .filterNot {
-                    it.isDirectory ||
-                        getFileExtensionFromFileName(it.name) != Constants.CONF_FILE_EXTENSION
-                }
-                .forEach {
-                    val name = getNameFromFileName(it.name)
-                    withContext(viewModelScope.coroutineContext + Dispatchers.IO) {
-                        try {
-                            var amQuick : String? = null
-                            val wgQuick =
-                                when(configType) {
-                                    ConfigType.AMNEZIA -> {
-                                        val config = org.amnezia.awg.config.Config.parse(zip)
-                                        amQuick = config.toAwgQuickString()
-                                        config.toWgQuickString()
+    private suspend fun saveTunnelsFromZipUri(
+        uri: Uri,
+        configType: ConfigType,
+        context: Context
+    ): Result<Unit> {
+        return withContext(ioDispatcher) {
+            ZipInputStream(getInputStreamFromUri(uri, context)).use { zip ->
+                generateSequence { zip.nextEntry }
+                    .filterNot {
+                        it.isDirectory ||
+                            getFileExtensionFromFileName(it.name) != Constants.CONF_FILE_EXTENSION
+                    }
+                    .forEach {
+                        val name = getNameFromFileName(it.name)
+                        withContext(viewModelScope.coroutineContext) {
+                            try {
+                                var amQuick: String? = null
+                                val wgQuick =
+                                    when (configType) {
+                                        ConfigType.AMNEZIA -> {
+                                            val config = org.amnezia.awg.config.Config.parse(zip)
+                                            amQuick = config.toAwgQuickString()
+                                            config.toWgQuickString()
+                                        }
+
+                                        ConfigType.WIREGUARD -> {
+                                            Config.parse(zip).toWgQuickString()
+                                        }
                                     }
-                                    ConfigType.WIREGUARD -> {
-                                        Config.parse(zip).toWgQuickString()
-                                    }
-                                }
-                            addTunnel(TunnelConfig(name = makeTunnelNameUnique(name), wgQuick = wgQuick, amQuick = amQuick ?: TunnelConfig.AM_QUICK_DEFAULT))
-                            Result.success(Unit)
-                        } catch (e : Exception) {
-                            Result.failure(WgTunnelExceptions.FileReadFailed())
+                                addTunnel(
+                                    TunnelConfig(
+                                        name = makeTunnelNameUnique(name),
+                                        wgQuick = wgQuick,
+                                        amQuick = amQuick ?: TunnelConfig.AM_QUICK_DEFAULT,
+                                    ),
+                                )
+                                Result.success(Unit)
+                            } catch (e: Exception) {
+                                Result.failure(WgTunnelExceptions.FileReadFailed())
+                            }
                         }
                     }
+                Result.success(Unit)
+            }
+        }
+    }
+
+    private suspend fun saveTunnelFromConfUri(
+        name: String,
+        uri: Uri,
+        configType: ConfigType,
+        context: Context
+    ): Result<Unit> {
+        return withContext(ioDispatcher) {
+            val stream = getInputStreamFromUri(uri, context)
+            return@withContext if (stream != null) {
+                try {
+                    saveTunnelConfigFromStream(stream, name, configType)
+                } catch (e: Exception) {
+                    return@withContext Result.failure(WgTunnelExceptions.ConfigParseError())
                 }
-            Result.success(Unit)
+                Result.success(Unit)
+            } else {
+                Result.failure(WgTunnelExceptions.FileReadFailed())
+            }
         }
     }
 
-    private suspend fun saveTunnelFromConfUri(name: String, uri: Uri, configType: ConfigType, context: Context): Result<Unit> {
-        val stream = getInputStreamFromUri(uri, context)
-        return if (stream != null) {
-            saveTunnelConfigFromStream(stream, name, configType)
-            Result.success(Unit)
-        } else {
-            Result.failure(WgTunnelExceptions.FileReadFailed())
-        }
-    }
-
-    private suspend fun addTunnel(tunnelConfig: TunnelConfig) {
+    private fun addTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
         val firstTunnel = appDataRepository.tunnels.count() == 0
         saveTunnel(tunnelConfig)
         if (firstTunnel) WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
@@ -266,7 +324,7 @@ constructor(
             WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate()
         }
 
-    private suspend fun saveTunnel(tunnelConfig: TunnelConfig) {
+    private fun saveTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
         appDataRepository.tunnels.save(tunnelConfig)
     }
 
@@ -317,7 +375,7 @@ constructor(
     }
 
     private fun saveSettings(settings: Settings) =
-        viewModelScope.launch(Dispatchers.IO) { appDataRepository.settings.save(settings) }
+        viewModelScope.launch { appDataRepository.settings.save(settings) }
 
 
     fun onCopyTunnel(tunnel: TunnelConfig?) = viewModelScope.launch {

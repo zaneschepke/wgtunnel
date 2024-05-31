@@ -1,7 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.module
 
 import android.content.Context
+import androidx.room.Room
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.AppDatabase
+import com.zaneschepke.wireguardautotunnel.data.DatabaseCallback
 import com.zaneschepke.wireguardautotunnel.data.SettingsDao
 import com.zaneschepke.wireguardautotunnel.data.TunnelConfigDao
 import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
@@ -18,11 +21,25 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 class RepositoryModule {
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            context.getString(R.string.db_name),
+        )
+            .fallbackToDestructiveMigration()
+            .addCallback(DatabaseCallback())
+            .build()
+    }
+
     @Singleton
     @Provides
     fun provideSettingsDoa(appDatabase: AppDatabase): SettingsDao {
@@ -49,8 +66,11 @@ class RepositoryModule {
 
     @Singleton
     @Provides
-    fun providePreferencesDataStore(@ApplicationContext context: Context): DataStoreManager {
-        return DataStoreManager(context)
+    fun providePreferencesDataStore(
+        @ApplicationContext context: Context,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): DataStoreManager {
+        return DataStoreManager(context, ioDispatcher)
     }
 
     @Provides

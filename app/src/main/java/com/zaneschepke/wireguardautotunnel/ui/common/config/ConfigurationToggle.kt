@@ -28,12 +28,15 @@ fun ConfigurationToggle(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(label, textAlign = TextAlign.Start, modifier = Modifier
-            .weight(
-                weight = 1.0f,
-                fill = false,
-            ),
-            softWrap = true)
+        Text(
+            label, textAlign = TextAlign.Start,
+            modifier = Modifier
+                .weight(
+                    weight = 1.0f,
+                    fill = false,
+                ),
+            softWrap = true,
+        )
         Switch(
             modifier = modifier,
             enabled = enabled,

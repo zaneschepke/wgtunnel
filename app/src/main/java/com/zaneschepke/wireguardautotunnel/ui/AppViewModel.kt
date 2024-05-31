@@ -4,25 +4,16 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.GoBackend
-import com.zaneschepke.logcatter.Logcatter
-import com.zaneschepke.logcatter.model.LogMessage
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,7 +41,7 @@ constructor() : ViewModel() {
     private fun requestPermissions() {
         _appUiState.update {
             it.copy(
-                requestPermissions = true
+                requestPermissions = true,
             )
         }
     }
@@ -58,12 +49,12 @@ constructor() : ViewModel() {
     fun permissionsRequested() {
         _appUiState.update {
             it.copy(
-                requestPermissions = false
+                requestPermissions = false,
             )
         }
     }
 
-    fun openWebPage(url: String, context : Context) {
+    fun openWebPage(url: String, context: Context) {
         try {
             val webpage: Uri = Uri.parse(url)
             val intent = Intent(Intent.ACTION_VIEW, webpage).apply {
@@ -79,7 +70,7 @@ constructor() : ViewModel() {
     fun onVpnPermissionAccepted() {
         _appUiState.update {
             it.copy(
-                vpnPermissionAccepted = true
+                vpnPermissionAccepted = true,
             )
         }
     }
@@ -120,33 +111,6 @@ constructor() : ViewModel() {
                 snackbarMessageConsumed = true,
             )
         }
-    }
-
-    val logs = mutableStateListOf<LogMessage>()
-
-    fun readLogCatOutput() =
-        viewModelScope.launch(viewModelScope.coroutineContext + Dispatchers.IO) {
-            launch {
-                Logcatter.logs(callback = {
-                    logs.add(it)
-                    if (logs.size > Constants.LOG_BUFFER_SIZE) {
-                        logs.removeRange(0, (logs.size - Constants.LOG_BUFFER_SIZE).toInt())
-                    }
-                })
-            }
-        }
-
-    fun clearLogs() {
-        logs.clear()
-        Logcatter.clear()
-    }
-
-    fun saveLogsToFile(context: Context) {
-        val fileName = "${Constants.BASE_LOG_FILE_NAME}-${Instant.now().epochSecond}.txt"
-        val content = logs.joinToString(separator = "\n")
-        FileUtils.saveFileToDownloads(context.applicationContext, content, fileName)
-        Toast.makeText(context, context.getString(R.string.logs_saved), Toast.LENGTH_SHORT)
-            .show()
     }
 
     fun setNotificationPermissionAccepted(accepted: Boolean) {

@@ -6,12 +6,11 @@ import android.service.quicksettings.TileService
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -25,29 +24,30 @@ class AutoTunnelControlTile : TileService() {
     @Inject
     lateinit var serviceManager: ServiceManager
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    @Inject
+    @ApplicationScope
+    lateinit var applicationScope: CoroutineScope
 
     private var manualStartConfig: TunnelConfig? = null
 
     override fun onStartListening() {
         super.onStartListening()
-        scope.launch {
-            appDataRepository.settings.getSettingsFlow().collectLatest {
-                when (it.isAutoTunnelEnabled) {
-                    true -> {
-                        if (it.isAutoTunnelPaused) {
-                            setInactive()
-                            setTileDescription(this@AutoTunnelControlTile.getString(R.string.paused))
-                        } else {
-                            setActive()
-                            setTileDescription(this@AutoTunnelControlTile.getString(R.string.active))
-                        }
+        applicationScope.launch {
+            val settings = appDataRepository.settings.getSettings()
+            when (settings.isAutoTunnelEnabled) {
+                true -> {
+                    if (settings.isAutoTunnelPaused) {
+                        setInactive()
+                        setTileDescription(this@AutoTunnelControlTile.getString(R.string.paused))
+                    } else {
+                        setActive()
+                        setTileDescription(this@AutoTunnelControlTile.getString(R.string.active))
                     }
+                }
 
-                    false -> {
-                        setTileDescription(this@AutoTunnelControlTile.getString(R.string.disabled))
-                        setUnavailable()
-                    }
+                false -> {
+                    setTileDescription(this@AutoTunnelControlTile.getString(R.string.disabled))
+                    setUnavailable()
                 }
             }
         }
@@ -58,20 +58,10 @@ class AutoTunnelControlTile : TileService() {
         onStartListening()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
-    }
-
-    override fun onTileRemoved() {
-        super.onTileRemoved()
-        scope.cancel()
-    }
-
     override fun onClick() {
         super.onClick()
         unlockAndRun {
-            scope.launch {
+            applicationScope.launch {
                 try {
                     appDataRepository.toggleWatcherServicePause()
                 } catch (e: Exception) {

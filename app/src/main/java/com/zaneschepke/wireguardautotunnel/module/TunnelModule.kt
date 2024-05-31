@@ -15,6 +15,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Module
@@ -42,7 +44,7 @@ class TunnelModule {
 
     @Provides
     @Singleton
-    fun provideAmneziaBackend(@ApplicationContext context: Context) : org.amnezia.awg.backend.Backend {
+    fun provideAmneziaBackend(@ApplicationContext context: Context): org.amnezia.awg.backend.Backend {
         return org.amnezia.awg.backend.GoBackend(context)
     }
 
@@ -52,14 +54,26 @@ class TunnelModule {
         amneziaBackend: org.amnezia.awg.backend.Backend,
         @Userspace userspaceBackend: Backend,
         @Kernel kernelBackend: Backend,
-        appDataRepository: AppDataRepository
+        appDataRepository: AppDataRepository,
+        @ApplicationScope applicationScope: CoroutineScope,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): VpnService {
-        return WireGuardTunnel(amneziaBackend,userspaceBackend, kernelBackend, appDataRepository)
+        return WireGuardTunnel(
+            amneziaBackend,
+            userspaceBackend,
+            kernelBackend,
+            appDataRepository,
+            applicationScope,
+            ioDispatcher,
+        )
     }
 
     @Provides
     @Singleton
-    fun provideServiceManager(appDataRepository: AppDataRepository): ServiceManager {
-        return ServiceManager(appDataRepository)
+    fun provideServiceManager(
+        appDataRepository: AppDataRepository,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): ServiceManager {
+        return ServiceManager(appDataRepository, ioDispatcher)
     }
 }

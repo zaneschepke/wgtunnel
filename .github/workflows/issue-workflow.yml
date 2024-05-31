@@ -2,7 +2,7 @@ name: Issue Updates Workflow
 
 on:
   issues:
-    types: [opened, closed, reopened]
+    types: [ opened, closed, reopened ]
 
 
 jobs:

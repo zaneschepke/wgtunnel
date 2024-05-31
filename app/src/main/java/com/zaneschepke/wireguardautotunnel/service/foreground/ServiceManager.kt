@@ -4,10 +4,16 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class ServiceManager(private val appDataRepository: AppDataRepository) {
+class ServiceManager(
+    private val appDataRepository: AppDataRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+) {
 
     private fun <T : Service> actionOnService(
         action: Action,
@@ -23,7 +29,10 @@ class ServiceManager(private val appDataRepository: AppDataRepository) {
         intent.component?.javaClass
         try {
             when (action) {
-                Action.START_FOREGROUND, Action.STOP_FOREGROUND -> context.startForegroundService(intent)
+                Action.START_FOREGROUND, Action.STOP_FOREGROUND -> context.startForegroundService(
+                    intent,
+                )
+
                 Action.START, Action.STOP -> context.startService(intent)
             }
         } catch (e: Exception) {
@@ -46,23 +55,27 @@ class ServiceManager(private val appDataRepository: AppDataRepository) {
     }
 
     suspend fun stopVpnServiceForeground(context: Context, isManualStop: Boolean = false) {
-        if (isManualStop) onManualStop()
-        Timber.i("Stopping vpn service")
-        actionOnService(
-            Action.STOP_FOREGROUND,
-            context,
-            WireGuardTunnelService::class.java,
-        )
+        withContext(ioDispatcher) {
+            if (isManualStop) onManualStop()
+            Timber.i("Stopping vpn service")
+            actionOnService(
+                Action.STOP_FOREGROUND,
+                context,
+                WireGuardTunnelService::class.java,
+            )
+        }
     }
 
     suspend fun stopVpnService(context: Context, isManualStop: Boolean = false) {
-        if (isManualStop) onManualStop()
-        Timber.i("Stopping vpn service")
-        actionOnService(
-            Action.STOP,
-            context,
-            WireGuardTunnelService::class.java,
-        )
+        withContext(ioDispatcher) {
+            if (isManualStop) onManualStop()
+            Timber.i("Stopping vpn service")
+            actionOnService(
+                Action.STOP,
+                context,
+                WireGuardTunnelService::class.java,
+            )
+        }
     }
 
     private suspend fun onManualStop() {
@@ -80,13 +93,15 @@ class ServiceManager(private val appDataRepository: AppDataRepository) {
         tunnelId: Int? = null,
         isManualStart: Boolean = false
     ) {
-        if (isManualStart) onManualStart(tunnelId)
-        actionOnService(
-            Action.START_FOREGROUND,
-            context,
-            WireGuardTunnelService::class.java,
-            tunnelId?.let { mapOf(Constants.TUNNEL_EXTRA_KEY to it) },
-        )
+        withContext(ioDispatcher) {
+            if (isManualStart) onManualStart(tunnelId)
+            actionOnService(
+                Action.START_FOREGROUND,
+                context,
+                WireGuardTunnelService::class.java,
+                tunnelId?.let { mapOf(Constants.TUNNEL_EXTRA_KEY to it) },
+            )
+        }
     }
 
     fun startWatcherServiceForeground(

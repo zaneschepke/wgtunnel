@@ -143,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                     if (!appUiState.vpnPermissionAccepted) {
                         return@LaunchedEffect appViewModel.vpnIntent?.let {
                             vpnActivityResultState.launch(
-                                it
+                                it,
                             )
                         }!!
                     }
@@ -155,7 +155,6 @@ class MainActivity : AppCompatActivity() {
                     appViewModel.setNotificationPermissionAccepted(
                         notificationPermissionState?.status?.isGranted ?: true,
                     )
-                    if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) appViewModel.readLogCatOutput()
                 }
 
                 LaunchedEffect(appUiState.snackbarMessageConsumed) {
@@ -237,30 +236,33 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
                         composable(Screen.Support.Logs.route) {
-                            LogsScreen(appViewModel)
+                            LogsScreen()
                         }
-                            //TODO fix navigation for amnezia
-                        composable("${Screen.Config.route}/{id}?configType={configType}", arguments =
-                        listOf(
-                            navArgument("id") {
-                                type = NavType.StringType
-                                defaultValue = "0"
-                            },
-                            navArgument("configType") {
-                                type = NavType.StringType
-                                defaultValue = ConfigType.WIREGUARD.name
-                            }
-                        )
+                        composable(
+                            "${Screen.Config.route}/{id}?configType={configType}",
+                            arguments =
+                            listOf(
+                                navArgument("id") {
+                                    type = NavType.StringType
+                                    defaultValue = "0"
+                                },
+                                navArgument("configType") {
+                                    type = NavType.StringType
+                                    defaultValue = ConfigType.WIREGUARD.name
+                                },
+                            ),
                         ) {
                             val id = it.arguments?.getString("id")
-                            val configType = ConfigType.valueOf( it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name)
+                            val configType = ConfigType.valueOf(
+                                it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
+                            )
                             if (!id.isNullOrBlank()) {
                                 ConfigScreen(
                                     navController = navController,
                                     tunnelId = id,
                                     appViewModel = appViewModel,
                                     focusRequester = focusRequester,
-                                    configType = configType
+                                    configType = configType,
                                 )
                             }
                         }

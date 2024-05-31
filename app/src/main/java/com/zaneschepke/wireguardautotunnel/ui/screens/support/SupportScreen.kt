@@ -107,7 +107,12 @@ fun SupportScreen(
                     modifier = Modifier.padding(bottom = 20.dp),
                 )
                 TextButton(
-                    onClick = { appViewModel.openWebPage(context.resources.getString(R.string.docs_url), context) },
+                    onClick = {
+                        appViewModel.openWebPage(
+                            context.resources.getString(R.string.docs_url),
+                            context,
+                        )
+                    },
                     modifier = Modifier
                         .padding(vertical = 5.dp)
                         .focusRequester(focusRequester),
@@ -129,7 +134,7 @@ fun SupportScreen(
                                         weight = 1.0f,
                                         fill = false,
                                     ),
-                                softWrap = true
+                                softWrap = true,
                             )
                         }
                         Icon(
@@ -143,7 +148,12 @@ fun SupportScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 TextButton(
-                    onClick = { appViewModel.openWebPage(context.resources.getString(R.string.telegram_url), context) },
+                    onClick = {
+                        appViewModel.openWebPage(
+                            context.resources.getString(R.string.telegram_url),
+                            context,
+                        )
+                    },
                     modifier = Modifier.padding(vertical = 5.dp),
                 ) {
                     Row(
@@ -175,7 +185,12 @@ fun SupportScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 TextButton(
-                    onClick = { appViewModel.openWebPage(context.resources.getString(R.string.github_url), context) },
+                    onClick = {
+                        appViewModel.openWebPage(
+                            context.resources.getString(R.string.github_url),
+                            context,
+                        )
+                    },
                     modifier = Modifier.padding(vertical = 5.dp),
                 ) {
                     Row(
@@ -269,7 +284,10 @@ fun SupportScreen(
             fontSize = 16.sp,
             modifier =
             Modifier.clickable {
-                appViewModel.openWebPage(context.resources.getString(R.string.privacy_policy_url), context)
+                appViewModel.openWebPage(
+                    context.resources.getString(R.string.privacy_policy_url),
+                    context,
+                )
             },
         )
         Row(
@@ -285,7 +303,7 @@ fun SupportScreen(
             val mode = buildAnnotatedString {
                 append(stringResource(R.string.mode))
                 append(": ")
-                when(uiState.settings.isKernelEnabled){
+                when (uiState.settings.isKernelEnabled) {
                     true -> append(stringResource(id = R.string.kernel))
                     false -> append(stringResource(id = R.string.userspace))
                 }

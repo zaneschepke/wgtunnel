@@ -19,7 +19,7 @@ data class ConfigUiState(
     val isAmneziaEnabled: Boolean = false
 ) {
     companion object {
-        fun from(config : Config) : ConfigUiState {
+        fun from(config: Config): ConfigUiState {
             val proxyPeers = config.peers.map { PeerProxy.from(it) }
             val proxyInterface = InterfaceProxy.from(config.`interface`)
             var include = true
@@ -43,7 +43,8 @@ data class ConfigUiState(
                 isAllApplicationsEnabled,
             )
         }
-        fun from(config: org.amnezia.awg.config.Config) : ConfigUiState {
+
+        fun from(config: org.amnezia.awg.config.Config): ConfigUiState {
             //TODO update with new values
             val proxyPeers = config.peers.map { PeerProxy.from(it) }
             val proxyInterface = InterfaceProxy.from(config.`interface`)

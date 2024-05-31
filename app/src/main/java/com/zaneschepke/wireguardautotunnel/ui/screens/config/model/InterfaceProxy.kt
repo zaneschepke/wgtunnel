@@ -35,7 +35,8 @@ data class InterfaceProxy(
                 mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
             )
         }
-        fun from(i: org.amnezia.awg.config.Interface) : InterfaceProxy {
+
+        fun from(i: org.amnezia.awg.config.Interface): InterfaceProxy {
             return InterfaceProxy(
                 publicKey = i.keyPair.publicKey.toBase64().trim(),
                 privateKey = i.keyPair.privateKey.toBase64().trim(),
@@ -48,15 +49,24 @@ data class InterfaceProxy(
                     ""
                 },
                 mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
-                junkPacketCount = if(i.junkPacketCount.isPresent) i.junkPacketCount.get().toString() else "",
-                junkPacketMinSize = if(i.junkPacketMinSize.isPresent) i.junkPacketMinSize.get().toString() else "",
-                junkPacketMaxSize = if(i.junkPacketMaxSize.isPresent) i.junkPacketMaxSize.get().toString() else "",
-                initPacketJunkSize = if(i.initPacketJunkSize.isPresent) i.initPacketJunkSize.get().toString() else "",
-                responsePacketJunkSize = if(i.responsePacketJunkSize.isPresent) i.responsePacketJunkSize.get().toString() else "",
-                initPacketMagicHeader = if(i.initPacketMagicHeader.isPresent) i.initPacketMagicHeader.get().toString() else "",
-                responsePacketMagicHeader = if(i.responsePacketMagicHeader.isPresent) i.responsePacketMagicHeader.get().toString() else "",
-                transportPacketMagicHeader = if(i.transportPacketMagicHeader.isPresent) i.transportPacketMagicHeader.get().toString() else "",
-                underloadPacketMagicHeader = if(i.underloadPacketMagicHeader.isPresent) i.underloadPacketMagicHeader.get().toString() else "",
+                junkPacketCount = if (i.junkPacketCount.isPresent) i.junkPacketCount.get()
+                    .toString() else "",
+                junkPacketMinSize = if (i.junkPacketMinSize.isPresent) i.junkPacketMinSize.get()
+                    .toString() else "",
+                junkPacketMaxSize = if (i.junkPacketMaxSize.isPresent) i.junkPacketMaxSize.get()
+                    .toString() else "",
+                initPacketJunkSize = if (i.initPacketJunkSize.isPresent) i.initPacketJunkSize.get()
+                    .toString() else "",
+                responsePacketJunkSize = if (i.responsePacketJunkSize.isPresent) i.responsePacketJunkSize.get()
+                    .toString() else "",
+                initPacketMagicHeader = if (i.initPacketMagicHeader.isPresent) i.initPacketMagicHeader.get()
+                    .toString() else "",
+                responsePacketMagicHeader = if (i.responsePacketMagicHeader.isPresent) i.responsePacketMagicHeader.get()
+                    .toString() else "",
+                transportPacketMagicHeader = if (i.transportPacketMagicHeader.isPresent) i.transportPacketMagicHeader.get()
+                    .toString() else "",
+                underloadPacketMagicHeader = if (i.underloadPacketMagicHeader.isPresent) i.underloadPacketMagicHeader.get()
+                    .toString() else "",
             )
         }
     }

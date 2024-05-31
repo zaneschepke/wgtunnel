@@ -5,12 +5,13 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -28,14 +29,19 @@ class TunnelControlTile : TileService() {
     @Inject
     lateinit var serviceManager: ServiceManager
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    @Inject
+    @ApplicationScope
+    lateinit var applicationScope: CoroutineScope
 
     private var manualStartConfig: TunnelConfig? = null
+
+    private var job: Job? = null;
 
     override fun onStartListening() {
         super.onStartListening()
         Timber.d("On start listening called")
-        scope.launch {
+        //TODO Fix this
+        if (job == null || job?.isCancelled == true) job = applicationScope.launch {
             vpnService.vpnState.collect { it ->
                 when (it.status) {
                     TunnelState.UP -> {
@@ -52,20 +58,11 @@ class TunnelControlTile : TileService() {
                             setTileDescription(it.name)
                         } ?: setUnavailable()
                     }
+
                     else -> setInactive()
                 }
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
-    }
-
-    override fun onTileRemoved() {
-        super.onTileRemoved()
-        scope.cancel()
     }
 
     override fun onTileAdded() {
@@ -76,7 +73,7 @@ class TunnelControlTile : TileService() {
     override fun onClick() {
         super.onClick()
         unlockAndRun {
-            scope.launch {
+            applicationScope.launch {
                 try {
                     if (vpnService.getState() == TunnelState.UP) {
                         serviceManager.stopVpnServiceForeground(

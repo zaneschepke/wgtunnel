@@ -9,13 +9,27 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.channels.ticker
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.whileSelect
 import org.amnezia.awg.config.Config
+import timber.log.Timber
 import java.math.BigDecimal
 import java.text.DecimalFormat
+import java.time.Duration
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 
 fun BroadcastReceiver.goAsync(
     context: CoroutineContext = EmptyCoroutineContext,
@@ -30,12 +44,6 @@ fun BroadcastReceiver.goAsync(
             pendingResult.finish()
         }
     }
-}
-
-fun String.truncateWithEllipsis(allowedLength: Int): String {
-    return if (this.length > allowedLength + 3) {
-        this.substring(0, allowedLength) + "***"
-    } else this
 }
 
 fun BigDecimal.toThreeDecimalPlaceString(): String {
@@ -73,14 +81,14 @@ fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
     }
 }
 
-fun Config.toWgQuickString() : String {
+fun Config.toWgQuickString(): String {
     val amQuick = toAwgQuickString()
     val lines = amQuick.lines().toMutableList()
     val linesIterator = lines.iterator()
-    while(linesIterator.hasNext()) {
+    while (linesIterator.hasNext()) {
         val next = linesIterator.next()
         Constants.amneziaProperties.forEach {
-            if(next.startsWith(it, ignoreCase = true)) {
+            if (next.startsWith(it, ignoreCase = true)) {
                 linesIterator.remove()
             }
         }
@@ -88,9 +96,73 @@ fun Config.toWgQuickString() : String {
     return lines.joinToString(System.lineSeparator())
 }
 
-fun Throwable.getMessage(context: Context) : String {
-    return when(this) {
+fun Throwable.getMessage(context: Context): String {
+    return when (this) {
         is WgTunnelExceptions -> this.getMessage(context)
         else -> this.message ?: StringValue.StringResource(R.string.unknown_error).asString(context)
     }
 }
+
+/**
+ * Chunks based on a time or size threshold.
+ *
+ * Borrowed from this [Stack Overflow question](https://stackoverflow.com/questions/51022533/kotlin-chunk-sequence-based-on-size-and-time).
+ */
+@OptIn(ObsoleteCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+fun <T> ReceiveChannel<T>.chunked(scope: CoroutineScope, size: Int, time: Duration) =
+    scope.produce<List<T>> {
+        while (true) { // this loop goes over each chunk
+            val chunk = ConcurrentLinkedQueue<T>() // current chunk
+            val ticker = ticker(time.toMillis()) // time-limit for this chunk
+            try {
+                whileSelect {
+                    ticker.onReceive {
+                        false // done with chunk when timer ticks, takes priority over received elements
+                    }
+                    this@chunked.onReceive {
+                        chunk += it
+                        chunk.size < size // continue whileSelect if chunk is not full
+                    }
+                }
+            } catch (e: ClosedReceiveChannelException) {
+                Timber.e(e)
+                return@produce
+            } finally {
+                ticker.cancel()
+                if (chunk.isNotEmpty()) {
+                    send(chunk.toList())
+                }
+            }
+        }
+    }
+
+@OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+fun <T> Flow<T>.chunked(size: Int, time: Duration) = channelFlow {
+    coroutineScope {
+        val channel = asChannel(this@chunked).chunked(this, size, time)
+        try {
+            while (!channel.isClosedForReceive) {
+                send(channel.receive())
+            }
+        } catch (e: ClosedReceiveChannelException) {
+            // Channel was closed by the flow completing, nothing to do
+            Timber.w(e)
+        } catch (e: CancellationException) {
+            channel.cancel(e)
+            throw e
+        } catch (e: Exception) {
+            channel.cancel(CancellationException("Closing channel due to flow exception", e))
+            throw e
+        }
+    }
+}
+
+@ExperimentalCoroutinesApi
+fun <T> CoroutineScope.asChannel(flow: Flow<T>): ReceiveChannel<T> = produce {
+    flow.collect { value ->
+        channel.send(value)
+    }
+}
+
+
+

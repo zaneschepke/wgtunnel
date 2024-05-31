@@ -21,13 +21,6 @@ data class WatcherState(
             isMobileDataConnected)
     }
 
-    fun isTunnelOnMobileDataPreferredConditionMet(): Boolean {
-        return (!isEthernetConnected &&
-            settings.isTunnelOnMobileDataEnabled &&
-            !isWifiConnected &&
-            isMobileDataConnected)
-    }
-
     fun isTunnelOffOnMobileDataConditionMet(): Boolean {
         return (!isEthernetConnected &&
             !settings.isTunnelOnMobileDataEnabled &&

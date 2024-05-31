@@ -9,7 +9,6 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -45,12 +44,12 @@ constructor(
     fun init(tunnelId: String) {
         _optionState.update {
             it.copy(
-                id = tunnelId
+                id = tunnelId,
             )
         }
     }
 
-    fun onDeleteRunSSID(ssid: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun onDeleteRunSSID(ssid: String) = viewModelScope.launch {
         uiState.value.tunnel?.let {
             appDataRepository.tunnels.save(
                 tunnelConfig = it.copy(
@@ -60,7 +59,7 @@ constructor(
         }
     }
 
-    private fun saveTunnel(tunnelConfig: TunnelConfig?) = viewModelScope.launch(Dispatchers.IO) {
+    private fun saveTunnel(tunnelConfig: TunnelConfig?) = viewModelScope.launch {
         tunnelConfig?.let {
             appDataRepository.tunnels.save(it)
         }
@@ -81,7 +80,7 @@ constructor(
         }
     }
 
-    fun onToggleIsMobileDataTunnel() = viewModelScope.launch(Dispatchers.IO) {
+    fun onToggleIsMobileDataTunnel() = viewModelScope.launch {
         uiState.value.tunnel?.let {
             if (it.isMobileDataTunnel) {
                 appDataRepository.tunnels.updateMobileDataTunnel(null)
@@ -89,7 +88,7 @@ constructor(
         }
     }
 
-    fun onTogglePrimaryTunnel() = viewModelScope.launch(Dispatchers.IO) {
+    fun onTogglePrimaryTunnel() = viewModelScope.launch {
         if (uiState.value.tunnel != null) {
             appDataRepository.tunnels.updatePrimaryTunnel(
                 when (uiState.value.isDefaultTunnel) {

@@ -40,12 +40,14 @@ data class TunnelConfig(
                 Config.parse(it)
             }
         }
-        fun configFromAmQuick(amQuick: String) : org.amnezia.awg.config.Config {
+
+        fun configFromAmQuick(amQuick: String): org.amnezia.awg.config.Config {
             val inputStream: InputStream = amQuick.byteInputStream()
             return inputStream.bufferedReader(Charsets.UTF_8).use {
                 org.amnezia.awg.config.Config.parse(it)
             }
         }
+
         const val AM_QUICK_DEFAULT = ""
     }
 }

@@ -12,6 +12,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +30,7 @@ constructor(
     private val appDataRepository: AppDataRepository,
     private val serviceManager: ServiceManager,
     private val rootShell: RootShell,
+    private val fileUtils: FileUtils,
     vpnService: VpnService
 ) : ViewModel() {
 
@@ -88,6 +91,10 @@ constructor(
                 (uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList(),
             ),
         )
+    }
+
+    suspend fun onExportTunnels(files: List<File>): Result<Unit> {
+        return fileUtils.saveFilesToZip(files)
     }
 
     fun onToggleAutoTunnel(context: Context) =
@@ -160,7 +167,7 @@ constructor(
     }
 
     fun onToggleAmnezia() = viewModelScope.launch {
-        if(uiState.value.settings.isKernelEnabled) {
+        if (uiState.value.settings.isKernelEnabled) {
             saveKernelMode(false)
         }
         saveAmneziaMode(!uiState.value.settings.isAmneziaEnabled)
@@ -169,8 +176,8 @@ constructor(
     private fun saveAmneziaMode(on: Boolean) {
         saveSettings(
             uiState.value.settings.copy(
-                isAmneziaEnabled = on
-            )
+                isAmneziaEnabled = on,
+            ),
         )
     }
 

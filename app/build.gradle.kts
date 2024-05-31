@@ -203,7 +203,6 @@ dependencies {
 
     // barcode scanning
     implementation(libs.zxing.android.embedded)
-    implementation(libs.zxing.core)
 
     // bio
     implementation(libs.androidx.biometric.ktx)

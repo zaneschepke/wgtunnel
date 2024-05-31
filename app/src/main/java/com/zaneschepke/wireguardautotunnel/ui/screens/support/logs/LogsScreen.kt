@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support.logs
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,17 +33,17 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.zaneschepke.logcatter.model.LogMessage
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LogsScreen(appViewModel: AppViewModel) {
+fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
 
-    val logs = remember {
-        appViewModel.logs
-    }
+    val logs = viewModel.logs
 
     val context = LocalContext.current
 
@@ -60,7 +61,15 @@ fun LogsScreen(appViewModel: AppViewModel) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    appViewModel.saveLogsToFile(context)
+                    scope.launch {
+                        viewModel.saveLogsToFile().onSuccess {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.logs_saved),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    }
                 },
                 shape = RoundedCornerShape(16.dp),
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -82,7 +91,11 @@ fun LogsScreen(appViewModel: AppViewModel) {
                 .fillMaxSize()
                 .padding(horizontal = 24.dp),
         ) {
-            items(logs) {
+            itemsIndexed(
+                logs,
+                key = { index, _ -> index },
+                contentType = { _: Int, _: LogMessage -> null },
+            ) { _, it ->
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
                     verticalAlignment = Alignment.Top,

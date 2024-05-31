@@ -14,6 +14,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -69,7 +70,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -111,8 +111,6 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.getMessage
 import com.zaneschepke.wireguardautotunnel.util.handshakeStatus
 import com.zaneschepke.wireguardautotunnel.util.mapPeerStats
-import com.zaneschepke.wireguardautotunnel.util.truncateWithEllipsis
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -128,7 +126,7 @@ fun MainScreen(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val isVisible = rememberSaveable { mutableStateOf(true) }
-    val scope = rememberCoroutineScope { Dispatchers.IO }
+    val scope = rememberCoroutineScope()
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -212,8 +210,8 @@ fun MainScreen(
             onResult = {
                 if (it.contents != null) {
                     scope.launch {
-                        viewModel.onTunnelQrResult(it.contents, configType).onFailure {
-                            appViewModel.showSnackbarMessage(it.getMessage(context))
+                        viewModel.onTunnelQrResult(it.contents, configType).onFailure { error ->
+                            appViewModel.showSnackbarMessage(error.getMessage(context))
                         }
                     }
                 }
@@ -246,7 +244,9 @@ fun MainScreen(
 
     fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
         if (appViewModel.isRequiredPermissionGranted()) {
-            if (checked) viewModel.onTunnelStart(tunnel, context) else viewModel.onTunnelStop(context)
+            if (checked) viewModel.onTunnelStart(tunnel, context) else viewModel.onTunnelStop(
+                context,
+            )
         }
     }
 
@@ -270,7 +270,7 @@ fun MainScreen(
     Scaffold(
         modifier =
         Modifier.pointerInput(Unit) {
-            if(uiState.tunnels.isNotEmpty()) {
+            if (uiState.tunnels.isNotEmpty()) {
                 detectTapGestures(
                     onTap = {
                         selectedTunnel = null
@@ -285,31 +285,25 @@ fun MainScreen(
                 visible = isVisible.value,
                 enter = slideInVertically(initialOffsetY = { it * 2 }),
                 exit = slideOutVertically(targetOffsetY = { it * 2 }),
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .focusGroup(),
             ) {
                 val secondaryColor = MaterialTheme.colorScheme.secondary
-                val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-                var fobColor by remember { mutableStateOf(secondaryColor) }
+                val tvFobColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+                val fobColor =
+                    if (WireGuardAutoTunnel.isRunningOnAndroidTv()) tvFobColor else secondaryColor
+                val fobIconColor =
+                    if (WireGuardAutoTunnel.isRunningOnAndroidTv()) Color.White else MaterialTheme.colorScheme.background
                 MultiFloatingActionButton(
-                    modifier =
-                    (if (
-                        WireGuardAutoTunnel.isRunningOnAndroidTv() &&
-                        uiState.tunnels.isEmpty()
-                    )
-                        Modifier.focusRequester(focusRequester)
-                    else Modifier)
-                        .onFocusChanged {
-                            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                                fobColor = if (it.isFocused) hoverColor else secondaryColor
-                            }
-                        },
                     fabIcon = FabIcon(
                         iconRes = R.drawable.add,
                         iconResAfterRotate = R.drawable.close,
-                        iconRotate = 180f
+                        iconRotate = 180f,
                     ),
                     fabOption = FabOption(
-                        iconTint = MaterialTheme.colorScheme.background,
-                        backgroundTint = MaterialTheme.colorScheme.primary,
+                        iconTint = fobIconColor,
+                        backgroundTint = fobColor,
                     ),
                     itemsMultiFab = listOf(
                         MultiFabItem(
@@ -318,24 +312,39 @@ fun MainScreen(
                                     stringResource(id = R.string.amnezia),
                                     color = Color.White,
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(end = 10.dp)
+                                    modifier = Modifier.padding(end = 10.dp),
                                 )
                             },
+                            modifier = Modifier
+                                .size(40.dp),
                             icon = R.drawable.add,
                             value = ConfigType.AMNEZIA.name,
+                            miniFabOption = FabOption(
+                                backgroundTint = fobColor,
+                                fobIconColor,
+                            ),
                         ),
                         MultiFabItem(
                             label = {
-                                Text(stringResource(id = R.string.wireguard), color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(end = 10.dp))
+                                Text(
+                                    stringResource(id = R.string.wireguard),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(end = 10.dp),
+                                )
                             },
                             icon = R.drawable.add,
-                            value = ConfigType.WIREGUARD.name
+                            value = ConfigType.WIREGUARD.name,
+                            miniFabOption = FabOption(
+                                backgroundTint = fobColor,
+                                fobIconColor,
+                            ),
                         ),
                     ),
                     onFabItemClicked = {
                         showBottomSheet = true
                         configType = ConfigType.valueOf(it.value)
-                       },
+                    },
                     shape = RoundedCornerShape(16.dp),
                 )
             }
@@ -343,7 +352,10 @@ fun MainScreen(
     ) {
         if (showBottomSheet) {
             ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
+                onDismissRequest = {
+                    showBottomSheet = false
+
+                },
                 sheetState = sheetState,
             ) {
                 // Sheet content
@@ -432,34 +444,48 @@ fun MainScreen(
             flingBehavior = ScrollableDefaults.flingBehavior(),
         ) {
             item {
-                val gettingStarted = buildAnnotatedString {
-                    append(stringResource(id = R.string.see_the))
-                    append(" ")
-                    pushStringAnnotation(tag = "gettingStarted", annotation = stringResource(id = R.string.getting_started_url))
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append(stringResource(id = R.string.getting_started_guide))
-                    }
-                    pop()
-                    append(" ")
-                    append(stringResource(R.string.unsure_how))
-                    append(".")
-                }
                 AnimatedVisibility(
-                    uiState.tunnels.isEmpty(), exit = fadeOut(), enter = fadeIn()) {
+                    uiState.tunnels.isEmpty(), exit = fadeOut(), enter = fadeIn(),
+                ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(top = 100.dp)
+                        modifier = Modifier
+                            .padding(top = 100.dp)
+                            .fillMaxSize(),
                     ) {
-                        Text(text = stringResource(R.string.no_tunnels), fontStyle = FontStyle.Italic)
-                        ClickableText(
-                            modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
-                            text = gettingStarted,
-                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center),
-                        ) {
-                            gettingStarted.getStringAnnotations(tag = "gettingStarted", it, it).firstOrNull()?.let { annotation ->
-                                appViewModel.openWebPage(annotation.item, context)
+                        val gettingStarted = buildAnnotatedString {
+                            append(stringResource(id = R.string.see_the))
+                            append(" ")
+                            pushStringAnnotation(
+                                tag = "gettingStarted",
+                                annotation = stringResource(id = R.string.getting_started_url),
+                            )
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                append(stringResource(id = R.string.getting_started_guide))
                             }
+                            pop()
+                            append(" ")
+                            append(stringResource(R.string.unsure_how))
+                            append(".")
+                        }
+                        Text(
+                            text = stringResource(R.string.no_tunnels),
+                            fontStyle = FontStyle.Italic,
+                        )
+                        ClickableText(
+                            modifier = Modifier
+                                .padding(vertical = 10.dp, horizontal = 24.dp),
+                            text = gettingStarted,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                            ),
+                        ) {
+                            gettingStarted.getStringAnnotations(tag = "gettingStarted", it, it)
+                                .firstOrNull()?.let { annotation ->
+                                    appViewModel.openWebPage(annotation.item, context)
+                                }
                         }
                     }
                 }
@@ -562,7 +588,7 @@ fun MainScreen(
                                 .size(if (icon == circleIcon) 15.dp else 20.dp),
                         )
                     },
-                    text = tunnel.name.truncateWithEllipsis(Constants.ALLOWED_DISPLAY_NAME_LENGTH),
+                    text = tunnel.name,
                     onHold = {
                         if (
                             (uiState.vpnState.status == TunnelState.UP) &&

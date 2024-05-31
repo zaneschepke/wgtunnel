@@ -7,14 +7,20 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.IOException
 
-class DataStoreManager(private val context: Context) {
+class DataStoreManager(
+    private val context: Context,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+) {
     companion object {
         val LOCATION_DISCLOSURE_SHOWN = booleanPreferencesKey("LOCATION_DISCLOSURE_SHOWN")
         val BATTERY_OPTIMIZE_DISABLE_SHOWN = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
@@ -32,20 +38,24 @@ class DataStoreManager(private val context: Context) {
     )
 
     suspend fun init() {
-        try {
-            context.dataStore.data.first()
-        } catch (e: IOException) {
-            Timber.e(e)
+        withContext(ioDispatcher) {
+            try {
+                context.dataStore.data.first()
+            } catch (e: IOException) {
+                Timber.e(e)
+            }
         }
     }
 
     suspend fun <T> saveToDataStore(key: Preferences.Key<T>, value: T) {
-        try {
-            context.dataStore.edit { it[key] = value }
-        } catch (e: IOException) {
-            Timber.e(e)
-        } catch (e: Exception) {
-            Timber.e(e)
+        withContext(ioDispatcher) {
+            try {
+                context.dataStore.edit { it[key] = value }
+            } catch (e: IOException) {
+                Timber.e(e)
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
         }
     }
 
@@ -53,11 +63,13 @@ class DataStoreManager(private val context: Context) {
     fun <T> getFromStoreFlow(key: Preferences.Key<T>) = context.dataStore.data.map { it[key] }
 
     suspend fun <T> getFromStore(key: Preferences.Key<T>): T? {
-        return try {
-            context.dataStore.data.map { it[key] }.first()
-        } catch (e: IOException) {
-            Timber.e(e)
-            null
+        return withContext(ioDispatcher) {
+            try {
+                context.dataStore.data.map { it[key] }.first()
+            } catch (e: IOException) {
+                Timber.e(e)
+                null
+            }
         }
     }
 

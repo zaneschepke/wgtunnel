@@ -1,7 +1,11 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.options
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -39,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -114,59 +118,75 @@ fun OptionsScreen(
     Scaffold(
         floatingActionButton = {
             val secondaryColor = MaterialTheme.colorScheme.secondary
-            val hoverColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-            var fobColor by remember { mutableStateOf(secondaryColor) }
-            MultiFloatingActionButton(
-                modifier =
-                (if (
-                    WireGuardAutoTunnel.isRunningOnAndroidTv()
-                )
-                    Modifier.focusRequester(focusRequester)
-                else Modifier)
-                    .onFocusChanged {
-                        if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                            fobColor = if (it.isFocused) hoverColor else secondaryColor
-                        }
+            val tvFobColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+            val fobColor =
+                if (WireGuardAutoTunnel.isRunningOnAndroidTv()) tvFobColor else secondaryColor
+            val fobIconColor =
+                if (WireGuardAutoTunnel.isRunningOnAndroidTv()) Color.White else MaterialTheme.colorScheme.background
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(initialOffsetY = { it * 2 }),
+                exit = slideOutVertically(targetOffsetY = { it * 2 }),
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .focusGroup(),
+            ) {
+                MultiFloatingActionButton(
+                    fabIcon = FabIcon(
+                        iconRes = R.drawable.edit,
+                        iconResAfterRotate = R.drawable.close,
+                        iconRotate = 180f,
+                    ),
+                    fabOption = FabOption(
+                        iconTint = fobIconColor,
+                        backgroundTint = fobColor,
+                    ),
+                    itemsMultiFab = listOf(
+                        MultiFabItem(
+                            label = {
+                                Text(
+                                    stringResource(id = R.string.amnezia),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(end = 10.dp),
+                                )
+                            },
+                            modifier = Modifier
+                                .size(40.dp),
+                            icon = R.drawable.edit,
+                            value = ConfigType.AMNEZIA.name,
+                            miniFabOption = FabOption(
+                                backgroundTint = fobColor,
+                                fobIconColor,
+                            ),
+                        ),
+                        MultiFabItem(
+                            label = {
+                                Text(
+                                    stringResource(id = R.string.wireguard),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(end = 10.dp),
+                                )
+                            },
+                            icon = R.drawable.edit,
+                            value = ConfigType.WIREGUARD.name,
+                            miniFabOption = FabOption(
+                                backgroundTint = fobColor,
+                                fobIconColor,
+                            ),
+                        ),
+                    ),
+                    onFabItemClicked = {
+                        val configType = ConfigType.valueOf(it.value)
+                        navController.navigate(
+                            "${Screen.Config.route}/${tunnelId}?configType=${configType.name}",
+                        )
                     },
-                fabIcon = FabIcon(
-                    iconRes = R.drawable.edit,
-                    iconResAfterRotate = R.drawable.close,
-                    iconRotate = 180f
-                ),
-                fabOption = FabOption(
-                    iconTint = MaterialTheme.colorScheme.background,
-                    backgroundTint = MaterialTheme.colorScheme.primary,
-                ),
-                itemsMultiFab = listOf(
-                    MultiFabItem(
-                        label = {
-                            Text(
-                                stringResource(id = R.string.amnezia),
-                                color = Color.White,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(end = 10.dp)
-                            )
-                        },
-                        icon = R.drawable.edit,
-                        value = ConfigType.AMNEZIA.name,
-                    ),
-                    MultiFabItem(
-                        label = {
-                            Text(stringResource(id = R.string.wireguard), color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(end = 10.dp))
-                        },
-                        icon = R.drawable.edit,
-                        value = ConfigType.WIREGUARD.name
-                    ),
-                ),
-                onFabItemClicked = {
-                    val configType = ConfigType.valueOf(it.value)
-                    navController.navigate(
-                        "${Screen.Config.route}/${tunnelId}?configType=${configType.name}",
-                    )
-                },
-                shape = RoundedCornerShape(16.dp),
-            )
-        }
+                    shape = RoundedCornerShape(16.dp),
+                )
+            }
+        },
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

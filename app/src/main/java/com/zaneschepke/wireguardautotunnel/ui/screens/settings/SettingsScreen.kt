@@ -81,9 +81,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
-import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.getMessage
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
@@ -100,9 +98,9 @@ fun SettingsScreen(
     navController: NavController,
     focusRequester: FocusRequester,
 ) {
-    val scope = rememberCoroutineScope { Dispatchers.IO }
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val interactionSource = remember { MutableInteractionSource() }
     val pinExists = remember { mutableStateOf(PinManager.pinExists()) }
@@ -137,18 +135,22 @@ fun SettingsScreen(
                 }
                 file
             }
-            val amFiles = uiState.tunnels.mapNotNull { config -> if(config.amQuick != TunnelConfig.AM_QUICK_DEFAULT) {
-                val file = File(context.cacheDir, "${config.name}-am.conf")
-                file.outputStream().use {
-                    it.write(config.amQuick.toByteArray())
+            val amFiles = uiState.tunnels.mapNotNull { config ->
+                if (config.amQuick != TunnelConfig.AM_QUICK_DEFAULT) {
+                    val file = File(context.cacheDir, "${config.name}-am.conf")
+                    file.outputStream().use {
+                        it.write(config.amQuick.toByteArray())
+                    }
+                    file
+                } else null
+            }
+            scope.launch {
+                viewModel.onExportTunnels(wgFiles + amFiles).onFailure {
+                    appViewModel.showSnackbarMessage(it.getMessage(context))
+                }.onSuccess {
+                    didExportFiles = true
+                    appViewModel.showSnackbarMessage(context.getString(R.string.exported_configs_message))
                 }
-                file
-            } else null }
-            FileUtils.saveFilesToZip(context, wgFiles + amFiles).onFailure {
-                appViewModel.showSnackbarMessage(it.getMessage(context))
-            }.onSuccess {
-                didExportFiles = true
-                appViewModel.showSnackbarMessage(context.getString(R.string.exported_configs_message))
             }
         } catch (e: Exception) {
             Timber.e(e)
@@ -190,11 +192,9 @@ fun SettingsScreen(
     }
 
     fun openSettings() {
-        scope.launch {
-            val intentSettings = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
-            intentSettings.data = Uri.fromParts("package", context.packageName, null)
-            context.startActivity(intentSettings)
-        }
+        val intentSettings = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
+        intentSettings.data = Uri.fromParts("package", context.packageName, null)
+        context.startActivity(intentSettings)
     }
 
     fun checkFineLocationGranted() {

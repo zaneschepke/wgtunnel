@@ -7,6 +7,8 @@ import androidx.core.app.ServiceCompat
 import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.module.MainImmediateDispatcher
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
@@ -17,10 +19,11 @@ import com.zaneschepke.wireguardautotunnel.util.handshakeStatus
 import com.zaneschepke.wireguardautotunnel.util.mapPeerStats
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -37,13 +40,21 @@ class WireGuardTunnelService : ForegroundService() {
     @Inject
     lateinit var notificationService: NotificationService
 
+    @Inject
+    @MainImmediateDispatcher
+    lateinit var mainImmediateDispatcher: CoroutineDispatcher
+
+    @Inject
+    @IoDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
+
     private var job: Job? = null
 
     private var didShowConnected = false
 
     override fun onCreate() {
         super.onCreate()
-        lifecycleScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(mainImmediateDispatcher) {
             //TODO fix this to not launch if AOVPN
             if (appDataRepository.tunnels.count() != 0) {
                 launchVpnNotification()
@@ -55,7 +66,7 @@ class WireGuardTunnelService : ForegroundService() {
         super.startService(extras)
         cancelJob()
         job =
-            lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch {
                 launch {
                     val tunnelId = extras?.getInt(Constants.TUNNEL_EXTRA_KEY)
                     if (vpnService.getState() == TunnelState.UP) {
@@ -75,39 +86,41 @@ class WireGuardTunnelService : ForegroundService() {
 
     //TODO improve tunnel notifications
     private suspend fun handshakeNotifications() {
-        var tunnelName: String? = null
-        vpnService.vpnState.collect { state ->
+        withContext(ioDispatcher) {
+            var tunnelName: String? = null
+            vpnService.vpnState.collect { state ->
                 state.statistics
-                ?.mapPeerStats()
-                ?.map { it.value?.handshakeStatus() }
-                .let { statuses ->
-                    when {
-                        statuses?.all { it == HandshakeStatus.HEALTHY } == true -> {
-                            if (!didShowConnected) {
-                                delay(Constants.VPN_CONNECTED_NOTIFICATION_DELAY)
-                                tunnelName = state.tunnelConfig?.name
-                                launchVpnNotification(
-                                    getString(R.string.tunnel_start_title),
-                                    "${getString(R.string.tunnel_start_text)} - $tunnelName",
-                                )
-                                didShowConnected = true
+                    ?.mapPeerStats()
+                    ?.map { it.value?.handshakeStatus() }
+                    .let { statuses ->
+                        when {
+                            statuses?.all { it == HandshakeStatus.HEALTHY } == true -> {
+                                if (!didShowConnected) {
+                                    delay(Constants.VPN_CONNECTED_NOTIFICATION_DELAY)
+                                    tunnelName = state.tunnelConfig?.name
+                                    launchVpnNotification(
+                                        getString(R.string.tunnel_start_title),
+                                        "${getString(R.string.tunnel_start_text)} - $tunnelName",
+                                    )
+                                    didShowConnected = true
+                                }
                             }
-                        }
 
-                        statuses?.any { it == HandshakeStatus.STALE } == true -> {}
-                        statuses?.all { it == HandshakeStatus.NOT_STARTED } ==
-                            true -> {
-                        }
+                            statuses?.any { it == HandshakeStatus.STALE } == true -> {}
+                            statuses?.all { it == HandshakeStatus.NOT_STARTED } ==
+                                true -> {
+                            }
 
-                        else -> {}
+                            else -> {}
+                        }
                     }
+                if (state.status == TunnelState.UP && state.tunnelConfig?.name != tunnelName) {
+                    tunnelName = state.tunnelConfig?.name
+                    launchVpnNotification(
+                        getString(R.string.tunnel_start_title),
+                        "${getString(R.string.tunnel_start_text)} - $tunnelName",
+                    )
                 }
-            if (state.status == TunnelState.UP && state.tunnelConfig?.name != tunnelName) {
-                tunnelName = state.tunnelConfig?.name
-                launchVpnNotification(
-                    getString(R.string.tunnel_start_title),
-                    "${getString(R.string.tunnel_start_text)} - $tunnelName",
-                )
             }
         }
     }
@@ -121,7 +134,7 @@ class WireGuardTunnelService : ForegroundService() {
 
     override fun stopService() {
         super.stopService()
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch {
             vpnService.stopTunnel()
             didShowConnected = false
         }
@@ -181,7 +194,7 @@ class WireGuardTunnelService : ForegroundService() {
     private fun cancelJob() {
         try {
             job?.cancel()
-        } catch (e : CancellationException) {
+        } catch (e: CancellationException) {
             Timber.i("Tunnel job cancelled")
         }
     }

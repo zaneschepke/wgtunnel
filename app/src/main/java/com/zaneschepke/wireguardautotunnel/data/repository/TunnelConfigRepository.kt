@@ -22,7 +22,7 @@ interface TunnelConfigRepository {
 
     suspend fun count(): Int
 
-    suspend fun findByTunnelName(name : String) : TunnelConfig?
+    suspend fun findByTunnelName(name: String): TunnelConfig?
 
     suspend fun findByTunnelNetworksName(name: String): TunnelConfigs
 

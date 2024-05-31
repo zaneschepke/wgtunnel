@@ -3,7 +3,7 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel.statistics
 import com.wireguard.android.backend.Statistics
 import org.amnezia.awg.crypto.Key
 
-class WireGuardStatistics(private val statistics: Statistics) : TunnelStatistics()  {
+class WireGuardStatistics(private val statistics: Statistics) : TunnelStatistics() {
     override fun peerStats(peer: Key): PeerStats? {
         val key = com.wireguard.crypto.Key.fromBase64(peer.toBase64())
         val peerStats = statistics.peer(key)
@@ -11,7 +11,7 @@ class WireGuardStatistics(private val statistics: Statistics) : TunnelStatistics
             PeerStats(
                 txBytes = peerStats.txBytes,
                 rxBytes = peerStats.rxBytes,
-                latestHandshakeEpochMillis = peerStats.latestHandshakeEpochMillis
+                latestHandshakeEpochMillis = peerStats.latestHandshakeEpochMillis,
             )
         }
     }
