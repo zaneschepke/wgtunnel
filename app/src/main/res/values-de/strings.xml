@@ -12,7 +12,6 @@
     <string name="disable_auto_tunnel">Auto-Tunneln stoppen</string>
     <string name="okay">Ok</string>
     <string name="tunnel_on_ethernet">Tunnel für Ethernet</string>
-    <string name="search_icon">Symbol suchen</string>
     <string name="attempt_connection">Verbindungsversuch..</string>
     <string name="auto_tunneling">Auto-Tunneln</string>
     <string name="default_vpn_off">Primärer VPN aus</string>
@@ -55,7 +54,6 @@
     <string name="always_on_vpn_support">Always-On VPN erlauben</string>
     <string name="location_services_not_detected">Standortdienste nicht erkannt</string>
     <string name="hint_search_packages">Pakete suchen</string>
-    <string name="clear_icon">Symbol löschen</string>
     <string name="vpn_starting">VPN startet</string>
     <string name="db_name">wg-tunnel-db</string>
     <string name="scanning_qr">Scanne nach QR</string>

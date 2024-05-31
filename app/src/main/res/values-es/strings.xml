@@ -72,7 +72,6 @@
     <string name="always_on_vpn_support">Permitir VPN siempre-activada</string>
     <string name="location_services_not_detected">Servicios de Ubicación No Detectados</string>
     <string name="hint_search_packages">Buscar paquetes</string>
-    <string name="clear_icon">Icono claro</string>
     <string name="attempt_connection">Intentando conexión...</string>
     <string name="vpn_starting">Iniciando VPN</string>
     <string name="db_name">wg-tunnel-db</string>
@@ -106,7 +105,6 @@
     <string name="listen_port">Puerto de escucha</string>
     <string name="preshared_key">Clave previamente compartida</string>
     <string name="persistent_keepalive">Keepalive persistente</string>
-    <string name="search_icon">Icono de búsqueda</string>
     <string name="docs_description">Leer documentación</string>
     <string name="email_description">Envíame un email</string>
     <string name="support_help_text">Si tienes problemas, ideas para mejoras, o simlemente comprometerte, tienes disponibles los siguientes recursos:</string>

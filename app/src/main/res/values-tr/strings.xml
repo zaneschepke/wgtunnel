@@ -59,8 +59,6 @@
     <string name="always_on_vpn_support">Her Zaman Açık VPN\'e İzin Ver</string>
     <string name="location_services_not_detected">Konum Hizmetleri Algılanmadı</string>
     <string name="hint_search_packages">Uygulama arayın</string>
-    <string name="clear_icon">Simgeyi Temizle</string>
-    <string name="search_icon">Simge Ara</string>
     <string name="attempt_connection">Bağlantı kurulmaya çalışılıyor..</string>
     <string name="vpn_starting">VPN başlatılıyor</string>
     <string name="db_name">wg-tunnel-db</string>

@@ -24,7 +24,6 @@
     <string name="always_on_vpn_support">Povolit trvalé připojení VPN</string>
     <string name="location_services_not_detected">Služby polohy nebyly detekovány</string>
     <string name="hint_search_packages">Hledat balíčky</string>
-    <string name="clear_icon">Smazat ikonu</string>
     <string name="attempt_connection">Pokus o připojení...</string>
     <string name="vpn_starting">VPN se spouští</string>
     <string name="vpn_on">VPN zapnuto</string>
@@ -105,7 +104,6 @@
     <string name="allowed_ips">Povolené IP adresy</string>
     <string name="name">Název</string>
     <string name="restart">Restartovat tunel</string>
-    <string name="search_icon">Hledat ikonu</string>
     <string name="scanning_qr">Skenování QR</string>
     <string name="none">Žádné názvy důvěryhodných Wi-Fi</string>
     <string name="other">Ostatní</string>

@@ -44,19 +44,21 @@ fun SearchBar(onQuery: (queryString: String) -> Unit) {
             onQuery(onQueryChanged)
         },
         leadingIcon = {
+            val icon = Icons.Rounded.Search
             Icon(
-                imageVector = Icons.Rounded.Search,
+                imageVector = icon,
                 tint = MaterialTheme.colorScheme.onBackground,
-                contentDescription = stringResource(id = R.string.search_icon),
+                contentDescription = icon.name,
             )
         },
         trailingIcon = {
             if (showClearIcon) {
                 IconButton(onClick = { query = "" }) {
+                    val icon = Icons.Rounded.Clear
                     Icon(
-                        imageVector = Icons.Rounded.Clear,
+                        imageVector = icon,
                         tint = MaterialTheme.colorScheme.onBackground,
-                        contentDescription = stringResource(id = R.string.clear_icon),
+                        contentDescription = icon.name,
                     )
                 }
             }

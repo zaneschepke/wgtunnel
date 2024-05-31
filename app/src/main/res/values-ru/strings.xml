@@ -59,7 +59,6 @@
     <string name="cancel">Отмена</string>
     <string name="docs_description">Посмотреть документацию</string>
     <string name="discord_description">Присоединиться к сообществу</string>
-    <string name="clear_icon">Значок очистки</string>
     <string name="email_chooser">Отправить письмо</string>
     <string name="add_trusted_ssid">Добавить доверенное имя сети Wi-Fi</string>
     <string name="included">включено</string>
@@ -97,7 +96,6 @@
     <string name="trusted_ssid_empty_description">Введите SSID</string>
     <string name="add_tunnels_text">Добавить из файла или архива</string>
     <string name="location_services_not_detected">Сервисы местоположения не обнаружены</string>
-    <string name="search_icon">Значок поиска</string>
     <string name="attempt_connection">Попытка соединения…</string>
     <string name="scanning_qr">Поиск QR-кода</string>
     <string name="none">Нет доверенных имён Wi-Fi</string>
