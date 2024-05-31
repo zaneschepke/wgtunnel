@@ -30,7 +30,7 @@ compose = "1.6.7"
 zxingAndroidEmbedded = "4.3.0"
 
 #plugins
-gradlePlugins-kotlinxSerialization = "1.9.23"
+gradlePlugins-kotlinxSerialization = "2.0.0"
 material = "1.12.0"
 
 
