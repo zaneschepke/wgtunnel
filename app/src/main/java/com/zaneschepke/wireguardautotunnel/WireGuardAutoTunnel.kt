@@ -49,7 +49,8 @@ class WireGuardAutoTunnel : Application() {
             )
         } else Timber.plant(ReleaseTree())
         applicationScope.launch(ioDispatcher) {
-            PinManager.initialize(this@WireGuardAutoTunnel)
+            //TODO disable pin lock for now
+            //PinManager.initialize(this@WireGuardAutoTunnel)
             if (!isRunningOnAndroidTv()) localLogCollector.start()
         }
     }

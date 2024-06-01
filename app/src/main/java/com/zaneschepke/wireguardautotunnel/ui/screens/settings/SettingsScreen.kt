@@ -103,7 +103,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val interactionSource = remember { MutableInteractionSource() }
-    val pinExists = remember { mutableStateOf(PinManager.pinExists()) }
+    //val pinExists = remember { mutableStateOf(PinManager.pinExists()) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val kernelSupport by viewModel.kernelSupport.collectAsStateWithLifecycle()
@@ -652,20 +652,21 @@ fun SettingsScreen(
                             onCheckChanged = { viewModel.onToggleShortcutsEnabled() },
                         )
                     }
-                    ConfigurationToggle(
-                        stringResource(R.string.enable_app_lock),
-                        enabled = true,
-                        checked = pinExists.value,
-                        padding = screenPadding,
-                        onCheckChanged = {
-                            if (pinExists.value) {
-                                PinManager.clearPin()
-                                pinExists.value = PinManager.pinExists()
-                            } else {
-                                navController.navigate(Screen.Lock.route)
-                            }
-                        },
-                    )
+                    // TODO disable for now
+//                    ConfigurationToggle(
+//                        stringResource(R.string.enable_app_lock),
+//                        enabled = true,
+//                        checked = pinExists.value,
+//                        padding = screenPadding,
+//                        onCheckChanged = {
+//                            if (pinExists.value) {
+//                                PinManager.clearPin()
+//                                pinExists.value = PinManager.pinExists()
+//                            } else {
+//                                navController.navigate(Screen.Lock.route)
+//                            }
+//                        },
+//                    )
                     if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

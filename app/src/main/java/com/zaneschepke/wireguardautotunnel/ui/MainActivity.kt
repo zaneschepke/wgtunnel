@@ -202,7 +202,9 @@ class MainActivity : AppCompatActivity() {
                     NavHost(
                         navController,
                         startDestination =
-                        (if (PinManager.pinExists()) Screen.Lock.route else Screen.Main.route),
+                        //TODO disable pin lock
+                        //(if (PinManager.pinExists()) Screen.Lock.route else Screen.Main.route),
+                        Screen.Main.route,
                         modifier =
                         Modifier
                             .padding(padding)
