@@ -17,6 +17,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -51,9 +52,9 @@ class TunnelModule {
     @Provides
     @Singleton
     fun provideVpnService(
-        amneziaBackend: org.amnezia.awg.backend.Backend,
-        @Userspace userspaceBackend: Backend,
-        @Kernel kernelBackend: Backend,
+        amneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
+        @Userspace userspaceBackend: Provider<Backend>,
+        @Kernel kernelBackend: Provider<Backend>,
         appDataRepository: AppDataRepository,
         @ApplicationScope applicationScope: CoroutineScope,
         @IoDispatcher ioDispatcher: CoroutineDispatcher

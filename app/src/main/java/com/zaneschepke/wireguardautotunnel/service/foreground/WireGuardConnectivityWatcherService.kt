@@ -390,19 +390,14 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                         }
 
                         watcherState.isMobileDataConditionMet() -> {
-                            Timber.i("$autoTunnel - tunnel on on mobile data condition met")
+                            Timber.i("$autoTunnel - tunnel on mobile data condition met")
                             val mobileDataTunnel = getMobileDataTunnel()
                             val tunnel =
                                 mobileDataTunnel ?: appDataRepository.getPrimaryOrFirstTunnel()
-                            if (isTunnelDown()) return@collectLatest serviceManager.startVpnServiceForeground(
-                                context,
-                                tunnel?.id,
-                            )
-                            if (tunnelConfig?.isMobileDataTunnel == false && mobileDataTunnel != null) {
-                                Timber.i("$autoTunnel - tunnel connected on mobile data is not preferred condition met, switching to preferred")
+                            if (isTunnelDown() || tunnelConfig?.isMobileDataTunnel == false) {
                                 serviceManager.startVpnServiceForeground(
                                     context,
-                                    mobileDataTunnel.id,
+                                    tunnel?.id,
                                 )
                             }
                         }
@@ -417,8 +412,8 @@ class WireGuardConnectivityWatcherService : ForegroundService() {
                                 tunnelConfig == null) {
                                 Timber.i("$autoTunnel - tunnel on ssid not associated with current tunnel condition met")
                                 getSsidTunnel(watcherState.currentNetworkSSID)?.let {
-                                    Timber.i("Found tunnel associated with this SSID, bringing tunnel up")
-                                    if (isTunnelDown()) serviceManager.startVpnServiceForeground(
+                                    Timber.i("Found tunnel associated with this SSID, bringing tunnel up: ${it.name}")
+                                    if (isTunnelDown() || tunnelConfig?.id != it.id) serviceManager.startVpnServiceForeground(
                                         context,
                                         it.id,
                                     )

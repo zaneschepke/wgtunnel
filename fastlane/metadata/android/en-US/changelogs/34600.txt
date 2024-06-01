@@ -1,0 +1,4 @@
+What's new:
+- Fixes auto tunneling bugs
+- Fixes android backup bug
+- Bump versions

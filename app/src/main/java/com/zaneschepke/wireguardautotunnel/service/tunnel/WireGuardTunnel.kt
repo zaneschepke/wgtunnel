@@ -27,13 +27,14 @@ import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 class WireGuardTunnel
 @Inject
 constructor(
-    private val userspaceAmneziaBackend: org.amnezia.awg.backend.Backend,
-    @Userspace private val userspaceBackend: Backend,
-    @Kernel private val kernelBackend: Backend,
+    private val userspaceAmneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
+    @Userspace private val userspaceBackend: Provider<Backend>,
+    @Kernel private val kernelBackend: Provider<Backend>,
     private val appDataRepository: AppDataRepository,
     @ApplicationScope private val applicationScope: CoroutineScope,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
@@ -44,7 +45,7 @@ constructor(
 
     private var statsJob: Job? = null
 
-    private var backend: Backend = userspaceBackend
+    private lateinit var backend: Backend;
 
     private var backendIsWgUserspace = true
 
@@ -52,15 +53,16 @@ constructor(
 
     init {
         applicationScope.launch(ioDispatcher) {
+            backend = userspaceBackend.get()
             appDataRepository.settings.getSettingsFlow().collect {
                 if (it.isKernelEnabled && (backendIsWgUserspace || backendIsAmneziaUserspace)) {
                     Timber.i("Setting kernel backend")
-                    backend = kernelBackend
+                    backend = kernelBackend.get()
                     backendIsWgUserspace = false
                     backendIsAmneziaUserspace = false
                 } else if (!it.isKernelEnabled && !it.isAmneziaEnabled && !backendIsWgUserspace) {
                     Timber.i("Setting WireGuard userspace backend")
-                    backend = userspaceBackend
+                    backend = userspaceBackend.get()
                     backendIsWgUserspace = true
                     backendIsAmneziaUserspace = false
                 } else if (it.isAmneziaEnabled && !backendIsAmneziaUserspace) {
@@ -81,7 +83,8 @@ constructor(
                     TunnelConfig.configFromAmQuick(it.wgQuick)
                 }
             }
-            val state = userspaceAmneziaBackend.setState(this, tunnelState.toAmState(), config)
+            val state =
+                userspaceAmneziaBackend.get().setState(this, tunnelState.toAmState(), config)
             TunnelState.from(state)
         } else {
             Timber.i("Using Wg backend")
@@ -156,7 +159,9 @@ constructor(
     }
 
     override fun getState(): TunnelState {
-        return if (backendIsAmneziaUserspace) TunnelState.from(userspaceAmneziaBackend.getState(this))
+        return if (backendIsAmneziaUserspace) TunnelState.from(
+            userspaceAmneziaBackend.get().getState(this),
+        )
         else TunnelState.from(backend.getState(this))
     }
 
@@ -187,7 +192,11 @@ constructor(
     private fun startTunnelStatisticsJob() = applicationScope.launch(ioDispatcher) {
         while (true) {
             if (backendIsAmneziaUserspace) {
-                emitBackendStatistics(AmneziaStatistics(userspaceAmneziaBackend.getStatistics(this@WireGuardTunnel)))
+                emitBackendStatistics(
+                    AmneziaStatistics(
+                        userspaceAmneziaBackend.get().getStatistics(this@WireGuardTunnel),
+                    ),
+                )
             } else {
                 emitBackendStatistics(WireGuardStatistics(backend.getStatistics(this@WireGuardTunnel)))
             }

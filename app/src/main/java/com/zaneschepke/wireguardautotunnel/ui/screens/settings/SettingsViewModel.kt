@@ -5,23 +5,31 @@ import android.location.LocationManager
 import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Provider
 
 @HiltViewModel
 class SettingsViewModel
@@ -29,10 +37,14 @@ class SettingsViewModel
 constructor(
     private val appDataRepository: AppDataRepository,
     private val serviceManager: ServiceManager,
-    private val rootShell: RootShell,
+    private val rootShell: Provider<RootShell>,
     private val fileUtils: FileUtils,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     vpnService: VpnService
 ) : ViewModel() {
+
+    private val _kernelSupport = MutableStateFlow(false)
+    val kernelSupport = _kernelSupport.asStateFlow()
 
     val uiState =
         combine(
@@ -181,27 +193,29 @@ constructor(
         )
     }
 
-    fun onToggleKernelMode(): Result<Unit> {
-        if (!uiState.value.settings.isKernelEnabled) {
-            try {
-                rootShell.start()
-                Timber.i("Root shell accepted!")
-                saveSettings(
-                    uiState.value.settings.copy(
-                        isKernelEnabled = true,
-                        isAmneziaEnabled = false,
-                    ),
-                )
+    suspend fun onToggleKernelMode(): Result<Unit> {
+        return withContext(ioDispatcher) {
+            if (!uiState.value.settings.isKernelEnabled) {
+                try {
+                    rootShell.get().start()
+                    Timber.i("Root shell accepted!")
+                    saveSettings(
+                        uiState.value.settings.copy(
+                            isKernelEnabled = true,
+                            isAmneziaEnabled = false,
+                        ),
+                    )
 
-            } catch (e: RootShell.RootShellException) {
-                Timber.e(e)
+                } catch (e: RootShell.RootShellException) {
+                    Timber.e(e)
+                    saveKernelMode(on = false)
+                    return@withContext Result.failure(WgTunnelExceptions.RootDenied())
+                }
+            } else {
                 saveKernelMode(on = false)
-                return Result.failure(WgTunnelExceptions.RootDenied())
             }
-        } else {
-            saveKernelMode(on = false)
+            Result.success(Unit)
         }
-        return Result.success(Unit)
     }
 
     fun onToggleRestartOnPing() = viewModelScope.launch {
@@ -210,5 +224,14 @@ constructor(
                 isPingEnabled = !uiState.value.settings.isPingEnabled,
             ),
         )
+    }
+
+    fun checkKernelSupport() = viewModelScope.launch {
+        val kernelSupport = withContext(ioDispatcher) {
+            WgQuickBackend.hasKernelSupport()
+        }
+        _kernelSupport.update {
+            kernelSupport
+        }
     }
 }

@@ -44,6 +44,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +71,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.wireguard.android.backend.WgQuickBackend
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
@@ -106,6 +106,7 @@ fun SettingsScreen(
     val pinExists = remember { mutableStateOf(PinManager.pinExists()) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val kernelSupport by viewModel.kernelSupport.collectAsStateWithLifecycle()
 
     val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var currentText by remember { mutableStateOf("") }
@@ -116,6 +117,10 @@ fun SettingsScreen(
 
     val screenPadding = 5.dp
     val fillMaxWidth = .85f
+
+    LaunchedEffect(Unit) {
+        viewModel.checkKernelSupport()
+    }
 
     val startForResult =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -591,7 +596,7 @@ fun SettingsScreen(
                             viewModel.onToggleAmnezia()
                         },
                     )
-                    if (WgQuickBackend.hasKernelSupport()) {
+                    if (kernelSupport) {
                         ConfigurationToggle(
                             stringResource(R.string.use_kernel),
                             enabled =
@@ -601,8 +606,10 @@ fun SettingsScreen(
                             checked = uiState.settings.isKernelEnabled,
                             padding = screenPadding,
                             onCheckChanged = {
-                                viewModel.onToggleKernelMode().onFailure {
-                                    appViewModel.showSnackbarMessage(it.getMessage(context))
+                                scope.launch {
+                                    viewModel.onToggleKernelMode().onFailure {
+                                        appViewModel.showSnackbarMessage(it.getMessage(context))
+                                    }
                                 }
                             },
                         )

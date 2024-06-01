@@ -1,12 +1,12 @@
 object Constants {
-    const val VERSION_NAME = "3.4.5"
+    const val VERSION_NAME = "3.4.6"
     const val JVM_TARGET = "17"
-    const val VERSION_CODE = 34500
+    const val VERSION_CODE = 34600
     const val TARGET_SDK = 34
     const val MIN_SDK = 26
     const val APP_ID = "com.zaneschepke.wireguardautotunnel"
     const val APP_NAME = "wgtunnel"
-    const val COMPOSE_COMPILER_EXTENSION_VERSION = "1.5.11"
+    const val COMPOSE_COMPILER_EXTENSION_VERSION = "1.5.14"
 
 
     const val STORE_PASS_VAR = "SIGNING_STORE_PASSWORD"
