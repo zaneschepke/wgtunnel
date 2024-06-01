@@ -65,21 +65,18 @@ and on while on different networks. This app was created to offer a free solutio
 * Battery preservation measures
 * Restart tunnel on ping failure (beta)
 
+## Fdroid
+
+Want updates faster?
+
+Check out my personal [fdroid repository](https://github.com/zaneschepke/fdroid) to get updates the moment they are released.
+
 ## Docs
 
-Basic documentation of the feature and behaviors of this app can be
-found [here](https://zaneschepke.com/wgtunnel-docs/overview.html).
+Information about features, behaviors, and answers to common questions can be found in the app [documentation](https://zaneschepke.com/wgtunnel-docs/overview.html).
 
 The repository for these docs can be found [here](https://github.com/zaneschepke/wgtunnel-docs).
 
-## Contributing
-
-Any contributions in the form of feedback, issues, code, or translations are welcome and much
-appreciated!
-
-Please read
-the [code of conduct](https://github.com/zaneschepke/wgtunnel?tab=coc-ov-file#contributor-code-of-conduct)
-before contributing.
 
 ## Translation
 
@@ -102,4 +99,11 @@ And then build the app:
 $ ./gradlew assembleDebug
 ```
 
-</span>
+## Contributing
+
+Any contributions in the form of feedback, issues, code, or translations are welcome and much
+appreciated!
+
+Please read
+the [code of conduct](https://github.com/zaneschepke/wgtunnel?tab=coc-ov-file#contributor-code-of-conduct)
+before contributing.
