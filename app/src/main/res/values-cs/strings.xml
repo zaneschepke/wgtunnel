@@ -144,4 +144,11 @@
     <string name="general">Obecné</string>
     <string name="settings">Nastavení</string>
     <string name="support">Podpora</string>
+    <string name="app_name">WG Tunnel</string>
+    <string name="mtu">MTU</string>
+    <string name="db_name">wg-tunnel-db</string>
+    <string name="listen_port">Naslouchací port</string>
+    <string name="auto">(automaticky)</string>
+    <string name="kernel">Kernel</string>
+    <string name="backend">Backend</string>
 </resources>
