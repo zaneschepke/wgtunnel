@@ -1,0 +1,5 @@
+Novedades:
+- Selección automática de túnel por nombre de WiFi
+- Control automático de túneles a través de mosaicos y atajos.
+- Reinicio automático del túnel manual después de un reinicio del sistema.
+- Varias correcciones de errores y mejoras de rendimiento
