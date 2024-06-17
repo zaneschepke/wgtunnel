@@ -59,7 +59,7 @@
     <string name="cancel">Отмена</string>
     <string name="docs_description">Посмотреть документацию</string>
     <string name="discord_description">Присоединиться к сообществу</string>
-    <string name="email_chooser">Отправить письмо</string>
+    <string name="email_chooser">Отправить письмо…</string>
     <string name="add_trusted_ssid">Добавить доверенное имя сети Wi-Fi</string>
     <string name="included">включено</string>
     <string name="vpn_starting">Идёт запуск VPN</string>
