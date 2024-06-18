@@ -1,0 +1,5 @@
+Novedades:
+- Mejora de la fiabilidad del túnel automático
+- Mejora de la sincronización de azulejos
+- Añadidos activos AndroidTV
+- Añadida huella digital al apk

@@ -1,0 +1,5 @@
+Novedades:
+- Añadir pantalla de registros
+- Añadir bloqueo local de aplicaciones
+- Añadir reiniciar vpn en ping fallido
+- Varios errores corregidos

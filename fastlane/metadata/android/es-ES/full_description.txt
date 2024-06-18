@@ -1,13 +1,14 @@
-Características:
+Características
 
-- Añadir túneles vía .conf file, zip, manualmente, o código QR
-- Conexión automática a la VPN basado en el SSID Wi-Fi, ethernet, o datos móviles
-- División de túnel por aplicacióno con búsqueda
-- Compatibilidad WireGuard para modos kernel y userspace
-- Compatibilidad con VPN Siempre-Activada
-- Exportar túmeles como zip
-- Añadido interruptor VPN en el Centro de Control
-- Accesos directos estáticos para túnel principal para intergración con apps de automatización
-- Intents de apps de automatización para todos los túneles
-- Inicio automático del servicio tras reinicio
-- Medidas para ahorro de batería
+- Añade túneles a través de un archivo .conf, zip, entrada manual o código QR
+- Conexión automática a VPN basada en Wi-Fi SSID, ethernet o datos móviles
+- Túneles divididos por aplicación con búsqueda
+- Soporte de WireGuard para los modos kernel y espacio de usuario
+- Soporte de Amnezia para el modo de espacio de usuario para protección DPI/censura
+- Compatible con VPN siempre activa
+- Exportación de túneles Amnezia y WireGuard a zip
+- Compatibilidad con Quick Tile para alternar entre VPN
+- Soporte de accesos directos estáticos para el túnel principal para la integración de automatización.
+- Soporte de automatización de intenciones para todos los túneles
+- Reinicio automático del servicio tras reiniciar
+- Medidas de conservación de la batería

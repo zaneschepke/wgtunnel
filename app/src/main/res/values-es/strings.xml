@@ -135,7 +135,7 @@
     <string name="pin_created">Pin creado con éxito</string>
     <string name="enter_pin">Introduce tu pin</string>
     <string name="create_pin">Crear pin</string>
-    <string name="enable_app_lock">Bloqueo de app activado</string>
+    <string name="enable_app_lock">Activar el bloqueo de aplicaciones</string>
     <string name="restart_on_ping">Reiniciar al fallar ping (beta)</string>
     <string name="set_primary_tunnel">Establecer como túnel Principal</string>
     <string name="no_wifi_names_configured">No hay nombres Wi-Fi configurados para este túnel</string>
@@ -152,4 +152,9 @@
     <string name="watcher_channel_id">Canal del obvervador</string>
     <string name="watcher_channel_name">Canal de notificación del obvervador</string>
     <string name="prominent_background_location_message">La monitorización SSID Wi-Fi necesita de permiso de ubicación en segundo plano incluso si la app está cerrada. Mira el enlace a la Política de Privacidad en la pantalla de ayuda para más detalles.</string>
+    <string name="export_configs_failed">Error al exportar la configuración</string>
+    <string name="use_amnezia">"Utilizar el entorno de usuario de Amnezia "</string>
+    <string name="junk_packet_count">Recuento de paquetes basura</string>
+    <string name="backend">Backend</string>
+    <string name="junk_packet_minimum_size">Tamaño mínimo del paquete basura</string>
 </resources>

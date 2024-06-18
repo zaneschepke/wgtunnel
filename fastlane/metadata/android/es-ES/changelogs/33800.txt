@@ -1,0 +1,4 @@
+Novedades:
+- Config editar corrección de errores de interfaz de usuario
+- Añadir GrapheneOS primer lanzamiento AOVPN notificación
+- Versiones Bump
