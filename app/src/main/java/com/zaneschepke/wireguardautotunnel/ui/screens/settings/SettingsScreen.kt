@@ -84,7 +84,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.util.getMessage
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import xyz.teamgravity.pin_lock_compose.PinManager
 import java.io.File
 
 @OptIn(
@@ -652,21 +651,29 @@ fun SettingsScreen(
                             onCheckChanged = { viewModel.onToggleShortcutsEnabled() },
                         )
                     }
-                    // TODO disable for now
-//                    ConfigurationToggle(
-//                        stringResource(R.string.enable_app_lock),
-//                        enabled = true,
-//                        checked = pinExists.value,
-//                        padding = screenPadding,
-//                        onCheckChanged = {
-//                            if (pinExists.value) {
-//                                PinManager.clearPin()
-//                                pinExists.value = PinManager.pinExists()
-//                            } else {
-//                                navController.navigate(Screen.Lock.route)
-//                            }
-//                        },
-//                    )
+                    ConfigurationToggle(
+                        stringResource(R.string.restart_at_boot),
+                        enabled = true,
+                        checked = uiState.settings.isRestoreOnBootEnabled,
+                        padding = screenPadding,
+                        onCheckChanged = {
+                            viewModel.onToggleRestartAtBoot()
+                        },
+                    )
+                    ConfigurationToggle(
+                        stringResource(R.string.enable_app_lock),
+                        enabled = true,
+                        checked = uiState.isPinLockEnabled,
+                        padding = screenPadding,
+                        onCheckChanged = {
+                            if (uiState.isPinLockEnabled) {
+                                viewModel.onPinLockDisabled()
+                            } else {
+                                viewModel.onPinLockEnabled()
+                                navController.navigate(Screen.Lock.route)
+                            }
+                        },
+                    )
                     if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

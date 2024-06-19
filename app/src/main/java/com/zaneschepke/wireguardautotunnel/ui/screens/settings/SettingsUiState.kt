@@ -10,4 +10,5 @@ data class SettingsUiState(
     val vpnState: VpnState = VpnState(),
     val isLocationDisclosureShown: Boolean = true,
     val isBatteryOptimizeDisableShown: Boolean = false,
+    val isPinLockEnabled: Boolean = false
 )

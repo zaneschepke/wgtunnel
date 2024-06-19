@@ -43,7 +43,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
@@ -61,14 +61,13 @@ import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var dataStoreManager: DataStoreManager
+    lateinit var appStateRepository: AppStateRepository
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
@@ -82,17 +81,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val isPinLockEnabled = intent.extras?.getBoolean(SplashActivity.IS_PIN_LOCK_ENABLED_KEY)
+
         enableEdgeToEdge(navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()))
 
-        // load preferences into memory and init data
         lifecycleScope.launch {
-            dataStoreManager.init()
             WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
             val settings = settingsRepository.getSettings()
             if (settings.isAutoTunnelEnabled) {
                 serviceManager.startWatcherService(application.applicationContext)
             }
         }
+
         setContent {
             val appViewModel = hiltViewModel<AppViewModel>()
             val appUiState by appViewModel.appUiState.collectAsStateWithLifecycle()
@@ -201,12 +201,8 @@ class MainActivity : AppCompatActivity() {
                 ) { padding ->
                     NavHost(
                         navController,
-                        startDestination =
-                        //TODO disable pin lock
-                        //(if (PinManager.pinExists()) Screen.Lock.route else Screen.Main.route),
-                        Screen.Main.route,
-                        modifier =
-                        Modifier
+                        startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
+                        modifier = Modifier
                             .padding(padding)
                             .fillMaxSize(),
                     ) {

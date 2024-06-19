@@ -176,4 +176,5 @@
     <string name="amnezia" translatable="false">Amnezia</string>
     <string name="wireguard" translatable="false">WireGuard</string>
     <string name="error_file_format">Invalid tunnel config format</string>
+    <string name="restart_at_boot">Restart on boot</string>
 </resources>

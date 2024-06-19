@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.util
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.pm.PackageInfo
 import com.zaneschepke.wireguardautotunnel.R
@@ -10,7 +9,6 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStati
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -19,7 +17,6 @@ import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.whileSelect
 import org.amnezia.awg.config.Config
 import timber.log.Timber
@@ -27,24 +24,7 @@ import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
-
-fun BroadcastReceiver.goAsync(
-    context: CoroutineContext = EmptyCoroutineContext,
-    block: suspend CoroutineScope.() -> Unit
-) {
-    val pendingResult = goAsync()
-    @OptIn(DelicateCoroutinesApi::class) // Must run globally; there's no teardown callback.
-    GlobalScope.launch(context) {
-        try {
-            block()
-        } finally {
-            pendingResult.finish()
-        }
-    }
-}
 
 fun BigDecimal.toThreeDecimalPlaceString(): String {
     val df = DecimalFormat("#.###")

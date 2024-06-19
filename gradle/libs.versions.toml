@@ -22,12 +22,13 @@ pinLockCompose = "1.0.3"
 roomVersion = "2.6.1"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
-androidGradlePlugin = "8.4.1"
+androidGradlePlugin = "8.5.0"
 kotlin = "1.9.24"
 ksp = "1.9.24-1.0.20"
-composeBom = "2024.05.00"
-compose = "1.6.7"
+composeBom = "2024.06.00"
+compose = "1.6.8"
 zxingAndroidEmbedded = "4.3.0"
+coreSplashscreen = "1.0.1"
 
 #plugins
 gradlePlugins-kotlinxSerialization = "1.9.24"
@@ -74,6 +75,7 @@ androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx"
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-compose" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }

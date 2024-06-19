@@ -28,6 +28,7 @@ class DataStoreManager(
             booleanPreferencesKey("TUNNEL_RUNNING_FROM_MANUAL_START")
         val ACTIVE_TUNNEL = intPreferencesKey("ACTIVE_TUNNEL")
         val CURRENT_SSID = stringPreferencesKey("CURRENT_SSID")
+        val IS_PIN_LOCK_ENABLED = booleanPreferencesKey("PIN_LOCK_ENABLED")
     }
 
     // preferences

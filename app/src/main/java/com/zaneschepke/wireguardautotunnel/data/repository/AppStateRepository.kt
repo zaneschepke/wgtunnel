@@ -7,6 +7,9 @@ interface AppStateRepository {
     suspend fun isLocationDisclosureShown(): Boolean
     suspend fun setLocationDisclosureShown(shown: Boolean)
 
+    suspend fun isPinLockEnabled(): Boolean
+    suspend fun setPinLockEnabled(enabled: Boolean)
+
     suspend fun isBatteryOptimizationDisableShown(): Boolean
     suspend fun setBatteryOptimizationDisableShown(shown: Boolean)
 

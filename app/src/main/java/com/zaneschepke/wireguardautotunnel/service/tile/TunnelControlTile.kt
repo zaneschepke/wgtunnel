@@ -11,7 +11,6 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -35,32 +34,27 @@ class TunnelControlTile : TileService() {
 
     private var manualStartConfig: TunnelConfig? = null
 
-    private var job: Job? = null;
-
     override fun onStartListening() {
         super.onStartListening()
         Timber.d("On start listening called")
-        //TODO Fix this
-        if (job == null || job?.isCancelled == true) job = applicationScope.launch {
-            vpnService.vpnState.collect { it ->
-                when (it.status) {
-                    TunnelState.UP -> {
-                        setActive()
-                        it.tunnelConfig?.name?.let { name -> setTileDescription(name) }
-                    }
-
-                    TunnelState.DOWN -> {
-                        setInactive()
-                        val config = appDataRepository.getStartTunnelConfig()?.also { config ->
-                            manualStartConfig = config
-                        } ?: appDataRepository.getPrimaryOrFirstTunnel()
-                        config?.let {
-                            setTileDescription(it.name)
-                        } ?: setUnavailable()
-                    }
-
-                    else -> setInactive()
+        applicationScope.launch {
+            when (vpnService.getState()) {
+                TunnelState.UP -> {
+                    setActive()
+                    setTileDescription(vpnService.name)
                 }
+
+                TunnelState.DOWN -> {
+                    setInactive()
+                    val config = appDataRepository.getStartTunnelConfig()?.also { config ->
+                        manualStartConfig = config
+                    } ?: appDataRepository.getPrimaryOrFirstTunnel()
+                    config?.let {
+                        setTileDescription(it.name)
+                    } ?: setUnavailable()
+                }
+
+                else -> setInactive()
             }
         }
     }

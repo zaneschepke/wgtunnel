@@ -69,14 +69,15 @@ and on while on different networks. This app was created to offer a free solutio
 
 Want updates faster?
 
-Check out my personal [fdroid repository](https://github.com/zaneschepke/fdroid) to get updates the moment they are released.
+Check out my personal [fdroid repository](https://github.com/zaneschepke/fdroid) to get updates the
+moment they are released.
 
 ## Docs
 
-Information about features, behaviors, and answers to common questions can be found in the app [documentation](https://zaneschepke.com/wgtunnel-docs/overview.html).
+Information about features, behaviors, and answers to common questions can be found in the
+app [documentation](https://zaneschepke.com/wgtunnel-docs/overview.html).
 
 The repository for these docs can be found [here](https://github.com/zaneschepke/wgtunnel-docs).
-
 
 ## Translation
 

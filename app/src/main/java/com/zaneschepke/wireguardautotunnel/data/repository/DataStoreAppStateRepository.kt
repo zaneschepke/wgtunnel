@@ -17,6 +17,15 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
         dataStoreManager.saveToDataStore(DataStoreManager.LOCATION_DISCLOSURE_SHOWN, shown)
     }
 
+    override suspend fun isPinLockEnabled(): Boolean {
+        return dataStoreManager.getFromStore(DataStoreManager.IS_PIN_LOCK_ENABLED)
+            ?: GeneralState.PIN_LOCK_ENABLED_DEFAULT
+    }
+
+    override suspend fun setPinLockEnabled(enabled: Boolean) {
+        dataStoreManager.saveToDataStore(DataStoreManager.IS_PIN_LOCK_ENABLED, enabled)
+    }
+
     override suspend fun isBatteryOptimizationDisableShown(): Boolean {
         return dataStoreManager.getFromStore(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN)
             ?: GeneralState.BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT
@@ -65,11 +74,13 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
             prefs?.let { pref ->
                 try {
                     GeneralState(
-                        locationDisclosureShown = pref[DataStoreManager.LOCATION_DISCLOSURE_SHOWN]
+                        isLocationDisclosureShown = pref[DataStoreManager.LOCATION_DISCLOSURE_SHOWN]
                             ?: GeneralState.LOCATION_DISCLOSURE_SHOWN_DEFAULT,
-                        batteryOptimizationDisableShown = pref[DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN]
+                        isBatteryOptimizationDisableShown = pref[DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN]
                             ?: GeneralState.BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT,
-                        tunnelRunningFromManualStart = pref[DataStoreManager.TUNNEL_RUNNING_FROM_MANUAL_START]
+                        isTunnelRunningFromManualStart = pref[DataStoreManager.TUNNEL_RUNNING_FROM_MANUAL_START]
+                            ?: GeneralState.TUNNELING_RUNNING_FROM_MANUAL_START_DEFAULT,
+                        isPinLockEnabled = pref[DataStoreManager.IS_PIN_LOCK_ENABLED]
                             ?: GeneralState.TUNNELING_RUNNING_FROM_MANUAL_START_DEFAULT,
                     )
                 } catch (e: IllegalArgumentException) {

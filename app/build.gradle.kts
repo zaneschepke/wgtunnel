@@ -112,9 +112,6 @@ android {
         }
         create("general") {
             dimension = Constants.TYPE
-            if (BuildHelper.isReleaseBuild(gradle) && BuildHelper.isGeneralFlavor(gradle)) {
-                //any plugins general specific
-            }
         }
     }
     compileOptions {
@@ -211,4 +208,7 @@ dependencies {
     // shortcuts
     implementation(libs.androidx.core)
     implementation(libs.androidx.core.google.shortcuts)
+
+    // splash
+    implementation(libs.androidx.core.splashscreen)
 }

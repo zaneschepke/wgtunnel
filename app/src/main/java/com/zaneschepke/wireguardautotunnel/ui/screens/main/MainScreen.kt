@@ -101,7 +101,6 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
-import com.zaneschepke.wireguardautotunnel.ui.CaptureActivityPortrait
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
@@ -262,8 +261,6 @@ fun MainScreen(
             context.getString(R.string.scanning_qr),
         )
         scanOptions.setBeepEnabled(false)
-        scanOptions.captureActivity =
-            CaptureActivityPortrait::class.java
         scanLauncher.launch(scanOptions)
     }
 

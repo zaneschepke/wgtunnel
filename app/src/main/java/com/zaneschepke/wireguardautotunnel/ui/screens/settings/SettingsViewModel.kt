@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import xyz.teamgravity.pin_lock_compose.PinManager
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -57,8 +58,9 @@ constructor(
                 settings,
                 tunnels,
                 tunnelState,
-                generalState.locationDisclosureShown,
-                generalState.batteryOptimizationDisableShown,
+                generalState.isLocationDisclosureShown,
+                generalState.isBatteryOptimizationDisableShown,
+                generalState.isPinLockEnabled,
             )
         }
             .stateIn(
@@ -233,5 +235,23 @@ constructor(
         _kernelSupport.update {
             kernelSupport
         }
+    }
+
+    fun onPinLockDisabled() = viewModelScope.launch {
+        PinManager.clearPin()
+        appDataRepository.appState.setPinLockEnabled(false)
+    }
+
+    fun onPinLockEnabled() = viewModelScope.launch {
+        PinManager.initialize(WireGuardAutoTunnel.instance)
+        appDataRepository.appState.setPinLockEnabled(true)
+    }
+
+    fun onToggleRestartAtBoot() = viewModelScope.launch {
+        saveSettings(
+            uiState.value.settings.copy(
+                isRestoreOnBootEnabled = !uiState.value.settings.isRestoreOnBootEnabled
+            )
+        )
     }
 }

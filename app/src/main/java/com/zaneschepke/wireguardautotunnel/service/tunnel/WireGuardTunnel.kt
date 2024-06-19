@@ -45,24 +45,19 @@ constructor(
 
     private var statsJob: Job? = null
 
-    private lateinit var backend: Backend;
-
     private var backendIsWgUserspace = true
 
     private var backendIsAmneziaUserspace = false
 
     init {
         applicationScope.launch(ioDispatcher) {
-            backend = userspaceBackend.get()
             appDataRepository.settings.getSettingsFlow().collect {
                 if (it.isKernelEnabled && (backendIsWgUserspace || backendIsAmneziaUserspace)) {
                     Timber.i("Setting kernel backend")
-                    backend = kernelBackend.get()
                     backendIsWgUserspace = false
                     backendIsAmneziaUserspace = false
                 } else if (!it.isKernelEnabled && !it.isAmneziaEnabled && !backendIsWgUserspace) {
                     Timber.i("Setting WireGuard userspace backend")
-                    backend = userspaceBackend.get()
                     backendIsWgUserspace = true
                     backendIsAmneziaUserspace = false
                 } else if (it.isAmneziaEnabled && !backendIsAmneziaUserspace) {
@@ -89,7 +84,7 @@ constructor(
         } else {
             Timber.i("Using Wg backend")
             val wgConfig = tunnelConfig?.let { TunnelConfig.configFromWgQuick(it.wgQuick) }
-            val state = backend.setState(
+            val state = backend().setState(
                 this,
                 tunnelState.toWgState(),
                 wgConfig,
@@ -102,6 +97,7 @@ constructor(
         return withContext(ioDispatcher) {
             try {
                 //TODO we need better error handling here
+                // need to bubble up these errors to the UI
                 val config = tunnelConfig ?: appDataRepository.getPrimaryOrFirstTunnel()
                 if (config != null) {
                     emitTunnelConfig(config)
@@ -110,6 +106,22 @@ constructor(
             } catch (e: BackendException) {
                 Timber.e("Failed to start tunnel with error: ${e.message}")
                 TunnelState.from(State.DOWN)
+            }
+        }
+    }
+
+    private fun backend(): Backend {
+        return when {
+            backendIsWgUserspace -> {
+                userspaceBackend.get()
+            }
+
+            !backendIsWgUserspace && !backendIsAmneziaUserspace -> {
+                kernelBackend.get()
+            }
+
+            else -> {
+                userspaceBackend.get()
             }
         }
     }
@@ -162,7 +174,7 @@ constructor(
         return if (backendIsAmneziaUserspace) TunnelState.from(
             userspaceAmneziaBackend.get().getState(this),
         )
-        else TunnelState.from(backend.getState(this))
+        else TunnelState.from(backend().getState(this))
     }
 
     override fun getName(): String {
@@ -198,7 +210,7 @@ constructor(
                     ),
                 )
             } else {
-                emitBackendStatistics(WireGuardStatistics(backend.getStatistics(this@WireGuardTunnel)))
+                emitBackendStatistics(WireGuardStatistics(backend().getStatistics(this@WireGuardTunnel)))
             }
             delay(Constants.VPN_STATISTIC_CHECK_INTERVAL)
         }
