@@ -85,17 +85,20 @@ jobs:
       # add fdroid flavor for apk upload
       - name: Build Fdroid Release APK
         if: ${{ inputs.release_type != '' && inputs.release_type != 'nightly' }}
-        run: |
-          ./gradlew :app:assembleFdroidRelease -x test
-          echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+        run: ./gradlew :app:assembleFdroidRelease -x test
+
 
       - name: Build Fdroid Nightly APK
         if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly' }}
-        run: |
-          ./gradlew :app:assembleFdroidNightly -x test
-          echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/nightly/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+        run: ./gradlew :app:assembleFdroidNightly -x test
+
+      - if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly' }}
+        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/nightly/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+      - if: ${{ inputs.release_type != '' && inputs.release_type != 'nightly' }}
+        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
 
       - name: Get version code
+        if: ${{ inputs.release_type == 'release' || inputs.release_type == 'prerelease' }}
         run: |
           version_code=$(grep "VERSION_CODE" buildSrc/src/main/kotlin/Constants.kt | awk '{print $5}' | tr -d '\n')
           echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
