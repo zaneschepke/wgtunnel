@@ -39,8 +39,15 @@ fun Project.isGeneralFlavor(gradle: Gradle): Boolean {
     return getCurrentFlavor(gradle) == "general"
 }
 
+fun Project.isReleaseBuild(): Boolean {
+    return (gradle.startParameter.taskNames.size > 0 &&
+        gradle.startParameter.taskNames[0].contains(
+            "Release",
+        ))
+}
+
 fun Project.isNightlyBuild(): Boolean {
-    return gradle.startParameter.taskRequests.toString().contains("Nightly")
+    return gradle.startParameter.taskNames.contains("assembleFdroidNightly")
 }
 
 fun Project.getSigningProperties() : Properties {
