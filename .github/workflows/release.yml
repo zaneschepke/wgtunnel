@@ -57,6 +57,10 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Install system dependencies
+        run: |
+          sudo apt update && sudo apt install -y gh apksigner
+
       # Here we need to decode keystore.jks from base64 string and place it
       # in the folder specified in the release signing configuration
       - name: Decode Keystore
@@ -140,11 +144,6 @@ jobs:
         run: |
           echo "RELEASE_NOTES=Nightly build of the latest development version of the android client." >> $GITHUB_ENV
           gh release delete nightly-android --yes || true
-
-      - name: Install apksigner
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y apksigner
 
       - name: Get checksum
         id: checksum
