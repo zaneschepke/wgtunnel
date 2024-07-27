@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.grgit)
 }
 
 android {
@@ -22,8 +23,8 @@ android {
         applicationId = Constants.APP_ID
         minSdk = Constants.MIN_SDK
         targetSdk = Constants.TARGET_SDK
-        versionCode = Constants.VERSION_CODE
-        versionName = Constants.VERSION_NAME
+        versionCode = versionCode()
+        versionName = versionName()
 
         ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
@@ -37,44 +38,10 @@ android {
 
     signingConfigs {
         create(Constants.RELEASE) {
-            val properties =
-                Properties().apply {
-                    // created local file for signing details
-                    try {
-                        load(file("signing.properties").reader())
-                    } catch (_: Exception) {
-                        load(file("signing_template.properties").reader())
-                    }
-                }
-
-            // try to get secrets from env first for pipeline build, then properties file for local
-            // build
-            storeFile =
-                file(
-                    System.getenv()
-                        .getOrDefault(
-                            Constants.KEY_STORE_PATH_VAR,
-                            properties.getProperty(Constants.KEY_STORE_PATH_VAR),
-                        ),
-                )
-            storePassword =
-                System.getenv()
-                    .getOrDefault(
-                        Constants.STORE_PASS_VAR,
-                        properties.getProperty(Constants.STORE_PASS_VAR),
-                    )
-            keyAlias =
-                System.getenv()
-                    .getOrDefault(
-                        Constants.KEY_ALIAS_VAR,
-                        properties.getProperty(Constants.KEY_ALIAS_VAR),
-                    )
-            keyPassword =
-                System.getenv()
-                    .getOrDefault(
-                        Constants.KEY_PASS_VAR,
-                        properties.getProperty(Constants.KEY_PASS_VAR),
-                    )
+            storeFile = getStoreFile()
+            storePassword = getSigningProperty(Constants.STORE_PASS_VAR)
+            keyAlias = getSigningProperty(Constants.KEY_ALIAS_VAR)
+            keyPassword = getSigningProperty(Constants.KEY_PASS_VAR)
         }
     }
 
@@ -102,9 +69,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName(Constants.RELEASE)
+            signingConfig = signingConfigs.getByName(signingConfigName())
         }
         debug { isDebuggable = true }
+
+        create("nightly") {
+            initWith(getByName("release"))
+        }
     }
     flavorDimensions.add(Constants.TYPE)
     productFlavors {
@@ -212,4 +183,12 @@ dependencies {
 
     // splash
     implementation(libs.androidx.core.splashscreen)
+}
+
+fun versionCode() : Int {
+    return if(!isNightlyBuild()) Constants.VERSION_CODE else Constants.VERSION_CODE + Constants.NIGHTLY_VERSION_CODE
+}
+
+fun versionName() : String {
+    return if(!isNightlyBuild()) Constants.VERSION_NAME else Constants.VERSION_NAME + "-${grgitService.service.get().grgit.head().abbreviatedId}"
 }

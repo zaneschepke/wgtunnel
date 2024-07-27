@@ -13,5 +13,8 @@ object Constants {
     const val KEY_STORE_PATH_VAR = "KEY_STORE_PATH"
 
     const val RELEASE = "release"
+    const val DEBUG = "debug"
     const val TYPE = "type"
+
+    const val NIGHTLY_VERSION_CODE = 42
 }

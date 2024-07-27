@@ -29,6 +29,7 @@ composeBom = "2024.06.00"
 compose = "1.6.8"
 zxingAndroidEmbedded = "4.3.0"
 coreSplashscreen = "1.0.1"
+gradlePlugins-grgit="5.2.2"
 
 #plugins
 material = "1.12.0"
@@ -100,3 +101,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+grgit = { id = "org.ajoberstar.grgit.service", version.ref = "gradlePlugins-grgit" }
