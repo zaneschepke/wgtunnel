@@ -489,6 +489,7 @@ fun MainScreen(
             }
             item {
                 if (uiState.settings.isAutoTunnelEnabled) {
+                    val itemFocusRequester = remember { FocusRequester() }
                     val autoTunnelingLabel = buildAnnotatedString {
                         append(stringResource(id = R.string.auto_tunneling))
                         append(": ")
@@ -516,22 +517,29 @@ fun MainScreen(
                         rowButton = {
                             if (uiState.settings.isAutoTunnelPaused) {
                                 TextButton(
+                                    modifier = Modifier.focusRequester(itemFocusRequester),
                                     onClick = { viewModel.resumeAutoTunneling() },
                                 ) {
                                     Text(stringResource(id = R.string.resume))
                                 }
                             } else {
                                 TextButton(
+                                    modifier = Modifier.focusRequester(itemFocusRequester),
                                     onClick = { viewModel.pauseAutoTunneling() },
                                 ) {
                                     Text(stringResource(id = R.string.pause))
                                 }
                             }
                         },
-                        onClick = {},
+                        onClick = {
+                            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+                                itemFocusRequester.requestFocus()
+                            }
+                        },
                         onHold = {},
                         expanded = false,
                         statistics = null,
+                        focusRequester = focusRequester
                     )
                 }
             }
@@ -562,6 +570,7 @@ fun MainScreen(
                     } else {
                         Color.Gray
                     })
+                val itemFocusRequester = remember { FocusRequester() }
                 val expanded = remember { mutableStateOf(false) }
                 RowListItem(
                     icon = {
@@ -607,11 +616,12 @@ fun MainScreen(
                             }
                         } else {
                             selectedTunnel = tunnel
-                            focusRequester.requestFocus()
+                            itemFocusRequester.requestFocus()
                         }
                     },
                     statistics = uiState.vpnState.statistics,
                     expanded = expanded.value,
+                    focusRequester = focusRequester,
                     rowButton = {
                         if (
                             tunnel.id == selectedTunnel?.id &&
@@ -667,7 +677,7 @@ fun MainScreen(
                             @Composable
                             fun TunnelSwitch() =
                                 Switch(
-                                    modifier = Modifier.focusRequester(focusRequester),
+                                    modifier = Modifier.focusRequester(itemFocusRequester),
                                     checked = checked,
                                     onCheckedChange = { checked ->
                                         if (!checked) expanded.value = false
@@ -678,7 +688,7 @@ fun MainScreen(
                                 Row {
                                     IconButton(
                                         onClick = {
-                                            if (uiState.settings.isAutoTunnelEnabled) {
+                                            if (uiState.settings.isAutoTunnelEnabled && !uiState.settings.isAutoTunnelPaused) {
                                                 appViewModel.showSnackbarMessage(
                                                     context.getString(R.string.turn_off_auto),
                                                 )

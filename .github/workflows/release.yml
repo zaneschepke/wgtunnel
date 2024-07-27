@@ -134,7 +134,7 @@ jobs:
       - name: On nightly release
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
-          echo "RELEASE_NOTES=Nightly build of the latest development version of the android client." >> $GITHUB_ENV
+          echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
           gh release delete nightly --yes || true
 
       # Setup TAG_NAME, which is used as a general "name"

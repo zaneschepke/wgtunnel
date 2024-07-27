@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,11 +33,12 @@ fun RowListItem(
     onClick: () -> Unit,
     rowButton: @Composable () -> Unit,
     expanded: Boolean,
-    statistics: TunnelStatistics?
+    statistics: TunnelStatistics?,
+    focusRequester: FocusRequester,
 ) {
     Box(
         modifier =
-        Modifier
+        Modifier.focusRequester(focusRequester)
             .animateContentSize()
             .clip(RoundedCornerShape(30.dp))
             .combinedClickable(
