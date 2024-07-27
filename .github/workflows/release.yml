@@ -165,7 +165,7 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           name: ${{ env.TAG_NAME }}
           draft: false
-          prerelease: ${{ inputs.release_type == 'prerelease' || inputs.release_type == '' || input.release_type == 'nightly' }}
+          prerelease: ${{ inputs.release_type == 'prerelease' || inputs.release_type == '' || inputs.release_type == 'nightly' }}
           make_latest: ${{ inputs.release_type == 'release' }}
           files: ${{ github.workspace }}/${{ env.APK_PATH }}
 
