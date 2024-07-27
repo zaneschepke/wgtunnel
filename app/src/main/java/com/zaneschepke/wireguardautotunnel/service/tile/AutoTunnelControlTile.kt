@@ -3,10 +3,15 @@ package com.zaneschepke.wireguardautotunnel.service.tile
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ServiceLifecycleDispatcher
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.module.ServiceScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -16,7 +21,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AutoTunnelControlTile : TileService() {
+class AutoTunnelControlTile : TileService(), LifecycleOwner {
 
     @Inject
     lateinit var appDataRepository: AppDataRepository
@@ -24,15 +29,13 @@ class AutoTunnelControlTile : TileService() {
     @Inject
     lateinit var serviceManager: ServiceManager
 
-    @Inject
-    @ApplicationScope
-    lateinit var applicationScope: CoroutineScope
+    private val dispatcher = ServiceLifecycleDispatcher(this)
 
     private var manualStartConfig: TunnelConfig? = null
 
     override fun onStartListening() {
         super.onStartListening()
-        applicationScope.launch {
+        lifecycleScope.launch {
             val settings = appDataRepository.settings.getSettings()
             when (settings.isAutoTunnelEnabled) {
                 true -> {
@@ -44,7 +47,6 @@ class AutoTunnelControlTile : TileService() {
                         setTileDescription(this@AutoTunnelControlTile.getString(R.string.active))
                     }
                 }
-
                 false -> {
                     setTileDescription(this@AutoTunnelControlTile.getString(R.string.disabled))
                     setUnavailable()
@@ -61,9 +63,10 @@ class AutoTunnelControlTile : TileService() {
     override fun onClick() {
         super.onClick()
         unlockAndRun {
-            applicationScope.launch {
+            lifecycleScope.launch {
                 try {
                     appDataRepository.toggleWatcherServicePause()
+                    onStartListening()
                 } catch (e: Exception) {
                     Timber.e(e.message)
                 } finally {
@@ -98,4 +101,7 @@ class AutoTunnelControlTile : TileService() {
         }
         qsTile.updateTile()
     }
+
+    override val lifecycle: Lifecycle
+        get() = dispatcher.lifecycle
 }

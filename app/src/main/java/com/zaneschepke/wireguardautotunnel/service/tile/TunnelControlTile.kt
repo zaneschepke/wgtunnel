@@ -3,6 +3,11 @@ package com.zaneschepke.wireguardautotunnel.service.tile
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.ServiceLifecycleDispatcher
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
@@ -17,7 +22,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TunnelControlTile : TileService() {
+class TunnelControlTile : TileService(), LifecycleOwner {
 
     @Inject
     lateinit var appDataRepository: AppDataRepository
@@ -28,16 +33,14 @@ class TunnelControlTile : TileService() {
     @Inject
     lateinit var serviceManager: ServiceManager
 
-    @Inject
-    @ApplicationScope
-    lateinit var applicationScope: CoroutineScope
+    private val dispatcher = ServiceLifecycleDispatcher(this)
 
     private var manualStartConfig: TunnelConfig? = null
 
     override fun onStartListening() {
         super.onStartListening()
         Timber.d("On start listening called")
-        applicationScope.launch {
+        lifecycleScope.launch {
             when (vpnService.getState()) {
                 TunnelState.UP -> {
                     setActive()
@@ -67,7 +70,7 @@ class TunnelControlTile : TileService() {
     override fun onClick() {
         super.onClick()
         unlockAndRun {
-            applicationScope.launch {
+            lifecycleScope.launch {
                 try {
                     if (vpnService.getState() == TunnelState.UP) {
                         serviceManager.stopVpnServiceForeground(
@@ -113,4 +116,7 @@ class TunnelControlTile : TileService() {
         }
         qsTile.updateTile()
     }
+
+    override val lifecycle: Lifecycle
+        get() = dispatcher.lifecycle
 }
