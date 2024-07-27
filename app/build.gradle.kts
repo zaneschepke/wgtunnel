@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -186,7 +184,7 @@ dependencies {
 }
 
 fun versionCode() : Int {
-    return if(!isNightlyBuild()) Constants.VERSION_CODE else Constants.VERSION_CODE + Constants.NIGHTLY_VERSION_CODE
+    return if(!isNightlyBuild()) Constants.VERSION_CODE else Constants.VERSION_CODE + Constants.NIGHTLY_CODE
 }
 
 fun versionName() : String {

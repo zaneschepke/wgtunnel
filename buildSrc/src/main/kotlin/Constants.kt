@@ -16,5 +16,5 @@ object Constants {
     const val DEBUG = "debug"
     const val TYPE = "type"
 
-    const val NIGHTLY_VERSION_CODE = 42
+    const val NIGHTLY_CODE = 42
 }
