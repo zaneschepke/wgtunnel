@@ -1,20 +1,20 @@
 [versions]
 accompanist = "0.34.0"
-activityCompose = "1.9.0"
+activityCompose = "1.9.1"
 amneziawgAndroid = "1.2.0"
-androidx-junit = "1.1.5"
+androidx-junit = "1.2.1"
 appcompat = "1.7.0"
-biometricKtx = "1.2.0-alpha05"
+biometricKtx = "1.4.0-alpha01"
 coreGoogleShortcuts = "1.1.0"
 coreKtx = "1.13.1"
 datastorePreferences = "1.1.1"
 desugar_jdk_libs = "2.0.4"
-espressoCore = "3.5.1"
+espressoCore = "3.6.1"
 hiltAndroid = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 junit = "4.13.2"
-kotlinx-serialization-json = "1.6.3"
-lifecycle-runtime-compose = "2.7.0"
+kotlinx-serialization-json = "1.7.1"
+lifecycle-runtime-compose = "2.8.4"
 material3 = "1.2.1"
 multifabVersion = "1.1.0"
 navigationCompose = "2.7.7"
@@ -22,16 +22,15 @@ pinLockCompose = "1.0.3"
 roomVersion = "2.6.1"
 timber = "5.0.1"
 tunnel = "1.0.20230706"
-androidGradlePlugin = "8.5.0"
-kotlin = "1.9.24"
-ksp = "1.9.24-1.0.20"
+androidGradlePlugin = "8.5.1"
+kotlin = "2.0.0"
+ksp = "2.0.0-1.0.23"
 composeBom = "2024.06.00"
 compose = "1.6.8"
 zxingAndroidEmbedded = "4.3.0"
 coreSplashscreen = "1.0.1"
 
 #plugins
-gradlePlugins-kotlinxSerialization = "1.9.24"
 material = "1.12.0"
 
 
@@ -98,5 +97,6 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "gradlePlugins-kotlinxSerialization" }
+kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

@@ -6,8 +6,6 @@ object Constants {
     const val MIN_SDK = 26
     const val APP_ID = "com.zaneschepke.wireguardautotunnel"
     const val APP_NAME = "wgtunnel"
-    const val COMPOSE_COMPILER_EXTENSION_VERSION = "1.5.14"
-
 
     const val STORE_PASS_VAR = "SIGNING_STORE_PASSWORD"
     const val KEY_ALIAS_VAR = "SIGNING_KEY_ALIAS"

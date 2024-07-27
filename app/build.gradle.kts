@@ -6,11 +6,13 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = Constants.APP_ID
     compileSdk = Constants.TARGET_SDK
+    compileSdkPreview = "VanillaIceCream"
 
     androidResources {
         generateLocaleConfig = true
@@ -124,7 +126,6 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions { kotlinCompilerExtensionVersion = Constants.COMPOSE_COMPILER_EXTENSION_VERSION }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 

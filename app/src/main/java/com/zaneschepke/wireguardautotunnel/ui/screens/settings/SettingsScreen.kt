@@ -102,7 +102,6 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val interactionSource = remember { MutableInteractionSource() }
-    //val pinExists = remember { mutableStateOf(PinManager.pinExists()) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val kernelSupport by viewModel.kernelSupport.collectAsStateWithLifecycle()
