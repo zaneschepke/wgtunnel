@@ -93,9 +93,9 @@ jobs:
         run: ./gradlew :app:assembleFdroidNightly -x test
 
       - if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly' }}
-        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/nightly/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/nightly/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
       - if: ${{ inputs.release_type != '' && inputs.release_type != 'nightly' }}
-        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_OUTPUT
+        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
 
       - name: Get version code
         if: ${{ inputs.release_type == 'release' || inputs.release_type == 'prerelease' }}
