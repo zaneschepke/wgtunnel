@@ -200,6 +200,26 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Here we need to decode keystore.jks from base64 string and place it
+      # in the folder specified in the release signing configuration
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: ${{ env.KEY_STORE_FILE }}
+          fileDir: ${{ env.KEY_STORE_LOCATION }}
+          encodedString: ${{ secrets.KEYSTORE }}
+
+      # create keystore path for gradle to read
+      - name: Create keystore path env var
+        run: |
+          store_path=${{ env.KEY_STORE_LOCATION }}${{ env.KEY_STORE_FILE }}
+          echo "KEY_STORE_PATH=$store_path" >> $GITHUB_ENV
+
+      - name: Create service_account.json
+        id: createServiceAccount
+        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service_account.json
+
       - name: Deploy with fastlane
         uses: ruby/setup-ruby@v1
         with:
