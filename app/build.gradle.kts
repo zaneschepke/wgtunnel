@@ -21,8 +21,8 @@ android {
         applicationId = Constants.APP_ID
         minSdk = Constants.MIN_SDK
         targetSdk = Constants.TARGET_SDK
-        versionCode = versionCode()
-        versionName = versionName()
+        versionCode = Constants.VERSION_CODE
+        versionName = Constants.VERSION_NAME
 
         ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
@@ -67,12 +67,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName(signingConfigName())
+            signingConfig = signingConfigs.getByName(Constants.RELEASE)
         }
         debug { isDebuggable = true }
 
-        create("nightly") {
+        create(Constants.NIGHTLY) {
             initWith(getByName("release"))
+            defaultConfig.versionName = nightlyVersionName()
+            defaultConfig.versionCode = nightlyVersionCode()
         }
     }
     flavorDimensions.add(Constants.TYPE)
@@ -183,10 +185,10 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 }
 
-fun versionCode() : Int {
-    return if(!isNightlyBuild()) Constants.VERSION_CODE else Constants.VERSION_CODE + Constants.NIGHTLY_CODE
+fun nightlyVersionCode() : Int {
+    return Constants.VERSION_CODE + Constants.NIGHTLY_CODE
 }
 
-fun versionName() : String {
-    return if(!isNightlyBuild()) Constants.VERSION_NAME else Constants.VERSION_NAME + "-${grgitService.service.get().grgit.head().abbreviatedId}"
+fun nightlyVersionName() : String {
+    return Constants.VERSION_NAME + "-${grgitService.service.get().grgit.head().abbreviatedId}"
 }
