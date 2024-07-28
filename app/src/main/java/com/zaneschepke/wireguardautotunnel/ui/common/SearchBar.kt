@@ -26,57 +26,57 @@ import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun SearchBar(onQuery: (queryString: String) -> Unit) {
-    // Immediately update and keep track of query from text field changes.
-    var query: String by rememberSaveable { mutableStateOf("") }
-    var showClearIcon by rememberSaveable { mutableStateOf(false) }
+	// Immediately update and keep track of query from text field changes.
+	var query: String by rememberSaveable { mutableStateOf("") }
+	var showClearIcon by rememberSaveable { mutableStateOf(false) }
 
-    if (query.isEmpty()) {
-        showClearIcon = false
-    } else if (query.isNotEmpty()) {
-        showClearIcon = true
-    }
+	if (query.isEmpty()) {
+		showClearIcon = false
+	} else if (query.isNotEmpty()) {
+		showClearIcon = true
+	}
 
-    TextField(
-        value = query,
-        onValueChange = { onQueryChanged ->
-            // If user makes changes to text, immediately updated it.
-            query = onQueryChanged
-            onQuery(onQueryChanged)
-        },
-        leadingIcon = {
-            val icon = Icons.Rounded.Search
-            Icon(
-                imageVector = icon,
-                tint = MaterialTheme.colorScheme.onBackground,
-                contentDescription = icon.name,
-            )
-        },
-        trailingIcon = {
-            if (showClearIcon) {
-                IconButton(onClick = { query = "" }) {
-                    val icon = Icons.Rounded.Clear
-                    Icon(
-                        imageVector = icon,
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        contentDescription = icon.name,
-                    )
-                }
-            }
-        },
-        maxLines = 1,
-        colors =
-        TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent,
-        ),
-        placeholder = { Text(text = stringResource(R.string.hint_search_packages)) },
-        textStyle = MaterialTheme.typography.bodySmall,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-        modifier =
-        Modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.background, shape = RectangleShape),
-    )
+	TextField(
+		value = query,
+		onValueChange = { onQueryChanged ->
+			// If user makes changes to text, immediately updated it.
+			query = onQueryChanged
+			onQuery(onQueryChanged)
+		},
+		leadingIcon = {
+			val icon = Icons.Rounded.Search
+			Icon(
+				imageVector = icon,
+				tint = MaterialTheme.colorScheme.onBackground,
+				contentDescription = icon.name,
+			)
+		},
+		trailingIcon = {
+			if (showClearIcon) {
+				IconButton(onClick = { query = "" }) {
+					val icon = Icons.Rounded.Clear
+					Icon(
+						imageVector = icon,
+						tint = MaterialTheme.colorScheme.onBackground,
+						contentDescription = icon.name,
+					)
+				}
+			}
+		},
+		maxLines = 1,
+		colors =
+		TextFieldDefaults.colors(
+			focusedContainerColor = Color.Transparent,
+			unfocusedContainerColor = Color.Transparent,
+			disabledContainerColor = Color.Transparent,
+		),
+		placeholder = { Text(text = stringResource(R.string.hint_search_packages)) },
+		textStyle = MaterialTheme.typography.bodySmall,
+		singleLine = true,
+		keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+		modifier =
+		Modifier
+			.fillMaxWidth()
+			.background(color = MaterialTheme.colorScheme.background, shape = RectangleShape),
+	)
 }

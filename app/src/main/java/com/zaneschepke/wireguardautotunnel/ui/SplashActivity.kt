@@ -23,46 +23,45 @@ import javax.inject.Inject
 @SuppressLint("CustomSplashScreen")
 @AndroidEntryPoint
 class SplashActivity : ComponentActivity() {
+	@Inject
+	lateinit var appStateRepository: AppStateRepository
 
-    @Inject
-    lateinit var appStateRepository: AppStateRepository
+	@Inject
+	lateinit var localLogCollector: LocalLogCollector
 
-    @Inject
-    lateinit var localLogCollector: LocalLogCollector
+	@Inject
+	@ApplicationScope
+	lateinit var applicationScope: CoroutineScope
 
-    @Inject
-    @ApplicationScope
-    lateinit var applicationScope: CoroutineScope
+	override fun onCreate(savedInstanceState: Bundle?) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			val splashScreen = installSplashScreen()
+			splashScreen.setKeepOnScreenCondition { true }
+		}
+		super.onCreate(savedInstanceState)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val splashScreen = installSplashScreen()
-            splashScreen.setKeepOnScreenCondition { true }
-        }
-        super.onCreate(savedInstanceState)
+		applicationScope.launch {
+			if (!isRunningOnAndroidTv()) localLogCollector.start()
+		}
 
-        applicationScope.launch {
-            if (!isRunningOnAndroidTv()) localLogCollector.start()
-        }
+		lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.CREATED) {
+				val pinLockEnabled = appStateRepository.isPinLockEnabled()
+				if (pinLockEnabled) {
+					PinManager.initialize(WireGuardAutoTunnel.instance)
+				}
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                val pinLockEnabled = appStateRepository.isPinLockEnabled()
-                if (pinLockEnabled) {
-                    PinManager.initialize(WireGuardAutoTunnel.instance)
-                }
+				val intent =
+					Intent(this@SplashActivity, MainActivity::class.java).apply {
+						putExtra(IS_PIN_LOCK_ENABLED_KEY, pinLockEnabled)
+					}
+				startActivity(intent)
+				finish()
+			}
+		}
+	}
 
-                val intent = Intent(this@SplashActivity, MainActivity::class.java).apply {
-                    putExtra(IS_PIN_LOCK_ENABLED_KEY, pinLockEnabled)
-                }
-                startActivity(intent)
-                finish()
-            }
-        }
-    }
-
-    companion object {
-        const val IS_PIN_LOCK_ENABLED_KEY = "is_pin_lock_enabled"
-    }
+	companion object {
+		const val IS_PIN_LOCK_ENABLED_KEY = "is_pin_lock_enabled"
+	}
 }
-

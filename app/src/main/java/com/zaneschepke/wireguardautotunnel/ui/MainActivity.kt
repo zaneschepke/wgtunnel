@@ -65,225 +65,233 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+	@Inject
+	lateinit var appStateRepository: AppStateRepository
 
-    @Inject
-    lateinit var appStateRepository: AppStateRepository
+	@Inject
+	lateinit var settingsRepository: SettingsRepository
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+	@Inject
+	lateinit var serviceManager: ServiceManager
 
-    @Inject
-    lateinit var serviceManager: ServiceManager
+	@OptIn(
+		ExperimentalPermissionsApi::class,
+	)
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
 
-    @OptIn(
-        ExperimentalPermissionsApi::class,
-    )
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+		val isPinLockEnabled = intent.extras?.getBoolean(SplashActivity.IS_PIN_LOCK_ENABLED_KEY)
 
-        val isPinLockEnabled = intent.extras?.getBoolean(SplashActivity.IS_PIN_LOCK_ENABLED_KEY)
+		enableEdgeToEdge(navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()))
 
-        enableEdgeToEdge(navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()))
+		lifecycleScope.launch {
+			WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
+			val settings = settingsRepository.getSettings()
+			if (settings.isAutoTunnelEnabled) {
+				serviceManager.startWatcherService(application.applicationContext)
+			}
+		}
 
-        lifecycleScope.launch {
-            WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
-            val settings = settingsRepository.getSettings()
-            if (settings.isAutoTunnelEnabled) {
-                serviceManager.startWatcherService(application.applicationContext)
-            }
-        }
+		setContent {
+			val appViewModel = hiltViewModel<AppViewModel>()
+			val appUiState by appViewModel.appUiState.collectAsStateWithLifecycle()
+			val navController = rememberNavController()
+			val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-        setContent {
-            val appViewModel = hiltViewModel<AppViewModel>()
-            val appUiState by appViewModel.appUiState.collectAsStateWithLifecycle()
-            val navController = rememberNavController()
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
+			val notificationPermissionState =
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+					rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+				} else {
+					null
+				}
 
-            val notificationPermissionState =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                    rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS) else null
+			val snackbarHostState = remember { SnackbarHostState() }
 
-            val snackbarHostState = remember { SnackbarHostState() }
+			val vpnActivityResultState =
+				rememberLauncherForActivityResult(
+					ActivityResultContracts.StartActivityForResult(),
+					onResult = {
+						val accepted = (it.resultCode == RESULT_OK)
+						if (accepted) {
+							appViewModel.onVpnPermissionAccepted()
+						}
+					},
+				)
 
-            val vpnActivityResultState =
-                rememberLauncherForActivityResult(
-                    ActivityResultContracts.StartActivityForResult(),
-                    onResult = {
-                        val accepted = (it.resultCode == RESULT_OK)
-                        if (accepted) {
-                            appViewModel.onVpnPermissionAccepted()
-                        }
-                    },
-                )
+			fun showSnackBarMessage(message: StringValue) {
+				lifecycleScope.launch(Dispatchers.Main) {
+					val result =
+						snackbarHostState.showSnackbar(
+							message = message.asString(this@MainActivity),
+							duration = SnackbarDuration.Short,
+						)
+					when (result) {
+						SnackbarResult.ActionPerformed,
+						SnackbarResult.Dismissed,
+						-> {
+							snackbarHostState.currentSnackbarData?.dismiss()
+						}
+					}
+				}
+			}
 
-            fun showSnackBarMessage(message: StringValue) {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    val result =
-                        snackbarHostState.showSnackbar(
-                            message = message.asString(this@MainActivity),
-                            duration = SnackbarDuration.Short,
-                        )
-                    when (result) {
-                        SnackbarResult.ActionPerformed,
-                        SnackbarResult.Dismissed -> {
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                        }
-                    }
-                }
-            }
+			LaunchedEffect(appUiState.requestPermissions) {
+				if (appUiState.requestPermissions) {
+					appViewModel.permissionsRequested()
+					if (notificationPermissionState != null && !notificationPermissionState.status.isGranted
+					) {
+						showSnackBarMessage(
+							StringValue.StringResource(R.string.notification_permission_required),
+						)
+						return@LaunchedEffect notificationPermissionState.launchPermissionRequest()
+					}
+					if (!appUiState.vpnPermissionAccepted) {
+						return@LaunchedEffect appViewModel.vpnIntent?.let {
+							vpnActivityResultState.launch(
+								it,
+							)
+						}!!
+					}
+				}
+			}
 
-            LaunchedEffect(appUiState.requestPermissions) {
-                if (appUiState.requestPermissions) {
-                    appViewModel.permissionsRequested()
-                    if (notificationPermissionState != null && !notificationPermissionState.status.isGranted
-                    ) {
-                        showSnackBarMessage(StringValue.StringResource(R.string.notification_permission_required))
-                        return@LaunchedEffect notificationPermissionState.launchPermissionRequest()
-                    }
-                    if (!appUiState.vpnPermissionAccepted) {
-                        return@LaunchedEffect appViewModel.vpnIntent?.let {
-                            vpnActivityResultState.launch(
-                                it,
-                            )
-                        }!!
-                    }
-                }
-            }
+			WireguardAutoTunnelTheme {
+				LaunchedEffect(Unit) {
+					appViewModel.setNotificationPermissionAccepted(
+						notificationPermissionState?.status?.isGranted ?: true,
+					)
+				}
 
-            WireguardAutoTunnelTheme {
-                LaunchedEffect(Unit) {
-                    appViewModel.setNotificationPermissionAccepted(
-                        notificationPermissionState?.status?.isGranted ?: true,
-                    )
-                }
+				LaunchedEffect(appUiState.snackbarMessageConsumed) {
+					if (!appUiState.snackbarMessageConsumed) {
+						showSnackBarMessage(StringValue.DynamicString(appUiState.snackbarMessage))
+						appViewModel.snackbarMessageConsumed()
+					}
+				}
 
-                LaunchedEffect(appUiState.snackbarMessageConsumed) {
-                    if (!appUiState.snackbarMessageConsumed) {
-                        showSnackBarMessage(StringValue.DynamicString(appUiState.snackbarMessage))
-                        appViewModel.snackbarMessageConsumed()
-                    }
-                }
+				val focusRequester = remember { FocusRequester() }
 
-                val focusRequester = remember { FocusRequester() }
-
-                Scaffold(
-                    snackbarHost = {
-                        SnackbarHost(snackbarHostState) { snackbarData: SnackbarData ->
-                            CustomSnackBar(
-                                snackbarData.visuals.message,
-                                isRtl = false,
-                                containerColor =
-                                MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                    2.dp,
-                                ),
-                            )
-                        }
-                    },
-                    //TODO refactor
-                    modifier = Modifier
-                        .focusable()
-                        .focusProperties {
-                            when (navBackStackEntry?.destination?.route) {
-                                Screen.Lock.route -> Unit
-                                else -> up = focusRequester
-                            }
-                        },
-                    bottomBar = {
-                        BottomNavBar(
-                            navController,
-                            listOf(
-                                Screen.Main.navItem,
-                                Screen.Settings.navItem,
-                                Screen.Support.navItem,
-                            ),
-                        )
-                    },
-                ) { padding ->
-                    NavHost(
-                        navController,
-                        startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
-                        modifier = Modifier
-                            .padding(padding)
-                            .fillMaxSize(),
-                    ) {
-                        composable(
-                            Screen.Main.route,
-                        ) {
-                            MainScreen(
-                                focusRequester = focusRequester,
-                                appViewModel = appViewModel,
-                                navController = navController,
-                            )
-                        }
-                        composable(
-                            Screen.Settings.route,
-                        ) {
-                            SettingsScreen(
-                                appViewModel = appViewModel,
-                                navController = navController,
-                                focusRequester = focusRequester,
-                            )
-                        }
-                        composable(
-                            Screen.Support.route,
-                        ) {
-                            SupportScreen(
-                                focusRequester = focusRequester,
-                                appViewModel = appViewModel,
-                                navController = navController,
-                            )
-                        }
-                        composable(Screen.Support.Logs.route) {
-                            LogsScreen()
-                        }
-                        composable(
-                            "${Screen.Config.route}/{id}?configType={configType}",
-                            arguments =
-                            listOf(
-                                navArgument("id") {
-                                    type = NavType.StringType
-                                    defaultValue = "0"
-                                },
-                                navArgument("configType") {
-                                    type = NavType.StringType
-                                    defaultValue = ConfigType.WIREGUARD.name
-                                },
-                            ),
-                        ) {
-                            val id = it.arguments?.getString("id")
-                            val configType = ConfigType.valueOf(
-                                it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
-                            )
-                            if (!id.isNullOrBlank()) {
-                                ConfigScreen(
-                                    navController = navController,
-                                    tunnelId = id,
-                                    appViewModel = appViewModel,
-                                    focusRequester = focusRequester,
-                                    configType = configType,
-                                )
-                            }
-                        }
-                        composable("${Screen.Option.route}/{id}") {
-                            val id = it.arguments?.getString("id")
-                            if (!id.isNullOrBlank()) {
-                                OptionsScreen(
-                                    navController = navController,
-                                    tunnelId = id,
-                                    appViewModel = appViewModel,
-                                    focusRequester = focusRequester,
-                                )
-                            }
-                        }
-                        composable(Screen.Lock.route) {
-                            PinLockScreen(
-                                navController = navController,
-                                appViewModel = appViewModel,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+				Scaffold(
+					snackbarHost = {
+						SnackbarHost(snackbarHostState) { snackbarData: SnackbarData ->
+							CustomSnackBar(
+								snackbarData.visuals.message,
+								isRtl = false,
+								containerColor =
+								MaterialTheme.colorScheme.surfaceColorAtElevation(
+									2.dp,
+								),
+							)
+						}
+					},
+					// TODO refactor
+					modifier =
+					Modifier
+						.focusable()
+						.focusProperties {
+							when (navBackStackEntry?.destination?.route) {
+								Screen.Lock.route -> Unit
+								else -> up = focusRequester
+							}
+						},
+					bottomBar = {
+						BottomNavBar(
+							navController,
+							listOf(
+								Screen.Main.navItem,
+								Screen.Settings.navItem,
+								Screen.Support.navItem,
+							),
+						)
+					},
+				) { padding ->
+					NavHost(
+						navController,
+						startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
+						modifier =
+						Modifier
+							.padding(padding)
+							.fillMaxSize(),
+					) {
+						composable(
+							Screen.Main.route,
+						) {
+							MainScreen(
+								focusRequester = focusRequester,
+								appViewModel = appViewModel,
+								navController = navController,
+							)
+						}
+						composable(
+							Screen.Settings.route,
+						) {
+							SettingsScreen(
+								appViewModel = appViewModel,
+								navController = navController,
+								focusRequester = focusRequester,
+							)
+						}
+						composable(
+							Screen.Support.route,
+						) {
+							SupportScreen(
+								focusRequester = focusRequester,
+								appViewModel = appViewModel,
+								navController = navController,
+							)
+						}
+						composable(Screen.Support.Logs.route) {
+							LogsScreen()
+						}
+						composable(
+							"${Screen.Config.route}/{id}?configType={configType}",
+							arguments =
+							listOf(
+								navArgument("id") {
+									type = NavType.StringType
+									defaultValue = "0"
+								},
+								navArgument("configType") {
+									type = NavType.StringType
+									defaultValue = ConfigType.WIREGUARD.name
+								},
+							),
+						) {
+							val id = it.arguments?.getString("id")
+							val configType =
+								ConfigType.valueOf(
+									it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
+								)
+							if (!id.isNullOrBlank()) {
+								ConfigScreen(
+									navController = navController,
+									tunnelId = id,
+									appViewModel = appViewModel,
+									focusRequester = focusRequester,
+									configType = configType,
+								)
+							}
+						}
+						composable("${Screen.Option.route}/{id}") {
+							val id = it.arguments?.getString("id")
+							if (!id.isNullOrBlank()) {
+								OptionsScreen(
+									navController = navController,
+									tunnelId = id,
+									appViewModel = appViewModel,
+									focusRequester = focusRequester,
+								)
+							}
+						}
+						composable(Screen.Lock.route) {
+							PinLockScreen(
+								navController = navController,
+								appViewModel = appViewModel,
+							)
+						}
+					}
+				}
+			}
+		}
+	}
 }

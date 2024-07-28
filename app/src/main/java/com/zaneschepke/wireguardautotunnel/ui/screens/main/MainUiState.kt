@@ -5,8 +5,8 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
 import com.zaneschepke.wireguardautotunnel.util.TunnelConfigs
 
 data class MainUiState(
-    val settings: Settings = Settings(),
-    val tunnels: TunnelConfigs = emptyList(),
-    val vpnState: VpnState = VpnState(),
-    val loading: Boolean = true
+	val settings: Settings = Settings(),
+	val tunnels: TunnelConfigs = emptyList(),
+	val vpnState: VpnState = VpnState(),
+	val loading: Boolean = true,
 )

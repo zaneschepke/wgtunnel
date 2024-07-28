@@ -18,113 +18,111 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 class FileUtils(
-    private val context: Context,
-    private val ioDispatcher: CoroutineDispatcher,
+	private val context: Context,
+	private val ioDispatcher: CoroutineDispatcher,
 ) {
+	suspend fun readBytesFromFile(file: File): ByteArray {
+		return withContext(ioDispatcher) {
+			FileInputStream(file).use {
+				it.readBytes()
+			}
+		}
+	}
 
-    suspend fun readBytesFromFile(file: File): ByteArray {
-        return withContext(ioDispatcher) {
-            FileInputStream(file).use {
-                it.readBytes()
-            }
-        }
-    }
+	suspend fun readTextFromFileName(fileName: String): String {
+		return withContext(ioDispatcher) {
+			context.assets.open(fileName).use { stream ->
+				stream.bufferedReader(Charsets.UTF_8).use {
+					it.readText()
+				}
+			}
+		}
+	}
 
-    suspend fun readTextFromFileName(fileName: String): String {
-        return withContext(ioDispatcher) {
-            context.assets.open(fileName).use { stream ->
-                stream.bufferedReader(Charsets.UTF_8).use {
-                    it.readText()
-                }
-            }
-        }
-    }
+	suspend fun saveByteArrayToDownloads(content: ByteArray, fileName: String): Result<Unit> {
+		return withContext(ioDispatcher) {
+			try {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+					val contentValues =
+						ContentValues().apply {
+							put(MediaColumns.DISPLAY_NAME, fileName)
+							put(MediaColumns.MIME_TYPE, Constants.TEXT_MIME_TYPE)
+							put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+						}
+					val resolver = context.contentResolver
+					val uri =
+						resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+					if (uri != null) {
+						resolver.openOutputStream(uri).use { output ->
+							output?.write(content)
+						}
+					}
+				} else {
+					val target =
+						File(
+							Environment.getExternalStoragePublicDirectory(
+								Environment.DIRECTORY_DOWNLOADS,
+							),
+							fileName,
+						)
+					FileOutputStream(target).use { output ->
+						output.write(content)
+					}
+				}
+				Result.success(Unit)
+			} catch (e: Exception) {
+				Result.failure(e)
+			}
+		}
+	}
 
-    suspend fun saveByteArrayToDownloads(content: ByteArray, fileName: String): Result<Unit> {
-        return withContext(ioDispatcher) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val contentValues =
-                        ContentValues().apply {
-                            put(MediaColumns.DISPLAY_NAME, fileName)
-                            put(MediaColumns.MIME_TYPE, Constants.TEXT_MIME_TYPE)
-                            put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                        }
-                    val resolver = context.contentResolver
-                    val uri =
-                        resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                    if (uri != null) {
-                        resolver.openOutputStream(uri).use { output ->
-                            output?.write(content)
-                        }
-                    }
-                } else {
-                    val target =
-                        File(
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                            fileName,
-                        )
-                    FileOutputStream(target).use { output ->
-                        output.write(content)
-                    }
-                }
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
-    }
+	suspend fun saveFilesToZip(files: List<File>): Result<Unit> {
+		return withContext(ioDispatcher) {
+			try {
+				val zipOutputStream =
+					createDownloadsFileOutputStream(
+						"wg-export_${Instant.now().epochSecond}.zip",
+						Constants.ZIP_FILE_MIME_TYPE,
+					)
+				ZipOutputStream(zipOutputStream).use { zos ->
+					files.forEach { file ->
+						val entry = ZipEntry(file.name)
+						zos.putNextEntry(entry)
+						if (file.isFile) {
+							file.inputStream().use { fis -> fis.copyTo(zos) }
+						}
+					}
+					return@withContext Result.success(Unit)
+				}
+			} catch (e: Exception) {
+				Timber.e(e)
+				Result.failure(WgTunnelExceptions.ConfigExportFailed())
+			}
+		}
+	}
 
-    suspend fun saveFilesToZip(files: List<File>): Result<Unit> {
-        return withContext(ioDispatcher) {
-            try {
-                val zipOutputStream =
-                    createDownloadsFileOutputStream(
-                        "wg-export_${Instant.now().epochSecond}.zip",
-                        Constants.ZIP_FILE_MIME_TYPE,
-                    )
-                ZipOutputStream(zipOutputStream).use { zos ->
-                    files.forEach { file ->
-                        val entry = ZipEntry(file.name)
-                        zos.putNextEntry(entry)
-                        if (file.isFile) {
-                            file.inputStream().use { fis -> fis.copyTo(zos) }
-                        }
-                    }
-                    return@withContext Result.success(Unit)
-                }
-            } catch (e: Exception) {
-                Timber.e(e)
-                Result.failure(WgTunnelExceptions.ConfigExportFailed())
-            }
-        }
-    }
-
-    //TODO issue with android 9
-    private fun createDownloadsFileOutputStream(
-        fileName: String,
-        mimeType: String = Constants.ALLOWED_FILE_TYPES
-    ): OutputStream? {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val resolver = context.contentResolver
-            val contentValues =
-                ContentValues().apply {
-                    put(MediaColumns.DISPLAY_NAME, fileName)
-                    put(MediaColumns.MIME_TYPE, mimeType)
-                    put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                }
-            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-            if (uri != null) {
-                return resolver.openOutputStream(uri)
-            }
-        } else {
-            val target =
-                File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    fileName,
-                )
-            return target.outputStream()
-        }
-        return null
-    }
+	// TODO issue with android 9
+	private fun createDownloadsFileOutputStream(fileName: String, mimeType: String = Constants.ALLOWED_FILE_TYPES): OutputStream? {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			val resolver = context.contentResolver
+			val contentValues =
+				ContentValues().apply {
+					put(MediaColumns.DISPLAY_NAME, fileName)
+					put(MediaColumns.MIME_TYPE, mimeType)
+					put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+				}
+			val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+			if (uri != null) {
+				return resolver.openOutputStream(uri)
+			}
+		} else {
+			val target =
+				File(
+					Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+					fileName,
+				)
+			return target.outputStream()
+		}
+		return null
+	}
 }

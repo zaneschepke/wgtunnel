@@ -19,84 +19,92 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class OptionsViewModel @Inject
+class OptionsViewModel
+@Inject
 constructor(
-    private val appDataRepository: AppDataRepository
+	private val appDataRepository: AppDataRepository,
 ) : ViewModel() {
+	private val _optionState = MutableStateFlow(OptionsUiState())
 
-    private val _optionState = MutableStateFlow(OptionsUiState())
+	val uiState =
+		combine(
+			appDataRepository.tunnels.getTunnelConfigsFlow(),
+			_optionState,
+		) { tunnels, optionState ->
+			if (optionState.id != null) {
+				val tunnelConfig = tunnels.fastFirstOrNull { it.id.toString() == optionState.id }
+				val isPrimaryTunnel = tunnelConfig?.isPrimaryTunnel == true
+				OptionsUiState(optionState.id, tunnelConfig, isPrimaryTunnel)
+			} else {
+				OptionsUiState()
+			}
+		}.stateIn(
+			viewModelScope,
+			SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+			OptionsUiState(),
+		)
 
-    val uiState = combine(
-        appDataRepository.tunnels.getTunnelConfigsFlow(),
-        _optionState,
-    ) { tunnels, optionState ->
-        if (optionState.id != null) {
-            val tunnelConfig = tunnels.fastFirstOrNull { it.id.toString() == optionState.id }
-            val isPrimaryTunnel = tunnelConfig?.isPrimaryTunnel == true
-            OptionsUiState(optionState.id, tunnelConfig, isPrimaryTunnel)
-        } else OptionsUiState()
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
-        OptionsUiState(),
-    )
+	fun init(tunnelId: String) {
+		_optionState.update {
+			it.copy(
+				id = tunnelId,
+			)
+		}
+	}
 
-    fun init(tunnelId: String) {
-        _optionState.update {
-            it.copy(
-                id = tunnelId,
-            )
-        }
-    }
+	fun onDeleteRunSSID(ssid: String) = viewModelScope.launch {
+		uiState.value.tunnel?.let {
+			appDataRepository.tunnels.save(
+				tunnelConfig =
+				it.copy(
+					tunnelNetworks = (uiState.value.tunnel!!.tunnelNetworks - ssid).toMutableList(),
+				),
+			)
+		}
+	}
 
-    fun onDeleteRunSSID(ssid: String) = viewModelScope.launch {
-        uiState.value.tunnel?.let {
-            appDataRepository.tunnels.save(
-                tunnelConfig = it.copy(
-                    tunnelNetworks = (uiState.value.tunnel!!.tunnelNetworks - ssid).toMutableList(),
-                ),
-            )
-        }
-    }
+	private fun saveTunnel(tunnelConfig: TunnelConfig?) = viewModelScope.launch {
+		tunnelConfig?.let {
+			appDataRepository.tunnels.save(it)
+		}
+	}
 
-    private fun saveTunnel(tunnelConfig: TunnelConfig?) = viewModelScope.launch {
-        tunnelConfig?.let {
-            appDataRepository.tunnels.save(it)
-        }
-    }
+	suspend fun onSaveRunSSID(ssid: String): Result<Unit> {
+		val trimmed = ssid.trim()
+		val tunnelsWithName =
+			withContext(viewModelScope.coroutineContext) {
+				appDataRepository.tunnels.findByTunnelNetworksName(trimmed)
+			}
+		return if (uiState.value.tunnel?.tunnelNetworks?.contains(trimmed) != true &&
+			tunnelsWithName.isEmpty()
+		) {
+			uiState.value.tunnel?.tunnelNetworks?.add(trimmed)
+			saveTunnel(uiState.value.tunnel)
+			Result.success(Unit)
+		} else {
+			Result.failure(WgTunnelExceptions.SsidConflict())
+		}
+	}
 
-    suspend fun onSaveRunSSID(ssid: String): Result<Unit> {
-        val trimmed = ssid.trim()
-        val tunnelsWithName = withContext(viewModelScope.coroutineContext) {
-            appDataRepository.tunnels.findByTunnelNetworksName(trimmed)
-        }
-        return if (uiState.value.tunnel?.tunnelNetworks?.contains(trimmed) != true &&
-            tunnelsWithName.isEmpty()) {
-            uiState.value.tunnel?.tunnelNetworks?.add(trimmed)
-            saveTunnel(uiState.value.tunnel)
-            Result.success(Unit)
-        } else {
-            Result.failure(WgTunnelExceptions.SsidConflict())
-        }
-    }
+	fun onToggleIsMobileDataTunnel() = viewModelScope.launch {
+		uiState.value.tunnel?.let {
+			if (it.isMobileDataTunnel) {
+				appDataRepository.tunnels.updateMobileDataTunnel(null)
+			} else {
+				appDataRepository.tunnels.updateMobileDataTunnel(it)
+			}
+		}
+	}
 
-    fun onToggleIsMobileDataTunnel() = viewModelScope.launch {
-        uiState.value.tunnel?.let {
-            if (it.isMobileDataTunnel) {
-                appDataRepository.tunnels.updateMobileDataTunnel(null)
-            } else appDataRepository.tunnels.updateMobileDataTunnel(it)
-        }
-    }
-
-    fun onTogglePrimaryTunnel() = viewModelScope.launch {
-        if (uiState.value.tunnel != null) {
-            appDataRepository.tunnels.updatePrimaryTunnel(
-                when (uiState.value.isDefaultTunnel) {
-                    true -> null
-                    false -> uiState.value.tunnel
-                },
-            )
-            WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
-        }
-    }
+	fun onTogglePrimaryTunnel() = viewModelScope.launch {
+		if (uiState.value.tunnel != null) {
+			appDataRepository.tunnels.updatePrimaryTunnel(
+				when (uiState.value.isDefaultTunnel) {
+					true -> null
+					false -> uiState.value.tunnel
+				},
+			)
+			WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
+		}
+	}
 }

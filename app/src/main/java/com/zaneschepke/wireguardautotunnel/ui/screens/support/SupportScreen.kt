@@ -54,262 +54,268 @@ import com.zaneschepke.wireguardautotunnel.ui.Screen
 
 @Composable
 fun SupportScreen(
-    viewModel: SupportViewModel = hiltViewModel(),
-    appViewModel: AppViewModel,
-    navController: NavController,
-    focusRequester: FocusRequester
+	viewModel: SupportViewModel = hiltViewModel(),
+	appViewModel: AppViewModel,
+	navController: NavController,
+	focusRequester: FocusRequester,
 ) {
-    val context = LocalContext.current
-    val fillMaxWidth = .85f
+	val context = LocalContext.current
+	val fillMaxWidth = .85f
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
-        modifier =
-        Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .focusable(),
-    ) {
-        Surface(
-            tonalElevation = 2.dp,
-            shadowElevation = 2.dp,
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surface,
-            modifier =
-            (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                Modifier
-                    .height(IntrinsicSize.Min)
-                    .fillMaxWidth(fillMaxWidth)
-                    .padding(top = 10.dp)
-            } else {
-                Modifier
-                    .fillMaxWidth(fillMaxWidth)
-                    .padding(top = 20.dp)
-            })
-                .padding(bottom = 25.dp),
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                val forwardIcon = Icons.AutoMirrored.Rounded.ArrowForward
-                Text(
-                    stringResource(R.string.thank_you),
-                    textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 20.dp),
-                    fontSize = 16.sp,
-                )
-                Text(
-                    stringResource(id = R.string.support_help_text),
-                    textAlign = TextAlign.Start,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(bottom = 20.dp),
-                )
-                TextButton(
-                    onClick = {
-                        appViewModel.openWebPage(
-                            context.resources.getString(R.string.docs_url),
-                            context,
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(vertical = 5.dp)
-                        .focusRequester(focusRequester),
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row {
-                            val icon = Icons.Rounded.Book
-                            Icon(icon, icon.name)
-                            Text(
-                                stringResource(id = R.string.docs_description),
-                                textAlign = TextAlign.Justify,
-                                modifier = Modifier
-                                    .padding(start = 10.dp)
-                                    .weight(
-                                        weight = 1.0f,
-                                        fill = false,
-                                    ),
-                                softWrap = true,
-                            )
-                        }
-                        Icon(
-                            forwardIcon,
-                            forwardIcon.name,
-                        )
-                    }
-                }
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                TextButton(
-                    onClick = {
-                        appViewModel.openWebPage(
-                            context.resources.getString(R.string.telegram_url),
-                            context,
-                        )
-                    },
-                    modifier = Modifier.padding(vertical = 5.dp),
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row {
-                            val icon = ImageVector.vectorResource(R.drawable.telegram)
-                            Icon(
-                                icon,
-                                icon.name,
-                                Modifier.size(25.dp),
-                            )
-                            Text(
-                                stringResource(id = R.string.discord_description),
-                                textAlign = TextAlign.Justify,
-                                modifier = Modifier.padding(start = 10.dp),
-                            )
-                        }
-                        Icon(
-                            forwardIcon,
-                            forwardIcon.name,
-                        )
-                    }
-                }
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                TextButton(
-                    onClick = {
-                        appViewModel.openWebPage(
-                            context.resources.getString(R.string.github_url),
-                            context,
-                        )
-                    },
-                    modifier = Modifier.padding(vertical = 5.dp),
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row {
-                            val icon = ImageVector.vectorResource(R.drawable.github)
-                            Icon(
-                                imageVector = icon,
-                                icon.name,
-                                Modifier.size(25.dp),
-                            )
-                            Text(
-                                stringResource(id = R.string.open_issue),
-                                textAlign = TextAlign.Justify,
-                                modifier = Modifier.padding(start = 10.dp),
-                            )
-                        }
-                        Icon(
-                            forwardIcon,
-                            forwardIcon.name,
-                        )
-                    }
-                }
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                TextButton(
-                    onClick = { appViewModel.launchEmail(context) },
-                    modifier = Modifier.padding(vertical = 5.dp),
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row {
-                            val icon = Icons.Rounded.Mail
-                            Icon(icon, icon.name)
-                            Text(
-                                stringResource(id = R.string.email_description),
-                                textAlign = TextAlign.Justify,
-                                modifier = Modifier.padding(start = 10.dp),
-                            )
-                        }
-                        Icon(
-                            forwardIcon,
-                            forwardIcon.name,
-                        )
-                    }
-                }
-                if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    TextButton(
-                        onClick = { navController.navigate(Screen.Support.Logs.route) },
-                        modifier = Modifier.padding(vertical = 5.dp),
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Row {
-                                val icon = Icons.Rounded.FormatListNumbered
-                                Icon(icon, icon.name)
-                                Text(
-                                    stringResource(id = R.string.read_logs),
-                                    textAlign = TextAlign.Justify,
-                                    modifier = Modifier.padding(start = 10.dp),
-                                )
-                            }
-                            Icon(
-                                Icons.AutoMirrored.Rounded.ArrowForward,
-                                stringResource(id = R.string.go),
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            stringResource(id = R.string.privacy_policy),
-            style = TextStyle(textDecoration = TextDecoration.Underline),
-            fontSize = 16.sp,
-            modifier =
-            Modifier.clickable {
-                appViewModel.openWebPage(
-                    context.resources.getString(R.string.privacy_policy_url),
-                    context,
-                )
-            },
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(25.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(25.dp),
-        ) {
-            val version = buildAnnotatedString {
-                append(stringResource(id = R.string.version))
-                append(": ")
-                append(BuildConfig.VERSION_NAME)
-            }
-            val mode = buildAnnotatedString {
-                append(stringResource(R.string.mode))
-                append(": ")
-                when (uiState.settings.isKernelEnabled) {
-                    true -> append(stringResource(id = R.string.kernel))
-                    false -> append(stringResource(id = R.string.userspace))
-                }
-            }
-            Text(version.text, modifier = Modifier.focusable())
-            Text(mode.text)
-        }
-    }
+	Column(
+		horizontalAlignment = Alignment.CenterHorizontally,
+		verticalArrangement = Arrangement.Top,
+		modifier =
+		Modifier
+			.fillMaxSize()
+			.verticalScroll(rememberScrollState())
+			.focusable(),
+	) {
+		Surface(
+			tonalElevation = 2.dp,
+			shadowElevation = 2.dp,
+			shape = RoundedCornerShape(12.dp),
+			color = MaterialTheme.colorScheme.surface,
+			modifier =
+			(
+				if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					Modifier
+						.height(IntrinsicSize.Min)
+						.fillMaxWidth(fillMaxWidth)
+						.padding(top = 10.dp)
+				} else {
+					Modifier
+						.fillMaxWidth(fillMaxWidth)
+						.padding(top = 20.dp)
+				}
+				)
+				.padding(bottom = 25.dp),
+		) {
+			Column(modifier = Modifier.padding(20.dp)) {
+				val forwardIcon = Icons.AutoMirrored.Rounded.ArrowForward
+				Text(
+					stringResource(R.string.thank_you),
+					textAlign = TextAlign.Start,
+					fontWeight = FontWeight.Bold,
+					modifier = Modifier.padding(bottom = 20.dp),
+					fontSize = 16.sp,
+				)
+				Text(
+					stringResource(id = R.string.support_help_text),
+					textAlign = TextAlign.Start,
+					fontSize = 16.sp,
+					modifier = Modifier.padding(bottom = 20.dp),
+				)
+				TextButton(
+					onClick = {
+						appViewModel.openWebPage(
+							context.resources.getString(R.string.docs_url),
+							context,
+						)
+					},
+					modifier =
+					Modifier
+						.padding(vertical = 5.dp)
+						.focusRequester(focusRequester),
+				) {
+					Row(
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically,
+						modifier = Modifier.fillMaxWidth(),
+					) {
+						Row {
+							val icon = Icons.Rounded.Book
+							Icon(icon, icon.name)
+							Text(
+								stringResource(id = R.string.docs_description),
+								textAlign = TextAlign.Justify,
+								modifier =
+								Modifier
+									.padding(start = 10.dp)
+									.weight(
+										weight = 1.0f,
+										fill = false,
+									),
+								softWrap = true,
+							)
+						}
+						Icon(
+							forwardIcon,
+							forwardIcon.name,
+						)
+					}
+				}
+				HorizontalDivider(
+					thickness = 0.5.dp,
+					color = MaterialTheme.colorScheme.onBackground,
+				)
+				TextButton(
+					onClick = {
+						appViewModel.openWebPage(
+							context.resources.getString(R.string.telegram_url),
+							context,
+						)
+					},
+					modifier = Modifier.padding(vertical = 5.dp),
+				) {
+					Row(
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically,
+						modifier = Modifier.fillMaxWidth(),
+					) {
+						Row {
+							val icon = ImageVector.vectorResource(R.drawable.telegram)
+							Icon(
+								icon,
+								icon.name,
+								Modifier.size(25.dp),
+							)
+							Text(
+								stringResource(id = R.string.discord_description),
+								textAlign = TextAlign.Justify,
+								modifier = Modifier.padding(start = 10.dp),
+							)
+						}
+						Icon(
+							forwardIcon,
+							forwardIcon.name,
+						)
+					}
+				}
+				HorizontalDivider(
+					thickness = 0.5.dp,
+					color = MaterialTheme.colorScheme.onBackground,
+				)
+				TextButton(
+					onClick = {
+						appViewModel.openWebPage(
+							context.resources.getString(R.string.github_url),
+							context,
+						)
+					},
+					modifier = Modifier.padding(vertical = 5.dp),
+				) {
+					Row(
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically,
+						modifier = Modifier.fillMaxWidth(),
+					) {
+						Row {
+							val icon = ImageVector.vectorResource(R.drawable.github)
+							Icon(
+								imageVector = icon,
+								icon.name,
+								Modifier.size(25.dp),
+							)
+							Text(
+								stringResource(id = R.string.open_issue),
+								textAlign = TextAlign.Justify,
+								modifier = Modifier.padding(start = 10.dp),
+							)
+						}
+						Icon(
+							forwardIcon,
+							forwardIcon.name,
+						)
+					}
+				}
+				HorizontalDivider(
+					thickness = 0.5.dp,
+					color = MaterialTheme.colorScheme.onBackground,
+				)
+				TextButton(
+					onClick = { appViewModel.launchEmail(context) },
+					modifier = Modifier.padding(vertical = 5.dp),
+				) {
+					Row(
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically,
+						modifier = Modifier.fillMaxWidth(),
+					) {
+						Row {
+							val icon = Icons.Rounded.Mail
+							Icon(icon, icon.name)
+							Text(
+								stringResource(id = R.string.email_description),
+								textAlign = TextAlign.Justify,
+								modifier = Modifier.padding(start = 10.dp),
+							)
+						}
+						Icon(
+							forwardIcon,
+							forwardIcon.name,
+						)
+					}
+				}
+				if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					HorizontalDivider(
+						thickness = 0.5.dp,
+						color = MaterialTheme.colorScheme.onBackground,
+					)
+					TextButton(
+						onClick = { navController.navigate(Screen.Support.Logs.route) },
+						modifier = Modifier.padding(vertical = 5.dp),
+					) {
+						Row(
+							horizontalArrangement = Arrangement.SpaceBetween,
+							verticalAlignment = Alignment.CenterVertically,
+							modifier = Modifier.fillMaxWidth(),
+						) {
+							Row {
+								val icon = Icons.Rounded.FormatListNumbered
+								Icon(icon, icon.name)
+								Text(
+									stringResource(id = R.string.read_logs),
+									textAlign = TextAlign.Justify,
+									modifier = Modifier.padding(start = 10.dp),
+								)
+							}
+							Icon(
+								Icons.AutoMirrored.Rounded.ArrowForward,
+								stringResource(id = R.string.go),
+							)
+						}
+					}
+				}
+			}
+		}
+		Spacer(modifier = Modifier.weight(1f))
+		Text(
+			stringResource(id = R.string.privacy_policy),
+			style = TextStyle(textDecoration = TextDecoration.Underline),
+			fontSize = 16.sp,
+			modifier =
+			Modifier.clickable {
+				appViewModel.openWebPage(
+					context.resources.getString(R.string.privacy_policy_url),
+					context,
+				)
+			},
+		)
+		Row(
+			horizontalArrangement = Arrangement.spacedBy(25.dp),
+			verticalAlignment = Alignment.CenterVertically,
+			modifier = Modifier.padding(25.dp),
+		) {
+			val version =
+				buildAnnotatedString {
+					append(stringResource(id = R.string.version))
+					append(": ")
+					append(BuildConfig.VERSION_NAME)
+				}
+			val mode =
+				buildAnnotatedString {
+					append(stringResource(R.string.mode))
+					append(": ")
+					when (uiState.settings.isKernelEnabled) {
+						true -> append(stringResource(id = R.string.kernel))
+						false -> append(stringResource(id = R.string.userspace))
+					}
+				}
+			Text(version.text, modifier = Modifier.focusable())
+			Text(mode.text)
+		}
+	}
 }

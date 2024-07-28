@@ -27,67 +27,62 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class RepositoryModule {
-    @Provides
-    @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            context.getString(R.string.db_name),
-        )
-            .fallbackToDestructiveMigration()
-            .addCallback(DatabaseCallback())
-            .build()
-    }
+	@Provides
+	@Singleton
+	fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+		return Room.databaseBuilder(
+			context,
+			AppDatabase::class.java,
+			context.getString(R.string.db_name),
+		)
+			.fallbackToDestructiveMigration()
+			.addCallback(DatabaseCallback())
+			.build()
+	}
 
-    @Singleton
-    @Provides
-    fun provideSettingsDoa(appDatabase: AppDatabase): SettingsDao {
-        return appDatabase.settingDao()
-    }
+	@Singleton
+	@Provides
+	fun provideSettingsDoa(appDatabase: AppDatabase): SettingsDao {
+		return appDatabase.settingDao()
+	}
 
-    @Singleton
-    @Provides
-    fun provideTunnelConfigDoa(appDatabase: AppDatabase): TunnelConfigDao {
-        return appDatabase.tunnelConfigDoa()
-    }
+	@Singleton
+	@Provides
+	fun provideTunnelConfigDoa(appDatabase: AppDatabase): TunnelConfigDao {
+		return appDatabase.tunnelConfigDoa()
+	}
 
-    @Singleton
-    @Provides
-    fun provideTunnelConfigRepository(tunnelConfigDao: TunnelConfigDao): TunnelConfigRepository {
-        return RoomTunnelConfigRepository(tunnelConfigDao)
-    }
+	@Singleton
+	@Provides
+	fun provideTunnelConfigRepository(tunnelConfigDao: TunnelConfigDao): TunnelConfigRepository {
+		return RoomTunnelConfigRepository(tunnelConfigDao)
+	}
 
-    @Singleton
-    @Provides
-    fun provideSettingsRepository(settingsDao: SettingsDao): SettingsRepository {
-        return RoomSettingsRepository(settingsDao)
-    }
+	@Singleton
+	@Provides
+	fun provideSettingsRepository(settingsDao: SettingsDao): SettingsRepository {
+		return RoomSettingsRepository(settingsDao)
+	}
 
-    @Singleton
-    @Provides
-    fun providePreferencesDataStore(
-        @ApplicationContext context: Context,
-        @IoDispatcher ioDispatcher: CoroutineDispatcher
-    ): DataStoreManager {
-        return DataStoreManager(context, ioDispatcher)
-    }
+	@Singleton
+	@Provides
+	fun providePreferencesDataStore(@ApplicationContext context: Context, @IoDispatcher ioDispatcher: CoroutineDispatcher): DataStoreManager {
+		return DataStoreManager(context, ioDispatcher)
+	}
 
-    @Provides
-    @Singleton
-    fun provideGeneralStateRepository(dataStoreManager: DataStoreManager): AppStateRepository {
-        return DataStoreAppStateRepository(dataStoreManager)
-    }
+	@Provides
+	@Singleton
+	fun provideGeneralStateRepository(dataStoreManager: DataStoreManager): AppStateRepository {
+		return DataStoreAppStateRepository(dataStoreManager)
+	}
 
-    @Provides
-    @Singleton
-    fun provideAppDataRepository(
-        settingsRepository: SettingsRepository,
-        tunnelConfigRepository: TunnelConfigRepository,
-        appStateRepository: AppStateRepository
-    ): AppDataRepository {
-        return AppDataRoomRepository(settingsRepository, tunnelConfigRepository, appStateRepository)
-    }
-
-
+	@Provides
+	@Singleton
+	fun provideAppDataRepository(
+		settingsRepository: SettingsRepository,
+		tunnelConfigRepository: TunnelConfigRepository,
+		appStateRepository: AppStateRepository,
+	): AppDataRepository {
+		return AppDataRoomRepository(settingsRepository, tunnelConfigRepository, appStateRepository)
+	}
 }

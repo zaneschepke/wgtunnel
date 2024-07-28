@@ -87,610 +87,654 @@ import timber.log.Timber
 import java.io.File
 
 @OptIn(
-    ExperimentalPermissionsApi::class,
-    ExperimentalLayoutApi::class,
+	ExperimentalPermissionsApi::class,
+	ExperimentalLayoutApi::class,
 )
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel(),
-    appViewModel: AppViewModel,
-    navController: NavController,
-    focusRequester: FocusRequester,
+	viewModel: SettingsViewModel = hiltViewModel(),
+	appViewModel: AppViewModel,
+	navController: NavController,
+	focusRequester: FocusRequester,
 ) {
-    val context = LocalContext.current
-    val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
-    val interactionSource = remember { MutableInteractionSource() }
+	val context = LocalContext.current
+	val focusManager = LocalFocusManager.current
+	val scope = rememberCoroutineScope()
+	val scrollState = rememberScrollState()
+	val interactionSource = remember { MutableInteractionSource() }
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val kernelSupport by viewModel.kernelSupport.collectAsStateWithLifecycle()
+	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+	val kernelSupport by viewModel.kernelSupport.collectAsStateWithLifecycle()
 
-    val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-    var currentText by remember { mutableStateOf("") }
-    var isBackgroundLocationGranted by remember { mutableStateOf(true) }
-    var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
-    var didExportFiles by remember { mutableStateOf(false) }
-    var showAuthPrompt by remember { mutableStateOf(false) }
+	val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+	var currentText by remember { mutableStateOf("") }
+	var isBackgroundLocationGranted by remember { mutableStateOf(true) }
+	var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
+	var didExportFiles by remember { mutableStateOf(false) }
+	var showAuthPrompt by remember { mutableStateOf(false) }
 
-    val screenPadding = 5.dp
-    val fillMaxWidth = .85f
+	val screenPadding = 5.dp
+	val fillMaxWidth = .85f
 
-    LaunchedEffect(Unit) {
-        viewModel.checkKernelSupport()
-    }
+	LaunchedEffect(Unit) {
+		viewModel.checkKernelSupport()
+	}
 
-    val startForResult =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                result.data
-                // Handle the Intent
-            }
-            viewModel.setBatteryOptimizeDisableShown()
-        }
+	val startForResult =
+		rememberLauncherForActivityResult(
+			ActivityResultContracts.StartActivityForResult(),
+		) { result: ActivityResult ->
+			if (result.resultCode == Activity.RESULT_OK) {
+				result.data
+				// Handle the Intent
+			}
+			viewModel.setBatteryOptimizeDisableShown()
+		}
 
-    fun exportAllConfigs() {
-        try {
-            val wgFiles = uiState.tunnels.map { config ->
-                val file = File(context.cacheDir, "${config.name}-wg.conf")
-                file.outputStream().use {
-                    it.write(config.wgQuick.toByteArray())
-                }
-                file
-            }
-            val amFiles = uiState.tunnels.mapNotNull { config ->
-                if (config.amQuick != TunnelConfig.AM_QUICK_DEFAULT) {
-                    val file = File(context.cacheDir, "${config.name}-am.conf")
-                    file.outputStream().use {
-                        it.write(config.amQuick.toByteArray())
-                    }
-                    file
-                } else null
-            }
-            scope.launch {
-                viewModel.onExportTunnels(wgFiles + amFiles).onFailure {
-                    appViewModel.showSnackbarMessage(it.getMessage(context))
-                }.onSuccess {
-                    didExportFiles = true
-                    appViewModel.showSnackbarMessage(context.getString(R.string.exported_configs_message))
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e)
-        }
-    }
+	fun exportAllConfigs() {
+		try {
+			val wgFiles =
+				uiState.tunnels.map { config ->
+					val file = File(context.cacheDir, "${config.name}-wg.conf")
+					file.outputStream().use {
+						it.write(config.wgQuick.toByteArray())
+					}
+					file
+				}
+			val amFiles =
+				uiState.tunnels.mapNotNull { config ->
+					if (config.amQuick != TunnelConfig.AM_QUICK_DEFAULT) {
+						val file = File(context.cacheDir, "${config.name}-am.conf")
+						file.outputStream().use {
+							it.write(config.amQuick.toByteArray())
+						}
+						file
+					} else {
+						null
+					}
+				}
+			scope.launch {
+				viewModel.onExportTunnels(wgFiles + amFiles).onFailure {
+					appViewModel.showSnackbarMessage(it.getMessage(context))
+				}.onSuccess {
+					didExportFiles = true
+					appViewModel.showSnackbarMessage(
+						context.getString(R.string.exported_configs_message),
+					)
+				}
+			}
+		} catch (e: Exception) {
+			Timber.e(e)
+		}
+	}
 
-    fun isBatteryOptimizationsDisabled(): Boolean {
-        val pm = context.getSystemService(POWER_SERVICE) as PowerManager
-        return pm.isIgnoringBatteryOptimizations(context.packageName)
-    }
+	fun isBatteryOptimizationsDisabled(): Boolean {
+		val pm = context.getSystemService(POWER_SERVICE) as PowerManager
+		return pm.isIgnoringBatteryOptimizations(context.packageName)
+	}
 
-    fun requestBatteryOptimizationsDisabled() {
-        val intent =
-            Intent().apply {
-                this.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                data = Uri.fromParts("package", context.packageName, null)
-            }
-        startForResult.launch(intent)
-    }
+	fun requestBatteryOptimizationsDisabled() {
+		val intent =
+			Intent().apply {
+				this.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+				data = Uri.fromParts("package", context.packageName, null)
+			}
+		startForResult.launch(intent)
+	}
 
-    fun handleAutoTunnelToggle() {
-        if (uiState.isBatteryOptimizeDisableShown || isBatteryOptimizationsDisabled()) {
-            if (appViewModel.isRequiredPermissionGranted()) {
-                viewModel.onToggleAutoTunnel(context)
-            }
-        } else {
-            requestBatteryOptimizationsDisabled()
-        }
-    }
+	fun handleAutoTunnelToggle() {
+		if (uiState.isBatteryOptimizeDisableShown || isBatteryOptimizationsDisabled()) {
+			if (appViewModel.isRequiredPermissionGranted()) {
+				viewModel.onToggleAutoTunnel(context)
+			}
+		} else {
+			requestBatteryOptimizationsDisabled()
+		}
+	}
 
-    fun saveTrustedSSID() {
-        if (currentText.isNotEmpty()) {
-            viewModel.onSaveTrustedSSID(currentText).onSuccess {
-                currentText = ""
-            }.onFailure {
-                appViewModel.showSnackbarMessage(it.getMessage(context))
-            }
-        }
-    }
+	fun saveTrustedSSID() {
+		if (currentText.isNotEmpty()) {
+			viewModel.onSaveTrustedSSID(currentText).onSuccess {
+				currentText = ""
+			}.onFailure {
+				appViewModel.showSnackbarMessage(it.getMessage(context))
+			}
+		}
+	}
 
-    fun openSettings() {
-        val intentSettings = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
-        intentSettings.data = Uri.fromParts("package", context.packageName, null)
-        context.startActivity(intentSettings)
-    }
+	fun openSettings() {
+		val intentSettings = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
+		intentSettings.data = Uri.fromParts("package", context.packageName, null)
+		context.startActivity(intentSettings)
+	}
 
-    fun checkFineLocationGranted() {
-        isBackgroundLocationGranted =
-            if (!fineLocationState.status.isGranted) {
-                false
-            } else {
-                viewModel.setLocationDisclosureShown()
-                true
-            }
-    }
+	fun checkFineLocationGranted() {
+		isBackgroundLocationGranted =
+			if (!fineLocationState.status.isGranted) {
+				false
+			} else {
+				viewModel.setLocationDisclosureShown()
+				true
+			}
+	}
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        if (
-            WireGuardAutoTunnel.isRunningOnAndroidTv() &&
-            Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
-        ) {
-            checkFineLocationGranted()
-        } else {
-            val backgroundLocationState =
-                rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-            isBackgroundLocationGranted =
-                if (!backgroundLocationState.status.isGranted) {
-                    false
-                } else {
-                    SideEffect { viewModel.setLocationDisclosureShown() }
-                    true
-                }
-        }
-    }
+	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+		if (
+			WireGuardAutoTunnel.isRunningOnAndroidTv() &&
+			Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
+		) {
+			checkFineLocationGranted()
+		} else {
+			val backgroundLocationState =
+				rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+			isBackgroundLocationGranted =
+				if (!backgroundLocationState.status.isGranted) {
+					false
+				} else {
+					SideEffect { viewModel.setLocationDisclosureShown() }
+					true
+				}
+		}
+	}
 
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-        checkFineLocationGranted()
-    }
+	if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+		checkFineLocationGranted()
+	}
 
-    AnimatedVisibility(showLocationServicesAlertDialog) {
-        AlertDialog(
-            onDismissRequest = { showLocationServicesAlertDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showLocationServicesAlertDialog = false
-                        handleAutoTunnelToggle()
-                    },
-                ) {
-                    Text(text = stringResource(R.string.okay))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLocationServicesAlertDialog = false }) {
-                    Text(text = stringResource(R.string.cancel))
-                }
-            },
-            title = { Text(text = stringResource(R.string.location_services_not_detected)) },
-            text = { Text(text = stringResource(R.string.location_services_missing_message)) },
-        )
-    }
+	AnimatedVisibility(showLocationServicesAlertDialog) {
+		AlertDialog(
+			onDismissRequest = { showLocationServicesAlertDialog = false },
+			confirmButton = {
+				TextButton(
+					onClick = {
+						showLocationServicesAlertDialog = false
+						handleAutoTunnelToggle()
+					},
+				) {
+					Text(text = stringResource(R.string.okay))
+				}
+			},
+			dismissButton = {
+				TextButton(onClick = { showLocationServicesAlertDialog = false }) {
+					Text(text = stringResource(R.string.cancel))
+				}
+			},
+			title = { Text(text = stringResource(R.string.location_services_not_detected)) },
+			text = { Text(text = stringResource(R.string.location_services_missing_message)) },
+		)
+	}
 
-    if (!uiState.isLocationDisclosureShown) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState),
-        ) {
-            Icon(
-                Icons.Rounded.LocationOff,
-                contentDescription = stringResource(id = R.string.map),
-                modifier = Modifier
-                    .padding(30.dp)
-                    .size(128.dp),
-            )
-            Text(
-                stringResource(R.string.prominent_background_location_title),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(30.dp),
-                fontSize = 20.sp,
-            )
-            Text(
-                stringResource(R.string.prominent_background_location_message),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(30.dp),
-                fontSize = 15.sp,
-            )
-            Row(
-                modifier =
-                if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                } else {
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(30.dp)
-                },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                TextButton(onClick = { viewModel.setLocationDisclosureShown() }) {
-                    Text(stringResource(id = R.string.no_thanks))
-                }
-                TextButton(
-                    modifier = Modifier.focusRequester(focusRequester),
-                    onClick = {
-                        openSettings()
-                        viewModel.setLocationDisclosureShown()
-                    },
-                ) {
-                    Text(stringResource(id = R.string.turn_on))
-                }
-            }
-        }
-    }
+	if (!uiState.isLocationDisclosureShown) {
+		Column(
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Top,
+			modifier =
+			Modifier
+				.fillMaxSize()
+				.verticalScroll(scrollState),
+		) {
+			Icon(
+				Icons.Rounded.LocationOff,
+				contentDescription = stringResource(id = R.string.map),
+				modifier =
+				Modifier
+					.padding(30.dp)
+					.size(128.dp),
+			)
+			Text(
+				stringResource(R.string.prominent_background_location_title),
+				textAlign = TextAlign.Center,
+				modifier = Modifier.padding(30.dp),
+				fontSize = 20.sp,
+			)
+			Text(
+				stringResource(R.string.prominent_background_location_message),
+				textAlign = TextAlign.Center,
+				modifier = Modifier.padding(30.dp),
+				fontSize = 15.sp,
+			)
+			Row(
+				modifier =
+				if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					Modifier
+						.fillMaxWidth()
+						.padding(10.dp)
+				} else {
+					Modifier
+						.fillMaxWidth()
+						.padding(30.dp)
+				},
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceEvenly,
+			) {
+				TextButton(onClick = { viewModel.setLocationDisclosureShown() }) {
+					Text(stringResource(id = R.string.no_thanks))
+				}
+				TextButton(
+					modifier = Modifier.focusRequester(focusRequester),
+					onClick = {
+						openSettings()
+						viewModel.setLocationDisclosureShown()
+					},
+				) {
+					Text(stringResource(id = R.string.turn_on))
+				}
+			}
+		}
+	}
 
-    if (showAuthPrompt) {
-        AuthorizationPrompt(
-            onSuccess = {
-                showAuthPrompt = false
-                exportAllConfigs()
-            },
-            onError = { _ ->
-                showAuthPrompt = false
-                appViewModel.showSnackbarMessage(context.getString(R.string.error_authentication_failed))
-            },
-            onFailure = {
-                showAuthPrompt = false
-                appViewModel.showSnackbarMessage(context.getString(R.string.error_authorization_failed))
-            },
-        )
-    }
+	if (showAuthPrompt) {
+		AuthorizationPrompt(
+			onSuccess = {
+				showAuthPrompt = false
+				exportAllConfigs()
+			},
+			onError = { _ ->
+				showAuthPrompt = false
+				appViewModel.showSnackbarMessage(
+					context.getString(R.string.error_authentication_failed),
+				)
+			},
+			onFailure = {
+				showAuthPrompt = false
+				appViewModel.showSnackbarMessage(
+					context.getString(R.string.error_authorization_failed),
+				)
+			},
+		)
+	}
 
-    if (uiState.tunnels.isEmpty() && uiState.isLocationDisclosureShown) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            Text(
-                stringResource(R.string.one_tunnel_required),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(15.dp),
-                fontStyle = FontStyle.Italic,
-            )
-        }
-    }
-    if (uiState.isLocationDisclosureShown && uiState.tunnels.isNotEmpty()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .clickable(
-                    indication = null,
-                    interactionSource = interactionSource,
-                ) {
-                    focusManager.clearFocus()
-                },
-        ) {
-            Surface(
-                tonalElevation = 2.dp,
-                shadowElevation = 2.dp,
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier =
-                (if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                    Modifier
-                        .height(IntrinsicSize.Min)
-                        .fillMaxWidth(fillMaxWidth)
-                        .padding(top = 10.dp)
-                } else {
-                    Modifier
-                        .fillMaxWidth(fillMaxWidth)
-                        .padding(top = 20.dp)
-                })
-                    .padding(bottom = 10.dp),
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top,
-                    modifier = Modifier.padding(15.dp),
-                ) {
-                    SectionTitle(
-                        title = stringResource(id = R.string.auto_tunneling),
-                        padding = screenPadding,
-                    )
-                    ConfigurationToggle(
-                        stringResource(id = R.string.tunnel_on_wifi),
-                        enabled =
-                        !(uiState.settings.isAutoTunnelEnabled ||
-                            uiState.settings.isAlwaysOnVpnEnabled),
-                        checked = uiState.settings.isTunnelOnWifiEnabled,
-                        padding = screenPadding,
-                        onCheckChanged = { viewModel.onToggleTunnelOnWifi() },
-                        modifier =
-                        if (uiState.settings.isAutoTunnelEnabled) Modifier
-                        else
-                            Modifier
-                                .focusRequester(focusRequester),
-                    )
-                    AnimatedVisibility(visible = uiState.settings.isTunnelOnWifiEnabled) {
-                        Column {
-                            FlowRow(
-                                modifier = Modifier
-                                    .padding(screenPadding)
-                                    .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                            ) {
-                                uiState.settings.trustedNetworkSSIDs.forEach { ssid ->
-                                    ClickableIconButton(
-                                        onClick = {
-                                            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                                                focusRequester.requestFocus()
-                                                viewModel.onDeleteTrustedSSID(ssid)
-                                            }
-                                        },
-                                        onIconClick = {
-                                            if (WireGuardAutoTunnel.isRunningOnAndroidTv()) focusRequester.requestFocus()
-                                            viewModel.onDeleteTrustedSSID(ssid)
+	if (uiState.tunnels.isEmpty() && uiState.isLocationDisclosureShown) {
+		Column(
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center,
+			modifier = Modifier.fillMaxSize(),
+		) {
+			Text(
+				stringResource(R.string.one_tunnel_required),
+				textAlign = TextAlign.Center,
+				modifier = Modifier.padding(15.dp),
+				fontStyle = FontStyle.Italic,
+			)
+		}
+	}
+	if (uiState.isLocationDisclosureShown && uiState.tunnels.isNotEmpty()) {
+		Column(
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Top,
+			modifier =
+			Modifier
+				.fillMaxSize()
+				.verticalScroll(scrollState)
+				.clickable(
+					indication = null,
+					interactionSource = interactionSource,
+				) {
+					focusManager.clearFocus()
+				},
+		) {
+			Surface(
+				tonalElevation = 2.dp,
+				shadowElevation = 2.dp,
+				shape = RoundedCornerShape(12.dp),
+				color = MaterialTheme.colorScheme.surface,
+				modifier =
+				(
+					if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+						Modifier
+							.height(IntrinsicSize.Min)
+							.fillMaxWidth(fillMaxWidth)
+							.padding(top = 10.dp)
+					} else {
+						Modifier
+							.fillMaxWidth(fillMaxWidth)
+							.padding(top = 20.dp)
+					}
+					)
+					.padding(bottom = 10.dp),
+			) {
+				Column(
+					horizontalAlignment = Alignment.Start,
+					verticalArrangement = Arrangement.Top,
+					modifier = Modifier.padding(15.dp),
+				) {
+					SectionTitle(
+						title = stringResource(id = R.string.auto_tunneling),
+						padding = screenPadding,
+					)
+					ConfigurationToggle(
+						stringResource(id = R.string.tunnel_on_wifi),
+						enabled =
+						!(
+							uiState.settings.isAutoTunnelEnabled ||
+								uiState.settings.isAlwaysOnVpnEnabled
+							),
+						checked = uiState.settings.isTunnelOnWifiEnabled,
+						padding = screenPadding,
+						onCheckChanged = { viewModel.onToggleTunnelOnWifi() },
+						modifier =
+						if (uiState.settings.isAutoTunnelEnabled) {
+							Modifier
+						} else {
+							Modifier
+								.focusRequester(focusRequester)
+						},
+					)
+					AnimatedVisibility(visible = uiState.settings.isTunnelOnWifiEnabled) {
+						Column {
+							FlowRow(
+								modifier =
+								Modifier
+									.padding(screenPadding)
+									.fillMaxWidth(),
+								horizontalArrangement = Arrangement.spacedBy(5.dp),
+							) {
+								uiState.settings.trustedNetworkSSIDs.forEach { ssid ->
+									ClickableIconButton(
+										onClick = {
+											if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+												focusRequester.requestFocus()
+												viewModel.onDeleteTrustedSSID(ssid)
+											}
+										},
+										onIconClick = {
+											if (WireGuardAutoTunnel.isRunningOnAndroidTv()) focusRequester.requestFocus()
+											viewModel.onDeleteTrustedSSID(ssid)
+										},
+										text = ssid,
+										icon = Icons.Filled.Close,
+										enabled =
+										!(
+											uiState.settings.isAutoTunnelEnabled ||
+												uiState.settings.isAlwaysOnVpnEnabled
+											),
+									)
+								}
+								if (uiState.settings.trustedNetworkSSIDs.isEmpty()) {
+									Text(
+										stringResource(R.string.none),
+										fontStyle = FontStyle.Italic,
+										color = Color.Gray,
+									)
+								}
+							}
+							OutlinedTextField(
+								enabled =
+								!(
+									uiState.settings.isAutoTunnelEnabled ||
+										uiState.settings.isAlwaysOnVpnEnabled
+									),
+								value = currentText,
+								onValueChange = { currentText = it },
+								label = { Text(stringResource(R.string.add_trusted_ssid)) },
+								modifier =
+								Modifier
+									.padding(
+										start = screenPadding,
+										top = 5.dp,
+										bottom = 10.dp,
+									),
+								maxLines = 1,
+								keyboardOptions =
+								KeyboardOptions(
+									capitalization = KeyboardCapitalization.None,
+									imeAction = ImeAction.Done,
+								),
+								keyboardActions = KeyboardActions(onDone = { saveTrustedSSID() }),
+								trailingIcon = {
+									if (currentText != "") {
+										IconButton(onClick = { saveTrustedSSID() }) {
+											Icon(
+												imageVector = Icons.Outlined.Add,
+												contentDescription =
+												if (currentText == "") {
+													stringResource(
+														id =
+														R.string
+															.trusted_ssid_empty_description,
+													)
+												} else {
+													stringResource(
+														id =
+														R.string
+															.trusted_ssid_value_description,
+													)
+												},
+												tint = MaterialTheme.colorScheme.primary,
+											)
+										}
+									}
+								},
+							)
+						}
+					}
+					ConfigurationToggle(
+						stringResource(R.string.tunnel_mobile_data),
+						enabled =
+						!(
+							uiState.settings.isAutoTunnelEnabled ||
+								uiState.settings.isAlwaysOnVpnEnabled
+							),
+						checked = uiState.settings.isTunnelOnMobileDataEnabled,
+						padding = screenPadding,
+						onCheckChanged = { viewModel.onToggleTunnelOnMobileData() },
+					)
+					ConfigurationToggle(
+						stringResource(id = R.string.tunnel_on_ethernet),
+						enabled =
+						!(
+							uiState.settings.isAutoTunnelEnabled ||
+								uiState.settings.isAlwaysOnVpnEnabled
+							),
+						checked = uiState.settings.isTunnelOnEthernetEnabled,
+						padding = screenPadding,
+						onCheckChanged = { viewModel.onToggleTunnelOnEthernet() },
+					)
+					ConfigurationToggle(
+						stringResource(R.string.restart_on_ping),
+						enabled =
+						!(
+							uiState.settings.isAutoTunnelEnabled ||
+								uiState.settings.isAlwaysOnVpnEnabled
+							),
+						checked = uiState.settings.isPingEnabled,
+						padding = screenPadding,
+						onCheckChanged = { viewModel.onToggleRestartOnPing() },
+					)
+					Row(
+						verticalAlignment = Alignment.CenterVertically,
+						modifier =
+						(
+							if (!uiState.settings.isAutoTunnelEnabled) {
+								Modifier
+							} else {
+								Modifier.focusRequester(
+									focusRequester,
+								)
+							}
+							)
+							.fillMaxSize()
+							.padding(top = 5.dp),
+						horizontalArrangement = Arrangement.Center,
+					) {
+						TextButton(
+							enabled = !uiState.settings.isAlwaysOnVpnEnabled,
+							onClick = {
+								if (
+									uiState.settings.isTunnelOnWifiEnabled &&
+									!uiState.settings.isAutoTunnelEnabled
+								) {
+									when (false) {
+										isBackgroundLocationGranted ->
+											appViewModel.showSnackbarMessage(
+												context.getString(
+													R.string.background_location_required,
+												),
+											)
 
-                                        },
-                                        text = ssid,
-                                        icon = Icons.Filled.Close,
-                                        enabled =
-                                        !(uiState.settings.isAutoTunnelEnabled ||
-                                            uiState.settings.isAlwaysOnVpnEnabled),
-                                    )
-                                }
-                                if (uiState.settings.trustedNetworkSSIDs.isEmpty()) {
-                                    Text(
-                                        stringResource(R.string.none),
-                                        fontStyle = FontStyle.Italic,
-                                        color = Color.Gray,
-                                    )
-                                }
-                            }
-                            OutlinedTextField(
-                                enabled =
-                                !(uiState.settings.isAutoTunnelEnabled ||
-                                    uiState.settings.isAlwaysOnVpnEnabled),
-                                value = currentText,
-                                onValueChange = { currentText = it },
-                                label = { Text(stringResource(R.string.add_trusted_ssid)) },
-                                modifier =
-                                Modifier
-                                    .padding(
-                                        start = screenPadding,
-                                        top = 5.dp,
-                                        bottom = 10.dp,
-                                    ),
-                                maxLines = 1,
-                                keyboardOptions =
-                                KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.None,
-                                    imeAction = ImeAction.Done,
-                                ),
-                                keyboardActions = KeyboardActions(onDone = { saveTrustedSSID() }),
-                                trailingIcon = {
-                                    if (currentText != "") {
-                                        IconButton(onClick = { saveTrustedSSID() }) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Add,
-                                                contentDescription =
-                                                if (currentText == "") {
-                                                    stringResource(
-                                                        id =
-                                                        R.string
-                                                            .trusted_ssid_empty_description,
-                                                    )
-                                                } else {
-                                                    stringResource(
-                                                        id =
-                                                        R.string
-                                                            .trusted_ssid_value_description,
-                                                    )
-                                                },
-                                                tint = MaterialTheme.colorScheme.primary,
-                                            )
-                                        }
-                                    }
-                                },
-                            )
-                        }
-                    }
-                    ConfigurationToggle(
-                        stringResource(R.string.tunnel_mobile_data),
-                        enabled =
-                        !(uiState.settings.isAutoTunnelEnabled ||
-                            uiState.settings.isAlwaysOnVpnEnabled),
-                        checked = uiState.settings.isTunnelOnMobileDataEnabled,
-                        padding = screenPadding,
-                        onCheckChanged = { viewModel.onToggleTunnelOnMobileData() },
-                    )
-                    ConfigurationToggle(
-                        stringResource(id = R.string.tunnel_on_ethernet),
-                        enabled =
-                        !(uiState.settings.isAutoTunnelEnabled ||
-                            uiState.settings.isAlwaysOnVpnEnabled),
-                        checked = uiState.settings.isTunnelOnEthernetEnabled,
-                        padding = screenPadding,
-                        onCheckChanged = { viewModel.onToggleTunnelOnEthernet() },
-                    )
-                    ConfigurationToggle(
-                        stringResource(R.string.restart_on_ping),
-                        enabled =
-                        !(uiState.settings.isAutoTunnelEnabled ||
-                            uiState.settings.isAlwaysOnVpnEnabled),
-                        checked = uiState.settings.isPingEnabled,
-                        padding = screenPadding,
-                        onCheckChanged = { viewModel.onToggleRestartOnPing() },
-                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier =
-                        (if (!uiState.settings.isAutoTunnelEnabled) Modifier
-                        else
-                            Modifier.focusRequester(
-                                focusRequester,
-                            ))
-                            .fillMaxSize()
-                            .padding(top = 5.dp),
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        TextButton(
-                            enabled = !uiState.settings.isAlwaysOnVpnEnabled,
-                            onClick = {
-                                if (
-                                    uiState.settings.isTunnelOnWifiEnabled &&
-                                    !uiState.settings.isAutoTunnelEnabled
-                                ) {
-                                    when (false) {
-                                        isBackgroundLocationGranted ->
-                                            appViewModel.showSnackbarMessage(
-                                                context.getString(R.string.background_location_required),
-                                            )
+										fineLocationState.status.isGranted ->
+											appViewModel.showSnackbarMessage(
+												context.getString(
+													R.string.precise_location_required,
+												),
+											)
 
-                                        fineLocationState.status.isGranted ->
-                                            appViewModel.showSnackbarMessage(
-                                                context.getString(R.string.precise_location_required),
-                                            )
+										viewModel.isLocationEnabled(context) ->
+											showLocationServicesAlertDialog = true
 
-                                        viewModel.isLocationEnabled(context) ->
-                                            showLocationServicesAlertDialog = true
-
-                                        else -> {
-                                            handleAutoTunnelToggle()
-                                        }
-                                    }
-                                } else {
-                                    handleAutoTunnelToggle()
-                                }
-                            },
-                        ) {
-                            val autoTunnelButtonText =
-                                if (uiState.settings.isAutoTunnelEnabled) {
-                                    stringResource(R.string.disable_auto_tunnel)
-                                } else {
-                                    stringResource(id = R.string.enable_auto_tunnel)
-                                }
-                            Text(autoTunnelButtonText)
-                        }
-                    }
-                }
-            }
-            Surface(
-                tonalElevation = 2.dp,
-                shadowElevation = 2.dp,
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier
-                    .fillMaxWidth(fillMaxWidth)
-                    .padding(vertical = 10.dp),
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top,
-                    modifier = Modifier.padding(15.dp),
-                ) {
-                    SectionTitle(
-                        title = stringResource(id = R.string.backend),
-                        padding = screenPadding,
-                    )
-                    ConfigurationToggle(
-                        stringResource(R.string.use_amnezia),
-                        enabled =
-                        !(uiState.settings.isAutoTunnelEnabled ||
-                            uiState.settings.isAlwaysOnVpnEnabled ||
-                            (uiState.vpnState.status == TunnelState.UP) || uiState.settings.isKernelEnabled),
-                        checked = uiState.settings.isAmneziaEnabled,
-                        padding = screenPadding,
-                        onCheckChanged = {
-                            viewModel.onToggleAmnezia()
-                        },
-                    )
-                    if (kernelSupport) {
-                        ConfigurationToggle(
-                            stringResource(R.string.use_kernel),
-                            enabled =
-                            !(uiState.settings.isAutoTunnelEnabled ||
-                                uiState.settings.isAlwaysOnVpnEnabled ||
-                                (uiState.vpnState.status == TunnelState.UP)),
-                            checked = uiState.settings.isKernelEnabled,
-                            padding = screenPadding,
-                            onCheckChanged = {
-                                scope.launch {
-                                    viewModel.onToggleKernelMode().onFailure {
-                                        appViewModel.showSnackbarMessage(it.getMessage(context))
-                                    }
-                                }
-                            },
-                        )
-                    }
-                }
-            }
-            Surface(
-                tonalElevation = 2.dp,
-                shadowElevation = 2.dp,
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier =
-                Modifier
-                    .fillMaxWidth(fillMaxWidth)
-                    .padding(vertical = 10.dp)
-                    .padding(bottom = 140.dp),
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Top,
-                    modifier = Modifier.padding(15.dp),
-                ) {
-                    SectionTitle(
-                        title = stringResource(id = R.string.other),
-                        padding = screenPadding,
-                    )
-                    if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                        ConfigurationToggle(
-                            stringResource(R.string.always_on_vpn_support),
-                            enabled = !uiState.settings.isAutoTunnelEnabled,
-                            checked = uiState.settings.isAlwaysOnVpnEnabled,
-                            padding = screenPadding,
-                            onCheckChanged = { viewModel.onToggleAlwaysOnVPN() },
-                        )
-                        ConfigurationToggle(
-                            stringResource(R.string.enabled_app_shortcuts),
-                            enabled = true,
-                            checked = uiState.settings.isShortcutsEnabled,
-                            padding = screenPadding,
-                            onCheckChanged = { viewModel.onToggleShortcutsEnabled() },
-                        )
-                    }
-                    ConfigurationToggle(
-                        stringResource(R.string.restart_at_boot),
-                        enabled = true,
-                        checked = uiState.settings.isRestoreOnBootEnabled,
-                        padding = screenPadding,
-                        onCheckChanged = {
-                            viewModel.onToggleRestartAtBoot()
-                        },
-                    )
-                    ConfigurationToggle(
-                        stringResource(R.string.enable_app_lock),
-                        enabled = true,
-                        checked = uiState.isPinLockEnabled,
-                        padding = screenPadding,
-                        onCheckChanged = {
-                            if (uiState.isPinLockEnabled) {
-                                viewModel.onPinLockDisabled()
-                            } else {
-                                viewModel.onPinLockEnabled()
-                                navController.navigate(Screen.Lock.route)
-                            }
-                        },
-                    )
-                    if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 5.dp),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            TextButton(
-                                enabled = !didExportFiles,
-                                onClick = { showAuthPrompt = true },
-                            ) {
-                                Text(stringResource(R.string.export_configs))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+										else -> {
+											handleAutoTunnelToggle()
+										}
+									}
+								} else {
+									handleAutoTunnelToggle()
+								}
+							},
+						) {
+							val autoTunnelButtonText =
+								if (uiState.settings.isAutoTunnelEnabled) {
+									stringResource(R.string.disable_auto_tunnel)
+								} else {
+									stringResource(id = R.string.enable_auto_tunnel)
+								}
+							Text(autoTunnelButtonText)
+						}
+					}
+				}
+			}
+			Surface(
+				tonalElevation = 2.dp,
+				shadowElevation = 2.dp,
+				shape = RoundedCornerShape(12.dp),
+				color = MaterialTheme.colorScheme.surface,
+				modifier =
+				Modifier
+					.fillMaxWidth(fillMaxWidth)
+					.padding(vertical = 10.dp),
+			) {
+				Column(
+					horizontalAlignment = Alignment.Start,
+					verticalArrangement = Arrangement.Top,
+					modifier = Modifier.padding(15.dp),
+				) {
+					SectionTitle(
+						title = stringResource(id = R.string.backend),
+						padding = screenPadding,
+					)
+					ConfigurationToggle(
+						stringResource(R.string.use_amnezia),
+						enabled =
+						!(
+							uiState.settings.isAutoTunnelEnabled ||
+								uiState.settings.isAlwaysOnVpnEnabled ||
+								(uiState.vpnState.status == TunnelState.UP) || uiState.settings.isKernelEnabled
+							),
+						checked = uiState.settings.isAmneziaEnabled,
+						padding = screenPadding,
+						onCheckChanged = {
+							viewModel.onToggleAmnezia()
+						},
+					)
+					if (kernelSupport) {
+						ConfigurationToggle(
+							stringResource(R.string.use_kernel),
+							enabled =
+							!(
+								uiState.settings.isAutoTunnelEnabled ||
+									uiState.settings.isAlwaysOnVpnEnabled ||
+									(uiState.vpnState.status == TunnelState.UP)
+								),
+							checked = uiState.settings.isKernelEnabled,
+							padding = screenPadding,
+							onCheckChanged = {
+								scope.launch {
+									viewModel.onToggleKernelMode().onFailure {
+										appViewModel.showSnackbarMessage(it.getMessage(context))
+									}
+								}
+							},
+						)
+					}
+				}
+			}
+			Surface(
+				tonalElevation = 2.dp,
+				shadowElevation = 2.dp,
+				shape = RoundedCornerShape(12.dp),
+				color = MaterialTheme.colorScheme.surface,
+				modifier =
+				Modifier
+					.fillMaxWidth(fillMaxWidth)
+					.padding(vertical = 10.dp)
+					.padding(bottom = 140.dp),
+			) {
+				Column(
+					horizontalAlignment = Alignment.Start,
+					verticalArrangement = Arrangement.Top,
+					modifier = Modifier.padding(15.dp),
+				) {
+					SectionTitle(
+						title = stringResource(id = R.string.other),
+						padding = screenPadding,
+					)
+					if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+						ConfigurationToggle(
+							stringResource(R.string.always_on_vpn_support),
+							enabled = !uiState.settings.isAutoTunnelEnabled,
+							checked = uiState.settings.isAlwaysOnVpnEnabled,
+							padding = screenPadding,
+							onCheckChanged = { viewModel.onToggleAlwaysOnVPN() },
+						)
+						ConfigurationToggle(
+							stringResource(R.string.enabled_app_shortcuts),
+							enabled = true,
+							checked = uiState.settings.isShortcutsEnabled,
+							padding = screenPadding,
+							onCheckChanged = { viewModel.onToggleShortcutsEnabled() },
+						)
+					}
+					ConfigurationToggle(
+						stringResource(R.string.restart_at_boot),
+						enabled = true,
+						checked = uiState.settings.isRestoreOnBootEnabled,
+						padding = screenPadding,
+						onCheckChanged = {
+							viewModel.onToggleRestartAtBoot()
+						},
+					)
+					ConfigurationToggle(
+						stringResource(R.string.enable_app_lock),
+						enabled = true,
+						checked = uiState.isPinLockEnabled,
+						padding = screenPadding,
+						onCheckChanged = {
+							if (uiState.isPinLockEnabled) {
+								viewModel.onPinLockDisabled()
+							} else {
+								viewModel.onPinLockEnabled()
+								navController.navigate(Screen.Lock.route)
+							}
+						},
+					)
+					if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+						Row(
+							verticalAlignment = Alignment.CenterVertically,
+							modifier =
+							Modifier
+								.fillMaxSize()
+								.padding(top = 5.dp),
+							horizontalArrangement = Arrangement.Center,
+						) {
+							TextButton(
+								enabled = !didExportFiles,
+								onClick = { showAuthPrompt = true },
+							) {
+								Text(stringResource(R.string.export_configs))
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

@@ -36,222 +36,219 @@ import javax.inject.Provider
 class SettingsViewModel
 @Inject
 constructor(
-    private val appDataRepository: AppDataRepository,
-    private val serviceManager: ServiceManager,
-    private val rootShell: Provider<RootShell>,
-    private val fileUtils: FileUtils,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    vpnService: VpnService
+	private val appDataRepository: AppDataRepository,
+	private val serviceManager: ServiceManager,
+	private val rootShell: Provider<RootShell>,
+	private val fileUtils: FileUtils,
+	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+	vpnService: VpnService,
 ) : ViewModel() {
+	private val _kernelSupport = MutableStateFlow(false)
+	val kernelSupport = _kernelSupport.asStateFlow()
 
-    private val _kernelSupport = MutableStateFlow(false)
-    val kernelSupport = _kernelSupport.asStateFlow()
+	val uiState =
+		combine(
+			appDataRepository.settings.getSettingsFlow(),
+			appDataRepository.tunnels.getTunnelConfigsFlow(),
+			vpnService.vpnState,
+			appDataRepository.appState.generalStateFlow,
+		) { settings, tunnels, tunnelState, generalState ->
+			SettingsUiState(
+				settings,
+				tunnels,
+				tunnelState,
+				generalState.isLocationDisclosureShown,
+				generalState.isBatteryOptimizationDisableShown,
+				generalState.isPinLockEnabled,
+			)
+		}
+			.stateIn(
+				viewModelScope,
+				SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+				SettingsUiState(),
+			)
 
-    val uiState =
-        combine(
-            appDataRepository.settings.getSettingsFlow(),
-            appDataRepository.tunnels.getTunnelConfigsFlow(),
-            vpnService.vpnState,
-            appDataRepository.appState.generalStateFlow,
-        ) { settings, tunnels, tunnelState, generalState ->
-            SettingsUiState(
-                settings,
-                tunnels,
-                tunnelState,
-                generalState.isLocationDisclosureShown,
-                generalState.isBatteryOptimizationDisableShown,
-                generalState.isPinLockEnabled,
-            )
-        }
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
-                SettingsUiState(),
-            )
+	fun onSaveTrustedSSID(ssid: String): Result<Unit> {
+		val trimmed = ssid.trim()
+		return if (!uiState.value.settings.trustedNetworkSSIDs.contains(trimmed)) {
+			uiState.value.settings.trustedNetworkSSIDs.add(trimmed)
+			saveSettings(uiState.value.settings)
+			Result.success(Unit)
+		} else {
+			Result.failure(WgTunnelExceptions.SsidConflict())
+		}
+	}
 
-    fun onSaveTrustedSSID(ssid: String): Result<Unit> {
-        val trimmed = ssid.trim()
-        return if (!uiState.value.settings.trustedNetworkSSIDs.contains(trimmed)) {
-            uiState.value.settings.trustedNetworkSSIDs.add(trimmed)
-            saveSettings(uiState.value.settings)
-            Result.success(Unit)
-        } else {
-            Result.failure(WgTunnelExceptions.SsidConflict())
-        }
-    }
+	fun setLocationDisclosureShown() = viewModelScope.launch {
+		appDataRepository.appState.setLocationDisclosureShown(true)
+	}
 
-    fun setLocationDisclosureShown() =
-        viewModelScope.launch {
-            appDataRepository.appState.setLocationDisclosureShown(true)
-        }
+	fun setBatteryOptimizeDisableShown() = viewModelScope.launch {
+		appDataRepository.appState.setBatteryOptimizationDisableShown(true)
+	}
 
-    fun setBatteryOptimizeDisableShown() =
-        viewModelScope.launch {
-            appDataRepository.appState.setBatteryOptimizationDisableShown(true)
-        }
+	fun onToggleTunnelOnMobileData() {
+		saveSettings(
+			uiState.value.settings.copy(
+				isTunnelOnMobileDataEnabled = !uiState.value.settings.isTunnelOnMobileDataEnabled,
+			),
+		)
+	}
 
-    fun onToggleTunnelOnMobileData() {
-        saveSettings(
-            uiState.value.settings.copy(
-                isTunnelOnMobileDataEnabled = !uiState.value.settings.isTunnelOnMobileDataEnabled,
-            ),
-        )
-    }
+	fun onDeleteTrustedSSID(ssid: String) {
+		saveSettings(
+			uiState.value.settings.copy(
+				trustedNetworkSSIDs =
+				(uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList(),
+			),
+		)
+	}
 
-    fun onDeleteTrustedSSID(ssid: String) {
-        saveSettings(
-            uiState.value.settings.copy(
-                trustedNetworkSSIDs =
-                (uiState.value.settings.trustedNetworkSSIDs - ssid).toMutableList(),
-            ),
-        )
-    }
+	suspend fun onExportTunnels(files: List<File>): Result<Unit> {
+		return fileUtils.saveFilesToZip(files)
+	}
 
-    suspend fun onExportTunnels(files: List<File>): Result<Unit> {
-        return fileUtils.saveFilesToZip(files)
-    }
+	fun onToggleAutoTunnel(context: Context) = viewModelScope.launch {
+		val isAutoTunnelEnabled = uiState.value.settings.isAutoTunnelEnabled
+		var isAutoTunnelPaused = uiState.value.settings.isAutoTunnelPaused
 
-    fun onToggleAutoTunnel(context: Context) =
-        viewModelScope.launch {
-            val isAutoTunnelEnabled = uiState.value.settings.isAutoTunnelEnabled
-            var isAutoTunnelPaused = uiState.value.settings.isAutoTunnelPaused
+		if (isAutoTunnelEnabled) {
+			serviceManager.stopWatcherService(context)
+		} else {
+			serviceManager.startWatcherService(context)
+			isAutoTunnelPaused = false
+		}
+		saveSettings(
+			uiState.value.settings.copy(
+				isAutoTunnelEnabled = !isAutoTunnelEnabled,
+				isAutoTunnelPaused = isAutoTunnelPaused,
+			),
+		)
+		WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate()
+	}
 
-            if (isAutoTunnelEnabled) {
-                serviceManager.stopWatcherService(context)
-            } else {
-                serviceManager.startWatcherService(context)
-                isAutoTunnelPaused = false
-            }
-            saveSettings(
-                uiState.value.settings.copy(
-                    isAutoTunnelEnabled = !isAutoTunnelEnabled,
-                    isAutoTunnelPaused = isAutoTunnelPaused,
-                ),
-            )
-            WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate()
-        }
+	fun onToggleAlwaysOnVPN() = viewModelScope.launch {
+		saveSettings(
+			uiState.value.settings.copy(
+				isAlwaysOnVpnEnabled = !uiState.value.settings.isAlwaysOnVpnEnabled,
+			),
+		)
+	}
 
-    fun onToggleAlwaysOnVPN() =
-        viewModelScope.launch {
-            saveSettings(
-                uiState.value.settings.copy(
-                    isAlwaysOnVpnEnabled = !uiState.value.settings.isAlwaysOnVpnEnabled,
-                ),
-            )
-        }
+	private fun saveSettings(settings: Settings) = viewModelScope.launch { appDataRepository.settings.save(settings) }
 
-    private fun saveSettings(settings: Settings) =
-        viewModelScope.launch { appDataRepository.settings.save(settings) }
+	fun onToggleTunnelOnEthernet() {
+		saveSettings(
+			uiState.value.settings.copy(
+				isTunnelOnEthernetEnabled = !uiState.value.settings.isTunnelOnEthernetEnabled,
+			),
+		)
+	}
 
-    fun onToggleTunnelOnEthernet() {
-        saveSettings(
-            uiState.value.settings.copy(
-                isTunnelOnEthernetEnabled = !uiState.value.settings.isTunnelOnEthernetEnabled,
-            ),
-        )
-    }
+	fun isLocationEnabled(context: Context): Boolean {
+		val locationManager =
+			context.getSystemService(
+				Context.LOCATION_SERVICE,
+			) as LocationManager
+		return LocationManagerCompat.isLocationEnabled(locationManager)
+	}
 
-    fun isLocationEnabled(context: Context): Boolean {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return LocationManagerCompat.isLocationEnabled(locationManager)
-    }
+	fun onToggleShortcutsEnabled() {
+		saveSettings(
+			uiState.value.settings.copy(
+				isShortcutsEnabled = !uiState.value.settings.isShortcutsEnabled,
+			),
+		)
+	}
 
-    fun onToggleShortcutsEnabled() {
-        saveSettings(
-            uiState.value.settings.copy(
-                isShortcutsEnabled = !uiState.value.settings.isShortcutsEnabled,
-            ),
-        )
-    }
+	private fun saveKernelMode(on: Boolean) {
+		saveSettings(
+			uiState.value.settings.copy(
+				isKernelEnabled = on,
+			),
+		)
+	}
 
-    private fun saveKernelMode(on: Boolean) {
-        saveSettings(
-            uiState.value.settings.copy(
-                isKernelEnabled = on,
-            ),
-        )
-    }
+	fun onToggleTunnelOnWifi() {
+		saveSettings(
+			uiState.value.settings.copy(
+				isTunnelOnWifiEnabled = !uiState.value.settings.isTunnelOnWifiEnabled,
+			),
+		)
+	}
 
-    fun onToggleTunnelOnWifi() {
-        saveSettings(
-            uiState.value.settings.copy(
-                isTunnelOnWifiEnabled = !uiState.value.settings.isTunnelOnWifiEnabled,
-            ),
-        )
-    }
+	fun onToggleAmnezia() = viewModelScope.launch {
+		if (uiState.value.settings.isKernelEnabled) {
+			saveKernelMode(false)
+		}
+		saveAmneziaMode(!uiState.value.settings.isAmneziaEnabled)
+	}
 
-    fun onToggleAmnezia() = viewModelScope.launch {
-        if (uiState.value.settings.isKernelEnabled) {
-            saveKernelMode(false)
-        }
-        saveAmneziaMode(!uiState.value.settings.isAmneziaEnabled)
-    }
+	private fun saveAmneziaMode(on: Boolean) {
+		saveSettings(
+			uiState.value.settings.copy(
+				isAmneziaEnabled = on,
+			),
+		)
+	}
 
-    private fun saveAmneziaMode(on: Boolean) {
-        saveSettings(
-            uiState.value.settings.copy(
-                isAmneziaEnabled = on,
-            ),
-        )
-    }
+	suspend fun onToggleKernelMode(): Result<Unit> {
+		return withContext(ioDispatcher) {
+			if (!uiState.value.settings.isKernelEnabled) {
+				try {
+					rootShell.get().start()
+					Timber.i("Root shell accepted!")
+					saveSettings(
+						uiState.value.settings.copy(
+							isKernelEnabled = true,
+							isAmneziaEnabled = false,
+						),
+					)
+				} catch (e: RootShell.RootShellException) {
+					Timber.e(e)
+					saveKernelMode(on = false)
+					return@withContext Result.failure(WgTunnelExceptions.RootDenied())
+				}
+			} else {
+				saveKernelMode(on = false)
+			}
+			Result.success(Unit)
+		}
+	}
 
-    suspend fun onToggleKernelMode(): Result<Unit> {
-        return withContext(ioDispatcher) {
-            if (!uiState.value.settings.isKernelEnabled) {
-                try {
-                    rootShell.get().start()
-                    Timber.i("Root shell accepted!")
-                    saveSettings(
-                        uiState.value.settings.copy(
-                            isKernelEnabled = true,
-                            isAmneziaEnabled = false,
-                        ),
-                    )
+	fun onToggleRestartOnPing() = viewModelScope.launch {
+		saveSettings(
+			uiState.value.settings.copy(
+				isPingEnabled = !uiState.value.settings.isPingEnabled,
+			),
+		)
+	}
 
-                } catch (e: RootShell.RootShellException) {
-                    Timber.e(e)
-                    saveKernelMode(on = false)
-                    return@withContext Result.failure(WgTunnelExceptions.RootDenied())
-                }
-            } else {
-                saveKernelMode(on = false)
-            }
-            Result.success(Unit)
-        }
-    }
+	fun checkKernelSupport() = viewModelScope.launch {
+		val kernelSupport =
+			withContext(ioDispatcher) {
+				WgQuickBackend.hasKernelSupport()
+			}
+		_kernelSupport.update {
+			kernelSupport
+		}
+	}
 
-    fun onToggleRestartOnPing() = viewModelScope.launch {
-        saveSettings(
-            uiState.value.settings.copy(
-                isPingEnabled = !uiState.value.settings.isPingEnabled,
-            ),
-        )
-    }
+	fun onPinLockDisabled() = viewModelScope.launch {
+		PinManager.clearPin()
+		appDataRepository.appState.setPinLockEnabled(false)
+	}
 
-    fun checkKernelSupport() = viewModelScope.launch {
-        val kernelSupport = withContext(ioDispatcher) {
-            WgQuickBackend.hasKernelSupport()
-        }
-        _kernelSupport.update {
-            kernelSupport
-        }
-    }
+	fun onPinLockEnabled() = viewModelScope.launch {
+		PinManager.initialize(WireGuardAutoTunnel.instance)
+		appDataRepository.appState.setPinLockEnabled(true)
+	}
 
-    fun onPinLockDisabled() = viewModelScope.launch {
-        PinManager.clearPin()
-        appDataRepository.appState.setPinLockEnabled(false)
-    }
-
-    fun onPinLockEnabled() = viewModelScope.launch {
-        PinManager.initialize(WireGuardAutoTunnel.instance)
-        appDataRepository.appState.setPinLockEnabled(true)
-    }
-
-    fun onToggleRestartAtBoot() = viewModelScope.launch {
-        saveSettings(
-            uiState.value.settings.copy(
-                isRestoreOnBootEnabled = !uiState.value.settings.isRestoreOnBootEnabled,
-            ),
-        )
-    }
+	fun onToggleRestartAtBoot() = viewModelScope.launch {
+		saveSettings(
+			uiState.value.settings.copy(
+				isRestoreOnBootEnabled = !uiState.value.settings.isRestoreOnBootEnabled,
+			),
+		)
+	}
 }

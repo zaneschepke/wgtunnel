@@ -29,173 +29,170 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class WireGuardTunnelService : ForegroundService() {
-    private val foregroundId = 123
+	private val foregroundId = 123
 
-    @Inject
-    lateinit var vpnService: VpnService
+	@Inject
+	lateinit var vpnService: VpnService
 
-    @Inject
-    lateinit var appDataRepository: AppDataRepository
+	@Inject
+	lateinit var appDataRepository: AppDataRepository
 
-    @Inject
-    lateinit var notificationService: NotificationService
+	@Inject
+	lateinit var notificationService: NotificationService
 
-    @Inject
-    @MainImmediateDispatcher
-    lateinit var mainImmediateDispatcher: CoroutineDispatcher
+	@Inject
+	@MainImmediateDispatcher
+	lateinit var mainImmediateDispatcher: CoroutineDispatcher
 
-    @Inject
-    @IoDispatcher
-    lateinit var ioDispatcher: CoroutineDispatcher
+	@Inject
+	@IoDispatcher
+	lateinit var ioDispatcher: CoroutineDispatcher
 
-    private var job: Job? = null
+	private var job: Job? = null
 
-    private var didShowConnected = false
+	private var didShowConnected = false
 
-    override fun onCreate() {
-        super.onCreate()
-        lifecycleScope.launch(mainImmediateDispatcher) {
-            //TODO fix this to not launch if AOVPN
-            if (appDataRepository.tunnels.count() != 0) {
-                launchVpnNotification()
-            }
-        }
-    }
+	override fun onCreate() {
+		super.onCreate()
+		lifecycleScope.launch(mainImmediateDispatcher) {
+			// TODO fix this to not launch if AOVPN
+			if (appDataRepository.tunnels.count() != 0) {
+				launchVpnNotification()
+			}
+		}
+	}
 
-    override fun startService(extras: Bundle?) {
-        super.startService(extras)
-        cancelJob()
-        job =
-            lifecycleScope.launch {
-                launch {
-                    val tunnelId = extras?.getInt(Constants.TUNNEL_EXTRA_KEY)
-                    if (vpnService.getState() == TunnelState.UP) {
-                        vpnService.stopTunnel()
-                    }
-                    vpnService.startTunnel(
-                        tunnelId?.let {
-                            appDataRepository.tunnels.getById(it)
-                        },
-                    )
-                }
-                launch {
-                    handshakeNotifications()
-                }
-            }
-    }
+	override fun startService(extras: Bundle?) {
+		super.startService(extras)
+		cancelJob()
+		job =
+			lifecycleScope.launch {
+				launch {
+					val tunnelId = extras?.getInt(Constants.TUNNEL_EXTRA_KEY)
+					if (vpnService.getState() == TunnelState.UP) {
+						vpnService.stopTunnel()
+					}
+					vpnService.startTunnel(
+						tunnelId?.let {
+							appDataRepository.tunnels.getById(it)
+						},
+					)
+				}
+				launch {
+					handshakeNotifications()
+				}
+			}
+	}
 
-    //TODO improve tunnel notifications
-    private suspend fun handshakeNotifications() {
-        withContext(ioDispatcher) {
-            var tunnelName: String? = null
-            vpnService.vpnState.collect { state ->
-                state.statistics
-                    ?.mapPeerStats()
-                    ?.map { it.value?.handshakeStatus() }
-                    .let { statuses ->
-                        when {
-                            statuses?.all { it == HandshakeStatus.HEALTHY } == true -> {
-                                if (!didShowConnected) {
-                                    delay(Constants.VPN_CONNECTED_NOTIFICATION_DELAY)
-                                    tunnelName = state.tunnelConfig?.name
-                                    launchVpnNotification(
-                                        getString(R.string.tunnel_start_title),
-                                        "${getString(R.string.tunnel_start_text)} - $tunnelName",
-                                    )
-                                    didShowConnected = true
-                                }
-                            }
+	// TODO improve tunnel notifications
+	private suspend fun handshakeNotifications() {
+		withContext(ioDispatcher) {
+			var tunnelName: String? = null
+			vpnService.vpnState.collect { state ->
+				state.statistics
+					?.mapPeerStats()
+					?.map { it.value?.handshakeStatus() }
+					.let { statuses ->
+						when {
+							statuses?.all { it == HandshakeStatus.HEALTHY } == true -> {
+								if (!didShowConnected) {
+									delay(Constants.VPN_CONNECTED_NOTIFICATION_DELAY)
+									tunnelName = state.tunnelConfig?.name
+									launchVpnNotification(
+										getString(R.string.tunnel_start_title),
+										"${getString(R.string.tunnel_start_text)} - $tunnelName",
+									)
+									didShowConnected = true
+								}
+							}
 
-                            statuses?.any { it == HandshakeStatus.STALE } == true -> {}
-                            statuses?.all { it == HandshakeStatus.NOT_STARTED } ==
-                                true -> {
-                            }
+							statuses?.any { it == HandshakeStatus.STALE } == true -> {}
+							statuses?.all { it == HandshakeStatus.NOT_STARTED } ==
+								true -> {
+							}
 
-                            else -> {}
-                        }
-                    }
-                if (state.status == TunnelState.UP && state.tunnelConfig?.name != tunnelName) {
-                    tunnelName = state.tunnelConfig?.name
-                    launchVpnNotification(
-                        getString(R.string.tunnel_start_title),
-                        "${getString(R.string.tunnel_start_text)} - $tunnelName",
-                    )
-                }
-            }
-        }
-    }
+							else -> {}
+						}
+					}
+				if (state.status == TunnelState.UP && state.tunnelConfig?.name != tunnelName) {
+					tunnelName = state.tunnelConfig?.name
+					launchVpnNotification(
+						getString(R.string.tunnel_start_title),
+						"${getString(R.string.tunnel_start_text)} - $tunnelName",
+					)
+				}
+			}
+		}
+	}
 
-    private fun launchAlwaysOnDisabledNotification() {
-        launchVpnNotification(
-            title = this.getString(R.string.vpn_connection_failed),
-            description = this.getString(R.string.always_on_disabled),
-        )
-    }
+	private fun launchAlwaysOnDisabledNotification() {
+		launchVpnNotification(
+			title = this.getString(R.string.vpn_connection_failed),
+			description = this.getString(R.string.always_on_disabled),
+		)
+	}
 
-    override fun stopService() {
-        super.stopService()
-        lifecycleScope.launch {
-            vpnService.stopTunnel()
-            didShowConnected = false
-        }
-        cancelJob()
-        stopSelf()
-    }
+	override fun stopService() {
+		super.stopService()
+		lifecycleScope.launch {
+			vpnService.stopTunnel()
+			didShowConnected = false
+		}
+		cancelJob()
+		stopSelf()
+	}
 
-    private fun launchVpnNotification(
-        title: String = getString(R.string.vpn_starting),
-        description: String = getString(R.string.attempt_connection)
-    ) {
-        val notification =
-            notificationService.createNotification(
-                channelId = getString(R.string.vpn_channel_id),
-                channelName = getString(R.string.vpn_channel_name),
-                title = title,
-                onGoing = false,
-                vibration = false,
-                showTimestamp = true,
-                description = description,
-            )
-        ServiceCompat.startForeground(
-            this,
-            foregroundId,
-            notification,
-            Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
-        )
-    }
+	private fun launchVpnNotification(title: String = getString(R.string.vpn_starting), description: String = getString(R.string.attempt_connection)) {
+		val notification =
+			notificationService.createNotification(
+				channelId = getString(R.string.vpn_channel_id),
+				channelName = getString(R.string.vpn_channel_name),
+				title = title,
+				onGoing = false,
+				vibration = false,
+				showTimestamp = true,
+				description = description,
+			)
+		ServiceCompat.startForeground(
+			this,
+			foregroundId,
+			notification,
+			Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
+		)
+	}
 
-    private fun launchVpnConnectionFailedNotification(message: String) {
-        val notification =
-            notificationService.createNotification(
-                channelId = getString(R.string.vpn_channel_id),
-                channelName = getString(R.string.vpn_channel_name),
-                action =
-                PendingIntent.getBroadcast(
-                    this,
-                    0,
-                    Intent(this, NotificationActionReceiver::class.java),
-                    PendingIntent.FLAG_IMMUTABLE,
-                ),
-                actionText = getString(R.string.restart),
-                title = getString(R.string.vpn_connection_failed),
-                onGoing = false,
-                vibration = true,
-                showTimestamp = true,
-                description = message,
-            )
-        ServiceCompat.startForeground(
-            this,
-            foregroundId,
-            notification,
-            Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
-        )
-    }
+	private fun launchVpnConnectionFailedNotification(message: String) {
+		val notification =
+			notificationService.createNotification(
+				channelId = getString(R.string.vpn_channel_id),
+				channelName = getString(R.string.vpn_channel_name),
+				action =
+				PendingIntent.getBroadcast(
+					this,
+					0,
+					Intent(this, NotificationActionReceiver::class.java),
+					PendingIntent.FLAG_IMMUTABLE,
+				),
+				actionText = getString(R.string.restart),
+				title = getString(R.string.vpn_connection_failed),
+				onGoing = false,
+				vibration = true,
+				showTimestamp = true,
+				description = message,
+			)
+		ServiceCompat.startForeground(
+			this,
+			foregroundId,
+			notification,
+			Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
+		)
+	}
 
-    private fun cancelJob() {
-        try {
-            job?.cancel()
-        } catch (e: CancellationException) {
-            Timber.i("Tunnel job cancelled")
-        }
-    }
+	private fun cancelJob() {
+		try {
+			job?.cancel()
+		} catch (e: CancellationException) {
+			Timber.i("Tunnel job cancelled")
+		}
+	}
 }

@@ -20,36 +20,37 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LogsViewModel
-@Inject constructor(
-    private val localLogCollector: LocalLogCollector,
-    private val fileUtils: FileUtils,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    @MainDispatcher private val mainDispatcher: CoroutineDispatcher
+@Inject
+constructor(
+	private val localLogCollector: LocalLogCollector,
+	private val fileUtils: FileUtils,
+	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+	@MainDispatcher private val mainDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
+	val logs = mutableStateListOf<LogMessage>()
 
-    val logs = mutableStateListOf<LogMessage>()
+	init {
+		viewModelScope.launch(ioDispatcher) {
+			localLogCollector.bufferedLogs.chunked(500, Duration.ofSeconds(1)).collect {
+				withContext(mainDispatcher) {
+					logs.addAll(it)
+				}
+				if (logs.size > Constants.LOG_BUFFER_SIZE) {
+					withContext(mainDispatcher) {
+						logs.removeRange(0, (logs.size - Constants.LOG_BUFFER_SIZE).toInt())
+					}
+				}
+			}
+		}
+	}
 
-    init {
-        viewModelScope.launch(ioDispatcher) {
-            localLogCollector.bufferedLogs.chunked(500, Duration.ofSeconds(1)).collect {
-                withContext(mainDispatcher) {
-                    logs.addAll(it)
-                }
-                if (logs.size > Constants.LOG_BUFFER_SIZE) {
-                    withContext(mainDispatcher) {
-                        logs.removeRange(0, (logs.size - Constants.LOG_BUFFER_SIZE).toInt())
-                    }
-                }
-            }
-        }
-    }
-
-    suspend fun saveLogsToFile(): Result<Unit> {
-        val file = localLogCollector.getLogFile().getOrElse {
-            return Result.failure(it)
-        }
-        val fileContent = fileUtils.readBytesFromFile(file)
-        val fileName = "${Constants.BASE_LOG_FILE_NAME}-${Instant.now().epochSecond}.txt"
-        return fileUtils.saveByteArrayToDownloads(fileContent, fileName)
-    }
+	suspend fun saveLogsToFile(): Result<Unit> {
+		val file =
+			localLogCollector.getLogFile().getOrElse {
+				return Result.failure(it)
+			}
+		val fileContent = fileUtils.readBytesFromFile(file)
+		val fileName = "${Constants.BASE_LOG_FILE_NAME}-${Instant.now().epochSecond}.txt"
+		return fileUtils.saveByteArrayToDownloads(fileContent, fileName)
+	}
 }

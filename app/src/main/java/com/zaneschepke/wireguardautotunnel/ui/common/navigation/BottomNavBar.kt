@@ -18,39 +18,42 @@ import com.zaneschepke.wireguardautotunnel.ui.Screen
 
 @Composable
 fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavItem>) {
-    val backStackEntry = navController.currentBackStackEntryAsState()
+	val backStackEntry = navController.currentBackStackEntryAsState()
 
-    var showBottomBar by rememberSaveable { mutableStateOf(true) }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
+	var showBottomBar by rememberSaveable { mutableStateOf(true) }
+	val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    //TODO find a better way to hide nav bar
-    showBottomBar = when (navBackStackEntry?.destination?.route) {
-        Screen.Lock.route -> false
-        else -> true
-    }
+	// TODO find a better way to hide nav bar
+	showBottomBar =
+		when (navBackStackEntry?.destination?.route) {
+			Screen.Lock.route -> false
+			else -> true
+		}
 
-    NavigationBar(
-        containerColor = if (!showBottomBar) Color.Transparent else MaterialTheme.colorScheme.background,
-    ) {
-        if (showBottomBar) bottomNavItems.forEach { item ->
-            val selected = item.route == backStackEntry.value?.destination?.route
+	NavigationBar(
+		containerColor = if (!showBottomBar) Color.Transparent else MaterialTheme.colorScheme.background,
+	) {
+		if (showBottomBar) {
+			bottomNavItems.forEach { item ->
+				val selected = item.route == backStackEntry.value?.destination?.route
 
-            NavigationBarItem(
-                selected = selected,
-                onClick = { navController.navigate(item.route) },
-                label = {
-                    Text(
-                        text = item.name,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                },
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = "${item.name} Icon",
-                    )
-                },
-            )
-        }
-    }
+				NavigationBarItem(
+					selected = selected,
+					onClick = { navController.navigate(item.route) },
+					label = {
+						Text(
+							text = item.name,
+							fontWeight = FontWeight.SemiBold,
+						)
+					},
+					icon = {
+						Icon(
+							imageVector = item.icon,
+							contentDescription = "${item.name} Icon",
+						)
+					},
+				)
+			}
+		}
+	}
 }

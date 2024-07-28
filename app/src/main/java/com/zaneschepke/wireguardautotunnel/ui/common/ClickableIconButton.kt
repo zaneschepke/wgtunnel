@@ -12,31 +12,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
-fun ClickableIconButton(
-    onClick: () -> Unit,
-    onIconClick: () -> Unit,
-    text: String,
-    icon: ImageVector,
-    enabled: Boolean
-) {
-    TextButton(
-        onClick = onClick,
-        enabled = enabled,
-    ) {
-        Text(text, Modifier.weight(1f, false))
-        Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-        Icon(
-            imageVector = icon,
-            contentDescription = icon.name,
-            modifier =
-            Modifier
-                .size(ButtonDefaults.IconSize)
-                .weight(1f, false)
-                .clickable {
-                    if (enabled) {
-                        onIconClick()
-                    }
-                },
-        )
-    }
+fun ClickableIconButton(onClick: () -> Unit, onIconClick: () -> Unit, text: String, icon: ImageVector, enabled: Boolean) {
+	TextButton(
+		onClick = onClick,
+		enabled = enabled,
+	) {
+		Text(text, Modifier.weight(1f, false))
+		Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+		Icon(
+			imageVector = icon,
+			contentDescription = icon.name,
+			modifier =
+			Modifier
+				.size(ButtonDefaults.IconSize)
+				.weight(1f, false)
+				.clickable {
+					if (enabled) {
+						onIconClick()
+					}
+				},
+		)
+	}
 }
