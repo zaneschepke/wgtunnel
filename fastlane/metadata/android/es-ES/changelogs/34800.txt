@@ -1,0 +1,5 @@
+Novedades:
+- Correcciones para el control del túnel de la interfaz de usuario de AndroidTV
+- Corrige el error de bloqueo de retrato.
+- Corrige el error de omisión del bloqueo del PIN
+- Corrige el error de mosaico de túnel automático

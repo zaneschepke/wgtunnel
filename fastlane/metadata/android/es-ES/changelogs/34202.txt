@@ -1,0 +1,3 @@
+Novedades:
+- Agregue Amnezia junto con WireGuard
+- Se corrigió el error de los accesos directos de la aplicación
