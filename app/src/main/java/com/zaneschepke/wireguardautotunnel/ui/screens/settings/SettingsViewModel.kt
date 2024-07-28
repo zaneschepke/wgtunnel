@@ -250,8 +250,8 @@ constructor(
     fun onToggleRestartAtBoot() = viewModelScope.launch {
         saveSettings(
             uiState.value.settings.copy(
-                isRestoreOnBootEnabled = !uiState.value.settings.isRestoreOnBootEnabled
-            )
+                isRestoreOnBootEnabled = !uiState.value.settings.isRestoreOnBootEnabled,
+            ),
         )
     }
 }

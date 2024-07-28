@@ -38,7 +38,8 @@ fun RowListItem(
 ) {
     Box(
         modifier =
-        Modifier.focusRequester(focusRequester)
+        Modifier
+            .focusRequester(focusRequester)
             .animateContentSize()
             .clip(RoundedCornerShape(30.dp))
             .combinedClickable(

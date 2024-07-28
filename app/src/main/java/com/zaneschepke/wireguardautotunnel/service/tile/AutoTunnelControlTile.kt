@@ -10,11 +10,8 @@ import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.module.ServiceScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -47,6 +44,7 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
                         setTileDescription(this@AutoTunnelControlTile.getString(R.string.active))
                     }
                 }
+
                 false -> {
                     setTileDescription(this@AutoTunnelControlTile.getString(R.string.disabled))
                     setUnavailable()

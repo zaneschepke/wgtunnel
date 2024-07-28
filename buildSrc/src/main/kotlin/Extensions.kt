@@ -40,7 +40,7 @@ fun Project.isGeneralFlavor(gradle: Gradle): Boolean {
 }
 
 
-fun Project.getSigningProperties() : Properties {
+fun Project.getSigningProperties(): Properties {
     return Properties().apply {
         // created local file for signing details
         try {
@@ -51,7 +51,7 @@ fun Project.getSigningProperties() : Properties {
     }
 }
 
-fun Project.getStoreFile() : File {
+fun Project.getStoreFile(): File {
     return file(
         System.getenv()
             .getOrDefault(
@@ -61,7 +61,7 @@ fun Project.getStoreFile() : File {
     )
 }
 
-fun Project.getSigningProperty(property: String) : String {
+fun Project.getSigningProperty(property: String): String {
     // try to get secrets from env first for pipeline build, then properties file for local
     return System.getenv()
         .getOrDefault(

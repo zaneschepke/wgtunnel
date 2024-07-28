@@ -1,6 +1,3 @@
-import com.android.builder.model.v2.dsl.SigningConfig
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -188,10 +185,10 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 }
 
-fun nightlyVersionCode() : Int {
+fun nightlyVersionCode(): Int {
     return Constants.VERSION_CODE + Constants.NIGHTLY_CODE
 }
 
-fun nightlyVersionName() : String {
+fun nightlyVersionName(): String {
     return Constants.VERSION_NAME + "-${grgitService.service.get().grgit.head().abbreviatedId}"
 }

@@ -9,7 +9,6 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.core.app.NotificationCompat
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.MainActivity
 import com.zaneschepke.wireguardautotunnel.ui.SplashActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

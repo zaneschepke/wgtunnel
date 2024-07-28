@@ -539,7 +539,7 @@ fun MainScreen(
                         onHold = {},
                         expanded = false,
                         statistics = null,
-                        focusRequester = focusRequester
+                        focusRequester = focusRequester,
                     )
                 }
             }

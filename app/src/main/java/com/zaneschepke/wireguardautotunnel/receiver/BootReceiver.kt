@@ -30,7 +30,7 @@ class BootReceiver : BroadcastReceiver() {
         context?.run {
             applicationScope.launch {
                 val settings = appDataRepository.settings.getSettings()
-                if(settings.isRestoreOnBootEnabled) {
+                if (settings.isRestoreOnBootEnabled) {
                     if (settings.isAutoTunnelEnabled) {
                         Timber.i("Starting watcher service from boot")
                         serviceManager.startWatcherServiceForeground(context)

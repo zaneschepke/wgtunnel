@@ -29,7 +29,7 @@ composeBom = "2024.06.00"
 compose = "1.6.8"
 zxingAndroidEmbedded = "4.3.0"
 coreSplashscreen = "1.0.1"
-gradlePlugins-grgit="5.2.2"
+gradlePlugins-grgit = "5.2.2"
 
 #plugins
 material = "1.12.0"
