@@ -44,7 +44,9 @@ jobs:
       KEY_STORE_FILE: 'android_keystore.jks'
       KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
       GH_USER: ${{ secrets.GH_USER }}
+      # GH needed for gh cli
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_REPO: ${{ github.repository }}
 
     steps:
       - uses: actions/checkout@v4
