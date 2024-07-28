@@ -1,3 +1,6 @@
+import com.android.builder.model.v2.dsl.SigningConfig
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,7 +14,6 @@ plugins {
 android {
     namespace = Constants.APP_ID
     compileSdk = Constants.TARGET_SDK
-    compileSdkPreview = "VanillaIceCream"
 
     androidResources {
         generateLocaleConfig = true
@@ -49,16 +51,6 @@ android {
             listOf("libwg-go.so", "libwg-quick.so", "libwg.so"),
         )
 
-        applicationVariants.all {
-            val variant = this
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-                .forEach { output ->
-                    val outputFileName =
-                        "${Constants.APP_NAME}-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
-                    output.outputFileName = outputFileName
-                }
-        }
         release {
             isDebuggable = false
             isMinifyEnabled = true
@@ -72,9 +64,20 @@ android {
         debug { isDebuggable = true }
 
         create(Constants.NIGHTLY) {
-            initWith(getByName("release"))
+            initWith(buildTypes.getByName(Constants.RELEASE))
             defaultConfig.versionName = nightlyVersionName()
             defaultConfig.versionCode = nightlyVersionCode()
+        }
+
+        applicationVariants.all {
+            val variant = this
+            variant.outputs
+                .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+                .forEach { output ->
+                    val outputFileName =
+                        "${Constants.APP_NAME}-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
+                    output.outputFileName = outputFileName
+                }
         }
     }
     flavorDimensions.add(Constants.TYPE)

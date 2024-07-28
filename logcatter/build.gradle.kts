@@ -5,10 +5,10 @@ plugins {
 
 android {
     namespace = "com.zaneschepke.logcatter"
-    compileSdk = 34
+    compileSdk = Constants.TARGET_SDK
 
     defaultConfig {
-        minSdk = 26
+        minSdk = Constants.MIN_SDK
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
