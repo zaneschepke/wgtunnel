@@ -44,7 +44,9 @@ jobs:
       KEY_STORE_FILE: 'android_keystore.jks'
       KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
       GH_USER: ${{ secrets.GH_USER }}
+      # GH needed for gh cli
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_REPO: ${{ github.repository }}
 
     steps:
       - uses: actions/checkout@v4
@@ -141,13 +143,13 @@ jobs:
       - if: github.event_name == 'workflow_dispatch'
         run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
       - if: github.event_name == 'schedule'
-        run: echo "TAG_NAME=nightly-android" >> $GITHUB_ENV
+        run: echo "TAG_NAME=nightly" >> $GITHUB_ENV
 
       - name: On nightly release
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
           echo "RELEASE_NOTES=Nightly build of the latest development version of the android client." >> $GITHUB_ENV
-          gh release delete nightly-android --yes || true
+          gh release delete nightly --yes || true
 
       - name: Get checksum
         id: checksum

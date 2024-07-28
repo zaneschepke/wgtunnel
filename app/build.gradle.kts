@@ -1,3 +1,6 @@
+import com.android.builder.model.v2.dsl.SigningConfig
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,7 +14,6 @@ plugins {
 android {
     namespace = Constants.APP_ID
     compileSdk = Constants.TARGET_SDK
-    compileSdkPreview = "VanillaIceCream"
 
     androidResources {
         generateLocaleConfig = true
@@ -21,8 +23,8 @@ android {
         applicationId = Constants.APP_ID
         minSdk = Constants.MIN_SDK
         targetSdk = Constants.TARGET_SDK
-        versionCode = versionCode()
-        versionName = versionName()
+        versionCode = Constants.VERSION_CODE
+        versionName = Constants.VERSION_NAME
 
         ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
@@ -49,6 +51,24 @@ android {
             listOf("libwg-go.so", "libwg-quick.so", "libwg.so"),
         )
 
+        release {
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            signingConfig = signingConfigs.getByName(Constants.RELEASE)
+        }
+        debug { isDebuggable = true }
+
+        create(Constants.NIGHTLY) {
+            initWith(buildTypes.getByName(Constants.RELEASE))
+            defaultConfig.versionName = nightlyVersionName()
+            defaultConfig.versionCode = nightlyVersionCode()
+        }
+
         applicationVariants.all {
             val variant = this
             variant.outputs
@@ -58,21 +78,6 @@ android {
                         "${Constants.APP_NAME}-${variant.flavorName}-${variant.buildType.name}-${variant.versionName}.apk"
                     output.outputFileName = outputFileName
                 }
-        }
-        release {
-            isDebuggable = false
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-            signingConfig = signingConfigs.getByName(signingConfigName())
-        }
-        debug { isDebuggable = true }
-
-        create("nightly") {
-            initWith(getByName("release"))
         }
     }
     flavorDimensions.add(Constants.TYPE)
@@ -183,10 +188,10 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 }
 
-fun versionCode() : Int {
-    return if(!isNightlyBuild()) Constants.VERSION_CODE else Constants.VERSION_CODE + Constants.NIGHTLY_CODE
+fun nightlyVersionCode() : Int {
+    return Constants.VERSION_CODE + Constants.NIGHTLY_CODE
 }
 
-fun versionName() : String {
-    return if(!isNightlyBuild()) Constants.VERSION_NAME else Constants.VERSION_NAME + "-${grgitService.service.get().grgit.head().abbreviatedId}"
+fun nightlyVersionName() : String {
+    return Constants.VERSION_NAME + "-${grgitService.service.get().grgit.head().abbreviatedId}"
 }

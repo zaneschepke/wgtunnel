@@ -111,7 +111,7 @@ constructor(
     }
 
     fun getPackageLabel(packageInfo: PackageInfo): String {
-        return packageInfo.applicationInfo.loadLabel(packageManager).toString()
+        return packageInfo.applicationInfo?.loadLabel(packageManager).toString()
     }
 
     private fun getAllInternetCapablePackages(): List<PackageInfo> {

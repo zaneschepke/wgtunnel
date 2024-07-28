@@ -39,16 +39,6 @@ fun Project.isGeneralFlavor(gradle: Gradle): Boolean {
     return getCurrentFlavor(gradle) == "general"
 }
 
-fun Project.isReleaseBuild(): Boolean {
-    return (gradle.startParameter.taskNames.size > 0 &&
-        gradle.startParameter.taskNames[0].contains(
-            "Release",
-        ))
-}
-
-fun Project.isNightlyBuild(): Boolean {
-    return gradle.startParameter.taskNames.contains("assembleFdroidNightly")
-}
 
 fun Project.getSigningProperties() : Properties {
     return Properties().apply {
@@ -78,10 +68,6 @@ fun Project.getSigningProperty(property: String) : String {
             property,
             getSigningProperties().getProperty(property),
         )
-}
-
-fun Project.signingConfigName() : String {
-    return if(getSigningProperty(Constants.KEY_PASS_VAR) == "") Constants.DEBUG else Constants.RELEASE
 }
 
 
