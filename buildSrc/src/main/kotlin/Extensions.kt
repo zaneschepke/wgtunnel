@@ -47,7 +47,7 @@ fun Project.isReleaseBuild(): Boolean {
 }
 
 fun Project.isNightlyBuild(): Boolean {
-    return gradle.startParameter.taskNames.contains("assembleFdroidNightly")
+    return gradle.startParameter.taskNames.contains("Nightly")
 }
 
 fun Project.getSigningProperties() : Properties {
@@ -81,7 +81,7 @@ fun Project.getSigningProperty(property: String) : String {
 }
 
 fun Project.signingConfigName() : String {
-    return if(getSigningProperty(Constants.KEY_PASS_VAR) == "") Constants.DEBUG else Constants.RELEASE
+    return if(getSigningProperty(Constants.KEY_PASS_VAR).isBlank()) Constants.DEBUG else Constants.RELEASE
 }
 
 
