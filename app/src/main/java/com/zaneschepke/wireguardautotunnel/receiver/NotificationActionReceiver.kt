@@ -17,28 +17,28 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotificationActionReceiver : BroadcastReceiver() {
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
+	@Inject
+	lateinit var settingsRepository: SettingsRepository
 
-    @Inject
-    lateinit var serviceManager: ServiceManager
+	@Inject
+	lateinit var serviceManager: ServiceManager
 
-    @Inject
-    @ApplicationScope
-    lateinit var applicationScope: CoroutineScope
+	@Inject
+	@ApplicationScope
+	lateinit var applicationScope: CoroutineScope
 
-    override fun onReceive(context: Context, intent: Intent?) {
-        applicationScope.launch {
-            try {
-                //TODO fix for manual start changes when enabled
-                serviceManager.stopVpnServiceForeground(context)
-                delay(Constants.TOGGLE_TUNNEL_DELAY)
-                serviceManager.startVpnServiceForeground(context)
-            } catch (e: Exception) {
-                Timber.e(e)
-            } finally {
-                cancel()
-            }
-        }
-    }
+	override fun onReceive(context: Context, intent: Intent?) {
+		applicationScope.launch {
+			try {
+				// TODO fix for manual start changes when enabled
+				serviceManager.stopVpnServiceForeground(context)
+				delay(Constants.TOGGLE_TUNNEL_DELAY)
+				serviceManager.startVpnServiceForeground(context)
+			} catch (e: Exception) {
+				Timber.e(e)
+			} finally {
+				cancel()
+			}
+		}
+	}
 }

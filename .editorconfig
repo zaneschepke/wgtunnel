@@ -1,8 +1,14 @@
-[{*.kt,*.kts}]
-indent_style = space
-insert_final_newline = true
-max_line_length = 100
+root = true
+
+[*]
+charset = utf-8
 indent_size = 4
+indent_style = tab
+max_line_length = 150
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[{*.kt,*.kts}]
 ij_continuation_indent_size = 4
 ij_java_names_count_to_use_import_on_demand = 9999
 ij_kotlin_align_in_columns_case_branch = false
@@ -11,8 +17,6 @@ ij_kotlin_align_multiline_extends_list = false
 ij_kotlin_align_multiline_method_parentheses = false
 ij_kotlin_align_multiline_parameters = true
 ij_kotlin_align_multiline_parameters_in_calls = false
-ij_kotlin_allow_trailing_comma = true
-ij_kotlin_allow_trailing_comma_on_call_site = true
 ij_kotlin_assignment_wrap = normal
 ij_kotlin_blank_lines_after_class_header = 0
 ij_kotlin_blank_lines_around_block_when_branches = 0
@@ -20,10 +24,7 @@ ij_kotlin_blank_lines_before_declaration_with_comment_or_annotation_on_separate_
 ij_kotlin_block_comment_at_first_column = true
 ij_kotlin_call_parameters_new_line_after_left_paren = true
 ij_kotlin_call_parameters_right_paren_on_new_line = false
-ij_kotlin_call_parameters_wrap = on_every_item
 ij_kotlin_catch_on_new_line = false
-ij_kotlin_class_annotation_wrap = split_into_lines
-ij_kotlin_code_style_defaults = KOTLIN_OFFICIAL
 ij_kotlin_continuation_indent_for_chained_calls = true
 ij_kotlin_continuation_indent_for_expression_bodies = true
 ij_kotlin_continuation_indent_in_argument_lists = true
@@ -52,7 +53,6 @@ ij_kotlin_method_annotation_wrap = split_into_lines
 ij_kotlin_method_call_chain_wrap = normal
 ij_kotlin_method_parameters_new_line_after_left_paren = true
 ij_kotlin_method_parameters_right_paren_on_new_line = true
-ij_kotlin_method_parameters_wrap = on_every_item
 ij_kotlin_name_count_to_use_star_import = 9999
 ij_kotlin_name_count_to_use_star_import_for_members = 9999
 ij_kotlin_parameter_annotation_wrap = off
@@ -83,3 +83,15 @@ ij_kotlin_while_on_new_line = false
 ij_kotlin_wrap_elvis_expressions = 1
 ij_kotlin_wrap_expression_body_functions = 1
 ij_kotlin_wrap_first_method_in_call_chain = false
+#compose
+ktlint_standard_filename = disabled
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_function-naming = disabled
+ktlint_standard_property-naming = disabled
+ktlint_standard_package-naming = disabled
+ktlint_function_naming_ignore_when_annotated_with = Composable
+ktlint_code_style = android_studio
+ktlint_standard_import-ordering = disabled
+ktlint_standard_package-naming = disabled
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true

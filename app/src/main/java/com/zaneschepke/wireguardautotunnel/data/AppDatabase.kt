@@ -10,46 +10,46 @@ import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 
 @Database(
-    entities = [Settings::class, TunnelConfig::class],
-    version = 8,
-    autoMigrations =
-    [
-        AutoMigration(from = 1, to = 2),
-        AutoMigration(from = 2, to = 3),
-        AutoMigration(
-            from = 3,
-            to = 4,
-        ),
-        AutoMigration(
-            from = 4,
-            to = 5,
-        ),
-        AutoMigration(
-            from = 5,
-            to = 6,
-        ),
-        AutoMigration(
-            from = 6,
-            to = 7,
-            spec = RemoveLegacySettingColumnsMigration::class,
-        ),
-        AutoMigration(7, 8),
-    ],
-    exportSchema = true,
+	entities = [Settings::class, TunnelConfig::class],
+	version = 8,
+	autoMigrations =
+	[
+		AutoMigration(from = 1, to = 2),
+		AutoMigration(from = 2, to = 3),
+		AutoMigration(
+			from = 3,
+			to = 4,
+		),
+		AutoMigration(
+			from = 4,
+			to = 5,
+		),
+		AutoMigration(
+			from = 5,
+			to = 6,
+		),
+		AutoMigration(
+			from = 6,
+			to = 7,
+			spec = RemoveLegacySettingColumnsMigration::class,
+		),
+		AutoMigration(7, 8),
+	],
+	exportSchema = true,
 )
 @TypeConverters(DatabaseListConverters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun settingDao(): SettingsDao
+	abstract fun settingDao(): SettingsDao
 
-    abstract fun tunnelConfigDoa(): TunnelConfigDao
+	abstract fun tunnelConfigDoa(): TunnelConfigDao
 }
 
 @DeleteColumn(
-    tableName = "Settings",
-    columnName = "default_tunnel",
+	tableName = "Settings",
+	columnName = "default_tunnel",
 )
 @DeleteColumn(
-    tableName = "Settings",
-    columnName = "is_battery_saver_enabled",
+	tableName = "Settings",
+	columnName = "is_battery_saver_enabled",
 )
 class RemoveLegacySettingColumnsMigration : AutoMigrationSpec

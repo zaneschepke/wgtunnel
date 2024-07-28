@@ -13,14 +13,15 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun LoadingScreen() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
-        modifier = Modifier
-            .fillMaxSize()
-            .focusable()
-            .padding(),
-    ) {
-        Column(modifier = Modifier.padding(120.dp)) { CircularProgressIndicator() }
-    }
+	Column(
+		horizontalAlignment = Alignment.CenterHorizontally,
+		verticalArrangement = Arrangement.Top,
+		modifier =
+		Modifier
+			.fillMaxSize()
+			.focusable()
+			.padding(),
+	) {
+		Column(modifier = Modifier.padding(120.dp)) { CircularProgressIndicator() }
+	}
 }

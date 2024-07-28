@@ -42,85 +42,88 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
+	val logs = viewModel.logs
 
-    val logs = viewModel.logs
+	val context = LocalContext.current
 
-    val context = LocalContext.current
+	val lazyColumnListState = rememberLazyListState()
+	val clipboardManager: ClipboardManager = LocalClipboardManager.current
+	val scope = rememberCoroutineScope()
 
-    val lazyColumnListState = rememberLazyListState()
-    val clipboardManager: ClipboardManager = LocalClipboardManager.current
-    val scope = rememberCoroutineScope()
+	LaunchedEffect(logs.size) {
+		scope.launch {
+			lazyColumnListState.animateScrollToItem(logs.size)
+		}
+	}
 
-    LaunchedEffect(logs.size) {
-        scope.launch {
-            lazyColumnListState.animateScrollToItem(logs.size)
-        }
-    }
-
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    scope.launch {
-                        viewModel.saveLogsToFile().onSuccess {
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.logs_saved),
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-            ) {
-                val icon = Icons.Filled.Save
-                Icon(
-                    imageVector = icon,
-                    contentDescription = icon.name,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                )
-            }
-        },
-    ) {
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
-            state = lazyColumnListState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-        ) {
-            itemsIndexed(
-                logs,
-                key = { index, _ -> index },
-                contentType = { _: Int, _: LogMessage -> null },
-            ) { _, it ->
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
-                    verticalAlignment = Alignment.Top,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {
-                                clipboardManager.setText(annotatedString = AnnotatedString(it.toString()))
-                            },
-                        ),
-                ) {
-                    val fontSize = 10.sp
-                    Text(text = it.tag, modifier = Modifier.fillMaxSize(0.3f), fontSize = fontSize)
-                    LogTypeLabel(color = Color(it.level.color())) {
-                        Text(
-                            text = it.level.signifier,
-                            textAlign = TextAlign.Center,
-                            fontSize = fontSize,
-                        )
-                    }
-                    Text("${it.message} - ${it.time}", fontSize = fontSize)
-                }
-            }
-        }
-    }
+	Scaffold(
+		floatingActionButton = {
+			FloatingActionButton(
+				onClick = {
+					scope.launch {
+						viewModel.saveLogsToFile().onSuccess {
+							Toast.makeText(
+								context,
+								context.getString(R.string.logs_saved),
+								Toast.LENGTH_SHORT,
+							).show()
+						}
+					}
+				},
+				shape = RoundedCornerShape(16.dp),
+				containerColor = MaterialTheme.colorScheme.primary,
+			) {
+				val icon = Icons.Filled.Save
+				Icon(
+					imageVector = icon,
+					contentDescription = icon.name,
+					tint = MaterialTheme.colorScheme.onPrimary,
+				)
+			}
+		},
+	) {
+		LazyColumn(
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
+			state = lazyColumnListState,
+			modifier =
+			Modifier
+				.fillMaxSize()
+				.padding(horizontal = 24.dp),
+		) {
+			itemsIndexed(
+				logs,
+				key = { index, _ -> index },
+				contentType = { _: Int, _: LogMessage -> null },
+			) { _, it ->
+				Row(
+					horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
+					verticalAlignment = Alignment.Top,
+					modifier =
+					Modifier
+						.fillMaxSize()
+						.clickable(
+							interactionSource = remember { MutableInteractionSource() },
+							indication = null,
+							onClick = {
+								clipboardManager.setText(
+									annotatedString = AnnotatedString(it.toString()),
+								)
+							},
+						),
+				) {
+					val fontSize = 10.sp
+					Text(text = it.tag, modifier = Modifier.fillMaxSize(0.3f), fontSize = fontSize)
+					LogTypeLabel(color = Color(it.level.color())) {
+						Text(
+							text = it.level.signifier,
+							textAlign = TextAlign.Center,
+							fontSize = fontSize,
+						)
+					}
+					Text("${it.message} - ${it.time}", fontSize = fontSize)
+				}
+			}
+		}
+	}
 }

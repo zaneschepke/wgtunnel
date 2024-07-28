@@ -4,11 +4,11 @@ import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
-    suspend fun save(settings: Settings)
+	suspend fun save(settings: Settings)
 
-    fun getSettingsFlow(): Flow<Settings>
+	fun getSettingsFlow(): Flow<Settings>
 
-    suspend fun getSettings(): Settings
+	suspend fun getSettings(): Settings
 
-    suspend fun getAll(): List<Settings>
+	suspend fun getAll(): List<Settings>
 }

@@ -14,44 +14,44 @@ import timber.log.Timber
 
 @HiltAndroidApp
 class WireGuardAutoTunnel : Application() {
+	override fun onCreate() {
+		super.onCreate()
+		instance = this
+		if (BuildConfig.DEBUG) {
+			Timber.plant(Timber.DebugTree())
+			StrictMode.setThreadPolicy(
+				ThreadPolicy.Builder()
+					.detectDiskReads()
+					.detectDiskWrites()
+					.detectNetwork()
+					.penaltyLog()
+					.build(),
+			)
+		} else {
+			Timber.plant(ReleaseTree())
+		}
+	}
 
-    override fun onCreate() {
-        super.onCreate()
-        instance = this
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-            StrictMode.setThreadPolicy(
-                ThreadPolicy.Builder()
-                    .detectDiskReads()
-                    .detectDiskWrites()
-                    .detectNetwork()
-                    .penaltyLog()
-                    .build(),
-            )
-        } else Timber.plant(ReleaseTree())
-    }
+	companion object {
+		lateinit var instance: WireGuardAutoTunnel
+			private set
 
-    companion object {
+		fun isRunningOnAndroidTv(): Boolean {
+			return instance.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+		}
 
-        lateinit var instance: WireGuardAutoTunnel
-            private set
+		fun requestTunnelTileServiceStateUpdate() {
+			TileService.requestListeningState(
+				instance,
+				ComponentName(instance, TunnelControlTile::class.java),
+			)
+		}
 
-        fun isRunningOnAndroidTv(): Boolean {
-            return instance.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
-        }
-
-        fun requestTunnelTileServiceStateUpdate() {
-            TileService.requestListeningState(
-                instance,
-                ComponentName(instance, TunnelControlTile::class.java),
-            )
-        }
-
-        fun requestAutoTunnelTileServiceUpdate() {
-            TileService.requestListeningState(
-                instance,
-                ComponentName(instance, AutoTunnelControlTile::class.java),
-            )
-        }
-    }
+		fun requestAutoTunnelTileServiceUpdate() {
+			TileService.requestListeningState(
+				instance,
+				ComponentName(instance, AutoTunnelControlTile::class.java),
+			)
+		}
+	}
 }

@@ -5,20 +5,19 @@ import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import kotlinx.coroutines.flow.Flow
 
 class RoomSettingsRepository(private val settingsDoa: SettingsDao) : SettingsRepository {
+	override suspend fun save(settings: Settings) {
+		settingsDoa.save(settings)
+	}
 
-    override suspend fun save(settings: Settings) {
-        settingsDoa.save(settings)
-    }
+	override fun getSettingsFlow(): Flow<Settings> {
+		return settingsDoa.getSettingsFlow()
+	}
 
-    override fun getSettingsFlow(): Flow<Settings> {
-        return settingsDoa.getSettingsFlow()
-    }
+	override suspend fun getSettings(): Settings {
+		return settingsDoa.getAll().firstOrNull() ?: Settings()
+	}
 
-    override suspend fun getSettings(): Settings {
-        return settingsDoa.getAll().firstOrNull() ?: Settings()
-    }
-
-    override suspend fun getAll(): List<Settings> {
-        return settingsDoa.getAll()
-    }
+	override suspend fun getAll(): List<Settings> {
+		return settingsDoa.getAll()
+	}
 }

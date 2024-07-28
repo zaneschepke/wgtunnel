@@ -18,66 +18,64 @@ import timber.log.Timber
 import java.io.IOException
 
 class DataStoreManager(
-    private val context: Context,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+	private val context: Context,
+	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
-    companion object {
-        val LOCATION_DISCLOSURE_SHOWN = booleanPreferencesKey("LOCATION_DISCLOSURE_SHOWN")
-        val BATTERY_OPTIMIZE_DISABLE_SHOWN = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
-        val TUNNEL_RUNNING_FROM_MANUAL_START =
-            booleanPreferencesKey("TUNNEL_RUNNING_FROM_MANUAL_START")
-        val ACTIVE_TUNNEL = intPreferencesKey("ACTIVE_TUNNEL")
-        val CURRENT_SSID = stringPreferencesKey("CURRENT_SSID")
-        val IS_PIN_LOCK_ENABLED = booleanPreferencesKey("PIN_LOCK_ENABLED")
-    }
+	companion object {
+		val LOCATION_DISCLOSURE_SHOWN = booleanPreferencesKey("LOCATION_DISCLOSURE_SHOWN")
+		val BATTERY_OPTIMIZE_DISABLE_SHOWN = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
+		val TUNNEL_RUNNING_FROM_MANUAL_START =
+			booleanPreferencesKey("TUNNEL_RUNNING_FROM_MANUAL_START")
+		val ACTIVE_TUNNEL = intPreferencesKey("ACTIVE_TUNNEL")
+		val CURRENT_SSID = stringPreferencesKey("CURRENT_SSID")
+		val IS_PIN_LOCK_ENABLED = booleanPreferencesKey("PIN_LOCK_ENABLED")
+	}
 
-    // preferences
-    private val preferencesKey = "preferences"
-    private val Context.dataStore by
-    preferencesDataStore(
-        name = preferencesKey,
-    )
+	// preferences
+	private val preferencesKey = "preferences"
+	private val Context.dataStore by
+		preferencesDataStore(
+			name = preferencesKey,
+		)
 
-    suspend fun init() {
-        withContext(ioDispatcher) {
-            try {
-                context.dataStore.data.first()
-            } catch (e: IOException) {
-                Timber.e(e)
-            }
-        }
-    }
+	suspend fun init() {
+		withContext(ioDispatcher) {
+			try {
+				context.dataStore.data.first()
+			} catch (e: IOException) {
+				Timber.e(e)
+			}
+		}
+	}
 
-    suspend fun <T> saveToDataStore(key: Preferences.Key<T>, value: T) {
-        withContext(ioDispatcher) {
-            try {
-                context.dataStore.edit { it[key] = value }
-            } catch (e: IOException) {
-                Timber.e(e)
-            } catch (e: Exception) {
-                Timber.e(e)
-            }
-        }
-    }
+	suspend fun <T> saveToDataStore(key: Preferences.Key<T>, value: T) {
+		withContext(ioDispatcher) {
+			try {
+				context.dataStore.edit { it[key] = value }
+			} catch (e: IOException) {
+				Timber.e(e)
+			} catch (e: Exception) {
+				Timber.e(e)
+			}
+		}
+	}
 
+	fun <T> getFromStoreFlow(key: Preferences.Key<T>) = context.dataStore.data.map { it[key] }
 
-    fun <T> getFromStoreFlow(key: Preferences.Key<T>) = context.dataStore.data.map { it[key] }
+	suspend fun <T> getFromStore(key: Preferences.Key<T>): T? {
+		return withContext(ioDispatcher) {
+			try {
+				context.dataStore.data.map { it[key] }.first()
+			} catch (e: IOException) {
+				Timber.e(e)
+				null
+			}
+		}
+	}
 
-    suspend fun <T> getFromStore(key: Preferences.Key<T>): T? {
-        return withContext(ioDispatcher) {
-            try {
-                context.dataStore.data.map { it[key] }.first()
-            } catch (e: IOException) {
-                Timber.e(e)
-                null
-            }
-        }
-    }
+	fun <T> getFromStoreBlocking(key: Preferences.Key<T>) = runBlocking {
+		context.dataStore.data.map { it[key] }.first()
+	}
 
-
-    fun <T> getFromStoreBlocking(key: Preferences.Key<T>) = runBlocking {
-        context.dataStore.data.map { it[key] }.first()
-    }
-
-    val preferencesFlow: Flow<Preferences?> = context.dataStore.data
+	val preferencesFlow: Flow<Preferences?> = context.dataStore.data
 }
