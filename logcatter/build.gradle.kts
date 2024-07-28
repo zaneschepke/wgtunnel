@@ -23,8 +23,8 @@ android {
             )
         }
 
-        create("nightly") {
-            initWith(getByName("release"))
+        create(Constants.NIGHTLY) {
+            initWith(getByName(Constants.RELEASE))
         }
     }
     compileOptions {
