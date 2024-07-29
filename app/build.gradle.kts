@@ -200,8 +200,9 @@ fun determineVersionCode(): Int {
 fun determineVersionName(): String {
 	return with(getBuildTaskName().lowercase()) {
 		when {
-			contains(Constants.NIGHTLY) || contains(Constants.PRERELEASE) -> Constants.VERSION_NAME +
-				"-${grgitService.service.get().grgit.head().abbreviatedId}"
+			contains(Constants.NIGHTLY) || contains(Constants.PRERELEASE) ->
+				Constants.VERSION_NAME +
+					"-${grgitService.service.get().grgit.head().abbreviatedId}"
 			else -> Constants.VERSION_NAME
 		}
 	}
