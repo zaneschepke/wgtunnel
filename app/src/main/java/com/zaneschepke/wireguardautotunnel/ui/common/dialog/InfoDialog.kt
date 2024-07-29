@@ -8,7 +8,13 @@ import androidx.compose.ui.res.stringResource
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
-fun InfoDialog(onAttest: () -> Unit, onDismiss: () -> Unit, title: @Composable () -> Unit, body: @Composable () -> Unit, confirmText: @Composable () -> Unit) {
+fun InfoDialog(
+	onAttest: () -> Unit,
+	onDismiss: () -> Unit,
+	title: @Composable () -> Unit,
+	body: @Composable () -> Unit,
+	confirmText: @Composable () -> Unit,
+) {
 	AlertDialog(
 		onDismissRequest = { onDismiss() },
 		confirmButton = {
