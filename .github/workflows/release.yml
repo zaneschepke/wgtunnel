@@ -147,7 +147,8 @@ jobs:
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
-            echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
+          echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
+            gh release delete ${{ github.event.inputs.tag_name }} --yes || true
 
       # Setup TAG_NAME, which is used as a general "name"
       - if: github.event_name == 'workflow_dispatch'
