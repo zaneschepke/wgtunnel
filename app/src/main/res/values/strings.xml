@@ -177,4 +177,7 @@
     <string name="wireguard" translatable="false">WireGuard</string>
     <string name="error_file_format">Invalid tunnel config format</string>
     <string name="restart_at_boot">Restart on boot</string>
+    <string name="vpn_denied_dialog_title">Permission Denied</string>
+	<string name="vpn_denied_dialog_message">Permission to start the VPN has either been explicitly denied or is being blocked by the system.</string>
+	<string name="vpn_denied_dialog_message2">If VPN permission is being blocked by the system, please confirm no other app is using the Always-on VPN feature and try again.</string>
 </resources>

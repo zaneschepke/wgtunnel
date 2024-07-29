@@ -43,7 +43,6 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
@@ -103,6 +102,7 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
+import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.corn
 import com.zaneschepke.wireguardautotunnel.ui.theme.mint
@@ -219,27 +219,17 @@ fun MainScreen(
 			},
 		)
 
-	AnimatedVisibility(showDeleteTunnelAlertDialog) {
-		AlertDialog(
-			onDismissRequest = { showDeleteTunnelAlertDialog = false },
-			confirmButton = {
-				TextButton(
-					onClick = {
-						selectedTunnel?.let { viewModel.onDelete(it, context) }
-						showDeleteTunnelAlertDialog = false
-						selectedTunnel = null
-					},
-				) {
-					Text(text = stringResource(R.string.yes))
-				}
-			},
-			dismissButton = {
-				TextButton(onClick = { showDeleteTunnelAlertDialog = false }) {
-					Text(text = stringResource(R.string.cancel))
-				}
+	if (showDeleteTunnelAlertDialog) {
+		InfoDialog(
+			onDismiss = { showDeleteTunnelAlertDialog = false },
+			onAttest = {
+				selectedTunnel?.let { viewModel.onDelete(it, context) }
+				showDeleteTunnelAlertDialog = false
+				selectedTunnel = null
 			},
 			title = { Text(text = stringResource(R.string.delete_tunnel)) },
-			text = { Text(text = stringResource(R.string.delete_tunnel_message)) },
+			body = { Text(text = stringResource(R.string.delete_tunnel_message)) },
+			confirmText = { Text(text = stringResource(R.string.yes)) },
 		)
 	}
 
