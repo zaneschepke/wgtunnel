@@ -86,9 +86,12 @@ jobs:
       # Build and sign APK ("-x test" argument is used to skip tests)
       # add fdroid flavor for apk upload
       - name: Build Fdroid Release APK
-        if: ${{ inputs.release_type != '' && inputs.release_type != 'nightly' }}
+        if: ${{ inputs.release_type != '' && inputs.release_type == 'release' }}
         run: ./gradlew :app:assembleFdroidRelease -x test
 
+      - name: Build Fdroid Prerelease APK
+        if: ${{ inputs.release_type != '' && inputs.release_type == 'prerelease' }}
+        run: ./gradlew :app:assembleFdroidPrerelease -x test
 
       - name: Build Fdroid Nightly APK
         if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly' }}
@@ -96,11 +99,13 @@ jobs:
 
       - if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly' }}
         run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/nightly/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
-      - if: ${{ inputs.release_type != '' && inputs.release_type != 'nightly' }}
+      - if: ${{ inputs.release_type != '' && inputs.release_type == 'release' }}
         run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
+      - if: ${{ inputs.release_type != '' && inputs.release_type == 'prerelease' }}
+        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/prerelease/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
 
       - name: Get version code
-        if: ${{ inputs.release_type == 'release' || inputs.release_type == 'prerelease' }}
+        if: ${{ inputs.release_type == 'release' }}
         run: |
           version_code=$(grep "VERSION_CODE" buildSrc/src/main/kotlin/Constants.kt | awk '{print $5}' | tr -d '\n')
           echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
@@ -126,30 +131,30 @@ jobs:
           event-type: fdroid-update
 
       - name: Set version release notes
-        if: ${{ inputs.release_type == 'release' || inputs.release_type == 'prerelease' }}
+        if: ${{ inputs.release_type == 'release' }}
         run: |
           RELEASE_NOTES="$(cat ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/${{ env.VERSION_CODE }}.txt)"
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "$RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: On nightly release
+      - name: On nightly release notes
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
           echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
           gh release delete nightly --yes || true
+
+      - name: On prerelease release notes
+        if: ${{ inputs.release_type == 'prerelease' }}
+        run: |
+          echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
+            gh release delete ${{ github.event.inputs.tag_name }} --yes || true
 
       # Setup TAG_NAME, which is used as a general "name"
       - if: github.event_name == 'workflow_dispatch'
         run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
       - if: github.event_name == 'schedule'
         run: echo "TAG_NAME=nightly" >> $GITHUB_ENV
-
-      - name: On nightly release
-        if: ${{ contains(env.TAG_NAME, 'nightly') }}
-        run: |
-          echo "RELEASE_NOTES=Nightly build of the latest development version of the android client." >> $GITHUB_ENV
-          gh release delete nightly --yes || true
 
       - name: Get checksum
         id: checksum
@@ -164,7 +169,7 @@ jobs:
         with:
           body: |
             ${{ env.RELEASE_NOTES }}
-            
+
             SHA256 fingerprint:
             ```${{ steps.checksum.outputs.checksum }}```
           tag_name: ${{ env.TAG_NAME }}

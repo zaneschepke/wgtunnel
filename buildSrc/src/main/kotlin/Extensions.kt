@@ -23,10 +23,10 @@ fun Project.getCurrentFlavor(): String {
     return flavor
 }
 
-fun Project.isNightlyBuild(): Boolean {
+fun Project.getBuildTaskName(): String {
     val taskRequestsStr = gradle.startParameter.taskRequests[0].toString()
-    return taskRequestsStr.lowercase().contains(Constants.NIGHTLY).also {
-        project.logger.lifecycle("Nightly build: $it")
+    return taskRequestsStr.also {
+        project.logger.lifecycle("Build task: $it")
     }
 }
 
