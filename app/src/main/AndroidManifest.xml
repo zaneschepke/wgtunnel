@@ -86,11 +86,15 @@
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             tools:replace="screenOrientation" />
+
         <activity
             android:name=".service.shortcut.ShortcutsActivity"
             android:enabled="true"
             android:exported="true"
-            android:finishOnTaskLaunch="true"
+			android:noHistory="true"
+			android:excludeFromRecents="true"
+			android:finishOnTaskLaunch="true"
+			android:launchMode="singleInstance"
             android:theme="@android:style/Theme.NoDisplay" />
 
         <service
