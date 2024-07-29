@@ -1,5 +1,5 @@
 object Constants {
-    const val VERSION_NAME = "3.4.8"
+	const val VERSION_NAME = "3.4.8"
     const val JVM_TARGET = "17"
     const val VERSION_CODE = 34800
     const val TARGET_SDK = 34
@@ -14,8 +14,10 @@ object Constants {
 
     const val RELEASE = "release"
     const val NIGHTLY = "nightly"
+	const val PRERELEASE = "prerelease"
     const val DEBUG = "debug"
     const val TYPE = "type"
 
     const val NIGHTLY_CODE = 42
+	const val PRERELEASE_CODE = 99
 }

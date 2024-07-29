@@ -60,6 +60,10 @@ android {
 		}
 		debug { isDebuggable = true }
 
+		create(Constants.PRERELEASE) {
+			initWith(buildTypes.getByName(Constants.RELEASE))
+		}
+
 		create(Constants.NIGHTLY) {
 			initWith(buildTypes.getByName(Constants.RELEASE))
 		}
@@ -184,19 +188,21 @@ dependencies {
 }
 
 fun determineVersionCode(): Int {
-	return if (isNightlyBuild()) {
-		Constants.VERSION_CODE +
-			Constants.NIGHTLY_CODE
-	} else {
-		Constants.VERSION_CODE
+	return with(getBuildTaskName().lowercase()) {
+		when {
+			contains(Constants.NIGHTLY) -> Constants.VERSION_CODE + Constants.NIGHTLY_CODE
+			contains(Constants.PRERELEASE) -> Constants.VERSION_CODE + Constants.PRERELEASE_CODE
+			else -> Constants.VERSION_CODE
+		}
 	}
 }
 
 fun determineVersionName(): String {
-	return if (isNightlyBuild()) {
-		Constants.VERSION_NAME +
-			"-${grgitService.service.get().grgit.head().abbreviatedId}"
-	} else {
-		Constants.VERSION_NAME
+	return with(getBuildTaskName().lowercase()) {
+		when {
+			contains(Constants.NIGHTLY) || contains(Constants.PRERELEASE) -> Constants.VERSION_NAME +
+				"-${grgitService.service.get().grgit.head().abbreviatedId}"
+			else -> Constants.VERSION_NAME
+		}
 	}
 }
