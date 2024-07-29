@@ -23,6 +23,10 @@ android {
 			)
 		}
 
+		create(Constants.PRERELEASE) {
+			initWith(getByName(Constants.RELEASE))
+		}
+
 		create(Constants.NIGHTLY) {
 			initWith(getByName(Constants.RELEASE))
 		}
