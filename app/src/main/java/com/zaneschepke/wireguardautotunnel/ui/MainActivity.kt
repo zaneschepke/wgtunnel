@@ -10,8 +10,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarData
@@ -19,15 +22,21 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,11 +50,13 @@ import androidx.navigation.navArgument
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
@@ -97,6 +108,7 @@ class MainActivity : AppCompatActivity() {
 			val appUiState by appViewModel.appUiState.collectAsStateWithLifecycle()
 			val navController = rememberNavController()
 			val navBackStackEntry by navController.currentBackStackEntryAsState()
+			var showVpnPermissionDialog by remember { mutableStateOf(false) }
 
 			val notificationPermissionState =
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -114,7 +126,7 @@ class MainActivity : AppCompatActivity() {
 						val accepted = (it.resultCode == RESULT_OK)
 						if (accepted) {
 							appViewModel.onVpnPermissionAccepted()
-						}
+						} else showVpnPermissionDialog = true
 					},
 				)
 
@@ -140,17 +152,19 @@ class MainActivity : AppCompatActivity() {
 					appViewModel.permissionsRequested()
 					if (notificationPermissionState != null && !notificationPermissionState.status.isGranted
 					) {
-						showSnackBarMessage(
-							StringValue.StringResource(R.string.notification_permission_required),
-						)
-						return@LaunchedEffect notificationPermissionState.launchPermissionRequest()
+						notificationPermissionState.launchPermissionRequest()
+						return@LaunchedEffect if(notificationPermissionState.status.shouldShowRationale || !notificationPermissionState.status.isGranted) {
+							showSnackBarMessage(
+								StringValue.StringResource(R.string.notification_permission_required),
+							)
+						} else Unit
 					}
 					if (!appUiState.vpnPermissionAccepted) {
 						return@LaunchedEffect appViewModel.vpnIntent?.let {
 							vpnActivityResultState.launch(
 								it,
 							)
-						}!!
+						} ?: Unit
 					}
 				}
 			}
@@ -170,6 +184,21 @@ class MainActivity : AppCompatActivity() {
 				}
 
 				val focusRequester = remember { FocusRequester() }
+
+				if(showVpnPermissionDialog) {
+					InfoDialog(
+						onDismiss = { showVpnPermissionDialog = false },
+						onAttest = { showVpnPermissionDialog = false },
+						title = { Text(text = stringResource(R.string.vpn_denied_dialog_title)) },
+						body = {
+							Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
+								Text(text = stringResource(R.string.vpn_denied_dialog_message))
+								Text(text = stringResource(R.string.vpn_denied_dialog_message2))
+							}
+					    },
+						confirmText = { Text(text = stringResource(R.string.okay)) }
+					)
+				}
 
 				Scaffold(
 					snackbarHost = {

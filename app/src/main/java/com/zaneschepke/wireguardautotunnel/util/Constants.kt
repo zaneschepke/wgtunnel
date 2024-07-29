@@ -31,8 +31,6 @@ object Constants {
 	const val PING_INTERVAL = 60_000L
 	const val PING_COOLDOWN = PING_INTERVAL * 60 // one hour
 
-	const val ALLOWED_DISPLAY_NAME_LENGTH = 20
-
 	const val TUNNEL_EXTRA_KEY = "tunnelId"
 
 	const val UNREADABLE_SSID = "<unknown ssid>"
