@@ -130,6 +130,12 @@ jobs:
           repository: zaneschepke/fdroid
           event-type: fdroid-update
 
+      # Setup TAG_NAME, which is used as a general "name"
+      - if: github.event_name == 'workflow_dispatch'
+        run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+      - if: github.event_name == 'schedule'
+        run: echo "TAG_NAME=nightly" >> $GITHUB_ENV
+
       - name: Set version release notes
         if: ${{ inputs.release_type == 'release' }}
         run: |
@@ -148,18 +154,11 @@ jobs:
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
           echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
-            gh release delete ${{ github.event.inputs.tag_name }} --yes || true
-
-      # Setup TAG_NAME, which is used as a general "name"
-      - if: github.event_name == 'workflow_dispatch'
-        run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-      - if: github.event_name == 'schedule'
-        run: echo "TAG_NAME=nightly" >> $GITHUB_ENV
+          gh release delete ${{ github.event.inputs.tag_name }} --yes || true
 
       - name: Get checksum
         id: checksum
         run: echo "checksum=$(apksigner verify -print-certs ${{ env.APK_PATH }} | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")" >> $GITHUB_OUTPUT
-
 
       - name: Create Release with Fastlane changelog notes
         id: create_release
