@@ -40,6 +40,7 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
 	override fun onCreate() {
 		super.onCreate()
+		Timber.d("onCreate for tile service")
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 
 		applicationScope.launch {

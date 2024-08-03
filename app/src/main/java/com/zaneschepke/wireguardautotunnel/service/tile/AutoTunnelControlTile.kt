@@ -13,7 +13,6 @@ import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -38,21 +37,25 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 
 		applicationScope.launch {
 			appDataRepository.settings.getSettingsFlow().collect {
-				when (it.isAutoTunnelEnabled) {
-					true -> {
-						if (it.isAutoTunnelPaused) {
-							setInactive()
-							setTileDescription(this@AutoTunnelControlTile.getString(R.string.paused))
-						} else {
-							setActive()
-							setTileDescription(this@AutoTunnelControlTile.getString(R.string.active))
+				kotlin.runCatching {
+					when (it.isAutoTunnelEnabled) {
+						true -> {
+							if (it.isAutoTunnelPaused) {
+								setInactive()
+								setTileDescription(this@AutoTunnelControlTile.getString(R.string.paused))
+							} else {
+								setActive()
+								setTileDescription(this@AutoTunnelControlTile.getString(R.string.active))
+							}
+						}
+
+						false -> {
+							setTileDescription(this@AutoTunnelControlTile.getString(R.string.disabled))
+							setUnavailable()
 						}
 					}
-
-					false -> {
-						setTileDescription(this@AutoTunnelControlTile.getString(R.string.disabled))
-						setUnavailable()
-					}
+				}.onFailure {
+					Timber.e(it)
 				}
 			}
 		}
@@ -76,12 +79,20 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 		super.onClick()
 		unlockAndRun {
 			lifecycleScope.launch {
-				try {
-					appDataRepository.toggleWatcherServicePause()
-				} catch (e: Exception) {
-					Timber.e(e.message)
-				} finally {
-					cancel()
+				kotlin.runCatching {
+					val settings = appDataRepository.settings.getSettings()
+					if (settings.isAutoTunnelPaused) {
+						return@launch appDataRepository.settings.save(
+							settings.copy(
+								isAutoTunnelPaused = false,
+							),
+						)
+					}
+					appDataRepository.settings.save(
+						settings.copy(
+							isAutoTunnelPaused = true,
+						),
+					)
 				}
 			}
 		}

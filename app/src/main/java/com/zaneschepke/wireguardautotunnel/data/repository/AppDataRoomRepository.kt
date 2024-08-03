@@ -23,16 +23,4 @@ constructor(
 			getPrimaryOrFirstTunnel()
 		}
 	}
-
-	override suspend fun toggleWatcherServicePause() {
-		val settings = settings.getSettings()
-		if (settings.isAutoTunnelEnabled) {
-			val pauseAutoTunnel = !settings.isAutoTunnelPaused
-			this.settings.save(
-				settings.copy(
-					isAutoTunnelPaused = pauseAutoTunnel,
-				),
-			)
-		}
-	}
 }

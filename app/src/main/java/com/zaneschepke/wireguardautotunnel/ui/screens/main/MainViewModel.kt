@@ -77,7 +77,7 @@ constructor(
 		)
 	}
 
-	suspend fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
+	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Starting tunnel ${tunnelConfig.name}")
 		tunnelService.startTunnel(tunnelConfig).onSuccess {
 			appDataRepository.appState.setTunnelRunningFromManualStart(tunnelConfig.id)
