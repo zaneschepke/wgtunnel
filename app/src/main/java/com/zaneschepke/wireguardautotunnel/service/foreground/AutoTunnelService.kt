@@ -421,7 +421,7 @@ class AutoTunnelService : ForegroundService() {
 								} ?: suspend {
 									Timber.i("No tunnel associated with this SSID, using defaults")
 									val default = appDataRepository.getPrimaryOrFirstTunnel()
-									if (default?.name != tunnelService.name) {
+									if (default?.name != tunnelService.name || isTunnelDown()) {
 										default?.let {
 											tunnelService.startTunnel(it)
 										}
