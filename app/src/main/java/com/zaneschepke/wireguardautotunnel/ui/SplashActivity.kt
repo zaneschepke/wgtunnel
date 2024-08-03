@@ -11,9 +11,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.zaneschepke.logcatter.LocalLogCollector
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel.Companion.isRunningOnAndroidTv
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -41,7 +41,7 @@ class SplashActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 
 		applicationScope.launch {
-			if (!isRunningOnAndroidTv()) localLogCollector.start()
+			if (!this@SplashActivity.isRunningOnTv()) localLogCollector.start()
 		}
 
 		lifecycleScope.launch {

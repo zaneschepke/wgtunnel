@@ -19,19 +19,21 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 
 @Composable
 fun CustomSnackBar(message: String, isRtl: Boolean = true, containerColor: Color = MaterialTheme.colorScheme.surface) {
+	val context = LocalContext.current
 	Snackbar(
 		containerColor = containerColor,
 		modifier =
 		Modifier
 			.fillMaxWidth(
-				if (WireGuardAutoTunnel.isRunningOnAndroidTv()) 1 / 3f else 2 / 3f,
+				if (context.isRunningOnTv()) 1 / 3f else 2 / 3f,
 			)
 			.padding(bottom = 100.dp),
 		shape = RoundedCornerShape(16.dp),

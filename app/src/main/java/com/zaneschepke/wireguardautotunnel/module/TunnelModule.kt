@@ -8,7 +8,7 @@ import com.wireguard.android.util.RootShell
 import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
 import dagger.Module
 import dagger.Provides
@@ -58,7 +58,7 @@ class TunnelModule {
 		appDataRepository: AppDataRepository,
 		@ApplicationScope applicationScope: CoroutineScope,
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
-	): VpnService {
+	): TunnelService {
 		return WireGuardTunnel(
 			amneziaBackend,
 			userspaceBackend,
@@ -71,7 +71,7 @@ class TunnelModule {
 
 	@Provides
 	@Singleton
-	fun provideServiceManager(appDataRepository: AppDataRepository, @IoDispatcher ioDispatcher: CoroutineDispatcher): ServiceManager {
-		return ServiceManager(appDataRepository, ioDispatcher)
+	fun provideServiceManager(): ServiceManager {
+		return ServiceManager()
 	}
 }

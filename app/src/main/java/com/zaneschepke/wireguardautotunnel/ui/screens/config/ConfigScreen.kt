@@ -71,7 +71,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.DrawablePainter
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.SearchBar
@@ -81,7 +80,8 @@ import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.getMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -109,7 +109,7 @@ fun ConfigScreen(
 	LaunchedEffect(Unit) { viewModel.init(tunnelId) }
 
 	LaunchedEffect(uiState.loading) {
-		if (!uiState.loading && WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+		if (!uiState.loading && context.isRunningOnTv()) {
 			delay(Constants.FOCUS_REQUEST_DELAY)
 			focusRequester.requestFocus()
 		}
@@ -331,7 +331,7 @@ fun ConfigScreen(
 			FloatingActionButton(
 				modifier =
 				Modifier.onFocusChanged {
-					if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					if (context.isRunningOnTv()) {
 						fobColor = if (it.isFocused) hoverColor else secondaryColor
 					}
 				},
@@ -373,7 +373,7 @@ fun ConfigScreen(
 					color = MaterialTheme.colorScheme.surface,
 					modifier =
 					(
-						if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+						if (context.isRunningOnTv()) {
 							Modifier
 								.fillMaxHeight(fillMaxHeight)
 								.fillMaxWidth(fillMaxWidth)
@@ -687,7 +687,7 @@ fun ConfigScreen(
 						color = MaterialTheme.colorScheme.surface,
 						modifier =
 						(
-							if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+							if (context.isRunningOnTv()) {
 								Modifier
 									.fillMaxHeight(fillMaxHeight)
 									.fillMaxWidth(fillMaxWidth)
@@ -810,7 +810,7 @@ fun ConfigScreen(
 					}
 				}
 			}
-			if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+			if (context.isRunningOnTv()) {
 				Spacer(modifier = Modifier.weight(.17f))
 			}
 		}

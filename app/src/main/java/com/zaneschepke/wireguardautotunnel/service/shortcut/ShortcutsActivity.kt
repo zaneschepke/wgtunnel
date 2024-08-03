@@ -2,15 +2,14 @@ package com.zaneschepke.wireguardautotunnel.service.shortcut
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardConnectivityWatcherService
-import com.zaneschepke.wireguardautotunnel.service.foreground.WireGuardTunnelService
+import com.zaneschepke.wireguardautotunnel.service.foreground.AutoTunnelService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -19,43 +18,31 @@ class ShortcutsActivity : ComponentActivity() {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var serviceManager: ServiceManager
-
-	@Inject
-	@ApplicationScope
-	lateinit var applicationScope: CoroutineScope
+	lateinit var tunnelService: TunnelService
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		applicationScope.launch {
+		lifecycleScope.launch {
 			val settings = appDataRepository.settings.getSettings()
 			if (settings.isShortcutsEnabled) {
 				when (intent.getStringExtra(CLASS_NAME_EXTRA_KEY)) {
-					WireGuardTunnelService::class.java.simpleName -> {
+					LEGACY_TUNNEL_SERVICE_NAME, TunnelService::class.java.simpleName -> {
 						val tunnelName = intent.getStringExtra(TUNNEL_NAME_EXTRA_KEY)
-						val tunnelConfig =
-							tunnelName?.let {
-								appDataRepository.tunnels.getAll().firstOrNull {
-									it.name == tunnelName
-								}
+						Timber.d("Tunnel name extra: $tunnelName")
+						val tunnelConfig = tunnelName?.let {
+							appDataRepository.tunnels.getAll()
+								.firstOrNull { it.name == tunnelName }
+						} ?: appDataRepository.getPrimaryOrFirstTunnel()
+						Timber.d("Shortcut action on name: ${tunnelConfig?.name}")
+						tunnelConfig?.let {
+							when (intent.action) {
+								Action.START.name -> tunnelService.startTunnel(it)
+								Action.STOP.name -> tunnelService.stopTunnel(it)
+								else -> Unit
 							}
-						when (intent.action) {
-							Action.START.name ->
-								serviceManager.startVpnServiceForeground(
-									this@ShortcutsActivity,
-									tunnelConfig?.id,
-									isManualStart = true,
-								)
-
-							Action.STOP.name ->
-								serviceManager.stopVpnServiceForeground(
-									this@ShortcutsActivity,
-									isManualStop = true,
-								)
 						}
 					}
-
-					WireGuardConnectivityWatcherService::class.java.simpleName -> {
+					AutoTunnelService::class.java.simpleName, LEGACY_AUTO_TUNNEL_SERVICE_NAME -> {
 						when (intent.action) {
 							Action.START.name ->
 								appDataRepository.settings.save(
@@ -63,7 +50,6 @@ class ShortcutsActivity : ComponentActivity() {
 										isAutoTunnelPaused = false,
 									),
 								)
-
 							Action.STOP.name ->
 								appDataRepository.settings.save(
 									settings.copy(
@@ -79,6 +65,8 @@ class ShortcutsActivity : ComponentActivity() {
 	}
 
 	companion object {
+		const val LEGACY_TUNNEL_SERVICE_NAME = "WireGuardTunnelService"
+		const val LEGACY_AUTO_TUNNEL_SERVICE_NAME = "WireGuardConnectivityWatcherService"
 		const val TUNNEL_NAME_EXTRA_KEY = "tunnelName"
 		const val CLASS_NAME_EXTRA_KEY = "className"
 	}

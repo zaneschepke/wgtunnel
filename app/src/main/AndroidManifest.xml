@@ -137,23 +137,23 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+		<service
+			android:name=".service.tunnel.AlwaysOnVpnService"
+			android:enabled="true"
+			android:exported="false"
+			android:foregroundServiceType="systemExempted"
+			android:permission="android.permission.BIND_VPN_SERVICE"
+			android:persistent="true"
+			tools:node="merge">
+			<intent-filter>
+				<action android:name="android.net.VpnService" />
+			</intent-filter>
+			<meta-data
+				android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
+				android:value="true" />
+		</service>
         <service
-            android:name=".service.foreground.WireGuardTunnelService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="systemExempted"
-            android:permission="android.permission.BIND_VPN_SERVICE"
-            android:persistent="true"
-            tools:node="merge">
-            <intent-filter>
-                <action android:name="android.net.VpnService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
-                android:value="true" />
-        </service>
-        <service
-            android:name=".service.foreground.WireGuardConnectivityWatcherService"
+            android:name=".service.foreground.AutoTunnelService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="systemExempted"
@@ -174,8 +174,9 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".receiver.NotificationActionReceiver"
-            android:exported="false" />
+		<receiver
+			android:name=".receiver.BackgroundActionReceiver"
+			android:enabled="true"
+			android:exported="false"/>
     </application>
 </manifest>

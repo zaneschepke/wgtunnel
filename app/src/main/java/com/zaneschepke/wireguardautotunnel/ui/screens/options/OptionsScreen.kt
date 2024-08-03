@@ -61,7 +61,6 @@ import com.iamageo.multifablibrary.FabOption
 import com.iamageo.multifablibrary.MultiFabItem
 import com.iamageo.multifablibrary.MultiFloatingActionButton
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
@@ -69,7 +68,8 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.getMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -97,7 +97,7 @@ fun OptionsScreen(
 
 	LaunchedEffect(Unit) {
 		optionsViewModel.init(tunnelId)
-		if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+		if (context.isRunningOnTv()) {
 			delay(Constants.FOCUS_REQUEST_DELAY)
 			focusRequester.requestFocus()
 		}
@@ -120,9 +120,9 @@ fun OptionsScreen(
 			val secondaryColor = MaterialTheme.colorScheme.secondary
 			val tvFobColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
 			val fobColor =
-				if (WireGuardAutoTunnel.isRunningOnAndroidTv()) tvFobColor else secondaryColor
+				if (context.isRunningOnTv()) tvFobColor else secondaryColor
 			val fobIconColor =
-				if (WireGuardAutoTunnel.isRunningOnAndroidTv()) Color.White else MaterialTheme.colorScheme.background
+				if (context.isRunningOnTv()) Color.White else MaterialTheme.colorScheme.background
 			AnimatedVisibility(
 				visible = true,
 				enter = slideInVertically(initialOffsetY = { it * 2 }),
@@ -216,7 +216,7 @@ fun OptionsScreen(
 				color = MaterialTheme.colorScheme.surface,
 				modifier =
 				(
-					if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					if (context.isRunningOnTv()) {
 						Modifier
 							.height(IntrinsicSize.Min)
 							.fillMaxWidth(fillMaxWidth)
@@ -257,7 +257,7 @@ fun OptionsScreen(
 				color = MaterialTheme.colorScheme.surface,
 				modifier =
 				(
-					if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					if (context.isRunningOnTv()) {
 						Modifier
 							.height(IntrinsicSize.Min)
 							.fillMaxWidth(fillMaxWidth)
@@ -297,13 +297,13 @@ fun OptionsScreen(
 							uiState.tunnel?.tunnelNetworks?.forEach { ssid ->
 								ClickableIconButton(
 									onClick = {
-										if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+										if (context.isRunningOnTv()) {
 											focusRequester.requestFocus()
 											optionsViewModel.onDeleteRunSSID(ssid)
 										}
 									},
 									onIconClick = {
-										if (WireGuardAutoTunnel.isRunningOnAndroidTv()) focusRequester.requestFocus()
+										if (context.isRunningOnTv()) focusRequester.requestFocus()
 										optionsViewModel.onDeleteRunSSID(ssid)
 									},
 									text = ssid,

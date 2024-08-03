@@ -7,8 +7,7 @@
     <string name="tunnels">Tunnel</string>
     <string name="enable_auto_tunnel">Auto-Tunneln starten</string>
     <string name="tunnel_mobile_data">Tunnel für mobile Daten</string>
-    <string name="one_tunnel_required">Mindestens ein Tunnel wird für diese Funktion benötigt</string>
-    <string name="privacy_policy">Datenschutzbestimmungen anzeigen</string>
+	<string name="privacy_policy">Datenschutzbestimmungen anzeigen</string>
     <string name="disable_auto_tunnel">Auto-Tunneln stoppen</string>
     <string name="okay">Ok</string>
     <string name="tunnel_on_ethernet">Tunnel für Ethernet</string>
@@ -75,7 +74,6 @@
     <string name="persistent_keepalive">Dauerhaftes Keepalive</string>
     <string name="background_location_required">Hintergrund Standortdienste erforderlich</string>
     <string name="enable_app_lock">App-Sperre aktivieren</string>
-    <string name="discord_description">Tritt der Community bei</string>
     <string name="interface_">Schnittstelle</string>
     <string name="listen_port">Eingehender Port</string>
     <string name="random">(zufällig)</string>

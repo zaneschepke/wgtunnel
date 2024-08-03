@@ -21,8 +21,7 @@
     <string name="enable_auto_tunnel">Start auto-tunneling</string>
     <string name="disable_auto_tunnel">Stop auto-tunneling</string>
     <string name="tunnel_mobile_data">Tunnel on mobile data</string>
-    <string name="one_tunnel_required">At least one tunnel required to use this feature</string>
-    <string name="privacy_policy">View Privacy Policy</string>
+	<string name="privacy_policy">View Privacy Policy</string>
     <string name="okay">Okay</string>
     <string name="tunnel_on_ethernet">Tunnel on ethernet</string>
     <string name="prominent_background_location_message">This feature requires background location permission to enable Wi-Fi SSID monitoring even while the application is closed. For more details, please see the Privacy Policy linked on the Support screen.</string>
@@ -104,8 +103,7 @@
     <string name="email_chooser">Send an email…</string>
     <string name="go">go</string>
     <string name="docs_description">Read the docs</string>
-    <string name="discord_description">Join the community</string>
-    <string name="email_description">Send me an email</string>
+	<string name="email_description">Send me an email</string>
     <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
     <string name="use_kernel">Use kernel module</string>
     <string name="error_ssid_exists">SSID already exists</string>
@@ -178,6 +176,9 @@
     <string name="error_file_format">Invalid tunnel config format</string>
     <string name="restart_at_boot">Restart on boot</string>
     <string name="vpn_denied_dialog_title">Permission Denied</string>
-	<string name="vpn_denied_dialog_message">Permission to start the VPN has either been explicitly denied or is being blocked by the system.</string>
-	<string name="vpn_denied_dialog_message2">If VPN permission is being blocked by the system, please confirm no other app is using the Always-on VPN feature and try again.</string>
+	<string name="vpn_settings">VPN system settings</string>
+	<string name="always_on_message">VPN connection permission has been denied. Please check the</string>
+	<string name="always_on_message2">to make sure Always-on VPN is turned off for all other apps and try again</string>
+	<string name="chat_description">Join the community</string>
+	<string name="tunnel_required">Feature requires at least one tunnel</string>
 </resources>

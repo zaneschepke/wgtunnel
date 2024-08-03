@@ -7,17 +7,16 @@ import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.config.Config
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
-import com.zaneschepke.wireguardautotunnel.util.toWgQuickString
+import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,14 +35,14 @@ class MainViewModel
 constructor(
 	private val appDataRepository: AppDataRepository,
 	private val serviceManager: ServiceManager,
-	val vpnService: VpnService,
+	val tunnelService: TunnelService,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 	val uiState =
 		combine(
 			appDataRepository.settings.getSettingsFlow(),
 			appDataRepository.tunnels.getTunnelConfigsFlow(),
-			vpnService.vpnState,
+			tunnelService.vpnState,
 		) { settings, tunnels, vpnState ->
 			MainUiState(settings, tunnels, vpnState, false)
 		}
@@ -66,7 +65,6 @@ constructor(
 				resetTunnelSetting(settings)
 			}
 			appDataRepository.tunnels.delete(tunnel)
-			WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
 		}
 	}
 
@@ -79,18 +77,18 @@ constructor(
 		)
 	}
 
-	fun onTunnelStart(tunnelConfig: TunnelConfig, context: Context) = viewModelScope.launch {
-		Timber.d("On start called!")
-		serviceManager.startVpnService(
-			context,
-			tunnelConfig.id,
-			isManualStart = true,
-		)
+	suspend fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
+		Timber.i("Starting tunnel ${tunnelConfig.name}")
+		tunnelService.startTunnel(tunnelConfig).onSuccess {
+			appDataRepository.appState.setTunnelRunningFromManualStart(tunnelConfig.id)
+		}
 	}
 
-	fun onTunnelStop(context: Context) = viewModelScope.launch {
+	fun onTunnelStop(tunnel: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Stopping active tunnel")
-		serviceManager.stopVpnService(context, isManualStop = true)
+		tunnelService.stopTunnel(tunnel).onSuccess {
+			appDataRepository.appState.setManualStop()
+		}
 	}
 
 	private fun validateConfigString(config: String, configType: ConfigType) {
@@ -301,23 +299,19 @@ constructor(
 	}
 
 	private fun addTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
-		val firstTunnel = appDataRepository.tunnels.count() == 0
 		saveTunnel(tunnelConfig)
-		if (firstTunnel) WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
 	}
 
 	fun pauseAutoTunneling() = viewModelScope.launch {
 		appDataRepository.settings.save(
 			uiState.value.settings.copy(isAutoTunnelPaused = true),
 		)
-		WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate()
 	}
 
 	fun resumeAutoTunneling() = viewModelScope.launch {
 		appDataRepository.settings.save(
 			uiState.value.settings.copy(isAutoTunnelPaused = false),
 		)
-		WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate()
 	}
 
 	private fun saveTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {

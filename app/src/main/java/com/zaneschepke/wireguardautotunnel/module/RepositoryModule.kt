@@ -54,14 +54,14 @@ class RepositoryModule {
 
 	@Singleton
 	@Provides
-	fun provideTunnelConfigRepository(tunnelConfigDao: TunnelConfigDao): TunnelConfigRepository {
-		return RoomTunnelConfigRepository(tunnelConfigDao)
+	fun provideTunnelConfigRepository(tunnelConfigDao: TunnelConfigDao, @IoDispatcher ioDispatcher: CoroutineDispatcher): TunnelConfigRepository {
+		return RoomTunnelConfigRepository(tunnelConfigDao, ioDispatcher)
 	}
 
 	@Singleton
 	@Provides
-	fun provideSettingsRepository(settingsDao: SettingsDao): SettingsRepository {
-		return RoomSettingsRepository(settingsDao)
+	fun provideSettingsRepository(settingsDao: SettingsDao, @IoDispatcher ioDispatcher: CoroutineDispatcher): SettingsRepository {
+		return RoomSettingsRepository(settingsDao, ioDispatcher)
 	}
 
 	@Singleton
@@ -72,8 +72,8 @@ class RepositoryModule {
 
 	@Provides
 	@Singleton
-	fun provideGeneralStateRepository(dataStoreManager: DataStoreManager): AppStateRepository {
-		return DataStoreAppStateRepository(dataStoreManager)
+	fun provideGeneralStateRepository(dataStoreManager: DataStoreManager, @IoDispatcher ioDispatcher: CoroutineDispatcher): AppStateRepository {
+		return DataStoreAppStateRepository(dataStoreManager, ioDispatcher)
 	}
 
 	@Provides

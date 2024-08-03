@@ -4,10 +4,10 @@ import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import kotlinx.coroutines.flow.StateFlow
 
-interface VpnService : Tunnel, org.amnezia.awg.backend.Tunnel {
-	suspend fun startTunnel(tunnelConfig: TunnelConfig? = null): TunnelState
+interface TunnelService : Tunnel, org.amnezia.awg.backend.Tunnel {
+	suspend fun startTunnel(tunnelConfig: TunnelConfig): Result<TunnelState>
 
-	suspend fun stopTunnel()
+	suspend fun stopTunnel(tunnelConfig: TunnelConfig): Result<TunnelState>
 
 	val vpnState: StateFlow<VpnState>
 

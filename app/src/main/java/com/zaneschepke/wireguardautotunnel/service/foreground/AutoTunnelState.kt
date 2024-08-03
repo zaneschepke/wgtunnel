@@ -2,7 +2,7 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 
-data class WatcherState(
+data class AutoTunnelState(
 	val isWifiConnected: Boolean = false,
 	val isEthernetConnected: Boolean = false,
 	val isMobileDataConnected: Boolean = false,

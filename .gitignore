@@ -71,3 +71,4 @@ app/release/output.json
 .idea/codeStyles/
 # where we keep our signing secrets locally
 app/signing.properties
+/.kotlin/

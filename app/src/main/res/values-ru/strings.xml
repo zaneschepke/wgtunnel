@@ -58,7 +58,6 @@
     <string name="tunnel_on_ethernet">Туннелировать через Ethernet</string>
     <string name="cancel">Отмена</string>
     <string name="docs_description">Посмотреть документацию</string>
-    <string name="discord_description">Присоединиться к сообществу</string>
     <string name="email_chooser">Отправить письмо…</string>
     <string name="add_trusted_ssid">Добавить доверенное имя сети Wi-Fi</string>
     <string name="included">включено</string>
@@ -88,8 +87,7 @@
     <string name="tunnels">Туннели</string>
     <string name="enable_auto_tunnel">Запустить авто-туннель</string>
     <string name="disable_auto_tunnel">Остановить авто-туннель</string>
-    <string name="one_tunnel_required">Для использования этой функции нужно настроить хотя бы один туннель</string>
-    <string name="okay">Хорошо</string>
+	<string name="okay">Хорошо</string>
     <string name="prominent_background_location_title">Фоновая передача местоположения</string>
     <string name="thank_you">Благодарим Вас за использование WG Tunnel!</string>
     <string name="trusted_ssid_value_description">Отправить SSID</string>

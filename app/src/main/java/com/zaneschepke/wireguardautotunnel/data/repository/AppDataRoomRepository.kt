@@ -20,7 +20,7 @@ constructor(
 				tunnels.getById(it)
 			}
 		} else {
-			null
+			getPrimaryOrFirstTunnel()
 		}
 	}
 

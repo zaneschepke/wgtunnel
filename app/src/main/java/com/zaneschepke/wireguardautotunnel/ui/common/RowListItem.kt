@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
-import com.zaneschepke.wireguardautotunnel.util.toThreeDecimalPlaceString
+import com.zaneschepke.wireguardautotunnel.util.extensions.toThreeDecimalPlaceString
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
