@@ -1,7 +1,7 @@
 [versions]
 accompanist = "0.34.0"
 activityCompose = "1.9.1"
-amneziawgAndroid = "1.2.0"
+amneziawgAndroid = "1.2.1"
 androidx-junit = "1.2.1"
 appcompat = "1.7.0"
 biometricKtx = "1.2.0-alpha05"
