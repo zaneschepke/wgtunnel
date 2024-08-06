@@ -192,17 +192,15 @@ constructor(
 	suspend fun onToggleKernelMode(): Result<Unit> {
 		return withContext(ioDispatcher) {
 			if (!uiState.value.settings.isKernelEnabled) {
-				try {
-					rootShell.get().start()
-					Timber.i("Root shell accepted!")
+				requestRoot().onSuccess {
 					saveSettings(
 						uiState.value.settings.copy(
 							isKernelEnabled = true,
 							isAmneziaEnabled = false,
 						),
 					)
-				} catch (e: RootShell.RootShellException) {
-					Timber.e(e)
+				}.onFailure {
+					Timber.e(it)
 					saveKernelMode(enabled = false)
 					return@withContext Result.failure(WgTunnelExceptions.RootDenied())
 				}
@@ -237,5 +235,12 @@ constructor(
 				isRestoreOnBootEnabled = !uiState.value.settings.isRestoreOnBootEnabled,
 			),
 		)
+	}
+
+	fun requestRoot(): Result<Unit> {
+		return kotlin.runCatching {
+			rootShell.get().start()
+			Timber.i("Root shell accepted!")
+		}
 	}
 }

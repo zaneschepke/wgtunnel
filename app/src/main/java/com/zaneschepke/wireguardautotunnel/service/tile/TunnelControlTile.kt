@@ -1,6 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.service.tile
 
+import android.content.Intent
 import android.os.Build
+import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.lifecycle.Lifecycle
@@ -16,8 +18,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import com.zaneschepke.wireguardautotunnel.util.extensions.stopTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -38,18 +38,23 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
 	private var tileTunnel: TunnelConfig? = null
 
+	/* This works around an annoying unsolved frameworks bug some people are hitting. */
+	override fun onBind(intent: Intent): IBinder? {
+		var ret: IBinder? = null
+		try {
+			ret = super.onBind(intent)
+		} catch (e: Throwable) {
+			Timber.e("Failed to bind to TunnelTile")
+		}
+		return ret
+	}
+
 	override fun onCreate() {
 		super.onCreate()
 		Timber.d("onCreate for tile service")
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 
 		applicationScope.launch {
-			launch {
-				tunnelService.vpnState.map { it.tunnelConfig to it.status }.distinctUntilChanged().collect {
-					Timber.d("Tunnel state change tile: ${it.first?.name} : ${it.second}")
-					updateTile(it)
-				}
-			}
 			launch {
 				appDataRepository.tunnels.getTunnelConfigsFlow().takeIf {
 					tunnelService.getState() == TunnelState.DOWN
@@ -80,26 +85,26 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	override fun onStartListening() {
 		super.onStartListening()
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+		lifecycleScope.launch {
+			val lastActive = appDataRepository.appState.getActiveTunnelId()
+			lastActive?.let {
+				val tunnel = appDataRepository.tunnels.getById(it)
+				updateTile(tunnel)
+			}
+		}
 	}
 
 	override fun onClick() {
 		super.onClick()
-		Timber.d("Clicked")
 		unlockAndRun {
 			lifecycleScope.launch {
-				Timber.d("In scope")
 				val context = this@TunnelControlTile
-				when (tunnelService.getState()) {
-					TunnelState.UP -> tunnelService.vpnState.value.tunnelConfig?.let {
-						Timber.d("Calling stop ${it.name}")
-						context.stopTunnelBackground(it.id)
-					}
-					else -> {
-						Timber.d("tunnel down")
-						(tileTunnel ?: appDataRepository.getPrimaryOrFirstTunnel())?.let {
-							Timber.d("Calling start ${it.name}")
-							context.startTunnelBackground(it.id)
-						}
+				val lastActive = appDataRepository.appState.getActiveTunnelId()
+				lastActive?.let { lastTun ->
+					val tunnel = appDataRepository.tunnels.getById(lastTun)
+					tunnel?.let { tun ->
+						if (tun.isActive) return@launch context.stopTunnelBackground(tun.id)
+						context.startTunnelBackground(tun.id)
 					}
 				}
 			}
@@ -107,40 +112,45 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	}
 
 	private fun setActive() {
-		qsTile.state = Tile.STATE_ACTIVE
-		qsTile.updateTile()
+		kotlin.runCatching {
+			qsTile.state = Tile.STATE_ACTIVE
+			qsTile.updateTile()
+		}
 	}
 
 	private fun setInactive() {
-		qsTile.state = Tile.STATE_INACTIVE
-		qsTile.updateTile()
+		kotlin.runCatching {
+			qsTile.state = Tile.STATE_INACTIVE
+			qsTile.updateTile()
+		}
 	}
 
 	private fun setUnavailable() {
-		qsTile.state = Tile.STATE_UNAVAILABLE
-		setTileDescription("")
-		qsTile.updateTile()
+		kotlin.runCatching {
+			qsTile.state = Tile.STATE_UNAVAILABLE
+			setTileDescription("")
+			qsTile.updateTile()
+		}
 	}
 
 	private fun setTileDescription(description: String) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			qsTile.subtitle = description
+		kotlin.runCatching {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				qsTile.subtitle = description
+			}
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+				qsTile.stateDescription = description
+			}
+			qsTile.updateTile()
 		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			qsTile.stateDescription = description
-		}
-		qsTile.updateTile()
 	}
 
-	private fun updateTile(state: Pair<TunnelConfig?, TunnelState>) {
+	private fun updateTile(tunnelConfig: TunnelConfig?) {
 		kotlin.runCatching {
-			when (state.second) {
-				TunnelState.UP -> setActive()
-				TunnelState.DOWN -> setInactive()
-				TunnelState.TOGGLE -> setInactive()
-			}
-			state.first?.let { config ->
-				setTileDescription(config.name)
+			tunnelConfig?.let {
+				setTileDescription(it.name)
+				if (it.isActive) return setActive()
+				setInactive()
 			}
 		}
 	}

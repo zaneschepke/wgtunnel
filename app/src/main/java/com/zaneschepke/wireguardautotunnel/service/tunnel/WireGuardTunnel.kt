@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel
 
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.Tunnel.State
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
@@ -30,7 +31,7 @@ import javax.inject.Provider
 class WireGuardTunnel
 @Inject
 constructor(
-	private val userspaceAmneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
+	private val amneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
 	@Userspace private val userspaceBackend: Provider<Backend>,
 	@Kernel private val kernelBackend: Provider<Backend>,
 	private val appDataRepository: AppDataRepository,
@@ -39,6 +40,8 @@ constructor(
 ) : TunnelService {
 	private val _vpnState = MutableStateFlow(VpnState())
 	override val vpnState: StateFlow<VpnState> = _vpnState.asStateFlow()
+
+	override val runningTunnelNames: Set<String> = wgBackend().runningTunnelNames
 
 	private var statsJob: Job? = null
 
@@ -88,7 +91,7 @@ constructor(
 			)
 			TunnelConfig.configFromAmQuick(tunnelConfig.wgQuick)
 		}
-		val state = userspaceAmneziaBackend.get().setState(this, tunnelState.toAmState(), config)
+		val state = amneziaBackend.get().setState(this, tunnelState.toAmState(), config)
 		return TunnelState.from(state)
 	}
 
@@ -96,7 +99,7 @@ constructor(
 		Timber.i("Using Wg backend")
 		val wgConfig = TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)
 		val state =
-			backend().setState(
+			wgBackend().setState(
 				this,
 				tunnelState.toWgState(),
 				wgConfig,
@@ -107,11 +110,16 @@ constructor(
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
 		return withContext(ioDispatcher) {
 			emitTunnelConfig(tunnelConfig)
-			setState(tunnelConfig, TunnelState.UP)
+			setState(tunnelConfig, TunnelState.UP).onSuccess {
+				emitTunnelState(it)
+				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = it == TunnelState.UP))
+				appDataRepository.appState.setActiveTunnelId(tunnelConfig.id)
+				WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
+			}
 		}
 	}
 
-	private fun backend(): Backend {
+	private fun wgBackend(): Backend {
 		return when {
 			backendIsWgUserspace -> userspaceBackend.get()
 			!backendIsWgUserspace && !backendIsAmneziaUserspace -> kernelBackend.get()
@@ -155,7 +163,9 @@ constructor(
 		return withContext(ioDispatcher) {
 			setState(tunnelConfig, TunnelState.DOWN).onSuccess {
 				emitTunnelState(it)
+				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = it == TunnelState.UP))
 				resetBackendStatistics()
+				WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
 			}.onFailure {
 				Timber.e(it)
 			}
@@ -165,10 +175,10 @@ constructor(
 	override fun getState(): TunnelState {
 		return if (backendIsAmneziaUserspace) {
 			TunnelState.from(
-				userspaceAmneziaBackend.get().getState(this),
+				amneziaBackend.get().getState(this),
 			)
 		} else {
-			TunnelState.from(backend().getState(this))
+			TunnelState.from(wgBackend().getState(this))
 		}
 	}
 
@@ -199,12 +209,12 @@ constructor(
 			if (backendIsAmneziaUserspace) {
 				emitBackendStatistics(
 					AmneziaStatistics(
-						userspaceAmneziaBackend.get().getStatistics(this@WireGuardTunnel),
+						amneziaBackend.get().getStatistics(this@WireGuardTunnel),
 					),
 				)
 			} else {
 				emitBackendStatistics(
-					WireGuardStatistics(backend().getStatistics(this@WireGuardTunnel)),
+					WireGuardStatistics(wgBackend().getStatistics(this@WireGuardTunnel)),
 				)
 			}
 			delay(Constants.VPN_STATISTIC_CHECK_INTERVAL)

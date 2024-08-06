@@ -1,6 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.service.tile
 
+import android.content.Intent
 import android.os.Build
+import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.lifecycle.Lifecycle
@@ -30,6 +32,17 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 	lateinit var applicationScope: CoroutineScope
 
 	private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
+
+	/* This works around an annoying unsolved frameworks bug some people are hitting. */
+	override fun onBind(intent: Intent): IBinder? {
+		var ret: IBinder? = null
+		try {
+			ret = super.onBind(intent)
+		} catch (e: Throwable) {
+			Timber.e("Failed to bind to AutoTunnelTile")
+		}
+		return ret
+	}
 
 	override fun onCreate() {
 		super.onCreate()
@@ -99,28 +112,36 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 	}
 
 	private fun setActive() {
-		qsTile.state = Tile.STATE_ACTIVE
-		qsTile.updateTile()
+		kotlin.runCatching {
+			qsTile.state = Tile.STATE_ACTIVE
+			qsTile.updateTile()
+		}
 	}
 
 	private fun setInactive() {
-		qsTile.state = Tile.STATE_INACTIVE
-		qsTile.updateTile()
+		kotlin.runCatching {
+			qsTile.state = Tile.STATE_INACTIVE
+			qsTile.updateTile()
+		}
 	}
 
 	private fun setUnavailable() {
-		qsTile.state = Tile.STATE_UNAVAILABLE
-		qsTile.updateTile()
+		kotlin.runCatching {
+			qsTile.state = Tile.STATE_UNAVAILABLE
+			qsTile.updateTile()
+		}
 	}
 
 	private fun setTileDescription(description: String) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			qsTile.subtitle = description
+		kotlin.runCatching {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+				qsTile.subtitle = description
+			}
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+				qsTile.stateDescription = description
+			}
+			qsTile.updateTile()
 		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			qsTile.stateDescription = description
-		}
-		qsTile.updateTile()
 	}
 
 	override val lifecycle: Lifecycle

@@ -19,6 +19,8 @@ interface TunnelConfigRepository {
 
 	suspend fun getById(id: Int): TunnelConfig?
 
+	suspend fun getActive(): TunnelConfigs
+
 	suspend fun count(): Int
 
 	suspend fun findByTunnelName(name: String): TunnelConfig?

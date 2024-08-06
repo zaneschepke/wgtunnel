@@ -32,6 +32,11 @@ data class TunnelConfig(
 		defaultValue = "",
 	)
 	val amQuick: String = AM_QUICK_DEFAULT,
+	@ColumnInfo(
+		name = "is_Active",
+		defaultValue = "false",
+	)
+	val isActive: Boolean = false,
 ) {
 	companion object {
 		fun findDefault(tunnels: List<TunnelConfig>): TunnelConfig? {

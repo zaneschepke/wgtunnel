@@ -31,6 +31,12 @@
     <!--start service on boot permission-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!--android tv support-->
+
+	<permission
+		android:name="${applicationId}.permission.CONTROL_TUNNELS"
+		android:icon="@mipmap/ic_launcher"
+		android:protectionLevel="dangerous" />
+
     <uses-feature
         android:name="android.software.leanback"
         android:required="false" />
@@ -178,5 +184,13 @@
 			android:name=".receiver.BackgroundActionReceiver"
 			android:enabled="true"
 			android:exported="false"/>
+		<receiver
+			android:name=".receiver.KernelReceiver"
+			android:exported="false"
+			android:permission="${applicationId}.permission.CONTROL_TUNNELS">
+			<intent-filter>
+				<action android:name="com.wireguard.android.action.REFRESH_TUNNEL_STATES" />
+			</intent-filter>
+		</receiver>
     </application>
 </manifest>

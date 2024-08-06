@@ -16,11 +16,7 @@ interface AppStateRepository {
 
 	suspend fun setBatteryOptimizationDisableShown(shown: Boolean)
 
-	suspend fun isTunnelRunningFromManualStart(): Boolean
-
-	suspend fun setTunnelRunningFromManualStart(id: Int)
-
-	suspend fun setManualStop()
+	suspend fun setActiveTunnelId(id: Int)
 
 	suspend fun getActiveTunnelId(): Int?
 

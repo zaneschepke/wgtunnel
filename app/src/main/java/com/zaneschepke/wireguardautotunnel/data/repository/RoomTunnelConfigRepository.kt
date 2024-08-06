@@ -63,6 +63,12 @@ class RoomTunnelConfigRepository(
 		return withContext(ioDispatcher) { tunnelConfigDao.getById(id.toLong()) }
 	}
 
+	override suspend fun getActive(): TunnelConfigs {
+		return withContext(ioDispatcher) {
+			tunnelConfigDao.getActive()
+		}
+	}
+
 	override suspend fun count(): Int {
 		return withContext(ioDispatcher) { tunnelConfigDao.count().toInt() }
 	}

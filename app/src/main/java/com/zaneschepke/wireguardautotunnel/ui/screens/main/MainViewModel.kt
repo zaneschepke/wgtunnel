@@ -79,16 +79,12 @@ constructor(
 
 	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Starting tunnel ${tunnelConfig.name}")
-		tunnelService.startTunnel(tunnelConfig).onSuccess {
-			appDataRepository.appState.setTunnelRunningFromManualStart(tunnelConfig.id)
-		}
+		tunnelService.startTunnel(tunnelConfig)
 	}
 
 	fun onTunnelStop(tunnel: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Stopping active tunnel")
-		tunnelService.stopTunnel(tunnel).onSuccess {
-			appDataRepository.appState.setManualStop()
-		}
+		tunnelService.stopTunnel(tunnel)
 	}
 
 	private fun validateConfigString(config: String, configType: ConfigType) {
@@ -169,7 +165,7 @@ constructor(
 			var tunnelName = name
 			var num = 1
 			while (tunnels.any { it.name == tunnelName }) {
-				tunnelName = name + "($num)"
+				tunnelName = "$name($num)"
 				num++
 			}
 			tunnelName
@@ -188,7 +184,7 @@ constructor(
 					}
 
 					ConfigType.WIREGUARD -> {
-						Config.parse(it).toWgQuickString()
+						Config.parse(it).toWgQuickString(true)
 					}
 				}
 			}
@@ -261,7 +257,7 @@ constructor(
 										}
 
 										ConfigType.WIREGUARD -> {
-											Config.parse(zip).toWgQuickString()
+											Config.parse(zip).toWgQuickString(true)
 										}
 									}
 								addTunnel(

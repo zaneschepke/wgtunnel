@@ -206,22 +206,20 @@ fun SettingsScreen(
 	}
 
 	fun handleAutoTunnelToggle() {
-		if (uiState.isBatteryOptimizeDisableShown || isBatteryOptimizationsDisabled()) {
-			if (notificationPermissionState != null && !notificationPermissionState.status.isGranted) {
-				appViewModel.showSnackbarMessage(
-					context.getString(R.string.notification_permission_required),
-				)
-				return notificationPermissionState.launchPermissionRequest()
-			}
-			val intent = com.wireguard.android.backend.GoBackend.VpnService.prepare(context)
-			if (intent == null) {
-				viewModel.onToggleAutoTunnel(context)
-			} else {
-				vpnActivityResultState.launch(intent)
-			}
-		} else {
-			requestBatteryOptimizationsDisabled()
+		if (!uiState.isBatteryOptimizeDisableShown || !isBatteryOptimizationsDisabled()) return requestBatteryOptimizationsDisabled()
+		if (notificationPermissionState != null && !notificationPermissionState.status.isGranted) {
+			appViewModel.showSnackbarMessage(
+				context.getString(R.string.notification_permission_required),
+			)
+			return notificationPermissionState.launchPermissionRequest()
 		}
+		val intent = if (!uiState.settings.isKernelEnabled) {
+			com.wireguard.android.backend.GoBackend.VpnService.prepare(context)
+		} else {
+			null
+		}
+		if (intent != null) return vpnActivityResultState.launch(intent)
+		viewModel.onToggleAutoTunnel(context)
 	}
 
 	fun saveTrustedSSID() {
@@ -604,6 +602,22 @@ fun SettingsScreen(
 								}
 							},
 						)
+						Row(
+							verticalAlignment = Alignment.CenterVertically,
+							modifier =
+							Modifier
+								.fillMaxSize()
+								.padding(top = 5.dp),
+							horizontalArrangement = Arrangement.Center,
+						) {
+							TextButton(
+								onClick = {
+									viewModel.requestRoot()
+								},
+							) {
+								Text(stringResource(R.string.request_root))
+							}
+						}
 					}
 				}
 			}

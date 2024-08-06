@@ -47,32 +47,12 @@ class DataStoreAppStateRepository(
 		withContext(ioDispatcher) { dataStoreManager.saveToDataStore(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN, shown) }
 	}
 
-	override suspend fun isTunnelRunningFromManualStart(): Boolean {
-		return withContext(ioDispatcher) {
-			dataStoreManager.getFromStore(DataStoreManager.TUNNEL_RUNNING_FROM_MANUAL_START)
-				?: GeneralState.TUNNELING_RUNNING_FROM_MANUAL_START_DEFAULT
-		}
-	}
-
-	override suspend fun setTunnelRunningFromManualStart(id: Int) {
-		setTunnelRunningFromManualStart(true)
-		setActiveTunnelId(id)
-	}
-
-	override suspend fun setManualStop() {
-		setTunnelRunningFromManualStart(false)
-	}
-
-	private suspend fun setTunnelRunningFromManualStart(running: Boolean) {
-		withContext(ioDispatcher) { dataStoreManager.saveToDataStore(DataStoreManager.TUNNEL_RUNNING_FROM_MANUAL_START, running) }
-	}
-
 	override suspend fun getActiveTunnelId(): Int? {
-		return withContext(ioDispatcher) { dataStoreManager.getFromStore(DataStoreManager.ACTIVE_TUNNEL) }
+		return withContext(ioDispatcher) { dataStoreManager.getFromStore(DataStoreManager.LAST_ACTIVE_TUNNEL) }
 	}
 
-	private suspend fun setActiveTunnelId(id: Int) {
-		withContext(ioDispatcher) { dataStoreManager.saveToDataStore(DataStoreManager.ACTIVE_TUNNEL, id) }
+	override suspend fun setActiveTunnelId(id: Int) {
+		withContext(ioDispatcher) { dataStoreManager.saveToDataStore(DataStoreManager.LAST_ACTIVE_TUNNEL, id) }
 	}
 
 	override suspend fun getCurrentSsid(): String? {
@@ -94,12 +74,9 @@ class DataStoreAppStateRepository(
 						isBatteryOptimizationDisableShown =
 						pref[DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN]
 							?: GeneralState.BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT,
-						isTunnelRunningFromManualStart =
-						pref[DataStoreManager.TUNNEL_RUNNING_FROM_MANUAL_START]
-							?: GeneralState.TUNNELING_RUNNING_FROM_MANUAL_START_DEFAULT,
 						isPinLockEnabled =
 						pref[DataStoreManager.IS_PIN_LOCK_ENABLED]
-							?: GeneralState.TUNNELING_RUNNING_FROM_MANUAL_START_DEFAULT,
+							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
 					)
 				} catch (e: IllegalArgumentException) {
 					Timber.e(e)

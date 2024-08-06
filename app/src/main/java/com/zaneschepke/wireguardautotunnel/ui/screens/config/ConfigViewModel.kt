@@ -293,7 +293,7 @@ constructor(
 
 	fun onSaveAllChanges(configType: ConfigType): Result<Unit> {
 		return try {
-			val wgQuick = buildConfig().toWgQuickString()
+			val wgQuick = buildConfig().toWgQuickString(true)
 			val amQuick =
 				if (configType == ConfigType.AMNEZIA) {
 					buildAmConfig().toAwgQuickString()

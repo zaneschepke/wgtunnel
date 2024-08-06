@@ -1,7 +1,7 @@
 [versions]
 accompanist = "0.34.0"
 activityCompose = "1.9.1"
-amneziawgAndroid = "1.2.0"
+amneziawgAndroid = "1.2.1"
 androidx-junit = "1.2.1"
 appcompat = "1.7.0"
 biometricKtx = "1.2.0-alpha05"
@@ -21,7 +21,7 @@ navigationCompose = "2.7.7"
 pinLockCompose = "1.0.3"
 roomVersion = "2.6.1"
 timber = "5.0.1"
-tunnel = "1.0.20230706"
+tunnel = "1.2.1"
 androidGradlePlugin = "8.5.1"
 kotlin = "2.0.0"
 ksp = "2.0.0-1.0.24"
@@ -88,7 +88,7 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 
 pin-lock-compose = { module = "com.zaneschepke:pin_lock_compose", version.ref = "pinLockCompose" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
-tunnel = { module = "com.wireguard.android:tunnel", version.ref = "tunnel" }
+tunnel = { module = "com.zaneschepke:wireguard-android", version.ref = "tunnel" }
 
 zaneschepke-multifab = { module = "com.zaneschepke:multifab", version.ref = "multifabVersion" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }

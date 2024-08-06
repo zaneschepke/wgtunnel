@@ -90,6 +90,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.handshakeStatus
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.mapPeerStats
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
+import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -196,7 +197,11 @@ fun MainScreen(
 
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
 		if (checked) {
-			viewModel.onTunnelStart(tunnel)
+			if (uiState.settings.isKernelEnabled) {
+				context.startTunnelBackground(tunnel.id)
+			} else {
+				viewModel.onTunnelStart(tunnel)
+			}
 		} else {
 			viewModel.onTunnelStop(
 				tunnel,
@@ -481,8 +486,9 @@ fun MainScreen(
 								checked = checked,
 								onCheckedChange = { checked ->
 									if (!checked) expanded.value = false
-									val intent = GoBackend.VpnService.prepare(context) ?: return@Switch onTunnelToggle(checked, tunnel)
-									vpnActivityResultState.launch(intent)
+									val intent = if (uiState.settings.isKernelEnabled) null else GoBackend.VpnService.prepare(context)
+									if (intent != null) return@Switch vpnActivityResultState.launch(intent)
+									onTunnelToggle(checked, tunnel)
 								},
 							)
 							if (context.isRunningOnTv()) {

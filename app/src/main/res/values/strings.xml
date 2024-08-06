@@ -181,4 +181,5 @@
 	<string name="always_on_message2">to make sure Always-on VPN is turned off for all other apps and try again</string>
 	<string name="chat_description">Join the community</string>
 	<string name="tunnel_required">Feature requires at least one tunnel</string>
+    <string name="request_root">Request root</string>
 </resources>
