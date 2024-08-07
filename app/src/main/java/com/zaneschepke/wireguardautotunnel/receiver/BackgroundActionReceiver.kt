@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.Intent
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,12 +26,16 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 	@Inject
 	lateinit var tunnelConfigRepository: TunnelConfigRepository
 
+	@Inject
+	@IoDispatcher
+	lateinit var ioDispatcher: CoroutineDispatcher
+
 	override fun onReceive(context: Context, intent: Intent) {
 		val id = intent.getIntExtra(TUNNEL_ID_EXTRA_KEY, 0)
 		if (id == 0) return
 		when (intent.action) {
 			ACTION_CONNECT -> {
-				applicationScope.launch {
+				applicationScope.launch(ioDispatcher) {
 					val tunnel = tunnelConfigRepository.getById(id)
 					tunnel?.let {
 						tunnelService.startTunnel(it)
@@ -37,7 +43,7 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 				}
 			}
 			ACTION_DISCONNECT -> {
-				applicationScope.launch {
+				applicationScope.launch(ioDispatcher) {
 					val tunnel = tunnelConfigRepository.getById(id)
 					tunnel?.let {
 						tunnelService.stopTunnel(it)

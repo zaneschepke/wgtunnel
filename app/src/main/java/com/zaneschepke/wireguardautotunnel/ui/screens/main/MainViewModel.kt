@@ -77,12 +77,12 @@ constructor(
 		)
 	}
 
-	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
+	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch(ioDispatcher) {
 		Timber.i("Starting tunnel ${tunnelConfig.name}")
 		tunnelService.startTunnel(tunnelConfig)
 	}
 
-	fun onTunnelStop(tunnel: TunnelConfig) = viewModelScope.launch {
+	fun onTunnelStop(tunnel: TunnelConfig) = viewModelScope.launch(ioDispatcher) {
 		Timber.i("Stopping active tunnel")
 		tunnelService.stopTunnel(tunnel)
 	}

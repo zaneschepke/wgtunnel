@@ -612,7 +612,9 @@ fun SettingsScreen(
 						) {
 							TextButton(
 								onClick = {
-									viewModel.requestRoot()
+									viewModel.requestRoot().onFailure {
+										context.showToast(R.string.error_root_denied)
+									}
 								},
 							) {
 								Text(stringResource(R.string.request_root))
