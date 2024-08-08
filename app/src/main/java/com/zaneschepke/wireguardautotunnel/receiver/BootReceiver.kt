@@ -5,11 +5,9 @@ import android.content.Context
 import android.content.Intent
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -30,13 +28,9 @@ class BootReceiver : BroadcastReceiver() {
 	@ApplicationScope
 	lateinit var applicationScope: CoroutineScope
 
-	@Inject
-	@IoDispatcher
-	lateinit var ioDispatcher: CoroutineDispatcher
-
 	override fun onReceive(context: Context, intent: Intent) {
 		if (Intent.ACTION_BOOT_COMPLETED != intent.action) return
-		applicationScope.launch(ioDispatcher) {
+		applicationScope.launch {
 			val settings = appDataRepository.settings.getSettings()
 			if (settings.isRestoreOnBootEnabled) {
 				appDataRepository.getStartTunnelConfig()?.let {

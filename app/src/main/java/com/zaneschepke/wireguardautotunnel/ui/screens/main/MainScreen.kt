@@ -237,7 +237,7 @@ fun MainScreen(
 		},
 		floatingActionButtonPosition = FabPosition.End,
 		floatingActionButton = {
-			ScrollDismissMultiFab(focusRequester, isVisible = isVisible.value, onFabItemClicked = {
+			ScrollDismissMultiFab(R.drawable.add, focusRequester, isVisible = isVisible.value, onFabItemClicked = {
 				showBottomSheet = true
 				configType = ConfigType.valueOf(it.value)
 			})
@@ -473,7 +473,7 @@ fun MainScreen(
 							val checked by remember {
 								derivedStateOf {
 									(
-										uiState.vpnState.status == TunnelState.UP &&
+										uiState.vpnState.status != TunnelState.DOWN &&
 											tunnel.name == uiState.vpnState.tunnelConfig?.name
 										)
 								}

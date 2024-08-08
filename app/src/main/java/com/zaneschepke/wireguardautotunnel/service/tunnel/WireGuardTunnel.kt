@@ -13,6 +13,7 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStat
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -69,7 +70,7 @@ constructor(
 		}
 	}
 
-	private fun setState(tunnelConfig: TunnelConfig, tunnelState: TunnelState): Result<TunnelState> {
+	private suspend fun setState(tunnelConfig: TunnelConfig, tunnelState: TunnelState): Result<TunnelState> {
 		return runCatching {
 			if (backendIsAmneziaUserspace) {
 				setStateAmnezia(tunnelConfig, tunnelState)
@@ -81,40 +82,45 @@ constructor(
 		}
 	}
 
-	private fun setStateAmnezia(tunnelConfig: TunnelConfig, tunnelState: TunnelState): TunnelState {
-		Timber.i("Using Amnezia backend")
-		val config = if (tunnelConfig.amQuick != "") {
-			TunnelConfig.configFromAmQuick(tunnelConfig.amQuick)
-		} else {
-			Timber.w(
-				"Using backwards compatible wg config, amnezia specific config not found.",
-			)
-			TunnelConfig.configFromAmQuick(tunnelConfig.wgQuick)
+	private suspend fun setStateAmnezia(tunnelConfig: TunnelConfig, tunnelState: TunnelState): TunnelState {
+		return withContext(ioDispatcher) {
+			Timber.i("Using Amnezia backend")
+			val config = if (tunnelConfig.amQuick != "") {
+				TunnelConfig.configFromAmQuick(tunnelConfig.amQuick)
+			} else {
+				Timber.w(
+					"Using backwards compatible wg config, amnezia specific config not found.",
+				)
+				TunnelConfig.configFromAmQuick(tunnelConfig.wgQuick)
+			}
+			val state = amneziaBackend.get().setState(this@WireGuardTunnel, tunnelState.toAmState(), config)
+			TunnelState.from(state)
 		}
-		val state = amneziaBackend.get().setState(this, tunnelState.toAmState(), config)
-		return TunnelState.from(state)
 	}
 
-	private fun setStateWg(tunnelConfig: TunnelConfig, tunnelState: TunnelState): TunnelState {
-		Timber.i("Using Wg backend")
-		val wgConfig = TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)
-		val state =
-			wgBackend().setState(
-				this,
-				tunnelState.toWgState(),
-				wgConfig,
-			)
-		return TunnelState.from(state)
+	private suspend fun setStateWg(tunnelConfig: TunnelConfig, tunnelState: TunnelState): TunnelState {
+		return withContext(ioDispatcher) {
+			Timber.i("Using Wg backend")
+			val wgConfig = TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)
+			val state =
+				wgBackend().setState(
+					this@WireGuardTunnel,
+					tunnelState.toWgState(),
+					wgConfig,
+				)
+			TunnelState.from(state)
+		}
 	}
 
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
 		return withContext(ioDispatcher) {
+			if (_vpnState.value.status == TunnelState.UP) vpnState.value.tunnelConfig?.let { stopTunnel(it) }
 			emitTunnelConfig(tunnelConfig)
 			setState(tunnelConfig, TunnelState.UP).onSuccess {
 				emitTunnelState(it)
 				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = it == TunnelState.UP))
 				appDataRepository.appState.setActiveTunnelId(tunnelConfig.id)
-				WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
+				WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
 			}
 		}
 	}
@@ -163,9 +169,9 @@ constructor(
 		return withContext(ioDispatcher) {
 			setState(tunnelConfig, TunnelState.DOWN).onSuccess {
 				emitTunnelState(it)
-				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = it == TunnelState.UP))
+				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
 				resetBackendStatistics()
-				WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
+				WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
 			}.onFailure {
 				Timber.e(it)
 			}
@@ -192,6 +198,7 @@ constructor(
 
 	private fun handleStateChange(state: TunnelState) {
 		emitTunnelState(state)
+		WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
 		if (state == TunnelState.UP) {
 			statsJob = startTunnelStatisticsJob()
 		}

@@ -3,10 +3,10 @@ package com.zaneschepke.wireguardautotunnel.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,9 +34,9 @@ class KernelReceiver : BroadcastReceiver() {
 					val tunnel = tunnelConfigRepository.findByTunnelName(name)
 					tunnel?.let {
 						tunnelConfigRepository.save(it.copy(isActive = true))
-						WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
 					}
 				}
+				context.requestTunnelTileServiceStateUpdate()
 			}
 		}
 	}

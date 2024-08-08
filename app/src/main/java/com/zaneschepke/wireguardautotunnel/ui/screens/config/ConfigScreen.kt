@@ -54,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -351,7 +350,7 @@ fun ConfigScreen(
 				Icon(
 					imageVector = Icons.Rounded.Save,
 					contentDescription = stringResource(id = R.string.save_changes),
-					tint = Color.DarkGray,
+					tint = MaterialTheme.colorScheme.background,
 				)
 			}
 		},
@@ -428,7 +427,7 @@ fun ConfigScreen(
 									Icon(
 										Icons.Rounded.Refresh,
 										stringResource(R.string.rotate_keys),
-										tint = Color.White,
+										tint = MaterialTheme.colorScheme.onSurface,
 									)
 								}
 							},
@@ -458,7 +457,7 @@ fun ConfigScreen(
 									Icon(
 										Icons.Rounded.ContentCopy,
 										stringResource(R.string.copy_public_key),
-										tint = Color.White,
+										tint = MaterialTheme.colorScheme.onSurface,
 									)
 								}
 							},

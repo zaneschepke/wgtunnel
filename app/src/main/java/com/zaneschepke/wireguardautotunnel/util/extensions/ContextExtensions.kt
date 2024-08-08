@@ -1,13 +1,17 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+import android.service.quicksettings.TileService
 import android.widget.Toast
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.receiver.BackgroundActionReceiver
+import com.zaneschepke.wireguardautotunnel.service.tile.AutoTunnelControlTile
+import com.zaneschepke.wireguardautotunnel.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.util.Constants
 
 fun Context.openWebUrl(url: String): Result<Unit> {
@@ -85,5 +89,19 @@ fun Context.stopTunnelBackground(tunnelId: Int) {
 			action = BackgroundActionReceiver.ACTION_DISCONNECT
 			putExtra(BackgroundActionReceiver.TUNNEL_ID_EXTRA_KEY, tunnelId)
 		},
+	)
+}
+
+fun Context.requestTunnelTileServiceStateUpdate() {
+	TileService.requestListeningState(
+		this,
+		ComponentName(this, TunnelControlTile::class.java),
+	)
+}
+
+fun Context.requestAutoTunnelTileServiceUpdate() {
+	TileService.requestListeningState(
+		this,
+		ComponentName(this, AutoTunnelControlTile::class.java),
 	)
 }

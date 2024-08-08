@@ -1,8 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.service.tile
 
-import android.content.Intent
 import android.os.Build
-import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.lifecycle.Lifecycle
@@ -38,39 +36,10 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
 	private var tileTunnel: TunnelConfig? = null
 
-	/* This works around an annoying unsolved frameworks bug some people are hitting. */
-	override fun onBind(intent: Intent): IBinder? {
-		var ret: IBinder? = null
-		try {
-			ret = super.onBind(intent)
-		} catch (e: Throwable) {
-			Timber.e("Failed to bind to TunnelTile")
-		}
-		return ret
-	}
-
 	override fun onCreate() {
 		super.onCreate()
 		Timber.d("onCreate for tile service")
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-
-		applicationScope.launch {
-			launch {
-				appDataRepository.tunnels.getTunnelConfigsFlow().takeIf {
-					tunnelService.getState() == TunnelState.DOWN
-				}?.collect { tunnels ->
-					kotlin.runCatching {
-						if (tunnels.isEmpty()) setUnavailable() else setInactive()
-					}
-					val tunnel = TunnelConfig.findDefault(tunnels)
-					Timber.d("Updating tile tunnel ${tunnel?.name}")
-					tileTunnel = tunnel
-					tunnel?.let {
-						setTileDescription(it.name)
-					}
-				}
-			}
-		}
 	}
 
 	override fun onStopListening() {
@@ -86,11 +55,29 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 		super.onStartListening()
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
 		lifecycleScope.launch {
-			val lastActive = appDataRepository.appState.getActiveTunnelId()
-			lastActive?.let {
-				val tunnel = appDataRepository.tunnels.getById(it)
-				updateTile(tunnel)
+			val settings = appDataRepository.settings.getSettings()
+			if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
+			if (settings.isKernelEnabled) return@launch updateTileStateKernel()
+			updateTileStateUserspace()
+		}
+	}
+
+	private suspend fun updateTileStateUserspace() {
+		val vpnState = tunnelService.vpnState.value
+		when (vpnState.status) {
+			TunnelState.UP -> updateTile(vpnState.tunnelConfig?.copy(isActive = true))
+			else -> {
+				val tunnel = appDataRepository.getStartTunnelConfig()
+				updateTile(tunnel?.copy(isActive = false))
 			}
+		}
+	}
+
+	private suspend fun updateTileStateKernel() {
+		val lastActive = appDataRepository.appState.getActiveTunnelId()
+		lastActive?.let {
+			val tunnel = appDataRepository.tunnels.getById(it)
+			updateTile(tunnel)
 		}
 	}
 

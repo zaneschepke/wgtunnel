@@ -241,6 +241,8 @@ constructor(
 		return kotlin.runCatching {
 			rootShell.get().start()
 			Timber.i("Root shell accepted!")
+		}.onFailure {
+			return Result.failure(WgTunnelExceptions.RootDenied())
 		}
 	}
 }

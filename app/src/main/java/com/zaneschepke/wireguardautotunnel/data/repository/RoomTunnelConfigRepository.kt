@@ -1,9 +1,11 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.TunnelConfigDao
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -24,6 +26,8 @@ class RoomTunnelConfigRepository(
 	override suspend fun save(tunnelConfig: TunnelConfig) {
 		withContext(ioDispatcher) {
 			tunnelConfigDao.save(tunnelConfig)
+		}.also {
+			WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
 		}
 	}
 
@@ -56,6 +60,8 @@ class RoomTunnelConfigRepository(
 	override suspend fun delete(tunnelConfig: TunnelConfig) {
 		withContext(ioDispatcher) {
 			tunnelConfigDao.delete(tunnelConfig)
+		}.also {
+			WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
 		}
 	}
 

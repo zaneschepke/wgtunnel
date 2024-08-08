@@ -52,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -401,7 +400,8 @@ fun SettingsScreen(
 									Text(
 										stringResource(R.string.none),
 										fontStyle = FontStyle.Italic,
-										color = Color.Gray,
+										style = MaterialTheme.typography.bodySmall,
+										color = MaterialTheme.colorScheme.onSurface,
 									)
 								}
 							}
@@ -613,7 +613,7 @@ fun SettingsScreen(
 							TextButton(
 								onClick = {
 									viewModel.requestRoot().onFailure {
-										context.showToast(R.string.error_root_denied)
+										appViewModel.showSnackbarMessage(it.getMessage(context))
 									}
 								},
 							) {

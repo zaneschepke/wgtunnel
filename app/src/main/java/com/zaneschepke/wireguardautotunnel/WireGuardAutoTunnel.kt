@@ -1,19 +1,15 @@
 package com.zaneschepke.wireguardautotunnel
 
 import android.app.Application
-import android.content.ComponentName
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
-import android.service.quicksettings.TileService
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.service.tile.AutoTunnelControlTile
-import com.zaneschepke.wireguardautotunnel.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.ReleaseTree
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -32,10 +28,6 @@ class WireGuardAutoTunnel : Application() {
 	@ApplicationScope
 	lateinit var applicationScope: CoroutineScope
 
-	@Inject
-	@IoDispatcher
-	lateinit var ioDispatcher: CoroutineDispatcher
-
 	override fun onCreate() {
 		super.onCreate()
 		instance = this
@@ -52,7 +44,7 @@ class WireGuardAutoTunnel : Application() {
 		} else {
 			Timber.plant(ReleaseTree())
 		}
-		applicationScope.launch(ioDispatcher) {
+		applicationScope.launch {
 			// TODO eventually make this support multitunnel
 			Timber.d("Check for active tunnels")
 			val activeTunnels = appDataRepository.tunnels.getActive()
@@ -60,7 +52,7 @@ class WireGuardAutoTunnel : Application() {
 			if (settings.isKernelEnabled) {
 				Timber.d("Kernel mode enabled, seeing if we need to start a tunnel")
 				activeTunnels.firstOrNull()?.let {
-					Timber.d("Trying to start active kernel tunnel")
+					Timber.d("Trying to start active kernel tunnel: ${it.name}")
 					tunnelService.startTunnel(it)
 				}
 			}
@@ -72,18 +64,5 @@ class WireGuardAutoTunnel : Application() {
 	companion object {
 		lateinit var instance: WireGuardAutoTunnel
 			private set
-
-		fun requestTunnelTileServiceStateUpdate() {
-			TileService.requestListeningState(
-				instance,
-				ComponentName(instance, TunnelControlTile::class.java),
-			)
-		}
-		fun requestAutoTunnelTileServiceUpdate() {
-			TileService.requestListeningState(
-				instance,
-				ComponentName(instance, AutoTunnelControlTile::class.java),
-			)
-		}
 	}
 }

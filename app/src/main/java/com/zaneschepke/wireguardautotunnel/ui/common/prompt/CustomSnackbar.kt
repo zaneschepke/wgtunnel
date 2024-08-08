@@ -53,10 +53,10 @@ fun CustomSnackBar(message: String, isRtl: Boolean = true, containerColor: Color
 				Icon(
 					icon,
 					contentDescription = icon.name,
-					tint = Color.White,
+					tint = MaterialTheme.colorScheme.onSurface,
 					modifier = Modifier.padding(end = 10.dp),
 				)
-				Text(message, color = Color.White, modifier = Modifier.padding(end = 5.dp))
+				Text(message, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(end = 5.dp))
 			}
 		}
 	}

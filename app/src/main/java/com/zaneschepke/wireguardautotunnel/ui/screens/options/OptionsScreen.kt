@@ -1,11 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.options
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -32,7 +27,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,22 +38,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.iamageo.multifablibrary.FabIcon
-import com.iamageo.multifablibrary.FabOption
-import com.iamageo.multifablibrary.MultiFabItem
-import com.iamageo.multifablibrary.MultiFloatingActionButton
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
@@ -67,6 +55,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissMultiFab
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
@@ -117,82 +106,12 @@ fun OptionsScreen(
 
 	Scaffold(
 		floatingActionButton = {
-			val secondaryColor = MaterialTheme.colorScheme.secondary
-			val tvFobColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-			val fobColor =
-				if (context.isRunningOnTv()) tvFobColor else secondaryColor
-			val fobIconColor =
-				if (context.isRunningOnTv()) Color.White else MaterialTheme.colorScheme.background
-			AnimatedVisibility(
-				visible = true,
-				enter = slideInVertically(initialOffsetY = { it * 2 }),
-				exit = slideOutVertically(targetOffsetY = { it * 2 }),
-				modifier =
-				Modifier
-					.focusRequester(focusRequester)
-					.focusGroup(),
-			) {
-				MultiFloatingActionButton(
-					fabIcon =
-					FabIcon(
-						iconRes = R.drawable.edit,
-						iconResAfterRotate = R.drawable.close,
-						iconRotate = 180f,
-					),
-					fabOption =
-					FabOption(
-						iconTint = fobIconColor,
-						backgroundTint = fobColor,
-					),
-					itemsMultiFab =
-					listOf(
-						MultiFabItem(
-							label = {
-								Text(
-									stringResource(id = R.string.amnezia),
-									color = Color.White,
-									textAlign = TextAlign.Center,
-									modifier = Modifier.padding(end = 10.dp),
-								)
-							},
-							modifier =
-							Modifier
-								.size(40.dp),
-							icon = R.drawable.edit,
-							value = ConfigType.AMNEZIA.name,
-							miniFabOption =
-							FabOption(
-								backgroundTint = fobColor,
-								fobIconColor,
-							),
-						),
-						MultiFabItem(
-							label = {
-								Text(
-									stringResource(id = R.string.wireguard),
-									color = Color.White,
-									textAlign = TextAlign.Center,
-									modifier = Modifier.padding(end = 10.dp),
-								)
-							},
-							icon = R.drawable.edit,
-							value = ConfigType.WIREGUARD.name,
-							miniFabOption =
-							FabOption(
-								backgroundTint = fobColor,
-								fobIconColor,
-							),
-						),
-					),
-					onFabItemClicked = {
-						val configType = ConfigType.valueOf(it.value)
-						navController.navigate(
-							"${Screen.Config.route}/$tunnelId?configType=${configType.name}",
-						)
-					},
-					shape = RoundedCornerShape(16.dp),
+			ScrollDismissMultiFab(R.drawable.edit, focusRequester, isVisible = true, onFabItemClicked = {
+				val configType = ConfigType.valueOf(it.value)
+				navController.navigate(
+					"${Screen.Config.route}/$tunnelId?configType=${configType.name}",
 				)
-			}
+			})
 		},
 	) {
 		Column(
@@ -315,7 +234,7 @@ fun OptionsScreen(
 								Text(
 									stringResource(R.string.no_wifi_names_configured),
 									fontStyle = FontStyle.Italic,
-									color = Color.Gray,
+									color = MaterialTheme.colorScheme.onSurface,
 								)
 							}
 						}
