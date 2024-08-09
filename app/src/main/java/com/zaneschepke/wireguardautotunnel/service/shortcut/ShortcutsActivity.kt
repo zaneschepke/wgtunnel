@@ -11,6 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class ShortcutsActivity : ComponentActivity() {
@@ -18,7 +19,7 @@ class ShortcutsActivity : ComponentActivity() {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -36,8 +37,8 @@ class ShortcutsActivity : ComponentActivity() {
 						Timber.d("Shortcut action on name: ${tunnelConfig?.name}")
 						tunnelConfig?.let {
 							when (intent.action) {
-								Action.START.name -> tunnelService.startTunnel(it)
-								Action.STOP.name -> tunnelService.stopTunnel(it)
+								Action.START.name -> tunnelService.get().startTunnel(it)
+								Action.STOP.name -> tunnelService.get().stopTunnel(it)
 								else -> Unit
 							}
 						}

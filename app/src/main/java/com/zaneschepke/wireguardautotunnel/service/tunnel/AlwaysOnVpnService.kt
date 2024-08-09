@@ -9,12 +9,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class AlwaysOnVpnService : LifecycleService() {
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
@@ -33,7 +34,7 @@ class AlwaysOnVpnService : LifecycleService() {
 				if (settings.isAlwaysOnVpnEnabled) {
 					val tunnel = appDataRepository.getPrimaryOrFirstTunnel()
 					tunnel?.let {
-						tunnelService.startTunnel(it)
+						tunnelService.get().startTunnel(it)
 					}
 				} else {
 					Timber.w("Always-on VPN is not enabled in app settings")

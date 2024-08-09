@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class BootReceiver : BroadcastReceiver() {
@@ -19,7 +20,7 @@ class BootReceiver : BroadcastReceiver() {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	lateinit var serviceManager: ServiceManager
@@ -34,7 +35,7 @@ class BootReceiver : BroadcastReceiver() {
 			val settings = appDataRepository.settings.getSettings()
 			if (settings.isRestoreOnBootEnabled) {
 				appDataRepository.getStartTunnelConfig()?.let {
-					tunnelService.startTunnel(it)
+					tunnelService.get().startTunnel(it)
 				}
 			}
 			if (settings.isAutoTunnelEnabled) {

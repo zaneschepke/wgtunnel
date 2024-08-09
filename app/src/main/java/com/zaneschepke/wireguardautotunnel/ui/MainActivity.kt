@@ -85,13 +85,6 @@ class MainActivity : AppCompatActivity() {
 			val navController = rememberNavController()
 			val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-// 			val notificationPermissionState =
-// 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-// 					rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-// 				} else {
-// 					null
-// 				}
-
 			val snackbarHostState = remember { SnackbarHostState() }
 
 			fun showSnackBarMessage(message: StringValue) {
@@ -111,36 +104,7 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 
-// 			LaunchedEffect(appUiState.requestPermissions) {
-// 				if (appUiState.requestPermissions) {
-// 					appViewModel.permissionsRequested()
-// 					if (notificationPermissionState != null && !notificationPermissionState.status.isGranted
-// 					) {
-// 						notificationPermissionState.launchPermissionRequest()
-// 						return@LaunchedEffect if (notificationPermissionState.status.shouldShowRationale || !notificationPermissionState.status.isGranted) {
-// 							showSnackBarMessage(
-// 								StringValue.StringResource(R.string.notification_permission_required),
-// 							)
-// 						} else {
-// 							Unit
-// 						}
-// 					}
-// 					if (!appUiState.vpnPermissionAccepted) {
-// 						return@LaunchedEffect appViewModel.vpnIntent?.let {
-// 							vpnActivityResultState.launch(
-// 								it,
-// 							)
-// 						} ?: Unit
-// 					}
-// 				}
-// 			}
-
 			WireguardAutoTunnelTheme {
-// 				LaunchedEffect(Unit) {
-// 					appViewModel.setNotificationPermissionAccepted(
-// 						notificationPermissionState?.status?.isGranted ?: true,
-// 					)
-// 				}
 
 				LaunchedEffect(appUiState.snackbarMessageConsumed) {
 					if (!appUiState.snackbarMessageConsumed) {

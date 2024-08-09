@@ -11,12 +11,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class KernelReceiver : BroadcastReceiver() {
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	@ApplicationScope
@@ -29,7 +30,7 @@ class KernelReceiver : BroadcastReceiver() {
 		val action = intent.action ?: return
 		applicationScope.launch {
 			if (action == REFRESH_TUNNELS_ACTION) {
-				tunnelService.runningTunnelNames.forEach { name ->
+				tunnelService.get().runningTunnelNames.forEach { name ->
 					// TODO can optimize later
 					val tunnel = tunnelConfigRepository.findByTunnelName(name)
 					tunnel?.let {

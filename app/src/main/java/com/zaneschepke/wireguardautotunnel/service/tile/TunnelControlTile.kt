@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class TunnelControlTile : TileService(), LifecycleOwner {
@@ -26,7 +27,7 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	@ApplicationScope
@@ -63,7 +64,7 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	}
 
 	private suspend fun updateTileStateUserspace() {
-		val vpnState = tunnelService.vpnState.value
+		val vpnState = tunnelService.get().vpnState.value
 		when (vpnState.status) {
 			TunnelState.UP -> updateTile(vpnState.tunnelConfig?.copy(isActive = true))
 			else -> {

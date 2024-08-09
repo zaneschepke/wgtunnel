@@ -14,12 +14,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 @HiltAndroidApp
 class WireGuardAutoTunnel : Application() {
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
@@ -53,7 +54,7 @@ class WireGuardAutoTunnel : Application() {
 				Timber.d("Kernel mode enabled, seeing if we need to start a tunnel")
 				activeTunnels.firstOrNull()?.let {
 					Timber.d("Trying to start active kernel tunnel: ${it.name}")
-					tunnelService.startTunnel(it)
+					tunnelService.get().startTunnel(it)
 				}
 			}
 		}

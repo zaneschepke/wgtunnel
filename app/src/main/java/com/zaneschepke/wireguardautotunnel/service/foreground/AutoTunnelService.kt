@@ -30,6 +30,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.net.InetAddress
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class AutoTunnelService : ForegroundService() {
@@ -51,7 +52,7 @@ class AutoTunnelService : ForegroundService() {
 	lateinit var notificationService: NotificationService
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	@IoDispatcher
@@ -65,6 +66,8 @@ class AutoTunnelService : ForegroundService() {
 
 	private var wakeLock: PowerManager.WakeLock? = null
 	private val tag = this.javaClass.name
+
+	private var running : Boolean = false
 
 	override fun onCreate() {
 		super.onCreate()
@@ -87,6 +90,7 @@ class AutoTunnelService : ForegroundService() {
 
 	override fun startService(extras: Bundle?) {
 		super.startService(extras)
+		if(running) return
 		kotlin.runCatching {
 			lifecycleScope.launch(mainImmediateDispatcher) {
 				launchNotification()
@@ -173,6 +177,7 @@ class AutoTunnelService : ForegroundService() {
 			Timber.i("Starting management watcher")
 			manageVpn()
 		}
+		running = true
 	}
 
 	private suspend fun watchForMobileDataConnectivityChanges() {
@@ -214,8 +219,8 @@ class AutoTunnelService : ForegroundService() {
 		withContext(ioDispatcher) {
 			try {
 				do {
-					if (tunnelService.vpnState.value.status == TunnelState.UP) {
-						val tunnelConfig = tunnelService.vpnState.value.tunnelConfig
+					if (tunnelService.get().vpnState.value.status == TunnelState.UP) {
+						val tunnelConfig = tunnelService.get().vpnState.value.tunnelConfig
 						tunnelConfig?.let {
 							val config = TunnelConfig.configFromWgQuick(it.wgQuick)
 							val results =
@@ -237,9 +242,9 @@ class AutoTunnelService : ForegroundService() {
 								}
 							if (results.contains(false)) {
 								Timber.i("Restarting VPN for ping failure")
-								tunnelService.stopTunnel(it)
+								tunnelService.get().stopTunnel(it)
 								delay(Constants.VPN_RESTART_DELAY)
-								tunnelService.startTunnel(it)
+								tunnelService.get().startTunnel(it)
 								delay(Constants.PING_COOLDOWN)
 							}
 						}
@@ -363,7 +368,7 @@ class AutoTunnelService : ForegroundService() {
 	}
 
 	private fun isTunnelDown(): Boolean {
-		return tunnelService.vpnState.value.status == TunnelState.DOWN
+		return tunnelService.get().vpnState.value.status == TunnelState.DOWN
 	}
 
 	private suspend fun manageVpn() {
@@ -373,14 +378,14 @@ class AutoTunnelService : ForegroundService() {
 				if (!watcherState.settings.isAutoTunnelPaused) {
 					// delay for rapid network state changes and then collect latest
 					delay(Constants.WATCHER_COLLECTION_DELAY)
-					val activeTunnel = tunnelService.vpnState.value.tunnelConfig
+					val activeTunnel = tunnelService.get().vpnState.value.tunnelConfig
 					val defaultTunnel = appDataRepository.getPrimaryOrFirstTunnel()
 					when {
 						watcherState.isEthernetConditionMet() -> {
 							Timber.i("$autoTunnel - tunnel on on ethernet condition met")
 							if (isTunnelDown()) {
 								defaultTunnel?.let {
-									tunnelService.startTunnel(it)
+									tunnelService.get().startTunnel(it)
 								}
 							}
 						}
@@ -392,7 +397,7 @@ class AutoTunnelService : ForegroundService() {
 								mobileDataTunnel ?: defaultTunnel
 							if (isTunnelDown() || activeTunnel?.isMobileDataTunnel == false) {
 								tunnel?.let {
-									tunnelService.startTunnel(it)
+									tunnelService.get().startTunnel(it)
 								}
 							}
 						}
@@ -401,7 +406,7 @@ class AutoTunnelService : ForegroundService() {
 							Timber.i("$autoTunnel - tunnel off on mobile data met, turning vpn off")
 							if (!isTunnelDown()) {
 								activeTunnel?.let {
-									tunnelService.stopTunnel(it)
+									tunnelService.get().stopTunnel(it)
 								}
 							}
 						}
@@ -416,14 +421,14 @@ class AutoTunnelService : ForegroundService() {
 								getSsidTunnel(watcherState.currentNetworkSSID)?.let {
 									Timber.i("Found tunnel associated with this SSID, bringing tunnel up: ${it.name}")
 									if (isTunnelDown() || activeTunnel?.id != it.id) {
-										tunnelService.startTunnel(it)
+										tunnelService.get().startTunnel(it)
 									}
 								} ?: suspend {
 									Timber.i("No tunnel associated with this SSID, using defaults")
 									val default = appDataRepository.getPrimaryOrFirstTunnel()
-									if (default?.name != tunnelService.name || isTunnelDown()) {
+									if (default?.name != tunnelService.get().name || isTunnelDown()) {
 										default?.let {
-											tunnelService.startTunnel(it)
+											tunnelService.get().startTunnel(it)
 										}
 									}
 								}.invoke()
@@ -434,21 +439,21 @@ class AutoTunnelService : ForegroundService() {
 							Timber.i(
 								"$autoTunnel - tunnel off on trusted wifi condition met, turning vpn off",
 							)
-							if (!isTunnelDown()) activeTunnel?.let { tunnelService.stopTunnel(it) }
+							if (!isTunnelDown()) activeTunnel?.let { tunnelService.get().stopTunnel(it) }
 						}
 
 						watcherState.isTunnelOffOnWifiConditionMet() -> {
 							Timber.i(
 								"$autoTunnel - tunnel off on wifi condition met, turning vpn off",
 							)
-							if (!isTunnelDown()) activeTunnel?.let { tunnelService.stopTunnel(it) }
+							if (!isTunnelDown()) activeTunnel?.let { tunnelService.get().stopTunnel(it) }
 						}
 
 						watcherState.isTunnelOffOnNoConnectivityMet() -> {
 							Timber.i(
 								"$autoTunnel - tunnel off on no connectivity met, turning vpn off",
 							)
-							if (!isTunnelDown()) activeTunnel?.let { tunnelService.stopTunnel(it) }
+							if (!isTunnelDown()) activeTunnel?.let { tunnelService.get().stopTunnel(it) }
 						}
 
 						else -> {

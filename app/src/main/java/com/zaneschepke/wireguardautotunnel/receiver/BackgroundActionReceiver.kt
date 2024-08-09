@@ -10,6 +10,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class BackgroundActionReceiver : BroadcastReceiver() {
@@ -19,7 +20,7 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 	lateinit var applicationScope: CoroutineScope
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	lateinit var tunnelConfigRepository: TunnelConfigRepository
@@ -32,7 +33,7 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 				applicationScope.launch {
 					val tunnel = tunnelConfigRepository.getById(id)
 					tunnel?.let {
-						tunnelService.startTunnel(it)
+						tunnelService.get().startTunnel(it)
 					}
 				}
 			}
@@ -40,7 +41,7 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 				applicationScope.launch {
 					val tunnel = tunnelConfigRepository.getById(id)
 					tunnel?.let {
-						tunnelService.stopTunnel(it)
+						tunnelService.get().stopTunnel(it)
 					}
 				}
 			}
