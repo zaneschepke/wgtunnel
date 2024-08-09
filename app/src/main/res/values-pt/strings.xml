@@ -56,8 +56,7 @@
     <string name="privacy_policy">Ver a Política de Privacidade</string>
     <string name="okay">OK</string>
     <string name="tunnel_mobile_data">Túnel em dados móveis</string>
-    <string name="one_tunnel_required">Pelo menos um túnel é necessário para usar este recurso</string>
-    <string name="prominent_background_location_title">Revelar a localização em segundo plano</string>
+	<string name="prominent_background_location_title">Revelar a localização em segundo plano</string>
     <string name="thank_you">Obrigado por usar o WG Tunnel!</string>
     <string name="trusted_ssid_value_description">Envie o SSID</string>
     <string name="open_file">Abrir Arquivo</string>
@@ -119,7 +118,6 @@
     <string name="delete_tunnel">Apagar túnel</string>
     <string name="email_chooser">Enviar um email…</string>
     <string name="use_kernel">Usar o módulo do kernel</string>
-    <string name="discord_description">Juntar-se à comunidade</string>
     <string name="docs_description">Ler a documentação</string>
     <string name="support_help_text">Se você enfrentar problemas, tiver ideias para melhorias ou apenas quiser participar, os seguintes recursos estão disponíveis:</string>
     <string name="error_root_denied">Shell Root negado</string>

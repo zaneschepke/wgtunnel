@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.util.TunnelConfigs
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -22,6 +22,9 @@ interface TunnelConfigDao {
 
 	@Query("SELECT * FROM TunnelConfig WHERE name=:name")
 	suspend fun getByName(name: String): TunnelConfig?
+
+	@Query("SELECT * FROM TunnelConfig WHERE is_Active=1")
+	suspend fun getActive(): TunnelConfigs
 
 	@Query("SELECT * FROM TunnelConfig")
 	suspend fun getAll(): TunnelConfigs

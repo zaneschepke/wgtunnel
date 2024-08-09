@@ -54,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -71,7 +70,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.DrawablePainter
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.SearchBar
@@ -81,7 +79,8 @@ import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.getMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -109,7 +108,7 @@ fun ConfigScreen(
 	LaunchedEffect(Unit) { viewModel.init(tunnelId) }
 
 	LaunchedEffect(uiState.loading) {
-		if (!uiState.loading && WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+		if (!uiState.loading && context.isRunningOnTv()) {
 			delay(Constants.FOCUS_REQUEST_DELAY)
 			focusRequester.requestFocus()
 		}
@@ -331,7 +330,7 @@ fun ConfigScreen(
 			FloatingActionButton(
 				modifier =
 				Modifier.onFocusChanged {
-					if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					if (context.isRunningOnTv()) {
 						fobColor = if (it.isFocused) hoverColor else secondaryColor
 					}
 				},
@@ -351,7 +350,7 @@ fun ConfigScreen(
 				Icon(
 					imageVector = Icons.Rounded.Save,
 					contentDescription = stringResource(id = R.string.save_changes),
-					tint = Color.DarkGray,
+					tint = MaterialTheme.colorScheme.background,
 				)
 			}
 		},
@@ -373,7 +372,7 @@ fun ConfigScreen(
 					color = MaterialTheme.colorScheme.surface,
 					modifier =
 					(
-						if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+						if (context.isRunningOnTv()) {
 							Modifier
 								.fillMaxHeight(fillMaxHeight)
 								.fillMaxWidth(fillMaxWidth)
@@ -428,7 +427,7 @@ fun ConfigScreen(
 									Icon(
 										Icons.Rounded.Refresh,
 										stringResource(R.string.rotate_keys),
-										tint = Color.White,
+										tint = MaterialTheme.colorScheme.onSurface,
 									)
 								}
 							},
@@ -458,7 +457,7 @@ fun ConfigScreen(
 									Icon(
 										Icons.Rounded.ContentCopy,
 										stringResource(R.string.copy_public_key),
-										tint = Color.White,
+										tint = MaterialTheme.colorScheme.onSurface,
 									)
 								}
 							},
@@ -687,7 +686,7 @@ fun ConfigScreen(
 						color = MaterialTheme.colorScheme.surface,
 						modifier =
 						(
-							if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+							if (context.isRunningOnTv()) {
 								Modifier
 									.fillMaxHeight(fillMaxHeight)
 									.fillMaxWidth(fillMaxWidth)
@@ -810,7 +809,7 @@ fun ConfigScreen(
 					}
 				}
 			}
-			if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+			if (context.isRunningOnTv()) {
 				Spacer(modifier = Modifier.weight(.17f))
 			}
 		}

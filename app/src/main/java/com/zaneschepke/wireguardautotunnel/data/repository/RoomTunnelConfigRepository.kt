@@ -1,71 +1,97 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.TunnelConfigDao
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.util.TunnelConfigs
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
-class RoomTunnelConfigRepository(private val tunnelConfigDao: TunnelConfigDao) :
+class RoomTunnelConfigRepository(
+	private val tunnelConfigDao: TunnelConfigDao,
+	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+) :
 	TunnelConfigRepository {
 	override fun getTunnelConfigsFlow(): Flow<TunnelConfigs> {
 		return tunnelConfigDao.getAllFlow()
 	}
 
 	override suspend fun getAll(): TunnelConfigs {
-		return tunnelConfigDao.getAll()
+		return withContext(ioDispatcher) { tunnelConfigDao.getAll() }
 	}
 
 	override suspend fun save(tunnelConfig: TunnelConfig) {
-		tunnelConfigDao.save(tunnelConfig)
+		withContext(ioDispatcher) {
+			tunnelConfigDao.save(tunnelConfig)
+		}.also {
+			WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
+		}
 	}
 
 	override suspend fun updatePrimaryTunnel(tunnelConfig: TunnelConfig?) {
-		tunnelConfigDao.resetPrimaryTunnel()
-		tunnelConfig?.let {
-			save(
-				it.copy(
-					isPrimaryTunnel = true,
-				),
-			)
+		withContext(ioDispatcher) {
+			tunnelConfigDao.resetPrimaryTunnel()
+			tunnelConfig?.let {
+				save(
+					it.copy(
+						isPrimaryTunnel = true,
+					),
+				)
+			}
 		}
 	}
 
 	override suspend fun updateMobileDataTunnel(tunnelConfig: TunnelConfig?) {
-		tunnelConfigDao.resetMobileDataTunnel()
-		tunnelConfig?.let {
-			save(
-				it.copy(
-					isMobileDataTunnel = true,
-				),
-			)
+		withContext(ioDispatcher) {
+			tunnelConfigDao.resetMobileDataTunnel()
+			tunnelConfig?.let {
+				save(
+					it.copy(
+						isMobileDataTunnel = true,
+					),
+				)
+			}
 		}
 	}
 
 	override suspend fun delete(tunnelConfig: TunnelConfig) {
-		tunnelConfigDao.delete(tunnelConfig)
+		withContext(ioDispatcher) {
+			tunnelConfigDao.delete(tunnelConfig)
+		}.also {
+			WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
+		}
 	}
 
 	override suspend fun getById(id: Int): TunnelConfig? {
-		return tunnelConfigDao.getById(id.toLong())
+		return withContext(ioDispatcher) { tunnelConfigDao.getById(id.toLong()) }
+	}
+
+	override suspend fun getActive(): TunnelConfigs {
+		return withContext(ioDispatcher) {
+			tunnelConfigDao.getActive()
+		}
 	}
 
 	override suspend fun count(): Int {
-		return tunnelConfigDao.count().toInt()
+		return withContext(ioDispatcher) { tunnelConfigDao.count().toInt() }
 	}
 
 	override suspend fun findByTunnelName(name: String): TunnelConfig? {
-		return tunnelConfigDao.getByName(name)
+		return withContext(ioDispatcher) { tunnelConfigDao.getByName(name) }
 	}
 
 	override suspend fun findByTunnelNetworksName(name: String): TunnelConfigs {
-		return tunnelConfigDao.findByTunnelNetworkName(name)
+		return withContext(ioDispatcher) { tunnelConfigDao.findByTunnelNetworkName(name) }
 	}
 
 	override suspend fun findByMobileDataTunnel(): TunnelConfigs {
-		return tunnelConfigDao.findByMobileDataTunnel()
+		return withContext(ioDispatcher) { tunnelConfigDao.findByMobileDataTunnel() }
 	}
 
 	override suspend fun findPrimary(): TunnelConfigs {
-		return tunnelConfigDao.findByPrimary()
+		return withContext(ioDispatcher) { tunnelConfigDao.findByPrimary() }
 	}
 }

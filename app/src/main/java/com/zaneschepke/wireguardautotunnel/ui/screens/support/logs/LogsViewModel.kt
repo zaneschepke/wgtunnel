@@ -9,7 +9,7 @@ import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.MainDispatcher
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
-import com.zaneschepke.wireguardautotunnel.util.chunked
+import com.zaneschepke.wireguardautotunnel.util.extensions.chunked
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch

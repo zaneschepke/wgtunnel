@@ -3,7 +3,6 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.options
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -104,7 +103,6 @@ constructor(
 					false -> uiState.value.tunnel
 				},
 			)
-			WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
 		}
 	}
 }

@@ -21,8 +21,7 @@
     <string name="enable_auto_tunnel">Otomatik tünellemeyi başlat</string>
     <string name="disable_auto_tunnel">Otomatik tünellemeyi durdur</string>
     <string name="tunnel_mobile_data">Mobil veride tünel</string>
-    <string name="one_tunnel_required">Bu özelliği kullanmak için en az bir tünel gerekli</string>
-    <string name="privacy_policy">Gizlilik Politikasını Görüntüle</string>
+	<string name="privacy_policy">Gizlilik Politikasını Görüntüle</string>
     <string name="okay">Tamam</string>
     <string name="tunnel_on_ethernet">Ethernet\'te tünel</string>
     <string name="prominent_background_location_message">Bu özellik, uygulama kapalıyken bile Wi-Fi SSID izlemesini etkinleştirmek için arka plan konum iznine ihtiyaç duyar. Daha fazla ayrıntı için lütfen Destek ekranında bağlantısı verilen Gizlilik Politikasına bakın.</string>
@@ -104,7 +103,6 @@
     <string name="email_chooser">E-posta gönder…</string>
     <string name="go">git</string>
     <string name="docs_description">Belgeleri oku</string>
-    <string name="discord_description">Topluluğa katıl</string>
     <string name="email_description">Bana e-posta gönder</string>
     <string name="support_help_text">Sorun yaşıyorsanız, iyileştirme fikirleriniz varsa veya sadece iletişime geçmek istiyorsanız, aşağıdaki kaynaklar mevcuttur:</string>
     <string name="use_kernel">Kernel modülünü kullan</string>

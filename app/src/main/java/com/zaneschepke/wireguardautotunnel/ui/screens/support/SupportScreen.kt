@@ -48,17 +48,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.util.extensions.launchSupportEmail
+import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 
 @Composable
-fun SupportScreen(
-	viewModel: SupportViewModel = hiltViewModel(),
-	appViewModel: AppViewModel,
-	navController: NavController,
-	focusRequester: FocusRequester,
-) {
+fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), navController: NavController, focusRequester: FocusRequester) {
 	val context = LocalContext.current
 	val fillMaxWidth = .85f
 
@@ -80,7 +76,7 @@ fun SupportScreen(
 			color = MaterialTheme.colorScheme.surface,
 			modifier =
 			(
-				if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+				if (context.isRunningOnTv()) {
 					Modifier
 						.height(IntrinsicSize.Min)
 						.fillMaxWidth(fillMaxWidth)
@@ -110,9 +106,8 @@ fun SupportScreen(
 				)
 				TextButton(
 					onClick = {
-						appViewModel.openWebPage(
+						context.openWebUrl(
 							context.resources.getString(R.string.docs_url),
-							context,
 						)
 					},
 					modifier =
@@ -153,9 +148,8 @@ fun SupportScreen(
 				)
 				TextButton(
 					onClick = {
-						appViewModel.openWebPage(
+						context.openWebUrl(
 							context.resources.getString(R.string.telegram_url),
-							context,
 						)
 					},
 					modifier = Modifier.padding(vertical = 5.dp),
@@ -173,7 +167,7 @@ fun SupportScreen(
 								Modifier.size(25.dp),
 							)
 							Text(
-								stringResource(id = R.string.discord_description),
+								stringResource(id = R.string.chat_description),
 								textAlign = TextAlign.Justify,
 								modifier = Modifier.padding(start = 10.dp),
 							)
@@ -190,9 +184,8 @@ fun SupportScreen(
 				)
 				TextButton(
 					onClick = {
-						appViewModel.openWebPage(
+						context.openWebUrl(
 							context.resources.getString(R.string.github_url),
-							context,
 						)
 					},
 					modifier = Modifier.padding(vertical = 5.dp),
@@ -226,7 +219,7 @@ fun SupportScreen(
 					color = MaterialTheme.colorScheme.onBackground,
 				)
 				TextButton(
-					onClick = { appViewModel.launchEmail(context) },
+					onClick = { context.launchSupportEmail() },
 					modifier = Modifier.padding(vertical = 5.dp),
 				) {
 					Row(
@@ -249,7 +242,7 @@ fun SupportScreen(
 						)
 					}
 				}
-				if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+				if (!context.isRunningOnTv()) {
 					HorizontalDivider(
 						thickness = 0.5.dp,
 						color = MaterialTheme.colorScheme.onBackground,
@@ -288,9 +281,8 @@ fun SupportScreen(
 			fontSize = 16.sp,
 			modifier =
 			Modifier.clickable {
-				appViewModel.openWebPage(
+				context.openWebUrl(
 					context.resources.getString(R.string.privacy_policy_url),
-					context,
 				)
 			},
 		)

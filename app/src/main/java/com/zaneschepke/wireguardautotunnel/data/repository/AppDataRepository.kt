@@ -7,8 +7,6 @@ interface AppDataRepository {
 
 	suspend fun getStartTunnelConfig(): TunnelConfig?
 
-	suspend fun toggleWatcherServicePause()
-
 	val settings: SettingsRepository
 	val tunnels: TunnelConfigRepository
 	val appState: AppStateRepository

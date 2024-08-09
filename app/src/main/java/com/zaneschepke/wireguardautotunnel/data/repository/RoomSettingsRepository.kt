@@ -2,11 +2,16 @@ package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.SettingsDao
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
-class RoomSettingsRepository(private val settingsDoa: SettingsDao) : SettingsRepository {
+class RoomSettingsRepository(private val settingsDoa: SettingsDao, @IoDispatcher private val ioDispatcher: CoroutineDispatcher) : SettingsRepository {
 	override suspend fun save(settings: Settings) {
-		settingsDoa.save(settings)
+		withContext(ioDispatcher) {
+			settingsDoa.save(settings)
+		}
 	}
 
 	override fun getSettingsFlow(): Flow<Settings> {
@@ -14,10 +19,12 @@ class RoomSettingsRepository(private val settingsDoa: SettingsDao) : SettingsRep
 	}
 
 	override suspend fun getSettings(): Settings {
-		return settingsDoa.getAll().firstOrNull() ?: Settings()
+		return withContext(ioDispatcher) {
+			settingsDoa.getAll().firstOrNull() ?: Settings()
+		}
 	}
 
 	override suspend fun getAll(): List<Settings> {
-		return settingsDoa.getAll()
+		return withContext(ioDispatcher) { settingsDoa.getAll() }
 	}
 }

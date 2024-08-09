@@ -134,6 +134,7 @@ dependencies {
 	debugImplementation(libs.androidx.compose.manifest)
 
 	// get tunnel lib from github packages or mavenLocal
+// 	implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 	implementation(libs.tunnel)
 	implementation(libs.amneziawg.android)
 	coreLibraryDesugaring(libs.desugar.jdk.libs)

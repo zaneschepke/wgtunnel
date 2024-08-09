@@ -4,7 +4,7 @@ import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
-import com.zaneschepke.wireguardautotunnel.util.Packages
+import com.zaneschepke.wireguardautotunnel.util.extensions.Packages
 
 data class ConfigUiState(
 	val proxyPeers: List<PeerProxy> = arrayListOf(PeerProxy()),

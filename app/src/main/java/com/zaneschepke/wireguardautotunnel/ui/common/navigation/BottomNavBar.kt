@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 
@@ -39,7 +40,19 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
 
 				NavigationBarItem(
 					selected = selected,
-					onClick = { navController.navigate(item.route) },
+					onClick = {
+						navController.navigate(item.route) {
+							// Pop up to the start destination of the graph to
+							// avoid building up a large stack of destinations
+							// on the back stack as users select items
+							popUpTo(navController.graph.findStartDestination().id) {
+								saveState = true
+							}
+							// Avoid multiple copies of the same destination when
+							// reselecting the same item
+							launchSingleTop = true
+						}
+					},
 					label = {
 						Text(
 							text = item.name,
