@@ -189,7 +189,7 @@ constructor(
 		)
 	}
 
-	fun onToggleKernelMode(onFailure: () -> Unit, onSuccess: () -> Unit) = viewModelScope.launch {
+	fun onToggleKernelMode(onSuccess: () -> Unit, onFailure: () -> Unit) = viewModelScope.launch {
 		if (!uiState.value.settings.isKernelEnabled) {
 			requestRoot(
 				{

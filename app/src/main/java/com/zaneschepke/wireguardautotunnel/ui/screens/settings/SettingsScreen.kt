@@ -596,7 +596,7 @@ fun SettingsScreen(
 							padding = screenPadding,
 							onCheckChanged = {
 								scope.launch {
-									viewModel.onToggleKernelMode({ onRootDenied() }, { onRootAccepted() })
+									viewModel.onToggleKernelMode({ onRootAccepted() }, { onRootDenied() })
 								}
 							},
 						)
@@ -610,9 +610,7 @@ fun SettingsScreen(
 						) {
 							TextButton(
 								onClick = {
-									viewModel.requestRoot({ onRootDenied() }) {
-										appViewModel.showSnackbarMessage(context.getString(R.string.root_accepted))
-									}
+									viewModel.requestRoot({ onRootAccepted() },{ onRootDenied() })
 								},
 							) {
 								Text(stringResource(R.string.request_root))
