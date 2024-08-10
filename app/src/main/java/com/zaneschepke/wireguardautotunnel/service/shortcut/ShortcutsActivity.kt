@@ -2,12 +2,13 @@ package com.zaneschepke.wireguardautotunnel.service.shortcut
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -21,9 +22,13 @@ class ShortcutsActivity : ComponentActivity() {
 	@Inject
 	lateinit var tunnelService: Provider<TunnelService>
 
+	@Inject
+	@ApplicationScope
+	lateinit var applicationScope: CoroutineScope
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		lifecycleScope.launch {
+		applicationScope.launch {
 			val settings = appDataRepository.settings.getSettings()
 			if (settings.isShortcutsEnabled) {
 				when (intent.getStringExtra(CLASS_NAME_EXTRA_KEY)) {
@@ -33,7 +38,7 @@ class ShortcutsActivity : ComponentActivity() {
 						val tunnelConfig = tunnelName?.let {
 							appDataRepository.tunnels.getAll()
 								.firstOrNull { it.name == tunnelName }
-						} ?: appDataRepository.getPrimaryOrFirstTunnel()
+						} ?: appDataRepository.getStartTunnelConfig()
 						Timber.d("Shortcut action on name: ${tunnelConfig?.name}")
 						tunnelConfig?.let {
 							when (intent.action) {
