@@ -610,7 +610,7 @@ fun SettingsScreen(
 						) {
 							TextButton(
 								onClick = {
-									viewModel.requestRoot({ onRootAccepted() },{ onRootDenied() })
+									viewModel.requestRoot({ onRootAccepted() }, { onRootDenied() })
 								},
 							) {
 								Text(stringResource(R.string.request_root))

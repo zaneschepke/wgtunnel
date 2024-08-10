@@ -44,7 +44,7 @@ constructor(
 			appDataRepository.tunnels.getTunnelConfigsFlow(),
 			tunnelService.vpnState,
 		) { settings, tunnels, vpnState ->
-			MainUiState(settings, tunnels, vpnState,false)
+			MainUiState(settings, tunnels, vpnState, false)
 		}
 			.stateIn(
 				viewModelScope,
