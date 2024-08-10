@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.widget.Toast
 import com.zaneschepke.wireguardautotunnel.R
@@ -66,11 +66,31 @@ fun Context.launchVpnSettings(): Result<Unit> {
 	}
 }
 
-fun Context.openAppSetting() {
+fun Context.launchLocationServicesSettings(): Result<Unit> {
+	return kotlin.runCatching {
+		val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
+			setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		}
+		startActivity(intent)
+	}
+}
+
+fun Context.launchSettings(): Result<Unit> {
+	return kotlin.runCatching {
+		val intent = Intent(Settings.ACTION_SETTINGS).apply {
+			setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		}
+		startActivity(intent)
+	}
+}
+
+fun Context.launchAppSettings() {
 	kotlin.runCatching {
-		val intentSettings = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
-		intentSettings.data = Uri.fromParts("package", packageName, null)
-		startActivity(intentSettings)
+		val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+			data = Uri.fromParts("package", packageName, null)
+			setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		}
+		startActivity(intent)
 	}
 }
 

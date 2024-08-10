@@ -11,7 +11,6 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import com.zaneschepke.wireguardautotunnel.util.extensions.stopTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,8 +34,6 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
 	private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
 
-	private var tileTunnel: TunnelConfig? = null
-
 	override fun onCreate() {
 		super.onCreate()
 		Timber.d("onCreate for tile service")
@@ -56,29 +53,15 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 		super.onStartListening()
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
 		lifecycleScope.launch {
-			val settings = appDataRepository.settings.getSettings()
 			if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
-			if (settings.isKernelEnabled) return@launch updateTileStateKernel()
-			updateTileStateUserspace()
+			updateTileState()
 		}
 	}
 
-	private suspend fun updateTileStateUserspace() {
-		val vpnState = tunnelService.get().vpnState.value
-		when (vpnState.status) {
-			TunnelState.UP -> updateTile(vpnState.tunnelConfig?.copy(isActive = true))
-			else -> {
-				val tunnel = appDataRepository.getStartTunnelConfig()
-				updateTile(tunnel?.copy(isActive = false))
-			}
-		}
-	}
-
-	private suspend fun updateTileStateKernel() {
-		val lastActive = appDataRepository.appState.getActiveTunnelId()
+	private suspend fun updateTileState() {
+		val lastActive = appDataRepository.getStartTunnelConfig()
 		lastActive?.let {
-			val tunnel = appDataRepository.tunnels.getById(it)
-			updateTile(tunnel)
+			updateTile(it)
 		}
 	}
 
@@ -87,13 +70,10 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 		unlockAndRun {
 			lifecycleScope.launch {
 				val context = this@TunnelControlTile
-				val lastActive = appDataRepository.appState.getActiveTunnelId()
-				lastActive?.let { lastTun ->
-					val tunnel = appDataRepository.tunnels.getById(lastTun)
-					tunnel?.let { tun ->
-						if (tun.isActive) return@launch context.stopTunnelBackground(tun.id)
-						context.startTunnelBackground(tun.id)
-					}
+				val lastActive = appDataRepository.getStartTunnelConfig()
+				lastActive?.let { tunnel ->
+					if (tunnel.isActive) return@launch context.stopTunnelBackground(tunnel.id)
+					context.startTunnelBackground(tunnel.id)
 				}
 			}
 		}

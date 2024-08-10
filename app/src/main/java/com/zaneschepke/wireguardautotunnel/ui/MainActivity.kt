@@ -105,7 +105,6 @@ class MainActivity : AppCompatActivity() {
 			}
 
 			WireguardAutoTunnelTheme {
-
 				LaunchedEffect(appUiState.snackbarMessageConsumed) {
 					if (!appUiState.snackbarMessageConsumed) {
 						showSnackBarMessage(StringValue.DynamicString(appUiState.snackbarMessage))

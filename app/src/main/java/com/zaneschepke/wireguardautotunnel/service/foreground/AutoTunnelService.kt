@@ -67,7 +67,7 @@ class AutoTunnelService : ForegroundService() {
 	private var wakeLock: PowerManager.WakeLock? = null
 	private val tag = this.javaClass.name
 
-	private var running : Boolean = false
+	private var running: Boolean = false
 
 	override fun onCreate() {
 		super.onCreate()
@@ -90,7 +90,7 @@ class AutoTunnelService : ForegroundService() {
 
 	override fun startService(extras: Bundle?) {
 		super.startService(extras)
-		if(running) return
+		if (running) return
 		kotlin.runCatching {
 			lifecycleScope.launch(mainImmediateDispatcher) {
 				launchNotification()

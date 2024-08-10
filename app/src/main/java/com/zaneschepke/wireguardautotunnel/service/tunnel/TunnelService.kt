@@ -11,7 +11,7 @@ interface TunnelService : Tunnel, org.amnezia.awg.backend.Tunnel {
 
 	val vpnState: StateFlow<VpnState>
 
-	val runningTunnelNames: Set<String>
+	suspend fun runningTunnelNames(): Set<String>
 
-	fun getState(): TunnelState
+	suspend fun getState(): TunnelState
 }

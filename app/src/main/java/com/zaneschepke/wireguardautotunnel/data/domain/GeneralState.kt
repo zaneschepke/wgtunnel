@@ -4,7 +4,7 @@ data class GeneralState(
 	val isLocationDisclosureShown: Boolean = LOCATION_DISCLOSURE_SHOWN_DEFAULT,
 	val isBatteryOptimizationDisableShown: Boolean = BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT,
 	val isPinLockEnabled: Boolean = PIN_LOCK_ENABLED_DEFAULT,
-	val activeTunnelId: Int? = null,
+	val lastActiveTunnelId: Int? = null,
 ) {
 	companion object {
 		const val LOCATION_DISCLOSURE_SHOWN_DEFAULT = false

@@ -189,25 +189,25 @@ constructor(
 		)
 	}
 
-	suspend fun onToggleKernelMode(): Result<Unit> {
-		return withContext(ioDispatcher) {
-			if (!uiState.value.settings.isKernelEnabled) {
-				requestRoot().onSuccess {
+	fun onToggleKernelMode(onFailure: () -> Unit, onSuccess: () -> Unit) = viewModelScope.launch {
+		if (!uiState.value.settings.isKernelEnabled) {
+			requestRoot(
+				{
+					onSuccess()
 					saveSettings(
 						uiState.value.settings.copy(
 							isKernelEnabled = true,
 							isAmneziaEnabled = false,
 						),
 					)
-				}.onFailure {
-					Timber.e(it)
+				},
+				{
+					onFailure()
 					saveKernelMode(enabled = false)
-					return@withContext Result.failure(WgTunnelExceptions.RootDenied())
-				}
-			} else {
-				saveKernelMode(enabled = false)
-			}
-			Result.success(Unit)
+				},
+			)
+		} else {
+			saveKernelMode(enabled = false)
 		}
 	}
 
@@ -237,12 +237,15 @@ constructor(
 		)
 	}
 
-	fun requestRoot(): Result<Unit> {
-		return kotlin.runCatching {
+	fun requestRoot(onSuccess: () -> Unit, onFailure: () -> Unit) = viewModelScope.launch(ioDispatcher) {
+		kotlin.runCatching {
 			rootShell.get().start()
 			Timber.i("Root shell accepted!")
+			onSuccess()
 		}.onFailure {
-			return Result.failure(WgTunnelExceptions.RootDenied())
+			onFailure()
+		}.onSuccess {
+			onSuccess()
 		}
 	}
 }

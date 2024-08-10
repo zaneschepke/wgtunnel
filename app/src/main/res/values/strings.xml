@@ -182,4 +182,8 @@
 	<string name="chat_description">Join the community</string>
 	<string name="tunnel_required">Feature requires at least one tunnel</string>
     <string name="request_root">Request root</string>
+    <string name="background_location_message">Allow all the time location permission and/or precise location is required for this feature. Please see</string>
+	<string name="app_settings">app settings</string>
+	<string name="background_location_message2">to make sure these permissions are enabled.</string>
+	<string name="root_accepted">Root shell accepted</string>
 </resources>

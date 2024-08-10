@@ -30,7 +30,7 @@ class KernelReceiver : BroadcastReceiver() {
 		val action = intent.action ?: return
 		applicationScope.launch {
 			if (action == REFRESH_TUNNELS_ACTION) {
-				tunnelService.get().runningTunnelNames.forEach { name ->
+				tunnelService.get().runningTunnelNames().forEach { name ->
 					// TODO can optimize later
 					val tunnel = tunnelConfigRepository.findByTunnelName(name)
 					tunnel?.let {

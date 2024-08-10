@@ -76,11 +76,12 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.VpnDeniedDialog
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDisclosure
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
 import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-import com.zaneschepke.wireguardautotunnel.util.extensions.openAppSetting
+import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -114,6 +115,7 @@ fun SettingsScreen(
 	var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
 	var didExportFiles by remember { mutableStateOf(false) }
 	var showAuthPrompt by remember { mutableStateOf(false) }
+	var showLocationDialog by remember { mutableStateOf(false) }
 
 	val screenPadding = 5.dp
 	val fillMaxWidth = .85f
@@ -241,6 +243,10 @@ fun SettingsScreen(
 			}
 	}
 
+	fun onRootDenied() = appViewModel.showSnackbarMessage(context.getString(R.string.error_root_denied))
+
+	fun onRootAccepted() = appViewModel.showSnackbarMessage(context.getString(R.string.root_accepted))
+
 	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 		if (
 			context.isRunningOnTv() &&
@@ -268,11 +274,17 @@ fun SettingsScreen(
 		!uiState.isLocationDisclosureShown,
 		onDismiss = { viewModel.setLocationDisclosureShown() },
 		onAttest = {
-			context.openAppSetting()
+			context.launchAppSettings()
 			viewModel.setLocationDisclosureShown()
 		},
 		scrollState,
 		focusRequester,
+	)
+
+	BackgroundLocationDialog(
+		showLocationDialog,
+		onDismiss = { showLocationDialog = false },
+		onAttest = { showLocationDialog = false },
 	)
 
 	LocationServicesDialog(
@@ -513,20 +525,8 @@ fun SettingsScreen(
 									!uiState.settings.isAutoTunnelEnabled
 								) {
 									when (false) {
-										isBackgroundLocationGranted ->
-											appViewModel.showSnackbarMessage(
-												context.getString(
-													R.string.background_location_required,
-												),
-											)
-
-										fineLocationState.status.isGranted ->
-											appViewModel.showSnackbarMessage(
-												context.getString(
-													R.string.precise_location_required,
-												),
-											)
-
+										isBackgroundLocationGranted -> showLocationDialog = true
+										fineLocationState.status.isGranted -> showLocationDialog = true
 										viewModel.isLocationEnabled(context) ->
 											showLocationServicesAlertDialog = true
 
@@ -596,9 +596,7 @@ fun SettingsScreen(
 							padding = screenPadding,
 							onCheckChanged = {
 								scope.launch {
-									viewModel.onToggleKernelMode().onFailure {
-										appViewModel.showSnackbarMessage(it.getMessage(context))
-									}
+									viewModel.onToggleKernelMode({ onRootDenied() }, { onRootAccepted() })
 								}
 							},
 						)
@@ -612,8 +610,8 @@ fun SettingsScreen(
 						) {
 							TextButton(
 								onClick = {
-									viewModel.requestRoot().onFailure {
-										appViewModel.showSnackbarMessage(it.getMessage(context))
+									viewModel.requestRoot({ onRootDenied() }) {
+										appViewModel.showSnackbarMessage(context.getString(R.string.root_accepted))
 									}
 								},
 							) {

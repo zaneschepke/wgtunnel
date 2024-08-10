@@ -29,7 +29,6 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -96,7 +94,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
 	viewModel: MainViewModel = hiltViewModel(),
@@ -345,11 +343,11 @@ fun MainScreen(
 				uiState.tunnels,
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
+				val isActive = uiState.tunnels.any { it.id == tunnel.id && it.isActive }
 				val leadingIconColor =
 					(
 						if (
-							uiState.vpnState.tunnelConfig?.name == tunnel.name &&
-							uiState.vpnState.status == TunnelState.UP
+							isActive
 						) {
 							uiState.vpnState.statistics
 								?.mapPeerStats()
@@ -413,8 +411,7 @@ fun MainScreen(
 					onClick = {
 						if (!context.isRunningOnTv()) {
 							if (
-								uiState.vpnState.status == TunnelState.UP &&
-								(uiState.vpnState.tunnelConfig?.name == tunnel.name)
+								isActive
 							) {
 								expanded.value = !expanded.value
 							}
@@ -470,20 +467,11 @@ fun MainScreen(
 								}
 							}
 						} else {
-							val checked by remember {
-								derivedStateOf {
-									(
-										uiState.vpnState.status != TunnelState.DOWN &&
-											tunnel.name == uiState.vpnState.tunnelConfig?.name
-										)
-								}
-							}
-							if (!checked) expanded.value = false
-
+							if (!isActive) expanded.value = false
 							@Composable
 							fun TunnelSwitch() = Switch(
 								modifier = Modifier.focusRequester(itemFocusRequester),
-								checked = checked,
+								checked = isActive,
 								onCheckedChange = { checked ->
 									if (!checked) expanded.value = false
 									val intent = if (uiState.settings.isKernelEnabled) null else GoBackend.VpnService.prepare(context)

@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.main.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.settings.components
 
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
@@ -11,22 +11,22 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
-import com.zaneschepke.wireguardautotunnel.util.extensions.launchVpnSettings
+import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 
 @Composable
-fun VpnDeniedDialog(show: Boolean, onDismiss: () -> Unit) {
+fun BackgroundLocationDialog(show: Boolean, onDismiss: () -> Unit, onAttest: () -> Unit) {
 	val context = LocalContext.current
 	if (show) {
 		val alwaysOnDescription = buildAnnotatedString {
-			append(stringResource(R.string.always_on_message))
+			append(stringResource(R.string.background_location_message))
 			append(" ")
-			pushStringAnnotation(tag = "vpnSettings", annotation = "")
+			pushStringAnnotation(tag = "appSettings", annotation = "")
 			withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-				append(stringResource(id = R.string.vpn_settings))
+				append(stringResource(id = R.string.app_settings))
 			}
 			pop()
 			append(" ")
-			append(stringResource(R.string.always_on_message2))
+			append(stringResource(R.string.background_location_message2))
 			append(".")
 		}
 		InfoDialog(
@@ -38,8 +38,8 @@ fun VpnDeniedDialog(show: Boolean, onDismiss: () -> Unit) {
 					text = alwaysOnDescription,
 					style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.outline),
 				) {
-					alwaysOnDescription.getStringAnnotations(tag = "vpnSettings", it, it).firstOrNull()?.let {
-						context.launchVpnSettings()
+					alwaysOnDescription.getStringAnnotations(tag = "appSettings", it, it).firstOrNull()?.let {
+						context.launchAppSettings()
 					}
 				}
 			},
