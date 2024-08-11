@@ -1,0 +1,6 @@
+What's new:
+- Improve auto tunnel reliability
+- Add support for light/dark/dynamic theming
+- Add support for pre/post up/down scripts
+- Remove tunnel persistent notification
+- Various other fixes and improvements
