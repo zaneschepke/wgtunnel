@@ -1,11 +1,5 @@
-package com.zaneschepke.wireguardautotunnel.util
+package com.zaneschepke.wireguardautotunnel.util.extensions
 
-import android.content.Context
-import android.content.pm.PackageInfo
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
-import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,70 +12,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.selects.whileSelect
-import org.amnezia.awg.config.Config
 import timber.log.Timber
-import java.math.BigDecimal
-import java.text.DecimalFormat
 import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.cancellation.CancellationException
-
-fun BigDecimal.toThreeDecimalPlaceString(): String {
-	val df = DecimalFormat("#.###")
-	return df.format(this)
-}
-
-fun <T> List<T>.update(index: Int, item: T): List<T> = toMutableList().apply { this[index] = item }
-
-fun <T> List<T>.removeAt(index: Int): List<T> = toMutableList().apply { this.removeAt(index) }
-
-typealias TunnelConfigs = List<TunnelConfig>
-
-typealias Packages = List<PackageInfo>
-
-fun TunnelStatistics.mapPeerStats(): Map<org.amnezia.awg.crypto.Key, TunnelStatistics.PeerStats?> {
-	return this.getPeers().associateWith { key -> (this.peerStats(key)) }
-}
-
-fun TunnelStatistics.PeerStats.latestHandshakeSeconds(): Long? {
-	return NumberUtils.getSecondsBetweenTimestampAndNow(this.latestHandshakeEpochMillis)
-}
-
-fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
-	// TODO add never connected status after duration
-	return this.latestHandshakeSeconds().let {
-		when {
-			it == null -> HandshakeStatus.NOT_STARTED
-			it <= HandshakeStatus.STALE_TIME_LIMIT_SEC -> HandshakeStatus.HEALTHY
-			it > HandshakeStatus.STALE_TIME_LIMIT_SEC -> HandshakeStatus.STALE
-			else -> {
-				HandshakeStatus.UNKNOWN
-			}
-		}
-	}
-}
-
-fun Config.toWgQuickString(): String {
-	val amQuick = toAwgQuickString()
-	val lines = amQuick.lines().toMutableList()
-	val linesIterator = lines.iterator()
-	while (linesIterator.hasNext()) {
-		val next = linesIterator.next()
-		Constants.amneziaProperties.forEach {
-			if (next.startsWith(it, ignoreCase = true)) {
-				linesIterator.remove()
-			}
-		}
-	}
-	return lines.joinToString(System.lineSeparator())
-}
-
-fun Throwable.getMessage(context: Context): String {
-	return when (this) {
-		is WgTunnelExceptions -> this.getMessage(context)
-		else -> this.message ?: StringValue.StringResource(R.string.unknown_error).asString(context)
-	}
-}
 
 /**
  * Chunks based on a time or size threshold.

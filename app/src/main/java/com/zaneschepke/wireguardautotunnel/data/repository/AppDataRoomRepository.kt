@@ -15,24 +15,8 @@ constructor(
 	}
 
 	override suspend fun getStartTunnelConfig(): TunnelConfig? {
-		return if (appState.isTunnelRunningFromManualStart()) {
-			appState.getActiveTunnelId()?.let {
-				tunnels.getById(it)
-			}
-		} else {
-			null
-		}
-	}
-
-	override suspend fun toggleWatcherServicePause() {
-		val settings = settings.getSettings()
-		if (settings.isAutoTunnelEnabled) {
-			val pauseAutoTunnel = !settings.isAutoTunnelPaused
-			this.settings.save(
-				settings.copy(
-					isAutoTunnelPaused = pauseAutoTunnel,
-				),
-			)
-		}
+		return appState.getLastActiveTunnelId()?.let {
+			tunnels.getById(it)
+		} ?: getPrimaryOrFirstTunnel()
 	}
 }

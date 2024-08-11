@@ -7,12 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import xyz.teamgravity.pin_lock_compose.PinManager
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -41,7 +39,7 @@ constructor(
 	private val rootShell: Provider<RootShell>,
 	private val fileUtils: FileUtils,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-	vpnService: VpnService,
+	tunnelService: TunnelService,
 ) : ViewModel() {
 	private val _kernelSupport = MutableStateFlow(false)
 	val kernelSupport = _kernelSupport.asStateFlow()
@@ -50,7 +48,7 @@ constructor(
 		combine(
 			appDataRepository.settings.getSettingsFlow(),
 			appDataRepository.tunnels.getTunnelConfigsFlow(),
-			vpnService.vpnState,
+			tunnelService.vpnState,
 			appDataRepository.appState.generalStateFlow,
 		) { settings, tunnels, tunnelState, generalState ->
 			SettingsUiState(
@@ -124,7 +122,6 @@ constructor(
 				isAutoTunnelPaused = isAutoTunnelPaused,
 			),
 		)
-		WireGuardAutoTunnel.requestAutoTunnelTileServiceUpdate()
 	}
 
 	fun onToggleAlwaysOnVPN() = viewModelScope.launch {
@@ -161,10 +158,10 @@ constructor(
 		)
 	}
 
-	private fun saveKernelMode(on: Boolean) {
+	private fun saveKernelMode(enabled: Boolean) {
 		saveSettings(
 			uiState.value.settings.copy(
-				isKernelEnabled = on,
+				isKernelEnabled = enabled,
 			),
 		)
 	}
@@ -192,27 +189,25 @@ constructor(
 		)
 	}
 
-	suspend fun onToggleKernelMode(): Result<Unit> {
-		return withContext(ioDispatcher) {
-			if (!uiState.value.settings.isKernelEnabled) {
-				try {
-					rootShell.get().start()
-					Timber.i("Root shell accepted!")
+	fun onToggleKernelMode(onSuccess: () -> Unit, onFailure: () -> Unit) = viewModelScope.launch {
+		if (!uiState.value.settings.isKernelEnabled) {
+			requestRoot(
+				{
+					onSuccess()
 					saveSettings(
 						uiState.value.settings.copy(
 							isKernelEnabled = true,
 							isAmneziaEnabled = false,
 						),
 					)
-				} catch (e: RootShell.RootShellException) {
-					Timber.e(e)
-					saveKernelMode(on = false)
-					return@withContext Result.failure(WgTunnelExceptions.RootDenied())
-				}
-			} else {
-				saveKernelMode(on = false)
-			}
-			Result.success(Unit)
+				},
+				{
+					onFailure()
+					saveKernelMode(enabled = false)
+				},
+			)
+		} else {
+			saveKernelMode(enabled = false)
 		}
 	}
 
@@ -234,21 +229,23 @@ constructor(
 		}
 	}
 
-	fun onPinLockDisabled() = viewModelScope.launch {
-		PinManager.clearPin()
-		appDataRepository.appState.setPinLockEnabled(false)
-	}
-
-	fun onPinLockEnabled() = viewModelScope.launch {
-		PinManager.initialize(WireGuardAutoTunnel.instance)
-		appDataRepository.appState.setPinLockEnabled(true)
-	}
-
 	fun onToggleRestartAtBoot() = viewModelScope.launch {
 		saveSettings(
 			uiState.value.settings.copy(
 				isRestoreOnBootEnabled = !uiState.value.settings.isRestoreOnBootEnabled,
 			),
 		)
+	}
+
+	fun requestRoot(onSuccess: () -> Unit, onFailure: () -> Unit) = viewModelScope.launch(ioDispatcher) {
+		kotlin.runCatching {
+			rootShell.get().start()
+			Timber.i("Root shell accepted!")
+			onSuccess()
+		}.onFailure {
+			onFailure()
+		}.onSuccess {
+			onSuccess()
+		}
 	}
 }

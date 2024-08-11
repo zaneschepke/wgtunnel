@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -44,23 +45,21 @@ private val LightColorScheme =
 @Composable
 fun WireguardAutoTunnelTheme(
 	// force dark theme
-	darkTheme: Boolean = true,
-	// darkTheme: Boolean = isSystemInDarkTheme(),
-	// Dynamic color is available on Android 12+
-	// turning off dynamic color for now
-	dynamicColor: Boolean = false,
+	useDarkTheme: Boolean = isSystemInDarkTheme(),
 	content: @Composable () -> Unit,
 ) {
-	val colorScheme =
-		when {
-			dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-				val context = LocalContext.current
-				if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+	val context = LocalContext.current
+	val colorScheme = when {
+		(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
+			if (useDarkTheme) {
+				dynamicDarkColorScheme(context)
+			} else {
+				dynamicLightColorScheme(context)
 			}
-
-			darkTheme -> DarkColorScheme
-			else -> LightColorScheme
 		}
+		useDarkTheme -> DarkColorScheme
+		else -> LightColorScheme
+	}
 	val view = LocalView.current
 	if (!view.isInEditMode) {
 		SideEffect {
@@ -69,7 +68,7 @@ fun WireguardAutoTunnelTheme(
 			window.statusBarColor = Color.Transparent.toArgb()
 			window.navigationBarColor = Color.Transparent.toArgb()
 			WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-				!darkTheme
+				!useDarkTheme
 		}
 	}
 

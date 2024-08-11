@@ -8,10 +8,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -34,8 +33,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.rounded.LocationOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,16 +52,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -81,9 +75,17 @@ import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
-import com.zaneschepke.wireguardautotunnel.util.getMessage
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.VpnDeniedDialog
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDisclosure
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
+import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
+import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import xyz.teamgravity.pin_lock_compose.PinManager
 import java.io.File
 
 @OptIn(
@@ -109,9 +111,11 @@ fun SettingsScreen(
 	val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 	var currentText by remember { mutableStateOf("") }
 	var isBackgroundLocationGranted by remember { mutableStateOf(true) }
+	var showVpnPermissionDialog by remember { mutableStateOf(false) }
 	var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
 	var didExportFiles by remember { mutableStateOf(false) }
 	var showAuthPrompt by remember { mutableStateOf(false) }
+	var showLocationDialog by remember { mutableStateOf(false) }
 
 	val screenPadding = 5.dp
 	val fillMaxWidth = .85f
@@ -119,6 +123,13 @@ fun SettingsScreen(
 	LaunchedEffect(Unit) {
 		viewModel.checkKernelSupport()
 	}
+
+	val notificationPermissionState =
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+		} else {
+			null
+		}
 
 	val startForResult =
 		rememberLauncherForActivityResult(
@@ -130,6 +141,19 @@ fun SettingsScreen(
 			}
 			viewModel.setBatteryOptimizeDisableShown()
 		}
+
+	val vpnActivityResultState =
+		rememberLauncherForActivityResult(
+			ActivityResultContracts.StartActivityForResult(),
+			onResult = {
+				val accepted = (it.resultCode == RESULT_OK)
+				if (accepted) {
+					viewModel.onToggleAutoTunnel(context)
+				} else {
+					showVpnPermissionDialog = true
+				}
+			},
+		)
 
 	fun exportAllConfigs() {
 		try {
@@ -183,13 +207,20 @@ fun SettingsScreen(
 	}
 
 	fun handleAutoTunnelToggle() {
-		if (uiState.isBatteryOptimizeDisableShown || isBatteryOptimizationsDisabled()) {
-			if (appViewModel.isRequiredPermissionGranted()) {
-				viewModel.onToggleAutoTunnel(context)
-			}
-		} else {
-			requestBatteryOptimizationsDisabled()
+		if (!uiState.isBatteryOptimizeDisableShown || !isBatteryOptimizationsDisabled()) return requestBatteryOptimizationsDisabled()
+		if (notificationPermissionState != null && !notificationPermissionState.status.isGranted) {
+			appViewModel.showSnackbarMessage(
+				context.getString(R.string.notification_permission_required),
+			)
+			return notificationPermissionState.launchPermissionRequest()
 		}
+		val intent = if (!uiState.settings.isKernelEnabled) {
+			com.wireguard.android.backend.GoBackend.VpnService.prepare(context)
+		} else {
+			null
+		}
+		if (intent != null) return vpnActivityResultState.launch(intent)
+		viewModel.onToggleAutoTunnel(context)
 	}
 
 	fun saveTrustedSSID() {
@@ -202,12 +233,6 @@ fun SettingsScreen(
 		}
 	}
 
-	fun openSettings() {
-		val intentSettings = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
-		intentSettings.data = Uri.fromParts("package", context.packageName, null)
-		context.startActivity(intentSettings)
-	}
-
 	fun checkFineLocationGranted() {
 		isBackgroundLocationGranted =
 			if (!fineLocationState.status.isGranted) {
@@ -218,9 +243,13 @@ fun SettingsScreen(
 			}
 	}
 
+	fun onRootDenied() = appViewModel.showSnackbarMessage(context.getString(R.string.error_root_denied))
+
+	fun onRootAccepted() = appViewModel.showSnackbarMessage(context.getString(R.string.root_accepted))
+
 	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 		if (
-			WireGuardAutoTunnel.isRunningOnAndroidTv() &&
+			context.isRunningOnTv() &&
 			Build.VERSION.SDK_INT == Build.VERSION_CODES.Q
 		) {
 			checkFineLocationGranted()
@@ -241,87 +270,30 @@ fun SettingsScreen(
 		checkFineLocationGranted()
 	}
 
-	AnimatedVisibility(showLocationServicesAlertDialog) {
-		AlertDialog(
-			onDismissRequest = { showLocationServicesAlertDialog = false },
-			confirmButton = {
-				TextButton(
-					onClick = {
-						showLocationServicesAlertDialog = false
-						handleAutoTunnelToggle()
-					},
-				) {
-					Text(text = stringResource(R.string.okay))
-				}
-			},
-			dismissButton = {
-				TextButton(onClick = { showLocationServicesAlertDialog = false }) {
-					Text(text = stringResource(R.string.cancel))
-				}
-			},
-			title = { Text(text = stringResource(R.string.location_services_not_detected)) },
-			text = { Text(text = stringResource(R.string.location_services_missing_message)) },
-		)
-	}
+	BackgroundLocationDisclosure(
+		!uiState.isLocationDisclosureShown,
+		onDismiss = { viewModel.setLocationDisclosureShown() },
+		onAttest = {
+			context.launchAppSettings()
+			viewModel.setLocationDisclosureShown()
+		},
+		scrollState,
+		focusRequester,
+	)
 
-	if (!uiState.isLocationDisclosureShown) {
-		Column(
-			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.Top,
-			modifier =
-			Modifier
-				.fillMaxSize()
-				.verticalScroll(scrollState),
-		) {
-			Icon(
-				Icons.Rounded.LocationOff,
-				contentDescription = stringResource(id = R.string.map),
-				modifier =
-				Modifier
-					.padding(30.dp)
-					.size(128.dp),
-			)
-			Text(
-				stringResource(R.string.prominent_background_location_title),
-				textAlign = TextAlign.Center,
-				modifier = Modifier.padding(30.dp),
-				fontSize = 20.sp,
-			)
-			Text(
-				stringResource(R.string.prominent_background_location_message),
-				textAlign = TextAlign.Center,
-				modifier = Modifier.padding(30.dp),
-				fontSize = 15.sp,
-			)
-			Row(
-				modifier =
-				if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
-					Modifier
-						.fillMaxWidth()
-						.padding(10.dp)
-				} else {
-					Modifier
-						.fillMaxWidth()
-						.padding(30.dp)
-				},
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceEvenly,
-			) {
-				TextButton(onClick = { viewModel.setLocationDisclosureShown() }) {
-					Text(stringResource(id = R.string.no_thanks))
-				}
-				TextButton(
-					modifier = Modifier.focusRequester(focusRequester),
-					onClick = {
-						openSettings()
-						viewModel.setLocationDisclosureShown()
-					},
-				) {
-					Text(stringResource(id = R.string.turn_on))
-				}
-			}
-		}
-	}
+	BackgroundLocationDialog(
+		showLocationDialog,
+		onDismiss = { showLocationDialog = false },
+		onAttest = { showLocationDialog = false },
+	)
+
+	LocationServicesDialog(
+		showLocationServicesAlertDialog,
+		onDismiss = { showVpnPermissionDialog = false },
+		onAttest = { handleAutoTunnelToggle() },
+	)
+
+	VpnDeniedDialog(showVpnPermissionDialog, onDismiss = { showVpnPermissionDialog = false })
 
 	if (showAuthPrompt) {
 		AuthorizationPrompt(
@@ -344,21 +316,7 @@ fun SettingsScreen(
 		)
 	}
 
-	if (uiState.tunnels.isEmpty() && uiState.isLocationDisclosureShown) {
-		Column(
-			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.Center,
-			modifier = Modifier.fillMaxSize(),
-		) {
-			Text(
-				stringResource(R.string.one_tunnel_required),
-				textAlign = TextAlign.Center,
-				modifier = Modifier.padding(15.dp),
-				fontStyle = FontStyle.Italic,
-			)
-		}
-	}
-	if (uiState.isLocationDisclosureShown && uiState.tunnels.isNotEmpty()) {
+	if (uiState.isLocationDisclosureShown) {
 		Column(
 			horizontalAlignment = Alignment.CenterHorizontally,
 			verticalArrangement = Arrangement.Top,
@@ -380,7 +338,7 @@ fun SettingsScreen(
 				color = MaterialTheme.colorScheme.surface,
 				modifier =
 				(
-					if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					if (context.isRunningOnTv()) {
 						Modifier
 							.height(IntrinsicSize.Min)
 							.fillMaxWidth(fillMaxWidth)
@@ -432,13 +390,13 @@ fun SettingsScreen(
 								uiState.settings.trustedNetworkSSIDs.forEach { ssid ->
 									ClickableIconButton(
 										onClick = {
-											if (WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+											if (context.isRunningOnTv()) {
 												focusRequester.requestFocus()
 												viewModel.onDeleteTrustedSSID(ssid)
 											}
 										},
 										onIconClick = {
-											if (WireGuardAutoTunnel.isRunningOnAndroidTv()) focusRequester.requestFocus()
+											if (context.isRunningOnTv()) focusRequester.requestFocus()
 											viewModel.onDeleteTrustedSSID(ssid)
 										},
 										text = ssid,
@@ -454,7 +412,8 @@ fun SettingsScreen(
 									Text(
 										stringResource(R.string.none),
 										fontStyle = FontStyle.Italic,
-										color = Color.Gray,
+										style = MaterialTheme.typography.bodySmall,
+										color = MaterialTheme.colorScheme.onSurface,
 									)
 								}
 							}
@@ -560,25 +519,14 @@ fun SettingsScreen(
 						TextButton(
 							enabled = !uiState.settings.isAlwaysOnVpnEnabled,
 							onClick = {
+								if (uiState.tunnels.isEmpty()) return@TextButton context.showToast(R.string.tunnel_required)
 								if (
 									uiState.settings.isTunnelOnWifiEnabled &&
 									!uiState.settings.isAutoTunnelEnabled
 								) {
 									when (false) {
-										isBackgroundLocationGranted ->
-											appViewModel.showSnackbarMessage(
-												context.getString(
-													R.string.background_location_required,
-												),
-											)
-
-										fineLocationState.status.isGranted ->
-											appViewModel.showSnackbarMessage(
-												context.getString(
-													R.string.precise_location_required,
-												),
-											)
-
+										isBackgroundLocationGranted -> showLocationDialog = true
+										fineLocationState.status.isGranted -> showLocationDialog = true
 										viewModel.isLocationEnabled(context) ->
 											showLocationServicesAlertDialog = true
 
@@ -648,12 +596,26 @@ fun SettingsScreen(
 							padding = screenPadding,
 							onCheckChanged = {
 								scope.launch {
-									viewModel.onToggleKernelMode().onFailure {
-										appViewModel.showSnackbarMessage(it.getMessage(context))
-									}
+									viewModel.onToggleKernelMode({ onRootAccepted() }, { onRootDenied() })
 								}
 							},
 						)
+						Row(
+							verticalAlignment = Alignment.CenterVertically,
+							modifier =
+							Modifier
+								.fillMaxSize()
+								.padding(top = 5.dp),
+							horizontalArrangement = Arrangement.Center,
+						) {
+							TextButton(
+								onClick = {
+									viewModel.requestRoot({ onRootAccepted() }, { onRootDenied() })
+								},
+							) {
+								Text(stringResource(R.string.request_root))
+							}
+						}
 					}
 				}
 			}
@@ -677,7 +639,7 @@ fun SettingsScreen(
 						title = stringResource(id = R.string.other),
 						padding = screenPadding,
 					)
-					if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					if (!context.isRunningOnTv()) {
 						ConfigurationToggle(
 							stringResource(R.string.always_on_vpn_support),
 							enabled = !uiState.settings.isAutoTunnelEnabled,
@@ -709,14 +671,15 @@ fun SettingsScreen(
 						padding = screenPadding,
 						onCheckChanged = {
 							if (uiState.isPinLockEnabled) {
-								viewModel.onPinLockDisabled()
+								appViewModel.onPinLockDisabled()
 							} else {
-								viewModel.onPinLockEnabled()
+								// TODO may want to show a dialog before proceeding in the future
+								PinManager.initialize(WireGuardAutoTunnel.instance)
 								navController.navigate(Screen.Lock.route)
 							}
 						},
 					)
-					if (!WireGuardAutoTunnel.isRunningOnAndroidTv()) {
+					if (!context.isRunningOnTv()) {
 						Row(
 							verticalAlignment = Alignment.CenterVertically,
 							modifier =
@@ -727,7 +690,10 @@ fun SettingsScreen(
 						) {
 							TextButton(
 								enabled = !didExportFiles,
-								onClick = { showAuthPrompt = true },
+								onClick = {
+									if (uiState.tunnels.isEmpty()) return@TextButton context.showToast(R.string.tunnel_required)
+									showAuthPrompt = true
+								},
 							) {
 								Text(stringResource(R.string.export_configs))
 							}

@@ -16,13 +16,9 @@ interface AppStateRepository {
 
 	suspend fun setBatteryOptimizationDisableShown(shown: Boolean)
 
-	suspend fun isTunnelRunningFromManualStart(): Boolean
+	suspend fun getLastActiveTunnelId(): Int?
 
-	suspend fun setTunnelRunningFromManualStart(id: Int)
-
-	suspend fun setManualStop()
-
-	suspend fun getActiveTunnelId(): Int?
+	suspend fun setLastActiveTunnelId(id: Int)
 
 	suspend fun getCurrentSsid(): String?
 

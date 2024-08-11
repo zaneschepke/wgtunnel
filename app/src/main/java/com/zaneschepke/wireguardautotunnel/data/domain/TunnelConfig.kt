@@ -32,8 +32,17 @@ data class TunnelConfig(
 		defaultValue = "",
 	)
 	val amQuick: String = AM_QUICK_DEFAULT,
+	@ColumnInfo(
+		name = "is_Active",
+		defaultValue = "false",
+	)
+	val isActive: Boolean = false,
 ) {
 	companion object {
+		fun findDefault(tunnels: List<TunnelConfig>): TunnelConfig? {
+			return tunnels.find { it.isPrimaryTunnel } ?: tunnels.firstOrNull()
+		}
+
 		fun configFromWgQuick(wgQuick: String): Config {
 			val inputStream: InputStream = wgQuick.byteInputStream()
 			return inputStream.bufferedReader(Charsets.UTF_8).use {

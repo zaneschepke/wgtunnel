@@ -4,7 +4,6 @@
     <string name="allowed_ips">Allowed IPs</string>
     <string name="email_chooser">Enviar un email…</string>
     <string name="go">ir</string>
-    <string name="discord_description">Únete a la comunidad</string>
     <string name="kernel">Kernel</string>
     <string name="restart">Reiniciar túnel</string>
     <string name="vpn_connection_failed">Error de conexión</string>
@@ -60,8 +59,7 @@
     <string name="enable_auto_tunnel">Iniciar túnel-automático</string>
     <string name="disable_auto_tunnel">Parar túnel-automático</string>
     <string name="tunnel_mobile_data">Activar túnel en datos móviles</string>
-    <string name="one_tunnel_required">Esta característica necesita ser usada en almenos por un túnel</string>
-    <string name="privacy_policy">Ver Política de Privacidad</string>
+	<string name="privacy_policy">Ver Política de Privacidad</string>
     <string name="okay">OK</string>
     <string name="tunnel_on_ethernet">Túnel en ethernet</string>
     <string name="prominent_background_location_title">Divulgación de la ubicación en segundo plano</string>

@@ -6,8 +6,7 @@
     <string name="add_trusted_ssid">Přidat název důvěryhodné Wi-Fi</string>
     <string name="enable_auto_tunnel">Spustit automatické tunelování</string>
     <string name="tunnel_mobile_data">Tunelování na mobilních datech</string>
-    <string name="one_tunnel_required">Alespoň jeden tunel je vyžadován pro použití této funkce</string>
-    <string name="privacy_policy">Otevřít zásady soukromí</string>
+	<string name="privacy_policy">Otevřít zásady soukromí</string>
     <string name="okay">OK</string>
     <string name="thank_you">Děkujeme za používání WG Tunnel!</string>
     <string name="add_tunnels_text">Přidat ze souboru nebo zipu</string>
@@ -116,7 +115,6 @@
     <string name="copy_public_key">Kopírovat veřejný klíč</string>
     <string name="base64_key">base64 klíč</string>
     <string name="docs_description">Přečíst si dokumentaci</string>
-    <string name="discord_description">Přidat se ke komunitě</string>
     <string name="email_description">Poslat mi email</string>
     <string name="support_help_text">Pokud máte potíže, nápady pro zlepšení, nebo se chcete jen zapojit, následující prostředky jsou k dispozici:</string>
     <string name="location_services_missing_message">Aplikace nenašla žádné služby polohy zapnuté na Vašem zařízení. Dle Vašeho zařízení, tohle může způsobit, že funkce nedůvěryhodné Wi-Fi nedokáže přečíst jméno připojené Wi-Fi. Chcete i přesto pokračovat?</string>

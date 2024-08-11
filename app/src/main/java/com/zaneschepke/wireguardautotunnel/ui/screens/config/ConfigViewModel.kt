@@ -23,8 +23,8 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
-import com.zaneschepke.wireguardautotunnel.util.removeAt
-import com.zaneschepke.wireguardautotunnel.util.update
+import com.zaneschepke.wireguardautotunnel.util.extensions.removeAt
+import com.zaneschepke.wireguardautotunnel.util.extensions.update
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -142,7 +142,6 @@ constructor(
 	private fun updateTunnelConfig(tunnelConfig: TunnelConfig?) = viewModelScope.launch {
 		if (tunnelConfig != null) {
 			saveConfig(tunnelConfig).join()
-			WireGuardAutoTunnel.requestTunnelTileServiceStateUpdate()
 		}
 	}
 
@@ -294,7 +293,7 @@ constructor(
 
 	fun onSaveAllChanges(configType: ConfigType): Result<Unit> {
 		return try {
-			val wgQuick = buildConfig().toWgQuickString()
+			val wgQuick = buildConfig().toWgQuickString(true)
 			val amQuick =
 				if (configType == ConfigType.AMNEZIA) {
 					buildAmConfig().toAwgQuickString()

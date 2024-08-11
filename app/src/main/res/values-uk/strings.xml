@@ -56,8 +56,7 @@
     <string name="tunnel_start_title">VPN підключено</string>
     <string name="notification_permission_required">Потрібен дозвіл на відображення сповіщень.</string>
     <string name="tunnel_mobile_data">Тунелювати мобільні дані</string>
-    <string name="one_tunnel_required">Для використання даної функції потрібно налаштувати мінімум один тунель</string>
-    <string name="privacy_policy">Переглянути політику конфіденційності</string>
+	<string name="privacy_policy">Переглянути політику конфіденційності</string>
     <string name="thank_you">Спасибі за використання WG Tunnel!</string>
     <string name="prominent_background_location_message">Дана функція потребує фоновий доступ до служби місцезнаходження для моніторингу назви мереж Wi-Fi навіть коли додаток закрито. Для отримання додаткової інформації прочитайте політику приватності на екрані Підтримки.</string>
     <string name="trusted_ssid_empty_description">Введіть SSID</string>
@@ -112,7 +111,6 @@
     <string name="go">вперед</string>
     <string name="docs_description">Переглянути документацію</string>
     <string name="email_description">Відправити email автору</string>
-    <string name="discord_description">Приєднатися до спільноти</string>
     <string name="support_help_text">Якщо у вас виникли проблеми, є ідеї щодо покращення, чи бажання долучитися, скористайтесь наступними ресурсами:</string>
     <string name="use_kernel">Використовувати модуль режиму ядра</string>
     <string name="error_ssid_exists">SSID вже існує</string>

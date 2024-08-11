@@ -3,12 +3,13 @@ package com.zaneschepke.wireguardautotunnel.module
 import android.content.Context
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.GoBackend
+import com.wireguard.android.backend.RootTunnelActionHandler
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
 import dagger.Module
 import dagger.Provides
@@ -31,22 +32,28 @@ class TunnelModule {
 
 	@Provides
 	@Singleton
+	fun provideRootShellAm(@ApplicationContext context: Context): org.amnezia.awg.util.RootShell {
+		return org.amnezia.awg.util.RootShell(context)
+	}
+
+	@Provides
+	@Singleton
 	@Userspace
-	fun provideUserspaceBackend(@ApplicationContext context: Context): Backend {
-		return GoBackend(context)
+	fun provideUserspaceBackend(@ApplicationContext context: Context, rootShell: RootShell): Backend {
+		return GoBackend(context, RootTunnelActionHandler(rootShell))
 	}
 
 	@Provides
 	@Singleton
 	@Kernel
 	fun provideKernelBackend(@ApplicationContext context: Context, rootShell: RootShell): Backend {
-		return WgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell))
+		return WgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell), RootTunnelActionHandler(rootShell))
 	}
 
 	@Provides
 	@Singleton
-	fun provideAmneziaBackend(@ApplicationContext context: Context): org.amnezia.awg.backend.Backend {
-		return org.amnezia.awg.backend.GoBackend(context)
+	fun provideAmneziaBackend(@ApplicationContext context: Context, rootShell: org.amnezia.awg.util.RootShell): org.amnezia.awg.backend.Backend {
+		return org.amnezia.awg.backend.GoBackend(context, org.amnezia.awg.backend.RootTunnelActionHandler(rootShell))
 	}
 
 	@Provides
@@ -58,7 +65,7 @@ class TunnelModule {
 		appDataRepository: AppDataRepository,
 		@ApplicationScope applicationScope: CoroutineScope,
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
-	): VpnService {
+	): TunnelService {
 		return WireGuardTunnel(
 			amneziaBackend,
 			userspaceBackend,
@@ -71,7 +78,7 @@ class TunnelModule {
 
 	@Provides
 	@Singleton
-	fun provideServiceManager(appDataRepository: AppDataRepository, @IoDispatcher ioDispatcher: CoroutineDispatcher): ServiceManager {
-		return ServiceManager(appDataRepository, ioDispatcher)
+	fun provideServiceManager(): ServiceManager {
+		return ServiceManager()
 	}
 }

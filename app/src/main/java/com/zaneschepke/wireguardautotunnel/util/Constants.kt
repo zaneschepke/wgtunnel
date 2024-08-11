@@ -7,8 +7,6 @@ object Constants {
 	const val MANUAL_TUNNEL_CONFIG_ID = "0"
 	const val BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT = 10 * 60 * 1_000L // 10 minutes
 	const val VPN_STATISTIC_CHECK_INTERVAL = 1_000L
-	const val VPN_CONNECTED_NOTIFICATION_DELAY = 3_000L
-	const val TOGGLE_TUNNEL_DELAY = 300L
 	const val WATCHER_COLLECTION_DELAY = 1_000L
 	const val CONF_FILE_EXTENSION = ".conf"
 	const val ZIP_FILE_EXTENSION = ".zip"
@@ -19,6 +17,7 @@ object Constants {
 	const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
 	const val ANDROID_TV_EXPLORER_STUB = "com.android.tv.frameworkpackagestubs"
 	const val ALWAYS_ON_VPN_ACTION = "android.net.VpnService"
+	const val VPN_SETTINGS_PACKAGE = "android.net.vpn.SETTINGS"
 	const val EMAIL_MIME_TYPE = "plain/text"
 	const val SYSTEM_EXEMPT_SERVICE_TYPE_ID = 1024
 
@@ -30,8 +29,6 @@ object Constants {
 	const val VPN_RESTART_DELAY = 1_000L
 	const val PING_INTERVAL = 60_000L
 	const val PING_COOLDOWN = PING_INTERVAL * 60 // one hour
-
-	const val TUNNEL_EXTRA_KEY = "tunnelId"
 
 	const val UNREADABLE_SSID = "<unknown ssid>"
 

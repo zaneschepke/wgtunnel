@@ -1,7 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.util.TunnelConfigs
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import kotlinx.coroutines.flow.Flow
 
 interface TunnelConfigRepository {
@@ -18,6 +18,8 @@ interface TunnelConfigRepository {
 	suspend fun delete(tunnelConfig: TunnelConfig)
 
 	suspend fun getById(id: Int): TunnelConfig?
+
+	suspend fun getActive(): TunnelConfigs
 
 	suspend fun count(): Int
 

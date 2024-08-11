@@ -2,7 +2,7 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
-import com.zaneschepke.wireguardautotunnel.util.TunnelConfigs
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 
 data class MainUiState(
 	val settings: Settings = Settings(),
