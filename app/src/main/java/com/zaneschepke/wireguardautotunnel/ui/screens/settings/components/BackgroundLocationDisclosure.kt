@@ -29,67 +29,64 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 
 @Composable
 fun BackgroundLocationDisclosure(
-	show: Boolean,
 	onDismiss: () -> Unit,
 	onAttest: () -> Unit,
 	scrollState: ScrollState,
 	focusRequester: FocusRequester,
 ) {
 	val context = LocalContext.current
-	if (show) {
-		Column(
-			horizontalAlignment = Alignment.CenterHorizontally,
-			verticalArrangement = Arrangement.Top,
+	Column(
+		horizontalAlignment = Alignment.CenterHorizontally,
+		verticalArrangement = Arrangement.Top,
+		modifier =
+		Modifier
+			.fillMaxSize()
+			.verticalScroll(scrollState),
+	) {
+		Icon(
+			Icons.Rounded.LocationOff,
+			contentDescription = stringResource(id = R.string.map),
 			modifier =
 			Modifier
-				.fillMaxSize()
-				.verticalScroll(scrollState),
-		) {
-			Icon(
-				Icons.Rounded.LocationOff,
-				contentDescription = stringResource(id = R.string.map),
-				modifier =
+				.padding(30.dp)
+				.size(128.dp),
+		)
+		Text(
+			stringResource(R.string.prominent_background_location_title),
+			textAlign = TextAlign.Center,
+			modifier = Modifier.padding(30.dp),
+			fontSize = 20.sp,
+		)
+		Text(
+			stringResource(R.string.prominent_background_location_message),
+			textAlign = TextAlign.Center,
+			modifier = Modifier.padding(30.dp),
+			fontSize = 15.sp,
+		)
+		Row(
+			modifier =
+			if (context.isRunningOnTv()) {
 				Modifier
+					.fillMaxWidth()
+					.padding(10.dp)
+			} else {
+				Modifier
+					.fillMaxWidth()
 					.padding(30.dp)
-					.size(128.dp),
-			)
-			Text(
-				stringResource(R.string.prominent_background_location_title),
-				textAlign = TextAlign.Center,
-				modifier = Modifier.padding(30.dp),
-				fontSize = 20.sp,
-			)
-			Text(
-				stringResource(R.string.prominent_background_location_message),
-				textAlign = TextAlign.Center,
-				modifier = Modifier.padding(30.dp),
-				fontSize = 15.sp,
-			)
-			Row(
-				modifier =
-				if (context.isRunningOnTv()) {
-					Modifier
-						.fillMaxWidth()
-						.padding(10.dp)
-				} else {
-					Modifier
-						.fillMaxWidth()
-						.padding(30.dp)
+			},
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceEvenly,
+		) {
+			TextButton(onClick = { onDismiss() }) {
+				Text(stringResource(id = R.string.no_thanks))
+			}
+			TextButton(
+				modifier = Modifier.focusRequester(focusRequester),
+				onClick = {
+					onAttest()
 				},
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceEvenly,
 			) {
-				TextButton(onClick = { onDismiss() }) {
-					Text(stringResource(id = R.string.no_thanks))
-				}
-				TextButton(
-					modifier = Modifier.focusRequester(focusRequester),
-					onClick = {
-						onAttest()
-					},
-				) {
-					Text(stringResource(id = R.string.turn_on))
-				}
+				Text(stringResource(id = R.string.turn_on))
 			}
 		}
 	}
