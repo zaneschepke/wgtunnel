@@ -50,4 +50,20 @@ class ServiceManager {
 			AutoTunnelService::class.java,
 		)
 	}
+
+	fun startTunnelBackgroundService(context: Context) {
+		actionOnService(
+			Action.START_FOREGROUND,
+			context,
+			TunnelBackgroundService::class.java,
+		)
+	}
+
+	fun stopTunnelBackgroundService(context: Context) {
+		actionOnService(
+			Action.STOP,
+			context,
+			TunnelBackgroundService::class.java
+		)
+	}
 }

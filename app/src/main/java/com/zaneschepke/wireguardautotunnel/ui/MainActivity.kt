@@ -41,6 +41,7 @@ import androidx.navigation.navArgument
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
@@ -65,10 +66,7 @@ class MainActivity : AppCompatActivity() {
 	lateinit var appStateRepository: AppStateRepository
 
 	@Inject
-	lateinit var settingsRepository: SettingsRepository
-
-	@Inject
-	lateinit var serviceManager: ServiceManager
+	lateinit var tunnelService: TunnelService
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -76,13 +74,6 @@ class MainActivity : AppCompatActivity() {
 		val isPinLockEnabled = intent.extras?.getBoolean(SplashActivity.IS_PIN_LOCK_ENABLED_KEY)
 
 		enableEdgeToEdge(navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()))
-
-		lifecycleScope.launch {
-			val settings = settingsRepository.getSettings()
-			if (settings.isAutoTunnelEnabled) {
-				serviceManager.startWatcherService(application.applicationContext)
-			}
-		}
 
 		setContent {
 			val appViewModel = hiltViewModel<AppViewModel>()
@@ -240,5 +231,10 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 		}
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+		tunnelService.cancelStatsJob()
 	}
 }

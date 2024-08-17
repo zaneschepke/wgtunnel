@@ -153,6 +153,14 @@ constructor(
 		}
 	}
 
+	override fun cancelStatsJob() {
+		statsJob?.cancel()
+	}
+
+	override fun startStatsJob() {
+		statsJob = startTunnelStatisticsJob()
+	}
+
 	override fun getName(): String {
 		return _vpnState.value.tunnelConfig?.name ?: ""
 	}
@@ -164,15 +172,9 @@ constructor(
 	private fun handleStateChange(state: TunnelState) {
 		emitTunnelState(state)
 		WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
-		if (state == TunnelState.UP) {
-			statsJob = startTunnelStatisticsJob()
-		}
-		if (state == TunnelState.DOWN) {
-			try {
-				statsJob?.cancel()
-			} catch (e: CancellationException) {
-				Timber.i("Stats job cancelled")
-			}
+		when(state) {
+			TunnelState.UP -> startStatsJob()
+			else -> cancelStatsJob()
 		}
 	}
 

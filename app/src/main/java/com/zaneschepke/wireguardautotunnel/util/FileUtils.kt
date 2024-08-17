@@ -6,6 +6,8 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.MediaStore.MediaColumns
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -36,6 +38,26 @@ class FileUtils(
 					it.readText()
 				}
 			}
+		}
+	}
+
+	fun createWgFiles(tunnels : TunnelConfigs) : List<File> {
+		return tunnels.map { config ->
+			val file = File(context.cacheDir, "${config.name}-wg.conf")
+			file.outputStream().use {
+				it.write(config.wgQuick.toByteArray())
+			}
+			file
+		}
+	}
+
+	fun createAmFiles(tunnels : TunnelConfigs) : List<File> {
+		return tunnels.filter{ it.amQuick != TunnelConfig.AM_QUICK_DEFAULT }.map { config ->
+			val file = File(context.cacheDir, "${config.name}-am.conf")
+			file.outputStream().use {
+				it.write(config.amQuick.toByteArray())
+			}
+			file
 		}
 	}
 

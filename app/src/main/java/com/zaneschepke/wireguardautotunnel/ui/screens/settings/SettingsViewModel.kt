@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
@@ -15,6 +17,7 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
+import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -246,6 +249,15 @@ constructor(
 			onFailure()
 		}.onSuccess {
 			onSuccess()
+		}
+	}
+
+	suspend fun exportAllConfigs() : Result<Unit> {
+		return kotlin.runCatching {
+			val tunnels = appDataRepository.tunnels.getAll()
+			val wgFiles = fileUtils.createWgFiles(tunnels)
+			val amFiles = fileUtils.createAmFiles(tunnels)
+			onExportTunnels(wgFiles + amFiles)
 		}
 	}
 }

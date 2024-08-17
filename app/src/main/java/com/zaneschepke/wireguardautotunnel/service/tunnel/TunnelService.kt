@@ -14,4 +14,7 @@ interface TunnelService : Tunnel, org.amnezia.awg.backend.Tunnel {
 	suspend fun runningTunnelNames(): Set<String>
 
 	suspend fun getState(): TunnelState
+
+	fun cancelStatsJob()
+	fun startStatsJob()
 }

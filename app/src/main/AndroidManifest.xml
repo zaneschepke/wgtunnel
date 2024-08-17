@@ -167,6 +167,16 @@
             android:stopWithTask="false"
             tools:node="merge" />
 
+		<service
+			android:name=".service.foreground.TunnelBackgroundService"
+			android:exported="false"
+			android:foregroundServiceType="systemExempted"
+			android:permission="android.permission.BIND_VPN_SERVICE">
+			<intent-filter>
+				<action android:name="android.net.VpnService" />
+			</intent-filter>
+		</service>
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"

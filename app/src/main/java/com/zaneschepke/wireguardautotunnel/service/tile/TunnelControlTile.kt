@@ -68,6 +68,7 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	override fun onClick() {
 		super.onClick()
 		unlockAndRun {
+			Timber.d("Click")
 			lifecycleScope.launch {
 				val context = this@TunnelControlTile
 				val lastActive = appDataRepository.getStartTunnelConfig()
