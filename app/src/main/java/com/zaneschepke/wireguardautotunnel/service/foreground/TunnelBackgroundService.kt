@@ -30,12 +30,12 @@ class TunnelBackgroundService : ForegroundService() {
 		stopForeground(STOP_FOREGROUND_REMOVE)
 	}
 
-	private fun createNotification() : Notification {
+	private fun createNotification(): Notification {
 		return notificationService.createNotification(
 			getString(R.string.vpn_channel_id),
 			getString(R.string.vpn_channel_name),
 			getString(R.string.tunnel_start_text),
-			description = ""
+			description = "",
 		)
 	}
 }

@@ -14,7 +14,6 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStati
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -172,7 +171,7 @@ constructor(
 	private fun handleStateChange(state: TunnelState) {
 		emitTunnelState(state)
 		WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
-		when(state) {
+		when (state) {
 			TunnelState.UP -> startStatsJob()
 			else -> cancelStatsJob()
 		}

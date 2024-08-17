@@ -22,7 +22,7 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
 
 	showBottomBar = bottomNavItems.firstOrNull { navBackStackEntry?.destination?.route?.contains(it.route) == true } != null
 
-	if(showBottomBar) {
+	if (showBottomBar) {
 		NavigationBar(
 			containerColor = MaterialTheme.colorScheme.surface,
 		) {
@@ -32,7 +32,7 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
 				NavigationBarItem(
 					selected = selected,
 					onClick = {
-						if(navBackStackEntry?.destination?.route == item.route) return@NavigationBarItem
+						if (navBackStackEntry?.destination?.route == item.route) return@NavigationBarItem
 						navController.navigate(item.route) {
 							// Pop up to the start destination of the graph to
 							// avoid building up a large stack of destinations

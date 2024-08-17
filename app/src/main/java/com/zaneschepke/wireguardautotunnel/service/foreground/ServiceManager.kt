@@ -63,7 +63,7 @@ class ServiceManager {
 		actionOnService(
 			Action.STOP,
 			context,
-			TunnelBackgroundService::class.java
+			TunnelBackgroundService::class.java,
 		)
 	}
 }

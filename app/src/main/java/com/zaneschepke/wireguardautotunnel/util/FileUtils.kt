@@ -41,7 +41,7 @@ class FileUtils(
 		}
 	}
 
-	fun createWgFiles(tunnels : TunnelConfigs) : List<File> {
+	fun createWgFiles(tunnels: TunnelConfigs): List<File> {
 		return tunnels.map { config ->
 			val file = File(context.cacheDir, "${config.name}-wg.conf")
 			file.outputStream().use {
@@ -51,8 +51,8 @@ class FileUtils(
 		}
 	}
 
-	fun createAmFiles(tunnels : TunnelConfigs) : List<File> {
-		return tunnels.filter{ it.amQuick != TunnelConfig.AM_QUICK_DEFAULT }.map { config ->
+	fun createAmFiles(tunnels: TunnelConfigs): List<File> {
+		return tunnels.filter { it.amQuick != TunnelConfig.AM_QUICK_DEFAULT }.map { config ->
 			val file = File(context.cacheDir, "${config.name}-am.conf")
 			file.outputStream().use {
 				it.write(config.amQuick.toByteArray())

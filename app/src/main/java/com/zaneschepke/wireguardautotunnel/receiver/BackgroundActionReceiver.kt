@@ -46,7 +46,6 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 			}
 			ACTION_DISCONNECT -> {
 				applicationScope.launch {
-
 					val tunnel = tunnelConfigRepository.getById(id)
 					tunnel?.let {
 						serviceManager.stopTunnelBackgroundService(context)

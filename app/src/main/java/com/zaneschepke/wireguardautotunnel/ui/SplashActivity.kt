@@ -18,16 +18,13 @@ import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
-import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 import javax.inject.Provider
@@ -77,9 +74,9 @@ class SplashActivity : ComponentActivity() {
 				}
 				val settings = appDataRepository.settings.getSettings()
 				if (settings.isAutoTunnelEnabled) serviceManager.startWatcherService(application.applicationContext)
-				if(tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startStatsJob()
+				if (tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startStatsJob()
 				val tunnels = appDataRepository.tunnels.getActive()
-				if(tunnels.isNotEmpty() && tunnelService.get().getState() == TunnelState.DOWN) tunnelService.get().startTunnel(tunnels.first())
+				if (tunnels.isNotEmpty() && tunnelService.get().getState() == TunnelState.DOWN) tunnelService.get().startTunnel(tunnels.first())
 				requestTunnelTileServiceStateUpdate()
 				requestAutoTunnelTileServiceUpdate()
 

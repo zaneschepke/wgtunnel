@@ -344,7 +344,7 @@ fun SettingsScreen(
 								.focusRequester(focusRequester)
 						},
 					)
-					if(uiState.settings.isTunnelOnWifiEnabled) {
+					if (uiState.settings.isTunnelOnWifiEnabled) {
 						Column {
 							FlowRow(
 								modifier =
