@@ -57,7 +57,13 @@ constructor(
 			when (val backend = backend()) {
 				is Backend -> backend.setState(this, tunnelState.toWgState(), TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)).let { TunnelState.from(it) }
 				is org.amnezia.awg.backend.Backend -> {
-					val config = if(tunnelConfig.amQuick.isBlank()) TunnelConfig.configFromAmQuick(tunnelConfig.wgQuick) else TunnelConfig.configFromAmQuick(tunnelConfig.amQuick)
+					val config = if (tunnelConfig.amQuick.isBlank()) {
+						TunnelConfig.configFromAmQuick(
+							tunnelConfig.wgQuick,
+						)
+					} else {
+						TunnelConfig.configFromAmQuick(tunnelConfig.amQuick)
+					}
 					backend.setState(this, tunnelState.toAmState(), config).let {
 						TunnelState.from(it)
 					}

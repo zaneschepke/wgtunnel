@@ -269,7 +269,7 @@ fun SettingsScreen(
 	if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
 		checkFineLocationGranted()
 	}
-	if(!uiState.isLocationDisclosureShown) {
+	if (!uiState.isLocationDisclosureShown) {
 		BackgroundLocationDisclosure(
 			onDismiss = { viewModel.setLocationDisclosureShown() },
 			onAttest = {
@@ -281,7 +281,6 @@ fun SettingsScreen(
 		)
 		return
 	}
-
 
 	BackgroundLocationDialog(
 		showLocationDialog,

@@ -144,7 +144,12 @@ fun MainScreen(
 	LaunchedEffect(Unit) {
 		if (context.isRunningOnTv()) {
 			delay(Constants.FOCUS_REQUEST_DELAY)
-			focusRequester.requestFocus()
+			kotlin.runCatching {
+				focusRequester.requestFocus()
+			}.onFailure {
+				delay(Constants.FOCUS_REQUEST_DELAY)
+				focusRequester.requestFocus()
+			}
 		}
 	}
 
@@ -262,7 +267,7 @@ fun MainScreen(
 			reverseLayout = false,
 			flingBehavior = ScrollableDefaults.flingBehavior(),
 		) {
-			if(uiState.tunnels.isEmpty()) {
+			if (uiState.tunnels.isEmpty()) {
 				item {
 					GettingStartedLabel(onClick = { context.openWebUrl(it) })
 				}

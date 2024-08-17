@@ -88,7 +88,12 @@ fun OptionsScreen(
 		optionsViewModel.init(tunnelId)
 		if (context.isRunningOnTv()) {
 			delay(Constants.FOCUS_REQUEST_DELAY)
-			focusRequester.requestFocus()
+			kotlin.runCatching {
+				focusRequester.requestFocus()
+			}.onFailure {
+				delay(Constants.FOCUS_REQUEST_DELAY)
+				focusRequester.requestFocus()
+			}
 		}
 	}
 

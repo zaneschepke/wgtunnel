@@ -28,12 +28,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 
 @Composable
-fun BackgroundLocationDisclosure(
-	onDismiss: () -> Unit,
-	onAttest: () -> Unit,
-	scrollState: ScrollState,
-	focusRequester: FocusRequester,
-) {
+fun BackgroundLocationDisclosure(onDismiss: () -> Unit, onAttest: () -> Unit, scrollState: ScrollState, focusRequester: FocusRequester) {
 	val context = LocalContext.current
 	Column(
 		horizontalAlignment = Alignment.CenterHorizontally,

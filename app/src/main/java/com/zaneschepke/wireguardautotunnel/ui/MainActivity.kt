@@ -5,6 +5,9 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -49,6 +52,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -129,7 +133,6 @@ class MainActivity : AppCompatActivity() {
 						}
 					},
 					containerColor = MaterialTheme.colorScheme.background,
-					// TODO refactor
 					modifier =
 					Modifier
 						.focusable()
@@ -150,14 +153,12 @@ class MainActivity : AppCompatActivity() {
 						)
 					},
 				) { padding ->
-					Surface {
+					Surface(modifier = Modifier.fillMaxSize().padding(padding)) {
 						NavHost(
 							navController,
+							enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
+							exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
 							startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
-							modifier =
-							Modifier
-								.padding(padding)
-								.fillMaxSize(),
 						) {
 							composable(
 								Screen.Main.route,

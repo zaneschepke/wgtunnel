@@ -24,6 +24,8 @@ object Constants {
 	const val SUBSCRIPTION_TIMEOUT = 5_000L
 	const val FOCUS_REQUEST_DELAY = 500L
 
+	const val TRANSITION_ANIMATION_TIME = 200
+
 	const val DEFAULT_PING_IP = "1.1.1.1"
 	const val PING_TIMEOUT = 5_000L
 	const val VPN_RESTART_DELAY = 1_000L
