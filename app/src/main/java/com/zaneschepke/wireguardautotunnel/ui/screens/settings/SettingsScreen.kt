@@ -630,7 +630,7 @@ fun SettingsScreen(
 				Modifier
 					.fillMaxWidth(fillMaxWidth)
 					.padding(vertical = 10.dp)
-					.padding(bottom = 140.dp),
+					.padding(bottom = 10.dp),
 			) {
 				Column(
 					horizontalAlignment = Alignment.Start,

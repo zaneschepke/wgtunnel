@@ -4,9 +4,6 @@ import android.annotation.SuppressLint
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.ScrollableDefaults
@@ -265,12 +262,8 @@ fun MainScreen(
 			reverseLayout = false,
 			flingBehavior = ScrollableDefaults.flingBehavior(),
 		) {
-			item {
-				AnimatedVisibility(
-					uiState.tunnels.isEmpty(),
-					exit = fadeOut(),
-					enter = fadeIn(),
-				) {
+			if(uiState.tunnels.isEmpty()) {
+				item {
 					GettingStartedLabel(onClick = { context.openWebUrl(it) })
 				}
 			}

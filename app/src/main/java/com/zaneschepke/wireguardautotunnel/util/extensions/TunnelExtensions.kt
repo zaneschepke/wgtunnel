@@ -29,7 +29,7 @@ fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
 }
 
 fun Config.toWgQuickString(): String {
-	val amQuick = toAwgQuickString()
+	val amQuick = toAwgQuickString(true)
 	val lines = amQuick.lines().toMutableList()
 	val linesIterator = lines.iterator()
 	while (linesIterator.hasNext()) {

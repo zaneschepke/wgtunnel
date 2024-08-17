@@ -296,7 +296,7 @@ constructor(
 			val wgQuick = buildConfig().toWgQuickString(true)
 			val amQuick =
 				if (configType == ConfigType.AMNEZIA) {
-					buildAmConfig().toAwgQuickString()
+					buildAmConfig().toAwgQuickString(true)
 				} else {
 					TunnelConfig.AM_QUICK_DEFAULT
 				}

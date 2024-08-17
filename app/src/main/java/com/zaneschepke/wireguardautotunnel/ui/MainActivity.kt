@@ -15,6 +15,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -127,6 +128,7 @@ class MainActivity : AppCompatActivity() {
 							)
 						}
 					},
+					containerColor = MaterialTheme.colorScheme.background,
 					// TODO refactor
 					modifier =
 					Modifier
@@ -148,88 +150,90 @@ class MainActivity : AppCompatActivity() {
 						)
 					},
 				) { padding ->
-					NavHost(
-						navController,
-						startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
-						modifier =
-						Modifier
-							.padding(padding)
-							.fillMaxSize(),
-					) {
-						composable(
-							Screen.Main.route,
+					Surface {
+						NavHost(
+							navController,
+							startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
+							modifier =
+							Modifier
+								.padding(padding)
+								.fillMaxSize(),
 						) {
-							MainScreen(
-								focusRequester = focusRequester,
-								appViewModel = appViewModel,
-								navController = navController,
-							)
-						}
-						composable(
-							Screen.Settings.route,
-						) {
-							SettingsScreen(
-								appViewModel = appViewModel,
-								navController = navController,
-								focusRequester = focusRequester,
-							)
-						}
-						composable(
-							Screen.Support.route,
-						) {
-							SupportScreen(
-								focusRequester = focusRequester,
-								navController = navController,
-							)
-						}
-						composable(Screen.Support.Logs.route) {
-							LogsScreen()
-						}
-						composable(
-							"${Screen.Config.route}/{id}?configType={configType}",
-							arguments =
-							listOf(
-								navArgument("id") {
-									type = NavType.StringType
-									defaultValue = "0"
-								},
-								navArgument("configType") {
-									type = NavType.StringType
-									defaultValue = ConfigType.WIREGUARD.name
-								},
-							),
-						) {
-							val id = it.arguments?.getString("id")
-							val configType =
-								ConfigType.valueOf(
-									it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
-								)
-							if (!id.isNullOrBlank()) {
-								ConfigScreen(
-									navController = navController,
-									tunnelId = id,
-									appViewModel = appViewModel,
+							composable(
+								Screen.Main.route,
+							) {
+								MainScreen(
 									focusRequester = focusRequester,
-									configType = configType,
+									appViewModel = appViewModel,
+									navController = navController,
 								)
 							}
-						}
-						composable("${Screen.Option.route}/{id}") {
-							val id = it.arguments?.getString("id")
-							if (!id.isNullOrBlank()) {
-								OptionsScreen(
-									navController = navController,
-									tunnelId = id,
+							composable(
+								Screen.Settings.route,
+							) {
+								SettingsScreen(
 									appViewModel = appViewModel,
+									navController = navController,
 									focusRequester = focusRequester,
 								)
 							}
-						}
-						composable(Screen.Lock.route) {
-							PinLockScreen(
-								navController = navController,
-								appViewModel = appViewModel,
-							)
+							composable(
+								Screen.Support.route,
+							) {
+								SupportScreen(
+									focusRequester = focusRequester,
+									navController = navController,
+								)
+							}
+							composable(Screen.Support.Logs.route) {
+								LogsScreen()
+							}
+							composable(
+								"${Screen.Config.route}/{id}?configType={configType}",
+								arguments =
+								listOf(
+									navArgument("id") {
+										type = NavType.StringType
+										defaultValue = "0"
+									},
+									navArgument("configType") {
+										type = NavType.StringType
+										defaultValue = ConfigType.WIREGUARD.name
+									},
+								),
+							) {
+								val id = it.arguments?.getString("id")
+								val configType =
+									ConfigType.valueOf(
+										it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
+									)
+								if (!id.isNullOrBlank()) {
+									ConfigScreen(
+										navController = navController,
+										tunnelId = id,
+										appViewModel = appViewModel,
+										focusRequester = focusRequester,
+										configType = configType,
+									)
+								}
+							}
+							composable("${Screen.Option.route}/{id}") {
+								val id = it.arguments?.getString("id")
+								if (!id.isNullOrBlank()) {
+									OptionsScreen(
+										navController = navController,
+										tunnelId = id,
+										appViewModel = appViewModel,
+										focusRequester = focusRequester,
+									)
+								}
+							}
+							composable(Screen.Lock.route) {
+								PinLockScreen(
+									navController = navController,
+									appViewModel = appViewModel,
+								)
+							}
 						}
 					}
 				}

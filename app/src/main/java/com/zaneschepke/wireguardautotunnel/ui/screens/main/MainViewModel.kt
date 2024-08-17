@@ -179,7 +179,7 @@ constructor(
 				when (type) {
 					ConfigType.AMNEZIA -> {
 						val config = org.amnezia.awg.config.Config.parse(it)
-						amQuick = config.toAwgQuickString()
+						amQuick = config.toAwgQuickString(true)
 						config.toWgQuickString()
 					}
 
@@ -252,7 +252,7 @@ constructor(
 												org.amnezia.awg.config.Config.parse(
 													zip,
 												)
-											amQuick = config.toAwgQuickString()
+											amQuick = config.toAwgQuickString(true)
 											config.toWgQuickString()
 										}
 
