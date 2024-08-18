@@ -55,13 +55,13 @@ and on while on different networks. This app was created to offer a free solutio
 * Split tunneling by application with search
 * WireGuard support for kernel and userspace modes
 * Amnezia support for userspace mode for DPI/censorship protection
+* Pre/Post Up/Down scripts support for all modes on a rooted device
 * Always-On VPN support
 * Export Amnezia and WireGuard tunnels to zip
 * Quick tile support for tunnel toggling, auto-tunneling
 * Static shortcuts support for tunnel toggling, auto-tunneling
 * Intent automation support for all tunnels
-* Automatic auto-tunneling service restart after reboot
-* Automatic tunnel restart after reboot
+* Automatic auto-tunneling service and/or tunnel restart after reboot and app update
 * Battery preservation measures
 * Restart tunnel on ping failure (beta)
 
