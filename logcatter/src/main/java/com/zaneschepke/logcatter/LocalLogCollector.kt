@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import java.io.File
 
 interface LocalLogCollector {
-	fun start(onLogMessage: ((message: LogMessage) -> Unit)? = null)
+	suspend fun start(onLogMessage: ((message: LogMessage) -> Unit)? = null)
 
 	fun stop()
 

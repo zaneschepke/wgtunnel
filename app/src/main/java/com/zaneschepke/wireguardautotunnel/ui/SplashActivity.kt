@@ -25,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 import javax.inject.Provider
@@ -42,17 +43,6 @@ class SplashActivity : ComponentActivity() {
 	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
-	lateinit var localLogCollector: LocalLogCollector
-
-	@Inject
-	@ApplicationScope
-	lateinit var applicationScope: CoroutineScope
-
-	@Inject
-	@IoDispatcher
-	lateinit var ioDispatcher: CoroutineDispatcher
-
-	@Inject
 	lateinit var serviceManager: ServiceManager
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,11 +52,7 @@ class SplashActivity : ComponentActivity() {
 		}
 		super.onCreate(savedInstanceState)
 
-		applicationScope.launch(ioDispatcher) {
-			if (!this@SplashActivity.isRunningOnTv()) localLogCollector.start()
-		}
-
-		lifecycleScope.launch(ioDispatcher) {
+		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.CREATED) {
 				val pinLockEnabled = appStateRepository.isPinLockEnabled()
 				if (pinLockEnabled) {

@@ -195,6 +195,13 @@
 			android:enabled="true"
 			android:exported="false"/>
 		<receiver
+			android:name=".receiver.AppUpdateReceiver"
+			android:exported="false">
+			<intent-filter>
+				<action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+			</intent-filter>
+		</receiver>
+		<receiver
 			android:name=".receiver.KernelReceiver"
 			android:exported="false"
 			android:permission="${applicationId}.permission.CONTROL_TUNNELS">

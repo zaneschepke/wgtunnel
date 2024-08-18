@@ -69,7 +69,7 @@ object LogcatUtil {
 	internal object Logcat : LocalLogCollector {
 		private var logcatReader: LogcatReader? = null
 
-		override fun start(onLogMessage: ((message: LogMessage) -> Unit)?) {
+		override suspend fun start(onLogMessage: ((message: LogMessage) -> Unit)?) {
 			logcatReader ?: run {
 				logcatReader =
 					LogcatReader(
@@ -78,9 +78,7 @@ object LogcatUtil {
 						onLogMessage,
 					)
 			}
-			logcatReader?.let { logReader ->
-				if (!logReader.isAlive) logReader.start()
-			}
+			logcatReader?.run()
 		}
 
 		override fun stop() {
@@ -142,7 +140,7 @@ object LogcatUtil {
 			pID: String,
 			private val logcatPath: String,
 			private val callback: ((input: LogMessage) -> Unit)?,
-		) : Thread() {
+		) {
 			private var logcatProc: Process? = null
 			private var reader: BufferedReader? = null
 			private var mRunning = true
@@ -177,7 +175,7 @@ object LogcatUtil {
 				}.let { last -> findIpv4AddressRegex.replace(last, "<ipv4-address>") }
 			}
 
-			override fun run() {
+			fun run() {
 				if (outputStream == null) return
 				try {
 					clear()

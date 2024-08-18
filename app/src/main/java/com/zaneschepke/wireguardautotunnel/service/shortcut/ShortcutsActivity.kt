@@ -7,6 +7,8 @@ import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
+import com.zaneschepke.wireguardautotunnel.util.extensions.stopTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -42,8 +44,8 @@ class ShortcutsActivity : ComponentActivity() {
 						Timber.d("Shortcut action on name: ${tunnelConfig?.name}")
 						tunnelConfig?.let {
 							when (intent.action) {
-								Action.START.name -> tunnelService.get().startTunnel(it)
-								Action.STOP.name -> tunnelService.get().stopTunnel(it)
+								Action.START.name -> this@ShortcutsActivity.startTunnelBackground(it.id)
+								Action.STOP.name -> this@ShortcutsActivity.stopTunnelBackground(it.id)
 								else -> Unit
 							}
 						}
