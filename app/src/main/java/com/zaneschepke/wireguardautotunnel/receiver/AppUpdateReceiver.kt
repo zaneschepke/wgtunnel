@@ -38,9 +38,9 @@ class AppUpdateReceiver : BroadcastReceiver() {
 				Timber.i("Restarting services after upgrade")
 				serviceManager.startWatcherServiceForeground(context)
 			}
-			if(!settings.isAutoTunnelEnabled || settings.isAutoTunnelPaused) {
+			if (!settings.isAutoTunnelEnabled || settings.isAutoTunnelPaused) {
 				val tunnels = appDataRepository.tunnels.getAll().filter { it.isActive }
-				if(tunnels.isNotEmpty()) context.startTunnelBackground(tunnels.first().id)
+				if (tunnels.isNotEmpty()) context.startTunnelBackground(tunnels.first().id)
 			}
 		}
 	}

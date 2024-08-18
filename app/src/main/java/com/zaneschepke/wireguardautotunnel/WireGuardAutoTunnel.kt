@@ -45,8 +45,10 @@ class WireGuardAutoTunnel : Application() {
 		} else {
 			Timber.plant(ReleaseTree())
 		}
-		if(!isRunningOnTv()) applicationScope.launch(ioDispatcher) {
-			localLogCollector.start()
+		if (!isRunningOnTv()) {
+			applicationScope.launch(ioDispatcher) {
+				localLogCollector.start()
+			}
 		}
 	}
 
