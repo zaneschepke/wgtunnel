@@ -1,0 +1,5 @@
+What's new:
+- Fixes for tunnels not launching from background
+- Add support for restart services after update
+- UI animation speed improvements
+- Other optimizations

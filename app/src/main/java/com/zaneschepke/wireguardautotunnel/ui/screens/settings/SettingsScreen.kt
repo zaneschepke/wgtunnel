@@ -12,7 +12,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -67,7 +66,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
@@ -84,9 +82,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
-import java.io.File
 
 @OptIn(
 	ExperimentalPermissionsApi::class,
@@ -154,43 +150,6 @@ fun SettingsScreen(
 				}
 			},
 		)
-
-	fun exportAllConfigs() {
-		try {
-			val wgFiles =
-				uiState.tunnels.map { config ->
-					val file = File(context.cacheDir, "${config.name}-wg.conf")
-					file.outputStream().use {
-						it.write(config.wgQuick.toByteArray())
-					}
-					file
-				}
-			val amFiles =
-				uiState.tunnels.mapNotNull { config ->
-					if (config.amQuick != TunnelConfig.AM_QUICK_DEFAULT) {
-						val file = File(context.cacheDir, "${config.name}-am.conf")
-						file.outputStream().use {
-							it.write(config.amQuick.toByteArray())
-						}
-						file
-					} else {
-						null
-					}
-				}
-			scope.launch {
-				viewModel.onExportTunnels(wgFiles + amFiles).onFailure {
-					appViewModel.showSnackbarMessage(it.getMessage(context))
-				}.onSuccess {
-					didExportFiles = true
-					appViewModel.showSnackbarMessage(
-						context.getString(R.string.exported_configs_message),
-					)
-				}
-			}
-		} catch (e: Exception) {
-			Timber.e(e)
-		}
-	}
 
 	fun isBatteryOptimizationsDisabled(): Boolean {
 		val pm = context.getSystemService(POWER_SERVICE) as PowerManager
@@ -300,7 +259,13 @@ fun SettingsScreen(
 		AuthorizationPrompt(
 			onSuccess = {
 				showAuthPrompt = false
-				exportAllConfigs()
+				scope.launch {
+					viewModel.exportAllConfigs().onSuccess {
+						appViewModel.showSnackbarMessage(context.getString(R.string.exported_configs_message))
+					}.onFailure {
+						appViewModel.showSnackbarMessage(context.getString(R.string.export_configs_failed))
+					}
+				}
 			},
 			onError = { _ ->
 				showAuthPrompt = false
@@ -379,7 +344,7 @@ fun SettingsScreen(
 								.focusRequester(focusRequester)
 						},
 					)
-					AnimatedVisibility(visible = uiState.settings.isTunnelOnWifiEnabled) {
+					if (uiState.settings.isTunnelOnWifiEnabled) {
 						Column {
 							FlowRow(
 								modifier =

@@ -13,35 +13,34 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Provider
 
 @AndroidEntryPoint
-class BootReceiver : BroadcastReceiver() {
-	@Inject
-	lateinit var appDataRepository: AppDataRepository
-
-	@Inject
-	lateinit var tunnelService: Provider<TunnelService>
-
-	@Inject
-	lateinit var serviceManager: ServiceManager
+class AppUpdateReceiver : BroadcastReceiver() {
 
 	@Inject
 	@ApplicationScope
 	lateinit var applicationScope: CoroutineScope
 
+	@Inject
+	lateinit var appDataRepository: AppDataRepository
+
+	@Inject
+	lateinit var serviceManager: ServiceManager
+
+	@Inject
+	lateinit var tunnelService: TunnelService
+
 	override fun onReceive(context: Context, intent: Intent) {
-		if (Intent.ACTION_BOOT_COMPLETED != intent.action) return
+		if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
 		applicationScope.launch {
 			val settings = appDataRepository.settings.getSettings()
-			if (settings.isRestoreOnBootEnabled) {
-				appDataRepository.getStartTunnelConfig()?.let {
-					context.startTunnelBackground(it.id)
-				}
-			}
 			if (settings.isAutoTunnelEnabled) {
-				Timber.i("Starting watcher service from boot")
+				Timber.i("Restarting services after upgrade")
 				serviceManager.startWatcherServiceForeground(context)
+			}
+			if (!settings.isAutoTunnelEnabled || settings.isAutoTunnelPaused) {
+				val tunnels = appDataRepository.tunnels.getAll().filter { it.isActive }
+				if (tunnels.isNotEmpty()) context.startTunnelBackground(tunnels.first().id)
 			}
 		}
 	}

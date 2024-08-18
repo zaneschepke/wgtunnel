@@ -248,4 +248,13 @@ constructor(
 			onSuccess()
 		}
 	}
+
+	suspend fun exportAllConfigs(): Result<Unit> {
+		return kotlin.runCatching {
+			val tunnels = appDataRepository.tunnels.getAll()
+			val wgFiles = fileUtils.createWgFiles(tunnels)
+			val amFiles = fileUtils.createAmFiles(tunnels)
+			onExportTunnels(wgFiles + amFiles)
+		}
+	}
 }

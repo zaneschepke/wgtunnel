@@ -7,7 +7,7 @@ object Constants {
 	const val MANUAL_TUNNEL_CONFIG_ID = "0"
 	const val BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT = 10 * 60 * 1_000L // 10 minutes
 	const val VPN_STATISTIC_CHECK_INTERVAL = 1_000L
-	const val WATCHER_COLLECTION_DELAY = 1_000L
+	const val WATCHER_COLLECTION_DELAY = 3_000L
 	const val CONF_FILE_EXTENSION = ".conf"
 	const val ZIP_FILE_EXTENSION = ".zip"
 	const val URI_CONTENT_SCHEME = "content"

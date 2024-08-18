@@ -167,6 +167,16 @@
             android:stopWithTask="false"
             tools:node="merge" />
 
+		<service
+			android:name=".service.foreground.TunnelBackgroundService"
+			android:exported="false"
+			android:foregroundServiceType="systemExempted"
+			android:permission="android.permission.BIND_VPN_SERVICE">
+			<intent-filter>
+				<action android:name="android.net.VpnService" />
+			</intent-filter>
+		</service>
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
@@ -184,6 +194,13 @@
 			android:name=".receiver.BackgroundActionReceiver"
 			android:enabled="true"
 			android:exported="false"/>
+		<receiver
+			android:name=".receiver.AppUpdateReceiver"
+			android:exported="false">
+			<intent-filter>
+				<action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+			</intent-filter>
+		</receiver>
 		<receiver
 			android:name=".receiver.KernelReceiver"
 			android:exported="false"
