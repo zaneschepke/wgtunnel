@@ -61,7 +61,7 @@ and on while on different networks. This app was created to offer a free solutio
 * Quick tile support for tunnel toggling, auto-tunneling
 * Static shortcuts support for tunnel toggling, auto-tunneling
 * Intent automation support for all tunnels
-* Automatic auto-tunneling service and/or tunnel restart after reboot and app update
+* Automatic auto-tunneling service and/or tunnel restart after reboot or app update
 * Battery preservation measures
 * Restart tunnel on ping failure (beta)
 
