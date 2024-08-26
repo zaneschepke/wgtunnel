@@ -58,14 +58,25 @@ android {
 			)
 			signingConfig = signingConfigs.getByName(Constants.RELEASE)
 		}
-		debug { isDebuggable = true }
+		debug {
+			applicationIdSuffix = ".debug"
+			versionNameSuffix = "-debug"
+			resValue("string", "app_name", "WG Tunnel - Debug")
+			isDebuggable = true
+		}
 
 		create(Constants.PRERELEASE) {
 			initWith(buildTypes.getByName(Constants.RELEASE))
+			applicationIdSuffix = ".prerelease"
+			versionNameSuffix = "-pre"
+			resValue("string", "app_name", "WG Tunnel - Pre")
 		}
 
 		create(Constants.NIGHTLY) {
 			initWith(buildTypes.getByName(Constants.RELEASE))
+			applicationIdSuffix = ".nightly"
+			versionNameSuffix = "-nightly"
+			resValue("string", "app_name", "WG Tunnel - Nightly")
 		}
 
 		applicationVariants.all {
