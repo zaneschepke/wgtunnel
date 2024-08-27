@@ -149,6 +149,7 @@ jobs:
         run: |
           echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
           gh release delete nightly --yes || true
+          git push origin :nightly || true
 
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
