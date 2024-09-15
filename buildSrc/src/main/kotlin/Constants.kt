@@ -1,7 +1,7 @@
 object Constants {
 	const val VERSION_NAME = "3.5.1"
     const val JVM_TARGET = "17"
-    const val VERSION_CODE = 35102
+    const val VERSION_CODE = 35103
     const val TARGET_SDK = 34
     const val MIN_SDK = 26
     const val APP_ID = "com.zaneschepke.wireguardautotunnel"
@@ -19,5 +19,5 @@ object Constants {
     const val TYPE = "type"
 
     const val NIGHTLY_CODE = 42
-	const val PRERELEASE_CODE = 53
+	const val PRERELEASE_CODE = 54
 }

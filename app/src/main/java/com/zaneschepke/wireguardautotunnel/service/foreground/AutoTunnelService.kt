@@ -1,11 +1,14 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import android.content.Context
-import android.os.Bundle
+import android.content.Intent
+import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
@@ -19,11 +22,17 @@ import com.zaneschepke.wireguardautotunnel.service.notification.NotificationServ
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
+import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
+import com.zaneschepke.wireguardautotunnel.util.extensions.onNotRunning
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +42,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 @AndroidEntryPoint
-class AutoTunnelService : ForegroundService() {
+class AutoTunnelService : LifecycleService() {
 	private val foregroundId = 122
 
 	@Inject
@@ -65,8 +74,14 @@ class AutoTunnelService : ForegroundService() {
 	private val networkEventsFlow = MutableStateFlow(AutoTunnelState())
 
 	private var wakeLock: PowerManager.WakeLock? = null
-	private val tag = this.javaClass.name
 
+	private var wifiJob: Job? = null
+	private var mobileDataJob: Job? = null
+	private var ethernetJob: Job? = null
+	private var pingJob: Job? = null
+	private var networkEventJob: Job? = null
+
+	@get:Synchronized @set:Synchronized
 	private var running: Boolean = false
 
 	override fun onCreate() {
@@ -80,6 +95,26 @@ class AutoTunnelService : ForegroundService() {
 		}
 	}
 
+	override fun onBind(intent: Intent): IBinder? {
+		super.onBind(intent)
+		// We don't provide binding, so return null
+		return null
+	}
+
+	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+		Timber.d("onStartCommand executed with startId: $startId")
+		if (intent != null) {
+			val action = intent.action
+			when (action) {
+				Action.START.name,
+				Action.START_FOREGROUND.name,
+				-> startService()
+				Action.STOP.name, Action.STOP_FOREGROUND.name -> stopService()
+			}
+		}
+		return super.onStartCommand(intent, flags, startId)
+	}
+
 	private suspend fun launchNotification() {
 		if (appDataRepository.settings.getSettings().isAutoTunnelPaused) {
 			launchWatcherPausedNotification()
@@ -88,27 +123,33 @@ class AutoTunnelService : ForegroundService() {
 		}
 	}
 
-	override fun startService(extras: Bundle?) {
-		super.startService(extras)
+	private fun startService() {
 		if (running) return
+		running = true
 		kotlin.runCatching {
 			lifecycleScope.launch(mainImmediateDispatcher) {
 				launchNotification()
 				initWakeLock()
 			}
-			startWatcherJob()
+			startSettingsJob()
 		}.onFailure {
 			Timber.e(it)
 		}
 	}
 
-	override fun stopService() {
-		super.stopService()
+	private fun stopService() {
 		wakeLock?.let {
 			if (it.isHeld) {
 				it.release()
 			}
 		}
+		stopSelf()
+	}
+
+	override fun onDestroy() {
+		cancelAndResetNetworkJobs()
+		cancelAndResetPingJob()
+		super.onDestroy()
 	}
 
 	private fun launchWatcherNotification(description: String = getString(R.string.watcher_notification_text_active)) {
@@ -134,6 +175,7 @@ class AutoTunnelService : ForegroundService() {
 	private fun initWakeLock() {
 		wakeLock =
 			(getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+				val tag = this.javaClass.name
 				newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
 					try {
 						Timber.i("Initiating wakelock with 10 min timeout")
@@ -145,43 +187,33 @@ class AutoTunnelService : ForegroundService() {
 			}
 	}
 
-	private fun startWatcherJob() = lifecycleScope.launch {
-		val setting = appDataRepository.settings.getSettings()
-		launch {
-			Timber.i("Starting wifi watcher")
-			watchForWifiConnectivityChanges()
-		}
-		if (setting.isTunnelOnMobileDataEnabled) {
-			launch {
-				Timber.i("Starting mobile data watcher")
-				watchForMobileDataConnectivityChanges()
-			}
-		}
-		if (setting.isTunnelOnEthernetEnabled) {
-			launch {
-				Timber.i("Starting ethernet data watcher")
-				watchForEthernetConnectivityChanges()
-			}
-		}
-		launch {
-			Timber.i("Starting settings watcher")
-			watchForSettingsChanges()
-		}
-		if (setting.isPingEnabled) {
-			launch {
-				Timber.i("Starting ping watcher")
-				watchForPingFailure()
-			}
-		}
-		launch {
-			Timber.i("Starting management watcher")
-			manageVpn()
-		}
-		running = true
+	private fun startSettingsJob() = lifecycleScope.launch {
+		watchForSettingsChanges()
+	}
+
+	private fun startWifiJob() = lifecycleScope.launch {
+		watchForWifiConnectivityChanges()
+	}
+
+	private fun startMobileDataJob() = lifecycleScope.launch {
+		watchForMobileDataConnectivityChanges()
+	}
+
+	private fun startEthernetJob() = lifecycleScope.launch {
+		watchForEthernetConnectivityChanges()
+	}
+
+	private fun startPingJob() = lifecycleScope.launch {
+		watchForPingFailure()
+	}
+
+	private fun startNetworkEventJob() = lifecycleScope.launch {
+		handleNetworkEventChanges()
 	}
 
 	private suspend fun watchForMobileDataConnectivityChanges() {
 		withContext(ioDispatcher) {
+			Timber.i("Starting mobile data watcher")
 			mobileDataService.networkStatus.collect { status ->
 				when (status) {
 					is NetworkStatus.Available -> {
@@ -217,92 +249,155 @@ class AutoTunnelService : ForegroundService() {
 
 	private suspend fun watchForPingFailure() {
 		withContext(ioDispatcher) {
-			try {
+			Timber.i("Starting ping watcher")
+			runCatching {
 				do {
-					if (tunnelService.get().vpnState.value.status == TunnelState.UP) {
-						val tunnelConfig = tunnelService.get().vpnState.value.tunnelConfig
-						tunnelConfig?.let {
-							val config = TunnelConfig.configFromWgQuick(it.wgQuick)
-							val results =
+					val vpnState = tunnelService.get().vpnState.value
+					if (vpnState.status == TunnelState.UP) {
+						if (vpnState.tunnelConfig != null) {
+							val config = TunnelConfig.configFromWgQuick(vpnState.tunnelConfig.wgQuick)
+							val results = if (vpnState.tunnelConfig.pingIp != null) {
+								Timber.d("Pinging custom ip : ${vpnState.tunnelConfig.pingIp}")
+								listOf(InetAddress.getByName(vpnState.tunnelConfig.pingIp).isReachable(Constants.PING_TIMEOUT.toInt()))
+							} else {
+								Timber.d("Pinging all peers")
 								config.peers.map { peer ->
-									val host =
-										if (peer.endpoint.isPresent &&
-											peer.endpoint.get().resolved.isPresent
-										) {
-											peer.endpoint.get().resolved.get().host
-										} else {
-											Constants.DEFAULT_PING_IP
-										}
-									Timber.i("Checking reachability of: $host")
-									val reachable =
-										InetAddress.getByName(host)
-											.isReachable(Constants.PING_TIMEOUT.toInt())
-									Timber.i("Result: reachable - $reachable")
-									reachable
+									peer.isReachable()
 								}
+							}
+							Timber.i("Ping results reachable: $results")
 							if (results.contains(false)) {
 								Timber.i("Restarting VPN for ping failure")
-								tunnelService.get().stopTunnel(it)
-								delay(Constants.VPN_RESTART_DELAY)
-								tunnelService.get().startTunnel(it)
-								delay(Constants.PING_COOLDOWN)
+								val cooldown = vpnState.tunnelConfig.pingCooldown
+								tunnelService.get().bounceTunnel(vpnState.tunnelConfig)
+								delay(cooldown ?: Constants.PING_COOLDOWN)
+								continue
 							}
 						}
 					}
-					delay(Constants.PING_INTERVAL)
+					delay(vpnState.tunnelConfig?.pingInterval ?: Constants.PING_INTERVAL)
 				} while (true)
-			} catch (e: Exception) {
-				Timber.e(e)
+			}.onFailure {
+				Timber.e(it)
+			}
+		}
+	}
+
+	private fun updateSettings(settings: Settings) {
+		networkEventsFlow.update {
+			it.copy(
+				settings = settings,
+			)
+		}
+	}
+
+	private fun onAutoTunnelPause(paused: Boolean) {
+		if (networkEventsFlow.value.settings.isAutoTunnelPaused
+			!= paused
+		) {
+			when (paused) {
+				true -> launchWatcherPausedNotification()
+				false -> launchWatcherNotification()
 			}
 		}
 	}
 
 	private suspend fun watchForSettingsChanges() {
-		appDataRepository.settings.getSettingsFlow().collect { settings ->
-			if (networkEventsFlow.value.settings.isAutoTunnelPaused
-				!= settings.isAutoTunnelPaused
-			) {
-				when (settings.isAutoTunnelPaused) {
-					true -> launchWatcherPausedNotification()
-					false -> launchWatcherNotification()
+		Timber.i("Starting settings watcher")
+		withContext(ioDispatcher) {
+			appDataRepository.settings.getSettingsFlow().combine(
+				appDataRepository.tunnels.getTunnelConfigsFlow(),
+			) { settings, tunnels ->
+				val activeTunnel = tunnels.firstOrNull { it.isActive }
+				if (!settings.isPingEnabled) {
+					settings.copy(isPingEnabled = activeTunnel?.isPingEnabled ?: false)
+				} else {
+					settings
 				}
+			}.collect {
+				Timber.d("Settings change: $it")
+				onAutoTunnelPause(it.isAutoTunnelPaused)
+				updateSettings(it)
+				manageJobsBySettings(it)
 			}
-			networkEventsFlow.update {
-				it.copy(
-					settings = settings,
-				)
+		}
+	}
+
+	private fun manageJobsBySettings(settings: Settings) {
+		with(settings) {
+			if (isPingEnabled) {
+				pingJob.onNotRunning { pingJob = startPingJob() }
+			} else {
+				cancelAndResetPingJob()
 			}
+			if (isTunnelOnWifiEnabled || isTunnelOnEthernetEnabled || isTunnelOnMobileDataEnabled) {
+				startNetworkJobs()
+			} else {
+				cancelAndResetNetworkJobs()
+			}
+		}
+	}
+
+	private fun startNetworkJobs() {
+		wifiJob.onNotRunning {
+			Timber.i("Wifi job starting")
+			wifiJob = startWifiJob()
+		}
+		ethernetJob.onNotRunning {
+			ethernetJob = startEthernetJob()
+			Timber.i("Ethernet job starting")
+		}
+		mobileDataJob.onNotRunning {
+			mobileDataJob = startMobileDataJob()
+			Timber.i("Mobile data job starting")
+		}
+		networkEventJob.onNotRunning {
+			Timber.i("Network event job starting")
+			networkEventJob = startNetworkEventJob()
+		}
+	}
+
+	private fun cancelAndResetPingJob() {
+		pingJob?.cancelWithMessage("Ping job canceled")
+		pingJob = null
+	}
+
+	private fun cancelAndResetNetworkJobs() {
+		networkEventJob?.cancelWithMessage("Network event job canceled")
+		wifiJob?.cancelWithMessage("Wifi job canceled")
+		ethernetJob?.cancelWithMessage("Ethernet job canceled")
+		mobileDataJob?.cancelWithMessage("Mobile data job canceled")
+		networkEventJob = null
+		wifiJob = null
+		ethernetJob = null
+		mobileDataJob = null
+	}
+
+	private fun updateEthernet(connected: Boolean) {
+		networkEventsFlow.update {
+			it.copy(
+				isEthernetConnected = connected,
+			)
 		}
 	}
 
 	private suspend fun watchForEthernetConnectivityChanges() {
 		withContext(ioDispatcher) {
+			Timber.i("Starting ethernet data watcher")
 			ethernetService.networkStatus.collect { status ->
 				when (status) {
 					is NetworkStatus.Available -> {
 						Timber.i("Gained Ethernet connection")
-						networkEventsFlow.update {
-							it.copy(
-								isEthernetConnected = true,
-							)
-						}
+						updateEthernet(true)
 					}
 
 					is NetworkStatus.CapabilitiesChanged -> {
 						Timber.i("Ethernet capabilities changed")
-						networkEventsFlow.update {
-							it.copy(
-								isEthernetConnected = true,
-							)
-						}
+						updateEthernet(true)
 					}
 
 					is NetworkStatus.Unavailable -> {
-						networkEventsFlow.update {
-							it.copy(
-								isEthernetConnected = false,
-							)
-						}
+						updateEthernet(false)
 						Timber.i("Lost Ethernet connection")
 					}
 				}
@@ -312,6 +407,7 @@ class AutoTunnelService : ForegroundService() {
 
 	private suspend fun watchForWifiConnectivityChanges() {
 		withContext(ioDispatcher) {
+			Timber.i("Starting wifi watcher")
 			wifiService.networkStatus.collect { status ->
 				when (status) {
 					is NetworkStatus.Available -> {
@@ -371,8 +467,9 @@ class AutoTunnelService : ForegroundService() {
 		return tunnelService.get().vpnState.value.status == TunnelState.DOWN
 	}
 
-	private suspend fun manageVpn() {
+	private suspend fun handleNetworkEventChanges() {
 		withContext(ioDispatcher) {
+			Timber.i("Starting network event watcher")
 			networkEventsFlow.collectLatest { watcherState ->
 				val autoTunnel = "Auto-tunnel watcher"
 				if (!watcherState.settings.isAutoTunnelPaused) {
@@ -412,8 +509,9 @@ class AutoTunnelService : ForegroundService() {
 						}
 
 						watcherState.isUntrustedWifiConditionMet() -> {
-							if (activeTunnel?.tunnelNetworks?.contains(watcherState.currentNetworkSSID) == false ||
-								activeTunnel == null
+							Timber.i("Untrusted wifi condition met")
+							if (activeTunnel?.tunnelNetworks?.isMatchingToWildcardList(watcherState.currentNetworkSSID) == false ||
+								activeTunnel == null || isTunnelDown()
 							) {
 								Timber.i(
 									"$autoTunnel - tunnel on ssid not associated with current tunnel condition met",

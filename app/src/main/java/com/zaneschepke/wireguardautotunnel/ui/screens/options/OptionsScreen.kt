@@ -32,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,23 +43,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
+import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
+import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissMultiFab
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Address
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalLayoutApi::class)
@@ -68,16 +67,15 @@ import kotlinx.coroutines.launch
 fun OptionsScreen(
 	optionsViewModel: OptionsViewModel = hiltViewModel(),
 	navController: NavController,
-	appViewModel: AppViewModel,
 	focusRequester: FocusRequester,
-	tunnelId: String,
+	appUiState: AppUiState,
+	tunnelId: Int,
 ) {
 	val scrollState = rememberScrollState()
-	val uiState by optionsViewModel.uiState.collectAsStateWithLifecycle()
 	val context = LocalContext.current
+	val config = appUiState.tunnels.first { it.id == tunnelId }
 
 	val interactionSource = remember { MutableInteractionSource() }
-	val scope = rememberCoroutineScope()
 	val focusManager = LocalFocusManager.current
 	val screenPadding = 5.dp
 	val fillMaxWidth = .85f
@@ -85,7 +83,6 @@ fun OptionsScreen(
 	var currentText by remember { mutableStateOf("") }
 
 	LaunchedEffect(Unit) {
-		optionsViewModel.init(tunnelId)
 		if (context.isRunningOnTv()) {
 			delay(Constants.FOCUS_REQUEST_DELAY)
 			kotlin.runCatching {
@@ -99,13 +96,8 @@ fun OptionsScreen(
 
 	fun saveTrustedSSID() {
 		if (currentText.isNotEmpty()) {
-			scope.launch {
-				optionsViewModel.onSaveRunSSID(currentText).onSuccess {
-					currentText = ""
-				}.onFailure {
-					appViewModel.showSnackbarMessage(it.getMessage(context))
-				}
-			}
+			optionsViewModel.onSaveRunSSID(currentText, config)
+			currentText = ""
 		}
 	}
 
@@ -114,7 +106,7 @@ fun OptionsScreen(
 			ScrollDismissMultiFab(R.drawable.edit, focusRequester, isVisible = true, onFabItemClicked = {
 				val configType = ConfigType.valueOf(it.value)
 				navController.navigate(
-					"${Screen.Config.route}/$tunnelId?configType=${configType.name}",
+					"${Screen.Config.route}/${config.id}?configType=${configType.name}",
 				)
 			})
 		},
@@ -165,12 +157,12 @@ fun OptionsScreen(
 					ConfigurationToggle(
 						stringResource(R.string.set_primary_tunnel),
 						enabled = true,
-						checked = uiState.isDefaultTunnel,
+						checked = config.isPrimaryTunnel,
 						modifier =
 						Modifier
 							.focusRequester(focusRequester),
 						padding = screenPadding,
-						onCheckChanged = { optionsViewModel.onTogglePrimaryTunnel() },
+						onCheckChanged = { optionsViewModel.onTogglePrimaryTunnel(config) },
 					)
 				}
 			}
@@ -206,9 +198,9 @@ fun OptionsScreen(
 					ConfigurationToggle(
 						stringResource(R.string.mobile_data_tunnel),
 						enabled = true,
-						checked = uiState.tunnel?.isMobileDataTunnel == true,
+						checked = config.isMobileDataTunnel,
 						padding = screenPadding,
-						onCheckChanged = { optionsViewModel.onToggleIsMobileDataTunnel() },
+						onCheckChanged = { optionsViewModel.onToggleIsMobileDataTunnel(config) },
 					)
 					Column {
 						FlowRow(
@@ -218,24 +210,24 @@ fun OptionsScreen(
 								.fillMaxWidth(),
 							horizontalArrangement = Arrangement.spacedBy(5.dp),
 						) {
-							uiState.tunnel?.tunnelNetworks?.forEach { ssid ->
+							config.tunnelNetworks.forEach { ssid ->
 								ClickableIconButton(
 									onClick = {
 										if (context.isRunningOnTv()) {
 											focusRequester.requestFocus()
-											optionsViewModel.onDeleteRunSSID(ssid)
+											optionsViewModel.onDeleteRunSSID(ssid, config)
 										}
 									},
 									onIconClick = {
 										if (context.isRunningOnTv()) focusRequester.requestFocus()
-										optionsViewModel.onDeleteRunSSID(ssid)
+										optionsViewModel.onDeleteRunSSID(ssid, config)
 									},
 									text = ssid,
 									icon = Icons.Filled.Close,
 									enabled = true,
 								)
 							}
-							if (uiState.tunnel == null || uiState.tunnel?.tunnelNetworks?.isEmpty() == true) {
+							if (config.tunnelNetworks.isEmpty()) {
 								Text(
 									stringResource(R.string.no_wifi_names_configured),
 									fontStyle = FontStyle.Italic,
@@ -267,26 +259,67 @@ fun OptionsScreen(
 									IconButton(onClick = { saveTrustedSSID() }) {
 										Icon(
 											imageVector = Icons.Outlined.Add,
-											contentDescription =
-											if (currentText == "") {
-												stringResource(
-													id =
-													R.string
-														.trusted_ssid_empty_description,
-												)
-											} else {
-												stringResource(
-													id =
-													R.string
-														.trusted_ssid_value_description,
-												)
-											},
+											contentDescription = stringResource(R.string.save_changes),
 											tint = MaterialTheme.colorScheme.primary,
 										)
 									}
 								}
 							},
 						)
+						ConfigurationToggle(
+							stringResource(R.string.restart_on_ping),
+							enabled = !appUiState.settings.isPingEnabled,
+							checked = config.isPingEnabled || appUiState.settings.isPingEnabled,
+							padding = screenPadding,
+							onCheckChanged = { optionsViewModel.onToggleRestartOnPing(config) },
+						)
+						if (config.isPingEnabled || appUiState.settings.isPingEnabled) {
+							SubmitConfigurationTextBox(
+								config.pingIp,
+								stringResource(R.string.set_custom_ping_ip),
+								stringResource(R.string.default_ping_ip),
+								focusRequester,
+								isErrorValue = { !(it?.isValidIpv4orIpv6Address() ?: true) },
+								onSubmit = {
+									optionsViewModel.saveTunnelChanges(
+										config.copy(pingIp = it),
+									)
+								},
+							)
+							fun isSecondsError(seconds: String?): Boolean {
+								return seconds?.let { value -> if (value.isBlank()) false else value.toLong() >= Long.MAX_VALUE / 1000 } ?: false
+							}
+							SubmitConfigurationTextBox(
+								config.pingInterval?.let { (it / 1000).toString() },
+								stringResource(R.string.set_custom_ping_internal),
+								"(${stringResource(R.string.optional_default)} ${Constants.PING_INTERVAL / 1000})",
+								focusRequester,
+								keyboardOptions = KeyboardOptions(
+									keyboardType = KeyboardType.Number,
+								),
+								isErrorValue = ::isSecondsError,
+								onSubmit = {
+									optionsViewModel.saveTunnelChanges(
+										config.copy(pingInterval = it.toLong() * 1000),
+									)
+								},
+							)
+							SubmitConfigurationTextBox(
+								config.pingCooldown?.let { (it / 1000).toString() },
+								stringResource(R.string.set_custom_ping_cooldown),
+								"(${stringResource(R.string.optional_default)} ${Constants.PING_COOLDOWN / 1000})",
+								focusRequester,
+								keyboardOptions = KeyboardOptions(
+									keyboardType = KeyboardType.Number,
+								),
+								isErrorValue = ::isSecondsError,
+								onSubmit = {
+									optionsViewModel.saveTunnelChanges(
+										config.copy(pingCooldown = it.toLong() * 1000),
+									)
+								},
+							)
+						}
 					}
 				}
 			}

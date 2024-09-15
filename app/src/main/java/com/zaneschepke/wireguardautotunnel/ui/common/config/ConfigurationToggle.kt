@@ -13,7 +13,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 
 @Composable
-fun ConfigurationToggle(label: String, enabled: Boolean, checked: Boolean, padding: Dp, onCheckChanged: () -> Unit, modifier: Modifier = Modifier) {
+fun ConfigurationToggle(
+	label: String,
+	enabled: Boolean = true,
+	checked: Boolean,
+	padding: Dp,
+	onCheckChanged: () -> Unit,
+	modifier: Modifier = Modifier,
+) {
 	Row(
 		modifier =
 		Modifier

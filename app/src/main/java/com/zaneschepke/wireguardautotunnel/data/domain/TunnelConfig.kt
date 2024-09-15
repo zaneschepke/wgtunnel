@@ -37,11 +37,28 @@ data class TunnelConfig(
 		defaultValue = "false",
 	)
 	val isActive: Boolean = false,
+	@ColumnInfo(
+		name = "is_ping_enabled",
+		defaultValue = "false",
+	)
+	val isPingEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "ping_interval",
+		defaultValue = "null",
+	)
+	val pingInterval: Long? = null,
+	@ColumnInfo(
+		name = "ping_cooldown",
+		defaultValue = "null",
+	)
+	val pingCooldown: Long? = null,
+	@ColumnInfo(
+		name = "ping_ip",
+		defaultValue = "null",
+	)
+	var pingIp: String? = null,
 ) {
 	companion object {
-		fun findDefault(tunnels: List<TunnelConfig>): TunnelConfig? {
-			return tunnels.find { it.isPrimaryTunnel } ?: tunnels.firstOrNull()
-		}
 
 		fun configFromWgQuick(wgQuick: String): Config {
 			val inputStream: InputStream = wgQuick.byteInputStream()

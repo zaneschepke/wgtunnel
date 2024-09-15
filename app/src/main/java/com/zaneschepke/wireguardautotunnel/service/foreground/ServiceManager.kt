@@ -3,10 +3,12 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.net.VpnService
 import timber.log.Timber
 
-class ServiceManager {
+object ServiceManager {
 	private fun <T : Service> actionOnService(action: Action, context: Context, cls: Class<T>, extras: Map<String, Int>? = null) {
+		if (VpnService.prepare(context) != null) return
 		val intent =
 			Intent(context, cls).also {
 				it.action = action.name

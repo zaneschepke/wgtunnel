@@ -27,7 +27,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -43,22 +42,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchSupportEmail
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 
 @Composable
-fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), navController: NavController, focusRequester: FocusRequester) {
+fun SupportScreen(navController: NavController, focusRequester: FocusRequester, appUiState: AppUiState) {
 	val context = LocalContext.current
 	val fillMaxWidth = .85f
-
-	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
 	Column(
 		horizontalAlignment = Alignment.CenterHorizontally,
@@ -301,7 +297,7 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), navController: 
 				buildAnnotatedString {
 					append(stringResource(R.string.mode))
 					append(": ")
-					when (uiState.settings.isKernelEnabled) {
+					when (appUiState.settings.isKernelEnabled) {
 						true -> append(stringResource(id = R.string.kernel))
 						false -> append(stringResource(id = R.string.userspace))
 					}

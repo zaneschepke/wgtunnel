@@ -58,7 +58,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
@@ -67,12 +66,12 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
-import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
+import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
-import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.GettingStartedLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissMultiFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImportSheet
@@ -93,14 +92,10 @@ import timber.log.Timber
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MainScreen(
-	viewModel: MainViewModel = hiltViewModel(),
-	appViewModel: AppViewModel,
-	focusRequester: FocusRequester,
-	navController: NavController,
-) {
+fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, focusRequester: FocusRequester, navController: NavController) {
 	val haptic = LocalHapticFeedback.current
 	val context = LocalContext.current
+	val snackbar = SnackbarController.current
 	val scope = rememberCoroutineScope()
 
 	var showBottomSheet by remember { mutableStateOf(false) }
@@ -109,7 +104,6 @@ fun MainScreen(
 	val isVisible = rememberSaveable { mutableStateOf(true) }
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
 	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
-	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
 	val nestedScrollConnection =
 		remember {
@@ -154,13 +148,13 @@ fun MainScreen(
 	}
 
 	val tunnelFileImportResultLauncher = rememberFileImportLauncherForResult(onNoFileExplorer = {
-		appViewModel.showSnackbarMessage(
+		snackbar.showMessage(
 			context.getString(R.string.error_no_file_explorer),
 		)
 	}, onData = { data ->
 		scope.launch {
 			viewModel.onTunnelFileSelected(data, configType, context).onFailure {
-				appViewModel.showSnackbarMessage(it.getMessage(context))
+				snackbar.showMessage(it.getMessage(context))
 			}
 		}
 	})
@@ -172,7 +166,7 @@ fun MainScreen(
 				if (it.contents != null) {
 					scope.launch {
 						viewModel.onTunnelQrResult(it.contents, configType).onFailure { error ->
-							appViewModel.showSnackbarMessage(error.getMessage(context))
+							snackbar.showMessage(error.getMessage(context))
 						}
 					}
 				}
@@ -207,10 +201,6 @@ fun MainScreen(
 				tunnel,
 			)
 		}
-	}
-
-	if (uiState.loading) {
-		return LoadingScreen()
 	}
 
 	fun launchQrScanner() {
@@ -398,7 +388,7 @@ fun MainScreen(
 							(uiState.vpnState.status == TunnelState.UP) &&
 							(tunnel.name == uiState.vpnState.tunnelConfig?.name)
 						) {
-							appViewModel.showSnackbarMessage(
+							snackbar.showMessage(
 								context.getString(R.string.turn_off_tunnel),
 							)
 							return@RowListItem
@@ -433,7 +423,7 @@ fun MainScreen(
 											uiState.settings.isAutoTunnelEnabled &&
 											!uiState.settings.isAutoTunnelPaused
 										) {
-											appViewModel.showSnackbarMessage(
+											snackbar.showMessage(
 												context.getString(R.string.turn_off_tunnel),
 											)
 										} else {
@@ -482,7 +472,7 @@ fun MainScreen(
 									IconButton(
 										onClick = {
 											if (uiState.settings.isAutoTunnelEnabled && !uiState.settings.isAutoTunnelPaused) {
-												appViewModel.showSnackbarMessage(
+												snackbar.showMessage(
 													context.getString(R.string.turn_off_auto),
 												)
 											} else {
@@ -508,7 +498,7 @@ fun MainScreen(
 											) {
 												expanded.value = !expanded.value
 											} else {
-												appViewModel.showSnackbarMessage(
+												snackbar.showMessage(
 													context.getString(R.string.turn_on_tunnel),
 												)
 											}
@@ -529,7 +519,7 @@ fun MainScreen(
 												uiState.vpnState.status == TunnelState.UP &&
 												tunnel.name == uiState.vpnState.tunnelConfig?.name
 											) {
-												appViewModel.showSnackbarMessage(
+												snackbar.showMessage(
 													context.getString(R.string.turn_off_tunnel),
 												)
 											} else {

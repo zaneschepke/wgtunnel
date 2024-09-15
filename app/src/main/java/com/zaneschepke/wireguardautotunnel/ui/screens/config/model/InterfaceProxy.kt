@@ -28,7 +28,7 @@ data class InterfaceProxy(
 				dnsServers = listOf(
 					i.dnsServers.joinToString(", ").replace("/", "").trim(),
 					i.dnsSearchDomains.joinToString(", ").trim(),
-				).filter { it.length > 0 } .joinToString(", "),
+				).filter { it.length > 0 }.joinToString(", "),
 				listenPort =
 				if (i.listenPort.isPresent) {
 					i.listenPort.get().toString().trim()

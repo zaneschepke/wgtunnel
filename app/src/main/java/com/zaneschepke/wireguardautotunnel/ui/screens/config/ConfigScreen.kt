@@ -70,12 +70,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.drawablepainter.DrawablePainter
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
 import com.zaneschepke.wireguardautotunnel.ui.common.SearchBar
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.screen.LoadingScreen
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -92,11 +92,11 @@ fun ConfigScreen(
 	viewModel: ConfigViewModel = hiltViewModel(),
 	focusRequester: FocusRequester,
 	navController: NavController,
-	appViewModel: AppViewModel,
 	tunnelId: String,
 	configType: ConfigType,
 ) {
 	val context = LocalContext.current
+	val snackbar = SnackbarController.current
 	val clipboardManager: ClipboardManager = LocalClipboardManager.current
 	val keyboardController = LocalSoftwareKeyboardController.current
 	var showApplicationsDialog by remember { mutableStateOf(false) }
@@ -160,13 +160,13 @@ fun ConfigScreen(
 			},
 			onError = {
 				showAuthPrompt = false
-				appViewModel.showSnackbarMessage(
+				snackbar.showMessage(
 					context.getString(R.string.error_authentication_failed),
 				)
 			},
 			onFailure = {
 				showAuthPrompt = false
-				appViewModel.showSnackbarMessage(
+				snackbar.showMessage(
 					context.getString(R.string.error_authorization_failed),
 				)
 			},
@@ -341,12 +341,12 @@ fun ConfigScreen(
 				},
 				onClick = {
 					viewModel.onSaveAllChanges(configType).onSuccess {
-						appViewModel.showSnackbarMessage(
+						snackbar.showMessage(
 							context.getString(R.string.config_changes_saved),
 						)
 						navController.navigate(Screen.Main.route)
 					}.onFailure {
-						appViewModel.showSnackbarMessage(it.getMessage(context))
+						snackbar.showMessage(it.getMessage(context))
 					}
 				},
 				containerColor = fobColor,

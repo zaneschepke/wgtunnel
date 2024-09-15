@@ -9,6 +9,8 @@ interface TunnelService : Tunnel, org.amnezia.awg.backend.Tunnel {
 
 	suspend fun stopTunnel(tunnelConfig: TunnelConfig): Result<TunnelState>
 
+	suspend fun bounceTunnel(tunnelConfig: TunnelConfig): Result<TunnelState>
+
 	val vpnState: StateFlow<VpnState>
 
 	suspend fun runningTunnelNames(): Set<String>

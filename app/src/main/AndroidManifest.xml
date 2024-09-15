@@ -104,12 +104,6 @@
             android:theme="@android:style/Theme.NoDisplay" />
 
         <service
-            android:name=".service.foreground.ForegroundService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="systemExempted"
-            tools:node="merge" />
-        <service
             android:name=".service.tile.TunnelControlTile"
             android:exported="true"
             android:icon="@drawable/ic_launcher"

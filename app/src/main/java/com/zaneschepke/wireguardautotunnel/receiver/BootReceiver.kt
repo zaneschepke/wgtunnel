@@ -24,24 +24,23 @@ class BootReceiver : BroadcastReceiver() {
 	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
-	lateinit var serviceManager: ServiceManager
-
-	@Inject
 	@ApplicationScope
 	lateinit var applicationScope: CoroutineScope
 
 	override fun onReceive(context: Context, intent: Intent) {
 		if (Intent.ACTION_BOOT_COMPLETED != intent.action) return
 		applicationScope.launch {
-			val settings = appDataRepository.settings.getSettings()
-			if (settings.isRestoreOnBootEnabled) {
-				appDataRepository.getStartTunnelConfig()?.let {
-					context.startTunnelBackground(it.id)
+			with(appDataRepository.settings.getSettings()) {
+				if (isRestoreOnBootEnabled) {
+					val activeTunnels = appDataRepository.tunnels.getActive()
+					if (activeTunnels.isNotEmpty()) {
+						context.startTunnelBackground(activeTunnels.first().id)
+					}
+					if (isAutoTunnelEnabled) {
+						Timber.i("Starting watcher service from boot")
+						ServiceManager.startWatcherServiceForeground(context)
+					}
 				}
-			}
-			if (settings.isAutoTunnelEnabled) {
-				Timber.i("Starting watcher service from boot")
-				serviceManager.startWatcherServiceForeground(context)
 			}
 		}
 	}

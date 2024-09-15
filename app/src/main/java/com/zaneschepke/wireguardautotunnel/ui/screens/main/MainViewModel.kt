@@ -19,9 +19,6 @@ import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -34,26 +31,12 @@ class MainViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
-	private val serviceManager: ServiceManager,
 	val tunnelService: TunnelService,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-	val uiState =
-		combine(
-			appDataRepository.settings.getSettingsFlow(),
-			appDataRepository.tunnels.getTunnelConfigsFlow(),
-			tunnelService.vpnState,
-		) { settings, tunnels, vpnState ->
-			MainUiState(settings, tunnels, vpnState, false)
-		}
-			.stateIn(
-				viewModelScope,
-				SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
-				MainUiState(),
-			)
 
 	private fun stopWatcherService(context: Context) {
-		serviceManager.stopWatcherService(context)
+		ServiceManager.stopWatcherService(context)
 	}
 
 	fun onDelete(tunnel: TunnelConfig, context: Context) {
@@ -299,14 +282,16 @@ constructor(
 	}
 
 	fun pauseAutoTunneling() = viewModelScope.launch {
+		val settings = appDataRepository.settings.getSettings()
 		appDataRepository.settings.save(
-			uiState.value.settings.copy(isAutoTunnelPaused = true),
+			settings.copy(isAutoTunnelPaused = true),
 		)
 	}
 
 	fun resumeAutoTunneling() = viewModelScope.launch {
+		val settings = appDataRepository.settings.getSettings()
 		appDataRepository.settings.save(
-			uiState.value.settings.copy(isAutoTunnelPaused = false),
+			settings.copy(isAutoTunnelPaused = false),
 		)
 	}
 

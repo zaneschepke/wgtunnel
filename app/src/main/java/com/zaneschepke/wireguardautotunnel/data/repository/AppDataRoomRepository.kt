@@ -15,8 +15,9 @@ constructor(
 	}
 
 	override suspend fun getStartTunnelConfig(): TunnelConfig? {
-		return appState.getLastActiveTunnelId()?.let {
-			tunnels.getById(it)
-		} ?: getPrimaryOrFirstTunnel()
+		tunnels.getActive().let {
+			if (it.isNotEmpty()) return it.first()
+			return getPrimaryOrFirstTunnel()
+		}
 	}
 }

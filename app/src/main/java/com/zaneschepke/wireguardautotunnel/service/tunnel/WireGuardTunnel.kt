@@ -33,11 +33,12 @@ class WireGuardTunnel
 constructor(
 	private val amneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
 	@Userspace private val userspaceBackend: Provider<Backend>,
-	@Kernel private val kernelBackend: Provider<Backend>,
+	@Kernel private val kernelBackend: Provider<org.amnezia.awg.backend.Backend>,
 	private val appDataRepository: AppDataRepository,
 	@ApplicationScope private val applicationScope: CoroutineScope,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : TunnelService {
+
 	private val _vpnState = MutableStateFlow(VpnState())
 	override val vpnState: StateFlow<VpnState> = _vpnState.asStateFlow()
 
@@ -84,30 +85,42 @@ constructor(
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
 		return withContext(ioDispatcher) {
 			if (_vpnState.value.status == TunnelState.UP) vpnState.value.tunnelConfig?.let { stopTunnel(it) }
-			appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
-			appDataRepository.appState.setLastActiveTunnelId(tunnelConfig.id)
 			emitTunnelConfig(tunnelConfig)
 			setState(tunnelConfig, TunnelState.UP).onSuccess {
 				emitTunnelState(it)
-				WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
+				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
 			}.onFailure {
-				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
-				WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
+				Timber.e(it)
 			}
 		}
 	}
 
 	override suspend fun stopTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
 		return withContext(ioDispatcher) {
-			appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
 			setState(tunnelConfig, TunnelState.DOWN).onSuccess {
 				emitTunnelState(it)
+				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
 				resetBackendStatistics()
-				WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
 			}.onFailure {
 				Timber.e(it)
-				appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
-				WireGuardAutoTunnel.instance.requestTunnelTileServiceStateUpdate()
+			}
+		}
+	}
+
+	// use this when we just want to bounce tunnel and not change tunnelConfig active state
+	override suspend fun bounceTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
+		toggleTunnel(tunnelConfig)
+		delay(Constants.VPN_RESTART_DELAY)
+		return toggleTunnel(tunnelConfig)
+	}
+
+	private suspend fun toggleTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
+		return withContext(ioDispatcher) {
+			setState(tunnelConfig, TunnelState.TOGGLE).onSuccess {
+				emitTunnelState(it)
+				resetBackendStatistics()
+			}.onFailure {
+				Timber.e(it)
 			}
 		}
 	}

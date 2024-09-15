@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
@@ -24,7 +23,6 @@ class DataStoreManager(
 	companion object {
 		val LOCATION_DISCLOSURE_SHOWN = booleanPreferencesKey("LOCATION_DISCLOSURE_SHOWN")
 		val BATTERY_OPTIMIZE_DISABLE_SHOWN = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
-		val LAST_ACTIVE_TUNNEL = intPreferencesKey("LAST_ACTIVE_TUNNEL")
 		val CURRENT_SSID = stringPreferencesKey("CURRENT_SSID")
 		val IS_PIN_LOCK_ENABLED = booleanPreferencesKey("PIN_LOCK_ENABLED")
 	}
@@ -50,6 +48,18 @@ class DataStoreManager(
 		withContext(ioDispatcher) {
 			try {
 				context.dataStore.edit { it[key] = value }
+			} catch (e: IOException) {
+				Timber.e(e)
+			} catch (e: Exception) {
+				Timber.e(e)
+			}
+		}
+	}
+
+	suspend fun <T> removeFromDataStore(key: Preferences.Key<T>) {
+		withContext(ioDispatcher) {
+			try {
+				context.dataStore.edit { it.remove(key) }
 			} catch (e: IOException) {
 				Timber.e(e)
 			} catch (e: Exception) {

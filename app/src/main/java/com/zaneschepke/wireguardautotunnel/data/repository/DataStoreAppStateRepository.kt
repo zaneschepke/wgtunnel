@@ -47,14 +47,6 @@ class DataStoreAppStateRepository(
 		withContext(ioDispatcher) { dataStoreManager.saveToDataStore(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN, shown) }
 	}
 
-	override suspend fun getLastActiveTunnelId(): Int? {
-		return withContext(ioDispatcher) { dataStoreManager.getFromStore(DataStoreManager.LAST_ACTIVE_TUNNEL) }
-	}
-
-	override suspend fun setLastActiveTunnelId(id: Int) {
-		return withContext(ioDispatcher) { dataStoreManager.saveToDataStore(DataStoreManager.LAST_ACTIVE_TUNNEL, id) }
-	}
-
 	override suspend fun getCurrentSsid(): String? {
 		return withContext(ioDispatcher) { dataStoreManager.getFromStore(DataStoreManager.CURRENT_SSID) }
 	}
@@ -77,7 +69,6 @@ class DataStoreAppStateRepository(
 						isPinLockEnabled =
 						pref[DataStoreManager.IS_PIN_LOCK_ENABLED]
 							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
-						lastActiveTunnelId = pref[DataStoreManager.LAST_ACTIVE_TUNNEL],
 					)
 				} catch (e: IllegalArgumentException) {
 					Timber.e(e)

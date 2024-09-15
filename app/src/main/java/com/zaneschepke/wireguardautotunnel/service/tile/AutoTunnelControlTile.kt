@@ -12,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -23,9 +22,6 @@ import javax.inject.Inject
 class AutoTunnelControlTile : TileService(), LifecycleOwner {
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
-
-	@Inject
-	lateinit var serviceManager: ServiceManager
 
 	@Inject
 	@ApplicationScope

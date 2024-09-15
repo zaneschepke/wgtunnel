@@ -27,9 +27,6 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 	@Inject
 	lateinit var tunnelConfigRepository: TunnelConfigRepository
 
-	@Inject
-	lateinit var serviceManager: ServiceManager
-
 	override fun onReceive(context: Context, intent: Intent) {
 		val id = intent.getIntExtra(TUNNEL_ID_EXTRA_KEY, 0)
 		if (id == 0) return
@@ -39,7 +36,7 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 				applicationScope.launch {
 					val tunnel = tunnelConfigRepository.getById(id)
 					tunnel?.let {
-						serviceManager.startTunnelBackgroundService(context)
+						ServiceManager.startTunnelBackgroundService(context)
 						tunnelService.get().startTunnel(it)
 					}
 				}
@@ -48,7 +45,7 @@ class BackgroundActionReceiver : BroadcastReceiver() {
 				applicationScope.launch {
 					val tunnel = tunnelConfigRepository.getById(id)
 					tunnel?.let {
-						serviceManager.stopTunnelBackgroundService(context)
+						ServiceManager.stopTunnelBackgroundService(context)
 						tunnelService.get().stopTunnel(it)
 					}
 				}

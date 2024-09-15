@@ -1,14 +1,16 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import android.app.Notification
-import android.os.Bundle
+import android.content.Intent
+import android.os.IBinder
+import androidx.lifecycle.LifecycleService
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TunnelBackgroundService : ForegroundService() {
+class TunnelBackgroundService : LifecycleService() {
 
 	@Inject
 	lateinit var notificationService: NotificationService
@@ -20,14 +22,32 @@ class TunnelBackgroundService : ForegroundService() {
 		startForeground(foregroundId, createNotification())
 	}
 
-	override fun startService(extras: Bundle?) {
-		super.startService(extras)
+	override fun onBind(intent: Intent): IBinder? {
+		super.onBind(intent)
+		// We don't provide binding, so return null
+		return null
+	}
+
+	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+		if (intent != null) {
+			val action = intent.action
+			when (action) {
+				Action.START.name,
+				Action.START_FOREGROUND.name,
+				-> startService()
+				Action.STOP.name, Action.STOP_FOREGROUND.name -> stopService()
+			}
+		}
+		return super.onStartCommand(intent, flags, startId)
+	}
+
+	private fun startService() {
 		startForeground(foregroundId, createNotification())
 	}
 
-	override fun stopService() {
-		super.stopService()
+	private fun stopService() {
 		stopForeground(STOP_FOREGROUND_REMOVE)
+		stopSelf()
 	}
 
 	private fun createNotification(): Notification {

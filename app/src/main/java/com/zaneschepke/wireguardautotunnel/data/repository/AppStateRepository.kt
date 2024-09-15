@@ -16,10 +16,6 @@ interface AppStateRepository {
 
 	suspend fun setBatteryOptimizationDisableShown(shown: Boolean)
 
-	suspend fun getLastActiveTunnelId(): Int?
-
-	suspend fun setLastActiveTunnelId(id: Int)
-
 	suspend fun getCurrentSsid(): String?
 
 	suspend fun setCurrentSsid(ssid: String)

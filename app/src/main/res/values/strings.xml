@@ -6,6 +6,7 @@
     <string name="watcher_channel_name">Watcher Notification Channel</string>
     <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
     <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
+	<string name="docs_features" translatable="false">https://zaneschepke.com/wgtunnel-docs/features.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
     <string name="error_file_extension">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Action requires tunnel off</string>
@@ -186,4 +187,11 @@
 	<string name="app_settings">app settings</string>
 	<string name="background_location_message2">to make sure these permissions are enabled.</string>
 	<string name="root_accepted">Root shell accepted</string>
+	<string name="set_custom_ping_ip">Set custom ping ip</string>
+	<string name="default_ping_ip">(optional, defaults to peers)</string>
+	<string name="set_custom_ping_internal">Ping interval (sec)</string>
+	<string name="optional_default">"optional, default: "</string>
+	<string name="set_custom_ping_cooldown">Ping restart cooldown (sec)</string>
+    <string name="wildcard_supported">Learn about supported wildcards.</string>
+	<string name="details">details</string>
 </resources>

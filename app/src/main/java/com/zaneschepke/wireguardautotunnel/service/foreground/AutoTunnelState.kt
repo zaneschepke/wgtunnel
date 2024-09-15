@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
 
 data class AutoTunnelState(
 	val isWifiConnected: Boolean = false,
@@ -38,7 +39,7 @@ data class AutoTunnelState(
 		return (
 			!isEthernetConnected &&
 				isWifiConnected &&
-				!settings.trustedNetworkSSIDs.contains(currentNetworkSSID) &&
+				!settings.trustedNetworkSSIDs.isMatchingToWildcardList(currentNetworkSSID) &&
 				settings.isTunnelOnWifiEnabled
 			)
 	}
@@ -48,7 +49,7 @@ data class AutoTunnelState(
 			!isEthernetConnected &&
 				(
 					isWifiConnected &&
-						settings.trustedNetworkSSIDs.contains(currentNetworkSSID)
+						settings.trustedNetworkSSIDs.isMatchingToWildcardList(currentNetworkSSID)
 					)
 			)
 	}

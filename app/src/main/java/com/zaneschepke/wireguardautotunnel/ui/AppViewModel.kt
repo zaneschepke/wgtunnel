@@ -2,11 +2,16 @@ package com.zaneschepke.wireguardautotunnel.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
@@ -16,30 +21,38 @@ class AppViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
+	private val tunnelService: TunnelService,
+	val navHostController: NavHostController,
 ) : ViewModel() {
 
-	private val _appUiState =
-		MutableStateFlow(
-			AppUiState(),
+	private val _appUiState = MutableStateFlow(AppUiState())
+
+	val uiState =
+		combine(
+			appDataRepository.settings.getSettingsFlow(),
+			appDataRepository.tunnels.getTunnelConfigsFlow(),
+			tunnelService.vpnState,
+			appDataRepository.appState.generalStateFlow,
+		) { settings, tunnels, tunnelState, generalState ->
+			AppUiState(
+				settings,
+				tunnels,
+				tunnelState,
+				generalState,
+			)
+		}
+			.stateIn(
+				viewModelScope,
+				SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+				_appUiState.value,
+			)
+
+	fun setTunnels(tunnels: TunnelConfigs) = viewModelScope.launch {
+		_appUiState.emit(
+			_appUiState.value.copy(
+				tunnels = tunnels,
+			),
 		)
-	val appUiState = _appUiState.asStateFlow()
-
-	fun showSnackbarMessage(message: String) {
-		_appUiState.update {
-			it.copy(
-				snackbarMessage = message,
-				snackbarMessageConsumed = false,
-			)
-		}
-	}
-
-	fun snackbarMessageConsumed() {
-		_appUiState.update {
-			it.copy(
-				snackbarMessage = "",
-				snackbarMessageConsumed = true,
-			)
-		}
 	}
 
 	fun onPinLockDisabled() = viewModelScope.launch {

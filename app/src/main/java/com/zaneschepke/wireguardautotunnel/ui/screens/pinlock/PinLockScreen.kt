@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import xyz.teamgravity.pin_lock_compose.PinLock
@@ -16,9 +17,11 @@ import xyz.teamgravity.pin_lock_compose.PinLock
 @Composable
 fun PinLockScreen(navController: NavController, appViewModel: AppViewModel) {
 	val context = LocalContext.current
+	val snackbar = SnackbarController.current
 	PinLock(
 		title = { pinExists ->
 			Text(
+				color = MaterialTheme.colorScheme.onSecondary,
 				text =
 				if (pinExists) {
 					stringResource(id = R.string.enter_pin)
@@ -29,7 +32,7 @@ fun PinLockScreen(navController: NavController, appViewModel: AppViewModel) {
 				},
 			)
 		},
-		color = MaterialTheme.colorScheme.surface,
+		color = MaterialTheme.colorScheme.secondary,
 		onPinCorrect = {
 			// pin is correct, navigate or hide pin lock
 			if (context.isRunningOnTv()) {
@@ -43,13 +46,13 @@ fun PinLockScreen(navController: NavController, appViewModel: AppViewModel) {
 		},
 		onPinIncorrect = {
 			// pin is incorrect, show error
-			appViewModel.showSnackbarMessage(
+			snackbar.showMessage(
 				StringValue.StringResource(R.string.incorrect_pin).asString(context),
 			)
 		},
 		onPinCreated = {
 			// pin created for the first time, navigate or hide pin lock
-			appViewModel.showSnackbarMessage(
+			snackbar.showMessage(
 				StringValue.StringResource(R.string.pin_created).asString(context),
 			)
 			appViewModel.onPinLockEnabled()

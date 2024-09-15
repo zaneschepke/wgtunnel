@@ -14,10 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarData
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.LaunchedEffect
@@ -31,17 +28,18 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
@@ -52,10 +50,8 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.StringValue
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -71,158 +67,148 @@ class MainActivity : AppCompatActivity() {
 
 		val isPinLockEnabled = intent.extras?.getBoolean(SplashActivity.IS_PIN_LOCK_ENABLED_KEY)
 
-		enableEdgeToEdge(navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()))
+		enableEdgeToEdge(
+			navigationBarStyle = SystemBarStyle.auto(
+				lightScrim = Color.Transparent.toArgb(),
+				darkScrim = Color.Transparent.toArgb(),
+			),
+		)
 
 		setContent {
 			val appViewModel = hiltViewModel<AppViewModel>()
-			val appUiState by appViewModel.appUiState.collectAsStateWithLifecycle()
-			val navController = rememberNavController()
+			val appUiState by appViewModel.uiState.collectAsStateWithLifecycle(lifecycle = this.lifecycle)
+			val navController = appViewModel.navHostController
 			val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-			val snackbarHostState = remember { SnackbarHostState() }
-
-			fun showSnackBarMessage(message: StringValue) {
-				lifecycleScope.launch(Dispatchers.Main) {
-					val result =
-						snackbarHostState.showSnackbar(
-							message = message.asString(this@MainActivity),
-							duration = SnackbarDuration.Short,
-						)
-					when (result) {
-						SnackbarResult.ActionPerformed,
-						SnackbarResult.Dismissed,
-						-> {
-							snackbarHostState.currentSnackbarData?.dismiss()
-						}
-					}
+			LaunchedEffect(appUiState.vpnState.status) {
+				val context = this@MainActivity
+				when (appUiState.vpnState.status) {
+					TunnelState.DOWN -> ServiceManager.stopTunnelBackgroundService(context)
+					else -> Unit
 				}
+				context.requestTunnelTileServiceStateUpdate()
 			}
 
-			WireguardAutoTunnelTheme {
-				LaunchedEffect(appUiState.snackbarMessageConsumed) {
-					if (!appUiState.snackbarMessageConsumed) {
-						showSnackBarMessage(StringValue.DynamicString(appUiState.snackbarMessage))
-						appViewModel.snackbarMessageConsumed()
-					}
-				}
-
-				val focusRequester = remember { FocusRequester() }
-
-				Scaffold(
-					snackbarHost = {
-						SnackbarHost(snackbarHostState) { snackbarData: SnackbarData ->
-							CustomSnackBar(
-								snackbarData.visuals.message,
-								isRtl = false,
-								containerColor =
-								MaterialTheme.colorScheme.surfaceColorAtElevation(
-									2.dp,
-								),
-							)
-						}
-					},
-					containerColor = MaterialTheme.colorScheme.background,
-					modifier =
-					Modifier
-						.focusable()
-						.focusProperties {
-							when (navBackStackEntry?.destination?.route) {
-								Screen.Lock.route -> Unit
-								else -> up = focusRequester
+			SnackbarControllerProvider { host ->
+				WireguardAutoTunnelTheme {
+					val focusRequester = remember { FocusRequester() }
+					Scaffold(
+						snackbarHost = {
+							SnackbarHost(host) { snackbarData: SnackbarData ->
+								CustomSnackBar(
+									snackbarData.visuals.message,
+									isRtl = false,
+									containerColor =
+									MaterialTheme.colorScheme.surfaceColorAtElevation(
+										2.dp,
+									),
+								)
 							}
 						},
-					bottomBar = {
-						BottomNavBar(
-							navController,
-							listOf(
-								Screen.Main.navItem,
-								Screen.Settings.navItem,
-								Screen.Support.navItem,
-							),
-						)
-					},
-				) { padding ->
-					Surface(modifier = Modifier.fillMaxSize().padding(padding)) {
-						NavHost(
-							navController,
-							enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
-							exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
-							startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
-						) {
-							composable(
-								Screen.Main.route,
-							) {
-								MainScreen(
-									focusRequester = focusRequester,
-									appViewModel = appViewModel,
-									navController = navController,
-								)
-							}
-							composable(
-								Screen.Settings.route,
-							) {
-								SettingsScreen(
-									appViewModel = appViewModel,
-									navController = navController,
-									focusRequester = focusRequester,
-								)
-							}
-							composable(
-								Screen.Support.route,
-							) {
-								SupportScreen(
-									focusRequester = focusRequester,
-									navController = navController,
-								)
-							}
-							composable(Screen.Support.Logs.route) {
-								LogsScreen()
-							}
-							composable(
-								"${Screen.Config.route}/{id}?configType={configType}",
-								arguments =
+						containerColor = MaterialTheme.colorScheme.background,
+						modifier =
+						Modifier
+							.focusable()
+							.focusProperties {
+								when (navBackStackEntry?.destination?.route) {
+									Screen.Lock.route -> Unit
+									else -> up = focusRequester
+								}
+							},
+						bottomBar = {
+							BottomNavBar(
+								navController,
 								listOf(
-									navArgument("id") {
-										type = NavType.StringType
-										defaultValue = "0"
-									},
-									navArgument("configType") {
-										type = NavType.StringType
-										defaultValue = ConfigType.WIREGUARD.name
-									},
+									Screen.Main.navItem,
+									Screen.Settings.navItem,
+									Screen.Support.navItem,
 								),
+							)
+						},
+					) { padding ->
+						Surface(modifier = Modifier.fillMaxSize().padding(padding)) {
+							NavHost(
+								navController,
+								enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
+								exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
+								startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
 							) {
-								val id = it.arguments?.getString("id")
-								val configType =
-									ConfigType.valueOf(
-										it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
-									)
-								if (!id.isNullOrBlank()) {
-									ConfigScreen(
-										navController = navController,
-										tunnelId = id,
-										appViewModel = appViewModel,
+								composable(
+									Screen.Main.route,
+								) {
+									MainScreen(
 										focusRequester = focusRequester,
-										configType = configType,
+										uiState = appUiState,
+										navController = navController,
 									)
 								}
-							}
-							composable("${Screen.Option.route}/{id}") {
-								val id = it.arguments?.getString("id")
-								if (!id.isNullOrBlank()) {
-									OptionsScreen(
-										navController = navController,
-										tunnelId = id,
+								composable(
+									Screen.Settings.route,
+								) {
+									SettingsScreen(
 										appViewModel = appViewModel,
+										uiState = appUiState,
+										navController = navController,
 										focusRequester = focusRequester,
 									)
 								}
-							}
-							composable(Screen.Lock.route) {
-								PinLockScreen(
-									navController = navController,
-									appViewModel = appViewModel,
-								)
+								composable(
+									Screen.Support.route,
+								) {
+									SupportScreen(
+										focusRequester = focusRequester,
+										navController = navController,
+										appUiState = appUiState,
+									)
+								}
+								composable(Screen.Support.Logs.route) {
+									LogsScreen()
+								}
+								composable(
+									"${Screen.Config.route}/{id}?configType={configType}",
+									arguments =
+									listOf(
+										navArgument("id") {
+											type = NavType.StringType
+											defaultValue = "0"
+										},
+										navArgument("configType") {
+											type = NavType.StringType
+											defaultValue = ConfigType.WIREGUARD.name
+										},
+									),
+								) {
+									val id = it.arguments?.getString("id")
+									val configType =
+										ConfigType.valueOf(
+											it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
+										)
+									if (!id.isNullOrBlank()) {
+										ConfigScreen(
+											navController = navController,
+											tunnelId = id,
+											focusRequester = focusRequester,
+											configType = configType,
+										)
+									}
+								}
+								composable("${Screen.Option.route}/{id}") {
+									val id = it.arguments?.getString("id")
+									if (!id.isNullOrBlank()) {
+										OptionsScreen(
+											navController = navController,
+											tunnelId = id.toInt(),
+											focusRequester = focusRequester,
+											appUiState = appUiState,
+										)
+									}
+								}
+								composable(Screen.Lock.route) {
+									PinLockScreen(
+										navController = navController,
+										appViewModel = appViewModel,
+									)
+								}
 							}
 						}
 					}

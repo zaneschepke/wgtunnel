@@ -25,9 +25,6 @@ class AppUpdateReceiver : BroadcastReceiver() {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var serviceManager: ServiceManager
-
-	@Inject
 	lateinit var tunnelService: TunnelService
 
 	override fun onReceive(context: Context, intent: Intent) {
@@ -36,7 +33,7 @@ class AppUpdateReceiver : BroadcastReceiver() {
 			val settings = appDataRepository.settings.getSettings()
 			if (settings.isAutoTunnelEnabled) {
 				Timber.i("Restarting services after upgrade")
-				serviceManager.startWatcherServiceForeground(context)
+				ServiceManager.startWatcherServiceForeground(context)
 			}
 			if (!settings.isAutoTunnelEnabled || settings.isAutoTunnelPaused) {
 				val tunnels = appDataRepository.tunnels.getAll().filter { it.isActive }

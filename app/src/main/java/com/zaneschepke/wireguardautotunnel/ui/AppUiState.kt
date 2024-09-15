@@ -1,8 +1,13 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
+import com.zaneschepke.wireguardautotunnel.data.domain.GeneralState
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
+
 data class AppUiState(
-	val snackbarMessage: String = "",
-	val snackbarMessageConsumed: Boolean = true,
-	val notificationPermissionAccepted: Boolean = false,
-	val requestPermissions: Boolean = false,
+	val settings: Settings = Settings(),
+	val tunnels: List<TunnelConfig> = emptyList(),
+	val vpnState: VpnState = VpnState(),
+	val generalState: GeneralState = GeneralState(),
 )

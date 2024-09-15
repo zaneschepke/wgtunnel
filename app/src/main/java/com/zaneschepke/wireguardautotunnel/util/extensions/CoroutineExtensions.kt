@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -74,5 +75,18 @@ fun <T> Flow<T>.chunked(size: Int, time: Duration) = channelFlow {
 fun <T> CoroutineScope.asChannel(flow: Flow<T>): ReceiveChannel<T> = produce {
 	flow.collect { value ->
 		channel.send(value)
+	}
+}
+
+fun Job?.onNotRunning(callback: () -> Unit) {
+	if (this == null || this.isCompleted || this.isCompleted) {
+		callback.invoke()
+	}
+}
+
+fun Job.cancelWithMessage(message: String) {
+	kotlin.runCatching {
+		this.cancel()
+		Timber.i(message)
 	}
 }
