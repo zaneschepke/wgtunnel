@@ -10,6 +10,13 @@ plugins {
 	alias(libs.plugins.grgit)
 }
 
+val versionFile = file("$rootDir/versionCode.txt")
+val versionCodeIncrement = if (versionFile.exists()) {
+	versionFile.readText().toInt() + 1
+} else {
+	1
+}
+
 android {
 	namespace = Constants.APP_ID
 	compileSdk = Constants.TARGET_SDK
@@ -22,7 +29,7 @@ android {
 		applicationId = Constants.APP_ID
 		minSdk = Constants.MIN_SDK
 		targetSdk = Constants.TARGET_SDK
-		versionCode = Constants.VERSION_CODE + (versionCode ?: 0)
+		versionCode = Constants.VERSION_CODE + versionCodeIncrement
 		versionName = determineVersionName()
 
 		ksp { arg("room.schemaLocation", "$projectDir/schemas") }
@@ -214,15 +221,11 @@ fun determineVersionName(): String {
 
 val incrementVersionCode by tasks.registering {
 	doLast {
-		val versionCodeFile = file("$rootDir/versionCode.txt")
-		val currentVersionCode = if (versionCodeFile.exists()) {
-			versionCodeFile.readText().toInt()
-		} else {
-			1
+		val versionFile = file("$rootDir/versionCode.txt")
+		if (versionFile.exists()) {
+			versionFile.writeText(versionCodeIncrement.toString())
+			println("Incremented versionCode to $versionCodeIncrement")
 		}
-		val newVersionCode = currentVersionCode + 1
-		versionCodeFile.writeText(newVersionCode.toString())
-		println("Incremented versionCode to $newVersionCode")
 	}
 }
 
