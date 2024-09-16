@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -111,7 +112,7 @@ fun SettingsScreen(
 	var isBackgroundLocationGranted by remember { mutableStateOf(true) }
 	var showVpnPermissionDialog by remember { mutableStateOf(false) }
 	var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
-	var didExportFiles by remember { mutableStateOf(false) }
+	val didExportFiles by remember { mutableStateOf(false) }
 	var showAuthPrompt by remember { mutableStateOf(false) }
 	var showLocationDialog by remember { mutableStateOf(false) }
 
@@ -125,13 +126,6 @@ fun SettingsScreen(
 	LaunchedEffect(uiState.settings.trustedNetworkSSIDs) {
 		currentText = ""
 	}
-
-	val notificationPermissionState =
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-		} else {
-			null
-		}
 
 	val startForResult =
 		rememberLauncherForActivityResult(
@@ -165,22 +159,20 @@ fun SettingsScreen(
 	fun requestBatteryOptimizationsDisabled() {
 		val intent =
 			Intent().apply {
-				this.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-				data = Uri.fromParts("package", context.packageName, null)
+				action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+				data = Uri.parse("package:${context.packageName}")
 			}
 		startForResult.launch(intent)
 	}
 
 	fun handleAutoTunnelToggle() {
-		if (!uiState.generalState.isBatteryOptimizationDisableShown || !isBatteryOptimizationsDisabled()) return requestBatteryOptimizationsDisabled()
-		if (notificationPermissionState != null && !notificationPermissionState.status.isGranted) {
-			snackbar.showMessage(
-				context.getString(R.string.notification_permission_required),
-			)
-			return notificationPermissionState.launchPermissionRequest()
+		if (!uiState.generalState.isBatteryOptimizationDisableShown &&
+			!isBatteryOptimizationsDisabled() && !context.isRunningOnTv()
+		) {
+			return requestBatteryOptimizationsDisabled()
 		}
 		val intent = if (!uiState.settings.isKernelEnabled) {
-			com.wireguard.android.backend.GoBackend.VpnService.prepare(context)
+			VpnService.prepare(context)
 		} else {
 			null
 		}

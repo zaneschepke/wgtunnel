@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.scope.ProjectInfo.Companion.getBaseName
+
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.android)
@@ -20,7 +22,7 @@ android {
 		applicationId = Constants.APP_ID
 		minSdk = Constants.MIN_SDK
 		targetSdk = Constants.TARGET_SDK
-		versionCode = determineVersionCode()
+		versionCode = Constants.VERSION_CODE + (versionCode ?: 0)
 		versionName = determineVersionName()
 
 		ksp { arg("room.schemaLocation", "$projectDir/schemas") }
@@ -199,16 +201,6 @@ dependencies {
 	implementation(libs.androidx.core.splashscreen)
 }
 
-fun determineVersionCode(): Int {
-	return with(getBuildTaskName().lowercase()) {
-		when {
-			contains(Constants.NIGHTLY) -> Constants.VERSION_CODE + Constants.NIGHTLY_CODE
-			contains(Constants.PRERELEASE) -> Constants.VERSION_CODE + Constants.PRERELEASE_CODE
-			else -> Constants.VERSION_CODE
-		}
-	}
-}
-
 fun determineVersionName(): String {
 	return with(getBuildTaskName().lowercase()) {
 		when {
@@ -219,3 +211,26 @@ fun determineVersionName(): String {
 		}
 	}
 }
+
+val incrementVersionCode by tasks.registering {
+	doLast {
+		val versionCodeFile = file("$rootDir/versionCode.txt")
+		val currentVersionCode = if (versionCodeFile.exists()) {
+			versionCodeFile.readText().toInt()
+		} else {
+			1
+		}
+		val newVersionCode = currentVersionCode + 1
+		versionCodeFile.writeText(newVersionCode.toString())
+		println("Incremented versionCode to $newVersionCode")
+	}
+}
+
+
+tasks.whenTaskAdded {
+	if (name.startsWith("assemble")) {
+		dependsOn(incrementVersionCode)
+	}
+}
+
+

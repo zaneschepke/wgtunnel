@@ -16,7 +16,4 @@ object Constants {
     const val NIGHTLY = "nightly"
 	const val PRERELEASE = "prerelease"
     const val TYPE = "type"
-
-    const val NIGHTLY_CODE = 42
-	const val PRERELEASE_CODE = 54
 }
