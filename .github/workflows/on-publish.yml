@@ -1,4 +1,4 @@
-name: Release Updates Workflow
+name: on-publish
 
 on:
   release:
@@ -7,8 +7,8 @@ on:
 
 jobs:
 
-  build:
-    name: Build
+  on-publish:
+    name: On publish
     runs-on: ubuntu-latest
     steps:
       - name: Send Telegram Message

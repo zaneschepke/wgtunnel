@@ -1,0 +1,17 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: "4 3 * * *"
+jobs:
+  nightly-publish-check:
+    name: Nightly publish check
+    runs-on: ubuntu-latest
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
+    steps:
+      - name: Build and publish nightly
+        uses: ./.github/workflows/release.yml
+        secrets: inherit
+        with:
+          build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
