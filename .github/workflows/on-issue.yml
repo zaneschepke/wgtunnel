@@ -1,4 +1,4 @@
-name: Issue Updates Workflow
+name: on-issue
 
 on:
   issues:
@@ -7,8 +7,8 @@ on:
 
 jobs:
 
-  build:
-    name: Build
+  on-issue:
+    name: On new issue
     runs-on: ubuntu-latest
     steps:
       - name: Send Telegram Message

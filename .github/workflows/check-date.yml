@@ -1,4 +1,4 @@
-name: Check nightly
+name: check-date
 
 on:
   workflow_dispatch:

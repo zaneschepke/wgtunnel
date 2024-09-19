@@ -1,16 +1,17 @@
-name: Nightly deployment
+name: nightly
 
 on:
   schedule:
     - cron: "4 3 * * *"
-publish_nightly:
-  needs: check_date
-  if: ${{ needs.check_date.outputs.should_run != 'false' }}
-  runs-on: ubuntu-latest
-  name: Deploy nightly build
-  release-android:
-    if: ${{ inputs.release_type != 'none' }}
-    uses: ./.github/workflows/release.yml
-    secrets: inherit
-    with:
-      build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
+jobs:
+  nightly-publish-check:
+    name: Nightly publish check
+    runs-on: ubuntu-latest
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
+    steps:
+      - name: Build and publish nightly
+        uses: ./.github/workflows/release.yml
+        secrets: inherit
+        with:
+          build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
