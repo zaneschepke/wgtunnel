@@ -1,8 +1,6 @@
 name: release-android
 
 on:
-  schedule:
-    - cron: "4 3 * * *"
   workflow_dispatch:
     inputs:
       track:
@@ -34,7 +32,8 @@ on:
 jobs:
   build:
     name: Build Signed APK
-    if: ${{ inputs.release_type != 'none' }}
+    needs: check_date
+    if: ${{ inputs.release_type != 'none' && (needs.check_date.outputs.should_run != 'false' && )  }}
     runs-on: ubuntu-latest
 
     env:
