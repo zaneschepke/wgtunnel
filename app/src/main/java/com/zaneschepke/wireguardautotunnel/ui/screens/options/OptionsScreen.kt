@@ -296,6 +296,7 @@ fun OptionsScreen(
 								focusRequester,
 								keyboardOptions = KeyboardOptions(
 									keyboardType = KeyboardType.Number,
+									imeAction = ImeAction.Done,
 								),
 								isErrorValue = ::isSecondsError,
 								onSubmit = {
