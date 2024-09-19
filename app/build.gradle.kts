@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.scope.ProjectInfo.Companion.getBaseName
-
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.android)
@@ -229,11 +227,9 @@ val incrementVersionCode by tasks.registering {
 	}
 }
 
-
 tasks.whenTaskAdded {
 	if (name.startsWith("assemble")) {
+		if (name.contains("debug")) return@whenTaskAdded
 		dependsOn(incrementVersionCode)
 	}
 }
-
-

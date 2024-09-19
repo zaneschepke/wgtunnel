@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.ui.common.config
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Save
@@ -22,6 +23,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.text.isDigitsOnly
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
@@ -49,10 +52,21 @@ fun SubmitConfigurationTextBox(
 		interactionSource = interactionSource,
 		value = stateValue ?: "",
 		onValueChange = {
-			stateValue = it
+			when (keyboardOptions.keyboardType) {
+				KeyboardType.Number -> {
+					if (it.isDigitsOnly()) stateValue = it
+				}
+				else -> stateValue = it
+			}
 		},
 		keyboardOptions = keyboardOptions,
 		label = label,
+		keyboardActions = KeyboardActions(
+			onDone = {
+				onSubmit(stateValue!!)
+				keyboardController?.hide()
+			},
+		),
 		hint = hint,
 		modifier = Modifier
 			.fillMaxWidth()
