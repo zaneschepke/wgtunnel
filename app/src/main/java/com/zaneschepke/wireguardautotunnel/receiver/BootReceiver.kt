@@ -7,6 +7,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +34,9 @@ class BootReceiver : BroadcastReceiver() {
 			with(appDataRepository.settings.getSettings()) {
 				if (isRestoreOnBootEnabled) {
 					val activeTunnels = appDataRepository.tunnels.getActive()
-					if (activeTunnels.isNotEmpty()) {
+					val tunState = tunnelService.get().vpnState.value.status
+					if (activeTunnels.isNotEmpty() && tunState != TunnelState.UP) {
+						Timber.i("Starting previously active tunnel")
 						context.startTunnelBackground(activeTunnels.first().id)
 					}
 					if (isAutoTunnelEnabled) {

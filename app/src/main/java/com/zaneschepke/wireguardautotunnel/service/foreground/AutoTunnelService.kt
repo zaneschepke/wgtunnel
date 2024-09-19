@@ -253,7 +253,8 @@ class AutoTunnelService : LifecycleService() {
 			runCatching {
 				do {
 					val vpnState = tunnelService.get().vpnState.value
-					if (vpnState.status == TunnelState.UP) {
+					val settings = appDataRepository.settings.getSettings()
+					if (vpnState.status == TunnelState.UP && !settings.isAutoTunnelPaused) {
 						if (vpnState.tunnelConfig != null) {
 							val config = TunnelConfig.configFromWgQuick(vpnState.tunnelConfig.wgQuick)
 							val results = if (vpnState.tunnelConfig.pingIp != null) {

@@ -228,8 +228,7 @@ val incrementVersionCode by tasks.registering {
 }
 
 tasks.whenTaskAdded {
-	if (name.startsWith("assemble")) {
-		if (name.contains("debug")) return@whenTaskAdded
+	if (name.startsWith("assemble") && !name.lowercase().contains("debug")) {
 		dependsOn(incrementVersionCode)
 	}
 }
