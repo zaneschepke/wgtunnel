@@ -3,15 +3,17 @@ name: nightly
 on:
   schedule:
     - cron: "4 3 * * *"
+  workflow_dispatch:
 jobs:
+  check-date:
+    uses: ./.github/workflows/check-date.yml
   nightly-publish-check:
     name: Nightly publish check
     runs-on: ubuntu-latest
-    needs: check_date
-    if: ${{ needs.check_date.outputs.should_run != 'false' }}
-    steps:
-      - name: Build and publish nightly
-        uses: ./.github/workflows/release.yml
-        secrets: inherit
-        with:
-          build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
+    needs: check-date
+    if: ${{ needs.check-date.outputs.should_run != 'false' }}
+  publish-nightly:
+    name: Publish nightly
+    runs-on: ubuntu-latest
+    needs: nightly-publish-check
+    uses: ./.github/workflows/release.yml

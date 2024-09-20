@@ -2,6 +2,7 @@ name: check-date
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   check_date:
