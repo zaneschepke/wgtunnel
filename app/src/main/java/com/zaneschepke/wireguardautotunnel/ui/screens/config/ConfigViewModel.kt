@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.wireguard.config.Config
 import com.wireguard.config.Interface
 import com.wireguard.config.Peer
@@ -15,102 +16,82 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
-import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
 import com.zaneschepke.wireguardautotunnel.util.extensions.removeAt
 import com.zaneschepke.wireguardautotunnel.util.extensions.update
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import timber.log.Timber
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = ConfigViewModel.ConfigViewModelFactory::class)
 class ConfigViewModel
-@Inject
+@AssistedInject
 constructor(
-	private val settingsRepository: SettingsRepository,
 	private val appDataRepository: AppDataRepository,
+	private val navController: NavHostController,
+	@Assisted val id: Int,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 	private val packageManager = WireGuardAutoTunnel.instance.packageManager
 
 	private val _uiState = MutableStateFlow(ConfigUiState())
-	val uiState = _uiState.asStateFlow()
-
-	fun init(tunnelId: String) = viewModelScope.launch(ioDispatcher) {
-		val packages = getQueriedPackages("")
-		val state =
-			if (tunnelId != Constants.MANUAL_TUNNEL_CONFIG_ID) {
-				val tunnelConfig =
-					appDataRepository.tunnels.getAll()
-						.firstOrNull { it.id.toString() == tunnelId }
-				val isAmneziaEnabled = settingsRepository.getSettings().isAmneziaEnabled
-				if (tunnelConfig != null) {
-					(
-						if (isAmneziaEnabled) {
-							val amConfig =
-								if (tunnelConfig.amQuick == "") tunnelConfig.wgQuick else tunnelConfig.amQuick
-							ConfigUiState.from(TunnelConfig.configFromAmQuick(amConfig))
-						} else {
-							ConfigUiState.from(
-								TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick),
-							)
-						}
-						).copy(
-						packages = packages,
-						loading = false,
-						tunnel = tunnelConfig,
-						tunnelName = tunnelConfig.name,
-						isAmneziaEnabled = isAmneziaEnabled,
-					)
-				} else {
-					ConfigUiState(loading = false, packages = packages)
-				}
-			} else {
-				ConfigUiState(loading = false, packages = packages)
-			}
-		_uiState.value = state
-	}
+	val uiState = _uiState.onStart {
+		appDataRepository.tunnels.getById(id)?.let {
+			_uiState.value = ConfigUiState.from(it)
+		}
+	}.stateIn(
+		viewModelScope + ioDispatcher,
+		SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+		ConfigUiState(),
+	)
 
 	fun onTunnelNameChange(name: String) {
-		_uiState.value = _uiState.value.copy(tunnelName = name)
+		_uiState.update {
+			it.copy(tunnelName = name)
+		}
 	}
 
 	fun onIncludeChange(include: Boolean) {
-		_uiState.value = _uiState.value.copy(include = include)
+		_uiState.update {
+			it.copy(include = include)
+		}
 	}
 
 	fun onAddCheckedPackage(packageName: String) {
-		_uiState.value =
-			_uiState.value.copy(
-				checkedPackageNames = _uiState.value.checkedPackageNames + packageName,
+		_uiState.update {
+			it.copy(
+				checkedPackageNames = it.checkedPackageNames + packageName,
 			)
+		}
 	}
 
 	fun onAllApplicationsChange(isAllApplicationsEnabled: Boolean) {
-		_uiState.value = _uiState.value.copy(isAllApplicationsEnabled = isAllApplicationsEnabled)
+		_uiState.update {
+			it.copy(isAllApplicationsEnabled = isAllApplicationsEnabled)
+		}
 	}
 
 	fun onRemoveCheckedPackage(packageName: String) {
-		_uiState.value =
-			_uiState.value.copy(
-				checkedPackageNames = _uiState.value.checkedPackageNames - packageName,
+		_uiState.update {
+			it.copy(
+				checkedPackageNames = it.checkedPackageNames - packageName,
 			)
-	}
-
-	private fun getQueriedPackages(query: String): List<PackageInfo> {
-		return getAllInternetCapablePackages().filter {
-			getPackageLabel(it).lowercase().contains(query.lowercase())
 		}
 	}
 
@@ -137,7 +118,9 @@ constructor(
 		return _uiState.value.isAllApplicationsEnabled
 	}
 
-	private fun saveConfig(tunnelConfig: TunnelConfig) = viewModelScope.launch { appDataRepository.tunnels.save(tunnelConfig) }
+	private fun saveConfig(tunnelConfig: TunnelConfig) = viewModelScope.launch {
+		appDataRepository.tunnels.save(tunnelConfig)
+	}
 
 	private fun updateTunnelConfig(tunnelConfig: TunnelConfig?) = viewModelScope.launch {
 		if (tunnelConfig != null) {
@@ -174,105 +157,113 @@ constructor(
 	}
 
 	private fun emptyCheckedPackagesList() {
-		_uiState.value = _uiState.value.copy(checkedPackageNames = emptyList())
+		_uiState.update {
+			it.copy(checkedPackageNames = emptyList())
+		}
 	}
 
 	private fun buildInterfaceListFromProxyInterface(): Interface {
 		val builder = Interface.Builder()
-		builder.parsePrivateKey(_uiState.value.interfaceProxy.privateKey.trim())
-		builder.parseAddresses(_uiState.value.interfaceProxy.addresses.trim())
-		if (_uiState.value.interfaceProxy.dnsServers.isNotEmpty()) {
-			builder.parseDnsServers(_uiState.value.interfaceProxy.dnsServers.trim())
+		with(_uiState.value.interfaceProxy) {
+			builder.parsePrivateKey(this.privateKey.trim())
+			builder.parseAddresses(this.addresses.trim())
+			if (this.dnsServers.isNotEmpty()) {
+				builder.parseDnsServers(this.dnsServers.trim())
+			}
+			if (this.mtu.isNotEmpty()) {
+				builder.parseMtu(this.mtu.trim())
+			}
+			if (this.listenPort.isNotEmpty()) {
+				builder.parseListenPort(this.listenPort.trim())
+			}
+			if (isAllApplicationsEnabled()) emptyCheckedPackagesList()
+			if (_uiState.value.include) {
+				builder.includeApplications(
+					_uiState.value.checkedPackageNames,
+				)
+			}
+			if (!_uiState.value.include) {
+				builder.excludeApplications(
+					_uiState.value.checkedPackageNames,
+				)
+			}
 		}
-		if (_uiState.value.interfaceProxy.mtu.isNotEmpty()) {
-			builder.parseMtu(_uiState.value.interfaceProxy.mtu.trim())
-		}
-		if (_uiState.value.interfaceProxy.listenPort.isNotEmpty()) {
-			builder.parseListenPort(_uiState.value.interfaceProxy.listenPort.trim())
-		}
-		if (isAllApplicationsEnabled()) emptyCheckedPackagesList()
-		if (_uiState.value.include) {
-			builder.includeApplications(
-				_uiState.value.checkedPackageNames,
-			)
-		}
-		if (!_uiState.value.include) {
-			builder.excludeApplications(
-				_uiState.value.checkedPackageNames,
-			)
-		}
+
 		return builder.build()
 	}
 
 	private fun buildAmInterfaceListFromProxyInterface(): org.amnezia.awg.config.Interface {
 		val builder = org.amnezia.awg.config.Interface.Builder()
-		builder.parsePrivateKey(_uiState.value.interfaceProxy.privateKey.trim())
-		builder.parseAddresses(_uiState.value.interfaceProxy.addresses.trim())
-		if (_uiState.value.interfaceProxy.dnsServers.isNotEmpty()) {
-			builder.parseDnsServers(_uiState.value.interfaceProxy.dnsServers.trim())
+		with(_uiState.value.interfaceProxy) {
+			builder.parsePrivateKey(this.privateKey.trim())
+			builder.parseAddresses(this.addresses.trim())
+			if (this.dnsServers.isNotEmpty()) {
+				builder.parseDnsServers(this.dnsServers.trim())
+			}
+			if (this.mtu.isNotEmpty()) {
+				builder.parseMtu(this.mtu.trim())
+			}
+			if (this.listenPort.isNotEmpty()) {
+				builder.parseListenPort(this.listenPort.trim())
+			}
+			if (isAllApplicationsEnabled()) emptyCheckedPackagesList()
+			if (_uiState.value.include) {
+				builder.includeApplications(
+					_uiState.value.checkedPackageNames,
+				)
+			}
+			if (!_uiState.value.include) {
+				builder.excludeApplications(
+					_uiState.value.checkedPackageNames,
+				)
+			}
+			if (this.junkPacketCount.isNotEmpty()) {
+				builder.setJunkPacketCount(
+					this.junkPacketCount.trim().toInt(),
+				)
+			}
+			if (this.junkPacketMinSize.isNotEmpty()) {
+				builder.setJunkPacketMinSize(
+					this.junkPacketMinSize.trim().toInt(),
+				)
+			}
+			if (this.junkPacketMaxSize.isNotEmpty()) {
+				builder.setJunkPacketMaxSize(
+					this.junkPacketMaxSize.trim().toInt(),
+				)
+			}
+			if (this.initPacketJunkSize.isNotEmpty()) {
+				builder.setInitPacketJunkSize(
+					this.initPacketJunkSize.trim().toInt(),
+				)
+			}
+			if (this.responsePacketJunkSize.isNotEmpty()) {
+				builder.setResponsePacketJunkSize(
+					this.responsePacketJunkSize.trim().toInt(),
+				)
+			}
+			if (this.initPacketMagicHeader.isNotEmpty()) {
+				builder.setInitPacketMagicHeader(
+					this.initPacketMagicHeader.trim().toLong(),
+				)
+			}
+			if (this.responsePacketMagicHeader.isNotEmpty()) {
+				builder.setResponsePacketMagicHeader(
+					this.responsePacketMagicHeader.trim().toLong(),
+				)
+			}
+			if (this.transportPacketMagicHeader.isNotEmpty()) {
+				builder.setTransportPacketMagicHeader(
+					this.transportPacketMagicHeader.trim().toLong(),
+				)
+			}
+			if (this.underloadPacketMagicHeader.isNotEmpty()) {
+				builder.setUnderloadPacketMagicHeader(
+					this.underloadPacketMagicHeader.trim().toLong(),
+				)
+			}
 		}
-		if (_uiState.value.interfaceProxy.mtu.isNotEmpty()) {
-			builder.parseMtu(_uiState.value.interfaceProxy.mtu.trim())
-		}
-		if (_uiState.value.interfaceProxy.listenPort.isNotEmpty()) {
-			builder.parseListenPort(_uiState.value.interfaceProxy.listenPort.trim())
-		}
-		if (isAllApplicationsEnabled()) emptyCheckedPackagesList()
-		if (_uiState.value.include) {
-			builder.includeApplications(
-				_uiState.value.checkedPackageNames,
-			)
-		}
-		if (!_uiState.value.include) {
-			builder.excludeApplications(
-				_uiState.value.checkedPackageNames,
-			)
-		}
-		if (_uiState.value.interfaceProxy.junkPacketCount.isNotEmpty()) {
-			builder.setJunkPacketCount(
-				_uiState.value.interfaceProxy.junkPacketCount.trim().toInt(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.junkPacketMinSize.isNotEmpty()) {
-			builder.setJunkPacketMinSize(
-				_uiState.value.interfaceProxy.junkPacketMinSize.trim().toInt(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.junkPacketMaxSize.isNotEmpty()) {
-			builder.setJunkPacketMaxSize(
-				_uiState.value.interfaceProxy.junkPacketMaxSize.trim().toInt(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.initPacketJunkSize.isNotEmpty()) {
-			builder.setInitPacketJunkSize(
-				_uiState.value.interfaceProxy.initPacketJunkSize.trim().toInt(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.responsePacketJunkSize.isNotEmpty()) {
-			builder.setResponsePacketJunkSize(
-				_uiState.value.interfaceProxy.responsePacketJunkSize.trim().toInt(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.initPacketMagicHeader.isNotEmpty()) {
-			builder.setInitPacketMagicHeader(
-				_uiState.value.interfaceProxy.initPacketMagicHeader.trim().toLong(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.responsePacketMagicHeader.isNotEmpty()) {
-			builder.setResponsePacketMagicHeader(
-				_uiState.value.interfaceProxy.responsePacketMagicHeader.trim().toLong(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.transportPacketMagicHeader.isNotEmpty()) {
-			builder.setTransportPacketMagicHeader(
-				_uiState.value.interfaceProxy.transportPacketMagicHeader.trim().toLong(),
-			)
-		}
-		if (_uiState.value.interfaceProxy.underloadPacketMagicHeader.isNotEmpty()) {
-			builder.setUnderloadPacketMagicHeader(
-				_uiState.value.interfaceProxy.underloadPacketMagicHeader.trim().toLong(),
-			)
-		}
+
 		return builder.build()
 	}
 
@@ -291,41 +282,32 @@ constructor(
 			.build()
 	}
 
-	fun onSaveAllChanges(configType: ConfigType): Result<Unit> {
-		return try {
+	fun onSaveAllChanges() = viewModelScope.launch {
+		kotlin.runCatching {
 			val wgQuick = buildConfig().toWgQuickString(true)
-			val amQuick =
-				if (configType == ConfigType.AMNEZIA) {
-					buildAmConfig().toAwgQuickString(true)
-				} else {
-					TunnelConfig.AM_QUICK_DEFAULT
-				}
-			val tunnelConfig =
-				when (uiState.value.tunnel) {
-					null ->
-						TunnelConfig(
-							name = _uiState.value.tunnelName,
-							wgQuick = wgQuick,
-							amQuick = amQuick,
-						)
-
-					else ->
-						uiState.value.tunnel!!.copy(
-							name = _uiState.value.tunnelName,
-							wgQuick = wgQuick,
-							amQuick = amQuick,
-						)
-				}
+			val amQuick = buildAmConfig().toAwgQuickString(true)
+			val tunnelConfig = uiState.value.tunnel?.copy(
+				name = _uiState.value.tunnelName,
+				amQuick = amQuick,
+				wgQuick = wgQuick,
+			) ?: TunnelConfig(
+				name = _uiState.value.tunnelName,
+				wgQuick = wgQuick,
+				amQuick = amQuick,
+			)
 			updateTunnelConfig(tunnelConfig)
-			Result.success(Unit)
-		} catch (e: Exception) {
-			Timber.e(e)
-			val message = e.message?.substringAfter(":", missingDelimiterValue = "")
+			SnackbarController.showMessage(
+				StringValue.StringResource(R.string.config_changes_saved),
+			)
+			navController.navigate(Screen.Main.route)
+		}.onFailure {
+			Timber.e(it)
+			val message = it.message?.substringAfter(":", missingDelimiterValue = "")
 			val stringValue =
 				message?.let {
 					StringValue.DynamicString(message)
 				} ?: StringValue.StringResource(R.string.unknown_error)
-			Result.failure(WgTunnelExceptions.ConfigParseError(stringValue))
+			SnackbarController.showMessage(stringValue)
 		}
 	}
 
@@ -408,7 +390,7 @@ constructor(
 		_uiState.update {
 			it.copy(
 				interfaceProxy =
-				_uiState.value.interfaceProxy.copy(
+				it.interfaceProxy.copy(
 					privateKey = keyPair.privateKey.toBase64(),
 					publicKey = keyPair.publicKey.toBase64(),
 				),
@@ -419,7 +401,7 @@ constructor(
 	fun onAddressesChanged(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(addresses = value),
+				interfaceProxy = it.interfaceProxy.copy(addresses = value),
 			)
 		}
 	}
@@ -427,7 +409,7 @@ constructor(
 	fun onListenPortChanged(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(listenPort = value),
+				interfaceProxy = it.interfaceProxy.copy(listenPort = value),
 			)
 		}
 	}
@@ -435,21 +417,21 @@ constructor(
 	fun onDnsServersChanged(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(dnsServers = value),
+				interfaceProxy = it.interfaceProxy.copy(dnsServers = value),
 			)
 		}
 	}
 
 	fun onMtuChanged(value: String) {
 		_uiState.update {
-			it.copy(interfaceProxy = _uiState.value.interfaceProxy.copy(mtu = value))
+			it.copy(interfaceProxy = it.interfaceProxy.copy(mtu = value))
 		}
 	}
 
 	private fun onInterfacePublicKeyChange(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(publicKey = value),
+				interfaceProxy = it.interfaceProxy.copy(publicKey = value),
 			)
 		}
 	}
@@ -457,7 +439,7 @@ constructor(
 	fun onPrivateKeyChange(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(privateKey = value),
+				interfaceProxy = it.interfaceProxy.copy(privateKey = value),
 			)
 		}
 		if (NumberUtils.isValidKey(value)) {
@@ -479,7 +461,7 @@ constructor(
 	fun onJunkPacketCountChanged(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketCount = value),
+				interfaceProxy = it.interfaceProxy.copy(junkPacketCount = value),
 			)
 		}
 	}
@@ -487,7 +469,7 @@ constructor(
 	fun onJunkPacketMinSizeChanged(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMinSize = value),
+				interfaceProxy = it.interfaceProxy.copy(junkPacketMinSize = value),
 			)
 		}
 	}
@@ -495,7 +477,7 @@ constructor(
 	fun onJunkPacketMaxSizeChanged(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(junkPacketMaxSize = value),
+				interfaceProxy = it.interfaceProxy.copy(junkPacketMaxSize = value),
 			)
 		}
 	}
@@ -503,7 +485,7 @@ constructor(
 	fun onInitPacketJunkSizeChanged(value: String) {
 		_uiState.update {
 			it.copy(
-				interfaceProxy = _uiState.value.interfaceProxy.copy(initPacketJunkSize = value),
+				interfaceProxy = it.interfaceProxy.copy(initPacketJunkSize = value),
 			)
 		}
 	}
@@ -512,7 +494,7 @@ constructor(
 		_uiState.update {
 			it.copy(
 				interfaceProxy =
-				_uiState.value.interfaceProxy.copy(
+				it.interfaceProxy.copy(
 					responsePacketJunkSize = value,
 				),
 			)
@@ -523,7 +505,7 @@ constructor(
 		_uiState.update {
 			it.copy(
 				interfaceProxy =
-				_uiState.value.interfaceProxy.copy(
+				it.interfaceProxy.copy(
 					initPacketMagicHeader = value,
 				),
 			)
@@ -534,7 +516,7 @@ constructor(
 		_uiState.update {
 			it.copy(
 				interfaceProxy =
-				_uiState.value.interfaceProxy.copy(
+				it.interfaceProxy.copy(
 					responsePacketMagicHeader = value,
 				),
 			)
@@ -545,7 +527,7 @@ constructor(
 		_uiState.update {
 			it.copy(
 				interfaceProxy =
-				_uiState.value.interfaceProxy.copy(
+				it.interfaceProxy.copy(
 					transportPacketMagicHeader = value,
 				),
 			)
@@ -556,10 +538,15 @@ constructor(
 		_uiState.update {
 			it.copy(
 				interfaceProxy =
-				_uiState.value.interfaceProxy.copy(
+				it.interfaceProxy.copy(
 					underloadPacketMagicHeader = value,
 				),
 			)
 		}
+	}
+
+	@AssistedFactory
+	interface ConfigViewModelFactory {
+		fun create(id: Int): ConfigViewModel
 	}
 }

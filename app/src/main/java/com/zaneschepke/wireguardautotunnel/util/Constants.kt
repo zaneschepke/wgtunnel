@@ -16,7 +16,6 @@ object Constants {
 	const val ZIP_FILE_MIME_TYPE = "application/zip"
 	const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
 	const val ANDROID_TV_EXPLORER_STUB = "com.android.tv.frameworkpackagestubs"
-	const val ALWAYS_ON_VPN_ACTION = "android.net.VpnService"
 	const val VPN_SETTINGS_PACKAGE = "android.net.vpn.SETTINGS"
 	const val EMAIL_MIME_TYPE = "plain/text"
 	const val SYSTEM_EXEMPT_SERVICE_TYPE_ID = 1024

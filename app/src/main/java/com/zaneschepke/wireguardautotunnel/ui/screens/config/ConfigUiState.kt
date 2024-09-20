@@ -15,7 +15,7 @@ data class ConfigUiState(
 	val isAllApplicationsEnabled: Boolean = false,
 	val loading: Boolean = true,
 	val tunnel: TunnelConfig? = null,
-	val tunnelName: String = "",
+	var tunnelName: String = "",
 	val isAmneziaEnabled: Boolean = false,
 ) {
 	companion object {
@@ -45,7 +45,6 @@ data class ConfigUiState(
 		}
 
 		fun from(config: org.amnezia.awg.config.Config): ConfigUiState {
-			// TODO update with new values
 			val proxyPeers = config.peers.map { PeerProxy.from(it) }
 			val proxyInterface = InterfaceProxy.from(config.`interface`)
 			var include = true
@@ -67,6 +66,14 @@ data class ConfigUiState(
 				checkedPackages.toList(),
 				include,
 				isAllApplicationsEnabled,
+			)
+		}
+
+		fun from(tunnel: TunnelConfig): ConfigUiState {
+			val config = tunnel.toAmConfig()
+			return from(config).copy(
+				tunnelName = tunnel.name,
+				tunnel = tunnel,
 			)
 		}
 	}

@@ -6,16 +6,19 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.config.Config
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.FileReadException
+import com.zaneschepke.wireguardautotunnel.util.InvalidFileExtensionException
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
-import com.zaneschepke.wireguardautotunnel.util.WgTunnelExceptions
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -70,32 +73,17 @@ constructor(
 		tunnelService.stopTunnel(tunnel)
 	}
 
-	private fun validateConfigString(config: String, configType: ConfigType) {
-		when (configType) {
-			ConfigType.AMNEZIA -> TunnelConfig.configFromAmQuick(config)
-			ConfigType.WIREGUARD -> TunnelConfig.configFromWgQuick(config)
-		}
-	}
-
-	private fun generateQrCodeDefaultName(config: String, configType: ConfigType): String {
+	private fun generateQrCodeDefaultName(config: String): String {
 		return try {
-			when (configType) {
-				ConfigType.AMNEZIA -> {
-					TunnelConfig.configFromAmQuick(config).peers[0].endpoint.get().host
-				}
-
-				ConfigType.WIREGUARD -> {
-					TunnelConfig.configFromWgQuick(config).peers[0].endpoint.get().host
-				}
-			}
+			TunnelConfig.configFromAmQuick(config).peers[0].endpoint.get().host
 		} catch (e: Exception) {
 			Timber.e(e)
 			NumberUtils.generateRandomTunnelName()
 		}
 	}
 
-	private fun generateQrCodeTunnelName(config: String, configType: ConfigType): String {
-		var defaultName = generateQrCodeDefaultName(config, configType)
+	private fun generateQrCodeTunnelName(config: String): String {
+		var defaultName = generateQrCodeDefaultName(config)
 		val lines = config.lines().toMutableList()
 		val linesIterator = lines.iterator()
 		while (linesIterator.hasNext()) {
@@ -108,37 +96,18 @@ constructor(
 		return defaultName
 	}
 
-	suspend fun onTunnelQrResult(result: String, configType: ConfigType): Result<Unit> {
-		return withContext(ioDispatcher) {
-			try {
-				validateConfigString(result, configType)
-				val tunnelName =
-					makeTunnelNameUnique(generateQrCodeTunnelName(result, configType))
-				val tunnelConfig =
-					when (configType) {
-						ConfigType.AMNEZIA -> {
-							TunnelConfig(
-								name = tunnelName,
-								amQuick = result,
-								wgQuick =
-								TunnelConfig.configFromAmQuick(
-									result,
-								).toWgQuickString(),
-							)
-						}
+	fun onTunnelQrResult(result: String) = viewModelScope.launch(ioDispatcher) {
+		kotlin.runCatching {
+			val amConfig = TunnelConfig.configFromAmQuick(result)
+			val amQuick = amConfig.toAwgQuickString(true)
+			val wgQuick = amConfig.toWgQuickString()
 
-						ConfigType.WIREGUARD ->
-							TunnelConfig(
-								name = tunnelName,
-								wgQuick = result,
-							)
-					}
-				addTunnel(tunnelConfig)
-				Result.success(Unit)
-			} catch (e: Exception) {
-				Timber.e(e)
-				Result.failure(WgTunnelExceptions.InvalidQrCode())
-			}
+			val tunnelName = makeTunnelNameUnique(generateQrCodeTunnelName(result))
+			val tunnelConfig = TunnelConfig(name = tunnelName, wgQuick = wgQuick, amQuick = amQuick)
+			saveTunnel(tunnelConfig)
+		}.onFailure {
+			Timber.e(it)
+			SnackbarController.showMessage(StringValue.StringResource(R.string.error_invalid_code))
 		}
 	}
 
@@ -155,130 +124,70 @@ constructor(
 		}
 	}
 
-	private fun saveTunnelConfigFromStream(stream: InputStream, fileName: String, type: ConfigType) {
-		var amQuick: String? = null
-		val wgQuick =
-			stream.use {
-				when (type) {
-					ConfigType.AMNEZIA -> {
-						val config = org.amnezia.awg.config.Config.parse(it)
-						amQuick = config.toAwgQuickString(true)
-						config.toWgQuickString()
-					}
-
-					ConfigType.WIREGUARD -> {
-						Config.parse(it).toWgQuickString(true)
-					}
-				}
-			}
-		viewModelScope.launch {
-			val tunnelName = makeTunnelNameUnique(getNameFromFileName(fileName))
-			addTunnel(
-				TunnelConfig(
-					name = tunnelName,
-					wgQuick = wgQuick,
-					amQuick = amQuick ?: TunnelConfig.AM_QUICK_DEFAULT,
-				),
-			)
-		}
+	private suspend fun saveTunnelConfigFromStream(stream: InputStream, fileName: String) {
+		val amConfig = stream.use { org.amnezia.awg.config.Config.parse(it) }
+		val tunnelName = makeTunnelNameUnique(getNameFromFileName(fileName))
+		saveTunnel(
+			TunnelConfig(
+				name = tunnelName,
+				wgQuick = amConfig.toWgQuickString(),
+				amQuick = amConfig.toAwgQuickString(true),
+			),
+		)
 	}
 
 	private fun getInputStreamFromUri(uri: Uri, context: Context): InputStream? {
 		return context.applicationContext.contentResolver.openInputStream(uri)
 	}
 
-	suspend fun onTunnelFileSelected(uri: Uri, configType: ConfigType, context: Context): Result<Unit> {
-		return withContext(ioDispatcher) {
-			try {
-				if (isValidUriContentScheme(uri)) {
-					val fileName = getFileName(context, uri)
-					return@withContext when (getFileExtensionFromFileName(fileName)) {
-						Constants.CONF_FILE_EXTENSION ->
-							saveTunnelFromConfUri(fileName, uri, configType, context)
-
-						Constants.ZIP_FILE_EXTENSION ->
-							saveTunnelsFromZipUri(
-								uri,
-								configType,
-								context,
-							)
-
-						else -> Result.failure(WgTunnelExceptions.InvalidFileExtension())
-					}
-				} else {
-					Result.failure(WgTunnelExceptions.InvalidFileExtension())
-				}
-			} catch (e: Exception) {
-				Timber.e(e)
-				Result.failure(WgTunnelExceptions.FileReadFailed())
+	fun onTunnelFileSelected(uri: Uri, context: Context) = viewModelScope.launch(ioDispatcher) {
+		kotlin.runCatching {
+			if (!isValidUriContentScheme(uri)) throw InvalidFileExtensionException
+			val fileName = getFileName(context, uri)
+			when (getFileExtensionFromFileName(fileName)) {
+				Constants.CONF_FILE_EXTENSION ->
+					saveTunnelFromConfUri(fileName, uri, context)
+				Constants.ZIP_FILE_EXTENSION ->
+					saveTunnelsFromZipUri(
+						uri,
+						context,
+					)
+				else -> throw InvalidFileExtensionException
 			}
-		}
-	}
-
-	private suspend fun saveTunnelsFromZipUri(uri: Uri, configType: ConfigType, context: Context): Result<Unit> {
-		return withContext(ioDispatcher) {
-			ZipInputStream(getInputStreamFromUri(uri, context)).use { zip ->
-				generateSequence { zip.nextEntry }
-					.filterNot {
-						it.isDirectory ||
-							getFileExtensionFromFileName(it.name) != Constants.CONF_FILE_EXTENSION
-					}
-					.forEach {
-						val name = getNameFromFileName(it.name)
-						withContext(viewModelScope.coroutineContext) {
-							try {
-								var amQuick: String? = null
-								val wgQuick =
-									when (configType) {
-										ConfigType.AMNEZIA -> {
-											val config =
-												org.amnezia.awg.config.Config.parse(
-													zip,
-												)
-											amQuick = config.toAwgQuickString(true)
-											config.toWgQuickString()
-										}
-
-										ConfigType.WIREGUARD -> {
-											Config.parse(zip).toWgQuickString(true)
-										}
-									}
-								addTunnel(
-									TunnelConfig(
-										name = makeTunnelNameUnique(name),
-										wgQuick = wgQuick,
-										amQuick = amQuick ?: TunnelConfig.AM_QUICK_DEFAULT,
-									),
-								)
-								Result.success(Unit)
-							} catch (e: Exception) {
-								Result.failure(WgTunnelExceptions.FileReadFailed())
-							}
-						}
-					}
-				Result.success(Unit)
-			}
-		}
-	}
-
-	private suspend fun saveTunnelFromConfUri(name: String, uri: Uri, configType: ConfigType, context: Context): Result<Unit> {
-		return withContext(ioDispatcher) {
-			val stream = getInputStreamFromUri(uri, context)
-			return@withContext if (stream != null) {
-				try {
-					saveTunnelConfigFromStream(stream, name, configType)
-				} catch (e: Exception) {
-					return@withContext Result.failure(WgTunnelExceptions.ConfigParseError())
-				}
-				Result.success(Unit)
+		}.onFailure {
+			Timber.e(it)
+			if (it is InvalidFileExtensionException) {
+				SnackbarController.showMessage(StringValue.StringResource(R.string.error_file_extension))
 			} else {
-				Result.failure(WgTunnelExceptions.FileReadFailed())
+				SnackbarController.showMessage(StringValue.StringResource(R.string.error_file_format))
 			}
 		}
 	}
 
-	private fun addTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
-		saveTunnel(tunnelConfig)
+	private suspend fun saveTunnelsFromZipUri(uri: Uri, context: Context) {
+		ZipInputStream(getInputStreamFromUri(uri, context)).use { zip ->
+			generateSequence { zip.nextEntry }
+				.filterNot {
+					it.isDirectory ||
+						getFileExtensionFromFileName(it.name) != Constants.CONF_FILE_EXTENSION
+				}
+				.forEach { entry ->
+					val name = getNameFromFileName(entry.name)
+					val amConf = org.amnezia.awg.config.Config.parse(zip.bufferedReader())
+					saveTunnel(
+						TunnelConfig(
+							name = makeTunnelNameUnique(name),
+							wgQuick = amConf.toWgQuickString(),
+							amQuick = amConf.toAwgQuickString(true),
+						),
+					)
+				}
+		}
+	}
+
+	private suspend fun saveTunnelFromConfUri(name: String, uri: Uri, context: Context) {
+		val stream = getInputStreamFromUri(uri, context) ?: throw FileReadException
+		saveTunnelConfigFromStream(stream, name)
 	}
 
 	fun pauseAutoTunneling() = viewModelScope.launch {
@@ -300,32 +209,23 @@ constructor(
 	}
 
 	private fun getFileNameByCursor(context: Context, uri: Uri): String? {
-		context.contentResolver.query(uri, null, null, null, null)?.use {
-			return getDisplayNameByCursor(it)
+		return context.contentResolver.query(uri, null, null, null, null)?.use {
+			getDisplayNameByCursor(it)
 		}
-		return null
 	}
 
 	private fun getDisplayNameColumnIndex(cursor: Cursor): Int? {
 		val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-		return if (columnIndex != -1) {
-			return columnIndex
-		} else {
-			null
-		}
+		if (columnIndex == -1) return null
+		return columnIndex
 	}
 
 	private fun getDisplayNameByCursor(cursor: Cursor): String? {
-		return if (cursor.moveToFirst()) {
-			val index = getDisplayNameColumnIndex(cursor)
-			if (index != null) {
-				cursor.getString(index)
-			} else {
-				null
-			}
-		} else {
-			null
-		}
+		val move = cursor.moveToFirst()
+		if (!move) return null
+		val index = getDisplayNameColumnIndex(cursor)
+		if (index == null) return index
+		return cursor.getString(index)
 	}
 
 	private fun isValidUriContentScheme(uri: Uri): Boolean {

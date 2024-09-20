@@ -10,6 +10,8 @@ import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,8 +25,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.core.text.isDigitsOnly
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
@@ -45,36 +45,31 @@ fun SubmitConfigurationTextBox(
 	val isFocused by interactionSource.collectIsFocusedAsState()
 	val keyboardController = LocalSoftwareKeyboardController.current
 
-	var stateValue by remember { mutableStateOf(value) }
+	var stateValue by remember { mutableStateOf(value ?: "") }
 
-	ConfigurationTextBox(
+	OutlinedTextField(
 		isError = isErrorValue(stateValue),
-		interactionSource = interactionSource,
-		value = stateValue ?: "",
-		onValueChange = {
-			when (keyboardOptions.keyboardType) {
-				KeyboardType.Number -> {
-					if (it.isDigitsOnly()) stateValue = it
-				}
-				else -> stateValue = it
-			}
-		},
-		keyboardOptions = keyboardOptions,
-		label = label,
-		keyboardActions = KeyboardActions(
-			onDone = {
-				onSubmit(stateValue!!)
-				keyboardController?.hide()
-			},
-		),
-		hint = hint,
 		modifier = Modifier
 			.fillMaxWidth()
 			.focusRequester(focusRequester),
-		trailing = {
-			if (!stateValue.isNullOrBlank() && !isErrorValue(stateValue) && isFocused) {
+		value = stateValue,
+		singleLine = true,
+		interactionSource = interactionSource,
+		onValueChange = { stateValue = it },
+		label = { Text(label) },
+		maxLines = 1,
+		placeholder = { Text(hint) },
+		keyboardOptions = keyboardOptions,
+		keyboardActions = KeyboardActions(
+			onDone = {
+				onSubmit(stateValue)
+				keyboardController?.hide()
+			},
+		),
+		trailingIcon = {
+			if (!isErrorValue(stateValue) && isFocused) {
 				IconButton(onClick = {
-					onSubmit(stateValue!!)
+					onSubmit(stateValue)
 					keyboardController?.hide()
 					focusManager.clearFocus()
 				}) {

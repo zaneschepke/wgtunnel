@@ -58,6 +58,11 @@ data class TunnelConfig(
 	)
 	var pingIp: String? = null,
 ) {
+
+	fun toAmConfig(): org.amnezia.awg.config.Config {
+		return configFromAmQuick(if (amQuick != "") amQuick else wgQuick)
+	}
+
 	companion object {
 
 		fun configFromWgQuick(wgQuick: String): Config {

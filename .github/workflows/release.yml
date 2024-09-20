@@ -1,6 +1,8 @@
 name: release-android
 
 on:
+  schedule:
+  - cron: "4 3 * * *"
   workflow_dispatch:
     inputs:
       track:
@@ -31,10 +33,25 @@ on:
   workflow_call:
 
 jobs:
+  check_date:
+    runs-on: ubuntu-latest
+    name: Check latest commit
+    outputs:
+      should_run: ${{ steps.should_run.outputs.should_run }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: print latest_commit
+      run: echo ${{ github.sha }}
+    - id: should_run
+      continue-on-error: true
+      name: check latest commit is less than a day
+      if: ${{ github.event_name == 'schedule' }}
+      run: test -z $(git rev-list --after="23 hours" ${{ github.sha }}) && echo "::set-output name=should_run::false"
   build:
+    needs: check_date
+    if: ${{ (needs.check_date.outputs.should_run != 'false' && github.event_name == 'schedule') || github.event_name != 'schedule'}}
     name: Build Signed APK
     runs-on: ubuntu-latest
-
     env:
       SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
       SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -47,7 +64,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
 
     steps:
-      - uses: actions/checkout@4
+      - uses: actions/checkout@v4
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:

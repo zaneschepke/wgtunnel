@@ -118,7 +118,7 @@ class FileUtils(
 				}
 			} catch (e: Exception) {
 				Timber.e(e)
-				Result.failure(WgTunnelExceptions.ConfigExportFailed())
+				Result.failure(ConfigExportException)
 			}
 		}
 	}
