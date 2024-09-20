@@ -18,7 +18,7 @@ fun ConfigurationToggle(
 	enabled: Boolean = true,
 	checked: Boolean,
 	padding: Dp,
-	onCheckChanged: () -> Unit,
+	onCheckChanged: (checked: Boolean) -> Unit,
 	modifier: Modifier = Modifier,
 ) {
 	Row(
@@ -44,7 +44,7 @@ fun ConfigurationToggle(
 			modifier = modifier,
 			enabled = enabled,
 			checked = checked,
-			onCheckedChange = { onCheckChanged() },
+			onCheckedChange = { onCheckChanged(it) },
 		)
 	}
 }

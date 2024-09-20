@@ -41,6 +41,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigViewModel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.options.OptionsScreen
@@ -179,16 +180,14 @@ class MainActivity : AppCompatActivity() {
 									),
 								) {
 									val id = it.arguments?.getString("id")
-									val configType =
-										ConfigType.valueOf(
-											it.arguments?.getString("configType") ?: ConfigType.WIREGUARD.name,
-										)
 									if (!id.isNullOrBlank()) {
+										val viewModel = hiltViewModel<ConfigViewModel, ConfigViewModel.ConfigViewModelFactory> { factory ->
+											factory.create(id.toInt())
+										}
 										ConfigScreen(
-											navController = navController,
-											tunnelId = id,
+											viewModel = viewModel,
 											focusRequester = focusRequester,
-											configType = configType,
+											tunnelId = id.toInt(),
 										)
 									}
 								}

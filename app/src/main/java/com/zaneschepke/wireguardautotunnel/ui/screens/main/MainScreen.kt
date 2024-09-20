@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.overscroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.CopyAll
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -73,20 +75,18 @@ import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.GettingStartedLabel
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissMultiFab
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImportSheet
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.VpnDeniedDialog
 import com.zaneschepke.wireguardautotunnel.ui.theme.corn
 import com.zaneschepke.wireguardautotunnel.ui.theme.mint
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.getMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.handshakeStatus
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.mapPeerStats
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -99,7 +99,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 	val scope = rememberCoroutineScope()
 
 	var showBottomSheet by remember { mutableStateOf(false) }
-	var configType by remember { mutableStateOf(ConfigType.WIREGUARD) }
 	var showVpnPermissionDialog by remember { mutableStateOf(false) }
 	val isVisible = rememberSaveable { mutableStateOf(true) }
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
@@ -152,11 +151,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 			context.getString(R.string.error_no_file_explorer),
 		)
 	}, onData = { data ->
-		scope.launch {
-			viewModel.onTunnelFileSelected(data, configType, context).onFailure {
-				snackbar.showMessage(it.getMessage(context))
-			}
-		}
+		viewModel.onTunnelFileSelected(data, context)
 	})
 
 	val scanLauncher =
@@ -164,11 +159,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 			contract = ScanContract(),
 			onResult = {
 				if (it.contents != null) {
-					scope.launch {
-						viewModel.onTunnelQrResult(it.contents, configType).onFailure { error ->
-							snackbar.showMessage(error.getMessage(context))
-						}
-					}
+					viewModel.onTunnelQrResult(it.contents)
 				}
 			},
 		)
@@ -227,9 +218,15 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 		},
 		floatingActionButtonPosition = FabPosition.End,
 		floatingActionButton = {
-			ScrollDismissMultiFab(R.drawable.add, focusRequester, isVisible = isVisible.value, onFabItemClicked = {
+			ScrollDismissFab(icon = {
+				val icon = Icons.Filled.Add
+				Icon(
+					imageVector = icon,
+					contentDescription = icon.name,
+					tint = MaterialTheme.colorScheme.onPrimary,
+				)
+			}, focusRequester, isVisible = isVisible.value, onClick = {
 				showBottomSheet = true
-				configType = ConfigType.valueOf(it.value)
 			})
 		},
 	) {
@@ -240,7 +237,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 			onQrClick = { launchQrScanner() },
 			onManualImportClick = {
 				navController.navigate(
-					"${Screen.Config.route}/${Constants.MANUAL_TUNNEL_CONFIG_ID}?configType=$configType",
+					"${Screen.Config.route}/${Constants.MANUAL_TUNNEL_CONFIG_ID}",
 				)
 			},
 		)

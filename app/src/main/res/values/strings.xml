@@ -194,4 +194,5 @@
 	<string name="set_custom_ping_cooldown">Ping restart cooldown (sec)</string>
     <string name="wildcard_supported">Learn about supported wildcards.</string>
 	<string name="details">details</string>
+	<string name="show_amnezia_properties">Show Amnezia properties</string>
 </resources>

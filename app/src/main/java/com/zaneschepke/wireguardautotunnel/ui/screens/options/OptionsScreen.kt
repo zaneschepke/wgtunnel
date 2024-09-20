@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,8 +55,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissMultiFab
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Address
@@ -103,10 +103,16 @@ fun OptionsScreen(
 
 	Scaffold(
 		floatingActionButton = {
-			ScrollDismissMultiFab(R.drawable.edit, focusRequester, isVisible = true, onFabItemClicked = {
-				val configType = ConfigType.valueOf(it.value)
+			ScrollDismissFab(icon = {
+				val icon = Icons.Filled.Edit
+				Icon(
+					imageVector = icon,
+					contentDescription = icon.name,
+					tint = MaterialTheme.colorScheme.onPrimary,
+				)
+			}, focusRequester, isVisible = true, onClick = {
 				navController.navigate(
-					"${Screen.Config.route}/${config.id}?configType=${configType.name}",
+					"${Screen.Config.route}/${config.id}",
 				)
 			})
 		},
@@ -279,10 +285,10 @@ fun OptionsScreen(
 								stringResource(R.string.set_custom_ping_ip),
 								stringResource(R.string.default_ping_ip),
 								focusRequester,
-								isErrorValue = { !(it?.isValidIpv4orIpv6Address() ?: true) },
+								isErrorValue = { !it.isNullOrBlank() && !it.isValidIpv4orIpv6Address() },
 								onSubmit = {
 									optionsViewModel.saveTunnelChanges(
-										config.copy(pingIp = it),
+										config.copy(pingIp = it.ifBlank { null }),
 									)
 								},
 							)
@@ -301,7 +307,7 @@ fun OptionsScreen(
 								isErrorValue = ::isSecondsError,
 								onSubmit = {
 									optionsViewModel.saveTunnelChanges(
-										config.copy(pingInterval = it.toLong() * 1000),
+										config.copy(pingInterval = if (it.isBlank()) null else it.toLong() * 1000),
 									)
 								},
 							)
@@ -316,7 +322,7 @@ fun OptionsScreen(
 								isErrorValue = ::isSecondsError,
 								onSubmit = {
 									optionsViewModel.saveTunnelChanges(
-										config.copy(pingCooldown = it.toLong() * 1000),
+										config.copy(pingCooldown = if (it.isBlank()) null else it.toLong() * 1000),
 									)
 								},
 							)

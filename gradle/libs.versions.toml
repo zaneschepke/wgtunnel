@@ -16,7 +16,6 @@ junit = "4.13.2"
 kotlinx-serialization-json = "1.7.2"
 lifecycle-runtime-compose = "2.8.6"
 material3 = "1.3.0"
-multifabVersion = "1.1.1"
 navigationCompose = "2.8.1"
 pinLockCompose = "1.0.3"
 roomVersion = "2.6.1"
@@ -90,7 +89,6 @@ pin-lock-compose = { module = "com.zaneschepke:pin_lock_compose", version.ref = 
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 tunnel = { module = "com.zaneschepke:wireguard-android", version.ref = "tunnel" }
 
-zaneschepke-multifab = { module = "com.zaneschepke:multifab", version.ref = "multifabVersion" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
