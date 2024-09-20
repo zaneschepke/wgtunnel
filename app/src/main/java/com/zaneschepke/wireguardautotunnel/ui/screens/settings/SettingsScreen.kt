@@ -512,7 +512,7 @@ fun SettingsScreen(
 						uiState.settings.isAutoTunnelEnabled ||
 							uiState.settings.isAlwaysOnVpnEnabled ||
 							(uiState.vpnState.status == TunnelState.UP) ||
-							kernelSupport
+							!kernelSupport
 						),
 					checked = uiState.settings.isKernelEnabled,
 					padding = screenPadding,
