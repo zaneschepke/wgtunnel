@@ -12,7 +12,7 @@ on:
           - alpha
           - beta
           - production
-        default: alpha
+        default: none
         required: true
       release_type:
         type: choice
@@ -28,12 +28,11 @@ on:
         description: "Tag name for release"
         required: false
         default: nightly
+  workflow_call:
 
 jobs:
   build:
     name: Build Signed APK
-    needs: check_date
-    if: ${{ inputs.release_type != 'none' && (needs.check_date.outputs.should_run != 'false' && )  }}
     runs-on: ubuntu-latest
 
     env:
@@ -48,7 +47,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@4
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
