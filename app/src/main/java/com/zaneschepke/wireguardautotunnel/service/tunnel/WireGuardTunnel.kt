@@ -32,8 +32,7 @@ class WireGuardTunnel
 @Inject
 constructor(
 	private val amneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
-	@Userspace private val userspaceBackend: Provider<Backend>,
-	@Kernel private val kernelBackend: Provider<org.amnezia.awg.backend.Backend>,
+	@Kernel private val kernelBackend: Provider<Backend>,
 	private val appDataRepository: AppDataRepository,
 	@ApplicationScope private val applicationScope: CoroutineScope,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -78,8 +77,7 @@ constructor(
 	private suspend fun backend(): Any {
 		val settings = appDataRepository.settings.getSettings()
 		if (settings.isKernelEnabled) return kernelBackend.get()
-		if (settings.isAmneziaEnabled) return amneziaBackend.get()
-		return userspaceBackend.get()
+		return amneziaBackend.get()
 	}
 
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
