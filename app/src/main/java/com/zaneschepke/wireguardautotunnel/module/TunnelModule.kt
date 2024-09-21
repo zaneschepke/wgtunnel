@@ -4,7 +4,9 @@ import android.content.Context
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.RootTunnelActionHandler
+import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
+import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
@@ -43,8 +45,8 @@ class TunnelModule {
 	@Provides
 	@Singleton
 	@Kernel
-	fun provideKernelBackend(@ApplicationContext context: Context, rootShell: org.amnezia.awg.util.RootShell): org.amnezia.awg.backend.Backend {
-		return org.amnezia.awg.backend.AwgQuickBackend(context, rootShell, org.amnezia.awg.util.ToolsInstaller(context, rootShell))
+	fun provideKernelBackend(@ApplicationContext context: Context, rootShell: RootShell): Backend {
+		return WgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell), RootTunnelActionHandler(rootShell))
 	}
 
 	@Provides
@@ -57,15 +59,13 @@ class TunnelModule {
 	@Singleton
 	fun provideVpnService(
 		amneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
-		@Userspace userspaceBackend: Provider<Backend>,
-		@Kernel kernelBackend: Provider<org.amnezia.awg.backend.Backend>,
+		@Kernel kernelBackend: Provider<Backend>,
 		appDataRepository: AppDataRepository,
 		@ApplicationScope applicationScope: CoroutineScope,
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
 	): TunnelService {
 		return WireGuardTunnel(
 			amneziaBackend,
-			userspaceBackend,
 			kernelBackend,
 			appDataRepository,
 			applicationScope,

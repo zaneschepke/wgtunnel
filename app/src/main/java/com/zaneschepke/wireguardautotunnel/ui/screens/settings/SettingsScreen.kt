@@ -492,20 +492,6 @@ fun SettingsScreen(
 					padding = screenPadding,
 				)
 				ConfigurationToggle(
-					stringResource(R.string.use_amnezia),
-					enabled =
-					!(
-						uiState.settings.isAutoTunnelEnabled ||
-							uiState.settings.isAlwaysOnVpnEnabled ||
-							(uiState.vpnState.status == TunnelState.UP) || uiState.settings.isKernelEnabled
-						),
-					checked = uiState.settings.isAmneziaEnabled,
-					padding = screenPadding,
-					onCheckChanged = {
-						viewModel.onToggleAmnezia()
-					},
-				)
-				ConfigurationToggle(
 					stringResource(R.string.use_kernel),
 					enabled =
 					!(
