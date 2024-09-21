@@ -53,7 +53,10 @@ constructor(
 	private val _uiState = MutableStateFlow(ConfigUiState())
 	val uiState = _uiState.onStart {
 		appDataRepository.tunnels.getById(id)?.let {
-			_uiState.value = ConfigUiState.from(it)
+			val packages = getQueriedPackages()
+			_uiState.value = ConfigUiState.from(it).copy(
+				packages = packages,
+			)
 		}
 	}.stateIn(
 		viewModelScope + ioDispatcher,
@@ -70,6 +73,33 @@ constructor(
 	fun onIncludeChange(include: Boolean) {
 		_uiState.update {
 			it.copy(include = include)
+		}
+	}
+
+	fun cleanUpUninstalledApps() = viewModelScope.launch(ioDispatcher) {
+		uiState.value.tunnel?.let {
+			val config = it.toAmConfig()
+			val packages = getQueriedPackages()
+			val packageSet = packages.map { pack -> pack.packageName }.toSet()
+			val includedApps = config.`interface`.includedApplications.toMutableList()
+			val excludedApps = config.`interface`.excludedApplications.toMutableList()
+			if (includedApps.isEmpty() && excludedApps.isEmpty()) return@launch
+			if (includedApps.retainAll(packageSet) || excludedApps.retainAll(packageSet)) {
+				Timber.i("Removing split tunnel package name that no longer exists on the device")
+				_uiState.update { state ->
+					state.copy(
+						checkedPackageNames = if (_uiState.value.include) includedApps else excludedApps,
+					)
+				}
+				val wgQuick = buildConfig().toWgQuickString(true)
+				val amQuick = buildAmConfig().toAwgQuickString(true)
+				saveConfig(
+					it.copy(
+						amQuick = amQuick,
+						wgQuick = wgQuick,
+					),
+				)
+			}
 		}
 	}
 
@@ -92,6 +122,12 @@ constructor(
 			it.copy(
 				checkedPackageNames = it.checkedPackageNames - packageName,
 			)
+		}
+	}
+
+	private fun getQueriedPackages(query: String = ""): List<PackageInfo> {
+		return getAllInternetCapablePackages().filter {
+			getPackageLabel(it).lowercase().contains(query.lowercase())
 		}
 	}
 
