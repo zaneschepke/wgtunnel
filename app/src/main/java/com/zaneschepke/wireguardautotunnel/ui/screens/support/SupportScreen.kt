@@ -46,7 +46,7 @@ import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.Screens
+import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchSupportEmail
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
@@ -244,7 +244,7 @@ fun SupportScreen(navController: NavController, focusRequester: FocusRequester, 
 						color = MaterialTheme.colorScheme.onBackground,
 					)
 					TextButton(
-						onClick = { navController.navigate(Screens.Logs) },
+						onClick = { navController.navigate(Route.Logs) },
 						modifier = Modifier.padding(vertical = 5.dp),
 					) {
 						Row(
