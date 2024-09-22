@@ -49,7 +49,9 @@ jobs:
       run: test -z $(git rev-list --after="23 hours" ${{ github.sha }}) && echo "::set-output name=should_run::false"
   build:
     needs: check_date
-    if: ${{ (needs.check_date.outputs.should_run != 'false' && github.event_name == 'schedule') || github.event_name != 'schedule'}}
+    if: |
+        github.event_name != 'schedule' ||
+        (needs.check_date.outputs.should_run == 'true' && github.event_name == 'schedule')
     name: Build Signed APK
     runs-on: ubuntu-latest
     env:
