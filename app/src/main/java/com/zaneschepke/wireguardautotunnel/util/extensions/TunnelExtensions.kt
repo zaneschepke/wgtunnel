@@ -54,7 +54,7 @@ fun Config.toWgQuickString(): String {
 	val linesIterator = lines.iterator()
 	while (linesIterator.hasNext()) {
 		val next = linesIterator.next()
-		Constants.amneziaProperties.forEach {
+		Constants.amProperties.forEach {
 			if (next.startsWith(it, ignoreCase = true)) {
 				linesIterator.remove()
 			}

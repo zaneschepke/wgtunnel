@@ -314,7 +314,20 @@ fun SettingsScreen(
 					enabled = !uiState.settings.isAlwaysOnVpnEnabled,
 					checked = uiState.settings.isTunnelOnWifiEnabled,
 					padding = screenPadding,
-					onCheckChanged = { viewModel.onToggleTunnelOnWifi() },
+					onCheckChanged = { checked ->
+						if (!checked) viewModel.onToggleTunnelOnWifi()
+						if (checked) {
+							when (false) {
+								isBackgroundLocationGranted -> showLocationDialog = true
+								fineLocationState.status.isGranted -> showLocationDialog = true
+								viewModel.isLocationEnabled(context) ->
+									showLocationServicesAlertDialog = true
+								else -> {
+									viewModel.onToggleTunnelOnWifi()
+								}
+							}
+						}
+					},
 					modifier =
 					if (uiState.settings.isAutoTunnelEnabled) {
 						Modifier
@@ -442,23 +455,7 @@ fun SettingsScreen(
 					TextButton(
 						onClick = {
 							if (uiState.tunnels.isEmpty()) return@TextButton context.showToast(R.string.tunnel_required)
-							if (
-								uiState.settings.isTunnelOnWifiEnabled &&
-								!uiState.settings.isAutoTunnelEnabled
-							) {
-								when (false) {
-									isBackgroundLocationGranted -> showLocationDialog = true
-									fineLocationState.status.isGranted -> showLocationDialog = true
-									viewModel.isLocationEnabled(context) ->
-										showLocationServicesAlertDialog = true
-
-									else -> {
-										handleAutoTunnelToggle()
-									}
-								}
-							} else {
-								handleAutoTunnelToggle()
-							}
+							handleAutoTunnelToggle()
 						},
 					) {
 						val autoTunnelButtonText =

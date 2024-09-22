@@ -40,7 +40,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -96,7 +95,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 	val haptic = LocalHapticFeedback.current
 	val context = LocalContext.current
 	val snackbar = SnackbarController.current
-	val scope = rememberCoroutineScope()
 
 	var showBottomSheet by remember { mutableStateOf(false) }
 	var showVpnPermissionDialog by remember { mutableStateOf(false) }
@@ -328,20 +326,22 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 				uiState.tunnels,
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
-				val isActive = uiState.tunnels.any { it.id == tunnel.id && it.isActive }
+				val isActive = uiState.tunnels.any {
+					it.id == tunnel.id &&
+						it.isActive
+				}
 				val leadingIconColor =
 					(
 						if (
-							isActive
+							isActive && uiState.vpnState.statistics != null
 						) {
-							uiState.vpnState.statistics
-								?.mapPeerStats()
-								?.map { it.value?.handshakeStatus() }
+							uiState.vpnState.statistics.mapPeerStats()
+								.map { it.value?.handshakeStatus() }
 								.let { statuses ->
 									when {
-										statuses?.all { it == HandshakeStatus.HEALTHY } == true -> mint
-										statuses?.any { it == HandshakeStatus.STALE } == true -> corn
-										statuses?.all { it == HandshakeStatus.NOT_STARTED } == true ->
+										statuses.all { it == HandshakeStatus.HEALTHY } -> mint
+										statuses.any { it == HandshakeStatus.STALE } -> corn
+										statuses.all { it == HandshakeStatus.NOT_STARTED } ->
 											Color.Gray
 
 										else -> {
@@ -381,15 +381,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 					},
 					text = tunnel.name,
 					onHold = {
-						if (
-							(uiState.vpnState.status == TunnelState.UP) &&
-							(tunnel.name == uiState.vpnState.tunnelConfig?.name)
-						) {
-							snackbar.showMessage(
-								context.getString(R.string.turn_off_tunnel),
-							)
-							return@RowListItem
-						}
 						haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 						selectedTunnel = tunnel
 					},
@@ -416,18 +407,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 							Row {
 								IconButton(
 									onClick = {
-										if (
-											uiState.settings.isAutoTunnelEnabled &&
-											!uiState.settings.isAutoTunnelPaused
-										) {
-											snackbar.showMessage(
-												context.getString(R.string.turn_off_tunnel),
-											)
-										} else {
-											navController.navigate(
-												"${Screen.Option.route}/${selectedTunnel?.id}",
-											)
-										}
+										navController.navigate(
+											"${Screen.Option.route}/${selectedTunnel?.id}",
+										)
 									},
 								) {
 									val icon = Icons.Rounded.Settings
@@ -444,6 +426,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 									Icon(icon, icon.name)
 								}
 								IconButton(
+									enabled = !isActive,
 									modifier = Modifier.focusable(),
 									onClick = { showDeleteTunnelAlertDialog = true },
 								) {
@@ -468,16 +451,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 								Row {
 									IconButton(
 										onClick = {
-											if (uiState.settings.isAutoTunnelEnabled && !uiState.settings.isAutoTunnelPaused) {
-												snackbar.showMessage(
-													context.getString(R.string.turn_off_auto),
-												)
-											} else {
-												selectedTunnel = tunnel
-												navController.navigate(
-													"${Screen.Option.route}/${selectedTunnel?.id}",
-												)
-											}
+											selectedTunnel = tunnel
+											navController.navigate(
+												"${Screen.Option.route}/${selectedTunnel?.id}",
+											)
 										},
 									) {
 										val icon = Icons.Rounded.Settings

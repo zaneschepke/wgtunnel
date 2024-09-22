@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
 
 data class AutoTunnelState(
@@ -9,6 +10,7 @@ data class AutoTunnelState(
 	val isMobileDataConnected: Boolean = false,
 	val currentNetworkSSID: String = "",
 	val settings: Settings = Settings(),
+	val tunnels: TunnelConfigs = emptyList(),
 ) {
 	fun isEthernetConditionMet(): Boolean {
 		return (

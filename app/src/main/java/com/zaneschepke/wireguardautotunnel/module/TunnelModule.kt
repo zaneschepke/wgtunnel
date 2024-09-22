@@ -8,6 +8,7 @@ import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
 import dagger.Module
@@ -61,11 +62,13 @@ class TunnelModule {
 		amneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
 		@Kernel kernelBackend: Provider<Backend>,
 		appDataRepository: AppDataRepository,
+		tunnelConfigRepository: TunnelConfigRepository,
 		@ApplicationScope applicationScope: CoroutineScope,
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
 	): TunnelService {
 		return WireGuardTunnel(
 			amneziaBackend,
+			tunnelConfigRepository,
 			kernelBackend,
 			appDataRepository,
 			applicationScope,
