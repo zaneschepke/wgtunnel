@@ -2,29 +2,29 @@ package com.zaneschepke.wireguardautotunnel.ui
 
 import kotlinx.serialization.Serializable
 
-sealed class Screens {
+sealed class Route {
 	@Serializable
-	data object Support : Screens()
+	data object Support : Route()
 
 	@Serializable
-	data object Settings : Screens()
+	data object Settings : Route()
 
 	@Serializable
-	data object Main : Screens()
+	data object Main : Route()
 
 	@Serializable
 	data class Option(
 		val id: Int,
-	) : Screens()
+	) : Route()
 
 	@Serializable
-	data object Lock : Screens()
+	data object Lock : Route()
 
 	@Serializable
 	data class Config(
 		val id: Int,
-	) : Screens()
+	) : Route()
 
 	@Serializable
-	data object Logs : Screens()
+	data object Logs : Route()
 }

@@ -33,9 +33,7 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
 			containerColor = MaterialTheme.colorScheme.surface,
 		) {
 			bottomNavItems.forEach { item ->
-				val selected = navBackStackEntry?.destination?.hierarchy?.any {
-					it.hasRoute(route = item.route::class)
-				} == true
+				val selected = navBackStackEntry.isCurrentRoute(item.route)
 				NavigationBarItem(
 					selected = selected,
 					onClick = {

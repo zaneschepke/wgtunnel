@@ -68,7 +68,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.Screens
+import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
@@ -235,7 +235,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 			onQrClick = { launchQrScanner() },
 			onManualImportClick = {
 				navController.navigate(
-					Screens.Config(Constants.MANUAL_TUNNEL_CONFIG_ID),
+					Route.Config(Constants.MANUAL_TUNNEL_CONFIG_ID),
 				)
 			},
 		)
@@ -409,7 +409,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 									onClick = {
 										selectedTunnel?.let {
 											navController.navigate(
-												Screens.Option(it.id),
+												Route.Option(it.id),
 											)
 										}
 									},
@@ -456,7 +456,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 											selectedTunnel = tunnel
 											selectedTunnel?.let {
 												navController.navigate(
-													Screens.Option(it.id),
+													Route.Option(it.id),
 												)
 											}
 										},
