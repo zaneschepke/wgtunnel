@@ -56,9 +56,11 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.WildcardSupportingLabel
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Address
+import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -246,6 +248,7 @@ fun OptionsScreen(
 							value = currentText,
 							onValueChange = { currentText = it },
 							label = { Text(stringResource(id = R.string.use_tunnel_on_wifi_name)) },
+							supportingText = { WildcardSupportingLabel { context.openWebUrl(it) } },
 							modifier =
 							Modifier
 								.padding(

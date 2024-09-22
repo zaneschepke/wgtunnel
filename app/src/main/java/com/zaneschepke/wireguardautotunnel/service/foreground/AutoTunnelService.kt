@@ -33,6 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,7 +72,7 @@ class AutoTunnelService : LifecycleService() {
 	@MainImmediateDispatcher
 	lateinit var mainImmediateDispatcher: CoroutineDispatcher
 
-	private val networkEventsFlow = MutableStateFlow(AutoTunnelState())
+	private val autoTunnelStateFlow = MutableStateFlow(AutoTunnelState())
 
 	private var wakeLock: PowerManager.WakeLock? = null
 
@@ -132,6 +133,7 @@ class AutoTunnelService : LifecycleService() {
 				initWakeLock()
 			}
 			startSettingsJob()
+			startVpnStateJob()
 		}.onFailure {
 			Timber.e(it)
 		}
@@ -191,6 +193,10 @@ class AutoTunnelService : LifecycleService() {
 		watchForSettingsChanges()
 	}
 
+	private fun startVpnStateJob() = lifecycleScope.launch {
+		watchForVpnStateChanges()
+	}
+
 	private fun startWifiJob() = lifecycleScope.launch {
 		watchForWifiConnectivityChanges()
 	}
@@ -218,7 +224,7 @@ class AutoTunnelService : LifecycleService() {
 				when (status) {
 					is NetworkStatus.Available -> {
 						Timber.i("Gained Mobile data connection")
-						networkEventsFlow.update {
+						autoTunnelStateFlow.update {
 							it.copy(
 								isMobileDataConnected = true,
 							)
@@ -226,7 +232,7 @@ class AutoTunnelService : LifecycleService() {
 					}
 
 					is NetworkStatus.CapabilitiesChanged -> {
-						networkEventsFlow.update {
+						autoTunnelStateFlow.update {
 							it.copy(
 								isMobileDataConnected = true,
 							)
@@ -235,7 +241,7 @@ class AutoTunnelService : LifecycleService() {
 					}
 
 					is NetworkStatus.Unavailable -> {
-						networkEventsFlow.update {
+						autoTunnelStateFlow.update {
 							it.copy(
 								isMobileDataConnected = false,
 							)
@@ -284,16 +290,8 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	private fun updateSettings(settings: Settings) {
-		networkEventsFlow.update {
-			it.copy(
-				settings = settings,
-			)
-		}
-	}
-
 	private fun onAutoTunnelPause(paused: Boolean) {
-		if (networkEventsFlow.value.settings.isAutoTunnelPaused
+		if (autoTunnelStateFlow.value.settings.isAutoTunnelPaused
 			!= paused
 		) {
 			when (paused) {
@@ -307,19 +305,36 @@ class AutoTunnelService : LifecycleService() {
 		Timber.i("Starting settings watcher")
 		withContext(ioDispatcher) {
 			appDataRepository.settings.getSettingsFlow().combine(
-				appDataRepository.tunnels.getTunnelConfigsFlow(),
+				// ignore isActive changes to allow manual tunnel overrides
+				appDataRepository.tunnels.getTunnelConfigsFlow().distinctUntilChanged { old, new ->
+					old.map { it.isActive } != new.map { it.isActive }
+				},
 			) { settings, tunnels ->
-				val activeTunnel = tunnels.firstOrNull { it.isActive }
-				if (!settings.isPingEnabled) {
-					settings.copy(isPingEnabled = activeTunnel?.isPingEnabled ?: false)
-				} else {
-					settings
-				}
+				autoTunnelStateFlow.value.copy(
+					settings = settings,
+					tunnels = tunnels,
+				)
 			}.collect {
-				Timber.d("Settings change: $it")
-				onAutoTunnelPause(it.isAutoTunnelPaused)
-				updateSettings(it)
-				manageJobsBySettings(it)
+				onAutoTunnelPause(it.settings.isAutoTunnelPaused)
+				manageJobsBySettings(it.settings)
+				autoTunnelStateFlow.emit(it)
+			}
+		}
+	}
+
+	private suspend fun watchForVpnStateChanges() {
+		Timber.i("Starting vpn state watcher")
+		withContext(ioDispatcher) {
+			tunnelService.get().vpnState.collect { state ->
+				state.tunnelConfig?.let {
+					val settings = appDataRepository.settings.getSettings()
+					if (it.isPingEnabled && !settings.isPingEnabled) {
+						pingJob.onNotRunning { pingJob = startPingJob() }
+					}
+					if (!it.isPingEnabled && !settings.isPingEnabled) {
+						cancelAndResetPingJob()
+					}
+				}
 			}
 		}
 	}
@@ -375,7 +390,7 @@ class AutoTunnelService : LifecycleService() {
 	}
 
 	private fun updateEthernet(connected: Boolean) {
-		networkEventsFlow.update {
+		autoTunnelStateFlow.update {
 			it.copy(
 				isEthernetConnected = connected,
 			)
@@ -413,7 +428,7 @@ class AutoTunnelService : LifecycleService() {
 				when (status) {
 					is NetworkStatus.Available -> {
 						Timber.i("Gained Wi-Fi connection")
-						networkEventsFlow.update {
+						autoTunnelStateFlow.update {
 							it.copy(
 								isWifiConnected = true,
 							)
@@ -422,7 +437,7 @@ class AutoTunnelService : LifecycleService() {
 
 					is NetworkStatus.CapabilitiesChanged -> {
 						Timber.i("Wifi capabilities changed")
-						networkEventsFlow.update {
+						autoTunnelStateFlow.update {
 							it.copy(
 								isWifiConnected = true,
 							)
@@ -435,7 +450,7 @@ class AutoTunnelService : LifecycleService() {
 								Timber.i("Detected valid SSID")
 							}
 							appDataRepository.appState.setCurrentSsid(name)
-							networkEventsFlow.update {
+							autoTunnelStateFlow.update {
 								it.copy(
 									currentNetworkSSID = name,
 								)
@@ -444,7 +459,7 @@ class AutoTunnelService : LifecycleService() {
 					}
 
 					is NetworkStatus.Unavailable -> {
-						networkEventsFlow.update {
+						autoTunnelStateFlow.update {
 							it.copy(
 								isWifiConnected = false,
 							)
@@ -460,10 +475,6 @@ class AutoTunnelService : LifecycleService() {
 		return appDataRepository.tunnels.findByMobileDataTunnel().firstOrNull()
 	}
 
-	private suspend fun getSsidTunnel(ssid: String): TunnelConfig? {
-		return appDataRepository.tunnels.findByTunnelNetworksName(ssid).firstOrNull()
-	}
-
 	private fun isTunnelDown(): Boolean {
 		return tunnelService.get().vpnState.value.status == TunnelState.DOWN
 	}
@@ -471,7 +482,7 @@ class AutoTunnelService : LifecycleService() {
 	private suspend fun handleNetworkEventChanges() {
 		withContext(ioDispatcher) {
 			Timber.i("Starting network event watcher")
-			networkEventsFlow.collectLatest { watcherState ->
+			autoTunnelStateFlow.collectLatest { watcherState ->
 				val autoTunnel = "Auto-tunnel watcher"
 				if (!watcherState.settings.isAutoTunnelPaused) {
 					// delay for rapid network state changes and then collect latest
@@ -517,7 +528,7 @@ class AutoTunnelService : LifecycleService() {
 								Timber.i(
 									"$autoTunnel - tunnel on ssid not associated with current tunnel condition met",
 								)
-								getSsidTunnel(watcherState.currentNetworkSSID)?.let {
+								watcherState.tunnels.firstOrNull { it.tunnelNetworks.isMatchingToWildcardList(watcherState.currentNetworkSSID) }?.let {
 									Timber.i("Found tunnel associated with this SSID, bringing tunnel up: ${it.name}")
 									if (isTunnelDown() || activeTunnel?.id != it.id) {
 										tunnelService.get().startTunnel(it)

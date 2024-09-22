@@ -145,7 +145,7 @@ fun ConfigScreen(tunnelId: Int, viewModel: ConfigViewModel, focusRequester: Focu
 		)
 	}
 
-	if(showApplicationsDialog) {
+	if (showApplicationsDialog) {
 		ApplicationSelectionDialog(viewModel, uiState) {
 			showApplicationsDialog = false
 		}

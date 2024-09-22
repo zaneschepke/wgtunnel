@@ -72,8 +72,8 @@ class RepositoryModule {
 
 	@Provides
 	@Singleton
-	fun provideGeneralStateRepository(dataStoreManager: DataStoreManager, @IoDispatcher ioDispatcher: CoroutineDispatcher): AppStateRepository {
-		return DataStoreAppStateRepository(dataStoreManager, ioDispatcher)
+	fun provideGeneralStateRepository(dataStoreManager: DataStoreManager): AppStateRepository {
+		return DataStoreAppStateRepository(dataStoreManager)
 	}
 
 	@Provides
