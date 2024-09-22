@@ -12,6 +12,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -20,19 +22,24 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
 	var showBottomBar by rememberSaveable { mutableStateOf(true) }
 	val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-	showBottomBar = bottomNavItems.firstOrNull { navBackStackEntry?.destination?.route?.contains(it.route) == true } != null
+	showBottomBar = bottomNavItems.firstOrNull {
+		navBackStackEntry?.destination?.hierarchy?.any { dest ->
+			bottomNavItems.map { dest.hasRoute(route = it.route::class) }.contains(true)
+		} == true
+	} != null
 
 	if (showBottomBar) {
 		NavigationBar(
 			containerColor = MaterialTheme.colorScheme.surface,
 		) {
 			bottomNavItems.forEach { item ->
-				val selected = navBackStackEntry?.destination?.route?.contains(item.route) == true
-
+				val selected = navBackStackEntry?.destination?.hierarchy?.any {
+					it.hasRoute(route = item.route::class)
+				} == true
 				NavigationBarItem(
 					selected = selected,
 					onClick = {
-						if (navBackStackEntry?.destination?.route == item.route) return@NavigationBarItem
+						if (selected) return@NavigationBarItem
 						navController.navigate(item.route) {
 							// Pop up to the start destination of the graph to
 							// avoid building up a large stack of destinations

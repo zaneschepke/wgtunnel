@@ -69,7 +69,7 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
-import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.ui.Screens
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
@@ -581,7 +581,7 @@ fun SettingsScreen(
 						} else {
 							// TODO may want to show a dialog before proceeding in the future
 							PinManager.initialize(WireGuardAutoTunnel.instance)
-							navController.navigate(Screen.Lock.route)
+							navController.navigate(Screens.Lock)
 						}
 					},
 				)

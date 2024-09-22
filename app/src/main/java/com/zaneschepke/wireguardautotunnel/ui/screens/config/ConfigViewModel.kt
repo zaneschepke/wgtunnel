@@ -17,7 +17,7 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.ui.Screens
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -335,7 +335,7 @@ constructor(
 			SnackbarController.showMessage(
 				StringValue.StringResource(R.string.config_changes_saved),
 			)
-			navController.navigate(Screen.Main.route)
+			navController.navigate(Screens.Main)
 		}.onFailure {
 			Timber.e(it)
 			val message = it.message?.substringAfter(":", missingDelimiterValue = "")

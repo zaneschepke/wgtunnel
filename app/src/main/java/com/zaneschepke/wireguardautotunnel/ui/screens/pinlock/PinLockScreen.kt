@@ -8,7 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
-import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.ui.Screens
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
@@ -36,11 +36,11 @@ fun PinLockScreen(navController: NavController, appViewModel: AppViewModel) {
 		onPinCorrect = {
 			// pin is correct, navigate or hide pin lock
 			if (context.isRunningOnTv()) {
-				navController.navigate(Screen.Main.route)
+				navController.navigate(Screens.Main)
 			} else {
 				val isPopped = navController.popBackStack()
 				if (!isPopped) {
-					navController.navigate(Screen.Main.route)
+					navController.navigate(Screens.Main)
 				}
 			}
 		},

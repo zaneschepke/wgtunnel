@@ -11,6 +11,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.QuestionMark
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarData
@@ -25,24 +29,24 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigViewModel
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.options.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.pinlock.PinLockScreen
@@ -111,8 +115,8 @@ class MainActivity : AppCompatActivity() {
 						Modifier
 							.focusable()
 							.focusProperties {
-								when (navBackStackEntry?.destination?.route) {
-									Screen.Lock.route -> Unit
+								when (navBackStackEntry?.toRoute<Screens>()) {
+									is Screens.Lock -> Unit
 									else -> up = focusRequester
 								}
 							},
@@ -120,9 +124,21 @@ class MainActivity : AppCompatActivity() {
 							BottomNavBar(
 								navController,
 								listOf(
-									Screen.Main.navItem,
-									Screen.Settings.navItem,
-									Screen.Support.navItem,
+									BottomNavItem(
+										name = stringResource(R.string.tunnels),
+										route = Screens.Main,
+										icon = Icons.Rounded.Home,
+									),
+									BottomNavItem(
+										name = stringResource(R.string.settings),
+										route = Screens.Settings,
+										icon = Icons.Rounded.Settings,
+									),
+									BottomNavItem(
+										name = stringResource(R.string.support),
+										route = Screens.Support,
+										icon = Icons.Rounded.QuestionMark,
+									),
 								),
 							)
 						},
@@ -132,20 +148,16 @@ class MainActivity : AppCompatActivity() {
 								navController,
 								enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
 								exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
-								startDestination = (if (isPinLockEnabled == true) Screen.Lock.route else Screen.Main.route),
+								startDestination = (if (isPinLockEnabled == true) Screens.Lock else Screens.Main),
 							) {
-								composable(
-									Screen.Main.route,
-								) {
+								composable<Screens.Main> {
 									MainScreen(
 										focusRequester = focusRequester,
 										uiState = appUiState,
 										navController = navController,
 									)
 								}
-								composable(
-									Screen.Settings.route,
-								) {
+								composable<Screens.Settings> {
 									SettingsScreen(
 										appViewModel = appViewModel,
 										uiState = appUiState,
@@ -153,56 +165,33 @@ class MainActivity : AppCompatActivity() {
 										focusRequester = focusRequester,
 									)
 								}
-								composable(
-									Screen.Support.route,
-								) {
+								composable<Screens.Support> {
 									SupportScreen(
 										focusRequester = focusRequester,
 										navController = navController,
 										appUiState = appUiState,
 									)
 								}
-								composable(Screen.Support.Logs.route) {
+								composable<Screens.Logs> {
 									LogsScreen()
 								}
-								composable(
-									"${Screen.Config.route}/{id}?configType={configType}",
-									arguments =
-									listOf(
-										navArgument("id") {
-											type = NavType.StringType
-											defaultValue = "0"
-										},
-										navArgument("configType") {
-											type = NavType.StringType
-											defaultValue = ConfigType.WIREGUARD.name
-										},
-									),
-								) {
-									val id = it.arguments?.getString("id")
-									if (!id.isNullOrBlank()) {
-										val viewModel = hiltViewModel<ConfigViewModel, ConfigViewModel.ConfigViewModelFactory> { factory ->
-											factory.create(id.toInt())
-										}
-										ConfigScreen(
-											viewModel = viewModel,
-											focusRequester = focusRequester,
-											tunnelId = id.toInt(),
-										)
-									}
+								composable<Screens.Config> {
+									val args = it.toRoute<Screens.Config>()
+									ConfigScreen(
+										focusRequester = focusRequester,
+										tunnelId = args.id,
+									)
 								}
-								composable("${Screen.Option.route}/{id}") {
-									val id = it.arguments?.getString("id")
-									if (!id.isNullOrBlank()) {
-										OptionsScreen(
-											navController = navController,
-											tunnelId = id.toInt(),
-											focusRequester = focusRequester,
-											appUiState = appUiState,
-										)
-									}
+								composable<Screens.Option> {
+									val args = it.toRoute<Screens.Option>()
+									OptionsScreen(
+										navController = navController,
+										tunnelId = args.id,
+										focusRequester = focusRequester,
+										appUiState = appUiState,
+									)
 								}
-								composable(Screen.Lock.route) {
+								composable<Screens.Lock> {
 									PinLockScreen(
 										navController = navController,
 										appViewModel = appViewModel,
