@@ -68,7 +68,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.ui.Screens
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
@@ -235,7 +235,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 			onQrClick = { launchQrScanner() },
 			onManualImportClick = {
 				navController.navigate(
-					"${Screen.Config.route}/${Constants.MANUAL_TUNNEL_CONFIG_ID}",
+					Screens.Config(Constants.MANUAL_TUNNEL_CONFIG_ID),
 				)
 			},
 		)
@@ -407,9 +407,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 							Row {
 								IconButton(
 									onClick = {
-										navController.navigate(
-											"${Screen.Option.route}/${selectedTunnel?.id}",
-										)
+										selectedTunnel?.let {
+											navController.navigate(
+												Screens.Option(it.id),
+											)
+										}
 									},
 								) {
 									val icon = Icons.Rounded.Settings
@@ -452,9 +454,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 									IconButton(
 										onClick = {
 											selectedTunnel = tunnel
-											navController.navigate(
-												"${Screen.Option.route}/${selectedTunnel?.id}",
-											)
+											selectedTunnel?.let {
+												navController.navigate(
+													Screens.Option(it.id),
+												)
+											}
 										},
 									) {
 										val icon = Icons.Rounded.Settings

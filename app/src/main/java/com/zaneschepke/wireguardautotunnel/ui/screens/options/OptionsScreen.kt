@@ -50,7 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.Screen
+import com.zaneschepke.wireguardautotunnel.ui.Screens
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
@@ -114,7 +114,7 @@ fun OptionsScreen(
 				)
 			}, focusRequester, isVisible = true, onClick = {
 				navController.navigate(
-					"${Screen.Config.route}/${config.id}",
+					Screens.Config(config.id),
 				)
 			})
 		},
