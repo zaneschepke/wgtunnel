@@ -18,7 +18,7 @@ fun WildcardSupportingLabel(onClick: (url: String) -> Unit) {
 		buildAnnotatedString {
 			pushStringAnnotation(
 				tag = "details",
-				annotation = stringResource(id = R.string.docs_features),
+				annotation = stringResource(id = R.string.docs_wildcards),
 			)
 			withStyle(
 				style = SpanStyle(color = MaterialTheme.colorScheme.primary),

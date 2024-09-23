@@ -9,10 +9,18 @@ plugins {
 }
 
 val versionFile = file("$rootDir/versionCode.txt")
-val versionCodeIncrement = if (versionFile.exists()) {
-	versionFile.readText().toInt() + 1
-} else {
-	1
+
+val versionCodeIncrement = with(getBuildTaskName().lowercase()) {
+	when {
+		this.contains(Constants.NIGHTLY) || this.contains(Constants.PRERELEASE) -> {
+			if (versionFile.exists()) {
+				versionFile.readText().toInt() + 1
+			} else {
+				1
+			}
+		}
+		else -> 0
+	}
 }
 
 android {

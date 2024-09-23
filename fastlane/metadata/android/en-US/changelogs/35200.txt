@@ -1,0 +1,5 @@
+What's new:
+- Added wildcard support for wifi names
+- Fix slowness on mobile data
+- Various bug fixes and improvements
+- UI optimizations
