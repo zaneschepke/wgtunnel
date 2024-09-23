@@ -1,5 +1,6 @@
 What's new:
 - Added wildcard support for wifi names
+- Live edit of tunnel/auto-tunnel settings while active
 - Fix slowness on mobile data
 - Various bug fixes and improvements
 - UI optimizations
