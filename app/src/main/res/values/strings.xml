@@ -8,7 +8,8 @@
     <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
 	<string name="docs_features" translatable="false">https://zaneschepke.com/wgtunnel-docs/features.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
-    <string name="error_file_extension">File is not a .conf or .zip</string>
+	<string name="docs_wildcards" translatable="false" >https://zaneschepke.com/wgtunnel-docs/features.html#wildcard-wi-fi-name-support</string>
+	<string name="error_file_extension">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Action requires tunnel off</string>
     <string name="no_tunnels">No tunnels added yet!</string>
     <string name="discord_url" translatable="false">https://discord.gg/rbRRNh6H7V</string>
