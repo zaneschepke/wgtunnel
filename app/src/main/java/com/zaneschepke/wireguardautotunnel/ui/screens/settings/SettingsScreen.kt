@@ -545,9 +545,10 @@ fun SettingsScreen(
 					ConfigurationToggle(
 						stringResource(R.string.always_on_vpn_support),
 						enabled = !(
-							uiState.settings.isTunnelOnWifiEnabled ||
-								uiState.settings.isTunnelOnWifiEnabled ||
-								uiState.settings.isTunnelOnMobileDataEnabled
+							(uiState.settings.isTunnelOnWifiEnabled ||
+								uiState.settings.isTunnelOnEthernetEnabled ||
+								uiState.settings.isTunnelOnMobileDataEnabled) &&
+							uiState.settings.isAutoTunnelEnabled
 							),
 						checked = uiState.settings.isAlwaysOnVpnEnabled,
 						padding = screenPadding,
