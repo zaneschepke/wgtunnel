@@ -1,0 +1,6 @@
+Lo nuevo:
+- Fiabilidad del túnel automático mejorada
+- Compatible con tema claro/oscuro/dinámico
+- Compatible con scripts pre/post up/down
+- Notificación persistente del túnel quitada
+- Correcciones y mejoras varias
