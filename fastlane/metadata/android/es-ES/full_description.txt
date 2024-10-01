@@ -1,6 +1,6 @@
 Características
 
-- Añade túneles a través de un archivo .conf, zip, entrada manual o código QR
+- Añade túneles mediante archivo .conf, zip, entrada manual o código QR
 - Conexión automática a VPN basada en Wi-Fi SSID, ethernet o datos móviles
 - Túneles divididos por aplicación con búsqueda
 - Soporte de WireGuard para los modos kernel y espacio de usuario
@@ -11,4 +11,4 @@ Características
 - Soporte de accesos directos estáticos para el túnel principal para la integración de automatización.
 - Soporte de automatización de intenciones para todos los túneles
 - Reinicio automático del servicio tras reiniciar
-- Medidas de conservación de la batería
+- Medidas de ahorro de la batería
