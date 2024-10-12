@@ -42,18 +42,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchSupportEmail
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 
 @Composable
-fun SupportScreen(navController: NavController, focusRequester: FocusRequester, appUiState: AppUiState) {
+fun SupportScreen(focusRequester: FocusRequester, appUiState: AppUiState) {
 	val context = LocalContext.current
+	val navController = LocalNavController.current
 	val fillMaxWidth = .85f
 
 	Column(

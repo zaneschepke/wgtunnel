@@ -47,13 +47,13 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.WildcardSupportingLabel
@@ -66,15 +66,10 @@ import kotlinx.coroutines.delay
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun OptionsScreen(
-	optionsViewModel: OptionsViewModel = hiltViewModel(),
-	navController: NavController,
-	focusRequester: FocusRequester,
-	appUiState: AppUiState,
-	tunnelId: Int,
-) {
+fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusRequester: FocusRequester, appUiState: AppUiState, tunnelId: Int) {
 	val scrollState = rememberScrollState()
 	val context = LocalContext.current
+	val navController = LocalNavController.current
 	val config = appUiState.tunnels.first { it.id == tunnelId }
 
 	val interactionSource = remember { MutableInteractionSource() }

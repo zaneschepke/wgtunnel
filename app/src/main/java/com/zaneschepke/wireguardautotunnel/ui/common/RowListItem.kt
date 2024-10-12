@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,9 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.extensions.toThreeDecimalPlaceString
@@ -52,16 +54,17 @@ fun RowListItem(
 				modifier =
 				Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 15.dp, vertical = 5.dp),
+					.padding(horizontal = 15.dp),
 				verticalAlignment = Alignment.CenterVertically,
 				horizontalArrangement = Arrangement.SpaceBetween,
 			) {
 				Row(
 					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.spacedBy(15.dp),
 					modifier = Modifier.fillMaxWidth(13 / 20f),
 				) {
 					icon()
-					Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+					Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelLarge)
 				}
 				rowButton()
 			}
@@ -71,26 +74,32 @@ fun RowListItem(
 						modifier =
 						Modifier
 							.fillMaxWidth()
-							.padding(end = 10.dp, bottom = 10.dp, start = 10.dp),
+							.padding(end = 10.dp, bottom = 10.dp, start = 45.dp),
 						verticalAlignment = Alignment.CenterVertically,
-						horizontalArrangement = Arrangement.SpaceEvenly,
+						horizontalArrangement = Arrangement.spacedBy(30.dp, Alignment.Start),
 					) {
-						// TODO change these to string resources
 						val handshakeEpoch = statistics.peerStats(it)!!.latestHandshakeEpochMillis
-						val peerTx = statistics.peerStats(it)!!.txBytes
-						val peerRx = statistics.peerStats(it)!!.rxBytes
 						val peerId = it.toBase64().subSequence(0, 3).toString() + "***"
 						val handshakeSec =
 							NumberUtils.getSecondsBetweenTimestampAndNow(handshakeEpoch)
 						val handshake =
-							if (handshakeSec == null) "never" else "$handshakeSec secs ago"
+							if (handshakeSec == null) stringResource(R.string.never) else "$handshakeSec " + stringResource(R.string.sec)
+						val peerTx = statistics.peerStats(it)!!.txBytes
+						val peerRx = statistics.peerStats(it)!!.rxBytes
 						val peerTxMB = NumberUtils.bytesToMB(peerTx).toThreeDecimalPlaceString()
 						val peerRxMB = NumberUtils.bytesToMB(peerRx).toThreeDecimalPlaceString()
-						val fontSize = 9.sp
-						Text("peer: $peerId", fontSize = fontSize)
-						Text("handshake: $handshake", fontSize = fontSize)
-						Text("tx: $peerTxMB MB", fontSize = fontSize)
-						Text("rx: $peerRxMB MB", fontSize = fontSize)
+						Column(
+							verticalArrangement = Arrangement.spacedBy(10.dp),
+						) {
+							Text(stringResource(R.string.peer).lowercase() + ": $peerId", style = MaterialTheme.typography.bodySmall)
+							Text("tx: $peerTxMB MB", style = MaterialTheme.typography.bodySmall)
+						}
+						Column(
+							verticalArrangement = Arrangement.spacedBy(10.dp),
+						) {
+							Text(stringResource(R.string.handshake) + ": $handshake", style = MaterialTheme.typography.bodySmall)
+							Text("rx: $peerRxMB MB", style = MaterialTheme.typography.bodySmall)
+						}
 					}
 				}
 			}

@@ -63,6 +63,10 @@ constructor(
 		)
 	}
 
+	fun onExpandedChanged(expanded: Boolean) = viewModelScope.launch {
+		appDataRepository.appState.setTunnelStatsExpanded(expanded)
+	}
+
 	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Starting tunnel ${tunnelConfig.name}")
 		tunnelService.startTunnel(tunnelConfig)
