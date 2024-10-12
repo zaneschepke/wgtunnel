@@ -62,6 +62,7 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
+import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 
 @AndroidEntryPoint
