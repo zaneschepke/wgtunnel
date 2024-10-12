@@ -11,7 +11,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -46,20 +45,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.wireguard.android.backend.GoBackend
@@ -69,16 +63,19 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.NestedScrollListener
 import com.zaneschepke.wireguardautotunnel.ui.common.RowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.GettingStartedLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImportSheet
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.VpnDeniedDialog
-import com.zaneschepke.wireguardautotunnel.ui.theme.corn
-import com.zaneschepke.wireguardautotunnel.ui.theme.mint
+import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
+import com.zaneschepke.wireguardautotunnel.ui.theme.Corn
+import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.handshakeStatus
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
@@ -86,49 +83,31 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.mapPeerStats
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import kotlinx.coroutines.delay
-import timber.log.Timber
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, focusRequester: FocusRequester, navController: NavController) {
+fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, focusRequester: FocusRequester) {
 	val haptic = LocalHapticFeedback.current
 	val context = LocalContext.current
+	val navController = LocalNavController.current
 	val snackbar = SnackbarController.current
 
 	var showBottomSheet by remember { mutableStateOf(false) }
 	var showVpnPermissionDialog by remember { mutableStateOf(false) }
-	val isVisible = rememberSaveable { mutableStateOf(true) }
+	var isFabVisible by rememberSaveable { mutableStateOf(true) }
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
 	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
 
-	val nestedScrollConnection =
-		remember {
-			object : NestedScrollConnection {
-				override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-					// Hide FAB
-					if (available.y < -1) {
-						isVisible.value = false
-					}
-					// Show FAB
-					if (available.y > 1) {
-						isVisible.value = true
-					}
-					return Offset.Zero
-				}
-			}
-		}
+	val nestedScrollConnection = remember {
+		NestedScrollListener({ isFabVisible = false },{ isFabVisible = true })
+	}
 
 	val vpnActivityResultState =
 		rememberLauncherForActivityResult(
 			ActivityResultContracts.StartActivityForResult(),
 			onResult = {
-				val accepted = (it.resultCode == RESULT_OK)
-				if (accepted) {
-					Timber.d("VPN permission granted")
-				} else {
-					showVpnPermissionDialog = true
-				}
+				if(it.resultCode != RESULT_OK) showVpnPermissionDialog = true
 			},
 		)
 
@@ -179,16 +158,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 	}
 
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
-		if (checked) {
-			if (uiState.settings.isKernelEnabled) {
-				context.startTunnelBackground(tunnel.id)
-			} else {
-				viewModel.onTunnelStart(tunnel)
-			}
+		if (!checked) viewModel.onTunnelStop(tunnel).also { return }
+		if (uiState.settings.isKernelEnabled) {
+			context.startTunnelBackground(tunnel.id)
 		} else {
-			viewModel.onTunnelStop(
-				tunnel,
-			)
+			viewModel.onTunnelStart(tunnel)
 		}
 	}
 
@@ -223,7 +197,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 					contentDescription = icon.name,
 					tint = MaterialTheme.colorScheme.onPrimary,
 				)
-			}, focusRequester, isVisible = isVisible.value, onClick = {
+			}, focusRequester, isVisible = isFabVisible, onClick = {
 				showBottomSheet = true
 			})
 		},
@@ -282,13 +256,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 								icon.name,
 								modifier =
 								Modifier
-									.padding(end = 8.5.dp)
-									.size(25.dp),
+									.size(iconSize),
 								tint =
 								if (uiState.settings.isAutoTunnelPaused) {
 									Color.Gray
 								} else {
-									mint
+									SilverTree
 								},
 							)
 						},
@@ -330,6 +303,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 					it.id == tunnel.id &&
 						it.isActive
 				}
+				val expanded = uiState.generalState.isTunnelStatsExpanded
 				val leadingIconColor =
 					(
 						if (
@@ -339,8 +313,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 								.map { it.value?.handshakeStatus() }
 								.let { statuses ->
 									when {
-										statuses.all { it == HandshakeStatus.HEALTHY } -> mint
-										statuses.any { it == HandshakeStatus.STALE } -> corn
+										statuses.all { it == HandshakeStatus.HEALTHY } -> SilverTree
+										statuses.any { it == HandshakeStatus.STALE } -> Corn
 										statuses.all { it == HandshakeStatus.NOT_STARTED } ->
 											Color.Gray
 
@@ -354,7 +328,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 						}
 						)
 				val itemFocusRequester = remember { FocusRequester() }
-				val expanded = remember { mutableStateOf(false) }
 				RowListItem(
 					icon = {
 						val circleIcon = Icons.Rounded.Circle
@@ -370,13 +343,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 							icon,
 							icon.name,
 							tint = leadingIconColor,
-							modifier =
-							Modifier
-								.padding(
-									end = if (icon == circleIcon) 12.5.dp else 10.dp,
-									start = if (icon == circleIcon) 2.5.dp else 0.dp,
-								)
-								.size(if (icon == circleIcon) 15.dp else 20.dp),
+							modifier = Modifier.size(iconSize),
 						)
 					},
 					text = tunnel.name,
@@ -389,7 +356,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 							if (
 								isActive
 							) {
-								expanded.value = !expanded.value
+								viewModel.onExpandedChanged(!expanded)
 							}
 						} else {
 							selectedTunnel = tunnel
@@ -397,7 +364,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 						}
 					},
 					statistics = uiState.vpnState.statistics,
-					expanded = expanded.value,
+					expanded = expanded && isActive,
 					focusRequester = focusRequester,
 					rowButton = {
 						if (
@@ -437,13 +404,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 								}
 							}
 						} else {
-							if (!isActive) expanded.value = false
 							@Composable
 							fun TunnelSwitch() = Switch(
 								modifier = Modifier.focusRequester(itemFocusRequester),
 								checked = isActive,
 								onCheckedChange = { checked ->
-									if (!checked) expanded.value = false
 									val intent = if (uiState.settings.isKernelEnabled) null else GoBackend.VpnService.prepare(context)
 									if (intent != null) return@Switch vpnActivityResultState.launch(intent)
 									onTunnelToggle(checked, tunnel)
@@ -474,7 +439,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 												uiState.vpnState.status == TunnelState.UP &&
 												(uiState.vpnState.tunnelConfig?.name == tunnel.name)
 											) {
-												expanded.value = !expanded.value
+												viewModel.onExpandedChanged(!expanded)
 											} else {
 												snackbar.showMessage(
 													context.getString(R.string.turn_on_tunnel),

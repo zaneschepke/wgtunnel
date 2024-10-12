@@ -72,6 +72,7 @@ import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
@@ -95,12 +96,13 @@ fun SettingsScreen(
 	viewModel: SettingsViewModel = hiltViewModel(),
 	appViewModel: AppViewModel,
 	uiState: AppUiState,
-	navController: NavController,
 	focusRequester: FocusRequester,
 ) {
 	val context = LocalContext.current
+	val navController = LocalNavController.current
 	val focusManager = LocalFocusManager.current
 	val snackbar = SnackbarController.current
+
 	val scrollState = rememberScrollState()
 	val interactionSource = remember { MutableInteractionSource() }
 	val isRunningOnTv = context.isRunningOnTv()
@@ -545,10 +547,12 @@ fun SettingsScreen(
 					ConfigurationToggle(
 						stringResource(R.string.always_on_vpn_support),
 						enabled = !(
-							(uiState.settings.isTunnelOnWifiEnabled ||
-								uiState.settings.isTunnelOnEthernetEnabled ||
-								uiState.settings.isTunnelOnMobileDataEnabled) &&
-							uiState.settings.isAutoTunnelEnabled
+							(
+								uiState.settings.isTunnelOnWifiEnabled ||
+									uiState.settings.isTunnelOnEthernetEnabled ||
+									uiState.settings.isTunnelOnMobileDataEnabled
+								) &&
+								uiState.settings.isAutoTunnelEnabled
 							),
 						checked = uiState.settings.isAlwaysOnVpnEnabled,
 						padding = screenPadding,

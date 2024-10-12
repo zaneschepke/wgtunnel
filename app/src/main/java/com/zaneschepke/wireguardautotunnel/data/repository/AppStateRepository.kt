@@ -20,5 +20,9 @@ interface AppStateRepository {
 
 	suspend fun setCurrentSsid(ssid: String)
 
+	suspend fun isTunnelStatsExpanded(): Boolean
+
+	suspend fun setTunnelStatsExpanded(expanded: Boolean)
+
 	val generalStateFlow: Flow<GeneralState>
 }

@@ -5,11 +5,9 @@
         <item name="android:windowBackground">@color/black_background</item>
     </style>
 
-    <style name="Theme.AppSplashScreen" parent="Theme.SplashScreen">
-        <!--<item name="windowSplashScreenBackground">@color/white</item>-->
-        <!-- icon has to be a circle -->
+    <style name="Theme.App.Start" parent="@style/Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/black_background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="windowSplashScreenAnimationDuration">500</item>
         <item name="postSplashScreenTheme">@style/Theme.WireguardAutoTunnel</item>
     </style>
 </resources>

@@ -54,6 +54,7 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.WildcardSupportingLabel
@@ -68,13 +69,13 @@ import kotlinx.coroutines.delay
 @Composable
 fun OptionsScreen(
 	optionsViewModel: OptionsViewModel = hiltViewModel(),
-	navController: NavController,
 	focusRequester: FocusRequester,
 	appUiState: AppUiState,
 	tunnelId: Int,
 ) {
 	val scrollState = rememberScrollState()
 	val context = LocalContext.current
+	val navController = LocalNavController.current
 	val config = appUiState.tunnels.first { it.id == tunnelId }
 
 	val interactionSource = remember { MutableInteractionSource() }

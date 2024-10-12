@@ -66,12 +66,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppSplashScreen"
+        android:theme="@style/Theme.App.Start"
         tools:targetApi="tiramisu">
         <activity
-            android:name=".ui.SplashActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppSplashScreen">
+            android:theme="@style/Theme.WireguardAutoTunnel">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -82,11 +82,6 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
-        </activity>
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.WireguardAutoTunnel">
         </activity>
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
