@@ -44,13 +44,13 @@ fun WireguardAutoTunnelTheme(
 ) {
 	val context = LocalContext.current
 	val colorScheme = when {
-		(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
-			if (useDarkTheme) {
-				dynamicDarkColorScheme(context)
-			} else {
-				dynamicLightColorScheme(context)
-			}
-		}
+ 		(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
+ 			if (useDarkTheme) {
+ 				dynamicDarkColorScheme(context)
+ 			} else {
+ 				dynamicLightColorScheme(context)
+ 			}
+ 		}
 		useDarkTheme -> DarkColorScheme
 		// TODO force dark theme for now until light theme designed
 		else -> DarkColorScheme

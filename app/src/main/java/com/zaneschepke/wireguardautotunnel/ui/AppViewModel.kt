@@ -60,6 +60,7 @@ constructor(
 	val isAppReady = _isAppReady.asStateFlow()
 
 	init {
+
 		viewModelScope.launch {
 			initPin()
 			initAutoTunnel()
