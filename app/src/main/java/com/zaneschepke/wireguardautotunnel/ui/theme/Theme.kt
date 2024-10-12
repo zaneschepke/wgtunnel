@@ -18,30 +18,22 @@ import androidx.core.view.WindowCompat
 
 private val DarkColorScheme =
 	darkColorScheme(
-		// primary = Purple80,
-		primary = virdigris,
-		secondary = PurpleGrey40,
-		// secondary = PurpleGrey80,
-		tertiary = Pink40,
-		surfaceTint = Pink80,
-		// tertiary = Pink80
+		primary = ThemeColors.Dark.primary,
+		surface = ThemeColors.Dark.surface,
+		background = ThemeColors.Dark.background,
+		secondaryContainer = ThemeColors.Dark.secondary,
+		onSurface = ThemeColors.Dark.onSurface,
+		onSecondaryContainer = ThemeColors.Dark.primary,
 	)
 
 private val LightColorScheme =
 	lightColorScheme(
-		primary = Purple40,
-		secondary = PurpleGrey40,
-		tertiary = Pink40,
-		surfaceTint = Pink80,
-        /* Other default colors to override
-        background = Color(0xFFFFFBFE),
-        surface = Color(0xFFFFFBFE),
-        onPrimary = Color.White,
-        onSecondary = Color.White,
-        onTertiary = Color.White,
-        onBackground = Color(0xFF1C1B1F),
-        onSurface = Color(0xFF1C1B1F),
-         */
+		primary = ThemeColors.Light.primary,
+		surface = ThemeColors.Light.surface,
+		background = ThemeColors.Light.background,
+		secondaryContainer = ThemeColors.Light.secondary,
+		onSurface = ThemeColors.Light.onSurface,
+		onSecondaryContainer = ThemeColors.Light.primary,
 	)
 
 @Composable
@@ -52,15 +44,16 @@ fun WireguardAutoTunnelTheme(
 ) {
 	val context = LocalContext.current
 	val colorScheme = when {
-		(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
-			if (useDarkTheme) {
-				dynamicDarkColorScheme(context)
-			} else {
-				dynamicLightColorScheme(context)
-			}
-		}
+ 		(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
+ 			if (useDarkTheme) {
+ 				dynamicDarkColorScheme(context)
+ 			} else {
+ 				dynamicLightColorScheme(context)
+ 			}
+ 		}
 		useDarkTheme -> DarkColorScheme
-		else -> LightColorScheme
+		//TODO force dark theme for now until light theme designed
+		else -> DarkColorScheme
 	}
 	val view = LocalView.current
 	if (!view.isInEditMode) {

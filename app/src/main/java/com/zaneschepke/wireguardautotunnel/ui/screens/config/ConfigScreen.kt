@@ -56,8 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
@@ -78,12 +80,21 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 	val snackbar = SnackbarController.current
 	val clipboardManager: ClipboardManager = LocalClipboardManager.current
 	val keyboardController = LocalSoftwareKeyboardController.current
+	val navController = LocalNavController.current
+
 	var showApplicationsDialog by remember { mutableStateOf(false) }
 	var showAuthPrompt by remember { mutableStateOf(false) }
 	var isAuthenticated by remember { mutableStateOf(false) }
 	var configType by remember { mutableStateOf(ConfigType.WIREGUARD) }
 
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+	val saved by viewModel.saved.collectAsStateWithLifecycle(null)
+
+	LaunchedEffect(saved) {
+		if (saved == true) {
+			navController.navigate(Route.Main)
+		}
+	}
 
 	LaunchedEffect(Unit) {
 		if (!uiState.loading && context.isRunningOnTv()) {

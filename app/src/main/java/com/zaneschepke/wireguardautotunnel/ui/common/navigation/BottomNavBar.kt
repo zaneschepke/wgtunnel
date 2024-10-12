@@ -10,10 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -22,11 +19,9 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
 	var showBottomBar by rememberSaveable { mutableStateOf(true) }
 	val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-	showBottomBar = bottomNavItems.firstOrNull {
-		navBackStackEntry?.destination?.hierarchy?.any { dest ->
-			bottomNavItems.map { dest.hasRoute(route = it.route::class) }.contains(true)
-		} == true
-	} != null
+	showBottomBar = bottomNavItems.any {
+		navBackStackEntry?.isCurrentRoute(it.route) == true
+	}
 
 	if (showBottomBar) {
 		NavigationBar(
@@ -53,7 +48,7 @@ fun BottomNavBar(navController: NavController, bottomNavItems: List<BottomNavIte
 					label = {
 						Text(
 							text = item.name,
-							fontWeight = FontWeight.SemiBold,
+							style = MaterialTheme.typography.labelMedium,
 						)
 					},
 					icon = {

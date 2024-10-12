@@ -45,6 +45,15 @@ class DataStoreAppStateRepository(
 		dataStoreManager.saveToDataStore(DataStoreManager.CURRENT_SSID, ssid)
 	}
 
+	override suspend fun isTunnelStatsExpanded(): Boolean {
+		return dataStoreManager.getFromStore(DataStoreManager.IS_TUNNEL_STATS_EXPANDED)
+			?: GeneralState.IS_TUNNEL_STATS_EXPANDED
+	}
+
+	override suspend fun setTunnelStatsExpanded(expanded: Boolean) {
+		dataStoreManager.saveToDataStore(DataStoreManager.IS_TUNNEL_STATS_EXPANDED, expanded)
+	}
+
 	override val generalStateFlow: Flow<GeneralState> =
 		dataStoreManager.preferencesFlow.map { prefs ->
 			prefs?.let { pref ->
@@ -59,6 +68,7 @@ class DataStoreAppStateRepository(
 						isPinLockEnabled =
 						pref[DataStoreManager.IS_PIN_LOCK_ENABLED]
 							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
+						isTunnelStatsExpanded = pref[DataStoreManager.IS_TUNNEL_STATS_EXPANDED] ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
 					)
 				} catch (e: IllegalArgumentException) {
 					Timber.e(e)

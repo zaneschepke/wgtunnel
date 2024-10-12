@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.wireguard.config.Config
 import com.wireguard.config.Interface
 import com.wireguard.config.Peer
@@ -17,7 +16,6 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -30,8 +28,10 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -44,11 +44,13 @@ class ConfigViewModel
 @AssistedInject
 constructor(
 	private val appDataRepository: AppDataRepository,
-	private val navController: NavHostController,
 	@Assisted val id: Int,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 	private val packageManager = WireGuardAutoTunnel.instance.packageManager
+
+	private val _saved = MutableSharedFlow<Boolean>()
+	val saved = _saved.asSharedFlow()
 
 	private val _uiState = MutableStateFlow(ConfigUiState())
 	val uiState = _uiState.onStart {
@@ -335,7 +337,7 @@ constructor(
 			SnackbarController.showMessage(
 				StringValue.StringResource(R.string.config_changes_saved),
 			)
-			navController.navigate(Route.Main)
+			_saved.emit(true)
 		}.onFailure {
 			Timber.e(it)
 			val message = it.message?.substringAfter(":", missingDelimiterValue = "")

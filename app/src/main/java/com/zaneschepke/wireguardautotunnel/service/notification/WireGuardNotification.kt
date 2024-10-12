@@ -9,7 +9,7 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.core.app.NotificationCompat
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.SplashActivity
+import com.zaneschepke.wireguardautotunnel.ui.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -63,7 +63,7 @@ constructor(
 				}
 		notificationManager.createNotificationChannel(channel)
 		val pendingIntent: PendingIntent =
-			Intent(context, SplashActivity::class.java).let { notificationIntent ->
+			Intent(context, MainActivity::class.java).let { notificationIntent ->
 				PendingIntent.getActivity(
 					context,
 					0,

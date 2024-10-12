@@ -25,6 +25,7 @@ class DataStoreManager(
 		val BATTERY_OPTIMIZE_DISABLE_SHOWN = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
 		val CURRENT_SSID = stringPreferencesKey("CURRENT_SSID")
 		val IS_PIN_LOCK_ENABLED = booleanPreferencesKey("PIN_LOCK_ENABLED")
+		val IS_TUNNEL_STATS_EXPANDED = booleanPreferencesKey("TUNNEL_STATS_EXPANDED")
 	}
 
 	// preferences
