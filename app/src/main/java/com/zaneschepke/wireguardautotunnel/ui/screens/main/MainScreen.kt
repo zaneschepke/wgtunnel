@@ -166,7 +166,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 		},
 		floatingActionButtonPosition = FabPosition.End,
 		floatingActionButton = {
-			ScrollDismissFab(icon = {
+			ScrollDismissFab({
 				val icon = Icons.Filled.Add
 				Icon(
 					imageVector = icon,

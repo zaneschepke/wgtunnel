@@ -16,7 +16,9 @@ fun rememberFileImportLauncherForResult(onNoFileExplorer: () -> Unit, onData: (d
 	return rememberLauncherForActivityResult(
 		object : ActivityResultContracts.GetContent() {
 			override fun createIntent(context: Context, input: String): Intent {
-				val intent = super.createIntent(context, input)
+				val intent = super.createIntent(context, input).apply {
+					type = Constants.ALLOWED_FILE_TYPES
+				}
 
 				/* AndroidTV now comes with stubs that do nothing but display a Toast less helpful than
 				 * what we can do, so detect this and throw an exception that we can catch later. */
