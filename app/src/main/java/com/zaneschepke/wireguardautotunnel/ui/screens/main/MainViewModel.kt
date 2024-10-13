@@ -194,17 +194,10 @@ constructor(
 		saveTunnelConfigFromStream(stream, name)
 	}
 
-	fun pauseAutoTunneling() = viewModelScope.launch {
+	fun onToggleAutoTunnelingPause() = viewModelScope.launch {
 		val settings = appDataRepository.settings.getSettings()
 		appDataRepository.settings.save(
-			settings.copy(isAutoTunnelPaused = true),
-		)
-	}
-
-	fun resumeAutoTunneling() = viewModelScope.launch {
-		val settings = appDataRepository.settings.getSettings()
-		appDataRepository.settings.save(
-			settings.copy(isAutoTunnelPaused = false),
+			settings.copy(isAutoTunnelPaused = !settings.isAutoTunnelPaused),
 		)
 	}
 

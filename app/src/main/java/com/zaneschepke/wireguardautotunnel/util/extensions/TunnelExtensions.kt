@@ -1,8 +1,11 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
+import androidx.compose.ui.graphics.Color
 import com.wireguard.config.Peer
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
+import com.zaneschepke.wireguardautotunnel.ui.theme.Corn
+import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import org.amnezia.awg.config.Config
@@ -46,6 +49,19 @@ fun Peer.isReachable(): Boolean {
 			.isReachable(Constants.PING_TIMEOUT.toInt())
 	Timber.i("Result: reachable - $reachable")
 	return reachable
+}
+
+fun TunnelStatistics?.asColor(): Color {
+	return this?.mapPeerStats()
+		?.map { it.value?.handshakeStatus() }
+		?.let { statuses ->
+			when {
+				statuses.all { it == HandshakeStatus.HEALTHY } -> SilverTree
+				statuses.any { it == HandshakeStatus.STALE } -> Corn
+				statuses.all { it == HandshakeStatus.NOT_STARTED } -> Color.Gray
+				else -> Color.Gray
+			}
+		} ?: Color.Gray
 }
 
 fun Config.toWgQuickString(): String {
