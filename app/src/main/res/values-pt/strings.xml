@@ -56,7 +56,7 @@
     <string name="privacy_policy">Ver a Política de Privacidade</string>
     <string name="okay">OK</string>
     <string name="tunnel_mobile_data">Túnel em dados móveis</string>
-	<string name="prominent_background_location_title">Revelar a localização em segundo plano</string>
+    <string name="prominent_background_location_title">Revelar a localização em segundo plano</string>
     <string name="thank_you">Obrigado por usar o WG Tunnel!</string>
     <string name="trusted_ssid_value_description">Envie o SSID</string>
     <string name="open_file">Abrir Arquivo</string>
@@ -157,4 +157,9 @@
     <string name="see_the">Veja o</string>
     <string name="getting_started_guide">guia de início rápido</string>
     <string name="error_file_format">Formato de arquivo de configuração inválido</string>
+    <string name="vpn_channel_id">Canal de VPN</string>
+    <string name="vpn_channel_name">Canal de notificações VPN</string>
+    <string name="watcher_channel_id">Canal de vigia</string>
+    <string name="watcher_channel_name">Canal de notificações de vigia</string>
+    <string name="db_name">wg-tunnel-db</string>
 </resources>
