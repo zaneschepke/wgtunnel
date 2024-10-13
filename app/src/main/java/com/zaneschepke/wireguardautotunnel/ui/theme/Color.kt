@@ -19,7 +19,7 @@ sealed class ThemeColors(
 	val secondary: Color,
 	val onSurface: Color,
 ) {
-	//TODO fix light theme colors
+	// TODO fix light theme colors
 	data object Light : ThemeColors(
 		background = LightGrey,
 		surface = OffWhite,

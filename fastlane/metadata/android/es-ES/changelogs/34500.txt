@@ -1,0 +1,5 @@
+Novedades:
+- Soporte de idiomas adicionales
+- Corrección de errores en la tunelización automática de datos móviles
+- Corrección del botón de acción flotante de AndroidTV
+- Otras optimizaciones y mejoras

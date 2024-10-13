@@ -1,0 +1,4 @@
+Novedades:
+- Se corrigieron problemas con la operación del túnel automático.
+- Se solucionó el problema con la copia de seguridad de Android.
+- Mayor número de versiones

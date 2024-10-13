@@ -100,14 +100,14 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
 
 	val nestedScrollConnection = remember {
-		NestedScrollListener({ isFabVisible = false },{ isFabVisible = true })
+		NestedScrollListener({ isFabVisible = false }, { isFabVisible = true })
 	}
 
 	val vpnActivityResultState =
 		rememberLauncherForActivityResult(
 			ActivityResultContracts.StartActivityForResult(),
 			onResult = {
-				if(it.resultCode != RESULT_OK) showVpnPermissionDialog = true
+				if (it.resultCode != RESULT_OK) showVpnPermissionDialog = true
 			},
 		)
 

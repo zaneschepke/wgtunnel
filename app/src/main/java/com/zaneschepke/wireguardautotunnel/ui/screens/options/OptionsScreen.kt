@@ -47,7 +47,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Route
@@ -67,12 +66,7 @@ import kotlinx.coroutines.delay
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun OptionsScreen(
-	optionsViewModel: OptionsViewModel = hiltViewModel(),
-	focusRequester: FocusRequester,
-	appUiState: AppUiState,
-	tunnelId: Int,
-) {
+fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusRequester: FocusRequester, appUiState: AppUiState, tunnelId: Int) {
 	val scrollState = rememberScrollState()
 	val context = LocalContext.current
 	val navController = LocalNavController.current

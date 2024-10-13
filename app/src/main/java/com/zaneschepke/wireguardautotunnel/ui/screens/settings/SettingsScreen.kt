@@ -60,7 +60,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -92,12 +91,7 @@ import xyz.teamgravity.pin_lock_compose.PinManager
 	ExperimentalLayoutApi::class,
 )
 @Composable
-fun SettingsScreen(
-	viewModel: SettingsViewModel = hiltViewModel(),
-	appViewModel: AppViewModel,
-	uiState: AppUiState,
-	focusRequester: FocusRequester,
-) {
+fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel: AppViewModel, uiState: AppUiState, focusRequester: FocusRequester) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val focusManager = LocalFocusManager.current

@@ -60,7 +60,8 @@ constructor(
 	val isAppReady = _isAppReady.asStateFlow()
 
 	init {
-	    viewModelScope.launch {
+
+		viewModelScope.launch {
 			initPin()
 			initAutoTunnel()
 			initTunnel()
@@ -87,7 +88,7 @@ constructor(
 
 	private suspend fun initPin() {
 		val isPinEnabled = appDataRepository.appState.isPinLockEnabled()
-		if(isPinEnabled) PinManager.initialize(WireGuardAutoTunnel.instance)
+		if (isPinEnabled) PinManager.initialize(WireGuardAutoTunnel.instance)
 	}
 
 	private suspend fun initAutoTunnel() {

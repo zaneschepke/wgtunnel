@@ -52,7 +52,7 @@ fun WireguardAutoTunnelTheme(
  			}
  		}
 		useDarkTheme -> DarkColorScheme
-		//TODO force dark theme for now until light theme designed
+		// TODO force dark theme for now until light theme designed
 		else -> DarkColorScheme
 	}
 	val view = LocalView.current

@@ -1,0 +1,3 @@
+更新：
+- 添加 Amnezia，与 WireGuard 并行使用
+- 修复应用快捷方式的 Bug

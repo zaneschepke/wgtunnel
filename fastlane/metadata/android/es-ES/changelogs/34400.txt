@@ -1,0 +1,5 @@
+Novedades:
+- Mejorar la denominación de las importaciones de túneles
+- Se solucionó el error del estado inicial de tunelización automática
+- Manejo de errores mejorado
+- Se solucionó el error de importación del zip de Amnezia

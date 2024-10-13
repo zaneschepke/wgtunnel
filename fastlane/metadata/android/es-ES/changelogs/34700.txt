@@ -1,0 +1,6 @@
+Novedades:
+- Solucionar problemas de bloqueo
+- Mejorar el rendimiento de los mosaicos
+- Volver a habilitar el bloqueo del PIN
+- Hacer que reiniciar al arrancar sea una configuración
+- Varias correcciones de errores y rendimiento

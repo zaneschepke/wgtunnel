@@ -1,0 +1,6 @@
+Was ist neu?
+- Verbesserte Zuverlässigkeit des automatischen Tunnels
+- Unterstützung für hell/dunkel/dynamisches Theming hinzugefügt
+- Unterstützung für Pre-/Post-Up-/Down-Skripte hinzugefügt
+- Entfernen der Benachrichtigung über das Fortbestehen des Tunnels
+- Verschiedene andere Korrekturen und Verbesserungen
