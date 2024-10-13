@@ -1,8 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.module
 
 import android.content.Context
-import com.zaneschepke.logcatter.LocalLogCollector
-import com.zaneschepke.logcatter.LogcatUtil
+import com.zaneschepke.logcatter.LogReader
+import com.zaneschepke.logcatter.LogcatCollector
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,7 +24,7 @@ class AppModule {
 
 	@Singleton
 	@Provides
-	fun provideLogCollect(@ApplicationContext context: Context): LocalLogCollector {
-		return LogcatUtil.init(context = context)
+	fun provideLogCollect(@ApplicationContext context: Context): LogReader {
+		return LogcatCollector.init(context = context)
 	}
 }

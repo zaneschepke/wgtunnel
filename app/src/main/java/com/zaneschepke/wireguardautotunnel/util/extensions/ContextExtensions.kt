@@ -26,6 +26,16 @@ fun Context.openWebUrl(url: String): Result<Unit> {
 	}
 }
 
+fun Context.launchShareFile(file: Uri) {
+	val shareIntent = Intent().apply {
+		setAction(Intent.ACTION_SEND)
+		setType("*/*")
+		putExtra(Intent.EXTRA_STREAM, file)
+		addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+	}
+	this.startActivity(Intent.createChooser(shareIntent, ""))
+}
+
 fun Context.showToast(resId: Int) {
 	Toast.makeText(
 		this,

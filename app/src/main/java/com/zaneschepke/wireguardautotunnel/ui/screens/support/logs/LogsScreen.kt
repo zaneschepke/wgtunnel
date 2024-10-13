@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support.logs
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +12,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,8 +20,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,9 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.logcatter.model.LogMessage
-import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
-import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -45,35 +46,52 @@ fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
 	val logs = viewModel.logs
 
 	val context = LocalContext.current
+	val clipboardManager: ClipboardManager = LocalClipboardManager.current
 
 	val lazyColumnListState = rememberLazyListState()
-	val clipboardManager: ClipboardManager = LocalClipboardManager.current
-	val scope = rememberCoroutineScope()
+	var isAutoScrolling by remember { mutableStateOf(true) }
+	var lastScrollPosition by remember { mutableIntStateOf(0) }
 
-	LaunchedEffect(logs.size) {
-		scope.launch {
+	LaunchedEffect(isAutoScrolling) {
+		if (isAutoScrolling) {
 			lazyColumnListState.animateScrollToItem(logs.size)
 		}
+	}
+
+	LaunchedEffect(logs.size) {
+		if (isAutoScrolling) {
+			lazyColumnListState.animateScrollToItem(logs.size)
+		}
+	}
+
+	LaunchedEffect(lazyColumnListState) {
+		snapshotFlow { lazyColumnListState.firstVisibleItemIndex }
+			.collect { currentScrollPosition ->
+				if (currentScrollPosition < lastScrollPosition && isAutoScrolling) {
+					isAutoScrolling = false
+				}
+				val visible = lazyColumnListState.layoutInfo.visibleItemsInfo
+				if (visible.isNotEmpty()) {
+					if (visible.last().index
+						== lazyColumnListState.layoutInfo.totalItemsCount - 1 && !isAutoScrolling
+					) {
+						isAutoScrolling = true
+					}
+				}
+				lastScrollPosition = currentScrollPosition
+			}
 	}
 
 	Scaffold(
 		floatingActionButton = {
 			FloatingActionButton(
 				onClick = {
-					scope.launch {
-						viewModel.saveLogsToFile().onSuccess {
-							Toast.makeText(
-								context,
-								context.getString(R.string.logs_saved),
-								Toast.LENGTH_SHORT,
-							).show()
-						}
-					}
+					viewModel.shareLogs(context)
 				},
 				shape = RoundedCornerShape(16.dp),
 				containerColor = MaterialTheme.colorScheme.primary,
 			) {
-				val icon = Icons.Filled.Save
+				val icon = Icons.Filled.Share
 				Icon(
 					imageVector = icon,
 					contentDescription = icon.name,

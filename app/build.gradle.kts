@@ -72,12 +72,14 @@ android {
 				"proguard-rules.pro",
 			)
 			signingConfig = signingConfigs.getByName(Constants.RELEASE)
+			resValue("string", "provider", "\"${Constants.APP_NAME}.provider\"")
 		}
 		debug {
 			applicationIdSuffix = ".debug"
 			versionNameSuffix = "-debug"
 			resValue("string", "app_name", "WG Tunnel - Debug")
 			isDebuggable = true
+			resValue("string", "provider", "\"${Constants.APP_NAME}.provider.debug\"")
 		}
 
 		create(Constants.PRERELEASE) {
@@ -85,6 +87,7 @@ android {
 			applicationIdSuffix = ".prerelease"
 			versionNameSuffix = "-pre"
 			resValue("string", "app_name", "WG Tunnel - Pre")
+			resValue("string", "provider", "\"${Constants.APP_NAME}.provider.pre\"")
 		}
 
 		create(Constants.NIGHTLY) {
@@ -92,6 +95,7 @@ android {
 			applicationIdSuffix = ".nightly"
 			versionNameSuffix = "-nightly"
 			resValue("string", "app_name", "WG Tunnel - Nightly")
+			resValue("string", "provider", "\"${Constants.APP_NAME}.provider.nightly\"")
 		}
 
 		applicationVariants.all {

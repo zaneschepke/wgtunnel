@@ -3,7 +3,7 @@ package com.zaneschepke.wireguardautotunnel
 import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
-import com.zaneschepke.logcatter.LocalLogCollector
+import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.util.ReleaseTree
@@ -23,7 +23,7 @@ class WireGuardAutoTunnel : Application() {
 	lateinit var applicationScope: CoroutineScope
 
 	@Inject
-	lateinit var localLogCollector: LocalLogCollector
+	lateinit var logReader: LogReader
 
 	@Inject
 	@IoDispatcher
@@ -47,7 +47,7 @@ class WireGuardAutoTunnel : Application() {
 		}
 		if (!isRunningOnTv()) {
 			applicationScope.launch(ioDispatcher) {
-				localLogCollector.start()
+				logReader.start()
 			}
 		}
 	}

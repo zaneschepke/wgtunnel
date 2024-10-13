@@ -2,14 +2,12 @@ package com.zaneschepke.logcatter
 
 import com.zaneschepke.logcatter.model.LogMessage
 import kotlinx.coroutines.flow.Flow
-import java.io.File
 
-interface LocalLogCollector {
+interface LogReader {
 	suspend fun start(onLogMessage: ((message: LogMessage) -> Unit)? = null)
-
 	fun stop()
-
-	suspend fun getLogFile(): Result<File>
-
+	fun zipLogFiles(path: String)
+	suspend fun deleteAndClearLogs()
 	val bufferedLogs: Flow<LogMessage>
+	val liveLogs: Flow<LogMessage>
 }
