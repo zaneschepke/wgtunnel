@@ -7,7 +7,7 @@
     <string name="tunnels">Tunnel</string>
     <string name="enable_auto_tunnel">Auto-Tunneln starten</string>
     <string name="tunnel_mobile_data">Tunnel für mobile Daten</string>
-	<string name="privacy_policy">Datenschutzbestimmungen anzeigen</string>
+    <string name="privacy_policy">Datenschutzbestimmungen anzeigen</string>
     <string name="disable_auto_tunnel">Auto-Tunneln stoppen</string>
     <string name="okay">Ok</string>
     <string name="tunnel_on_ethernet">Tunnel für Ethernet</string>
@@ -166,4 +166,27 @@
     <string name="export_configs_failed">Konfigurationsexport fehlgeschlagen</string>
     <string name="error_file_format">Ungültige Konfiguration Tunnel-Format</string>
     <string name="response_packet_magic_header">Antwortpaket magic header</string>
+    <string name="restart_at_boot">Neustart nach Systemstart</string>
+    <string name="optional_default">"optional, standard: "</string>
+    <string name="background_location_message">Erlauben Sie dauerhaft für diese Funktion die Standortberechtigung und/oder die genaue Lage. Bitte</string>
+    <string name="details">Details</string>
+    <string name="vpn_settings">VPN-Systemeinstellungen</string>
+    <string name="always_on_message">Die VPN-Verbindungsberechtigung wurde verweigert. Bitte überprüfen Sie die</string>
+    <string name="chat_description">Treten Sie der Community bei</string>
+    <string name="set_custom_ping_cooldown">Ping-Neustart-Cooldown (sek)</string>
+    <string name="set_custom_ping_ip">Benutzerdefinierte Ping-IP einstellen</string>
+    <string name="default_ping_ip">(optional, Vorgabe ist peers)</string>
+    <string name="wildcard_supported">Erfahren Sie mehr über unterstützte Wildcards.</string>
+    <string name="set_custom_ping_internal">Pingintervall (sek)</string>
+    <string name="always_on_message2">um sicherzustellen, dass Always-on VPN für alle anderen Apps ausgeschaltet ist und versuchen es erneut</string>
+    <string name="tunnel_required">Feature erfordert mindestens einen Tunnel</string>
+    <string name="request_root">Root anfragen</string>
+    <string name="sec">sek</string>
+    <string name="app_settings">App-Einstellungen</string>
+    <string name="background_location_message2">um sicherzustellen, dass diese Berechtigungen aktiviert sind.</string>
+    <string name="root_accepted">Root-Shell akzeptiert</string>
+    <string name="show_amnezia_properties">Amnezia-Eigenschaften anzeigen</string>
+    <string name="never">nie</string>
+    <string name="handshake">Handshake</string>
+    <string name="vpn_denied_dialog_title">Genehmigung verweigert</string>
 </resources>
