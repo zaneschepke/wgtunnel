@@ -33,25 +33,23 @@ on:
   workflow_call:
 
 jobs:
-  check_date:
+  check-commits:
     runs-on: ubuntu-latest
-    name: Check latest commit
     outputs:
-      should_run: ${{ steps.should_run.outputs.should_run }}
+      has_new_commits: ${{ steps.commits_check.outputs.has-new-commits }}
     steps:
-    - uses: actions/checkout@v4
-    - name: print latest_commit
-      run: echo ${{ github.sha }}
-    - id: should_run
-      continue-on-error: true
-      name: check latest commit is less than a day
-      if: ${{ github.event_name == 'schedule' }}
-      run: test -z $(git rev-list --after="23 hours" ${{ github.sha }}) && echo "::set-output name=should_run::false"
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for all branches and tags
+    - name: Check for commits in the last 23 hours
+      id: commits_check
+      run: |
+        commits=$(git rev-list --after="23 hours" HEAD --count)
+        echo "::set-output name=has-new-commits::$(($commits > 0))"
   build:
-    needs: check_date
-    if: |
-        github.event_name != 'schedule' ||
-        (needs.check_date.outputs.should_run == 'true' && github.event_name == 'schedule')
+    needs: check-commits
+    if: ${{ needs.check-commits.outputs.has_new_commits == 'true' || github.event_name != 'schedule' }}
     name: Build Signed APK
     runs-on: ubuntu-latest
     env:

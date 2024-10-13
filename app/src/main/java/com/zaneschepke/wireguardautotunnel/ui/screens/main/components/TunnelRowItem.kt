@@ -88,7 +88,7 @@ fun TunnelRowItem(
 			}
 		},
 		isExpanded = expanded && isActive,
-		expanded = { if (isActive && expanded) TunnelStatisticsBox(vpnState.statistics, tunnel) },
+		expanded = { if (isActive && expanded) TunnelStatisticsRow(vpnState.statistics, tunnel) },
 		focusRequester = focusRequester,
 		trailing = {
 			if (

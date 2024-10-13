@@ -19,7 +19,7 @@ import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.extensions.toThreeDecimalPlaceString
 
 @Composable
-fun TunnelStatisticsBox(statistics: TunnelStatistics?, tunnelConfig: TunnelConfig) {
+fun TunnelStatisticsRow(statistics: TunnelStatistics?, tunnelConfig: TunnelConfig) {
 	val config = TunnelConfig.configFromAmQuick(tunnelConfig.wgQuick)
 
 	Row(
