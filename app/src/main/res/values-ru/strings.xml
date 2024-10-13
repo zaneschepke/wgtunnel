@@ -87,7 +87,7 @@
     <string name="tunnels">Туннели</string>
     <string name="enable_auto_tunnel">Запустить авто-туннель</string>
     <string name="disable_auto_tunnel">Остановить авто-туннель</string>
-	<string name="okay">Хорошо</string>
+    <string name="okay">Хорошо</string>
     <string name="prominent_background_location_title">Фоновая передача местоположения</string>
     <string name="thank_you">Благодарим Вас за использование WG Tunnel!</string>
     <string name="trusted_ssid_value_description">Отправить SSID</string>
@@ -166,4 +166,5 @@
     <string name="getting_started_guide">руководство по началу работы</string>
     <string name="unsure_how">, если не уверены, что делать дальше</string>
     <string name="underload_packet_magic_header">Заголовок пакета под нагрузкой</string>
+    <string name="restart_at_boot"></string>
 </resources>
