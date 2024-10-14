@@ -166,5 +166,4 @@
     <string name="getting_started_guide">руководство по началу работы</string>
     <string name="unsure_how">, если не уверены, что делать дальше</string>
     <string name="underload_packet_magic_header">Заголовок пакета под нагрузкой</string>
-    <string name="restart_at_boot"></string>
 </resources>
