@@ -169,7 +169,7 @@
     <string name="root_accepted">Root-доступ разрешён</string>
     <string name="always_on_message">Разрешение на VPN-соединение было отклонено, проверьте</string>
     <string name="set_custom_ping_cooldown">Время ожидания перезапуска пинга (сек.)</string>
-    <string name="tunnel_required">Для этой функции требуется как минимум один туннель</string>
+    <string name="tunnel_required">Для этой функции необходим хотя бы один туннель</string>
     <string name="restart_at_boot">Перезапуск при загрузке</string>
     <string name="wildcard_supported">Узнайте о поддерживаемых подстановочных знаках.</string>
     <string name="default_ping_ip">(необязательно, по умолчанию для пиров)</string>
@@ -178,7 +178,7 @@
     <string name="background_location_message2">, чтобы убедиться, что эти разрешения предоставлены.</string>
     <string name="always_on_message2">, чтобы убедиться, что функция «Постоянный VPN» отключена для всех других приложений, и повторите попытку</string>
     <string name="background_location_message">Разрешать всё время, пока для работы этой функции требуется доступ на определение местоположения и/или точное местоположение. Смотрите</string>
-    <string name="vpn_settings">Настройки системы VPN</string>
+    <string name="vpn_settings">Системные настройки VPN</string>
     <string name="chat_description">Присоединиться к сообществу</string>
     <string name="details">детали</string>
     <string name="vpn_denied_dialog_title">Нет разрешения</string>
