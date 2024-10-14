@@ -12,8 +12,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.OutputStream
 import java.time.Instant
 import java.util.zip.ZipEntry
@@ -23,23 +21,6 @@ class FileUtils(
 	private val context: Context,
 	private val ioDispatcher: CoroutineDispatcher,
 ) {
-	suspend fun readBytesFromFile(file: File): ByteArray {
-		return withContext(ioDispatcher) {
-			FileInputStream(file).use {
-				it.readBytes()
-			}
-		}
-	}
-
-	suspend fun readTextFromFileName(fileName: String): String {
-		return withContext(ioDispatcher) {
-			context.assets.open(fileName).use { stream ->
-				stream.bufferedReader(Charsets.UTF_8).use {
-					it.readText()
-				}
-			}
-		}
-	}
 
 	fun createWgFiles(tunnels: TunnelConfigs): List<File> {
 		return tunnels.map { config ->
@@ -58,43 +39,6 @@ class FileUtils(
 				it.write(config.amQuick.toByteArray())
 			}
 			file
-		}
-	}
-
-	suspend fun saveByteArrayToDownloads(content: ByteArray, fileName: String): Result<Unit> {
-		return withContext(ioDispatcher) {
-			try {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-					val contentValues =
-						ContentValues().apply {
-							put(MediaColumns.DISPLAY_NAME, fileName)
-							put(MediaColumns.MIME_TYPE, Constants.TEXT_MIME_TYPE)
-							put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-						}
-					val resolver = context.contentResolver
-					val uri =
-						resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-					if (uri != null) {
-						resolver.openOutputStream(uri).use { output ->
-							output?.write(content)
-						}
-					}
-				} else {
-					val target =
-						File(
-							Environment.getExternalStoragePublicDirectory(
-								Environment.DIRECTORY_DOWNLOADS,
-							),
-							fileName,
-						)
-					FileOutputStream(target).use { output ->
-						output.write(content)
-					}
-				}
-				Result.success(Unit)
-			} catch (e: Exception) {
-				Result.failure(e)
-			}
 		}
 	}
 
@@ -124,7 +68,7 @@ class FileUtils(
 	}
 
 	// TODO issue with android 9
-	private fun createDownloadsFileOutputStream(fileName: String, mimeType: String = Constants.ALLOWED_FILE_TYPES): OutputStream? {
+	private fun createDownloadsFileOutputStream(fileName: String, mimeType: String = Constants.ALL_FILE_TYPES): OutputStream? {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			val resolver = context.contentResolver
 			val contentValues =

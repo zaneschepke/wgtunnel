@@ -31,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -181,7 +180,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 		TunnelImportSheet(
 			showBottomSheet,
 			onDismiss = { showBottomSheet = false },
-			onFileClick = { tunnelFileImportResultLauncher.launch(Constants.ALLOWED_FILE_TYPES) },
+			onFileClick = { tunnelFileImportResultLauncher.launch(Constants.ALLOWED_TV_FILE_TYPES) },
 			onQrClick = { launchQrScanner() },
 			onManualImportClick = {
 				navController.navigate(

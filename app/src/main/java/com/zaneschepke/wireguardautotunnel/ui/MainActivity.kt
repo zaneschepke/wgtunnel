@@ -60,6 +60,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -101,6 +102,12 @@ class MainActivity : AppCompatActivity() {
 					else -> Unit
 				}
 				context.requestTunnelTileServiceStateUpdate()
+			}
+
+			with(appUiState.settings) {
+				LaunchedEffect(isAutoTunnelPaused, isAutoTunnelEnabled) {
+					this@MainActivity.requestAutoTunnelTileServiceUpdate()
+				}
 			}
 
 			CompositionLocalProvider(LocalNavController provides navController) {

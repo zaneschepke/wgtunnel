@@ -37,8 +37,11 @@ fun TunnelStatisticsRow(statistics: TunnelStatistics?, tunnelConfig: TunnelConfi
 			val peerTxMB = NumberUtils.bytesToMB(peerTx).toThreeDecimalPlaceString()
 			val peerRxMB = NumberUtils.bytesToMB(peerRx).toThreeDecimalPlaceString()
 			val handshake = statistics?.peerStats(it.publicKey)?.latestHandshakeEpochMillis?.let {
-				if(it == 0L) stringResource(R.string.never) else
-				"${NumberUtils.getSecondsBetweenTimestampAndNow(it)} ${stringResource(R.string.sec)}"
+				if (it == 0L) {
+					stringResource(R.string.never)
+				} else {
+					"${NumberUtils.getSecondsBetweenTimestampAndNow(it)} ${stringResource(R.string.sec)}"
+				}
 			} ?: stringResource(R.string.never)
 			Column(
 				verticalArrangement = Arrangement.spacedBy(10.dp),

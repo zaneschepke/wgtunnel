@@ -44,21 +44,21 @@ fun Context.showToast(resId: Int) {
 	).show()
 }
 
-fun Context.launchSupportEmail(): Result<Unit> {
-	return runCatching {
-		val intent =
-			Intent(Intent.ACTION_SENDTO).apply {
-				type = Constants.EMAIL_MIME_TYPE
-				putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.my_email)))
-				putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject))
-				addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			}
+fun Context.launchSupportEmail() {
+	val intent =
+		Intent(Intent.ACTION_SENDTO).apply {
+			data = Uri.parse("mailto:")
+			putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.my_email)))
+			putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject))
+			addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		}
+	if (intent.resolveActivity(packageManager) != null) {
 		startActivity(
 			Intent.createChooser(intent, getString(R.string.email_chooser)).apply {
 				addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 			},
 		)
-	}.onFailure {
+	} else {
 		showToast(R.string.no_email_detected)
 	}
 }

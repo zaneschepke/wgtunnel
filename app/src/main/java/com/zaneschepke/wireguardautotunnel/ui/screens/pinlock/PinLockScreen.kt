@@ -22,7 +22,7 @@ fun PinLockScreen(appViewModel: AppViewModel) {
 	PinLock(
 		title = { pinExists ->
 			Text(
-				color = MaterialTheme.colorScheme.onSecondary,
+				color = MaterialTheme.colorScheme.onSurface,
 				text =
 				if (pinExists) {
 					stringResource(id = R.string.enter_pin)
@@ -33,7 +33,8 @@ fun PinLockScreen(appViewModel: AppViewModel) {
 				},
 			)
 		},
-		color = MaterialTheme.colorScheme.secondary,
+		backgroundColor = MaterialTheme.colorScheme.surface,
+		textColor = MaterialTheme.colorScheme.onSurface,
 		onPinCorrect = {
 			// pin is correct, navigate or hide pin lock
 			if (context.isRunningOnTv()) {

@@ -133,8 +133,6 @@ android {
 	packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
-val generalImplementation by configurations
-
 dependencies {
 
 	implementation(project(":logcatter"))

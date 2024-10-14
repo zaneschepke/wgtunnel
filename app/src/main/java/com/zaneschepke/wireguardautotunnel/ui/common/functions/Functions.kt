@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 
 @Composable
 fun rememberFileImportLauncherForResult(onNoFileExplorer: () -> Unit, onData: (data: Uri) -> Unit): ManagedActivityResultLauncher<String, Uri?> {
@@ -17,7 +18,11 @@ fun rememberFileImportLauncherForResult(onNoFileExplorer: () -> Unit, onData: (d
 		object : ActivityResultContracts.GetContent() {
 			override fun createIntent(context: Context, input: String): Intent {
 				val intent = super.createIntent(context, input).apply {
-					type = Constants.ALLOWED_FILE_TYPES
+					type = if (context.isRunningOnTv()) {
+						Constants.ALLOWED_TV_FILE_TYPES
+					} else {
+						Constants.ALL_FILE_TYPES
+					}
 				}
 
 				/* AndroidTV now comes with stubs that do nothing but display a Toast less helpful than
