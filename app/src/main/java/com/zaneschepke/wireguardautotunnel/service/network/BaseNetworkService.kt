@@ -5,8 +5,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.net.wifi.SupplicantState
-import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import kotlinx.coroutines.channels.awaitClose
@@ -21,7 +19,7 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
 	private val connectivityManager =
 		context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-	private val wifiManager =
+	val wifiManager =
 		context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
 	override val networkStatus =
@@ -83,30 +81,6 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
 
 			awaitClose { connectivityManager.unregisterNetworkCallback(networkStatusCallback) }
 		}
-
-	override fun getNetworkName(networkCapabilities: NetworkCapabilities): String? {
-		var ssid: String? = getWifiNameFromCapabilities(networkCapabilities)
-		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-			val info = wifiManager.connectionInfo
-			if (info.supplicantState === SupplicantState.COMPLETED) {
-				ssid = info.ssid
-			}
-		}
-		return ssid?.trim('"')
-	}
-
-	companion object {
-		private fun getWifiNameFromCapabilities(networkCapabilities: NetworkCapabilities): String? {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-				val info: WifiInfo
-				if (networkCapabilities.transportInfo is WifiInfo) {
-					info = networkCapabilities.transportInfo as WifiInfo
-					return info.ssid
-				}
-			}
-			return null
-		}
-	}
 }
 
 inline fun <Result> Flow<NetworkStatus>.map(

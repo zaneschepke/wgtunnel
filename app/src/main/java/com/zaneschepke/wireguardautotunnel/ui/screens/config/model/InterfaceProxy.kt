@@ -44,7 +44,7 @@ data class InterfaceProxy(
 				publicKey = i.keyPair.publicKey.toBase64().trim(),
 				privateKey = i.keyPair.privateKey.toBase64().trim(),
 				addresses = i.addresses.joinToString(", ").trim(),
-				dnsServers = (i.dnsServers + i.dnsSearchDomains).joinToString(", ").replace("/", "").trim() ,
+				dnsServers = (i.dnsServers + i.dnsSearchDomains).joinToString(", ").replace("/", "").trim(),
 				listenPort =
 				if (i.listenPort.isPresent) {
 					i.listenPort.get().toString().trim()

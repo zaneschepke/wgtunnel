@@ -10,4 +10,9 @@ class EthernetService
 constructor(
 	@ApplicationContext context: Context,
 ) :
-	BaseNetworkService<EthernetService>(context, NetworkCapabilities.TRANSPORT_ETHERNET)
+	BaseNetworkService<EthernetService>(context, NetworkCapabilities.TRANSPORT_ETHERNET) {
+
+	override fun isNetworkSecure(): Boolean {
+		return true
+	}
+}

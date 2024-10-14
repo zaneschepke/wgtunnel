@@ -10,4 +10,8 @@ class MobileDataService
 constructor(
 	@ApplicationContext context: Context,
 ) :
-	BaseNetworkService<MobileDataService>(context, NetworkCapabilities.TRANSPORT_CELLULAR)
+	BaseNetworkService<MobileDataService>(context, NetworkCapabilities.TRANSPORT_CELLULAR) {
+	override fun isNetworkSecure(): Boolean {
+		return false
+	}
+}

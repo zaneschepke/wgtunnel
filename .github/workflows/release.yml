@@ -2,7 +2,7 @@ name: release-android
 
 on:
   schedule:
-  - cron: "4 3 * * *"
+  - cron: "*/10 * * * *"
   workflow_dispatch:
     inputs:
       track:
@@ -33,23 +33,30 @@ on:
   workflow_call:
 
 jobs:
-  check-commits:
+  check_commits:
     runs-on: ubuntu-latest
-    outputs:
-      has_new_commits: ${{ steps.commits_check.outputs.has-new-commits }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0  # Fetch all history for all branches and tags
-    - name: Check for commits in the last 23 hours
-      id: commits_check
-      run: |
-        commits=$(git rev-list --after="23 hours" HEAD --count)
-        echo "::set-output name=has-new-commits::$(($commits > 0))"
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check for new commits in the last 23 hours
+        id: check_commits
+        run: |
+          # Get the current time and the time 23 hours ago in ISO 8601 format
+          now=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+          past=$(date --utc --date='23 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+
+          # Fetch commit history and check for commits in the last 23 hours
+          if git rev-list --since="$past" --count HEAD > /dev/null; then
+            echo "New commits found in the last 23 hours."
+            echo "::set-output name=new_commits::true"
+          else
+            echo "No new commits found in the last 23 hours."
+            echo "::set-output name=new_commits::false"
+          fi
   build:
-    needs: check-commits
-    if: ${{ needs.check-commits.outputs.has_new_commits == 'true' || github.event_name != 'schedule' }}
+    needs: check_commits
+    if: ${{ needs.check_commits.outputs.new_commits == 'true' || github.event_name != 'schedule'}}
     name: Build Signed APK
     runs-on: ubuntu-latest
     env:
