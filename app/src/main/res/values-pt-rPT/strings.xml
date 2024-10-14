@@ -180,4 +180,8 @@
     <string name="no_wifi_names_configured">Nenhum Wi-Fi configurado para este túnel</string>
     <string name="see_the">Veja o</string>
     <string name="getting_started_guide">guia de início rápido</string>
+    <string name="always_on_message2">para ter certeza que VPN Sempre-ligada é desligada para todas as outras aplicações e tente novamente</string>
+    <string name="auto_on">Continuar auto-túnel</string>
+    <string name="auto_off">Pausar auto-túnel</string>
+    <string name="restart_at_boot">Reiniciar no arranque</string>
 </resources>
