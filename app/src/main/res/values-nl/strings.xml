@@ -1,2 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="error_file_extension">Bestand is geen .conf of .zip</string>
+    <string name="turn_off_tunnel">Actie vereist uitgeschakelde tunnel</string>
+    <string name="tunnel_start_text">Tunnel verbonden</string>
+    <string name="tunnel_start_title">VPN verbonden</string>
+    <string name="notification_permission_required">Notificatiepermissies vereist</string>
+    <string name="enable_auto_tunnel">Start auto-tunnelen</string>
+    <string name="disable_auto_tunnel">Stop auto-tunnelen</string>
+    <string name="tunnel_mobile_data">Tunnel bij mobiele data</string>
+    <string name="app_name">WG Tunnel</string>
+    <string name="vpn_channel_id">VPN Kanaal</string>
+    <string name="vpn_channel_name">VPN Notificatiekanaal</string>
+    <string name="tunnels">Tunnels</string>
+    <string name="watcher_notification_text_active">Monitor van connectietoestand: Actief</string>
+    <string name="watcher_notification_text_paused">Monitor van connectietoestand: Pause</string>
+    <string name="add_trusted_ssid">Voeg vertrouwde WiFi netwerknaam toe</string>
+    <string name="privacy_policy">Bekijk privacybeleid</string>
+    <string name="tunnel_on_ethernet">Tunnel bij ethernet</string>
+    <string name="no_tunnels">Nog geen tunnels geconfigureerd</string>
+    <string name="okay">Oke</string>
+</resources>
