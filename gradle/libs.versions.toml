@@ -1,6 +1,6 @@
 [versions]
 accompanist = "0.36.0"
-activityCompose = "1.9.2"
+activityCompose = "1.9.3"
 amneziawgAndroid = "1.2.2"
 androidx-junit = "1.2.1"
 appcompat = "1.7.0"
