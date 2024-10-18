@@ -55,6 +55,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.options.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.pinlock.PinLockScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.scanner.ScannerScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
@@ -208,6 +209,9 @@ class MainActivity : AppCompatActivity() {
 										PinLockScreen(
 											appViewModel = viewModel,
 										)
+									}
+									composable<Route.Scanner> {
+										ScannerScreen()
 									}
 								}
 							}

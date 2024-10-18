@@ -100,21 +100,6 @@ constructor(
 		return defaultName
 	}
 
-	fun onTunnelQrResult(result: String) = viewModelScope.launch(ioDispatcher) {
-		kotlin.runCatching {
-			val amConfig = TunnelConfig.configFromAmQuick(result)
-			val amQuick = amConfig.toAwgQuickString(true)
-			val wgQuick = amConfig.toWgQuickString()
-
-			val tunnelName = makeTunnelNameUnique(generateQrCodeTunnelName(result))
-			val tunnelConfig = TunnelConfig(name = tunnelName, wgQuick = wgQuick, amQuick = amQuick)
-			saveTunnel(tunnelConfig)
-		}.onFailure {
-			Timber.e(it)
-			SnackbarController.showMessage(StringValue.StringResource(R.string.error_invalid_code))
-		}
-	}
-
 	private suspend fun makeTunnelNameUnique(name: String): String {
 		return withContext(ioDispatcher) {
 			val tunnels = appDataRepository.tunnels.getAll()

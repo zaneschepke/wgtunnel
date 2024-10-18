@@ -21,6 +21,9 @@ sealed class Route {
 	data object Lock : Route()
 
 	@Serializable
+	data object Scanner : Route()
+
+	@Serializable
 	data class Config(
 		val id: Int,
 	) : Route()

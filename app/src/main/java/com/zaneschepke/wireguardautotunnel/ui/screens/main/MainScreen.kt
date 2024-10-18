@@ -36,8 +36,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
@@ -105,15 +103,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 		viewModel.onTunnelFileSelected(data, context)
 	})
 
-	val scanLauncher =
-		rememberLauncherForActivityResult(
-			contract = ScanContract(),
-			onResult = {
-				if (it.contents != null) {
-					viewModel.onTunnelQrResult(it.contents)
-				}
-			},
-		)
+	val requestPermissionLauncher = rememberLauncherForActivityResult(
+		ActivityResultContracts.RequestPermission(),
+	) { isGranted ->
+		if (!isGranted) return@rememberLauncherForActivityResult snackbar.showMessage("Camera permission required")
+		navController.navigate(Route.Scanner)
+	}
 
 	VpnDeniedDialog(showVpnPermissionDialog, onDismiss = { showVpnPermissionDialog = false })
 
@@ -140,17 +135,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 		} else {
 			viewModel.onTunnelStart(tunnel)
 		}
-	}
-
-	fun launchQrScanner() {
-		val scanOptions = ScanOptions()
-		scanOptions.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-		scanOptions.setOrientationLocked(true)
-		scanOptions.setPrompt(
-			context.getString(R.string.scanning_qr),
-		)
-		scanOptions.setBeepEnabled(false)
-		scanLauncher.launch(scanOptions)
 	}
 
 	Scaffold(
@@ -181,7 +165,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 			showBottomSheet,
 			onDismiss = { showBottomSheet = false },
 			onFileClick = { tunnelFileImportResultLauncher.launch(Constants.ALLOWED_TV_FILE_TYPES) },
-			onQrClick = { launchQrScanner() },
+			onQrClick = { requestPermissionLauncher.launch(android.Manifest.permission.CAMERA) },
 			onManualImportClick = {
 				navController.navigate(
 					Route.Config(Constants.MANUAL_TUNNEL_CONFIG_ID),
