@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.logcatter.model.LogMessage
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.MainDispatcher
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -15,7 +16,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.launchShareFile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
-import com.zaneschepke.wireguardautotunnel.R
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber

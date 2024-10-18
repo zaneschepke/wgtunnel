@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
 import androidx.compose.ui.graphics.Color
+import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
@@ -77,4 +78,10 @@ fun Config.toWgQuickString(): String {
 		}
 	}
 	return lines.joinToString(System.lineSeparator())
+}
+
+fun RootShell.getCurrentWifiName(): String? {
+	val response = mutableListOf<String>()
+	this.run(response, "dumpsys wifi | grep -o \"SSID: [^,]*\" | cut -d ' ' -f2- | tr -d '\"'")
+	return response.lastOrNull()
 }

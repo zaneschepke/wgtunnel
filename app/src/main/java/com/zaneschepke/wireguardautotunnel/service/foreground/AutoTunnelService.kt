@@ -2,11 +2,13 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 
 import android.content.Context
 import android.content.Intent
+import android.net.NetworkCapabilities
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
@@ -23,6 +25,7 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.getCurrentWifiName
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import com.zaneschepke.wireguardautotunnel.util.extensions.onNotRunning
@@ -45,6 +48,9 @@ import javax.inject.Provider
 @AndroidEntryPoint
 class AutoTunnelService : LifecycleService() {
 	private val foregroundId = 122
+
+	@Inject
+	lateinit var rootShell: Provider<RootShell>
 
 	@Inject
 	lateinit var wifiService: NetworkService<WifiService>
@@ -397,6 +403,14 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
+	private fun updateWifi(connected: Boolean) {
+		autoTunnelStateFlow.update {
+			it.copy(
+				isWifiConnected = connected,
+			)
+		}
+	}
+
 	private suspend fun watchForEthernetConnectivityChanges() {
 		withContext(ioDispatcher) {
 			Timber.i("Starting ethernet data watcher")
@@ -428,21 +442,13 @@ class AutoTunnelService : LifecycleService() {
 				when (status) {
 					is NetworkStatus.Available -> {
 						Timber.i("Gained Wi-Fi connection")
-						autoTunnelStateFlow.update {
-							it.copy(
-								isWifiConnected = true,
-							)
-						}
+						updateWifi(true)
 					}
 
 					is NetworkStatus.CapabilitiesChanged -> {
 						Timber.i("Wifi capabilities changed")
-						autoTunnelStateFlow.update {
-							it.copy(
-								isWifiConnected = true,
-							)
-						}
-						val ssid = wifiService.getNetworkName(status.networkCapabilities)
+						updateWifi(true)
+						val ssid = getWifiSSID(status.networkCapabilities)
 						ssid?.let { name ->
 							if (name.contains(Constants.UNREADABLE_SSID)) {
 								Timber.w("SSID unreadable: missing permissions")
@@ -459,14 +465,20 @@ class AutoTunnelService : LifecycleService() {
 					}
 
 					is NetworkStatus.Unavailable -> {
-						autoTunnelStateFlow.update {
-							it.copy(
-								isWifiConnected = false,
-							)
-						}
+						updateWifi(false)
 						Timber.i("Lost Wi-Fi connection")
 					}
 				}
+			}
+		}
+	}
+
+	private suspend fun getWifiSSID(networkCapabilities: NetworkCapabilities): String? {
+		return withContext(ioDispatcher) {
+			try {
+				rootShell.get().getCurrentWifiName()
+			} catch (_: Exception) {
+				wifiService.getNetworkName(networkCapabilities)
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.net.Uri
@@ -101,7 +100,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 	val interactionSource = remember { MutableInteractionSource() }
 	val isRunningOnTv = context.isRunningOnTv()
 
-	val kernelSupport by viewModel.kernelSupport.collectAsStateWithLifecycle()
+	val settingsUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
 	val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 	var currentText by remember { mutableStateOf("") }
@@ -115,10 +114,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 	val screenPadding = 5.dp
 	val fillMaxWidth = .85f
 
-	LaunchedEffect(Unit) {
-		viewModel.checkKernelSupport()
-	}
-
 	LaunchedEffect(uiState.settings.trustedNetworkSSIDs) {
 		currentText = ""
 	}
@@ -127,7 +122,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 		rememberLauncherForActivityResult(
 			ActivityResultContracts.StartActivityForResult(),
 		) { result: ActivityResult ->
-			if (result.resultCode == Activity.RESULT_OK) {
+			if (result.resultCode == RESULT_OK) {
 				result.data
 				// Handle the Intent
 			}
@@ -262,6 +257,18 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 		)
 	}
 
+	fun onAutoTunnelWifiChecked() {
+		when (false) {
+			isBackgroundLocationGranted -> showLocationDialog = true
+			fineLocationState.status.isGranted -> showLocationDialog = true
+			viewModel.isLocationEnabled(context) ->
+				showLocationServicesAlertDialog = true
+			else -> {
+				viewModel.onToggleTunnelOnWifi()
+			}
+		}
+	}
+
 	Column(
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.Top,
@@ -311,18 +318,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 					checked = uiState.settings.isTunnelOnWifiEnabled,
 					padding = screenPadding,
 					onCheckChanged = { checked ->
-						if (!checked) viewModel.onToggleTunnelOnWifi()
-						if (checked) {
-							when (false) {
-								isBackgroundLocationGranted -> showLocationDialog = true
-								fineLocationState.status.isGranted -> showLocationDialog = true
-								viewModel.isLocationEnabled(context) ->
-									showLocationServicesAlertDialog = true
-								else -> {
-									viewModel.onToggleTunnelOnWifi()
-								}
-							}
-						}
+						if (!checked || settingsUiState.isRooted) viewModel.onToggleTunnelOnWifi().also { return@ConfigurationToggle }
+						onAutoTunnelWifiChecked()
 					},
 					modifier =
 					if (uiState.settings.isAutoTunnelEnabled) {
@@ -491,7 +488,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						uiState.settings.isAutoTunnelEnabled ||
 							uiState.settings.isAlwaysOnVpnEnabled ||
 							(uiState.vpnState.status == TunnelState.UP) ||
-							!kernelSupport
+							!settingsUiState.isKernelAvailable
 						),
 					checked = uiState.settings.isKernelEnabled,
 					padding = screenPadding,

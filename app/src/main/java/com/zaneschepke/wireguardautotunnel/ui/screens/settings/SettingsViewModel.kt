@@ -13,13 +13,14 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -38,8 +39,16 @@ constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
-	private val _kernelSupport = MutableStateFlow(false)
-	val kernelSupport = _kernelSupport.asStateFlow()
+	private val _uiState = MutableStateFlow(SettingsUiState())
+	val uiState = _uiState.onStart {
+		_uiState.update {
+			it.copy(isKernelAvailable = isKernelSupported(), isRooted = isRooted())
+		}
+	}.stateIn(
+		viewModelScope,
+		SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+		SettingsUiState(),
+	)
 	private val settings = appDataRepository.settings.getSettingsFlow()
 		.stateIn(viewModelScope, SharingStarted.Eagerly, Settings())
 
@@ -211,13 +220,9 @@ constructor(
 		}
 	}
 
-	fun checkKernelSupport() = viewModelScope.launch {
-		val kernelSupport =
-			withContext(ioDispatcher) {
-				WgQuickBackend.hasKernelSupport()
-			}
-		_kernelSupport.update {
-			kernelSupport
+	private suspend fun isKernelSupported(): Boolean {
+		return withContext(ioDispatcher) {
+			WgQuickBackend.hasKernelSupport()
 		}
 	}
 
@@ -228,6 +233,17 @@ constructor(
 					isRestoreOnBootEnabled = !isRestoreOnBootEnabled,
 				),
 			)
+		}
+	}
+
+	private suspend fun isRooted(): Boolean {
+		return try {
+			withContext(ioDispatcher) {
+				rootShell.get().start()
+			}
+			true
+		} catch (_: Exception) {
+			false
 		}
 	}
 
