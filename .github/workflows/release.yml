@@ -56,7 +56,7 @@ jobs:
           fi
   build:
     needs: check_commits
-    if: ${{ needs.check_commits.outputs.new_commits == 'true' || github.event_name != 'schedule'}}
+    if: ${{ needs.check_commits.outputs.new_commits == 'true' && inputs.track != 'none' }}
     name: Build Signed APK
     runs-on: ubuntu-latest
     env:
