@@ -1,0 +1,4 @@
+Apa yang baru:
+- Perbaikan bug UI edit konfigurasi
+- Tambahkan pemberitahuan AOVPN peluncuran pertama GrapheneOS
+- Versi bump

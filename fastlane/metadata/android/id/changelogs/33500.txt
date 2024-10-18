@@ -1,0 +1,5 @@
+Apa yang baru:
+- Mulai otomatis saat reboot untuk mode kernel VPN Always-On
+- Dukungan untuk ikon tema adaptif
+- Perbaiki ikon notifikasi, ikon kartu
+- Perbaiki ikon AndroidTV

@@ -1,0 +1,6 @@
+Apa yang baru:
+- Meningkatkan keandalan tunnel otomatis
+- Tambahkan dukungan untuk tema terang/gelap/dinamis
+- Tambahkan dukungan untuk skrip pra/pasca naik/turun
+- Hapus pemberitahuan persisten tunnel
+- Berbagai perbaikan dan peningkatan lainnya

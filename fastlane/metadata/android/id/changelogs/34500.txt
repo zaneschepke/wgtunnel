@@ -1,0 +1,5 @@
+Apa yang baru:
+- Dukungan bahasa tambahan
+- Perbaikan bug data seluler tunnel otomatis
+- Perbaikan tombol tindakan mengambang AndroidTV
+- Pengoptimalan dan penyempurnaan lainnya

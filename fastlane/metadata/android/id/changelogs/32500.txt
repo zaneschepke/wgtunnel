@@ -1,0 +1,2 @@
+Perbaikan:
+- Izin latar depan Android 14

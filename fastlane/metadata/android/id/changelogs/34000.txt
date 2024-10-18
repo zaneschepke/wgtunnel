@@ -1,0 +1,5 @@
+Apa yang baru:
+- Tunnel otomatis ke tunnel tertentu dengan nama wifi
+- Kontrol tunnel otomatis dari ubin dan pintasan
+- Mulai otomatis tunnel manual jika aktif sebelum reboot
+- Berbagai perbaikan bug dan peningkatan kinerja
