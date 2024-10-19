@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.options
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -18,9 +17,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +55,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.WildcardSupportingLabel
@@ -63,7 +65,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Addr
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import kotlinx.coroutines.delay
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusRequester: FocusRequester, appUiState: AppUiState, tunnelId: Int) {
@@ -99,18 +100,17 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusReq
 	}
 
 	Scaffold(
-		floatingActionButton = {
-			ScrollDismissFab(icon = {
-				val icon = Icons.Filled.Edit
-				Icon(
-					imageVector = icon,
-					contentDescription = icon.name,
-					tint = MaterialTheme.colorScheme.onPrimary,
-				)
-			}, focusRequester, isVisible = true, onClick = {
-				navController.navigate(
+		topBar = {
+			TopNavBar(config.name, trailing = {
+				IconButton(onClick = { navController.navigate(
 					Route.Config(config.id),
-				)
+				) }) {
+					val icon = Icons.Outlined.Edit
+					Icon(
+						imageVector = icon,
+						contentDescription = icon.name
+					)
+				}
 			})
 		},
 	) {
@@ -119,7 +119,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusReq
 			verticalArrangement = Arrangement.Top,
 			modifier =
 			Modifier
-				.fillMaxSize()
+				.fillMaxSize().padding(it)
 				.verticalScroll(scrollState)
 				.clickable(
 					indication = null,
