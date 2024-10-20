@@ -161,7 +161,7 @@
     <string name="getting_started_guide">Schnellstartanleitung an</string>
     <string name="transport_packet_magic_header">Transportpaket magic header</string>
     <string name="underload_packet_magic_header">Unterlastpaket magic header</string>
-    <string name="see_the">Schaue dir die</string>
+    <string name="see_the">wirf einen Blick in die</string>
     <string name="unsure_how">Wenn du nicht sicher bist, wie du weiterverfahren sollst</string>
     <string name="export_configs_failed">Konfigurationsexport fehlgeschlagen</string>
     <string name="error_file_format">Ungültige Konfiguration Tunnel-Format</string>
@@ -189,4 +189,5 @@
     <string name="never">nie</string>
     <string name="handshake">Handshake</string>
     <string name="vpn_denied_dialog_title">Genehmigung verweigert</string>
+    <string name="logs">Logs</string>
 </resources>
