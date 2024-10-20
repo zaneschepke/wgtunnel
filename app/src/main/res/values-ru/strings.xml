@@ -189,4 +189,5 @@
     <string name="never">никогда</string>
     <string name="sec">сек.</string>
     <string name="handshake">рукопожатие</string>
+    <string name="logs">Журналы</string>
 </resources>
