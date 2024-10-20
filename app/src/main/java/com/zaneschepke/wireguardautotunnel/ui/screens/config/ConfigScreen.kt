@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,9 +85,14 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 	var showApplicationsDialog by remember { mutableStateOf(false) }
 	var showAuthPrompt by remember { mutableStateOf(false) }
 	var isAuthenticated by remember { mutableStateOf(false) }
-	var configType by remember { mutableStateOf(ConfigType.WIREGUARD) }
 
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+	var configType by remember { mutableStateOf<ConfigType?>(null) }
+	val derivedConfigType = remember {
+		derivedStateOf<ConfigType> {
+			configType ?: if (!uiState.hasAmneziaProperties()) ConfigType.WIREGUARD else ConfigType.AMNEZIA
+		}
+	}
 	val saved by viewModel.saved.collectAsStateWithLifecycle(null)
 
 	LaunchedEffect(saved) {
@@ -228,7 +234,7 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 						)
 						ConfigurationToggle(
 							stringResource(id = R.string.show_amnezia_properties),
-							checked = configType == ConfigType.AMNEZIA,
+							checked = derivedConfigType.value == ConfigType.AMNEZIA,
 							padding = screenPadding,
 							onCheckChanged = { configType = if (it) ConfigType.AMNEZIA else ConfigType.WIREGUARD },
 							modifier = Modifier.focusRequester(focusRequester),
@@ -346,7 +352,7 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier = Modifier.width(IntrinsicSize.Min),
 							)
 						}
-						if (configType == ConfigType.AMNEZIA) {
+						if (derivedConfigType.value == ConfigType.AMNEZIA) {
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.junkPacketCount,
 								onValueChange = viewModel::onJunkPacketCountChanged,
