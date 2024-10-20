@@ -19,6 +19,8 @@ import com.zaneschepke.wireguardautotunnel.util.FileReadException
 import com.zaneschepke.wireguardautotunnel.util.InvalidFileExtensionException
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
+import com.zaneschepke.wireguardautotunnel.util.extensions.extractNameAndNumber
+import com.zaneschepke.wireguardautotunnel.util.extensions.hasNumberInParentheses
 import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -106,7 +108,12 @@ constructor(
 			var tunnelName = name
 			var num = 1
 			while (tunnels.any { it.name == tunnelName }) {
-				tunnelName = "$name($num)"
+				tunnelName = if (!tunnelName.hasNumberInParentheses()) {
+					"$name($num)"
+				} else {
+					val pair = tunnelName.extractNameAndNumber()
+					"${pair?.first}($num)"
+				}
 				num++
 			}
 			tunnelName
@@ -233,14 +240,15 @@ constructor(
 
 	private fun saveSettings(settings: Settings) = viewModelScope.launch { appDataRepository.settings.save(settings) }
 
-	fun onCopyTunnel(tunnel: TunnelConfig?) = viewModelScope.launch {
-		tunnel?.let {
-			saveTunnel(
-				TunnelConfig(
-					name = it.name.plus(NumberUtils.randomThree()),
-					wgQuick = it.wgQuick,
-				),
-			)
-		}
+	fun onCopyTunnel(tunnel: TunnelConfig) = viewModelScope.launch {
+		saveTunnel(
+			tunnel.copy(
+				id = 0,
+				isPrimaryTunnel = false,
+				isMobileDataTunnel = false,
+				isActive = false,
+				name = makeTunnelNameUnique(tunnel.name),
+			),
+		)
 	}
 }

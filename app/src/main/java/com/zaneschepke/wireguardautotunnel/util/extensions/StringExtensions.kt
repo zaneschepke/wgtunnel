@@ -3,6 +3,8 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 import timber.log.Timber
 import java.util.regex.Pattern
 
+val hasNumberInParentheses = """^(.+?)\((\d+)\)$""".toRegex()
+
 fun String.isValidIpv4orIpv6Address(): Boolean {
 	val ipv4Pattern = Pattern.compile(
 		"^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\$",
@@ -11,6 +13,18 @@ fun String.isValidIpv4orIpv6Address(): Boolean {
 		"^([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}\$",
 	)
 	return ipv4Pattern.matcher(this).matches() || ipv6Pattern.matcher(this).matches()
+}
+
+fun String.hasNumberInParentheses(): Boolean {
+	return hasNumberInParentheses.matches(this)
+}
+
+// Function to extract name and number
+fun String.extractNameAndNumber(): Pair<String, Int>? {
+	val matchResult = hasNumberInParentheses.matchEntire(this)
+	return matchResult?.let {
+		Pair(it.groupValues[1], it.groupValues[2].toInt())
+	}
 }
 
 fun List<String>.isMatchingToWildcardList(value: String): Boolean {
