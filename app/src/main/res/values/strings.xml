@@ -199,4 +199,5 @@
 	<string name="never">never</string>
 	<string name="sec">sec</string>
 	<string name="handshake">handshake</string>
+    <string name="logs">Logs</string>
 </resources>

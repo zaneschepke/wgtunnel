@@ -17,9 +17,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
@@ -57,7 +55,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationT
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.WildcardSupportingLabel
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
@@ -102,13 +99,15 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusReq
 	Scaffold(
 		topBar = {
 			TopNavBar(config.name, trailing = {
-				IconButton(onClick = { navController.navigate(
-					Route.Config(config.id),
-				) }) {
+				IconButton(onClick = {
+					navController.navigate(
+						Route.Config(config.id),
+					)
+				}) {
 					val icon = Icons.Outlined.Edit
 					Icon(
 						imageVector = icon,
-						contentDescription = icon.name
+						contentDescription = icon.name,
 					)
 				}
 			})

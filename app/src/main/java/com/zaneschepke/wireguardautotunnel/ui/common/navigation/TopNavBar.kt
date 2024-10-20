@@ -22,12 +22,12 @@ fun TopNavBar(title: String, trailing: @Composable () -> Unit = {}) {
 				val icon = Icons.AutoMirrored.Outlined.ArrowBack
 				Icon(
 					imageVector = icon,
-					contentDescription = icon.name
+					contentDescription = icon.name,
 				)
 			}
 		},
 		actions = {
 			trailing()
-		}
+		},
 	)
 }
