@@ -166,7 +166,7 @@
     <string name="export_configs_failed">Konfigurationsexport fehlgeschlagen</string>
     <string name="error_file_format">Ungültige Konfiguration Tunnel-Format</string>
     <string name="response_packet_magic_header">Antwortpaket magic header</string>
-    <string name="restart_at_boot">Neustart nach Systemstart</string>
+    <string name="restart_at_boot">Beim Hochfahren starten</string>
     <string name="optional_default">"optional, standard: "</string>
     <string name="background_location_message">Für diese Funktion ist die Erlaubnis, den Standort jederzeit zu bestimmen, und/oder ein genauer Standort erforderlich. Bitte</string>
     <string name="details">Details</string>
