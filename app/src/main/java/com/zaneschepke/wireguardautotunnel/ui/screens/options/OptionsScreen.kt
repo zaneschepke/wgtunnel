@@ -163,7 +163,6 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusReq
 						modifier =
 						Modifier
 							.focusRequester(focusRequester),
-						padding = screenPadding,
 						onCheckChanged = { optionsViewModel.onTogglePrimaryTunnel(config) },
 					)
 				}
@@ -201,7 +200,6 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusReq
 						stringResource(R.string.mobile_data_tunnel),
 						enabled = true,
 						checked = config.isMobileDataTunnel,
-						padding = screenPadding,
 						onCheckChanged = { optionsViewModel.onToggleIsMobileDataTunnel(config) },
 					)
 					Column {
@@ -273,7 +271,6 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), focusReq
 							stringResource(R.string.restart_on_ping),
 							enabled = !appUiState.settings.isPingEnabled,
 							checked = config.isPingEnabled || appUiState.settings.isPingEnabled,
-							padding = screenPadding,
 							onCheckChanged = { optionsViewModel.onToggleRestartOnPing(config) },
 						)
 						if (config.isPingEnabled || appUiState.settings.isPingEnabled) {

@@ -68,6 +68,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.config.components.Applicat
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import kotlinx.coroutines.delay
 
 @Composable
@@ -193,7 +194,7 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 			}
 		},
 	) {
-		Column(Modifier.padding(it)) {
+		Column(Modifier.padding(top = 24.dp.scaledHeight()).padding(it)) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Top,
@@ -235,7 +236,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 						ConfigurationToggle(
 							stringResource(id = R.string.show_amnezia_properties),
 							checked = derivedConfigType.value == ConfigType.AMNEZIA,
-							padding = screenPadding,
 							onCheckChanged = { configType = if (it) ConfigType.AMNEZIA else ConfigType.WIREGUARD },
 							modifier = Modifier.focusRequester(focusRequester),
 						)

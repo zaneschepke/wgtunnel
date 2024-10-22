@@ -44,6 +44,8 @@ android {
 			getByName("debug").assets.srcDirs(files("$projectDir/schemas")) // Room
 		}
 
+		buildConfigField("String[]", "LANGUAGES", "new String[]{ ${languageList().joinToString(separator = ", ") { "\"$it\"" }} }")
+
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		vectorDrawables { useSupportLibrary = true }
 	}

@@ -1,9 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
+import android.content.Context
 import android.os.Bundle
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.core.tween
@@ -11,8 +10,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.QuestionMark
@@ -29,8 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -41,6 +42,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.data.datastore.LocaleStorage
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
@@ -48,8 +51,9 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.isCurrentRoute
-import com.zaneschepke.wireguardautotunnel.ui.common.prompt.CustomSnackBar
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
@@ -57,10 +61,15 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.options.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.pinlock.PinLockScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.scanner.ScannerScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.AppearanceScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.display.DisplayScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.LanguageScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.AutoTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
@@ -68,6 +77,13 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+	private val localeStorage: LocaleStorage by lazy {
+		(application as WireGuardAutoTunnel).localeStorage
+	}
+
+	private lateinit var oldPrefLocaleCode: String
+
 	@Inject
 	lateinit var appStateRepository: AppStateRepository
 
@@ -78,12 +94,6 @@ class MainActivity : AppCompatActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		enableEdgeToEdge(
-			navigationBarStyle = SystemBarStyle.auto(
-				lightScrim = Color.Transparent.toArgb(),
-				darkScrim = Color.Transparent.toArgb(),
-			),
-		)
 
 		installSplashScreen().apply {
 			setKeepOnScreenCondition {
@@ -113,9 +123,10 @@ class MainActivity : AppCompatActivity() {
 
 			CompositionLocalProvider(LocalNavController provides navController) {
 				SnackbarControllerProvider { host ->
-					WireguardAutoTunnelTheme {
+					WireguardAutoTunnelTheme(theme = appUiState.generalState.theme){
 						val focusRequester = remember { FocusRequester() }
 						Scaffold(
+							contentWindowInsets = WindowInsets(0.dp),
 							snackbarHost = {
 								SnackbarHost(host) { snackbarData: SnackbarData ->
 									CustomSnackBar(
@@ -160,8 +171,8 @@ class MainActivity : AppCompatActivity() {
 									),
 								)
 							},
-						) { padding ->
-							Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+						) {
+							Box(modifier = Modifier.fillMaxSize().padding(it)) {
 								NavHost(
 									navController,
 									enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
@@ -180,6 +191,20 @@ class MainActivity : AppCompatActivity() {
 											uiState = appUiState,
 											focusRequester = focusRequester,
 										)
+									}
+									composable<Route.AutoTunnel> {
+										AutoTunnelScreen(
+											appUiState,
+										)
+									}
+									composable<Route.Appearance> {
+										AppearanceScreen()
+									}
+									composable<Route.Language> {
+										LanguageScreen(localeStorage)
+									}
+									composable<Route.Display> {
+										DisplayScreen(appUiState)
 									}
 									composable<Route.Support> {
 										SupportScreen(
@@ -220,6 +245,21 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 		}
+	}
+
+	override fun attachBaseContext(newBase: Context) {
+		oldPrefLocaleCode = LocaleStorage(newBase).getPreferredLocale()
+		applyOverrideConfiguration(LocaleUtil.getLocalizedConfiguration(oldPrefLocaleCode))
+		super.attachBaseContext(newBase)
+	}
+
+	override fun onResume() {
+		val currentLocaleCode = LocaleStorage(this).getPreferredLocale()
+		if (oldPrefLocaleCode != currentLocaleCode) {
+			recreate() // locale is changed, restart the activity to update
+			oldPrefLocaleCode = currentLocaleCode
+		}
+		super.onResume()
 	}
 
 	override fun onDestroy() {

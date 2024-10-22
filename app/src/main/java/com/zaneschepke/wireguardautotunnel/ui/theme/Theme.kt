@@ -36,24 +36,34 @@ private val LightColorScheme =
 		onSecondaryContainer = ThemeColors.Light.primary,
 	)
 
+enum class Theme {
+	AUTOMATIC,
+	LIGHT,
+	DARK,
+	DYNAMIC
+}
+
 @Composable
 fun WireguardAutoTunnelTheme(
-	// force dark theme
-	useDarkTheme: Boolean = isSystemInDarkTheme(),
+	theme: Theme = Theme.AUTOMATIC,
 	content: @Composable () -> Unit,
 ) {
 	val context = LocalContext.current
-	val colorScheme = when {
-		(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
-			if (useDarkTheme) {
-				dynamicDarkColorScheme(context)
-			} else {
-				dynamicLightColorScheme(context)
-			}
+	val isDark = isSystemInDarkTheme()
+	val autoTheme = if(isDark) DarkColorScheme else LightColorScheme
+	val colorScheme = when(theme) {
+		Theme.AUTOMATIC -> autoTheme
+		Theme.DARK -> DarkColorScheme
+		Theme.LIGHT -> LightColorScheme
+		Theme.DYNAMIC -> {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				if (isDark) {
+					dynamicDarkColorScheme(context)
+				} else {
+					dynamicLightColorScheme(context)
+				}
+			} else autoTheme
 		}
-		useDarkTheme -> DarkColorScheme
-		// TODO force dark theme for now until light theme designed
-		else -> DarkColorScheme
 	}
 	val view = LocalView.current
 	if (!view.isInEditMode) {
@@ -62,8 +72,7 @@ fun WireguardAutoTunnelTheme(
 			WindowCompat.setDecorFitsSystemWindows(window, false)
 			window.statusBarColor = Color.Transparent.toArgb()
 			window.navigationBarColor = Color.Transparent.toArgb()
-			WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-				!useDarkTheme
+			WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = isDark
 		}
 	}
 

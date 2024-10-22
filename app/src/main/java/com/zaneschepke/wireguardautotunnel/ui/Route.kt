@@ -10,6 +10,18 @@ sealed class Route {
 	data object Settings : Route()
 
 	@Serializable
+	data object AutoTunnel : Route()
+
+	@Serializable
+	data object Appearance : Route()
+
+	@Serializable
+	data object Display : Route()
+
+	@Serializable
+	data object Language : Route()
+
+	@Serializable
 	data object Main : Route()
 
 	@Serializable

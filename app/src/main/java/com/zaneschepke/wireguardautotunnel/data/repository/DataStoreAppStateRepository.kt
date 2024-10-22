@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
 import com.zaneschepke.wireguardautotunnel.data.domain.GeneralState
+import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -11,47 +12,61 @@ class DataStoreAppStateRepository(
 ) :
 	AppStateRepository {
 	override suspend fun isLocationDisclosureShown(): Boolean {
-		return dataStoreManager.getFromStore(DataStoreManager.LOCATION_DISCLOSURE_SHOWN)
+		return dataStoreManager.getFromStore(DataStoreManager.locationDisclosureShown)
 			?: GeneralState.LOCATION_DISCLOSURE_SHOWN_DEFAULT
 	}
 
 	override suspend fun setLocationDisclosureShown(shown: Boolean) {
-		dataStoreManager.saveToDataStore(DataStoreManager.LOCATION_DISCLOSURE_SHOWN, shown)
+		dataStoreManager.saveToDataStore(DataStoreManager.locationDisclosureShown, shown)
 	}
 
 	override suspend fun isPinLockEnabled(): Boolean {
-		return dataStoreManager.getFromStore(DataStoreManager.IS_PIN_LOCK_ENABLED)
+		return dataStoreManager.getFromStore(DataStoreManager.pinLockEnabled)
 			?: GeneralState.PIN_LOCK_ENABLED_DEFAULT
 	}
 
 	override suspend fun setPinLockEnabled(enabled: Boolean) {
-		dataStoreManager.saveToDataStore(DataStoreManager.IS_PIN_LOCK_ENABLED, enabled)
+		dataStoreManager.saveToDataStore(DataStoreManager.pinLockEnabled, enabled)
 	}
 
 	override suspend fun isBatteryOptimizationDisableShown(): Boolean {
-		return dataStoreManager.getFromStore(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN)
+		return dataStoreManager.getFromStore(DataStoreManager.batteryDisableShown)
 			?: GeneralState.BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT
 	}
 
 	override suspend fun setBatteryOptimizationDisableShown(shown: Boolean) {
-		dataStoreManager.saveToDataStore(DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN, shown)
+		dataStoreManager.saveToDataStore(DataStoreManager.batteryDisableShown, shown)
 	}
 
 	override suspend fun getCurrentSsid(): String? {
-		return dataStoreManager.getFromStore(DataStoreManager.CURRENT_SSID)
+		return dataStoreManager.getFromStore(DataStoreManager.currentSSID)
 	}
 
 	override suspend fun setCurrentSsid(ssid: String) {
-		dataStoreManager.saveToDataStore(DataStoreManager.CURRENT_SSID, ssid)
+		dataStoreManager.saveToDataStore(DataStoreManager.currentSSID, ssid)
 	}
 
 	override suspend fun isTunnelStatsExpanded(): Boolean {
-		return dataStoreManager.getFromStore(DataStoreManager.IS_TUNNEL_STATS_EXPANDED)
+		return dataStoreManager.getFromStore(DataStoreManager.tunnelStatsExpanded)
 			?: GeneralState.IS_TUNNEL_STATS_EXPANDED
 	}
 
 	override suspend fun setTunnelStatsExpanded(expanded: Boolean) {
-		dataStoreManager.saveToDataStore(DataStoreManager.IS_TUNNEL_STATS_EXPANDED, expanded)
+		dataStoreManager.saveToDataStore(DataStoreManager.tunnelStatsExpanded, expanded)
+	}
+
+	override suspend fun setTheme(theme: Theme) {
+		dataStoreManager.saveToDataStore(DataStoreManager.theme, theme.name)
+	}
+
+	override suspend fun getTheme(): Theme {
+		return dataStoreManager.getFromStore(DataStoreManager.theme)?.let {
+			try {
+				Theme.valueOf(it)
+			} catch (_ : IllegalArgumentException) {
+				Theme.AUTOMATIC
+			}
+		} ?: Theme.AUTOMATIC
 	}
 
 	override val generalStateFlow: Flow<GeneralState> =
@@ -60,15 +75,16 @@ class DataStoreAppStateRepository(
 				try {
 					GeneralState(
 						isLocationDisclosureShown =
-						pref[DataStoreManager.LOCATION_DISCLOSURE_SHOWN]
+						pref[DataStoreManager.locationDisclosureShown]
 							?: GeneralState.LOCATION_DISCLOSURE_SHOWN_DEFAULT,
 						isBatteryOptimizationDisableShown =
-						pref[DataStoreManager.BATTERY_OPTIMIZE_DISABLE_SHOWN]
+						pref[DataStoreManager.batteryDisableShown]
 							?: GeneralState.BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT,
 						isPinLockEnabled =
-						pref[DataStoreManager.IS_PIN_LOCK_ENABLED]
+						pref[DataStoreManager.pinLockEnabled]
 							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
-						isTunnelStatsExpanded = pref[DataStoreManager.IS_TUNNEL_STATS_EXPANDED] ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
+						isTunnelStatsExpanded = pref[DataStoreManager.tunnelStatsExpanded] ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
+						theme = getTheme()
 					)
 				} catch (e: IllegalArgumentException) {
 					Timber.e(e)

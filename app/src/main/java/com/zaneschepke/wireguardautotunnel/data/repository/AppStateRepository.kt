@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.domain.GeneralState
+import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
 
 interface AppStateRepository {
@@ -23,6 +24,10 @@ interface AppStateRepository {
 	suspend fun isTunnelStatsExpanded(): Boolean
 
 	suspend fun setTunnelStatsExpanded(expanded: Boolean)
+
+	suspend fun setTheme(theme: Theme)
+
+	suspend fun getTheme() : Theme
 
 	val generalStateFlow: Flow<GeneralState>
 }

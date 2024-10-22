@@ -200,4 +200,15 @@
 	<string name="sec">sec</string>
 	<string name="handshake">handshake</string>
     <string name="logs">Logs</string>
+    <string name="tunnel_notifications">Tunnel notifications</string>
+	<string name="kill_switch">Kill switch</string>
+	<string name="appearance">Appearance</string>
+	<string name="notifications">Notifications</string>
+	<string name="automatic">Automatic</string>
+	<string name="light">Light</string>
+	<string name="dark">Dark</string>
+	<string name="dynamic">Dynamic</string>
+	<string name="language">Language</string>
+	<string name="display_theme">Display theme</string>
+	<string name="selected">Selected</string>
 </resources>

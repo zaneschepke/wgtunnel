@@ -1,10 +1,13 @@
 package com.zaneschepke.wireguardautotunnel.data.domain
 
+import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
+
 data class GeneralState(
 	val isLocationDisclosureShown: Boolean = LOCATION_DISCLOSURE_SHOWN_DEFAULT,
 	val isBatteryOptimizationDisableShown: Boolean = BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT,
 	val isPinLockEnabled: Boolean = PIN_LOCK_ENABLED_DEFAULT,
 	val isTunnelStatsExpanded: Boolean = IS_TUNNEL_STATS_EXPANDED,
+	val theme: Theme = Theme.AUTOMATIC
 ) {
 	companion object {
 		const val LOCATION_DISCLOSURE_SHOWN_DEFAULT = false

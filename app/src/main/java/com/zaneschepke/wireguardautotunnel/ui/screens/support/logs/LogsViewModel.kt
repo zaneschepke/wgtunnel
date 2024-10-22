@@ -11,6 +11,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.MainDispatcher
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.extensions.chunked
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchShareFile
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
@@ -29,6 +29,7 @@ class LogsViewModel
 @Inject
 constructor(
 	private val localLogCollector: LogReader,
+	private val fileUtils: FileUtils,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	@MainDispatcher private val mainDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
@@ -51,12 +52,7 @@ constructor(
 
 	fun shareLogs(context: Context): Job = viewModelScope.launch(ioDispatcher) {
 		runCatching {
-			val sharePath = File(context.filesDir, "external_files")
-			if (sharePath.exists()) sharePath.delete()
-			sharePath.mkdir()
-			val file = File("${sharePath.path + "/" + Constants.BASE_LOG_FILE_NAME}-${Instant.now().epochSecond}.zip")
-			if (file.exists()) file.delete()
-			file.createNewFile()
+			val file = fileUtils.createNewShareFile("${Constants.BASE_LOG_FILE_NAME}-${Instant.now().epochSecond}.zip")
 			localLogCollector.zipLogFiles(file.absolutePath)
 			val uri = FileProvider.getUriForFile(context, context.getString(R.string.provider), file)
 			context.launchShareFile(uri)

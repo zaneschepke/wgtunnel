@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.common.prompt
+package com.zaneschepke.wireguardautotunnel.ui.common.snackbar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize

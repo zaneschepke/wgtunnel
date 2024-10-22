@@ -2,6 +2,8 @@ package com.zaneschepke.wireguardautotunnel.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wireguard.android.backend.WgQuickBackend
+import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
@@ -18,10 +20,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 import javax.inject.Provider
@@ -32,10 +37,24 @@ class AppViewModel
 constructor(
 	private val appDataRepository: AppDataRepository,
 	private val tunnelService: Provider<TunnelService>,
+	private val rootShell: Provider<RootShell>,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
 	private val _appUiState = MutableStateFlow(AppUiState())
+
+	val appUiState = _appUiState.onStart {
+		_appUiState.update {
+			it.copy(
+				isRooted = isRooted(),
+				isKernelAvailable = isKernelSupported(),
+			)
+		}
+	}.stateIn(
+		viewModelScope + ioDispatcher,
+		SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
+		AppUiState(),
+	)
 
 	val uiState =
 		combine(
@@ -43,8 +62,9 @@ constructor(
 			appDataRepository.tunnels.getTunnelConfigsFlow(),
 			tunnelService.get().vpnState,
 			appDataRepository.appState.generalStateFlow,
-		) { settings, tunnels, tunnelState, generalState ->
-			AppUiState(
+			appUiState,
+		) { settings, tunnels, tunnelState, generalState, appUiState ->
+			appUiState.copy(
 				settings,
 				tunnels,
 				tunnelState,
@@ -111,5 +131,22 @@ constructor(
 
 	fun onPinLockEnabled() = viewModelScope.launch {
 		appDataRepository.appState.setPinLockEnabled(true)
+	}
+
+	private suspend fun isKernelSupported(): Boolean {
+		return withContext(ioDispatcher) {
+			WgQuickBackend.hasKernelSupport()
+		}
+	}
+
+	private suspend fun isRooted(): Boolean {
+		return try {
+			withContext(ioDispatcher) {
+				rootShell.get().start()
+			}
+			true
+		} catch (_: Exception) {
+			false
+		}
 	}
 }

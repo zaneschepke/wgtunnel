@@ -1,8 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings
 
 import android.content.Context
-import android.location.LocationManager
-import androidx.core.location.LocationManagerCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
@@ -16,6 +15,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
+import com.zaneschepke.wireguardautotunnel.util.extensions.launchShareFile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -52,56 +52,12 @@ constructor(
 	private val settings = appDataRepository.settings.getSettingsFlow()
 		.stateIn(viewModelScope, SharingStarted.Eagerly, Settings())
 
-	fun onSaveTrustedSSID(ssid: String) = viewModelScope.launch {
-		val trimmed = ssid.trim()
-		with(settings.value) {
-			if (!trustedNetworkSSIDs.contains(trimmed)) {
-				this.trustedNetworkSSIDs.add(ssid)
-				appDataRepository.settings.save(this)
-			} else {
-				SnackbarController.showMessage(
-					StringValue.StringResource(
-						R.string.error_ssid_exists,
-					),
-				)
-			}
-		}
-	}
-
 	fun setLocationDisclosureShown() = viewModelScope.launch {
 		appDataRepository.appState.setLocationDisclosureShown(true)
 	}
 
 	fun setBatteryOptimizeDisableShown() = viewModelScope.launch {
 		appDataRepository.appState.setBatteryOptimizationDisableShown(true)
-	}
-
-	fun onToggleTunnelOnMobileData() = viewModelScope.launch {
-		with(settings.value) {
-			appDataRepository.settings.save(
-				copy(
-					isTunnelOnMobileDataEnabled = !this.isTunnelOnMobileDataEnabled,
-				),
-			)
-		}
-	}
-
-	fun onDeleteTrustedSSID(ssid: String) = viewModelScope.launch {
-		with(settings.value) {
-			appDataRepository.settings.save(
-				copy(
-					trustedNetworkSSIDs = (this.trustedNetworkSSIDs - ssid).toMutableList(),
-				),
-			)
-		}
-	}
-
-	private fun exportTunnels(files: List<File>) = viewModelScope.launch {
-		fileUtils.saveFilesToZip(files).onSuccess {
-			SnackbarController.showMessage(StringValue.StringResource(R.string.exported_configs_message))
-		}.onFailure {
-			SnackbarController.showMessage(StringValue.StringResource(R.string.export_configs_failed))
-		}
 	}
 
 	fun onToggleAutoTunnel(context: Context) = viewModelScope.launch {
@@ -132,24 +88,6 @@ constructor(
 		}
 	}
 
-	fun onToggleTunnelOnEthernet() = viewModelScope.launch {
-		with(settings.value) {
-			appDataRepository.settings.save(
-				copy(
-					isTunnelOnEthernetEnabled = !isTunnelOnEthernetEnabled,
-				),
-			)
-		}
-	}
-
-	fun isLocationEnabled(context: Context): Boolean {
-		val locationManager =
-			context.getSystemService(
-				Context.LOCATION_SERVICE,
-			) as LocationManager
-		return LocationManagerCompat.isLocationEnabled(locationManager)
-	}
-
 	fun onToggleShortcutsEnabled() = viewModelScope.launch {
 		with(settings.value) {
 			appDataRepository.settings.save(
@@ -165,16 +103,6 @@ constructor(
 			appDataRepository.settings.save(
 				this.copy(
 					isKernelEnabled = enabled,
-				),
-			)
-		}
-	}
-
-	fun onToggleTunnelOnWifi() = viewModelScope.launch {
-		with(settings.value) {
-			appDataRepository.settings.save(
-				copy(
-					isTunnelOnWifiEnabled = !isTunnelOnWifiEnabled,
 				),
 			)
 		}
@@ -207,16 +135,6 @@ constructor(
 			} else {
 				saveKernelMode(enabled = false)
 			}
-		}
-	}
-
-	fun onToggleRestartOnPing() = viewModelScope.launch {
-		with(settings.value) {
-			appDataRepository.settings.save(
-				copy(
-					isPingEnabled = !isPingEnabled,
-				),
-			)
 		}
 	}
 
@@ -262,12 +180,16 @@ constructor(
 		requestRoot()
 	}
 
-	fun exportAllConfigs() = viewModelScope.launch {
+	fun exportAllConfigs(context: Context) = viewModelScope.launch {
 		kotlin.runCatching {
+			val shareFile = fileUtils.createNewShareFile("wg-export_${Instant.now().epochSecond}.zip")
 			val tunnels = appDataRepository.tunnels.getAll()
 			val wgFiles = fileUtils.createWgFiles(tunnels)
 			val amFiles = fileUtils.createAmFiles(tunnels)
-			exportTunnels(wgFiles + amFiles)
+			val allFiles = wgFiles + amFiles
+			fileUtils.zipAll(shareFile, allFiles)
+			val uri = FileProvider.getUriForFile(context, context.getString(R.string.provider), shareFile)
+			context.launchShareFile(uri)
 		}
 	}
 }

@@ -21,11 +21,12 @@ class DataStoreManager(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
 	companion object {
-		val LOCATION_DISCLOSURE_SHOWN = booleanPreferencesKey("LOCATION_DISCLOSURE_SHOWN")
-		val BATTERY_OPTIMIZE_DISABLE_SHOWN = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
-		val CURRENT_SSID = stringPreferencesKey("CURRENT_SSID")
-		val IS_PIN_LOCK_ENABLED = booleanPreferencesKey("PIN_LOCK_ENABLED")
-		val IS_TUNNEL_STATS_EXPANDED = booleanPreferencesKey("TUNNEL_STATS_EXPANDED")
+		val locationDisclosureShown = booleanPreferencesKey("LOCATION_DISCLOSURE_SHOWN")
+		val batteryDisableShown = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
+		val currentSSID = stringPreferencesKey("CURRENT_SSID")
+		val pinLockEnabled = booleanPreferencesKey("PIN_LOCK_ENABLED")
+		val tunnelStatsExpanded = booleanPreferencesKey("TUNNEL_STATS_EXPANDED")
+		val theme = stringPreferencesKey("THEME")
 	}
 
 	// preferences
