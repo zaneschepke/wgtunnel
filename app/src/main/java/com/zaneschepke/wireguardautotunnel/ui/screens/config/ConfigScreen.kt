@@ -542,15 +542,27 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								hint = stringResource(R.string.base64_key),
 								modifier = Modifier.fillMaxWidth(),
 							)
-							ConfigurationTextBox(
+							OutlinedTextField(
+								modifier =
+								Modifier
+									.fillMaxWidth()
+									.clickable { showAuthPrompt = true },
 								value = peer.preSharedKey,
+								visualTransformation =
+								if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID.toInt()) || isAuthenticated) {
+									VisualTransformation.None
+								} else {
+									PasswordVisualTransformation()
+								},
+								enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID.toInt()) || isAuthenticated || peer.preSharedKey.isEmpty(),
 								onValueChange = { value ->
 									viewModel.onPreSharedKeyChange(index, value)
 								},
+								label = { Text(stringResource(R.string.preshared_key)) },
+								singleLine = true,
+								placeholder = { Text(stringResource(R.string.optional)) },
+								keyboardOptions = keyboardOptions,
 								keyboardActions = keyboardActions,
-								label = stringResource(R.string.preshared_key),
-								hint = stringResource(R.string.optional),
-								modifier = Modifier.fillMaxWidth(),
 							)
 							OutlinedTextField(
 								modifier = Modifier.fillMaxWidth(),
