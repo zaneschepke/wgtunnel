@@ -1,4 +1,4 @@
-Was ist neu?
-- Behebt Auto-Tunneling-Fehler
-- Behebt Android-Backup-Fehler
-- Versionen erhöhen
+Was ist neu:
+- Bug beim auto-tunneling behoben
+- Bug bei Backups auf Android behoben
+- Version angehoben
