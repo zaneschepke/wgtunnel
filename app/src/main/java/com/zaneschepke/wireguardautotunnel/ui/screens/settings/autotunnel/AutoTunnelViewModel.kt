@@ -18,7 +18,6 @@ class AutoTunnelViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
-
 ) : ViewModel() {
 
 	private val settings = appDataRepository.settings.getSettingsFlow()
@@ -42,6 +41,13 @@ constructor(
 				),
 			)
 		}
+	}
+
+	fun onToggleWildcards() = viewModelScope.launch {
+		val wildcards = appDataRepository.appState.isWildcardsEnabled()
+		appDataRepository.appState.setWildcardsEnabled(
+			!wildcards
+		)
 	}
 
 	fun onDeleteTrustedSSID(ssid: String) = viewModelScope.launch {

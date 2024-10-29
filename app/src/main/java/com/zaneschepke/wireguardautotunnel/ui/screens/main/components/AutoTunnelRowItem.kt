@@ -16,31 +16,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.ui.common.ExpandingRowListItem
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 
 @Composable
-fun AutoTunnelRowItem(settings: Settings, onToggle: () -> Unit, focusRequester: FocusRequester) {
+fun AutoTunnelRowItem(settings: Settings, onToggle: () -> Unit) {
 	val context = LocalContext.current
 	val itemFocusRequester = remember { FocusRequester() }
-	val autoTunnelingLabel =
-		buildAnnotatedString {
-			append(stringResource(id = R.string.auto_tunneling))
-			append(": ")
-			if (settings.isAutoTunnelPaused) {
-				append(
-					stringResource(id = R.string.paused),
-				)
-			} else {
-				append(
-					stringResource(id = R.string.active),
-				)
-			}
-		}
 	ExpandingRowListItem(
 		leading = {
 			val icon = Icons.Rounded.Bolt
@@ -49,23 +38,23 @@ fun AutoTunnelRowItem(settings: Settings, onToggle: () -> Unit, focusRequester: 
 				icon.name,
 				modifier =
 				Modifier
-					.size(iconSize).scale(1.5f),
+					.size(16.dp.scaledHeight()).scale(1.5f),
 				tint =
-				if (settings.isAutoTunnelPaused) {
+				if (!settings.isAutoTunnelEnabled) {
 					Color.Gray
 				} else {
 					SilverTree
 				},
 			)
 		},
-		text = autoTunnelingLabel.text,
+		text = stringResource(R.string.auto_tunneling),
 		trailing = {
-			TextButton(
-				modifier = Modifier.focusRequester(itemFocusRequester),
-				onClick = { onToggle() },
-			) {
-				Text(stringResource(id = if (settings.isAutoTunnelPaused) R.string.resume else R.string.pause))
-			}
+			ScaledSwitch(
+				settings.isAutoTunnelEnabled,
+				onClick = {
+					onToggle()
+				}
+			)
 		},
 		onClick = {
 			if (context.isRunningOnTv()) {
@@ -73,6 +62,5 @@ fun AutoTunnelRowItem(settings: Settings, onToggle: () -> Unit, focusRequester: 
 			}
 		},
 		isExpanded = false,
-		focusRequester = focusRequester,
 	)
 }

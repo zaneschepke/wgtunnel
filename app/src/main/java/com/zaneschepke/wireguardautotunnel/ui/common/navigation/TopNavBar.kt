@@ -11,14 +11,14 @@ import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopNavBar(title: String, trailing: @Composable () -> Unit = {}) {
+fun TopNavBar(title: String, trailing: @Composable () -> Unit = {}, showBack: Boolean = true) {
 	val navController = LocalNavController.current
 	CenterAlignedTopAppBar(
 		title = {
 			Text(title)
 		},
 		navigationIcon = {
-			IconButton(onClick = { navController.popBackStack() }) {
+			if(showBack) IconButton(onClick = { navController.popBackStack() }) {
 				val icon = Icons.AutoMirrored.Outlined.ArrowBack
 				Icon(
 					imageVector = icon,

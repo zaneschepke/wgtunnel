@@ -13,7 +13,6 @@ import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,16 +22,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.ExpandingRowListItem
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.extensions.asColor
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 
 @Composable
 fun TunnelRowItem(
@@ -46,7 +47,6 @@ fun TunnelRowItem(
 	onCopy: () -> Unit,
 	onDelete: () -> Unit,
 	onSwitchClick: (checked: Boolean) -> Unit,
-	focusRequester: FocusRequester,
 ) {
 	val leadingIconColor = if (!isActive) Color.Gray else vpnState.statistics.asColor()
 	val context = LocalContext.current
@@ -69,7 +69,7 @@ fun TunnelRowItem(
 				icon,
 				icon.name,
 				tint = leadingIconColor,
-				modifier = Modifier.size(iconSize),
+				modifier = Modifier.size(16.dp.scaledHeight()),
 			)
 		},
 		text = tunnel.name,
@@ -89,7 +89,6 @@ fun TunnelRowItem(
 		},
 		isExpanded = expanded && isActive,
 		expanded = { if (isActive && expanded) TunnelStatisticsRow(vpnState.statistics, tunnel) },
-		focusRequester = focusRequester,
 		trailing = {
 			if (
 				isSelected &&
@@ -143,7 +142,6 @@ fun TunnelRowItem(
 							)
 						}
 						IconButton(
-							modifier = Modifier.focusRequester(focusRequester),
 							onClick = {
 								if (isActive) {
 									onClick()
@@ -181,21 +179,17 @@ fun TunnelRowItem(
 								icon.name,
 							)
 						}
-						Switch(
+						ScaledSwitch(
 							modifier = Modifier.focusRequester(itemFocusRequester),
 							checked = isActive,
-							onCheckedChange = { checked ->
-								onSwitchClick(checked)
-							},
+							onClick = onSwitchClick
 						)
 					}
 				} else {
-					Switch(
+					ScaledSwitch(
 						modifier = Modifier.focusRequester(itemFocusRequester),
 						checked = isActive,
-						onCheckedChange = { checked ->
-							onSwitchClick(checked)
-						},
+						onClick = onSwitchClick
 					)
 				}
 			}

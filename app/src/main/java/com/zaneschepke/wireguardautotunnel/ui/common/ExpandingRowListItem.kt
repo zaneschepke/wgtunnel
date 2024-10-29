@@ -31,12 +31,10 @@ fun ExpandingRowListItem(
 	trailing: @Composable () -> Unit,
 	isExpanded: Boolean,
 	expanded: @Composable () -> Unit = {},
-	focusRequester: FocusRequester,
 ) {
 	Box(
 		modifier =
 		Modifier
-			.focusRequester(focusRequester)
 			.animateContentSize()
 			.clip(RoundedCornerShape(30.dp))
 			.combinedClickable(

@@ -60,24 +60,6 @@ constructor(
 		appDataRepository.appState.setBatteryOptimizationDisableShown(true)
 	}
 
-	fun onToggleAutoTunnel(context: Context) = viewModelScope.launch {
-		with(settings.value) {
-			var isAutoTunnelPaused = this.isAutoTunnelPaused
-			if (isAutoTunnelEnabled) {
-				ServiceManager.stopWatcherService(context)
-			} else {
-				ServiceManager.startWatcherService(context)
-				isAutoTunnelPaused = false
-			}
-			appDataRepository.settings.save(
-				copy(
-					isAutoTunnelEnabled = !isAutoTunnelEnabled,
-					isAutoTunnelPaused = isAutoTunnelPaused,
-				),
-			)
-		}
-	}
-
 	fun onToggleAlwaysOnVPN() = viewModelScope.launch {
 		with(settings.value) {
 			appDataRepository.settings.save(

@@ -72,7 +72,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import kotlinx.coroutines.delay
 
 @Composable
-fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
+fun ConfigScreen(tunnelId: Int) {
 	val viewModel = hiltViewModel<ConfigViewModel, ConfigViewModel.ConfigViewModelFactory> { factory ->
 		factory.create(tunnelId)
 	}
@@ -99,18 +99,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 	LaunchedEffect(saved) {
 		if (saved == true) {
 			navController.navigate(Route.Main)
-		}
-	}
-
-	LaunchedEffect(Unit) {
-		if (!uiState.loading && context.isRunningOnTv()) {
-			delay(Constants.FOCUS_REQUEST_DELAY)
-			kotlin.runCatching {
-				focusRequester.requestFocus()
-			}.onFailure {
-				delay(Constants.FOCUS_REQUEST_DELAY)
-				focusRequester.requestFocus()
-			}
 		}
 	}
 
@@ -194,7 +182,7 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 			}
 		},
 	) {
-		Column(Modifier.padding(top = 24.dp.scaledHeight()).padding(it)) {
+		Column(Modifier.padding(it)) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Top,
@@ -219,7 +207,7 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 							Modifier.fillMaxWidth(fillMaxWidth)
 						}
 						)
-						.padding(bottom = 10.dp),
+						.padding(bottom = 10.dp.scaledHeight()).padding(top = 24.dp.scaledHeight()),
 				) {
 					Column(
 						horizontalAlignment = Alignment.Start,
@@ -237,7 +225,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 							stringResource(id = R.string.show_amnezia_properties),
 							checked = derivedConfigType.value == ConfigType.AMNEZIA,
 							onCheckChanged = { configType = if (it) ConfigType.AMNEZIA else ConfigType.WIREGUARD },
-							modifier = Modifier.focusRequester(focusRequester),
 						)
 						ConfigurationTextBox(
 							value = uiState.tunnelName,
@@ -248,7 +235,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 							modifier =
 							Modifier
 								.fillMaxWidth()
-								.focusRequester(focusRequester),
 						)
 						OutlinedTextField(
 							modifier =
@@ -362,7 +348,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.junkPacketMinSize,
@@ -376,7 +361,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.junkPacketMaxSize,
@@ -390,7 +374,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.initPacketJunkSize,
@@ -401,7 +384,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.responsePacketJunkSize,
@@ -415,7 +397,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.initPacketMagicHeader,
@@ -429,7 +410,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.responsePacketMagicHeader,
@@ -443,7 +423,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.underloadPacketMagicHeader,
@@ -457,7 +436,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.transportPacketMagicHeader,
@@ -471,7 +449,6 @@ fun ConfigScreen(tunnelId: Int, focusRequester: FocusRequester) {
 								modifier =
 								Modifier
 									.fillMaxWidth()
-									.focusRequester(focusRequester),
 							)
 						}
 						Row(

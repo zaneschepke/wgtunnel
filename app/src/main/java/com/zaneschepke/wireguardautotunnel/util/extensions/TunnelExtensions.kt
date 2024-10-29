@@ -5,7 +5,7 @@ import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
-import com.zaneschepke.wireguardautotunnel.ui.theme.Corn
+import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
@@ -58,7 +58,7 @@ fun TunnelStatistics?.asColor(): Color {
 		?.let { statuses ->
 			when {
 				statuses.all { it == HandshakeStatus.HEALTHY } -> SilverTree
-				statuses.any { it == HandshakeStatus.STALE } -> Corn
+				statuses.any { it == HandshakeStatus.STALE } -> Straw
 				statuses.all { it == HandshakeStatus.NOT_STARTED } -> Color.Gray
 				else -> Color.Gray
 			}

@@ -151,6 +151,7 @@ dependencies {
 	implementation(libs.androidx.compose.ui.tooling.preview)
 	implementation(libs.androidx.material3)
 	implementation(libs.androidx.appcompat)
+	implementation(libs.material)
 
 	// test
 	testImplementation(libs.junit)

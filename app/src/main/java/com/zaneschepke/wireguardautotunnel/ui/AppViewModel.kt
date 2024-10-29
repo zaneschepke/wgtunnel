@@ -37,24 +37,8 @@ class AppViewModel
 constructor(
 	private val appDataRepository: AppDataRepository,
 	private val tunnelService: Provider<TunnelService>,
-	private val rootShell: Provider<RootShell>,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-
-	private val _appUiState = MutableStateFlow(AppUiState())
-
-	val appUiState = _appUiState.onStart {
-		_appUiState.update {
-			it.copy(
-				isRooted = isRooted(),
-				isKernelAvailable = isKernelSupported(),
-			)
-		}
-	}.stateIn(
-		viewModelScope + ioDispatcher,
-		SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
-		AppUiState(),
-	)
 
 	val uiState =
 		combine(
@@ -62,9 +46,8 @@ constructor(
 			appDataRepository.tunnels.getTunnelConfigsFlow(),
 			tunnelService.get().vpnState,
 			appDataRepository.appState.generalStateFlow,
-			appUiState,
-		) { settings, tunnels, tunnelState, generalState, appUiState ->
-			appUiState.copy(
+		) { settings, tunnels, tunnelState, generalState ->
+			AppUiState(
 				settings,
 				tunnels,
 				tunnelState,
@@ -73,14 +56,13 @@ constructor(
 		}.stateIn(
 			viewModelScope + ioDispatcher,
 			SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
-			_appUiState.value,
+			AppUiState(),
 		)
 
 	private val _isAppReady = MutableStateFlow<Boolean>(false)
 	val isAppReady = _isAppReady.asStateFlow()
 
 	init {
-
 		viewModelScope.launch {
 			initPin()
 			initAutoTunnel()
@@ -116,14 +98,6 @@ constructor(
 		if (settings.isAutoTunnelEnabled) ServiceManager.startWatcherService(WireGuardAutoTunnel.instance)
 	}
 
-	fun setTunnels(tunnels: TunnelConfigs) = viewModelScope.launch(ioDispatcher) {
-		_appUiState.emit(
-			_appUiState.value.copy(
-				tunnels = tunnels,
-			),
-		)
-	}
-
 	fun onPinLockDisabled() = viewModelScope.launch(ioDispatcher) {
 		PinManager.clearPin()
 		appDataRepository.appState.setPinLockEnabled(false)
@@ -133,20 +107,7 @@ constructor(
 		appDataRepository.appState.setPinLockEnabled(true)
 	}
 
-	private suspend fun isKernelSupported(): Boolean {
-		return withContext(ioDispatcher) {
-			WgQuickBackend.hasKernelSupport()
-		}
-	}
-
-	private suspend fun isRooted(): Boolean {
-		return try {
-			withContext(ioDispatcher) {
-				rootShell.get().start()
-			}
-			true
-		} catch (_: Exception) {
-			false
-		}
+	fun setLocationDisclosureShown() = viewModelScope.launch {
+		appDataRepository.appState.setLocationDisclosureShown(true)
 	}
 }

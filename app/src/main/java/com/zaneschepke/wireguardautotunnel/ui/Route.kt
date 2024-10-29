@@ -13,6 +13,9 @@ sealed class Route {
 	data object AutoTunnel : Route()
 
 	@Serializable
+	data object LocationDisclosure : Route()
+
+	@Serializable
 	data object Appearance : Route()
 
 	@Serializable

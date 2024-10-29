@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,15 +24,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.automirrored.outlined.ArrowRight
 import androidx.compose.material.icons.automirrored.outlined.ViewQuilt
 import androidx.compose.material.icons.filled.AppShortcut
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.VpnLock
 import androidx.compose.material.icons.outlined.AdminPanelSettings
-import androidx.compose.material.icons.outlined.AppShortcut
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.FolderZip
@@ -39,7 +34,6 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Pin
 import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.VpnLock
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -58,7 +52,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
@@ -66,13 +59,15 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalFocusRequester
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.VpnDeniedDialog
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDisclosure
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
+import com.zaneschepke.wireguardautotunnel.ui.theme.topPadding
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchNotificationSettings
@@ -87,13 +82,14 @@ import xyz.teamgravity.pin_lock_compose.PinManager
 	ExperimentalLayoutApi::class,
 )
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel: AppViewModel, uiState: AppUiState, focusRequester: FocusRequester) {
+fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel: AppViewModel, uiState: AppUiState) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val focusManager = LocalFocusManager.current
 	val snackbar = SnackbarController.current
+	val rootFocusRequester = LocalFocusRequester.current
+	val isRunningOnTv = remember { context.isRunningOnTv() }
 
-	val scrollState = rememberScrollState()
 	val interactionSource = remember { MutableInteractionSource() }
 
 	val settingsUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -119,9 +115,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 			ActivityResultContracts.StartActivityForResult(),
 			onResult = {
 				val accepted = (it.resultCode == RESULT_OK)
-				if (accepted) {
-					viewModel.onToggleAutoTunnel(context)
-				} else {
+				if (!accepted) {
 					showVpnPermissionDialog = true
 				}
 			},
@@ -141,20 +135,23 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 		startForResult.launch(intent)
 	}
 
-	fun handleAutoTunnelToggle() {
-		if (!uiState.generalState.isBatteryOptimizationDisableShown &&
-			!isBatteryOptimizationsDisabled() && !context.isRunningOnTv()
-		) {
-			return requestBatteryOptimizationsDisabled()
-		}
-		val intent = if (!uiState.settings.isKernelEnabled) {
-			VpnService.prepare(context)
-		} else {
-			null
-		}
-		if (intent != null) return vpnActivityResultState.launch(intent)
-		viewModel.onToggleAutoTunnel(context)
-	}
+//	fun handleAutoTunnelToggle() {
+//		if (!uiState.generalState.isBatteryOptimizationDisableShown &&
+//			!isBatteryOptimizationsDisabled() && !isRunningOnTv
+//		) {
+//			return requestBatteryOptimizationsDisabled()
+//		}
+//		val intent = if (!uiState.settings.isKernelEnabled) {
+//			VpnService.prepare(context)
+//		} else {
+//			null
+//		}
+//		if (intent != null) return vpnActivityResultState.launch(intent)
+//		viewModel.onToggleAutoTunnel(context)
+//	}
+
+
+
 
 // 	fun checkFineLocationGranted() {
 // 		isBackgroundLocationGranted =
@@ -188,18 +185,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 // 	if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
 // 		checkFineLocationGranted()
 // 	}
-	if (!uiState.generalState.isLocationDisclosureShown) {
-		BackgroundLocationDisclosure(
-			onDismiss = { viewModel.setLocationDisclosureShown() },
-			onAttest = {
-				context.launchAppSettings()
-				viewModel.setLocationDisclosureShown()
-			},
-			scrollState,
-			focusRequester,
-		)
-		return
-	}
 
 	BackgroundLocationDialog(
 		showLocationDialog,
@@ -207,11 +192,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 		onAttest = { showLocationDialog = false },
 	)
 
-	LocationServicesDialog(
-		showLocationServicesAlertDialog,
-		onDismiss = { showVpnPermissionDialog = false },
-		onAttest = { handleAutoTunnelToggle() },
-	)
+//	LocationServicesDialog(
+//		showLocationServicesAlertDialog,
+//		onDismiss = { showVpnPermissionDialog = false },
+//		onAttest = { handleAutoTunnelToggle() },
+//	)
 
 	VpnDeniedDialog(showVpnPermissionDialog, onDismiss = { showVpnPermissionDialog = false })
 
@@ -243,121 +228,139 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 		Modifier
 			.verticalScroll(rememberScrollState())
 			.fillMaxSize()
-			.padding(top = 24.dp.scaledHeight())
-			.padding(horizontal = 24.dp.scaledWidth()).clickable(
+			.padding(top = topPadding)
+			.padding(bottom = 40.dp.scaledHeight())
+			.padding(horizontal = 24.dp.scaledWidth())
+			.then(if(!isRunningOnTv) Modifier.clickable(
 				indication = null,
 				interactionSource = interactionSource,
 			) {
 				focusManager.clearFocus()
-			}.windowInsetsPadding(WindowInsets.systemBars),
+			} else Modifier)
 	) {
 		SurfaceSelectionGroupButton(
 			listOf(
 				SelectionItem(
 					Icons.Outlined.Bolt,
-					title = { Text(stringResource(R.string.auto_tunneling), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
+					title = { Text(stringResource(R.string.auto_tunneling), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
 					description = {
 						Text(
-							"Configure on demand tunnel rules",
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.outline),
+							stringResource(R.string.on_demand_rules),
+							style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
 						)
 					},
 					onClick = {
+						if(!uiState.generalState.isLocationDisclosureShown) return@SelectionItem navController.navigate(Route.LocationDisclosure)
 						navController.navigate(Route.AutoTunnel)
 					},
 					trailing = {
-						val icon = Icons.AutoMirrored.Outlined.ArrowForward
-						Icon(icon, icon.name)
-					}
-				),
-			),
+						ForwardButton(Modifier.focusable().focusRequester(rootFocusRequester)) { navController.navigate(Route.AutoTunnel) }
+					},
+				)
+			)
+		)
+		SurfaceSelectionGroupButton(
+			buildList {
+				if (!isRunningOnTv) addAll(
+					listOf(
+						SelectionItem(
+							Icons.Filled.AppShortcut,
+							{
+								ScaledSwitch(
+									uiState.settings.isShortcutsEnabled,
+									onClick = { viewModel.onToggleShortcutsEnabled() },
+								)
+							},
+							title = {
+								Text(
+									stringResource(R.string.enabled_app_shortcuts),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface))
+							},
+							onClick = { viewModel.onToggleShortcutsEnabled() }
+						),
+						SelectionItem(
+							Icons.Outlined.VpnLock,
+							{
+								ScaledSwitch(
+									enabled = !(
+										(
+											uiState.settings.isTunnelOnWifiEnabled ||
+												uiState.settings.isTunnelOnEthernetEnabled ||
+												uiState.settings.isTunnelOnMobileDataEnabled
+											) &&
+											uiState.settings.isAutoTunnelEnabled
+										),
+									onClick = { viewModel.onToggleAlwaysOnVPN() },
+									checked = uiState.settings.isAlwaysOnVpnEnabled,
+								)
+							},
+							title = {
+								Text(
+									stringResource(R.string.always_on_vpn_support),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface))
+							},
+							onClick = { viewModel.onToggleAlwaysOnVPN() }
+						),
+						SelectionItem(
+							Icons.Outlined.AdminPanelSettings,
+							title = {
+								Text(
+									stringResource(R.string.kill_switch),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface))
+							},
+							onClick = {
+								context.launchVpnSettings()
+							},
+							trailing = {
+								ForwardButton { context.launchVpnSettings() }
+							},
+						)
+					)
+				)
+				add(
+					SelectionItem(
+						Icons.Outlined.Restore,
+						{
+							ScaledSwitch(
+								uiState.settings.isRestoreOnBootEnabled,
+								onClick = { viewModel.onToggleRestartAtBoot() },
+							)
+						},
+						title = {
+							Text(
+								stringResource(R.string.restart_at_boot),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface))
+						},
+						onClick = { viewModel.onToggleRestartAtBoot() }
+					)
+				)
+			}
 		)
 
 		SurfaceSelectionGroupButton(
-			listOf(
-				SelectionItem(
-					Icons.Filled.AppShortcut,
-					{
-						ScaledSwitch(
-							uiState.settings.isShortcutsEnabled,
-							onClick = { viewModel.onToggleShortcutsEnabled() },
-						)
-					},
-					title = {
-						Text(stringResource(R.string.enabled_app_shortcuts), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface))
-					},
-				),
-				SelectionItem(
-					Icons.Outlined.VpnLock,
-					{
-						ScaledSwitch(
-							enabled = !(
-								(
-									uiState.settings.isTunnelOnWifiEnabled ||
-										uiState.settings.isTunnelOnEthernetEnabled ||
-										uiState.settings.isTunnelOnMobileDataEnabled
-									) &&
-									uiState.settings.isAutoTunnelEnabled
-								),
-							onClick = { viewModel.onToggleAlwaysOnVPN() },
-							checked = uiState.settings.isAlwaysOnVpnEnabled,
-						)
-					},
-					title = {
-						Text(stringResource(R.string.always_on_vpn_support), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface))
-					},
-				),
-				SelectionItem(
-					Icons.Outlined.AdminPanelSettings,
-					title = { Text(stringResource(R.string.kill_switch), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
-					onClick = {
-						context.launchVpnSettings()
-					},
-					trailing = {
-						val icon = Icons.AutoMirrored.Outlined.ArrowForward
-						Icon(icon, icon.name)
-					}
-				),
-				SelectionItem(
-					Icons.Outlined.Restore,
-					{
-						ScaledSwitch(
-							uiState.settings.isRestoreOnBootEnabled,
-							onClick = { viewModel.onToggleRestartAtBoot() },
-						)
-					},
-					title = { Text(stringResource(R.string.restart_at_boot), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
-				),
+			listOf(SelectionItem(
+				Icons.AutoMirrored.Outlined.ViewQuilt,
+				title = { Text(stringResource(R.string.appearance), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
+				onClick = {
+					navController.navigate(Route.Appearance)
+				},
+				trailing = {
+					ForwardButton { navController.navigate(Route.Appearance) }
+				},
 			),
-		)
-
-		SurfaceSelectionGroupButton(
-			mutableListOf(
-				SelectionItem(
-					Icons.AutoMirrored.Outlined.ViewQuilt,
-					title = { Text(stringResource(R.string.appearance), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
-					onClick = {
-						navController.navigate(Route.Appearance)
-					},
-					trailing = {
-						val icon = Icons.AutoMirrored.Outlined.ArrowForward
-						Icon(icon, icon.name)
-					}
-				),
 				SelectionItem(
 					Icons.Outlined.Notifications,
-					title = { Text(stringResource(R.string.notifications), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
+					title = { Text(stringResource(R.string.notifications), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
 					onClick = {
 						context.launchNotificationSettings()
 					},
 					trailing = {
-						val icon = Icons.AutoMirrored.Outlined.ArrowForward
-						Icon(icon, icon.name)
-					}
+						ForwardButton { context.launchNotificationSettings() }
+					},
 				),
 				SelectionItem(
 					Icons.Outlined.Pin,
-					title = { Text(stringResource(R.string.enable_app_lock), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
+					title = { Text(stringResource(R.string.enable_app_lock), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
 					trailing = {
 						ScaledSwitch(
 							uiState.generalState.isPinLockEnabled,
@@ -370,51 +373,60 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								}
 							},
 						)
-					}
-				),
-			),
-		)
-
-		SurfaceSelectionGroupButton(
-			listOf(
-				SelectionItem(
-					Icons.Outlined.Code,
-					title = { Text(stringResource(R.string.kernel), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
-					description = {
-						Text(
-							"Use kernel backend (root only)",
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.outline),
-						)
 					},
-					trailing = {
-						ScaledSwitch(
-							uiState.settings.isKernelEnabled,
-							onClick = { viewModel.onToggleKernelMode() },
-							enabled = !(
-								uiState.settings.isAutoTunnelEnabled ||
-									uiState.settings.isAlwaysOnVpnEnabled ||
-									(uiState.vpnState.status == TunnelState.UP) ||
-									!settingsUiState.isKernelAvailable
-								),
-						)
-					},
-				),
-			),
-		)
+					onClick = { if (uiState.generalState.isPinLockEnabled) {
+						appViewModel.onPinLockDisabled()
+					} else {
+						PinManager.initialize(context)
+						navController.navigate(Route.Lock)
+					} }
+				)
+			))
 
-		SurfaceSelectionGroupButton(
+		if(!isRunningOnTv) SurfaceSelectionGroupButton(listOf(
+			SelectionItem(
+				Icons.Outlined.Code,
+				title = { Text(stringResource(R.string.kernel), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
+				description = {
+					Text(
+						stringResource(R.string.use_kernel),
+						style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+					)
+				},
+				trailing = {
+					ScaledSwitch(
+						uiState.settings.isKernelEnabled,
+						onClick = { viewModel.onToggleKernelMode() },
+						enabled = !(
+							uiState.settings.isAutoTunnelEnabled ||
+								uiState.settings.isAlwaysOnVpnEnabled ||
+								(uiState.vpnState.status == TunnelState.UP) ||
+								!settingsUiState.isKernelAvailable
+							),
+					)
+				},
+				onClick = {
+					viewModel.onToggleKernelMode()
+				}
+			),
+		))
+
+		if(!isRunningOnTv) SurfaceSelectionGroupButton(
 			listOf(
 				SelectionItem(
 					Icons.Outlined.FolderZip,
-					title = { Text(stringResource(R.string.export_configs), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
+					title = { Text(stringResource(R.string.export_configs), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
 					onClick = {
 						if (uiState.tunnels.isEmpty()) return@SelectionItem context.showToast(R.string.tunnel_required)
 						showAuthPrompt = true
 					},
-					trailing = {},
 				),
-			),
+			)
 		)
+
+
+
+
 
 // 		Surface(
 // 			tonalElevation = 2.dp,

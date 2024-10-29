@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
-import android.annotation.SuppressLint
 import android.net.VpnService
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -9,23 +8,22 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.overscroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +31,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -47,6 +44,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.NestedScrollListener
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.AutoTunnelRowItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.GettingStartedLabel
@@ -58,12 +56,10 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
-import kotlinx.coroutines.delay
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, focusRequester: FocusRequester) {
+fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val snackbar = SnackbarController.current
@@ -73,6 +69,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 	var isFabVisible by rememberSaveable { mutableStateOf(true) }
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
 	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
+	val isRunningOnTv = remember { context.isRunningOnTv() }
 
 	val nestedScrollConnection = remember {
 		NestedScrollListener({ isFabVisible = false }, { isFabVisible = true })
@@ -85,18 +82,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 				if (it.resultCode != RESULT_OK) showVpnPermissionDialog = true
 			},
 		)
-
-	LaunchedEffect(Unit) {
-		if (context.isRunningOnTv()) {
-			delay(Constants.FOCUS_REQUEST_DELAY)
-			runCatching {
-				focusRequester.requestFocus()
-			}.onFailure {
-				delay(Constants.FOCUS_REQUEST_DELAY)
-				focusRequester.requestFocus()
-			}
-		}
-	}
 
 	val tunnelFileImportResultLauncher = rememberFileImportLauncherForResult(onNoFileExplorer = {
 		snackbar.showMessage(
@@ -149,20 +134,37 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 					selectedTunnel = null
 				},
 			)
-		}.windowInsetsPadding(WindowInsets.systemBars),
+		},
 		floatingActionButtonPosition = FabPosition.End,
 		floatingActionButton = {
-			ScrollDismissFab({
+			if(!isRunningOnTv) ScrollDismissFab({
 				val icon = Icons.Filled.Add
 				Icon(
 					imageVector = icon,
 					contentDescription = icon.name,
 					tint = MaterialTheme.colorScheme.onPrimary,
 				)
-			}, focusRequester, isVisible = isFabVisible, onClick = {
+			}, isVisible = isFabVisible, onClick = {
 				showBottomSheet = true
 			})
 		},
+		topBar = {
+			if(isRunningOnTv) TopNavBar(
+				showBack = false,
+				title = stringResource(R.string.app_name),
+				trailing = {
+					IconButton(onClick = {
+						showBottomSheet = true
+					}) {
+						val icon = Icons.Outlined.Add
+						Icon(
+							imageVector = icon,
+							contentDescription = icon.name,
+						)
+					}
+				}
+			)
+		}
 	) {
 		TunnelImportSheet(
 			showBottomSheet,
@@ -180,7 +182,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 			verticalArrangement = Arrangement.Top,
 			modifier =
 			Modifier
-				.fillMaxSize()
+				.fillMaxSize().padding(it)
 				.overscroll(ScrollableDefaults.overscrollEffect())
 				.nestedScroll(nestedScrollConnection),
 			state = rememberLazyListState(0, uiState.tunnels.count()),
@@ -192,10 +194,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 				item {
 					GettingStartedLabel(onClick = { context.openWebUrl(it) })
 				}
-			}
-			if (uiState.settings.isAutoTunnelEnabled) {
+			} else {
 				item {
-					AutoTunnelRowItem(uiState.settings, { viewModel.onToggleAutoTunnelingPause() }, focusRequester)
+					AutoTunnelRowItem(uiState.settings, { viewModel.onToggleAutoTunnel(context) })
 				}
 			}
 			items(
@@ -218,7 +219,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState, 
 					onDelete = { showDeleteTunnelAlertDialog = true },
 					onCopy = { viewModel.onCopyTunnel(tunnel) },
 					onSwitchClick = { onTunnelToggle(it, tunnel) },
-					focusRequester = focusRequester,
 				)
 			}
 		}

@@ -12,18 +12,18 @@ import androidx.compose.ui.text.withStyle
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
-fun WildcardSupportingLabel(onClick: (url: String) -> Unit) {
+fun LearnMoreLinkLabel(onClick: (url: String) -> Unit, url : String) {
 	// TODO update link when docs are fully updated
 	val gettingStarted =
 		buildAnnotatedString {
 			pushStringAnnotation(
 				tag = "details",
-				annotation = stringResource(id = R.string.docs_wildcards),
+				annotation = url,
 			)
 			withStyle(
 				style = SpanStyle(color = MaterialTheme.colorScheme.primary),
 			) {
-				append(stringResource(id = R.string.wildcard_supported))
+				append(stringResource(id = R.string.learn_more))
 			}
 			pop()
 		}

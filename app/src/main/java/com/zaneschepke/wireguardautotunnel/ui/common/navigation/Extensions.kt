@@ -5,10 +5,11 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import kotlin.reflect.KClass
 
 @SuppressLint("RestrictedApi")
-fun NavBackStackEntry?.isCurrentRoute(route: Route): Boolean {
+fun <T : Route> NavBackStackEntry?.isCurrentRoute(cls: KClass<T>): Boolean {
 	return this?.destination?.hierarchy?.any {
-		it.hasRoute(route = route::class)
+		it.hasRoute(route = cls)
 	} == true
 }

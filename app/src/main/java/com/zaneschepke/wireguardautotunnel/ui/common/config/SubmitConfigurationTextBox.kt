@@ -32,7 +32,6 @@ fun SubmitConfigurationTextBox(
 	value: String?,
 	label: String,
 	hint: String,
-	focusRequester: FocusRequester,
 	isErrorValue: (value: String?) -> Boolean,
 	onSubmit: (value: String) -> Unit,
 	keyboardOptions: KeyboardOptions = KeyboardOptions(
@@ -50,8 +49,7 @@ fun SubmitConfigurationTextBox(
 	OutlinedTextField(
 		isError = isErrorValue(stateValue),
 		modifier = Modifier
-			.fillMaxWidth()
-			.focusRequester(focusRequester),
+			.fillMaxWidth(),
 		value = stateValue,
 		singleLine = true,
 		interactionSource = interactionSource,

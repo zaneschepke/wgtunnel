@@ -14,14 +14,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ScrollDismissFab(icon: @Composable () -> Unit, focusRequester: FocusRequester, isVisible: Boolean, onClick: () -> Unit) {
+fun ScrollDismissFab(icon: @Composable () -> Unit, isVisible: Boolean, onClick: () -> Unit) {
 	AnimatedVisibility(
 		visible = isVisible,
 		enter = slideInVertically(initialOffsetY = { it * 2 }),
 		exit = slideOutVertically(targetOffsetY = { it * 2 }),
 		modifier =
 		Modifier
-			.focusRequester(focusRequester)
 			.focusGroup(),
 	) {
 		FloatingActionButton(

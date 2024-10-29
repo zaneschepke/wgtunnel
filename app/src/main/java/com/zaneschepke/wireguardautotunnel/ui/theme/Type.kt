@@ -18,6 +18,7 @@ val inter = FontFamily(
 val Typography =
 	Typography(
 		bodyLarge = TextStyle(
+			fontFamily = inter,
 			fontWeight = FontWeight.Normal,
 			fontSize = 16.sp.scaled(),
 			lineHeight = 24.sp.scaled(),
@@ -26,12 +27,13 @@ val Typography =
 		bodySmall = TextStyle(
 			fontFamily = inter,
 			fontWeight = FontWeight.Normal,
-			fontSize = 13.sp.scaled(),
+			fontSize = 12.sp.scaled(),
 			lineHeight = 20.sp.scaled(),
 			letterSpacing = 1.sp,
 			color = LightGrey,
 		),
 		bodyMedium = TextStyle(
+			fontFamily = inter,
 			fontSize = 14.sp.scaled(),
 			lineHeight = 20.sp.scaled(),
 			fontWeight = FontWeight(400),
@@ -54,7 +56,7 @@ val Typography =
 		titleMedium = TextStyle(
 			fontFamily = inter,
 			fontWeight = FontWeight.Bold,
-			fontSize = 17.sp.scaled(),
+			fontSize = 16.sp.scaled(),
 			lineHeight = 21.sp.scaled(),
 			letterSpacing = 0.sp,
 		),

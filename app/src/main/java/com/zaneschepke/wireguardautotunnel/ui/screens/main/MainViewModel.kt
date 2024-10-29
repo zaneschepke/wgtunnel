@@ -160,6 +160,20 @@ constructor(
 		}
 	}
 
+	fun onToggleAutoTunnel(context: Context) = viewModelScope.launch {
+		val settings = appDataRepository.settings.getSettings()
+		if (settings.isAutoTunnelEnabled) {
+			ServiceManager.stopWatcherService(context)
+		} else {
+			ServiceManager.startWatcherService(context)
+		}
+		appDataRepository.settings.save(
+			settings.copy(
+				isAutoTunnelEnabled = !settings.isAutoTunnelEnabled,
+			),
+		)
+	}
+
 	private suspend fun saveTunnelsFromZipUri(uri: Uri, context: Context) {
 		ZipInputStream(getInputStreamFromUri(uri, context)).use { zip ->
 			generateSequence { zip.nextEntry }
@@ -184,13 +198,6 @@ constructor(
 	private suspend fun saveTunnelFromConfUri(name: String, uri: Uri, context: Context) {
 		val stream = getInputStreamFromUri(uri, context) ?: throw FileReadException
 		saveTunnelConfigFromStream(stream, name)
-	}
-
-	fun onToggleAutoTunnelingPause() = viewModelScope.launch {
-		val settings = appDataRepository.settings.getSettings()
-		appDataRepository.settings.save(
-			settings.copy(isAutoTunnelPaused = !settings.isAutoTunnelPaused),
-		)
 	}
 
 	private fun saveTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {

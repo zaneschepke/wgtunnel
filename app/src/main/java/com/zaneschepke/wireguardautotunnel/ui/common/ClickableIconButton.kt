@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -17,7 +18,7 @@ fun ClickableIconButton(onClick: () -> Unit, onIconClick: () -> Unit, text: Stri
 		onClick = onClick,
 		enabled = enabled,
 	) {
-		Text(text, Modifier.weight(1f, false))
+		Text(text, Modifier.weight(1f, false), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
 		Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
 		Icon(
 			imageVector = icon,
@@ -30,7 +31,7 @@ fun ClickableIconButton(onClick: () -> Unit, onIconClick: () -> Unit, text: Stri
 					if (enabled) {
 						onIconClick()
 					}
-				},
+			},
 		)
 	}
 }

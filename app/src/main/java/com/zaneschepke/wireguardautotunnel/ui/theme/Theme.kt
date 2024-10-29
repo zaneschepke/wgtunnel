@@ -49,12 +49,18 @@ fun WireguardAutoTunnelTheme(
 	content: @Composable () -> Unit,
 ) {
 	val context = LocalContext.current
-	val isDark = isSystemInDarkTheme()
+	var isDark = isSystemInDarkTheme()
 	val autoTheme = if(isDark) DarkColorScheme else LightColorScheme
 	val colorScheme = when(theme) {
 		Theme.AUTOMATIC -> autoTheme
-		Theme.DARK -> DarkColorScheme
-		Theme.LIGHT -> LightColorScheme
+		Theme.DARK -> {
+			isDark = true
+			DarkColorScheme
+		}
+		Theme.LIGHT -> {
+			isDark = false
+			LightColorScheme
+		}
 		Theme.DYNAMIC -> {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 				if (isDark) {
@@ -72,7 +78,7 @@ fun WireguardAutoTunnelTheme(
 			WindowCompat.setDecorFitsSystemWindows(window, false)
 			window.statusBarColor = Color.Transparent.toArgb()
 			window.navigationBarColor = Color.Transparent.toArgb()
-			WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = isDark
+			WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDark
 		}
 	}
 

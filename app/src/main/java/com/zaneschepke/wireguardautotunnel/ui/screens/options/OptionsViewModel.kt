@@ -32,6 +32,7 @@ constructor(
 	}
 
 	fun onSaveRunSSID(ssid: String, tunnelConfig: TunnelConfig) = viewModelScope.launch {
+		if(ssid.isBlank()) return@launch
 		val trimmed = ssid.trim()
 		val tunnelsWithName = appDataRepository.tunnels.findByTunnelNetworksName(trimmed)
 

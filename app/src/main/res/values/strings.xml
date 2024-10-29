@@ -23,7 +23,7 @@
     <string name="enable_auto_tunnel">Start auto-tunneling</string>
     <string name="disable_auto_tunnel">Stop auto-tunneling</string>
     <string name="tunnel_mobile_data">Tunnel on mobile data</string>
-	<string name="privacy_policy">View Privacy Policy</string>
+	<string name="privacy_policy">View privacy policy</string>
     <string name="okay">Okay</string>
     <string name="tunnel_on_ethernet">Tunnel on ethernet</string>
     <string name="prominent_background_location_message">This feature requires background location permission to enable Wi-Fi SSID monitoring even while the application is closed. For more details, please see the Privacy Policy linked on the Support screen.</string>
@@ -193,7 +193,6 @@
 	<string name="set_custom_ping_internal">Ping interval (sec)</string>
 	<string name="optional_default">"optional, default: "</string>
 	<string name="set_custom_ping_cooldown">Ping restart cooldown (sec)</string>
-    <string name="wildcard_supported">Learn about supported wildcards.</string>
 	<string name="details">details</string>
 	<string name="show_amnezia_properties">Show Amnezia properties</string>
 	<string name="never">never</string>
@@ -211,4 +210,14 @@
 	<string name="language">Language</string>
 	<string name="display_theme">Display theme</string>
 	<string name="selected">Selected</string>
+    <string name="trusted_wifi_names">Trusted wifi names</string>
+	<string name="add_wifi_name">Add wifi name</string>
+	<string name="on_demand_rules">On demand tunnel rules</string>
+	<string name="primary_tunnel">Primary tunnel</string>
+	<string name="mobile_tunnel">Mobile data tunnel</string>
+	<string name="skip">Skip</string>
+	<string name="launch_app_settings">Launch app settings</string>
+	<string name="use_wildcards">Use name wildcards</string>
+	<string name="learn_more">Learn more</string>
+	<string name="wildcards_active">Wildcards active</string>
 </resources>

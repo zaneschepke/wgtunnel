@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,32 +26,28 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.WildcardSupportingLabel
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TrustedNetworkTextBox(trustedNetworks: List<String>, onDelete: (ssid: String) -> Unit, currentText: String, onSave : (ssid: String) -> Unit, onValueChange: (network: String) -> Unit) {
+fun TrustedNetworkTextBox(trustedNetworks: List<String>, onDelete: (ssid: String) -> Unit, currentText: String, onSave : (ssid: String) -> Unit, onValueChange: (network: String) -> Unit, supporting: @Composable () -> Unit) {
 	val context = LocalContext.current
 	Column(verticalArrangement = Arrangement.spacedBy(10.dp.scaledHeight())){
 		FlowRow(
 			modifier =
 			Modifier.fillMaxWidth(),
-			horizontalArrangement = Arrangement.spacedBy(5.dp),
+			horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
 		) {
 			trustedNetworks.forEach { ssid ->
 				ClickableIconButton(
 					onClick = {
 						if (context.isRunningOnTv()) {
-							//focusRequester.requestFocus()
 							onDelete(ssid)
 						}
 					},
 					onIconClick = {
-						//if (context.isRunningOnTv()) focusRequester.requestFocus()
 						onDelete(ssid)
 					},
 					text = ssid,
@@ -59,17 +56,18 @@ fun TrustedNetworkTextBox(trustedNetworks: List<String>, onDelete: (ssid: String
 			}
 		}
 		CustomTextField(
+			textStyle = MaterialTheme.typography.bodySmall,
 			value = currentText,
 			onValueChange = onValueChange,
-			label = { Text(stringResource(R.string.add_trusted_ssid)) },
+			label = { Text(stringResource(R.string.add_wifi_name)) },
 			containerColor = MaterialTheme.colorScheme.surface,
+			supportingText = supporting,
 			modifier =
 			Modifier
 				.padding(
 					top = 5.dp,
 					bottom = 10.dp,
 				).fillMaxWidth().padding(end = 16.dp.scaledWidth()),
-			supportingText = { WildcardSupportingLabel { context.openWebUrl(it)} },
 			singleLine = true,
 			keyboardOptions =
 			KeyboardOptions(
@@ -94,7 +92,7 @@ fun TrustedNetworkTextBox(trustedNetworks: List<String>, onDelete: (ssid: String
 					}
 				}
 			},
-
 		)
+
 	}
 }

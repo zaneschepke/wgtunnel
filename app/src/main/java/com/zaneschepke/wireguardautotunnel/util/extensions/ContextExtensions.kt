@@ -66,6 +66,7 @@ fun Context.resizeWidth(dp: Dp): Dp {
 }
 
 fun Context.launchNotificationSettings() {
+	if(isRunningOnTv()) return launchAppSettings()
 	val settingsIntent: Intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
 		.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 		.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
