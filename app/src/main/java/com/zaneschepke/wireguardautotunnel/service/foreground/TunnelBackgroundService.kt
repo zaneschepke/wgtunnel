@@ -3,9 +3,11 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 import android.app.Notification
 import android.content.Intent
 import android.os.IBinder
+import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import javax.inject.Inject
@@ -23,7 +25,7 @@ class TunnelBackgroundService : LifecycleService() {
 
 	override fun onCreate() {
 		super.onCreate()
-		startForeground(foregroundId, createNotification())
+		start()
 	}
 
 	override fun onBind(intent: Intent): IBinder? {
@@ -38,7 +40,12 @@ class TunnelBackgroundService : LifecycleService() {
 	}
 
 	fun start() {
-		startForeground(foregroundId, createNotification())
+		ServiceCompat.startForeground(
+			this,
+			foregroundId,
+			createNotification(),
+			Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
+		)
 	}
 
 	fun stop() {
