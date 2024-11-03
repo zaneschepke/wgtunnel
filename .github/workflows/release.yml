@@ -34,29 +34,28 @@ on:
 
 jobs:
   check_commits:
+    name: Check for New Commits
     runs-on: ubuntu-latest
+    outputs:
+      has_new_commits: ${{ steps.check.outputs.new_commits }}
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # This fetches all history so we can check commits
 
-      - name: Check for new commits in the last 23 hours
-        id: check_commits
+      - name: Check for new commits
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get the current time and the time 23 hours ago in ISO 8601 format
-          now=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-          past=$(date --utc --date='23 hours ago' +%Y-%m-%dT%H:%M:%SZ)
-
-          # Fetch commit history and check for commits in the last 23 hours
-          if git rev-list --since="$past" --count HEAD > /dev/null; then
-            echo "New commits found in the last 23 hours."
-            echo "::set-output name=new_commits::true"
-          else
-            echo "No new commits found in the last 23 hours."
-            echo "::set-output name=new_commits::false"
-          fi
+          # This script checks for commits newer than 23 hours ago
+          NEW_COMMITS=$(git rev-list --count --after="$(date -Iseconds -d '23 hours ago')" ${{ github.sha }})
+          echo "new_commits=$NEW_COMMITS" >> $GITHUB_OUTPUT
   build:
     needs: check_commits
-    if: ${{ needs.check_commits.outputs.new_commits == 'true' && inputs.track != 'none' }}
+    if: ${{ needs.check_commits.outputs.has_new_commits == 'true' && inputs.release_type != 'none' }}
     name: Build Signed APK
     runs-on: ubuntu-latest
     env:

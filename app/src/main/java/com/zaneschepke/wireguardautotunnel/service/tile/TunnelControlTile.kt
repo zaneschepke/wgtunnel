@@ -60,7 +60,6 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
 	private suspend fun updateTileState() {
 		val lastActive = appDataRepository.getStartTunnelConfig()
-		Timber.d("Got config $lastActive")
 		lastActive?.let {
 			updateTile(it)
 		}
