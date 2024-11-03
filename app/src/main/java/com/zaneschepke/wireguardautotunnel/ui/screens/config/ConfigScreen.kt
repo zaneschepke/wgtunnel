@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.config
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -60,7 +61,6 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
@@ -71,6 +71,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import kotlinx.coroutines.delay
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ConfigScreen(tunnelId: Int) {
 	val viewModel = hiltViewModel<ConfigViewModel, ConfigViewModel.ConfigViewModelFactory> { factory ->
@@ -162,9 +163,6 @@ fun ConfigScreen(tunnelId: Int) {
 	}
 
 	Scaffold(
-		topBar = {
-			TopNavBar(stringResource(R.string.edit_tunnel))
-		},
 		floatingActionButtonPosition = FabPosition.End,
 		floatingActionButton = {
 			FloatingActionButton(
@@ -182,7 +180,7 @@ fun ConfigScreen(tunnelId: Int) {
 			}
 		},
 	) {
-		Column(Modifier.padding(it)) {
+		Column {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Top,
@@ -519,15 +517,27 @@ fun ConfigScreen(tunnelId: Int) {
 								hint = stringResource(R.string.base64_key),
 								modifier = Modifier.fillMaxWidth(),
 							)
-							ConfigurationTextBox(
+							OutlinedTextField(
+								modifier =
+								Modifier
+									.fillMaxWidth()
+									.clickable { showAuthPrompt = true },
 								value = peer.preSharedKey,
+								visualTransformation =
+								if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID.toInt()) || isAuthenticated) {
+									VisualTransformation.None
+								} else {
+									PasswordVisualTransformation()
+								},
+								enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID.toInt()) || isAuthenticated || peer.preSharedKey.isEmpty(),
 								onValueChange = { value ->
 									viewModel.onPreSharedKeyChange(index, value)
 								},
+								label = { Text(stringResource(R.string.preshared_key)) },
+								singleLine = true,
+								placeholder = { Text(stringResource(R.string.optional)) },
+								keyboardOptions = keyboardOptions,
 								keyboardActions = keyboardActions,
-								label = stringResource(R.string.preshared_key),
-								hint = stringResource(R.string.optional),
-								modifier = Modifier.fillMaxWidth(),
 							)
 							OutlinedTextField(
 								modifier = Modifier.fillMaxWidth(),

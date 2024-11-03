@@ -1,0 +1,5 @@
+What's new:
+- Fix Android 12 crashing issue
+- Fix copy tunnel bug
+- Auto toggle Amnezia props
+- Hide preshared key without auth

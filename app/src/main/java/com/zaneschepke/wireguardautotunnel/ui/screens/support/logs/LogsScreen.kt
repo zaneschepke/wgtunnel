@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support.logs
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -31,17 +32,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.logcatter.model.LogMessage
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
 	val logs = viewModel.logs
@@ -84,9 +83,6 @@ fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
 	}
 
 	Scaffold(
-		topBar = {
-			TopNavBar(stringResource(R.string.logs))
-		},
 		floatingActionButton = {
 			FloatingActionButton(
 				onClick = {
@@ -111,7 +107,7 @@ fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
 			modifier =
 			Modifier
 				.fillMaxSize()
-				.padding(horizontal = 24.dp).padding(it),
+				.padding(horizontal = 24.dp),
 		) {
 			itemsIndexed(
 				logs,

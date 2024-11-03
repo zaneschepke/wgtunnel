@@ -45,6 +45,7 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiState: AppUiState, tunnelId: Int) {
@@ -57,19 +58,18 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 		currentText = ""
 	}
 	Scaffold(
-		topBar = {
-			TopNavBar(config.name, trailing = {
-				IconButton(onClick = {
-					navController.navigate(
-						Route.Config(config.id),
-					)
-				}) {
-					val icon = Icons.Outlined.Edit
-					Icon(
-						imageVector = icon,
-						contentDescription = icon.name,
-					)
-				}
+		floatingActionButton = {
+			ScrollDismissFab(icon = {
+				val icon = Icons.Filled.Edit
+				Icon(
+					imageVector = icon,
+					contentDescription = icon.name,
+					tint = MaterialTheme.colorScheme.onPrimary,
+				)
+			}, focusRequester, isVisible = true, onClick = {
+				navController.navigate(
+					Route.Config(config.id),
+				)
 			})
 		},
 	) {
