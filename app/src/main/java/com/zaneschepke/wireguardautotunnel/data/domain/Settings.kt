@@ -41,11 +41,6 @@ data class Settings(
 	)
 	val isMultiTunnelEnabled: Boolean = false,
 	@ColumnInfo(
-		name = "is_auto_tunnel_paused",
-		defaultValue = "false",
-	)
-	val isAutoTunnelPaused: Boolean = false,
-	@ColumnInfo(
 		name = "is_ping_enabled",
 		defaultValue = "false",
 	)
@@ -55,4 +50,14 @@ data class Settings(
 		defaultValue = "false",
 	)
 	val isAmneziaEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "is_wildcards_enabled",
+		defaultValue = "false",
+	)
+	val isWildcardsEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "is_wifi_by_shell_enabled",
+		defaultValue = "false",
+	)
+	val isWifiNameByShellEnabled: Boolean = false,
 )

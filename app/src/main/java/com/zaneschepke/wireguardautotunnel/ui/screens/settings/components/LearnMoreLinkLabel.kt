@@ -12,7 +12,7 @@ import androidx.compose.ui.text.withStyle
 import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
-fun LearnMoreLinkLabel(onClick: (url: String) -> Unit, url : String) {
+fun LearnMoreLinkLabel(onClick: (url: String) -> Unit, url: String) {
 	// TODO update link when docs are fully updated
 	val gettingStarted =
 		buildAnnotatedString {

@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.service.tile
 
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
@@ -9,9 +8,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
-import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -24,50 +23,17 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
+	lateinit var serviceManager: ServiceManager
+
+	@Inject
 	@ApplicationScope
 	lateinit var applicationScope: CoroutineScope
 
 	private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
 
-	/* This works around an annoying unsolved frameworks bug some people are hitting. */
-	override fun onBind(intent: Intent): IBinder? {
-		var ret: IBinder? = null
-		try {
-			ret = super.onBind(intent)
-		} catch (e: Throwable) {
-			Timber.e("Failed to bind to AutoTunnelTile")
-		}
-		return ret
-	}
-
 	override fun onCreate() {
 		super.onCreate()
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-
-		applicationScope.launch {
-			appDataRepository.settings.getSettingsFlow().collect {
-				kotlin.runCatching {
-					when (it.isAutoTunnelEnabled) {
-						true -> {
-							if (it.isAutoTunnelPaused) {
-								setInactive()
-								setTileDescription(this@AutoTunnelControlTile.getString(R.string.paused))
-							} else {
-								setActive()
-								setTileDescription(this@AutoTunnelControlTile.getString(R.string.active))
-							}
-						}
-
-						false -> {
-							setTileDescription(this@AutoTunnelControlTile.getString(R.string.disabled))
-							setUnavailable()
-						}
-					}
-				}.onFailure {
-					Timber.e(it)
-				}
-			}
-		}
 	}
 
 	override fun onStopListening() {
@@ -82,26 +48,28 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 	override fun onStartListening() {
 		super.onStartListening()
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+		lifecycleScope.launch {
+			if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
+			updateTileState()
+		}
+	}
+
+	private fun updateTileState() {
+		serviceManager.autoTunnelActive.value.let {
+			if (it) setActive() else setInactive()
+		}
 	}
 
 	override fun onClick() {
 		super.onClick()
 		unlockAndRun {
 			lifecycleScope.launch {
-				kotlin.runCatching {
-					val settings = appDataRepository.settings.getSettings()
-					if (settings.isAutoTunnelPaused) {
-						return@launch appDataRepository.settings.save(
-							settings.copy(
-								isAutoTunnelPaused = false,
-							),
-						)
-					}
-					appDataRepository.settings.save(
-						settings.copy(
-							isAutoTunnelPaused = true,
-						),
-					)
+				if (serviceManager.autoTunnelActive.value) {
+					serviceManager.stopAutoTunnel()
+					setInactive()
+				} else {
+					serviceManager.startAutoTunnel(true)
+					setActive()
 				}
 			}
 		}
@@ -128,16 +96,15 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 		}
 	}
 
-	private fun setTileDescription(description: String) {
-		kotlin.runCatching {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-				qsTile.subtitle = description
-			}
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-				qsTile.stateDescription = description
-			}
-			qsTile.updateTile()
+	/* This works around an annoying unsolved frameworks bug some people are hitting. */
+	override fun onBind(intent: Intent): IBinder? {
+		var ret: IBinder? = null
+		try {
+			ret = super.onBind(intent)
+		} catch (_: Throwable) {
+			Timber.e("Failed to bind to TunnelControlTile")
 		}
+		return ret
 	}
 
 	override val lifecycle: Lifecycle

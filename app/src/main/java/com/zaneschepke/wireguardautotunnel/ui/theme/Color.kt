@@ -12,8 +12,6 @@ val BalticSea = Color(0xFF1C1B1F)
 val Brick = Color(0xFFCE4257)
 val Straw = Color(0xFFD4C483)
 
-
-
 sealed class ThemeColors(
 	val background: Color,
 	val surface: Color,

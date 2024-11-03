@@ -30,26 +30,24 @@ import timber.log.Timber
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
+import javax.inject.Provider
 
 @HiltViewModel
 class MainViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
-	val tunnelService: TunnelService,
+	private val tunnelService: Provider<TunnelService>,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+	private val serviceManager: ServiceManager,
 ) : ViewModel() {
 
-	private fun stopWatcherService(context: Context) {
-		ServiceManager.stopWatcherService(context)
-	}
-
-	fun onDelete(tunnel: TunnelConfig, context: Context) {
+	fun onDelete(tunnel: TunnelConfig) {
 		viewModelScope.launch {
 			val settings = appDataRepository.settings.getSettings()
 			val isPrimary = tunnel.isPrimaryTunnel
 			if (appDataRepository.tunnels.count() == 1 || isPrimary) {
-				stopWatcherService(context)
+				serviceManager.stopAutoTunnel()
 				resetTunnelSetting(settings)
 			}
 			appDataRepository.tunnels.delete(tunnel)
@@ -69,14 +67,14 @@ constructor(
 		appDataRepository.appState.setTunnelStatsExpanded(expanded)
 	}
 
-	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
+	fun onTunnelStart(tunnelConfig: TunnelConfig, background: Boolean) = viewModelScope.launch {
 		Timber.i("Starting tunnel ${tunnelConfig.name}")
-		tunnelService.startTunnel(tunnelConfig)
+		tunnelService.get().startTunnel(tunnelConfig, background)
 	}
 
 	fun onTunnelStop(tunnel: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Stopping active tunnel")
-		tunnelService.stopTunnel(tunnel)
+		tunnelService.get().stopTunnel(tunnel)
 	}
 
 	private fun generateQrCodeDefaultName(config: String): String {
@@ -160,16 +158,17 @@ constructor(
 		}
 	}
 
-	fun onToggleAutoTunnel(context: Context) = viewModelScope.launch {
+	fun onToggleAutoTunnel() = viewModelScope.launch {
 		val settings = appDataRepository.settings.getSettings()
-		if (settings.isAutoTunnelEnabled) {
-			ServiceManager.stopWatcherService(context)
+		val toggled = !settings.isAutoTunnelEnabled
+		if (toggled) {
+			serviceManager.startAutoTunnel(false)
 		} else {
-			ServiceManager.startWatcherService(context)
+			serviceManager.stopAutoTunnel()
 		}
 		appDataRepository.settings.save(
 			settings.copy(
-				isAutoTunnelEnabled = !settings.isAutoTunnelEnabled,
+				isAutoTunnelEnabled = toggled,
 			),
 		)
 	}
@@ -193,6 +192,10 @@ constructor(
 					)
 				}
 		}
+	}
+
+	fun setBatteryOptimizeDisableShown() = viewModelScope.launch {
+		appDataRepository.appState.setBatteryOptimizationDisableShown(true)
 	}
 
 	private suspend fun saveTunnelFromConfUri(name: String, uri: Uri, context: Context) {

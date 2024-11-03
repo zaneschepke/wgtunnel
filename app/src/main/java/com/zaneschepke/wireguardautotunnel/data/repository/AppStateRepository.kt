@@ -13,10 +13,6 @@ interface AppStateRepository {
 
 	suspend fun setPinLockEnabled(enabled: Boolean)
 
-	suspend fun isWildcardsEnabled(): Boolean
-
-	suspend fun setWildcardsEnabled(enabled: Boolean)
-
 	suspend fun isBatteryOptimizationDisableShown(): Boolean
 
 	suspend fun setBatteryOptimizationDisableShown(shown: Boolean)
@@ -31,7 +27,7 @@ interface AppStateRepository {
 
 	suspend fun setTheme(theme: Theme)
 
-	suspend fun getTheme() : Theme
+	suspend fun getTheme(): Theme
 
 	val generalStateFlow: Flow<GeneralState>
 }

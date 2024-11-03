@@ -7,12 +7,12 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 @AndroidEntryPoint
 class AppUpdateReceiver : BroadcastReceiver() {
@@ -25,7 +25,10 @@ class AppUpdateReceiver : BroadcastReceiver() {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelService: Provider<TunnelService>
+
+	@Inject
+	lateinit var serviceManager: ServiceManager
 
 	override fun onReceive(context: Context, intent: Intent) {
 		if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
@@ -33,11 +36,11 @@ class AppUpdateReceiver : BroadcastReceiver() {
 			val settings = appDataRepository.settings.getSettings()
 			if (settings.isAutoTunnelEnabled) {
 				Timber.i("Restarting services after upgrade")
-				ServiceManager.startWatcherServiceForeground(context)
+				serviceManager.startAutoTunnel(true)
 			}
-			if (!settings.isAutoTunnelEnabled || settings.isAutoTunnelPaused) {
+			if (!settings.isAutoTunnelEnabled) {
 				val tunnels = appDataRepository.tunnels.getAll().filter { it.isActive }
-				if (tunnels.isNotEmpty()) context.startTunnelBackground(tunnels.first().id)
+				if (tunnels.isNotEmpty()) tunnelService.get().startTunnel(tunnels.first(), true)
 			}
 		}
 	}

@@ -10,19 +10,14 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchShareFile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -39,25 +34,11 @@ constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
-	private val _uiState = MutableStateFlow(SettingsUiState())
-	val uiState = _uiState.onStart {
-		_uiState.update {
-			it.copy(isKernelAvailable = isKernelSupported(), isRooted = isRooted())
-		}
-	}.stateIn(
-		viewModelScope,
-		SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
-		SettingsUiState(),
-	)
 	private val settings = appDataRepository.settings.getSettingsFlow()
 		.stateIn(viewModelScope, SharingStarted.Eagerly, Settings())
 
 	fun setLocationDisclosureShown() = viewModelScope.launch {
 		appDataRepository.appState.setLocationDisclosureShown(true)
-	}
-
-	fun setBatteryOptimizeDisableShown() = viewModelScope.launch {
-		appDataRepository.appState.setBatteryOptimizationDisableShown(true)
 	}
 
 	fun onToggleAlwaysOnVPN() = viewModelScope.launch {
@@ -90,23 +71,11 @@ constructor(
 		}
 	}
 
-	fun onToggleAmnezia() = viewModelScope.launch {
-		with(settings.value) {
-			if (isKernelEnabled) {
-				saveKernelMode(false)
-			}
-			appDataRepository.settings.save(
-				copy(
-					isAmneziaEnabled = !isAmneziaEnabled,
-				),
-			)
-		}
-	}
-
 	fun onToggleKernelMode() = viewModelScope.launch {
 		with(settings.value) {
 			if (!isKernelEnabled) {
 				requestRoot().onSuccess {
+					if (!isKernelSupported()) return@onSuccess SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
 					appDataRepository.settings.save(
 						copy(
 							isKernelEnabled = true,
@@ -136,17 +105,6 @@ constructor(
 		}
 	}
 
-	private suspend fun isRooted(): Boolean {
-		return try {
-			withContext(ioDispatcher) {
-				rootShell.get().start()
-			}
-			true
-		} catch (_: Exception) {
-			false
-		}
-	}
-
 	private suspend fun requestRoot(): Result<Unit> {
 		return withContext(ioDispatcher) {
 			kotlin.runCatching {
@@ -156,10 +114,6 @@ constructor(
 				SnackbarController.showMessage(StringValue.StringResource(R.string.error_root_denied))
 			}
 		}
-	}
-
-	fun onRequestRoot() = viewModelScope.launch {
-		requestRoot()
 	}
 
 	fun exportAllConfigs(context: Context) = viewModelScope.launch {

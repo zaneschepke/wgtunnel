@@ -24,65 +24,63 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
-
-		Card(
-			modifier = Modifier.fillMaxWidth(),
-			shape = RoundedCornerShape(8.dp),
-			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-		) {
-			items.mapIndexed { index, item ->
-				Box(
-					contentAlignment = Alignment.Center,
-					modifier = Modifier
-						.then(item.onClick?.let { Modifier.clickable { it() }} ?: Modifier)
-						.fillMaxWidth()
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		shape = RoundedCornerShape(8.dp),
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+	) {
+		items.mapIndexed { index, item ->
+			Box(
+				contentAlignment = Alignment.Center,
+				modifier = Modifier
+					.then(item.onClick?.let { Modifier.clickable { it() } } ?: Modifier)
+					.fillMaxWidth(),
+			) {
+				Row(
+					verticalAlignment = Alignment.CenterVertically,
+					modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp.scaledHeight()),
 				) {
 					Row(
 						verticalAlignment = Alignment.CenterVertically,
-						modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp.scaledHeight()),
+						modifier = Modifier
+							.padding(start = 16.dp.scaledWidth())
+							.weight(4f, false)
+							.fillMaxWidth(),
 					) {
-						Row(
-							verticalAlignment = Alignment.CenterVertically,
-							modifier = Modifier
-								.padding(start = 16.dp.scaledWidth())
-								.weight(4f, false)
-								.fillMaxWidth(),
-						) {
-							item.leadingIcon?.let { icon ->
-								Icon(
-									icon,
-									icon.name,
-									modifier = Modifier.size(iconSize),
-								)
-							}
-							Column(
-								horizontalAlignment = Alignment.Start,
-								verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(start = if (item.leadingIcon != null) 16.dp.scaledWidth() else 0.dp)
-									.padding(vertical = if (item.description == null) 16.dp.scaledHeight() else 6.dp.scaledHeight()),
-							) {
-								item.title()
-								item.description?.let {
-									it()
-								}
-							}
+						item.leadingIcon?.let { icon ->
+							Icon(
+								icon,
+								icon.name,
+								modifier = Modifier.size(iconSize),
+							)
 						}
-						item.trailing?.let {
-							Box(
-								contentAlignment = Alignment.CenterEnd,
-								modifier = Modifier
-									.padding(end = 24.dp.scaledWidth(), start = 16.dp.scaledWidth())
-									.weight(1f),
-							) {
+						Column(
+							horizontalAlignment = Alignment.Start,
+							verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(start = if (item.leadingIcon != null) 16.dp.scaledWidth() else 0.dp)
+								.padding(vertical = if (item.description == null) 16.dp.scaledHeight() else 6.dp.scaledHeight()),
+						) {
+							item.title()
+							item.description?.let {
 								it()
 							}
 						}
 					}
+					item.trailing?.let {
+						Box(
+							contentAlignment = Alignment.CenterEnd,
+							modifier = Modifier
+								.padding(end = 24.dp.scaledWidth(), start = 16.dp.scaledWidth())
+								.weight(1f),
+						) {
+							it()
+						}
+					}
 				}
-				if (index + 1 != items.size) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 			}
+			if (index + 1 != items.size) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 		}
 	}
-
+}

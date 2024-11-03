@@ -46,14 +46,18 @@ fun TunnelStatisticsRow(statistics: TunnelStatistics?, tunnelConfig: TunnelConfi
 			Column(
 				verticalArrangement = Arrangement.spacedBy(10.dp),
 			) {
-				Text(stringResource(R.string.peer).lowercase() + ": $peerId", style = MaterialTheme.typography.bodySmall)
-				Text("tx: $peerTxMB MB", style = MaterialTheme.typography.bodySmall)
+				Text(
+					stringResource(R.string.peer).lowercase() + ": $peerId",
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.outline,
+				)
+				Text("tx: $peerTxMB MB", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
 			}
 			Column(
 				verticalArrangement = Arrangement.spacedBy(10.dp),
 			) {
-				Text(stringResource(R.string.handshake) + ": $handshake", style = MaterialTheme.typography.bodySmall)
-				Text("rx: $peerRxMB MB", style = MaterialTheme.typography.bodySmall)
+				Text(stringResource(R.string.handshake) + ": $handshake", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+				Text("rx: $peerRxMB MB", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
 			}
 		}
 	}

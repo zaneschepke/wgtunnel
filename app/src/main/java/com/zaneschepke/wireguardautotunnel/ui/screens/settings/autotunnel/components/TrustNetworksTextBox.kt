@@ -32,9 +32,16 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TrustedNetworkTextBox(trustedNetworks: List<String>, onDelete: (ssid: String) -> Unit, currentText: String, onSave : (ssid: String) -> Unit, onValueChange: (network: String) -> Unit, supporting: @Composable () -> Unit) {
+fun TrustedNetworkTextBox(
+	trustedNetworks: List<String>,
+	onDelete: (ssid: String) -> Unit,
+	currentText: String,
+	onSave: (ssid: String) -> Unit,
+	onValueChange: (network: String) -> Unit,
+	supporting: @Composable () -> Unit,
+) {
 	val context = LocalContext.current
-	Column(verticalArrangement = Arrangement.spacedBy(10.dp.scaledHeight())){
+	Column(verticalArrangement = Arrangement.spacedBy(10.dp.scaledHeight())) {
 		FlowRow(
 			modifier =
 			Modifier.fillMaxWidth(),
@@ -93,6 +100,5 @@ fun TrustedNetworkTextBox(trustedNetworks: List<String>, onDelete: (ssid: String
 				}
 			},
 		)
-
 	}
 }

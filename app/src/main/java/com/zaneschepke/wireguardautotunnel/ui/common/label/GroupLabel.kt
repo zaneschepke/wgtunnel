@@ -19,4 +19,3 @@ fun GroupLabel(title: String) {
 		)
 	}
 }
-

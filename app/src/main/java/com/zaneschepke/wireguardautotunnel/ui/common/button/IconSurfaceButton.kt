@@ -2,7 +2,6 @@ package com.zaneschepke.wireguardautotunnel.ui.common.button
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,21 +30,27 @@ import kotlin.let
 @androidx.compose.runtime.Composable
 fun IconSurfaceButton(title: String, onClick: () -> Unit, selected: Boolean, leadingIcon: ImageVector? = null, description: String? = null) {
 	val border: BorderStroke? =
-		if (selected) BorderStroke(
-            1.dp,
-			MaterialTheme.colorScheme.primary
-        ) else null
-    Card(
-        modifier =
-        Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-        shape = RoundedCornerShape(8.dp),
-        border = border,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-		Box(modifier = Modifier.clickable { onClick() }
-			.fillMaxWidth()) {
+		if (selected) {
+			BorderStroke(
+				1.dp,
+				MaterialTheme.colorScheme.primary,
+			)
+		} else {
+			null
+		}
+	Card(
+		modifier =
+		Modifier
+			.fillMaxWidth()
+			.height(IntrinsicSize.Min),
+		shape = RoundedCornerShape(8.dp),
+		border = border,
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+	) {
+		Box(
+			modifier = Modifier.clickable { onClick() }
+				.fillMaxWidth(),
+		) {
 			Column(
 				modifier =
 				Modifier
@@ -61,7 +66,7 @@ fun IconSurfaceButton(title: String, onClick: () -> Unit, selected: Boolean, lea
 				) {
 					Row(
 						horizontalArrangement = Arrangement.spacedBy(
-							16.dp.scaledWidth()
+							16.dp.scaledWidth(),
 						),
 						verticalAlignment = Alignment.Companion.CenterVertically,
 						modifier = Modifier.padding(vertical = if (description == null) 10.dp.scaledHeight() else 0.dp),
@@ -77,7 +82,7 @@ fun IconSurfaceButton(title: String, onClick: () -> Unit, selected: Boolean, lea
 						Column {
 							Text(
 								title,
-								style = MaterialTheme.typography.titleMedium
+								style = MaterialTheme.typography.titleMedium,
 							)
 							description?.let {
 								Text(
@@ -91,5 +96,5 @@ fun IconSurfaceButton(title: String, onClick: () -> Unit, selected: Boolean, lea
 				}
 			}
 		}
-    }
+	}
 }

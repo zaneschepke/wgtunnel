@@ -39,9 +39,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.datastore.LocaleStorage
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
-import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalFocusRequester
@@ -67,6 +65,7 @@ import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -100,17 +99,17 @@ class MainActivity : AppCompatActivity() {
 			val navController = rememberNavController()
 			val rootItemFocusRequester = remember { FocusRequester() }
 
-			LaunchedEffect(appUiState.vpnState.status) {
-				val context = this@MainActivity
-				when (appUiState.vpnState.status) {
-					TunnelState.DOWN -> ServiceManager.stopTunnelBackgroundService(context)
-					else -> Unit
-				}
-				context.requestTunnelTileServiceStateUpdate()
+			LaunchedEffect(appUiState.tunnels) {
+				Timber.d("Updating launched")
+				requestTunnelTileServiceStateUpdate()
+			}
+
+			LaunchedEffect(appUiState.autoTunnelActive) {
+				requestAutoTunnelTileServiceUpdate()
 			}
 
 			with(appUiState.settings) {
-				LaunchedEffect(isAutoTunnelPaused, isAutoTunnelEnabled) {
+				LaunchedEffect(isAutoTunnelEnabled) {
 					this@MainActivity.requestAutoTunnelTileServiceUpdate()
 				}
 			}
@@ -248,4 +247,3 @@ class MainActivity : AppCompatActivity() {
 		tunnelService.cancelStatsJob()
 	}
 }
-

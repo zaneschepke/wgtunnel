@@ -32,8 +32,8 @@ fun AppearanceScreen() {
 	Scaffold(
 		topBar = {
 			TopNavBar(stringResource(R.string.appearance))
-		}
-	){
+		},
+	) {
 		Column(
 			horizontalAlignment = Alignment.Start,
 			verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
@@ -51,7 +51,7 @@ fun AppearanceScreen() {
 						onClick = { navController.navigate(Route.Language) },
 						trailing = {
 							ForwardButton { navController.navigate(Route.Language) }
-						}
+						},
 					),
 				),
 			)
@@ -63,7 +63,7 @@ fun AppearanceScreen() {
 						onClick = { navController.navigate(Route.Display) },
 						trailing = {
 							ForwardButton { navController.navigate(Route.Display) }
-						}
+						},
 					),
 				),
 			)

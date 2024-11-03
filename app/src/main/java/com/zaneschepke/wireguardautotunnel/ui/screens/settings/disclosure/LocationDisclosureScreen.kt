@@ -39,7 +39,7 @@ fun LocationDisclosureScreen(appViewModel: AppViewModel, appUiState: AppUiState)
 	val navController = LocalNavController.current
 
 	LaunchedEffect(Unit, appUiState) {
-		if(appUiState.generalState.isLocationDisclosureShown) navController.goFromRoot(Route.AutoTunnel)
+		if (appUiState.generalState.isLocationDisclosureShown) navController.goFromRoot(Route.AutoTunnel)
 	}
 
 	Column(
@@ -56,40 +56,49 @@ fun LocationDisclosureScreen(appViewModel: AppViewModel, appUiState: AppUiState)
 				.padding(30.dp.scaledHeight())
 				.size(128.dp.scaledHeight()),
 		)
-			Text(
-				stringResource(R.string.prominent_background_location_title),
-				style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-			)
-			Text(
-				stringResource(R.string.prominent_background_location_message),
-				style = MaterialTheme.typography.bodyLarge
-			)
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						Icons.Outlined.LocationOn,
-						title = { Text(stringResource(R.string.launch_app_settings), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
-						onClick = { context.launchAppSettings().also {
+		Text(
+			stringResource(R.string.prominent_background_location_title),
+			style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+		)
+		Text(
+			stringResource(R.string.prominent_background_location_message),
+			style = MaterialTheme.typography.bodyLarge,
+		)
+		SurfaceSelectionGroupButton(
+			listOf(
+				SelectionItem(
+					Icons.Outlined.LocationOn,
+					title = {
+						Text(
+							stringResource(R.string.launch_app_settings),
+							style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface),
+						)
+					},
+					onClick = {
+						context.launchAppSettings().also {
 							appViewModel.setLocationDisclosureShown()
-						} },
-						trailing = {
-							ForwardButton { context.launchAppSettings().also {
+						}
+					},
+					trailing = {
+						ForwardButton {
+							context.launchAppSettings().also {
 								appViewModel.setLocationDisclosureShown()
-							}  }
+							}
 						}
-					),
+					},
 				),
-			)
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						title = { Text(stringResource(R.string.skip), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
-						onClick = { appViewModel.setLocationDisclosureShown() },
-						trailing = {
-							ForwardButton { appViewModel.setLocationDisclosureShown() }
-						}
-					),
+			),
+		)
+		SurfaceSelectionGroupButton(
+			listOf(
+				SelectionItem(
+					title = { Text(stringResource(R.string.skip), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
+					onClick = { appViewModel.setLocationDisclosureShown() },
+					trailing = {
+						ForwardButton { appViewModel.setLocationDisclosureShown() }
+					},
 				),
-			)
-		}
+			),
+		)
 	}
+}

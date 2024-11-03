@@ -220,4 +220,9 @@
 	<string name="use_wildcards">Use name wildcards</string>
 	<string name="learn_more">Learn more</string>
 	<string name="wildcards_active">Wildcards active</string>
+    <string name="wifi_name_via_shell">Wifi name via shell</string>
+	<string name="use_root_shell_for_wifi">Use root shell to get wifi name</string>
+	<string name="kernel_not_supported">Kernel not supported</string>
+	<string name="start_auto">Start auto-tunnel</string>
+	<string name="stop_auto">Stop auto-tunnel</string>
 </resources>

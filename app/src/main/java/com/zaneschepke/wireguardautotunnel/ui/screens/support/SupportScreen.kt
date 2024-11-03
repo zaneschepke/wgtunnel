@@ -38,94 +38,118 @@ fun SupportScreen() {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 
-		Column(
-			horizontalAlignment = Alignment.Start,
-			verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
-			modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(top = topPadding)
-				.padding(horizontal = 24.dp.scaledWidth()),
-		) {
-			GroupLabel(stringResource(R.string.thank_you))
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						Icons.Filled.Book,
-						title = { Text(stringResource(R.string.docs_description), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-						trailing = {
-							ForwardButton { context.openWebUrl(context.getString(R.string.docs_url)) }
-						},
-						onClick = {
-							context.openWebUrl(context.getString(R.string.docs_url))
-						}
-					),
-					SelectionItem(
-						Icons.Filled.LineStyle,
-						title = { Text(stringResource(R.string.read_logs),
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-						trailing = {
-							ForwardButton {
-								navController.navigate(Route.Logs)
-							}
-						},
-						onClick = {
+	Column(
+		horizontalAlignment = Alignment.Start,
+		verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
+		modifier =
+		Modifier
+			.fillMaxSize()
+			.padding(top = topPadding)
+			.padding(horizontal = 24.dp.scaledWidth()),
+	) {
+		GroupLabel(stringResource(R.string.thank_you))
+		SurfaceSelectionGroupButton(
+			listOf(
+				SelectionItem(
+					Icons.Filled.Book,
+					title = {
+						Text(
+							stringResource(R.string.docs_description),
+							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+						)
+					},
+					trailing = {
+						ForwardButton { context.openWebUrl(context.getString(R.string.docs_url)) }
+					},
+					onClick = {
+						context.openWebUrl(context.getString(R.string.docs_url))
+					},
+				),
+				SelectionItem(
+					Icons.Filled.LineStyle,
+					title = {
+						Text(
+							stringResource(R.string.read_logs),
+							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+						)
+					},
+					trailing = {
+						ForwardButton {
 							navController.navigate(Route.Logs)
 						}
-					),
-					SelectionItem(
-						Icons.Filled.Policy,
-						title = { Text(stringResource(R.string.privacy_policy), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-						trailing = {
-							ForwardButton { context.openWebUrl(context.getString(R.string.privacy_policy_url)) }
-						},
-						onClick = {
-							context.openWebUrl(context.getString(R.string.privacy_policy_url))
-						}
-					),
+					},
+					onClick = {
+						navController.navigate(Route.Logs)
+					},
+				),
+				SelectionItem(
+					Icons.Filled.Policy,
+					title = {
+						Text(
+							stringResource(R.string.privacy_policy),
+							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+						)
+					},
+					trailing = {
+						ForwardButton { context.openWebUrl(context.getString(R.string.privacy_policy_url)) }
+					},
+					onClick = {
+						context.openWebUrl(context.getString(R.string.privacy_policy_url))
+					},
+				),
 
-					)
-			)
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						ImageVector.vectorResource(R.drawable.telegram),
-						title = { Text(stringResource(R.string.chat_description), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-						trailing = {
-							ForwardButton {
-								context.openWebUrl(context.getString(R.string.telegram_url))
-							}
-						},
-						onClick = {
+			),
+		)
+		SurfaceSelectionGroupButton(
+			listOf(
+				SelectionItem(
+					ImageVector.vectorResource(R.drawable.telegram),
+					title = {
+						Text(
+							stringResource(R.string.chat_description),
+							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+						)
+					},
+					trailing = {
+						ForwardButton {
 							context.openWebUrl(context.getString(R.string.telegram_url))
 						}
-					),
-					SelectionItem(
-						ImageVector.vectorResource(R.drawable.github),
-						title = { Text(stringResource(R.string.open_issue), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-						trailing = {
-							ForwardButton {
-								context.openWebUrl(context.getString(R.string.github_url))
-							}
-						},
-						onClick = {
+					},
+					onClick = {
+						context.openWebUrl(context.getString(R.string.telegram_url))
+					},
+				),
+				SelectionItem(
+					ImageVector.vectorResource(R.drawable.github),
+					title = { Text(stringResource(R.string.open_issue), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
+					trailing = {
+						ForwardButton {
 							context.openWebUrl(context.getString(R.string.github_url))
 						}
-					),
-					SelectionItem(
-						Icons.Filled.Mail,
-						title = { Text(stringResource(R.string.email_description), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-						trailing = {
-							ForwardButton {
-								context.launchSupportEmail()
-							}
-						},
-						onClick = {
+					},
+					onClick = {
+						context.openWebUrl(context.getString(R.string.github_url))
+					},
+				),
+				SelectionItem(
+					Icons.Filled.Mail,
+					title = {
+						Text(
+							stringResource(R.string.email_description),
+							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+						)
+					},
+					trailing = {
+						ForwardButton {
 							context.launchSupportEmail()
 						}
-					),
-				)
-			)
-			VersionLabel()
-		}
+					},
+					onClick = {
+						context.launchSupportEmail()
+					},
+				),
+			),
+		)
+		VersionLabel()
 	}
+}

@@ -31,7 +31,7 @@ fun ClickableIconButton(onClick: () -> Unit, onIconClick: () -> Unit, text: Stri
 					if (enabled) {
 						onIconClick()
 					}
-			},
+				},
 		)
 	}
 }

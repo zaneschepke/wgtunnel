@@ -27,7 +27,7 @@ fun VersionLabel() {
 			color = MaterialTheme.colorScheme.outline,
 			modifier = Modifier.clickable {
 				clipboardManager.setText(AnnotatedString(BuildConfig.VERSION_NAME))
-			}
+			},
 		)
 	}
 }

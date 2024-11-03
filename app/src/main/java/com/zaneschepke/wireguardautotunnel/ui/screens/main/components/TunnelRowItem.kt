@@ -182,14 +182,14 @@ fun TunnelRowItem(
 						ScaledSwitch(
 							modifier = Modifier.focusRequester(itemFocusRequester),
 							checked = isActive,
-							onClick = onSwitchClick
+							onClick = onSwitchClick,
 						)
 					}
 				} else {
 					ScaledSwitch(
 						modifier = Modifier.focusRequester(itemFocusRequester),
 						checked = isActive,
-						onClick = onSwitchClick
+						onClick = onSwitchClick,
 					)
 				}
 			}

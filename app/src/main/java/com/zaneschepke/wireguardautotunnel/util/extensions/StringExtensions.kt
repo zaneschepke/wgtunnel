@@ -28,9 +28,9 @@ fun String.extractNameAndNumber(): Pair<String, Int>? {
 }
 
 fun List<String>.isMatchingToWildcardList(value: String): Boolean {
-	val excludeValues = this.filter { it.startsWith("!") }.map { it.removePrefix("!").toRegexWithWildcards() }
+	val excludeValues = this.filter { it.startsWith("!") }.map { it.removePrefix("!").transformWildcardsToRegex() }
 	Timber.d("Excluded values: $excludeValues")
-	val includedValues = this.filter { !it.startsWith("!") }.map { it.toRegexWithWildcards() }
+	val includedValues = this.filter { !it.startsWith("!") }.map { it.transformWildcardsToRegex() }
 	Timber.d("Included values: $includedValues")
 	val matches = includedValues.filter { it.matches(value) }
 	val excludedMatches = excludeValues.filter { it.matches(value) }
@@ -39,6 +39,32 @@ fun List<String>.isMatchingToWildcardList(value: String): Boolean {
 	return matches.isNotEmpty() && excludedMatches.isEmpty()
 }
 
-fun String.toRegexWithWildcards(): Regex {
-	return this.replace("*", ".*").replace("?", ".").toRegex()
+fun String.transformWildcardsToRegex(): Regex {
+	return this.replaceUnescapedChar("*", ".*").replaceUnescapedChar("?", ".").toRegex()
+}
+
+fun String.replaceUnescapedChar(charToReplace: String, replacement: String): String {
+	val escapedChar = Regex.escape(charToReplace)
+	val regex = "(?<!\\\\)(?<!(?<!\\\\)\\\\)($escapedChar)".toRegex()
+	return regex.replace(this) { matchResult ->
+		if (matchResult.range.first == 0 ||
+			this[matchResult.range.first - 1] != '\\' ||
+			(matchResult.range.first > 1 && this[matchResult.range.first - 2] == '\\')
+		) {
+			replacement.toString()
+		} else {
+			matchResult.value
+		}
+	}
+}
+
+fun String.isCharacterEscaped(index: Int): Boolean {
+	if (index <= 0) return false
+	var backslashCount = 0
+	var currentIndex = index - 1
+	while (currentIndex >= 0 && this[currentIndex] == '\\') {
+		backslashCount++
+		currentIndex--
+	}
+	return backslashCount % 2 != 0
 }

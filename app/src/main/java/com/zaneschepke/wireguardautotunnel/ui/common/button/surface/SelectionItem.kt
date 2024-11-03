@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.common.button.surface
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class SelectionItem(

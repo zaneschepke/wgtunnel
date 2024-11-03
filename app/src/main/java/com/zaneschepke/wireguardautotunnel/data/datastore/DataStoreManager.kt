@@ -26,7 +26,6 @@ class DataStoreManager(
 		val currentSSID = stringPreferencesKey("CURRENT_SSID")
 		val pinLockEnabled = booleanPreferencesKey("PIN_LOCK_ENABLED")
 		val tunnelStatsExpanded = booleanPreferencesKey("TUNNEL_STATS_EXPANDED")
-		val wildcardsEnabled = booleanPreferencesKey("WILDCARDS_ENABLED")
 		val theme = stringPreferencesKey("THEME")
 	}
 

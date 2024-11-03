@@ -11,7 +11,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 
 @Database(
 	entities = [Settings::class, TunnelConfig::class],
-	version = 10,
+	version = 11,
 	autoMigrations =
 	[
 		AutoMigration(from = 1, to = 2),
@@ -36,6 +36,11 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 		AutoMigration(7, 8),
 		AutoMigration(8, 9),
 		AutoMigration(9, 10),
+		AutoMigration(
+			from = 10,
+			to = 11,
+			spec = RemoveTunnelPauseMigration::class,
+		),
 	],
 	exportSchema = true,
 )
@@ -55,3 +60,9 @@ abstract class AppDatabase : RoomDatabase() {
 	columnName = "is_battery_saver_enabled",
 )
 class RemoveLegacySettingColumnsMigration : AutoMigrationSpec
+
+@DeleteColumn(
+	tableName = "Settings",
+	columnName = "is_auto_tunnel_paused",
+)
+class RemoveTunnelPauseMigration : AutoMigrationSpec

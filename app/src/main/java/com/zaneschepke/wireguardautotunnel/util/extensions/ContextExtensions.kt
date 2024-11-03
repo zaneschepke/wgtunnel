@@ -2,10 +2,12 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
+import android.os.PowerManager
 import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.widget.Toast
@@ -13,7 +15,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.location.LocationManagerCompat
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.receiver.BackgroundActionReceiver
 import com.zaneschepke.wireguardautotunnel.service.tile.AutoTunnelControlTile
 import com.zaneschepke.wireguardautotunnel.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -32,6 +33,11 @@ fun Context.openWebUrl(url: String): Result<Unit> {
 	}.onFailure {
 		showToast(R.string.no_browser_detected)
 	}
+}
+
+fun Context.isBatteryOptimizationsDisabled(): Boolean {
+	val pm = getSystemService(POWER_SERVICE) as PowerManager
+	return pm.isIgnoringBatteryOptimizations(packageName)
 }
 
 val Context.actionBarSize
@@ -66,7 +72,7 @@ fun Context.resizeWidth(dp: Dp): Dp {
 }
 
 fun Context.launchNotificationSettings() {
-	if(isRunningOnTv()) return launchAppSettings()
+	if (isRunningOnTv()) return launchAppSettings()
 	val settingsIntent: Intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
 		.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 		.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
@@ -159,23 +165,23 @@ fun Context.launchAppSettings() {
 	}
 }
 
-fun Context.startTunnelBackground(tunnelId: Int) {
-	sendBroadcast(
-		Intent(this, BackgroundActionReceiver::class.java).apply {
-			action = BackgroundActionReceiver.ACTION_CONNECT
-			putExtra(BackgroundActionReceiver.TUNNEL_ID_EXTRA_KEY, tunnelId)
-		},
-	)
-}
-
-fun Context.stopTunnelBackground(tunnelId: Int) {
-	sendBroadcast(
-		Intent(this, BackgroundActionReceiver::class.java).apply {
-			action = BackgroundActionReceiver.ACTION_DISCONNECT
-			putExtra(BackgroundActionReceiver.TUNNEL_ID_EXTRA_KEY, tunnelId)
-		},
-	)
-}
+// fun Context.startTunnelBackground(tunnelId: Int) {
+// 	sendBroadcast(
+// 		Intent(this, BackgroundActionReceiver::class.java).apply {
+// 			action = BackgroundActionReceiver.ACTION_CONNECT
+// 			putExtra(BackgroundActionReceiver.TUNNEL_ID_EXTRA_KEY, tunnelId)
+// 		},
+// 	)
+// }
+//
+// fun Context.stopTunnelBackground(tunnelId: Int) {
+// 	sendBroadcast(
+// 		Intent(this, BackgroundActionReceiver::class.java).apply {
+// 			action = BackgroundActionReceiver.ACTION_DISCONNECT
+// 			putExtra(BackgroundActionReceiver.TUNNEL_ID_EXTRA_KEY, tunnelId)
+// 		},
+// 	)
+// }
 
 fun Context.requestTunnelTileServiceStateUpdate() {
 	TileService.requestListeningState(

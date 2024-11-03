@@ -29,14 +29,6 @@ class DataStoreAppStateRepository(
 		dataStoreManager.saveToDataStore(DataStoreManager.pinLockEnabled, enabled)
 	}
 
-	override suspend fun isWildcardsEnabled(): Boolean {
-		return dataStoreManager.getFromStore(DataStoreManager.wildcardsEnabled) ?: GeneralState.IS_WILDCARDS_ENABLED
-	}
-
-	override suspend fun setWildcardsEnabled(enabled: Boolean) {
-		dataStoreManager.saveToDataStore(DataStoreManager.wildcardsEnabled, enabled)
-	}
-
 	override suspend fun isBatteryOptimizationDisableShown(): Boolean {
 		return dataStoreManager.getFromStore(DataStoreManager.batteryDisableShown)
 			?: GeneralState.BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT
@@ -71,7 +63,7 @@ class DataStoreAppStateRepository(
 		return dataStoreManager.getFromStore(DataStoreManager.theme)?.let {
 			try {
 				Theme.valueOf(it)
-			} catch (_ : IllegalArgumentException) {
+			} catch (_: IllegalArgumentException) {
 				Theme.AUTOMATIC
 			}
 		} ?: Theme.AUTOMATIC
@@ -92,8 +84,7 @@ class DataStoreAppStateRepository(
 						pref[DataStoreManager.pinLockEnabled]
 							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
 						isTunnelStatsExpanded = pref[DataStoreManager.tunnelStatsExpanded] ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
-						isWildcardsEnabled = pref[DataStoreManager.wildcardsEnabled] ?: GeneralState.IS_WILDCARDS_ENABLED,
-						theme = getTheme()
+						theme = getTheme(),
 					)
 				} catch (e: IllegalArgumentException) {
 					Timber.e(e)

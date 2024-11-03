@@ -8,7 +8,6 @@ import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
-import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -28,6 +27,9 @@ class BootReceiver : BroadcastReceiver() {
 	@ApplicationScope
 	lateinit var applicationScope: CoroutineScope
 
+	@Inject
+	lateinit var serviceManager: ServiceManager
+
 	override fun onReceive(context: Context, intent: Intent) {
 		if (Intent.ACTION_BOOT_COMPLETED != intent.action) return
 		applicationScope.launch {
@@ -37,11 +39,11 @@ class BootReceiver : BroadcastReceiver() {
 					val tunState = tunnelService.get().vpnState.value.status
 					if (activeTunnels.isNotEmpty() && tunState != TunnelState.UP) {
 						Timber.i("Starting previously active tunnel")
-						context.startTunnelBackground(activeTunnels.first().id)
+						tunnelService.get().startTunnel(activeTunnels.first(), true)
 					}
 					if (isAutoTunnelEnabled) {
 						Timber.i("Starting watcher service from boot")
-						ServiceManager.startWatcherServiceForeground(context)
+						serviceManager.startAutoTunnel(true)
 					}
 				}
 			}

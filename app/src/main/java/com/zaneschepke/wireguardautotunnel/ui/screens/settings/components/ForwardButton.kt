@@ -14,7 +14,7 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 fun ForwardButton(modifier: Modifier = Modifier.focusable(), onClick: () -> Unit) {
 	IconButton(
 		modifier = modifier,
-		onClick = onClick
+		onClick = onClick,
 	) {
 		val icon = Icons.AutoMirrored.Outlined.ArrowForward
 		Icon(icon, icon.name, Modifier.size(iconSize))

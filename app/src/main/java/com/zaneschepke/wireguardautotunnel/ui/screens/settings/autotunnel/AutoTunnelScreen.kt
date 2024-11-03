@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel
 
 import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Filter1
 import androidx.compose.material.icons.outlined.NetworkPing
 import androidx.compose.material.icons.outlined.Security
@@ -31,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -45,9 +46,12 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelec
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.TrustedNetworkTextBox
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WildcardsLabel
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LearnMoreLinkLabel
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.extensions.isLocationServicesEnabled
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
@@ -63,11 +67,12 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 	var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
 	var showLocationDialog by remember { mutableStateOf(false) }
 
-	LaunchedEffect(uiState.settings.trustedNetworkSSIDs) {
-		currentText = ""
+	fun checkFineLocationGranted() {
+		isBackgroundLocationGranted = fineLocationState.status.isGranted
 	}
 
 	fun onAutoTunnelWifiChecked() {
+		if (uiState.settings.isTunnelOnWifiEnabled) viewModel.onToggleTunnelOnWifi().also { return }
 		when (false) {
 			isBackgroundLocationGranted -> showLocationDialog = true
 			fineLocationState.status.isGranted -> showLocationDialog = true
@@ -79,11 +84,39 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 		}
 	}
 
+	if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) checkFineLocationGranted()
+	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+		if (context.isRunningOnTv() && Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+			checkFineLocationGranted()
+		} else {
+			val backgroundLocationState = rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+			isBackgroundLocationGranted = backgroundLocationState.status.isGranted
+		}
+	}
+
+	LaunchedEffect(uiState.settings.trustedNetworkSSIDs) {
+		currentText = ""
+	}
+
+	LocationServicesDialog(
+		showLocationServicesAlertDialog,
+		onDismiss = { showLocationServicesAlertDialog = false },
+		onAttest = {
+			viewModel.onToggleTunnelOnWifi()
+		},
+	)
+
+	BackgroundLocationDialog(
+		showLocationDialog,
+		onDismiss = { showLocationDialog = false },
+		onAttest = { showLocationDialog = false },
+	)
+
 	Scaffold(
 		contentWindowInsets = WindowInsets(0.dp),
 		topBar = {
 			TopNavBar(stringResource(R.string.auto_tunneling))
-		}
+		},
 	) {
 		Column(
 			horizontalAlignment = Alignment.Start,
@@ -97,34 +130,60 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 		) {
 			SurfaceSelectionGroupButton(
 				buildList {
-					add(
-						SelectionItem(
-							Icons.Outlined.Wifi,
-							title = {
-								Text(
-									stringResource(R.string.tunnel_on_wifi),
-									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)
-								)
-							},
-							description = {
-							},
-							trailing = {
-								ScaledSwitch(
-									enabled = !uiState.settings.isAlwaysOnVpnEnabled,
-									checked = uiState.settings.isTunnelOnWifiEnabled,
-									onClick = {
-										if (!uiState.settings.isTunnelOnWifiEnabled || uiState.isRooted) viewModel.onToggleTunnelOnWifi()
-											.also { return@ScaledSwitch }
-										onAutoTunnelWifiChecked()
-									},
-								)
-							},
-							onClick = {
-								if (!uiState.settings.isTunnelOnWifiEnabled || uiState.isRooted) viewModel.onToggleTunnelOnWifi()
-									.also { return@SelectionItem }
-								onAutoTunnelWifiChecked()
-							}
-						)
+					addAll(
+						listOf(
+							SelectionItem(
+								Icons.Outlined.Wifi,
+								title = {
+									Text(
+										stringResource(R.string.tunnel_on_wifi),
+										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+									)
+								},
+								description = {
+								},
+								trailing = {
+									ScaledSwitch(
+										enabled = !uiState.settings.isAlwaysOnVpnEnabled,
+										checked = uiState.settings.isTunnelOnWifiEnabled,
+										onClick = {
+											if (uiState.settings.isWifiNameByShellEnabled) viewModel.onToggleTunnelOnWifi().also { return@ScaledSwitch }
+											onAutoTunnelWifiChecked()
+										},
+									)
+								},
+								onClick = {
+									if (uiState.settings.isWifiNameByShellEnabled) viewModel.onToggleTunnelOnWifi().also { return@SelectionItem }
+									onAutoTunnelWifiChecked()
+								},
+							),
+							SelectionItem(
+								Icons.Outlined.Code,
+								title = {
+									Text(
+										stringResource(R.string.wifi_name_via_shell),
+										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+									)
+								},
+								description = {
+									Text(
+										stringResource(R.string.use_root_shell_for_wifi),
+										style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+									)
+								},
+								trailing = {
+									ScaledSwitch(
+										checked = uiState.settings.isWifiNameByShellEnabled,
+										onClick = {
+											viewModel.onRootShellWifiToggle()
+										},
+									)
+								},
+								onClick = {
+									viewModel.onRootShellWifiToggle()
+								},
+							),
+						),
 					)
 					if (uiState.settings.isTunnelOnWifiEnabled) {
 						addAll(
@@ -134,15 +193,15 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 									title = {
 										Text(
 											stringResource(R.string.use_wildcards),
-											style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)
+											style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 										)
 									},
 									description = {
-										LearnMoreLinkLabel({context.openWebUrl(it)}, stringResource(id = R.string.docs_wildcards))
+										LearnMoreLinkLabel({ context.openWebUrl(it) }, stringResource(id = R.string.docs_wildcards))
 									},
 									trailing = {
 										ScaledSwitch(
-											checked = uiState.generalState.isWildcardsEnabled,
+											checked = uiState.settings.isWildcardsEnabled,
 											onClick = {
 												viewModel.onToggleWildcards()
 											},
@@ -150,7 +209,7 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 									},
 									onClick = {
 										viewModel.onToggleWildcards()
-									}
+									},
 								),
 								SelectionItem(
 									title = {
@@ -183,87 +242,89 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 														style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 													)
 												}
-
 											}
 										}
-
 									},
 									description = {
 										TrustedNetworkTextBox(
-											uiState.settings.trustedNetworkSSIDs, onDelete = viewModel::onDeleteTrustedSSID,
+											uiState.settings.trustedNetworkSSIDs,
+											onDelete = viewModel::onDeleteTrustedSSID,
 											currentText = currentText,
 											onSave = viewModel::onSaveTrustedSSID,
 											onValueChange = { currentText = it },
-											supporting = { if(uiState.generalState.isWildcardsEnabled) {
-												WildcardsLabel()
-											}}
+											supporting = {
+												if (uiState.settings.isWildcardsEnabled) {
+													WildcardsLabel()
+												}
+											},
 										)
 									},
-								)
-							))
+								),
+							),
+						)
 					}
-				}
+				},
 			)
 			SurfaceSelectionGroupButton(
-						listOf(
-							SelectionItem(
-								Icons.Outlined.SignalCellular4Bar,
-								title = {
-									Text(
-										stringResource(R.string.tunnel_mobile_data),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								trailing = {
-									ScaledSwitch(
-										enabled = !uiState.settings.isAlwaysOnVpnEnabled,
-										checked = uiState.settings.isTunnelOnMobileDataEnabled,
-										onClick = { viewModel.onToggleTunnelOnMobileData() },
-									)
-								},
-								onClick = {
-									viewModel.onToggleTunnelOnMobileData()
-								}
-							),
-							SelectionItem(
-								Icons.Outlined.SettingsEthernet,
-								title = {
-									Text(
-										stringResource(R.string.tunnel_on_ethernet),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								trailing = {
-									ScaledSwitch(
-										enabled = !uiState.settings.isAlwaysOnVpnEnabled,
-										checked = uiState.settings.isTunnelOnEthernetEnabled,
-										onClick = { viewModel.onToggleTunnelOnEthernet() },
-									)
-								},
-								onClick = {
-									viewModel.onToggleTunnelOnEthernet()
-								}
-							),
-							SelectionItem(
-								Icons.Outlined.NetworkPing,
-								title = {
-									Text(
-										stringResource(R.string.restart_on_ping),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								trailing = {
-									ScaledSwitch(
-										checked = uiState.settings.isPingEnabled,
-										onClick = { viewModel.onToggleRestartOnPing() },
-									)
-								},
-								onClick = {
-									viewModel.onToggleRestartOnPing()
-								}
+				listOf(
+					SelectionItem(
+						Icons.Outlined.SignalCellular4Bar,
+						title = {
+							Text(
+								stringResource(R.string.tunnel_mobile_data),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 							)
-						)
-					)
+						},
+						trailing = {
+							ScaledSwitch(
+								enabled = !uiState.settings.isAlwaysOnVpnEnabled,
+								checked = uiState.settings.isTunnelOnMobileDataEnabled,
+								onClick = { viewModel.onToggleTunnelOnMobileData() },
+							)
+						},
+						onClick = {
+							viewModel.onToggleTunnelOnMobileData()
+						},
+					),
+					SelectionItem(
+						Icons.Outlined.SettingsEthernet,
+						title = {
+							Text(
+								stringResource(R.string.tunnel_on_ethernet),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						trailing = {
+							ScaledSwitch(
+								enabled = !uiState.settings.isAlwaysOnVpnEnabled,
+								checked = uiState.settings.isTunnelOnEthernetEnabled,
+								onClick = { viewModel.onToggleTunnelOnEthernet() },
+							)
+						},
+						onClick = {
+							viewModel.onToggleTunnelOnEthernet()
+						},
+					),
+					SelectionItem(
+						Icons.Outlined.NetworkPing,
+						title = {
+							Text(
+								stringResource(R.string.restart_on_ping),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						trailing = {
+							ScaledSwitch(
+								checked = uiState.settings.isPingEnabled,
+								onClick = { viewModel.onToggleRestartOnPing() },
+							)
+						},
+						onClick = {
+							viewModel.onToggleRestartOnPing()
+						},
+					),
+				),
+			)
 		}
 	}
 }

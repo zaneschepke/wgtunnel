@@ -12,7 +12,7 @@ import javax.inject.Inject
 class DisplayViewModel
 @Inject
 constructor(
-	private val appStateRepository: AppStateRepository
+	private val appStateRepository: AppStateRepository,
 ) : ViewModel() {
 
 	fun onThemeChange(theme: Theme) = viewModelScope.launch {

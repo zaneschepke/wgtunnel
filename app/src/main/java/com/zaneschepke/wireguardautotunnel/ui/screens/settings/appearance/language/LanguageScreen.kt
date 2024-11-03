@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -69,7 +68,7 @@ fun LanguageScreen(localeStorage: LocaleStorage) {
 	Scaffold(
 		topBar = {
 			TopNavBar(stringResource(R.string.language))
-		}
+		},
 	) {
 		LazyColumn(
 			horizontalAlignment = Alignment.CenterHorizontally,

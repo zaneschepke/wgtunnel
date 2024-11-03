@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleService
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CompletableDeferred
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -14,6 +15,9 @@ class TunnelBackgroundService : LifecycleService() {
 
 	@Inject
 	lateinit var notificationService: NotificationService
+
+	@Inject
+	lateinit var serviceManager: ServiceManager
 
 	private val foregroundId = 123
 
@@ -29,25 +33,22 @@ class TunnelBackgroundService : LifecycleService() {
 	}
 
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-		if (intent != null) {
-			val action = intent.action
-			when (action) {
-				Action.START.name,
-				Action.START_FOREGROUND.name,
-				-> startService()
-				Action.STOP.name, Action.STOP_FOREGROUND.name -> stopService()
-			}
-		}
+		serviceManager.backgroundService.complete(this)
 		return super.onStartCommand(intent, flags, startId)
 	}
 
-	private fun startService() {
+	fun start() {
 		startForeground(foregroundId, createNotification())
 	}
 
-	private fun stopService() {
+	fun stop() {
 		stopForeground(STOP_FOREGROUND_REMOVE)
 		stopSelf()
+	}
+
+	override fun onDestroy() {
+		serviceManager.backgroundService = CompletableDeferred()
+		super.onDestroy()
 	}
 
 	private fun createNotification(): Notification {

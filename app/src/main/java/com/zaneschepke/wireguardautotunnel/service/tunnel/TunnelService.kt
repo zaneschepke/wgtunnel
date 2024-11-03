@@ -5,7 +5,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import kotlinx.coroutines.flow.StateFlow
 
 interface TunnelService : Tunnel, org.amnezia.awg.backend.Tunnel {
-	suspend fun startTunnel(tunnelConfig: TunnelConfig): Result<TunnelState>
+	suspend fun startTunnel(tunnelConfig: TunnelConfig, background: Boolean = false): Result<TunnelState>
 
 	suspend fun stopTunnel(tunnelConfig: TunnelConfig): Result<TunnelState>
 
@@ -18,5 +18,6 @@ interface TunnelService : Tunnel, org.amnezia.awg.backend.Tunnel {
 	suspend fun getState(): TunnelState
 
 	fun cancelStatsJob()
+
 	fun startStatsJob()
 }

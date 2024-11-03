@@ -1,7 +1,11 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
+import android.content.Intent
+import android.net.Uri
 import android.net.VpnService
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -53,9 +57,9 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImpo
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelRowItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.VpnDeniedDialog
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.isBatteryOptimizationsDisabled
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
-import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -75,13 +79,19 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		NestedScrollListener({ isFabVisible = false }, { isFabVisible = true })
 	}
 
-	val vpnActivityResultState =
+	val vpnActivity =
 		rememberLauncherForActivityResult(
 			ActivityResultContracts.StartActivityForResult(),
 			onResult = {
 				if (it.resultCode != RESULT_OK) showVpnPermissionDialog = true
 			},
 		)
+	val batteryActivity =
+		rememberLauncherForActivityResult(
+			ActivityResultContracts.StartActivityForResult(),
+		) { result: ActivityResult ->
+			viewModel.setBatteryOptimizeDisableShown()
+		}
 
 	val tunnelFileImportResultLauncher = rememberFileImportLauncherForResult(onNoFileExplorer = {
 		snackbar.showMessage(
@@ -104,7 +114,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		InfoDialog(
 			onDismiss = { showDeleteTunnelAlertDialog = false },
 			onAttest = {
-				selectedTunnel?.let { viewModel.onDelete(it, context) }
+				selectedTunnel?.let { viewModel::onDelete }
 				showDeleteTunnelAlertDialog = false
 				selectedTunnel = null
 			},
@@ -114,15 +124,35 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		)
 	}
 
+	fun requestBatteryOptimizationsDisabled() {
+		val intent =
+			Intent().apply {
+				action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+				data = Uri.parse("package:${context.packageName}")
+			}
+		batteryActivity.launch(intent)
+	}
+
+	fun onAutoTunnelToggle() {
+		if (!uiState.generalState.isBatteryOptimizationDisableShown &&
+			!context.isBatteryOptimizationsDisabled() && !isRunningOnTv
+		) {
+			return requestBatteryOptimizationsDisabled()
+		}
+		val intent = if (!uiState.settings.isKernelEnabled) {
+			VpnService.prepare(context)
+		} else {
+			null
+		}
+		if (intent != null) return vpnActivity.launch(intent)
+		viewModel.onToggleAutoTunnel()
+	}
+
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
 		val intent = if (uiState.settings.isKernelEnabled) null else VpnService.prepare(context)
-		if (intent != null) return vpnActivityResultState.launch(intent)
+		if (intent != null) return vpnActivity.launch(intent)
 		if (!checked) viewModel.onTunnelStop(tunnel).also { return }
-		if (uiState.settings.isKernelEnabled) {
-			context.startTunnelBackground(tunnel.id)
-		} else {
-			viewModel.onTunnelStart(tunnel)
-		}
+		viewModel.onTunnelStart(tunnel, uiState.settings.isKernelEnabled)
 	}
 
 	Scaffold(
@@ -137,34 +167,38 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		},
 		floatingActionButtonPosition = FabPosition.End,
 		floatingActionButton = {
-			if(!isRunningOnTv) ScrollDismissFab({
-				val icon = Icons.Filled.Add
-				Icon(
-					imageVector = icon,
-					contentDescription = icon.name,
-					tint = MaterialTheme.colorScheme.onPrimary,
-				)
-			}, isVisible = isFabVisible, onClick = {
-				showBottomSheet = true
-			})
+			if (!isRunningOnTv) {
+				ScrollDismissFab({
+					val icon = Icons.Filled.Add
+					Icon(
+						imageVector = icon,
+						contentDescription = icon.name,
+						tint = MaterialTheme.colorScheme.onPrimary,
+					)
+				}, isVisible = isFabVisible, onClick = {
+					showBottomSheet = true
+				})
+			}
 		},
 		topBar = {
-			if(isRunningOnTv) TopNavBar(
-				showBack = false,
-				title = stringResource(R.string.app_name),
-				trailing = {
-					IconButton(onClick = {
-						showBottomSheet = true
-					}) {
-						val icon = Icons.Outlined.Add
-						Icon(
-							imageVector = icon,
-							contentDescription = icon.name,
-						)
-					}
-				}
-			)
-		}
+			if (isRunningOnTv) {
+				TopNavBar(
+					showBack = false,
+					title = stringResource(R.string.app_name),
+					trailing = {
+						IconButton(onClick = {
+							showBottomSheet = true
+						}) {
+							val icon = Icons.Outlined.Add
+							Icon(
+								imageVector = icon,
+								contentDescription = icon.name,
+							)
+						}
+					},
+				)
+			}
+		},
 	) {
 		TunnelImportSheet(
 			showBottomSheet,
@@ -196,7 +230,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				}
 			} else {
 				item {
-					AutoTunnelRowItem(uiState.settings, { viewModel.onToggleAutoTunnel(context) })
+					AutoTunnelRowItem(uiState, {
+						onAutoTunnelToggle()
+					})
 				}
 			}
 			items(

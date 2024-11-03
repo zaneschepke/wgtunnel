@@ -40,18 +40,15 @@ enum class Theme {
 	AUTOMATIC,
 	LIGHT,
 	DARK,
-	DYNAMIC
+	DYNAMIC,
 }
 
 @Composable
-fun WireguardAutoTunnelTheme(
-	theme: Theme = Theme.AUTOMATIC,
-	content: @Composable () -> Unit,
-) {
+fun WireguardAutoTunnelTheme(theme: Theme = Theme.AUTOMATIC, content: @Composable () -> Unit) {
 	val context = LocalContext.current
 	var isDark = isSystemInDarkTheme()
-	val autoTheme = if(isDark) DarkColorScheme else LightColorScheme
-	val colorScheme = when(theme) {
+	val autoTheme = if (isDark) DarkColorScheme else LightColorScheme
+	val colorScheme = when (theme) {
 		Theme.AUTOMATIC -> autoTheme
 		Theme.DARK -> {
 			isDark = true
@@ -68,7 +65,9 @@ fun WireguardAutoTunnelTheme(
 				} else {
 					dynamicLightColorScheme(context)
 				}
-			} else autoTheme
+			} else {
+				autoTheme
+			}
 		}
 	}
 	val view = LocalView.current

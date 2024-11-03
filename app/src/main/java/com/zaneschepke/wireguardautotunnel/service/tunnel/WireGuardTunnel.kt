@@ -8,6 +8,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepositor
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.Kernel
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
@@ -36,6 +37,7 @@ constructor(
 	private val appDataRepository: AppDataRepository,
 	@ApplicationScope private val applicationScope: CoroutineScope,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+	private val serviceManager: ServiceManager,
 ) : TunnelService {
 
 	private val _vpnState = MutableStateFlow(VpnState())
@@ -87,9 +89,9 @@ constructor(
 		}
 	}
 
-	override suspend fun startTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
+	override suspend fun startTunnel(tunnelConfig: TunnelConfig, background: Boolean): Result<TunnelState> {
 		return withContext(ioDispatcher) {
-			onBeforeStart(tunnelConfig)
+			onBeforeStart(tunnelConfig, background)
 			setState(tunnelConfig, TunnelState.UP).onSuccess {
 				emitTunnelState(it)
 			}.onFailure {
@@ -143,18 +145,28 @@ constructor(
 		resetBackendStatistics()
 	}
 
-	private suspend fun onBeforeStart(tunnelConfig: TunnelConfig) {
-		if (_vpnState.value.status == TunnelState.UP) vpnState.value.tunnelConfig?.let { stopTunnel(it) }
+	private suspend fun onBeforeStart(tunnelConfig: TunnelConfig, background: Boolean) {
+		if (_vpnState.value.status == TunnelState.UP &&
+			tunnelConfig != _vpnState.value.tunnelConfig
+		) {
+			vpnState.value.tunnelConfig?.let { stopTunnel(it) }
+		}
+		if (background) serviceManager.startBackgroundService()
 		resetBackendStatistics()
 		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
 		emitVpnStateConfig(tunnelConfig)
 		startStatsJob()
+		Timber.d("Updating start")
+		serviceManager.requestTunnelTileUpdate()
 	}
 
 	private suspend fun onBeforeStop(tunnelConfig: TunnelConfig) {
 		cancelStatsJob()
 		resetBackendStatistics()
 		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
+		serviceManager.stopBackgroundService()
+		Timber.d("UPdating stop")
+		serviceManager.requestTunnelTileUpdate()
 	}
 
 	private fun emitTunnelState(state: TunnelState) {

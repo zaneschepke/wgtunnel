@@ -234,7 +234,7 @@ fun ConfigScreen(tunnelId: Int) {
 							hint = stringResource(R.string.tunnel_name).lowercase(),
 							modifier =
 							Modifier
-								.fillMaxWidth()
+								.fillMaxWidth(),
 						)
 						OutlinedTextField(
 							modifier =
@@ -347,7 +347,7 @@ fun ConfigScreen(tunnelId: Int) {
 								hint = stringResource(R.string.junk_packet_count).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.junkPacketMinSize,
@@ -360,7 +360,7 @@ fun ConfigScreen(tunnelId: Int) {
 								).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.junkPacketMaxSize,
@@ -373,7 +373,7 @@ fun ConfigScreen(tunnelId: Int) {
 								).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.initPacketJunkSize,
@@ -383,7 +383,7 @@ fun ConfigScreen(tunnelId: Int) {
 								hint = stringResource(R.string.init_packet_junk_size).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.responsePacketJunkSize,
@@ -396,7 +396,7 @@ fun ConfigScreen(tunnelId: Int) {
 								).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.initPacketMagicHeader,
@@ -409,7 +409,7 @@ fun ConfigScreen(tunnelId: Int) {
 								).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.responsePacketMagicHeader,
@@ -422,7 +422,7 @@ fun ConfigScreen(tunnelId: Int) {
 								).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.underloadPacketMagicHeader,
@@ -435,7 +435,7 @@ fun ConfigScreen(tunnelId: Int) {
 								).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
 								value = uiState.interfaceProxy.transportPacketMagicHeader,
@@ -448,7 +448,7 @@ fun ConfigScreen(tunnelId: Int) {
 								).lowercase(),
 								modifier =
 								Modifier
-									.fillMaxWidth()
+									.fillMaxWidth(),
 							)
 						}
 						Row(

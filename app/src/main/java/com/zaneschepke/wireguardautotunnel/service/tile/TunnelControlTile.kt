@@ -1,6 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.service.tile
 
+import android.content.Intent
 import android.os.Build
+import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.lifecycle.Lifecycle
@@ -11,8 +13,6 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
-import com.zaneschepke.wireguardautotunnel.util.extensions.stopTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -36,7 +36,6 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
 	override fun onCreate() {
 		super.onCreate()
-		Timber.d("onCreate for tile service")
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 	}
 
@@ -52,6 +51,7 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	override fun onStartListening() {
 		super.onStartListening()
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+		Timber.d("Updating tile!")
 		lifecycleScope.launch {
 			if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
 			updateTileState()
@@ -60,6 +60,7 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
 	private suspend fun updateTileState() {
 		val lastActive = appDataRepository.getStartTunnelConfig()
+		Timber.d("Got config $lastActive")
 		lastActive?.let {
 			updateTile(it)
 		}
@@ -68,13 +69,15 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	override fun onClick() {
 		super.onClick()
 		unlockAndRun {
-			Timber.d("Click")
 			lifecycleScope.launch {
-				val context = this@TunnelControlTile
 				val lastActive = appDataRepository.getStartTunnelConfig()
 				lastActive?.let { tunnel ->
-					if (tunnel.isActive) return@launch context.stopTunnelBackground(tunnel.id)
-					context.startTunnelBackground(tunnel.id)
+					if (tunnel.isActive) {
+						tunnelService.get().stopTunnel(tunnel)
+					} else {
+						tunnelService.get().startTunnel(tunnel, true)
+					}
+					updateTileState()
 				}
 			}
 		}
@@ -122,6 +125,17 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 				setInactive()
 			}
 		}
+	}
+
+	/* This works around an annoying unsolved frameworks bug some people are hitting. */
+	override fun onBind(intent: Intent): IBinder? {
+		var ret: IBinder? = null
+		try {
+			ret = super.onBind(intent)
+		} catch (_: Throwable) {
+			Timber.e("Failed to bind to TunnelControlTile")
+		}
+		return ret
 	}
 
 	override val lifecycle: Lifecycle

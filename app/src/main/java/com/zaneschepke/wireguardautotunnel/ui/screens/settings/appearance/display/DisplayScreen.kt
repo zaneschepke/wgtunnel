@@ -2,11 +2,8 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.displ
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,11 +21,10 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun DisplayScreen(appUiState: AppUiState, viewModel: DisplayViewModel = hiltViewModel()) {
-
 	Scaffold(
 		topBar = {
 			TopNavBar(stringResource(R.string.display_theme))
-		}
+		},
 	) {
 		Column(
 			horizontalAlignment = Alignment.Start,

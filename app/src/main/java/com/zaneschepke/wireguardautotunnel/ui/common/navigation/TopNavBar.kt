@@ -18,12 +18,14 @@ fun TopNavBar(title: String, trailing: @Composable () -> Unit = {}, showBack: Bo
 			Text(title)
 		},
 		navigationIcon = {
-			if(showBack) IconButton(onClick = { navController.popBackStack() }) {
-				val icon = Icons.AutoMirrored.Outlined.ArrowBack
-				Icon(
-					imageVector = icon,
-					contentDescription = icon.name,
-				)
+			if (showBack) {
+				IconButton(onClick = { navController.popBackStack() }) {
+					val icon = Icons.AutoMirrored.Outlined.ArrowBack
+					Icon(
+						imageVector = icon,
+						contentDescription = icon.name,
+					)
+				}
 			}
 		},
 		actions = {

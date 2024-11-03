@@ -7,7 +7,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import com.zaneschepke.wireguardautotunnel.R
 
-
 @Composable
 fun WildcardsLabel() {
 	Text(

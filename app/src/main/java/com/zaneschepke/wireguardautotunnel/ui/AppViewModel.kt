@@ -2,8 +2,6 @@ package com.zaneschepke.wireguardautotunnel.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.android.backend.WgQuickBackend
-import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
@@ -11,7 +9,6 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,13 +17,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.withContext
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 import javax.inject.Provider
@@ -38,6 +32,7 @@ constructor(
 	private val appDataRepository: AppDataRepository,
 	private val tunnelService: Provider<TunnelService>,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+	private val serviceManager: ServiceManager,
 ) : ViewModel() {
 
 	val uiState =
@@ -46,12 +41,14 @@ constructor(
 			appDataRepository.tunnels.getTunnelConfigsFlow(),
 			tunnelService.get().vpnState,
 			appDataRepository.appState.generalStateFlow,
-		) { settings, tunnels, tunnelState, generalState ->
+			serviceManager.autoTunnelActive,
+		) { settings, tunnels, tunnelState, generalState, autoTunnel ->
 			AppUiState(
 				settings,
 				tunnels,
 				tunnelState,
 				generalState,
+				autoTunnel,
 			)
 		}.stateIn(
 			viewModelScope + ioDispatcher,
@@ -95,7 +92,7 @@ constructor(
 
 	private suspend fun initAutoTunnel() {
 		val settings = appDataRepository.settings.getSettings()
-		if (settings.isAutoTunnelEnabled) ServiceManager.startWatcherService(WireGuardAutoTunnel.instance)
+		if (settings.isAutoTunnelEnabled) serviceManager.startAutoTunnel(false)
 	}
 
 	fun onPinLockDisabled() = viewModelScope.launch(ioDispatcher) {

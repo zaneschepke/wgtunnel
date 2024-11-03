@@ -6,9 +6,8 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.Action
 import com.zaneschepke.wireguardautotunnel.service.foreground.AutoTunnelService
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.util.extensions.startTunnelBackground
-import com.zaneschepke.wireguardautotunnel.util.extensions.stopTunnelBackground
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -23,6 +22,9 @@ class ShortcutsActivity : ComponentActivity() {
 
 	@Inject
 	lateinit var tunnelService: Provider<TunnelService>
+
+	@Inject
+	lateinit var serviceManager: ServiceManager
 
 	@Inject
 	@ApplicationScope
@@ -44,26 +46,16 @@ class ShortcutsActivity : ComponentActivity() {
 						Timber.d("Shortcut action on name: ${tunnelConfig?.name}")
 						tunnelConfig?.let {
 							when (intent.action) {
-								Action.START.name -> this@ShortcutsActivity.startTunnelBackground(it.id)
-								Action.STOP.name -> this@ShortcutsActivity.stopTunnelBackground(it.id)
+								Action.START.name -> tunnelService.get().startTunnel(it, true)
+								Action.STOP.name -> tunnelService.get().stopTunnel(it)
 								else -> Unit
 							}
 						}
 					}
 					AutoTunnelService::class.java.simpleName, LEGACY_AUTO_TUNNEL_SERVICE_NAME -> {
 						when (intent.action) {
-							Action.START.name ->
-								appDataRepository.settings.save(
-									settings.copy(
-										isAutoTunnelPaused = false,
-									),
-								)
-							Action.STOP.name ->
-								appDataRepository.settings.save(
-									settings.copy(
-										isAutoTunnelPaused = true,
-									),
-								)
+							Action.START.name -> serviceManager.startAutoTunnel(true)
+							Action.STOP.name -> serviceManager.stopAutoTunnel()
 						}
 					}
 				}

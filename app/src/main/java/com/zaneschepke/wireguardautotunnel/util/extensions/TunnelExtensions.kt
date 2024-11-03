@@ -4,9 +4,11 @@ import androidx.compose.ui.graphics.Color
 import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
-import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
+import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import org.amnezia.awg.config.Config
@@ -19,6 +21,10 @@ fun TunnelStatistics.mapPeerStats(): Map<org.amnezia.awg.crypto.Key, TunnelStati
 
 fun TunnelStatistics.PeerStats.latestHandshakeSeconds(): Long? {
 	return NumberUtils.getSecondsBetweenTimestampAndNow(this.latestHandshakeEpochMillis)
+}
+
+fun VpnState.isDown(): Boolean {
+	return this.status == TunnelState.DOWN
 }
 
 fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {

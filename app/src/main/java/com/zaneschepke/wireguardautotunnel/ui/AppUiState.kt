@@ -10,6 +10,5 @@ data class AppUiState(
 	val tunnels: List<TunnelConfig> = emptyList(),
 	val vpnState: VpnState = VpnState(),
 	val generalState: GeneralState = GeneralState(),
-	val isKernelAvailable: Boolean = false,
-	val isRooted: Boolean = false,
+	val autoTunnelActive: Boolean = false,
 )

@@ -4,15 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NetworkPing
@@ -27,18 +22,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,7 +44,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.compon
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -84,7 +71,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 					)
 				}
 			})
-		}
+		},
 	) {
 		Column(
 			horizontalAlignment = Alignment.Start,
@@ -101,7 +88,12 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 				listOf(
 					SelectionItem(
 						Icons.Outlined.Star,
-						title = { Text(stringResource(R.string.primary_tunnel), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
+						title = {
+							Text(
+								stringResource(R.string.primary_tunnel),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
 						description = {
 							Text(
 								stringResource(R.string.set_primary_tunnel),
@@ -114,7 +106,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 								onClick = { optionsViewModel.onTogglePrimaryTunnel(config) },
 							)
 						},
-						onClick = { optionsViewModel.onTogglePrimaryTunnel(config) }
+						onClick = { optionsViewModel.onTogglePrimaryTunnel(config) },
 					),
 					SelectionItem(
 						Icons.Outlined.PhoneAndroid,
@@ -131,7 +123,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 								onClick = { optionsViewModel.onToggleIsMobileDataTunnel(config) },
 							)
 						},
-						onClick = { optionsViewModel.onToggleIsMobileDataTunnel(config) }
+						onClick = { optionsViewModel.onToggleIsMobileDataTunnel(config) },
 					),
 					SelectionItem(
 						Icons.Outlined.NetworkPing,
@@ -147,7 +139,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 								onClick = { optionsViewModel.onToggleRestartOnPing(config) },
 							)
 						},
-						onClick = { optionsViewModel.onToggleRestartOnPing(config) }
+						onClick = { optionsViewModel.onToggleRestartOnPing(config) },
 					),
 					SelectionItem(
 						title = {
@@ -180,24 +172,25 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 											style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 										)
 									}
-
 								}
 							}
-
 						},
 						description = {
 							TrustedNetworkTextBox(
-								config.tunnelNetworks, onDelete = { optionsViewModel.onDeleteRunSSID(it, config) },
+								config.tunnelNetworks,
+								onDelete = { optionsViewModel.onDeleteRunSSID(it, config) },
 								currentText = currentText,
 								onSave = { optionsViewModel.onSaveRunSSID(it, config) },
 								onValueChange = { currentText = it },
-								supporting = { if(appUiState.generalState.isWildcardsEnabled) {
-									WildcardsLabel()
-								}}
+								supporting = {
+									if (appUiState.settings.isWildcardsEnabled) {
+										WildcardsLabel()
+									}
+								},
 							)
 						},
-					)
-				)
+					),
+				),
 			)
 		}
 	}
