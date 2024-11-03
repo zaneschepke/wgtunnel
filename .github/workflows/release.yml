@@ -55,7 +55,7 @@ jobs:
           echo "new_commits=$NEW_COMMITS" >> $GITHUB_OUTPUT
   build:
     needs: check_commits
-    if: ${{ needs.check_commits.outputs.has_new_commits == 'true' && inputs.release_type != 'none' }}
+    if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: Build Signed APK
     runs-on: ubuntu-latest
     env:
