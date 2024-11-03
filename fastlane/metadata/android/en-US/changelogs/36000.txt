@@ -1,0 +1,6 @@
+What's new:
+- UI update
+- AndroidTV navigation improvements
+- Battery drain bug fix
+- Wildcards fix with optional setting
+- Other improvements
