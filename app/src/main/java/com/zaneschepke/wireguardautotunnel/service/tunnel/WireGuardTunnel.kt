@@ -91,7 +91,8 @@ constructor(
 
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig, background: Boolean): Result<TunnelState> {
 		return withContext(ioDispatcher) {
-			onBeforeStart(tunnelConfig, background)
+			onBeforeStart(tunnelConfig)
+			if (background) startBackgroundService()
 			setState(tunnelConfig, TunnelState.UP).onSuccess {
 				emitTunnelState(it)
 			}.onFailure {
@@ -109,6 +110,8 @@ constructor(
 			}.onFailure {
 				Timber.e(it)
 				onStopFailed()
+			}.also {
+				stopBackgroundService()
 			}
 		}
 	}
@@ -145,28 +148,36 @@ constructor(
 		resetBackendStatistics()
 	}
 
-	private suspend fun onBeforeStart(tunnelConfig: TunnelConfig, background: Boolean) {
-		if (_vpnState.value.status == TunnelState.UP &&
-			tunnelConfig != _vpnState.value.tunnelConfig
-		) {
-			vpnState.value.tunnelConfig?.let { stopTunnel(it) }
+	private suspend fun shutDownActiveTunnel(config: TunnelConfig) {
+		with(_vpnState.value) {
+			if (status == TunnelState.UP && tunnelConfig != config) {
+				tunnelConfig?.let { stopTunnel(it) }
+			}
 		}
-		if (background) serviceManager.startBackgroundService()
-		resetBackendStatistics()
-		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
-		emitVpnStateConfig(tunnelConfig)
-		startStatsJob()
-		Timber.d("Updating start")
+	}
+
+	private suspend fun startBackgroundService() {
+		serviceManager.startBackgroundService()
 		serviceManager.requestTunnelTileUpdate()
 	}
 
+	private fun stopBackgroundService() {
+		serviceManager.stopBackgroundService()
+		serviceManager.requestTunnelTileUpdate()
+	}
+
+	private suspend fun onBeforeStart(tunnelConfig: TunnelConfig) {
+		shutDownActiveTunnel(tunnelConfig)
+		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
+		emitVpnStateConfig(tunnelConfig)
+		resetBackendStatistics()
+		startStatsJob()
+	}
+
 	private suspend fun onBeforeStop(tunnelConfig: TunnelConfig) {
+		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
 		cancelStatsJob()
 		resetBackendStatistics()
-		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
-		serviceManager.stopBackgroundService()
-		Timber.d("UPdating stop")
-		serviceManager.requestTunnelTileUpdate()
 	}
 
 	private fun emitTunnelState(state: TunnelState) {

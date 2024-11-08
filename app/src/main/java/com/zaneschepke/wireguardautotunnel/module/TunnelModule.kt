@@ -82,6 +82,6 @@ class TunnelModule {
 	@Singleton
 	@Provides
 	fun provideServiceManager(@ApplicationContext context: Context): ServiceManager {
-		return ServiceManager(context)
+		return ServiceManager.getInstance(context)
 	}
 }

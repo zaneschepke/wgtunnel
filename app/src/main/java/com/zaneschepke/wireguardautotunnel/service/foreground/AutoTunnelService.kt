@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground
 
-import android.content.Context
 import android.content.Intent
 import android.net.NetworkCapabilities
 import android.os.IBinder
@@ -162,7 +161,7 @@ class AutoTunnelService : LifecycleService() {
 
 	private fun initWakeLock() {
 		wakeLock =
-			(getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+			(getSystemService(POWER_SERVICE) as PowerManager).run {
 				val tag = this.javaClass.name
 				newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
 					try {
