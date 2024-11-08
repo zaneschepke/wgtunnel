@@ -6,6 +6,7 @@ import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.AppShell
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.StringValue
@@ -23,7 +24,7 @@ class AutoTunnelViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
-	private val rootShell: Provider<RootShell>,
+	@AppShell private val rootShell: Provider<RootShell>,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 

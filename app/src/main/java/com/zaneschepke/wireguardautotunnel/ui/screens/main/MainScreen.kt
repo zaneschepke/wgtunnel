@@ -39,6 +39,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
@@ -60,6 +61,7 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isBatteryOptimizationsDisabled
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
+import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -213,7 +215,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		)
 		LazyColumn(
 			horizontalAlignment = Alignment.Start,
-			verticalArrangement = Arrangement.Top,
+			verticalArrangement = Arrangement.spacedBy(5.dp.scaledHeight(), Alignment.Top),
 			modifier =
 			Modifier
 				.fillMaxSize().padding(it)

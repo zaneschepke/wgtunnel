@@ -225,4 +225,6 @@
 	<string name="kernel_not_supported">Kernel not supported</string>
 	<string name="start_auto">Start auto-tunnel</string>
 	<string name="stop_auto">Stop auto-tunnel</string>
+    <string name="tunnel_running">Tunnel running</string>
+	<string name="monitoring_state_changes">Monitoring state changes</string>
 </resources>

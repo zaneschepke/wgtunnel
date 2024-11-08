@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -51,6 +52,8 @@ constructor(
 	}.stateIn(applicationScope, SharingStarted.Lazily, VpnState())
 
 	private var statsJob: Job? = null
+
+	private val runningHandle = AtomicBoolean(false)
 
 	private suspend fun backend(): Any {
 		val settings = appDataRepository.settings.getSettings()
@@ -91,8 +94,14 @@ constructor(
 
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig, background: Boolean): Result<TunnelState> {
 		return withContext(ioDispatcher) {
+			if (runningHandle.get() == true && tunnelConfig == vpnState.value.tunnelConfig) {
+				Timber.w("Tunnel already running")
+				return@withContext Result.success(vpnState.value.status)
+			}
+			runningHandle.set(true)
 			onBeforeStart(tunnelConfig)
-			if (background) startBackgroundService()
+			val settings = appDataRepository.settings.getSettings()
+			if (background || settings.isKernelEnabled) startBackgroundService()
 			setState(tunnelConfig, TunnelState.UP).onSuccess {
 				emitTunnelState(it)
 			}.onFailure {
@@ -112,6 +121,7 @@ constructor(
 				onStopFailed()
 			}.also {
 				stopBackgroundService()
+				runningHandle.set(false)
 			}
 		}
 	}
@@ -146,6 +156,7 @@ constructor(
 		}
 		cancelStatsJob()
 		resetBackendStatistics()
+		runningHandle.set(false)
 	}
 
 	private suspend fun shutDownActiveTunnel(config: TunnelConfig) {

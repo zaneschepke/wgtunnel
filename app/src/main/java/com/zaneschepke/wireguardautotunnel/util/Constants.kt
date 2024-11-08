@@ -21,7 +21,6 @@ object Constants {
 	const val SYSTEM_EXEMPT_SERVICE_TYPE_ID = 1024
 
 	const val SUBSCRIPTION_TIMEOUT = 5_000L
-	const val FOCUS_REQUEST_DELAY = 500L
 
 	const val TRANSITION_ANIMATION_TIME = 200
 

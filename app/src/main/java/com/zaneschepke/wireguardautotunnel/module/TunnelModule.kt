@@ -25,9 +25,18 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class TunnelModule {
+
 	@Provides
 	@Singleton
-	fun provideRootShell(@ApplicationContext context: Context): RootShell {
+	@TunnelShell
+	fun provideTunnelRootShell(@ApplicationContext context: Context): RootShell {
+		return RootShell(context)
+	}
+
+	@Provides
+	@Singleton
+	@AppShell
+	fun provideAppRootShell(@ApplicationContext context: Context): RootShell {
 		return RootShell(context)
 	}
 
@@ -40,14 +49,14 @@ class TunnelModule {
 	@Provides
 	@Singleton
 	@Userspace
-	fun provideUserspaceBackend(@ApplicationContext context: Context, rootShell: RootShell): Backend {
+	fun provideUserspaceBackend(@ApplicationContext context: Context, @TunnelShell rootShell: RootShell): Backend {
 		return GoBackend(context, RootTunnelActionHandler(rootShell))
 	}
 
 	@Provides
 	@Singleton
 	@Kernel
-	fun provideKernelBackend(@ApplicationContext context: Context, rootShell: RootShell): Backend {
+	fun provideKernelBackend(@ApplicationContext context: Context, @TunnelShell rootShell: RootShell): Backend {
 		return WgQuickBackend(context, rootShell, ToolsInstaller(context, rootShell), RootTunnelActionHandler(rootShell))
 	}
 

@@ -27,12 +27,14 @@ class ServiceManager
 	companion object : SingletonHolder<ServiceManager, Context>(::ServiceManager)
 
 	private fun <T : Service> startService(cls: Class<T>, background: Boolean) {
-		val intent = Intent(context, cls)
-		if (background) {
-			context.startForegroundService(intent)
-		} else {
-			context.startService(intent)
-		}
+		runCatching {
+			val intent = Intent(context, cls)
+			if (background) {
+				context.startForegroundService(intent)
+			} else {
+				context.startService(intent)
+			}
+		}.onFailure { Timber.e(it) }
 	}
 
 	suspend fun startAutoTunnel(background: Boolean) {

@@ -62,7 +62,7 @@ class TunnelBackgroundService : LifecycleService() {
 		return notificationService.createNotification(
 			getString(R.string.vpn_channel_id),
 			getString(R.string.vpn_channel_name),
-			getString(R.string.tunnel_start_text),
+			getString(R.string.tunnel_running),
 			description = "",
 		)
 	}
