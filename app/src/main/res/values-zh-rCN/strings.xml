@@ -107,4 +107,7 @@
     <string name="location_services_missing_message">此app不会在你的设备上检测任何已开启的定位服务。根据不同的设备，可能会导致无法获得不可信wifi的名称。你想继续吗？</string>
     <string name="yes">是</string>
     <string name="resume">恢复</string>
+    <string name="pause">暂停</string>
+    <string name="paused">已暂停</string>
+    <string name="active">开启</string>
 </resources>
