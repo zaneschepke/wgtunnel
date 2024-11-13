@@ -105,4 +105,6 @@
     <string name="delete_tunnel">删除隧道</string>
     <string name="delete_tunnel_message">确定删除这个隧道吗？</string>
     <string name="location_services_missing_message">此app不会在你的设备上检测任何已开启的定位服务。根据不同的设备，可能会导致无法获得不可信wifi的名称。你想继续吗？</string>
+    <string name="yes">是</string>
+    <string name="resume">恢复</string>
 </resources>
