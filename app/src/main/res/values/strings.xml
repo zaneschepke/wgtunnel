@@ -9,6 +9,7 @@
 	<string name="docs_features" translatable="false">https://zaneschepke.com/wgtunnel-docs/features.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
 	<string name="docs_wildcards" translatable="false" >https://zaneschepke.com/wgtunnel-docs/features.html#wildcard-wi-fi-name-support</string>
+	<string name="donate_url" translatable="false">https://zaneschepke.com/donate/</string>
 	<string name="error_file_extension">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Action requires tunnel off</string>
     <string name="no_tunnels">No tunnels added yet!</string>
@@ -227,4 +228,5 @@
 	<string name="stop_auto">Stop auto-tunnel</string>
     <string name="tunnel_running">Tunnel running</string>
 	<string name="monitoring_state_changes">Monitoring state changes</string>
+	<string name="donate">Donate to project</string>
 </resources>

@@ -1,10 +1,12 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support
 
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.LineStyle
 import androidx.compose.material.icons.filled.Mail
@@ -19,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
@@ -101,54 +104,83 @@ fun SupportScreen() {
 			),
 		)
 		SurfaceSelectionGroupButton(
-			listOf(
-				SelectionItem(
-					ImageVector.vectorResource(R.drawable.telegram),
-					title = {
-						Text(
-							stringResource(R.string.chat_description),
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-						)
-					},
-					trailing = {
-						ForwardButton {
-							context.openWebUrl(context.getString(R.string.telegram_url))
-						}
-					},
-					onClick = {
-						context.openWebUrl(context.getString(R.string.telegram_url))
-					},
-				),
-				SelectionItem(
-					ImageVector.vectorResource(R.drawable.github),
-					title = { Text(stringResource(R.string.open_issue), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-					trailing = {
-						ForwardButton {
-							context.openWebUrl(context.getString(R.string.github_url))
-						}
-					},
-					onClick = {
-						context.openWebUrl(context.getString(R.string.github_url))
-					},
-				),
-				SelectionItem(
-					Icons.Filled.Mail,
-					title = {
-						Text(
-							stringResource(R.string.email_description),
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-						)
-					},
-					trailing = {
-						ForwardButton {
-							context.launchSupportEmail()
-						}
-					},
-					onClick = {
-						context.launchSupportEmail()
-					},
-				),
-			),
+			buildList {
+				addAll(
+					listOf(
+						SelectionItem(
+							ImageVector.vectorResource(R.drawable.telegram),
+							title = {
+								Text(
+									stringResource(R.string.chat_description),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
+							},
+							trailing = {
+								ForwardButton {
+									context.openWebUrl(context.getString(R.string.telegram_url))
+								}
+							},
+							onClick = {
+								context.openWebUrl(context.getString(R.string.telegram_url))
+							},
+						),
+						SelectionItem(
+							ImageVector.vectorResource(R.drawable.github),
+							title = {
+								Text(
+									stringResource(R.string.open_issue),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface))
+							},
+							trailing = {
+								ForwardButton {
+									context.openWebUrl(context.getString(R.string.github_url))
+								}
+							},
+							onClick = {
+								context.openWebUrl(context.getString(R.string.github_url))
+							},
+						),
+						SelectionItem(
+							Icons.Filled.Mail,
+							title = {
+								Text(
+									stringResource(R.string.email_description),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
+							},
+							trailing = {
+								ForwardButton {
+									context.launchSupportEmail()
+								}
+							},
+							onClick = {
+								context.launchSupportEmail()
+							},
+						),
+					)
+				)
+				if (BuildConfig.FLAVOR == "fdroid") {
+					add(
+						SelectionItem(
+							Icons.Filled.AttachMoney,
+							title = {
+								Text(
+									stringResource(R.string.donate),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
+							},
+							trailing = {
+								ForwardButton {
+									context.openWebUrl(context.getString(R.string.donate_url))
+								}
+							},
+							onClick = {
+								context.openWebUrl(context.getString(R.string.donate_url))
+							},
+						),
+					)
+				}
+			}
 		)
 		VersionLabel()
 	}
