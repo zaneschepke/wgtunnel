@@ -1,0 +1,5 @@
+Novità:
+- Auto-avvio al riavvio per modalità kernel VPN sempre attiva
+- Supporto ad icone per tema adattive
+- Corrette icone notifica, icone tile
+- Corrette icone AndroidTV

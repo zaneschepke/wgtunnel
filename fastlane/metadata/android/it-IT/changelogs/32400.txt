@@ -1,0 +1,5 @@
+Migliorie:
+- Aggiunge supporto di base a WireGuard Kernel
+- Flusso di divulgazione della posizione migliorato
+- Corretto bug permessi auto-tunnel
+- Varie altre correzioni di bug UI
