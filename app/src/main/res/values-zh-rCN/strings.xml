@@ -101,4 +101,8 @@
     <string name="email_subject">WG Tunnel 支持</string>
     <string name="support_help_text">如果有好的意见或建议，或是想参与其中，可以看看下列的资源：</string>
     <string name="error_none">无错误</string>
+    <string name="auto_tunnel_title">自动连接服务</string>
+    <string name="delete_tunnel">删除隧道</string>
+    <string name="delete_tunnel_message">确定删除这个隧道吗？</string>
+    <string name="location_services_missing_message">此app不会在你的设备上检测任何已开启的定位服务。根据不同的设备，可能会导致无法获得不可信wifi的名称。你想继续吗？</string>
 </resources>
