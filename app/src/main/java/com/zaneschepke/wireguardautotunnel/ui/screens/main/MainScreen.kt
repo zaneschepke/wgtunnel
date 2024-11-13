@@ -116,7 +116,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		InfoDialog(
 			onDismiss = { showDeleteTunnelAlertDialog = false },
 			onAttest = {
-				selectedTunnel?.let { viewModel::onDelete }
+				selectedTunnel?.let { viewModel.onDelete(it) }
 				showDeleteTunnelAlertDialog = false
 				selectedTunnel = null
 			},
