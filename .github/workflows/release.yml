@@ -94,6 +94,31 @@ jobs:
           fileDir: ${{ env.KEY_STORE_LOCATION }}
           encodedString: ${{ secrets.KEYSTORE }}
 
+      # update latest tag
+      - name: Set latest tag
+        uses: rickstaa/action-create-tag@v1
+        id: tag_creation
+        with:
+          tag: "latest"  # or any tag name you wish to use
+          message: "Automated tag for HEAD commit"
+          force_push_tag: true
+          tag_exists_error: false
+
+      - name: Create latest tag
+        uses: tvdias/github-tagger@v0.0.1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          tag: "latest"
+
+      - name: Generate Changelog
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fromTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
+          toTag: "latest"
+          writeToFile: false  # we won't write to file, just output
+
       # create keystore path for gradle to read
       - name: Create keystore path env var
         run: |
@@ -209,6 +234,9 @@ jobs:
 
             SHA256 fingerprint:
             ```${{ steps.checksum.outputs.checksum }}```
+
+            ### Changelog
+            ${{ steps.changelog.outputs.changes }}
           tag_name: ${{ env.TAG_NAME }}
           name: ${{ env.TAG_NAME }}
           draft: false
