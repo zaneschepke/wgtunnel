@@ -105,7 +105,7 @@ jobs:
           tag_exists_error: false
 
       - name: Create latest tag
-        uses: tvdias/github-tagger@v0.0.1
+        uses: tvdias/github-tagger@v0.0.2
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           tag: "latest"
