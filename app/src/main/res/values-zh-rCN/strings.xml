@@ -1,2 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="turn_off_tunnel">请关闭连接再操作</string>
+    <string name="tunnel_start_title">VPN已连接</string>
+    <string name="tunnel_start_text">已连接到隧道</string>
+    <string name="watcher_notification_text_paused">网络状态：暂停</string>
+    <string name="no_tunnels">你还没有添加隧道!</string>
+    <string name="tunnels">连接列表</string>
+    <string name="enable_auto_tunnel">使用自动连接</string>
+    <string name="disable_auto_tunnel">关闭自动连接</string>
+    <string name="add_trusted_ssid">添加信任的wifi名称</string>
+    <string name="privacy_policy">查看隐私政策</string>
+    <string name="tunnel_mobile_data">隧道使用手机数据流量</string>
+    <string name="okay">好</string>
+    <string name="tunnel_on_ethernet">在局域网中使用隧道</string>
+    <string name="error_file_extension">文件类型不是 .conf 或 .zip</string>
+    <string name="watcher_notification_text_active">网络状态：运行中</string>
+    <string name="notification_permission_required">需要开启通知权限</string>
+</resources>
