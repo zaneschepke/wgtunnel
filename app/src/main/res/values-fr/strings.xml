@@ -85,4 +85,5 @@
     <string name="cancel">Annuler</string>
     <string name="seconds">secondes</string>
     <string name="error_authentication_failed">Échec de l\'authentification</string>
+    <string name="error_authorization_failed">Autorisation échouée</string>
 </resources>
