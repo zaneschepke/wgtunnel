@@ -48,7 +48,7 @@
     <string name="turn_on_tunnel">Cette action nécessite un tunnel actif</string>
     <string name="add_peer">Ajouter un pair</string>
     <string name="done">Terminé</string>
-    <string name="rotate_keys">Changer les clés</string>
+    <string name="rotate_keys">Tourner les clés</string>
     <string name="error_file_extension">Le fichier n\'est pas un .conf ou .zip</string>
     <string name="vpn_channel_name">Canal de notifications VPN</string>
     <string name="app_name">WG Tunnel</string>
@@ -73,4 +73,15 @@
     <string name="private_key">Clé privée</string>
     <string name="turn_off_auto">Cette action nécessite de désactiver ou de mettre en pause le VPN automatique</string>
     <string name="interface_">Interface</string>
+    <string name="copy_public_key">Copier la clé publique</string>
+    <string name="base64_key">clé base64</string>
+    <string name="comma_separated_list">liste séparée par des virgules</string>
+    <string name="listen_port">Écouter sur le port</string>
+    <string name="random">(aléatoire)</string>
+    <string name="optional_no_recommend">(optionnel, non recommandé)</string>
+    <string name="persistent_keepalive">Keepalive persistent</string>
+    <string name="optional">(optionnel)</string>
+    <string name="preshared_key">Clé pré-partagée</string>
+    <string name="cancel">Annuler</string>
+    <string name="seconds">secondes</string>
 </resources>
