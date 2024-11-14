@@ -1,0 +1,3 @@
+Novità:
+- Aggiunta Amnezia side-by-side con Wireguard
+- Risolti problemi con le scorciatoie app

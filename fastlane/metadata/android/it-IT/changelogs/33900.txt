@@ -1,0 +1,5 @@
+Novità:
+- Aggiunte schermate log
+- Aggiunto blocco app locale
+- Aggiunto riavvia vpn quando fallisce il ping
+- Varie risoluzioni di problemi

@@ -1,0 +1,5 @@
+Novità:
+- Auto tunnel a specifici tunnel su nome wifi
+- Controllo auto tunnel da tile e scorciatoia
+- Avvio automatico tunnel manuale se era attivo prima del riavvio
+- Varie risoluzioni di problemi e migliorie di prestazioni

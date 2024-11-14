@@ -1,0 +1,5 @@
+Novità:
+- Migliorato flusso avvio
+- Passaggio a fork della libreria wireguard
+- Richiesta permesso VPN al primo avvio VPN
+- Aggiornate versioni

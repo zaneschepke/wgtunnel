@@ -1,0 +1,5 @@
+Novità:
+- Supporto lingue aggiuntive
+- Corretto problema auto-tunneling dati mobili
+- Corretta azione pulsante mobile AndroidTV 
+- Altre ottimizzazioni e miglioramenti
