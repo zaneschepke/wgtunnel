@@ -1,0 +1,5 @@
+Quoi de neuf :
+- Amélioration du nommage lors de l'importation du tunnel
+- Correction du bug d'état d'initialisation de l'auto-tunnel
+- Amélioration de la gestion des erreurs
+- Correction du bug d'importation de fichiers zip Amnezia

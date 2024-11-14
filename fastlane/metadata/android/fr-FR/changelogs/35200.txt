@@ -1,0 +1,6 @@
+Quoi de neuf :
+- Ajout du support des « wildcard » pour les noms wifi
+- Modification des réglages des tunnel/auto-tunnel pendant leur fonctionnement
+- Correction de la lenteur sur les données mobiles
+- Divers correctifs de bogues et améliorations
+- Optimisations de l'interface utilisateur

@@ -1,0 +1,5 @@
+Quoi de neuf :
+- Démarrage automatique au redémarrage pour le mode noyau VPN permanent
+- Prise en charge des icônes de thème adaptatif
+- Correction des icônes de notification et des icônes de réglages rapide
+- Correction des icônes AndroidTV

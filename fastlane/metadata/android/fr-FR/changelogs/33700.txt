@@ -1,0 +1,2 @@
+Quoi de neuf :
+- Résolution d'un bug d'affichage du tunnel sur l'interface utilisateur
