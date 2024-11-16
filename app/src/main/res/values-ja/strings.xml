@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">WG Tunnel</string>
+    <string name="error_file_extension">ファイルが.confまたは.zipではありません</string>
+    <string name="vpn_channel_id">VPNチャンネル</string>
+    <string name="vpn_channel_name">VPN通知チャンネル</string>
+</resources>
