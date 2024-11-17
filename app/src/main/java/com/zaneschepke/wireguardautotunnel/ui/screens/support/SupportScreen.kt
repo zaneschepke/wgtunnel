@@ -1,10 +1,11 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support
 
-import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Book
@@ -48,6 +49,7 @@ fun SupportScreen() {
 		Modifier
 			.fillMaxSize()
 			.padding(top = topPadding)
+			.verticalScroll(rememberScrollState())
 			.padding(horizontal = 24.dp.scaledWidth()),
 	) {
 		GroupLabel(stringResource(R.string.thank_you))
@@ -129,7 +131,8 @@ fun SupportScreen() {
 							title = {
 								Text(
 									stringResource(R.string.open_issue),
-									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface))
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
 							},
 							trailing = {
 								ForwardButton {
@@ -157,7 +160,7 @@ fun SupportScreen() {
 								context.launchSupportEmail()
 							},
 						),
-					)
+					),
 				)
 				if (BuildConfig.FLAVOR == "fdroid") {
 					add(
@@ -180,7 +183,7 @@ fun SupportScreen() {
 						),
 					)
 				}
-			}
+			},
 		)
 		VersionLabel()
 	}

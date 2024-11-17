@@ -33,7 +33,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.extensions.asColor
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 
 @Composable
 fun TunnelRowItem(
@@ -56,20 +55,19 @@ fun TunnelRowItem(
 	val itemFocusRequester = remember { FocusRequester() }
 	ExpandingRowListItem(
 		leading = {
-			val circleIcon = Icons.Rounded.Circle
 			val icon =
 				if (tunnel.isPrimaryTunnel) {
 					Icons.Rounded.Star
 				} else if (tunnel.isMobileDataTunnel) {
 					Icons.Rounded.Smartphone
 				} else {
-					circleIcon
+					Icons.Rounded.Circle
 				}
 			Icon(
 				icon,
 				icon.name,
 				tint = leadingIconColor,
-				modifier = Modifier.size(16.dp.scaledHeight()),
+				modifier = Modifier.size(16.dp),
 			)
 		},
 		text = tunnel.name,

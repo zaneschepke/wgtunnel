@@ -22,6 +22,7 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 private const val BASELINE_HEIGHT = 2201
 private const val BASELINE_WIDTH = 1080
 private const val BASELINE_DENSITY = 2.625
+private const val ANDROID_TV_SIZE_MULTIPLIER = 1.5f
 
 fun Context.openWebUrl(url: String): Result<Unit> {
 	return kotlin.runCatching {
@@ -47,7 +48,8 @@ val Context.actionBarSize
 fun Context.resizeHeight(dp: Dp): Dp {
 	val displayMetrics = resources.displayMetrics
 	val density = displayMetrics.density
-	val height = displayMetrics.heightPixels - this.actionBarSize
+	val height = (displayMetrics.heightPixels - this.actionBarSize) *
+		(if (isRunningOnTv()) ANDROID_TV_SIZE_MULTIPLIER else 1f)
 	val resizeHeightPercentage =
 		(height.toFloat() / BASELINE_HEIGHT) * (BASELINE_DENSITY.toFloat() / density)
 	return dp * resizeHeightPercentage
@@ -56,7 +58,8 @@ fun Context.resizeHeight(dp: Dp): Dp {
 fun Context.resizeHeight(textUnit: TextUnit): TextUnit {
 	val displayMetrics = resources.displayMetrics
 	val density = displayMetrics.density
-	val height = displayMetrics.heightPixels - actionBarSize
+	val height = (displayMetrics.heightPixels - actionBarSize) *
+		(if (isRunningOnTv()) ANDROID_TV_SIZE_MULTIPLIER else 1f)
 	val resizeHeightPercentage =
 		(height.toFloat() / BASELINE_HEIGHT) * (BASELINE_DENSITY.toFloat() / density)
 	return textUnit * resizeHeightPercentage * 1.1

@@ -5,10 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -19,12 +17,10 @@ import com.zaneschepke.wireguardautotunnel.ui.common.ExpandingRowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 
 @Composable
 fun AutoTunnelRowItem(appUiState: AppUiState, onToggle: () -> Unit) {
 	val context = LocalContext.current
-	val itemFocusRequester = remember { FocusRequester() }
 	ExpandingRowListItem(
 		leading = {
 			val icon = Icons.Rounded.Bolt
@@ -33,7 +29,7 @@ fun AutoTunnelRowItem(appUiState: AppUiState, onToggle: () -> Unit) {
 				icon.name,
 				modifier =
 				Modifier
-					.size(16.dp.scaledHeight()).scale(1.5f),
+					.size(16.dp).scale(1.5f),
 				tint =
 				if (!appUiState.autoTunnelActive) {
 					Color.Gray
@@ -53,7 +49,7 @@ fun AutoTunnelRowItem(appUiState: AppUiState, onToggle: () -> Unit) {
 		},
 		onClick = {
 			if (context.isRunningOnTv()) {
-				itemFocusRequester.requestFocus()
+				onToggle()
 			}
 		},
 		isExpanded = false,
