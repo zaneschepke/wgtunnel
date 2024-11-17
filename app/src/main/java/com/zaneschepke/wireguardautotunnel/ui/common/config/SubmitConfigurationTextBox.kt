@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.ui.common.config
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,10 +20,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import com.zaneschepke.wireguardautotunnel.R
+import androidx.compose.ui.unit.dp
+import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
+import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun SubmitConfigurationTextBox(
@@ -44,17 +45,22 @@ fun SubmitConfigurationTextBox(
 
 	var stateValue by remember { mutableStateOf(value ?: "") }
 
-	OutlinedTextField(
+	CustomTextField(
 		isError = isErrorValue(stateValue),
-		modifier = Modifier
-			.fillMaxWidth(),
+		textStyle = MaterialTheme.typography.bodySmall,
 		value = stateValue,
-		singleLine = true,
-		interactionSource = interactionSource,
 		onValueChange = { stateValue = it },
+		interactionSource = interactionSource,
 		label = { Text(label) },
-		maxLines = 1,
-		placeholder = { Text(hint) },
+		containerColor = MaterialTheme.colorScheme.surface,
+		placeholder = { Text(hint, style = MaterialTheme.typography.bodySmall) },
+		modifier =
+		Modifier
+			.padding(
+				top = 5.dp,
+				bottom = 10.dp,
+			).fillMaxWidth().padding(end = 16.dp.scaledWidth()),
+		singleLine = true,
 		keyboardOptions = keyboardOptions,
 		keyboardActions = KeyboardActions(
 			onDone = {
@@ -62,16 +68,17 @@ fun SubmitConfigurationTextBox(
 				keyboardController?.hide()
 			},
 		),
-		trailingIcon = {
+		trailing = {
 			if (!isErrorValue(stateValue) && isFocused) {
 				IconButton(onClick = {
 					onSubmit(stateValue)
 					keyboardController?.hide()
 					focusManager.clearFocus()
 				}) {
+					val icon = Icons.Outlined.Save
 					Icon(
-						imageVector = Icons.Outlined.Save,
-						contentDescription = stringResource(R.string.save_changes),
+						imageVector = icon,
+						contentDescription = icon.name,
 						tint = MaterialTheme.colorScheme.primary,
 					)
 				}

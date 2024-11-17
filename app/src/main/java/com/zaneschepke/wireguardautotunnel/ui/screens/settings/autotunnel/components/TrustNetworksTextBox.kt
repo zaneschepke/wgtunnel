@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -16,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +68,7 @@ fun TrustedNetworkTextBox(
 			textStyle = MaterialTheme.typography.bodySmall,
 			value = currentText,
 			onValueChange = onValueChange,
+			interactionSource = remember { MutableInteractionSource() },
 			label = { Text(stringResource(R.string.add_wifi_name)) },
 			containerColor = MaterialTheme.colorScheme.surface,
 			supportingText = supporting,

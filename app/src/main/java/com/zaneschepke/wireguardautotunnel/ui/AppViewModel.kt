@@ -2,13 +2,19 @@ package com.zaneschepke.wireguardautotunnel.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wireguard.android.backend.WgQuickBackend
+import com.wireguard.android.util.RootShell
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.module.AppShell
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +27,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 import javax.inject.Provider
@@ -32,6 +39,7 @@ constructor(
 	private val appDataRepository: AppDataRepository,
 	private val tunnelService: Provider<TunnelService>,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+	@AppShell private val rootShell: Provider<RootShell>,
 	private val serviceManager: ServiceManager,
 ) : ViewModel() {
 
@@ -106,5 +114,80 @@ constructor(
 
 	fun setLocationDisclosureShown() = viewModelScope.launch {
 		appDataRepository.appState.setLocationDisclosureShown(true)
+	}
+
+	fun onToggleAlwaysOnVPN() = viewModelScope.launch {
+		with(uiState.value.settings) {
+			appDataRepository.settings.save(
+				copy(
+					isAlwaysOnVpnEnabled = !isAlwaysOnVpnEnabled,
+				),
+			)
+		}
+	}
+
+	fun onToggleRestartAtBoot() = viewModelScope.launch {
+		with(uiState.value.settings) {
+			appDataRepository.settings.save(
+				copy(
+					isRestoreOnBootEnabled = !isRestoreOnBootEnabled,
+				),
+			)
+		}
+	}
+
+	fun onToggleShortcutsEnabled() = viewModelScope.launch {
+		with(uiState.value.settings) {
+			appDataRepository.settings.save(
+				this.copy(
+					isShortcutsEnabled = !isShortcutsEnabled,
+				),
+			)
+		}
+	}
+
+	private fun saveKernelMode(enabled: Boolean) = viewModelScope.launch {
+		with(uiState.value.settings) {
+			appDataRepository.settings.save(
+				this.copy(
+					isKernelEnabled = enabled,
+				),
+			)
+		}
+	}
+
+	fun onToggleKernelMode() = viewModelScope.launch {
+		with(uiState.value.settings) {
+			if (!isKernelEnabled) {
+				requestRoot().onSuccess {
+					if (!isKernelSupported()) return@onSuccess SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
+					appDataRepository.settings.save(
+						copy(
+							isKernelEnabled = true,
+							isAmneziaEnabled = false,
+						),
+					)
+				}
+			} else {
+				saveKernelMode(enabled = false)
+			}
+		}
+	}
+
+	private suspend fun isKernelSupported(): Boolean {
+		return withContext(ioDispatcher) {
+			WgQuickBackend.hasKernelSupport()
+		}
+	}
+
+	private suspend fun requestRoot(): Result<Unit> {
+		return withContext(ioDispatcher) {
+			kotlin.runCatching {
+				rootShell.get().start()
+				SnackbarController.showMessage(StringValue.StringResource(R.string.root_accepted))
+			}.onFailure {
+				SnackbarController.showMessage(StringValue.StringResource(R.string.error_root_denied))
+			}
+		}
 	}
 }

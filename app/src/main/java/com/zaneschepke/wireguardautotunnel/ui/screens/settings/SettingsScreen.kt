@@ -150,7 +150,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								{
 									ScaledSwitch(
 										uiState.settings.isShortcutsEnabled,
-										onClick = { viewModel.onToggleShortcutsEnabled() },
+										onClick = { appViewModel.onToggleShortcutsEnabled() },
 									)
 								},
 								title = {
@@ -159,7 +159,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 									)
 								},
-								onClick = { viewModel.onToggleShortcutsEnabled() },
+								onClick = { appViewModel.onToggleShortcutsEnabled() },
 							),
 							SelectionItem(
 								Icons.Outlined.VpnLock,
@@ -173,7 +173,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 												) &&
 												uiState.settings.isAutoTunnelEnabled
 											),
-										onClick = { viewModel.onToggleAlwaysOnVPN() },
+										onClick = { appViewModel.onToggleAlwaysOnVPN() },
 										checked = uiState.settings.isAlwaysOnVpnEnabled,
 									)
 								},
@@ -183,7 +183,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 									)
 								},
-								onClick = { viewModel.onToggleAlwaysOnVPN() },
+								onClick = { appViewModel.onToggleAlwaysOnVPN() },
 							),
 							SelectionItem(
 								Icons.Outlined.AdminPanelSettings,
@@ -209,7 +209,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						{
 							ScaledSwitch(
 								uiState.settings.isRestoreOnBootEnabled,
-								onClick = { viewModel.onToggleRestartAtBoot() },
+								onClick = { appViewModel.onToggleRestartAtBoot() },
 							)
 						},
 						title = {
@@ -218,7 +218,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 							)
 						},
-						onClick = { viewModel.onToggleRestartAtBoot() },
+						onClick = { appViewModel.onToggleRestartAtBoot() },
 					),
 				)
 			},
@@ -294,7 +294,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						trailing = {
 							ScaledSwitch(
 								uiState.settings.isKernelEnabled,
-								onClick = { viewModel.onToggleKernelMode() },
+								onClick = { appViewModel.onToggleKernelMode() },
 								enabled = !(
 									uiState.settings.isAutoTunnelEnabled ||
 										uiState.settings.isAlwaysOnVpnEnabled ||
@@ -303,7 +303,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 							)
 						},
 						onClick = {
-							viewModel.onToggleKernelMode()
+							appViewModel.onToggleKernelMode()
 						},
 					),
 				),
