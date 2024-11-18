@@ -31,8 +31,8 @@
     <string name="always_on_vpn_support">Разрешить постоянный VPN</string>
     <string name="hint_search_packages">Поиск приложений</string>
     <string name="other">Другое</string>
-    <string name="vpn_on">VPN включён</string>
-    <string name="vpn_off">VPN отключён</string>
+    <string name="vpn_on">VPN вкл.</string>
+    <string name="vpn_off">VPN откл.</string>
     <string name="interface_">Интерфейс</string>
     <string name="optional">(необязательно)</string>
     <string name="optional_no_recommend">(необязательно, не рекомендуется)</string>
