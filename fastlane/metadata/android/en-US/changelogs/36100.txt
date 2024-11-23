@@ -1,0 +1,7 @@
+What's new:
+- Add tunnel from clipboard
+- Add localizations
+- Fix battery drain bug
+- Fix delete bug
+- Improve tunnel tile sync
+- Other fixes and improvements
