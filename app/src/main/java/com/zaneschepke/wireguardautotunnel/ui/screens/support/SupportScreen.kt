@@ -9,12 +9,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.LineStyle
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.ViewTimeline
+import androidx.compose.material.icons.outlined.ViewHeadline
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,23 +29,41 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.label.VersionLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.theme.topPadding
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchSupportEmail
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
-fun SupportScreen() {
+fun SupportScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
+
+	var showDialog by remember { mutableStateOf(false) }
+
+	if (showDialog) {
+		InfoDialog(onAttest = {
+			showDialog = false
+			appViewModel.onToggleLocalLogging()
+		}, onDismiss = {
+			showDialog = false
+		}, title = {
+			Text(stringResource(R.string.configuration_change))
+		}, body = { Text(stringResource(R.string.requires_app_relaunch)) }, confirmText = { Text(stringResource(R.string.yes)) })
+	}
 
 	Column(
 		horizontalAlignment = Alignment.Start,
@@ -54,56 +77,93 @@ fun SupportScreen() {
 	) {
 		GroupLabel(stringResource(R.string.thank_you))
 		SurfaceSelectionGroupButton(
-			listOf(
-				SelectionItem(
-					Icons.Filled.Book,
-					title = {
-						Text(
-							stringResource(R.string.docs_description),
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+			buildList {
+				add(
+					SelectionItem(
+						Icons.Filled.Book,
+						title = {
+							Text(
+								stringResource(R.string.docs_description),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						trailing = {
+							ForwardButton { context.openWebUrl(context.getString(R.string.docs_url)) }
+						},
+						onClick = {
+							context.openWebUrl(context.getString(R.string.docs_url))
+						},
+					),
+				)
+				if (!context.isRunningOnTv()) {
+					add(
+						SelectionItem(
+							Icons.Outlined.ViewHeadline,
+							title = {
+								Text(
+									stringResource(R.string.local_logging),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
+							},
+							description = {
+								Text(
+									stringResource(R.string.enable_local_logging),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.outline),
+								)
+							},
+							trailing = {
+								ScaledSwitch(
+									appUiState.generalState.isLocalLogsEnabled,
+									onClick = {
+										showDialog = true
+									},
+								)
+							},
+							onClick = {
+								showDialog = true
+							},
+						),
+					)
+					if (appUiState.generalState.isLocalLogsEnabled) {
+						add(
+							SelectionItem(
+								Icons.Filled.ViewTimeline,
+								title = {
+									Text(
+										stringResource(R.string.read_logs),
+										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+									)
+								},
+								trailing = {
+									ForwardButton {
+										navController.navigate(Route.Logs)
+									}
+								},
+								onClick = {
+									navController.navigate(Route.Logs)
+								},
+							),
 						)
-					},
-					trailing = {
-						ForwardButton { context.openWebUrl(context.getString(R.string.docs_url)) }
-					},
-					onClick = {
-						context.openWebUrl(context.getString(R.string.docs_url))
-					},
-				),
-				SelectionItem(
-					Icons.Filled.LineStyle,
-					title = {
-						Text(
-							stringResource(R.string.read_logs),
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-						)
-					},
-					trailing = {
-						ForwardButton {
-							navController.navigate(Route.Logs)
-						}
-					},
-					onClick = {
-						navController.navigate(Route.Logs)
-					},
-				),
-				SelectionItem(
-					Icons.Filled.Policy,
-					title = {
-						Text(
-							stringResource(R.string.privacy_policy),
-							style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-						)
-					},
-					trailing = {
-						ForwardButton { context.openWebUrl(context.getString(R.string.privacy_policy_url)) }
-					},
-					onClick = {
-						context.openWebUrl(context.getString(R.string.privacy_policy_url))
-					},
-				),
-
-			),
+					}
+				}
+				add(
+					SelectionItem(
+						Icons.Filled.Policy,
+						title = {
+							Text(
+								stringResource(R.string.privacy_policy),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						trailing = {
+							ForwardButton { context.openWebUrl(context.getString(R.string.privacy_policy_url)) }
+						},
+						onClick = {
+							context.openWebUrl(context.getString(R.string.privacy_policy_url))
+						},
+					),
+				)
+			},
 		)
 		SurfaceSelectionGroupButton(
 			buildList {

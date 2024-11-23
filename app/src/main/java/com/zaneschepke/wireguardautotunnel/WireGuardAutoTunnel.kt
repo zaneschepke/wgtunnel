@@ -6,6 +6,7 @@ import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.data.datastore.LocaleStorage
+import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
@@ -33,6 +34,9 @@ class WireGuardAutoTunnel : Application() {
 	lateinit var logReader: LogReader
 
 	@Inject
+	lateinit var appStateRepository: AppStateRepository
+
+	@Inject
 	@IoDispatcher
 	lateinit var ioDispatcher: CoroutineDispatcher
 
@@ -54,7 +58,10 @@ class WireGuardAutoTunnel : Application() {
 		}
 		if (!isRunningOnTv()) {
 			applicationScope.launch(ioDispatcher) {
-				logReader.start()
+				if (appStateRepository.isLocalLogsEnabled()) {
+					Timber.d("Starting logger")
+					logReader.start()
+				}
 			}
 		}
 	}

@@ -2,7 +2,6 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.options
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,7 +52,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Addr
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiState: AppUiState, tunnelId: Int) {
 	val navController = LocalNavController.current

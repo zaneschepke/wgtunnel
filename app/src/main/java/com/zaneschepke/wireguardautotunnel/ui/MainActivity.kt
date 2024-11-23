@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -24,9 +25,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -42,7 +41,6 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalFocusRequester
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
@@ -65,8 +63,8 @@ import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -83,10 +81,10 @@ class MainActivity : AppCompatActivity() {
 	@Inject
 	lateinit var tunnelService: TunnelService
 
-	private val viewModel by viewModels<AppViewModel>()
-
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+
+		val viewModel by viewModels<AppViewModel>()
 
 		installSplashScreen().apply {
 			setKeepOnScreenCondition {
@@ -95,13 +93,21 @@ class MainActivity : AppCompatActivity() {
 		}
 
 		setContent {
-			val appUiState by viewModel.uiState.collectAsStateWithLifecycle(lifecycle = this.lifecycle)
+			val appUiState by viewModel.uiState.collectAsStateWithLifecycle()
+			val configurationChange by viewModel.configurationChange.collectAsStateWithLifecycle()
 			val navController = rememberNavController()
-			val rootItemFocusRequester = remember { FocusRequester() }
 
 			LaunchedEffect(appUiState.tunnels) {
-				Timber.d("Updating launched")
 				requestTunnelTileServiceStateUpdate()
+			}
+
+			LaunchedEffect(configurationChange) {
+				if (configurationChange) {
+					Intent(this@MainActivity, MainActivity::class.java).also {
+						startActivity(it)
+						exitProcess(0)
+					}
+				}
 			}
 
 			LaunchedEffect(appUiState.autoTunnelActive) {
@@ -114,109 +120,107 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 
-			CompositionLocalProvider(LocalFocusRequester provides rootItemFocusRequester) {
-				CompositionLocalProvider(LocalNavController provides navController) {
-					SnackbarControllerProvider { host ->
-						WireguardAutoTunnelTheme(theme = appUiState.generalState.theme) {
-							Scaffold(
-								contentWindowInsets = WindowInsets(0.dp),
-								snackbarHost = {
-									SnackbarHost(host) { snackbarData: SnackbarData ->
-										CustomSnackBar(
-											snackbarData.visuals.message,
-											isRtl = false,
-											containerColor =
-											MaterialTheme.colorScheme.surfaceColorAtElevation(
-												2.dp,
-											),
-										)
-									}
-								},
-								bottomBar = {
-									BottomNavBar(
-										navController,
-										listOf(
-											BottomNavItem(
-												name = stringResource(R.string.tunnels),
-												route = Route.Main,
-												icon = Icons.Rounded.Home,
-											),
-											BottomNavItem(
-												name = stringResource(R.string.settings),
-												route = Route.Settings,
-												icon = Icons.Rounded.Settings,
-											),
-											BottomNavItem(
-												name = stringResource(R.string.support),
-												route = Route.Support,
-												icon = Icons.Rounded.QuestionMark,
-											),
+			CompositionLocalProvider(LocalNavController provides navController) {
+				SnackbarControllerProvider { host ->
+					WireguardAutoTunnelTheme(theme = appUiState.generalState.theme) {
+						Scaffold(
+							contentWindowInsets = WindowInsets(0.dp),
+							snackbarHost = {
+								SnackbarHost(host) { snackbarData: SnackbarData ->
+									CustomSnackBar(
+										snackbarData.visuals.message,
+										isRtl = false,
+										containerColor =
+										MaterialTheme.colorScheme.surfaceColorAtElevation(
+											2.dp,
 										),
 									)
-								},
-							) {
-								Box(modifier = Modifier.fillMaxSize().padding(it)) {
-									NavHost(
-										navController,
-										enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
-										exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
-										startDestination = (if (appUiState.generalState.isPinLockEnabled == true) Route.Lock else Route.Main),
-									) {
-										composable<Route.Main> {
-											MainScreen(
-												uiState = appUiState,
-											)
-										}
-										composable<Route.Settings> {
-											SettingsScreen(
-												appViewModel = viewModel,
-												uiState = appUiState,
-											)
-										}
-										composable<Route.LocationDisclosure> {
-											LocationDisclosureScreen(viewModel, appUiState)
-										}
-										composable<Route.AutoTunnel> {
-											AutoTunnelScreen(
-												appUiState,
-											)
-										}
-										composable<Route.Appearance> {
-											AppearanceScreen()
-										}
-										composable<Route.Language> {
-											LanguageScreen(localeStorage)
-										}
-										composable<Route.Display> {
-											DisplayScreen(appUiState)
-										}
-										composable<Route.Support> {
-											SupportScreen()
-										}
-										composable<Route.Logs> {
-											LogsScreen()
-										}
-										composable<Route.Config> {
-											val args = it.toRoute<Route.Config>()
-											ConfigScreen(
-												tunnelId = args.id,
-											)
-										}
-										composable<Route.Option> {
-											val args = it.toRoute<Route.Option>()
-											OptionsScreen(
-												tunnelId = args.id,
-												appUiState = appUiState,
-											)
-										}
-										composable<Route.Lock> {
-											PinLockScreen(
-												appViewModel = viewModel,
-											)
-										}
-										composable<Route.Scanner> {
-											ScannerScreen()
-										}
+								}
+							},
+							bottomBar = {
+								BottomNavBar(
+									navController,
+									listOf(
+										BottomNavItem(
+											name = stringResource(R.string.tunnels),
+											route = Route.Main,
+											icon = Icons.Rounded.Home,
+										),
+										BottomNavItem(
+											name = stringResource(R.string.settings),
+											route = Route.Settings,
+											icon = Icons.Rounded.Settings,
+										),
+										BottomNavItem(
+											name = stringResource(R.string.support),
+											route = Route.Support,
+											icon = Icons.Rounded.QuestionMark,
+										),
+									),
+								)
+							},
+						) {
+							Box(modifier = Modifier.fillMaxSize().padding(it)) {
+								NavHost(
+									navController,
+									enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
+									exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
+									startDestination = (if (appUiState.generalState.isPinLockEnabled == true) Route.Lock else Route.Main),
+								) {
+									composable<Route.Main> {
+										MainScreen(
+											uiState = appUiState,
+										)
+									}
+									composable<Route.Settings> {
+										SettingsScreen(
+											appViewModel = viewModel,
+											uiState = appUiState,
+										)
+									}
+									composable<Route.LocationDisclosure> {
+										LocationDisclosureScreen(viewModel, appUiState)
+									}
+									composable<Route.AutoTunnel> {
+										AutoTunnelScreen(
+											appUiState,
+										)
+									}
+									composable<Route.Appearance> {
+										AppearanceScreen()
+									}
+									composable<Route.Language> {
+										LanguageScreen(localeStorage)
+									}
+									composable<Route.Display> {
+										DisplayScreen(appUiState)
+									}
+									composable<Route.Support> {
+										SupportScreen(appUiState, viewModel)
+									}
+									composable<Route.Logs> {
+										LogsScreen()
+									}
+									composable<Route.Config> {
+										val args = it.toRoute<Route.Config>()
+										ConfigScreen(
+											tunnelId = args.id,
+										)
+									}
+									composable<Route.Option> {
+										val args = it.toRoute<Route.Option>()
+										OptionsScreen(
+											tunnelId = args.id,
+											appUiState = appUiState,
+										)
+									}
+									composable<Route.Lock> {
+										PinLockScreen(
+											appViewModel = viewModel,
+										)
+									}
+									composable<Route.Scanner> {
+										ScannerScreen()
 									}
 								}
 							}
@@ -240,10 +244,5 @@ class MainActivity : AppCompatActivity() {
 			oldPrefLocaleCode = currentLocaleCode
 		}
 		super.onResume()
-	}
-
-	override fun onDestroy() {
-		super.onDestroy()
-		tunnelService.cancelStatsJob()
 	}
 }

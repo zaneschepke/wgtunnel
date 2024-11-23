@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
+import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
@@ -41,6 +43,7 @@ constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	@AppShell private val rootShell: Provider<RootShell>,
 	private val serviceManager: ServiceManager,
+	private val logReader: LogReader,
 ) : ViewModel() {
 
 	val uiState =
@@ -64,11 +67,14 @@ constructor(
 			AppUiState(),
 		)
 
-	private val _isAppReady = MutableStateFlow<Boolean>(false)
+	private val _isAppReady = MutableStateFlow(false)
 	val isAppReady = _isAppReady.asStateFlow()
 
+	private val _configurationChange = MutableStateFlow(false)
+	val configurationChange = _configurationChange.asStateFlow()
+
 	init {
-		viewModelScope.launch {
+		viewModelScope.launch(ioDispatcher) {
 			initPin()
 			initAutoTunnel()
 			initTunnel()
@@ -84,7 +90,6 @@ constructor(
 	}
 
 	private suspend fun initTunnel() {
-		if (tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startStatsJob()
 		val activeTunnels = appDataRepository.tunnels.getActive()
 		if (activeTunnels.isNotEmpty() &&
 			tunnelService.get().getState() == TunnelState.DOWN
@@ -114,6 +119,22 @@ constructor(
 
 	fun setLocationDisclosureShown() = viewModelScope.launch {
 		appDataRepository.appState.setLocationDisclosureShown(true)
+	}
+
+	fun onToggleLocalLogging() = viewModelScope.launch(ioDispatcher) {
+		with(uiState.value.generalState) {
+			val toggledOn = !isLocalLogsEnabled
+			appDataRepository.appState.setLocalLogsEnabled(toggledOn)
+			if (!toggledOn) onLoggerStop()
+			_configurationChange.update {
+				true
+			}
+		}
+	}
+
+	private suspend fun onLoggerStop() {
+		logReader.stop()
+		logReader.deleteAndClearLogs()
 	}
 
 	fun onToggleAlwaysOnVPN() = viewModelScope.launch {

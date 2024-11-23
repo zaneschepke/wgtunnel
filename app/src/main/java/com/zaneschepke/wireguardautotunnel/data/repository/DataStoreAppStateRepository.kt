@@ -69,6 +69,14 @@ class DataStoreAppStateRepository(
 		} ?: Theme.AUTOMATIC
 	}
 
+	override suspend fun isLocalLogsEnabled(): Boolean {
+		return dataStoreManager.getFromStore(DataStoreManager.isLocalLogsEnabled) ?: GeneralState.IS_LOGS_ENABLED_DEFAULT
+	}
+
+	override suspend fun setLocalLogsEnabled(enabled: Boolean) {
+		dataStoreManager.saveToDataStore(DataStoreManager.isLocalLogsEnabled, enabled)
+	}
+
 	override val generalStateFlow: Flow<GeneralState> =
 		dataStoreManager.preferencesFlow.map { prefs ->
 			prefs?.let { pref ->
@@ -84,6 +92,7 @@ class DataStoreAppStateRepository(
 						pref[DataStoreManager.pinLockEnabled]
 							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
 						isTunnelStatsExpanded = pref[DataStoreManager.tunnelStatsExpanded] ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
+						isLocalLogsEnabled = pref[DataStoreManager.isLocalLogsEnabled] ?: GeneralState.IS_LOGS_ENABLED_DEFAULT,
 						theme = getTheme(),
 					)
 				} catch (e: IllegalArgumentException) {

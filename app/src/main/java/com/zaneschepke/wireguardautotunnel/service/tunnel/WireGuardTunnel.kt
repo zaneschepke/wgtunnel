@@ -49,7 +49,7 @@ constructor(
 		vpnState.copy(
 			tunnelConfig = tunnels.firstOrNull { it.id == vpnState.tunnelConfig?.id },
 		)
-	}.stateIn(applicationScope, SharingStarted.Lazily, VpnState())
+	}.stateIn(applicationScope, SharingStarted.Eagerly, VpnState())
 
 	private var statsJob: Job? = null
 

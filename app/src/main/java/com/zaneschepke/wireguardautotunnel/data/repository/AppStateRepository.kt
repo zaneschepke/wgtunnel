@@ -29,5 +29,9 @@ interface AppStateRepository {
 
 	suspend fun getTheme(): Theme
 
+	suspend fun isLocalLogsEnabled(): Boolean
+
+	suspend fun setLocalLogsEnabled(enabled: Boolean)
+
 	val generalStateFlow: Flow<GeneralState>
 }

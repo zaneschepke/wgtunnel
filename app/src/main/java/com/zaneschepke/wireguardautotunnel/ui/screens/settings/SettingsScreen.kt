@@ -5,7 +5,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -30,13 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
@@ -45,7 +42,6 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalFocusRequester
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
@@ -59,17 +55,12 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
 import xyz.teamgravity.pin_lock_compose.PinManager
 
-@OptIn(
-	ExperimentalPermissionsApi::class,
-	ExperimentalLayoutApi::class,
-)
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel: AppViewModel, uiState: AppUiState) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val focusManager = LocalFocusManager.current
 	val snackbar = SnackbarController.current
-	val rootFocusRequester = LocalFocusRequester.current
 	val isRunningOnTv = remember { context.isRunningOnTv() }
 
 	val interactionSource = remember { MutableInteractionSource() }
@@ -135,32 +126,34 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						navController.navigate(Route.AutoTunnel)
 					},
 					trailing = {
-						ForwardButton(Modifier.focusable().focusRequester(rootFocusRequester)) { navController.navigate(Route.AutoTunnel) }
+						ForwardButton(Modifier.focusable()) { navController.navigate(Route.AutoTunnel) }
 					},
 				),
 			),
 		)
 		SurfaceSelectionGroupButton(
 			buildList {
+				add(
+					SelectionItem(
+						Icons.Filled.AppShortcut,
+						{
+							ScaledSwitch(
+								uiState.settings.isShortcutsEnabled,
+								onClick = { appViewModel.onToggleShortcutsEnabled() },
+							)
+						},
+						title = {
+							Text(
+								stringResource(R.string.enabled_app_shortcuts),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						onClick = { appViewModel.onToggleShortcutsEnabled() },
+					),
+				)
 				if (!isRunningOnTv) {
 					addAll(
 						listOf(
-							SelectionItem(
-								Icons.Filled.AppShortcut,
-								{
-									ScaledSwitch(
-										uiState.settings.isShortcutsEnabled,
-										onClick = { appViewModel.onToggleShortcutsEnabled() },
-									)
-								},
-								title = {
-									Text(
-										stringResource(R.string.enabled_app_shortcuts),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								onClick = { appViewModel.onToggleShortcutsEnabled() },
-							),
 							SelectionItem(
 								Icons.Outlined.VpnLock,
 								{

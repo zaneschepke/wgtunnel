@@ -229,4 +229,8 @@
     <string name="tunnel_running">Tunnel running</string>
 	<string name="monitoring_state_changes">Monitoring state changes</string>
 	<string name="donate">Donate to project</string>
+	<string name="local_logging">Local logging</string>
+	<string name="enable_local_logging">Enable local logging</string>
+	<string name="configuration_change">Configuration change</string>
+	<string name="requires_app_relaunch">This change requires an app relaunch. Would you like to proceed?</string>
 </resources>
