@@ -215,4 +215,9 @@ class MainActivity : AppCompatActivity() {
 			}
 		}
 	}
+	override fun onDestroy() {
+		super.onDestroy()
+		// save battery by not polling stats while app is closed
+		tunnelService.cancelStatsJob()
+	}
 }

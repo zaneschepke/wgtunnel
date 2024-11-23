@@ -273,7 +273,7 @@ constructor(
 	}
 
 	companion object {
-		const val STATS_START_DELAY = 5_000L
+		const val STATS_START_DELAY = 1_000L
 		const val VPN_STATISTIC_CHECK_INTERVAL = 1_000L
 		const val VPN_RESTART_DELAY = 1_000L
 	}

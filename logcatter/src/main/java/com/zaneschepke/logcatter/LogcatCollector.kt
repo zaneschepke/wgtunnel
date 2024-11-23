@@ -182,8 +182,7 @@ object LogcatCollector {
 						clear()
 						logcatProc = Runtime.getRuntime().exec(command)
 						reader = BufferedReader(InputStreamReader(logcatProc!!.inputStream), 1024)
-						var line: String? = null
-
+						var line: String?
 						while (!stopped) {
 							if (paused) continue
 							line = reader?.readLine()

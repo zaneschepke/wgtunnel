@@ -94,6 +94,7 @@ constructor(
 	}
 
 	private suspend fun initTunnel() {
+		if (tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startStatsJob()
 		val activeTunnels = appDataRepository.tunnels.getActive()
 		if (activeTunnels.isNotEmpty() &&
 			tunnelService.get().getState() == TunnelState.DOWN
