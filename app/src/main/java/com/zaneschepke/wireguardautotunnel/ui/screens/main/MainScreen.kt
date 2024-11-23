@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
+	val clipboard = LocalClipboardManager.current
 	val snackbar = SnackbarController.current
 
 	var showBottomSheet by remember { mutableStateOf(false) }
@@ -201,12 +203,17 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				)
 			}
 		},
-	) {
+	) { padding ->
 		TunnelImportSheet(
 			showBottomSheet,
 			onDismiss = { showBottomSheet = false },
 			onFileClick = { tunnelFileImportResultLauncher.launch(Constants.ALLOWED_TV_FILE_TYPES) },
 			onQrClick = { requestPermissionLauncher.launch(android.Manifest.permission.CAMERA) },
+			onClipboardClick = {
+				clipboard.getText()?.text?.let {
+					viewModel.onClipboardImport(it)
+				}
+			},
 			onManualImportClick = {
 				navController.navigate(
 					Route.Config(Constants.MANUAL_TUNNEL_CONFIG_ID),
@@ -218,7 +225,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 			verticalArrangement = Arrangement.spacedBy(5.dp.scaledHeight(), Alignment.Top),
 			modifier =
 			Modifier
-				.fillMaxSize().padding(it)
+				.fillMaxSize().padding(padding)
 				.overscroll(ScrollableDefaults.overscrollEffect())
 				.nestedScroll(nestedScrollConnection),
 			state = rememberLazyListState(0, uiState.tunnels.count()),

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.wireguard.config.Config
+import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import java.io.InputStream
 
 @Entity(indices = [Index(value = ["name"], unique = true)])
@@ -77,6 +78,12 @@ data class TunnelConfig(
 			return inputStream.bufferedReader(Charsets.UTF_8).use {
 				org.amnezia.awg.config.Config.parse(it)
 			}
+		}
+
+		fun tunnelConfigFromAmConfig(config: org.amnezia.awg.config.Config, name: String): TunnelConfig {
+			val amQuick = config.toAwgQuickString(true)
+			val wgQuick = config.toWgQuickString()
+			return TunnelConfig(name = name, wgQuick = wgQuick, amQuick = amQuick)
 		}
 
 		const val AM_QUICK_DEFAULT = ""

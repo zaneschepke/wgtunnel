@@ -9,7 +9,6 @@ import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
-import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -45,10 +44,7 @@ constructor(
 	fun onTunnelQrResult(result: String) = viewModelScope.launch(ioDispatcher) {
 		kotlin.runCatching {
 			val amConfig = TunnelConfig.configFromAmQuick(result)
-			val amQuick = amConfig.toAwgQuickString(true)
-			val wgQuick = amConfig.toWgQuickString()
-			val tunnelName = makeTunnelNameUnique(generateQrCodeDefaultName(result))
-			val tunnelConfig = TunnelConfig(name = tunnelName, wgQuick = wgQuick, amQuick = amQuick)
+			val tunnelConfig = TunnelConfig.tunnelConfigFromAmConfig(amConfig, makeTunnelNameUnique(generateQrCodeDefaultName(result)))
 			appDataRepository.tunnels.save(tunnelConfig)
 			_success.emit(true)
 		}.onFailure {

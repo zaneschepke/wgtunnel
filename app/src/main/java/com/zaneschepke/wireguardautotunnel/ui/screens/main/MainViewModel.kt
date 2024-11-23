@@ -261,4 +261,14 @@ constructor(
 			),
 		)
 	}
+
+	fun onClipboardImport(config: String) = viewModelScope.launch(ioDispatcher) {
+		runCatching {
+			val amConfig = TunnelConfig.configFromAmQuick(config)
+			val tunnelConfig = TunnelConfig.tunnelConfigFromAmConfig(amConfig, makeTunnelNameUnique(generateQrCodeDefaultName(config)))
+			saveTunnel(tunnelConfig)
+		}.onFailure {
+			SnackbarController.showMessage(StringValue.StringResource(R.string.error_file_format))
+		}
+	}
 }

@@ -9,11 +9,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.journeyapps.barcodescanner.CompoundBarcodeView
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ScannerScreen(viewModel: ScannerViewModel = hiltViewModel()) {
 	val context = LocalContext.current

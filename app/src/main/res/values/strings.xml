@@ -177,4 +177,5 @@
 	<string name="enable_local_logging">Enable local logging</string>
 	<string name="configuration_change">Configuration change</string>
 	<string name="requires_app_relaunch">This change requires an app relaunch. Would you like to proceed?</string>
+	<string name="add_from_clipboard">Add from clipboard</string>
 </resources>

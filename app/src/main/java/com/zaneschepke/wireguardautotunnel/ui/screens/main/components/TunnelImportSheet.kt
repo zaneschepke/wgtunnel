@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentPasteGo
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.QrCode
@@ -22,9 +23,17 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 
+// TODO refactor this component
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TunnelImportSheet(show: Boolean, onDismiss: () -> Unit, onFileClick: () -> Unit, onQrClick: () -> Unit, onManualImportClick: () -> Unit) {
+fun TunnelImportSheet(
+	show: Boolean,
+	onDismiss: () -> Unit,
+	onFileClick: () -> Unit,
+	onQrClick: () -> Unit,
+	onManualImportClick: () -> Unit,
+	onClipboardClick: () -> Unit,
+) {
 	val sheetState = rememberModalBottomSheetState()
 
 	val context = LocalContext.current
@@ -74,6 +83,28 @@ fun TunnelImportSheet(show: Boolean, onDismiss: () -> Unit, onFileClick: () -> U
 					)
 					Text(
 						stringResource(id = R.string.add_from_qr),
+						modifier = Modifier.padding(10.dp),
+					)
+				}
+				HorizontalDivider()
+				Row(
+					modifier =
+					Modifier
+						.fillMaxWidth()
+						.clickable {
+							onDismiss()
+							onClipboardClick()
+						}
+						.padding(10.dp),
+				) {
+					val icon = Icons.Filled.ContentPasteGo
+					Icon(
+						icon,
+						contentDescription = icon.name,
+						modifier = Modifier.padding(10.dp),
+					)
+					Text(
+						stringResource(id = R.string.add_from_clipboard),
 						modifier = Modifier.padding(10.dp),
 					)
 				}
