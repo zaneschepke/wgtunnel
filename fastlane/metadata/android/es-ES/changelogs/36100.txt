@@ -1,0 +1,7 @@
+Novedades:
+- Agregar túnel desde el portapapeles
+- Añadir localizaciones
+- Solucionar el error de descarga de la batería
+- Corregir error de eliminación
+- Mejorar la sincronización de los mosaicos del túnel
+- Otras correcciones y mejoras

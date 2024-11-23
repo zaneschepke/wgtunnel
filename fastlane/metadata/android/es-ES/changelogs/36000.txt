@@ -1,0 +1,6 @@
+Novedades:
+- Actualización de la interfaz de usuario
+- Mejoras en la navegación de AndroidTV
+- Corrección del error de descarga de la batería
+- Se corrigieron los comodines con configuración opcional
+- Otras mejoras
