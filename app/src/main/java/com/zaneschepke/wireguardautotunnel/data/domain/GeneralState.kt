@@ -8,6 +8,7 @@ data class GeneralState(
 	val isPinLockEnabled: Boolean = PIN_LOCK_ENABLED_DEFAULT,
 	val isTunnelStatsExpanded: Boolean = IS_TUNNEL_STATS_EXPANDED,
 	val isLocalLogsEnabled: Boolean = IS_LOGS_ENABLED_DEFAULT,
+	val locale: String? = null,
 	val theme: Theme = Theme.AUTOMATIC,
 ) {
 	companion object {

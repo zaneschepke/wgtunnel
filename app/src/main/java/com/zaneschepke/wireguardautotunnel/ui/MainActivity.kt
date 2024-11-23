@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -35,8 +34,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.data.datastore.LocaleStorage
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
@@ -59,7 +56,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -67,12 +63,6 @@ import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
-	private val localeStorage: LocaleStorage by lazy {
-		(application as WireGuardAutoTunnel).localeStorage
-	}
-
-	private lateinit var oldPrefLocaleCode: String
 
 	@Inject
 	lateinit var appStateRepository: AppStateRepository
@@ -185,7 +175,7 @@ class MainActivity : AppCompatActivity() {
 										AppearanceScreen()
 									}
 									composable<Route.Language> {
-										LanguageScreen(localeStorage)
+										LanguageScreen(appUiState, viewModel)
 									}
 									composable<Route.Display> {
 										DisplayScreen(appUiState)
@@ -224,20 +214,5 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 		}
-	}
-
-	override fun attachBaseContext(newBase: Context) {
-		oldPrefLocaleCode = LocaleStorage(newBase).getPreferredLocale()
-		applyOverrideConfiguration(LocaleUtil.getLocalizedConfiguration(oldPrefLocaleCode))
-		super.attachBaseContext(newBase)
-	}
-
-	override fun onResume() {
-		val currentLocaleCode = LocaleStorage(this).getPreferredLocale()
-		if (oldPrefLocaleCode != currentLocaleCode) {
-			recreate() // locale is changed, restart the activity to update
-			oldPrefLocaleCode = currentLocaleCode
-		}
-		super.onResume()
 	}
 }

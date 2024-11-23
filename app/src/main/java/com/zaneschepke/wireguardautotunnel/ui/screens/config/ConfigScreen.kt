@@ -90,8 +90,8 @@ fun ConfigScreen(tunnelId: Int) {
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 	var configType by remember { mutableStateOf<ConfigType?>(null) }
 	val derivedConfigType = remember {
-		derivedStateOf<ConfigType> {
-			configType ?: if (!uiState.hasAmneziaProperties()) ConfigType.WIREGUARD else ConfigType.AMNEZIA
+		derivedStateOf {
+			configType ?: if (!uiState.isAmneziaEnabled) ConfigType.WIREGUARD else ConfigType.AMNEZIA
 		}
 	}
 	val saved by viewModel.saved.collectAsStateWithLifecycle(null)
@@ -181,8 +181,8 @@ fun ConfigScreen(tunnelId: Int) {
 				)
 			}
 		},
-	) {
-		Column(Modifier.padding(it)) {
+	) { padding ->
+		Column(Modifier.padding(padding)) {
 			Column(
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Top,
@@ -243,12 +243,12 @@ fun ConfigScreen(tunnelId: Int) {
 								.clickable { showAuthPrompt = true },
 							value = uiState.interfaceProxy.privateKey,
 							visualTransformation =
-							if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID.toInt()) || isAuthenticated) {
+							if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated) {
 								VisualTransformation.None
 							} else {
 								PasswordVisualTransformation()
 							},
-							enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID.toInt()) || isAuthenticated,
+							enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
 							onValueChange = { value -> viewModel.onPrivateKeyChange(value) },
 							trailingIcon = {
 								IconButton(

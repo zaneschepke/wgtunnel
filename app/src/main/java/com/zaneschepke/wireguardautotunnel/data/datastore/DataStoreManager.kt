@@ -27,6 +27,7 @@ class DataStoreManager(
 		val pinLockEnabled = booleanPreferencesKey("PIN_LOCK_ENABLED")
 		val tunnelStatsExpanded = booleanPreferencesKey("TUNNEL_STATS_EXPANDED")
 		val isLocalLogsEnabled = booleanPreferencesKey("LOCAL_LOGS_ENABLED")
+		val locale = stringPreferencesKey("LOCALE")
 		val theme = stringPreferencesKey("THEME")
 	}
 

@@ -1,11 +1,11 @@
 package com.zaneschepke.wireguardautotunnel
 
 import android.app.Application
-import android.content.Context
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.zaneschepke.logcatter.LogReader
-import com.zaneschepke.wireguardautotunnel.data.datastore.LocaleStorage
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
@@ -21,10 +21,6 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class WireGuardAutoTunnel : Application() {
-
-	val localeStorage: LocaleStorage by lazy {
-		LocaleStorage(this)
-	}
 
 	@Inject
 	@ApplicationScope
@@ -56,6 +52,13 @@ class WireGuardAutoTunnel : Application() {
 		} else {
 			Timber.plant(ReleaseTree())
 		}
+		applicationScope.launch {
+			appStateRepository.getLocale()?.let {
+				val locale = LocaleUtil.getLocaleFromPrefCode(it)
+				val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(locale)
+				AppCompatDelegate.setApplicationLocales(appLocale)
+			}
+		}
 		if (!isRunningOnTv()) {
 			applicationScope.launch(ioDispatcher) {
 				if (appStateRepository.isLocalLogsEnabled()) {
@@ -64,10 +67,6 @@ class WireGuardAutoTunnel : Application() {
 				}
 			}
 		}
-	}
-
-	override fun attachBaseContext(base: Context) {
-		super.attachBaseContext(LocaleUtil.getLocalizedContext(base, LocaleStorage(base).getPreferredLocale()))
 	}
 
 	companion object {

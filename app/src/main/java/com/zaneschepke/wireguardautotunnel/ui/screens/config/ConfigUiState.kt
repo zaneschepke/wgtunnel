@@ -18,9 +18,6 @@ data class ConfigUiState(
 	var tunnelName: String = "",
 	val isAmneziaEnabled: Boolean = false,
 ) {
-	fun hasAmneziaProperties(): Boolean {
-		return this.interfaceProxy.junkPacketCount != ""
-	}
 	companion object {
 		fun from(config: Config): ConfigUiState {
 			val proxyPeers = config.peers.map { PeerProxy.from(it) }
@@ -77,6 +74,7 @@ data class ConfigUiState(
 			return from(config).copy(
 				tunnelName = tunnel.name,
 				tunnel = tunnel,
+				isAmneziaEnabled = config.`interface`.junkPacketCount.isPresent,
 			)
 		}
 	}

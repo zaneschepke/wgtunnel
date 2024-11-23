@@ -33,5 +33,9 @@ interface AppStateRepository {
 
 	suspend fun setLocalLogsEnabled(enabled: Boolean)
 
+	suspend fun setLocale(localeTag: String)
+
+	suspend fun getLocale(): String?
+
 	val generalStateFlow: Flow<GeneralState>
 }

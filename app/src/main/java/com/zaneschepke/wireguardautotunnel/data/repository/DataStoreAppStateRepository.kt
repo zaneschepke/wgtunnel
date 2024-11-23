@@ -77,6 +77,14 @@ class DataStoreAppStateRepository(
 		dataStoreManager.saveToDataStore(DataStoreManager.isLocalLogsEnabled, enabled)
 	}
 
+	override suspend fun setLocale(localeTag: String) {
+		dataStoreManager.saveToDataStore(DataStoreManager.locale, localeTag)
+	}
+
+	override suspend fun getLocale(): String? {
+		return dataStoreManager.getFromStore(DataStoreManager.locale)
+	}
+
 	override val generalStateFlow: Flow<GeneralState> =
 		dataStoreManager.preferencesFlow.map { prefs ->
 			prefs?.let { pref ->
@@ -93,6 +101,7 @@ class DataStoreAppStateRepository(
 							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
 						isTunnelStatsExpanded = pref[DataStoreManager.tunnelStatsExpanded] ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
 						isLocalLogsEnabled = pref[DataStoreManager.isLocalLogsEnabled] ?: GeneralState.IS_LOGS_ENABLED_DEFAULT,
+						locale = pref[DataStoreManager.locale],
 						theme = getTheme(),
 					)
 				} catch (e: IllegalArgumentException) {
