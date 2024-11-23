@@ -1,0 +1,5 @@
+Migliorie:
+- Aggiunge supporto a tunnel automatico su soli dati mobili 
+- Migliorata UI schermata supporto
+- Aggiornati link risorse
+- Varie altre correzioni di bug

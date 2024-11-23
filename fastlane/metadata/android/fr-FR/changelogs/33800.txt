@@ -1,0 +1,4 @@
+Quoi de neuf :
+- Correction du bug d'affichage de l'interface utilisateur lors de l'édition de la configuration
+- Ajout d'une notification VPN permanent au premier lancement pour GrapheneOS
+- Mise à jour des versions

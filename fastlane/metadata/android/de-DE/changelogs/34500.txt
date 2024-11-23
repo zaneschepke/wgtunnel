@@ -1,5 +1,5 @@
-Was ist neu?
-- Zusätzliche Sprachunterstützung
-- Fehler beim automatischen Tunneln von mobilen Daten behoben
-- AndroidTV-Schaltfläche für schwebende Aktionen behoben
-- Weitere Optimierungen und Erweiterungen
+Was ist neu
+- Unterstützung für weitere Sprachen
+- bug-fix für auto-tunneling bei Mobilfunk
+- für AndroidTV: Bug bei schwebendem Aktionsknopf behoben
+- andere Optimisation und Erweiterungen

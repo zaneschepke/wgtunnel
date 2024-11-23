@@ -1,0 +1,5 @@
+Quoi de neuf :
+- Amélioration de la fiabilité des tunnels automatique
+- Synchronisation améliorée avec la barre de réglages rapides
+- Ajout de ressources pour AndroidTV
+- Ajout de l'empreinte apk

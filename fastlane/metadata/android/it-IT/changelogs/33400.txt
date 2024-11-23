@@ -1,0 +1,3 @@
+Migliorie:
+- Corretto mancato salvataggio creazione configurazione 
+- Aggiornate versioni

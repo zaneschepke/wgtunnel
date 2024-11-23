@@ -1,0 +1,7 @@
+Migliorie:
+- Rivista gestione stati
+- Migliorata navigazione AndroidTV
+- Migliorata efficienza auto-tunneling
+- Migliorata navigazione
+- Nuova funzione pausa auto-tunneling
+- Molte correzioni di bug

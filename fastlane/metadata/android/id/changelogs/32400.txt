@@ -1,0 +1,5 @@
+Peningkatan:
+- Tambahkan dukungan dasar WireGuard Kernel
+- Alur pengungkapan lokasi yang ditingkatkan
+- Perbaiki bug izin tunnel otomatis
+- Berbagai perbaikan bug UI lainnya

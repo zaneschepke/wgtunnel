@@ -1,0 +1,2 @@
+Résolutions :
+- Autorisations avant plan sur Android 14

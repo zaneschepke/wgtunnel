@@ -1,0 +1,4 @@
+Quoi de neuf :
+- Correction des bugs de l'auto-tunnel
+- Correction du bug de sauvegarde Android
+- Mise à jour des versions

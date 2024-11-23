@@ -1,0 +1,5 @@
+Novedades:
+- Solucionar el problema de bloqueo de Android 12
+- Corregir error de túnel de copia
+- Cambio automático de accesorios de Amnesia
+- Ocultar clave precompartida sin autenticación

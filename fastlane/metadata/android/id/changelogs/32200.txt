@@ -1,0 +1,5 @@
+Peningkatan:
+- Tambahkan statistik terowongan ke layar utama
+- Tingkatkan layar pengaturan navigasi AndroidTV
+- Hapus getaran notifikasi
+- Berbagai perbaikan bug lainnya

@@ -1,0 +1,6 @@
+Novità:
+- Migliorata stabilità auto tunnel
+- Aggiunto supporto per tema chiaro/scuro/dinamico
+- Aggiunto supporto per script pre/post up/down
+- Rimuovi tunnel notifica persistente
+- Varie altre risoluzioni e migliorie

@@ -1,0 +1,5 @@
+Novità:
+- Migliorata nomenclatura importazione tunnel
+- Risolto problema inizializzazione stato auto tunneling
+- Migliorata gestione errori
+- Risolto problema importazione zip Amnezia

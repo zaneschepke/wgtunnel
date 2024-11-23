@@ -1,0 +1,5 @@
+Apa yang baru:
+- Meningkatkan penamaan impor tunnel
+- Perbaiki bug status init tunnel otomatis
+- Penanganan kesalahan yang ditingkatkan
+- Perbaiki bug impor zip Amnezia

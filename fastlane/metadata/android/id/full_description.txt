@@ -1,0 +1,14 @@
+Fitur
+
+- Tambahkan tunnel melalui file .conf, zip, entri manual, atau kode
+QR- Sambungkan otomatis ke VPN berdasarkan SSID Wi-Fi, ethernet, atau data
+seluler- Tunnel terpisah berdasarkan aplikasi dengan pencarian
+- Dukungan WireGuard untuk mode
+kernel dan ruang pengguna- Dukungan Amnezia untuk mode ruang pengguna untuk perlindungan
+DPI/sensor- Dukungan
+VPN Selalu Aktif- Ekspor terowongan Amnezia dan WireGuard ke zip
+- Dukungan kartu akses cepat untuk beralih VPN
+- Dukungan pintasan statis untuk tunnel utama untuk integrasi
+otomatisasi- Dukungan otomatisasi niat untuk semua tunnel
+- Mulai ulang layanan otomatis setelah reboot
+- Tindakan pelestarian baterai

@@ -1,0 +1,6 @@
+Apa yang baru:
+- Perangkat yang di-rooting sekarang mendapatkan nama wifi tanpa lokasi
+- Memperbaiki scroll layar dan berbagi
+- Perbaikan bug impor tunnel untuk AndroidTV 14
+- Penyempurnaan UI statistik tunnel
+- Perbaikan dan peningkatan bug lainnya

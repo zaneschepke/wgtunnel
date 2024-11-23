@@ -1,0 +1,2 @@
+Novità:
+- Questa è una versione di test CI
