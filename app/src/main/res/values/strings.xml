@@ -6,23 +6,13 @@
     <string name="watcher_channel_name">Watcher Notification Channel</string>
     <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
     <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
-	<string name="docs_features" translatable="false">https://zaneschepke.com/wgtunnel-docs/features.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
 	<string name="docs_wildcards" translatable="false" >https://zaneschepke.com/wgtunnel-docs/features.html#wildcard-wi-fi-name-support</string>
 	<string name="donate_url" translatable="false">https://zaneschepke.com/donate/</string>
 	<string name="error_file_extension">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Action requires tunnel off</string>
     <string name="no_tunnels">No tunnels added yet!</string>
-    <string name="discord_url" translatable="false">https://discord.gg/rbRRNh6H7V</string>
-    <string name="watcher_notification_text_active">Monitoring network state changes: active</string>
-    <string name="watcher_notification_text_paused">Monitoring network state changes: paused</string>
-    <string name="tunnel_start_title">VPN connected</string>
-    <string name="tunnel_start_text">Connected to tunnel</string>
-    <string name="notification_permission_required">Notifications permission required.</string>
-    <string name="add_trusted_ssid">Add trusted wifi name</string>
     <string name="tunnels">Tunnels</string>
-    <string name="enable_auto_tunnel">Start auto-tunneling</string>
-    <string name="disable_auto_tunnel">Stop auto-tunneling</string>
     <string name="tunnel_mobile_data">Tunnel on mobile data</string>
 	<string name="privacy_policy">View privacy policy</string>
     <string name="okay">Okay</string>
@@ -30,23 +20,18 @@
     <string name="prominent_background_location_message">This feature requires background location permission to enable Wi-Fi SSID monitoring even while the application is closed. For more details, please see the Privacy Policy linked on the Support screen.</string>
     <string name="prominent_background_location_title">Background Location Disclosure</string>
     <string name="thank_you">Thank you for using WG Tunnel!</string>
-    <string name="trusted_ssid_empty_description">Enter SSID</string>
     <string name="trusted_ssid_value_description">Submit SSID</string>
     <string name="add_tunnels_text">Add from file or zip</string>
     <string name="open_file">File Open</string>
     <string name="add_from_qr">Add from QR code</string>
     <string name="qr_scan">QR Scan</string>
     <string name="tunnel_name">Tunnel Name</string>
-    <string name="add_tunnel">Add Tunnel</string>
     <string name="exclude">Exclude</string>
     <string name="include">Include</string>
     <string name="tunnel_all">Tunnel all applications</string>
     <string name="config_changes_saved">Configuration changes saved.</string>
     <string name="save_changes">Save</string>
     <string name="icon">Icon</string>
-    <string name="no_thanks">No thanks</string>
-    <string name="turn_on">Turn on</string>
-    <string name="map">Map</string>
     <string name="public_key">Public key</string>
     <string name="addresses">Addresses</string>
     <string name="dns_servers">DNS servers</string>
@@ -55,24 +40,14 @@
     <string name="allowed_ips">Allowed IPs</string>
     <string name="endpoint">Endpoint</string>
     <string name="name">Name</string>
-    <string name="restart">Restart Tunnel</string>
-    <string name="vpn_connection_failed">Connection failed</string>
     <string name="always_on_vpn_support">Allow Always-On VPN </string>
     <string name="location_services_not_detected">Location Services Not Detected</string>
     <string name="hint_search_packages">Search packages</string>
-    <string name="attempt_connection">Attempting connection..</string>
-    <string name="vpn_starting">VPN starting</string>
     <string name="db_name">wg-tunnel-db</string>
-    <string name="scanning_qr">Scanning for QR</string>
-    <string name="none">No trusted wifi names</string>
-    <string name="other">Other</string>
     <string name="auto_tunneling">Auto-tunneling</string>
     <string name="vpn_on">VPN on</string>
     <string name="vpn_off">VPN off</string>
-    <string name="default_vpn_on">Primary VPN on</string>
-    <string name="default_vpn_off">Primary VPN off</string>
     <string name="create_import">Create from scratch</string>
-    <string name="turn_off_auto">Action requires auto-tunnel disabled or paused</string>
     <string name="turn_on_tunnel">Action requires active tunnel</string>
     <string name="add_peer">Add peer</string>
     <string name="done">Done</string>
@@ -94,47 +69,32 @@
     <string name="error_authorization_failed">Failed to authorize</string>
     <string name="enabled_app_shortcuts">Enable app shortcuts</string>
     <string name="export_configs">Export configs</string>
-    <string name="export_configs_failed">Failed to export configs</string>
-    <string name="location_services_required">Location services required</string>
-    <string name="background_location_required">Background location required</string>
-    <string name="precise_location_required">Precise location required</string>
     <string name="unknown_error">Unknown error occurred</string>
-    <string name="exported_configs_message">Exported configs to downloads</string>
     <string name="tunnel_on_wifi">Tunnel on untrusted wifi</string>
     <string name="my_email" translatable="false">support@zaneschepke.com</string>
     <string name="email_subject">WG Tunnel Support</string>
     <string name="email_chooser">Send an email…</string>
-    <string name="go">go</string>
     <string name="docs_description">Read the docs</string>
 	<string name="email_description">Send me an email</string>
-    <string name="support_help_text">If you are experiencing issues, have improvement ideas, or just want to engage, the following resources are available:</string>
     <string name="use_kernel">Use kernel module</string>
     <string name="error_ssid_exists">SSID already exists</string>
     <string name="error_root_denied">Root shell denied</string>
     <string name="error_no_file_explorer">No file explorer installed</string>
     <string name="error_invalid_code">Invalid QR code</string>
-    <string name="error_none">No error</string>
     <string name="location_services_missing_message">The app is not detecting any location services enabled on your device. Depending on the device, this could cause the untrusted wifi feature to fail to read the wifi name. Would you like to continue anyways?</string>
     <string name="auto_tunnel_title">Auto-tunnel Service</string>
     <string name="delete_tunnel">Delete tunnel</string>
     <string name="delete_tunnel_message">Are you sure you would like to delete this tunnel?</string>
     <string name="yes">Yes</string>
-    <string name="resume">Resume</string>
-    <string name="pause">Pause</string>
-    <string name="paused">paused</string>
-    <string name="active">active</string>
     <string name="tunneling_apps">Tunneling apps</string>
     <string name="included">included</string>
     <string name="excluded">excluded</string>
     <string name="all">all</string>
-    <string name="always_on_disabled">Always-on VPN attempted to start a tunnel, but this feature is disabled in settings.</string>
     <string name="no_email_detected">No email app detected</string>
     <string name="no_browser_detected">No browser detected</string>
-    <string name="logs_saved">Logs saved to downloads</string>
     <string name="open_issue">Open an issue</string>
     <string name="read_logs">Read the logs</string>
     <string name="auto">(auto)</string>
-    <string name="config_parse_error">Failed to parse config</string>
     <string name="incorrect_pin">Pin is incorrect</string>
     <string name="pin_created">Pin successfully created</string>
     <string name="enter_pin">Enter your pin</string>
@@ -144,22 +104,11 @@
     <string name="mobile_data_tunnel">Set as mobile data tunnel</string>
     <string name="set_primary_tunnel">Set as primary tunnel</string>
     <string name="use_tunnel_on_wifi_name">Use tunnel on wifi name</string>
-    <string name="no_wifi_names_configured">No wifi names configured for this tunnel</string>
-    <string name="general">General</string>
     <string name="edit_tunnel">Edit tunnel</string>
-    <string name="disabled">disabled</string>
-    <string name="auto_on">Resume auto tun</string>
-    <string name="auto_off">Pause auto tun</string>
-    <string name="auto_tun_on">Resume auto-tunnel</string>
-    <string name="auto_tun_off">Pause auto-tunnel</string>
     <string name="version">Version</string>
-    <string name="mode">Mode</string>
-    <string name="userspace">Userspace</string>
     <string name="settings">Settings</string>
     <string name="support">Support</string>
-    <string name="backend">Backend</string>
     <string name="kernel">Kernel</string>
-    <string name="use_amnezia">"Use Amnezia userspace "</string>
     <string name="junk_packet_count">Junk packet count</string>
     <string name="junk_packet_minimum_size">Junk packet minimum size</string>
     <string name="junk_packet_maximum_size">Junk packet maximum size</string>
@@ -174,8 +123,6 @@
     <string name="see_the">See the</string>
     <string name="getting_started_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/getting-started.html</string>
     <string name="getting_started_guide">getting started guide</string>
-    <string name="amnezia" translatable="false">Amnezia</string>
-    <string name="wireguard" translatable="false">WireGuard</string>
     <string name="error_file_format">Invalid tunnel config format</string>
     <string name="restart_at_boot">Restart on boot</string>
     <string name="vpn_denied_dialog_title">Permission Denied</string>
@@ -184,7 +131,6 @@
 	<string name="always_on_message2">to make sure Always-on VPN is turned off for all other apps and try again</string>
 	<string name="chat_description">Join the community</string>
 	<string name="tunnel_required">Feature requires at least one tunnel</string>
-    <string name="request_root">Request root</string>
     <string name="background_location_message">Allow all the time location permission and/or precise location is required for this feature. Please see</string>
 	<string name="app_settings">app settings</string>
 	<string name="background_location_message2">to make sure these permissions are enabled.</string>
@@ -194,14 +140,12 @@
 	<string name="set_custom_ping_internal">Ping interval (sec)</string>
 	<string name="optional_default">"optional, default: "</string>
 	<string name="set_custom_ping_cooldown">Ping restart cooldown (sec)</string>
-	<string name="details">details</string>
-	<string name="show_amnezia_properties">Show Amnezia properties</string>
+    <string name="show_amnezia_properties">Show Amnezia properties</string>
 	<string name="never">never</string>
 	<string name="sec">sec</string>
 	<string name="handshake">handshake</string>
     <string name="logs">Logs</string>
-    <string name="tunnel_notifications">Tunnel notifications</string>
-	<string name="kill_switch">Kill switch</string>
+    <string name="kill_switch">Kill switch</string>
 	<string name="appearance">Appearance</string>
 	<string name="notifications">Notifications</string>
 	<string name="automatic">Automatic</string>
