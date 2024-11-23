@@ -61,7 +61,6 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
-import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlin.system.exitProcess
@@ -96,10 +95,6 @@ class MainActivity : AppCompatActivity() {
 			val appUiState by viewModel.uiState.collectAsStateWithLifecycle()
 			val configurationChange by viewModel.configurationChange.collectAsStateWithLifecycle()
 			val navController = rememberNavController()
-
-			LaunchedEffect(appUiState.tunnels) {
-				requestTunnelTileServiceStateUpdate()
-			}
 
 			LaunchedEffect(configurationChange) {
 				if (configurationChange) {

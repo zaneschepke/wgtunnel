@@ -94,7 +94,7 @@ constructor(
 
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig, background: Boolean): Result<TunnelState> {
 		return withContext(ioDispatcher) {
-			if (runningHandle.get() == true && tunnelConfig == vpnState.value.tunnelConfig) {
+			if (runningHandle.get() && tunnelConfig == vpnState.value.tunnelConfig) {
 				Timber.w("Tunnel already running")
 				return@withContext Result.success(vpnState.value.status)
 			}
@@ -103,7 +103,7 @@ constructor(
 			val settings = appDataRepository.settings.getSettings()
 			if (background || settings.isKernelEnabled) startBackgroundService()
 			setState(tunnelConfig, TunnelState.UP).onSuccess {
-				emitTunnelState(it)
+				updateTunnelState(it)
 			}.onFailure {
 				Timber.e(it)
 				onStartFailed()
@@ -115,7 +115,7 @@ constructor(
 		return withContext(ioDispatcher) {
 			onBeforeStop(tunnelConfig)
 			setState(tunnelConfig, TunnelState.DOWN).onSuccess {
-				emitTunnelState(it)
+				updateTunnelState(it)
 			}.onFailure {
 				Timber.e(it)
 				onStopFailed()
@@ -136,7 +136,7 @@ constructor(
 	private suspend fun toggleTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
 		return withContext(ioDispatcher) {
 			setState(tunnelConfig, TunnelState.TOGGLE).onSuccess {
-				emitTunnelState(it)
+				updateTunnelState(it)
 				resetBackendStatistics()
 			}.onFailure {
 				Timber.e(it)
@@ -191,12 +191,13 @@ constructor(
 		resetBackendStatistics()
 	}
 
-	private fun emitTunnelState(state: TunnelState) {
+	private fun updateTunnelState(state: TunnelState) {
 		_vpnState.tryEmit(
 			_vpnState.value.copy(
 				status = state,
 			),
 		)
+		serviceManager.requestTunnelTileUpdate()
 	}
 
 	private fun emitBackendStatistics(statistics: TunnelStatistics) {
@@ -264,11 +265,11 @@ constructor(
 	}
 
 	override fun onStateChange(newState: Tunnel.State) {
-		emitTunnelState(TunnelState.from(newState))
+		updateTunnelState(TunnelState.from(newState))
 	}
 
 	override fun onStateChange(state: State) {
-		emitTunnelState(TunnelState.from(state))
+		updateTunnelState(TunnelState.from(state))
 	}
 
 	companion object {

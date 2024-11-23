@@ -74,7 +74,7 @@ constructor(
 	val configurationChange = _configurationChange.asStateFlow()
 
 	init {
-		viewModelScope.launch(ioDispatcher) {
+		viewModelScope.launch {
 			initPin()
 			initAutoTunnel()
 			initTunnel()
