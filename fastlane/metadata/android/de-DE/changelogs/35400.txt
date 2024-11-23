@@ -1,5 +1,0 @@
-Was ist neu?
-- Problem mit dem Absturz von Android 12 behoben
-- Fehler beim Kopieren eines Tunnels behoben
-- Automatisches Umschalten der Amnezia- Eigenschaften
-- Preshared Key ohne Authentifizierung ausblenden
