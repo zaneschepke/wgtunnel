@@ -130,4 +130,19 @@
     <string name="never">从不</string>
     <string name="sec">秒</string>
     <string name="handshake">握手</string>
+    <string name="light">亮色</string>
+    <string name="dark">暗色</string>
+    <string name="trusted_wifi_names">可信wifi名称</string>
+    <string name="prominent_background_location_title">后台定位披露</string>
+    <string name="dynamic">动态</string>
+    <string name="display_theme">应用主题</string>
+    <string name="kill_switch">安全开关</string>
+    <string name="appearance">外观</string>
+    <string name="notifications">通知</string>
+    <string name="automatic">自动</string>
+    <string name="language">语言</string>
+    <string name="add_wifi_name">添加wifi名称</string>
+    <string name="primary_tunnel">主要隧道</string>
+    <string name="mobile_tunnel">移动数据隧道</string>
+    <string name="add_from_clipboard">从剪贴板添加</string>
 </resources>
