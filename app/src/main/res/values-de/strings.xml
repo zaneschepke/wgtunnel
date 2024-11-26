@@ -29,7 +29,7 @@
     <string name="addresses">Adressen</string>
     <string name="dns_servers">DNS-Server</string>
     <string name="mtu">MTU</string>
-    <string name="peer">Peer</string>
+    <string name="peer">Gegenstelle</string>
     <string name="allowed_ips">Erlaubte IPs</string>
     <string name="endpoint">Endpunkt</string>
     <string name="name">Name</string>
