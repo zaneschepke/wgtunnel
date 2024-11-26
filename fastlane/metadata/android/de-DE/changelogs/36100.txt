@@ -1,0 +1,7 @@
+Was ist neu?
+- Tunnel aus der Zwischenablage hinzufügen
+- Lokalisierungen hinzugefügt
+- Behebung eines Fehlers, der den Akku entleert
+- Fehler beim Löschen behoben
+- Verbesserte Synchronisation der Tunnelkacheln
+- Andere Korrekturen und Verbesserungen
