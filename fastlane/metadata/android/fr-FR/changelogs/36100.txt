@@ -1,0 +1,7 @@
+Quoi de neuf :
+- Ajout des tunnels depuis le presse-papiers
+- Ajout des localisations
+- Correction d'un bug de surconsommation de la batterie
+- Correction d'un bug de suppression
+- Amélioration de la synchronisation des tuiles du tunnel.
+- Autres améliorations
