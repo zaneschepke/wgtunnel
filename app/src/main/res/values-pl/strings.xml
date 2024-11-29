@@ -75,7 +75,7 @@
     <string name="delete_tunnel_message">Czy na pewno chcesz usunąć ten tunel?</string>
     <string name="tunnel_on_wifi">Tunel przez niezaufaną sieć Wi-Fi</string>
     <string name="dns_servers">Serwery DNS</string>
-    <string name="error_file_extension">Plik nie jest plikiem .conf ani .zip</string>
+    <string name="error_file_extension">Plik nie jest w formacie .conf lub .zip</string>
     <string name="export_configs">Eksportuj konfiguracje</string>
     <string name="copy_public_key">Skopiuj klucz publiczny</string>
     <string name="restart_on_ping">Uruchom ponownie w przypadku niepowodzenia pingowania (beta)</string>
