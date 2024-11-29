@@ -170,13 +170,5 @@
     <string name="email_description">Wyślij mi e-mail</string>
     <string name="set_primary_tunnel">Ustaw jako tunel podstawowy</string>
     <string name="mobile_data_tunnel">Ustaw jako tunel mobilnej transmisji danych</string>
-    <string name="telegram_url" translatable="false"></string>
-    <string name="github_url" translatable="false"></string>
-    <string name="docs_wildcards" translatable="false"></string>
-    <string name="my_email" translatable="false"></string>
-    <string name="getting_started_url" translatable="false"></string>
-    <string name="donate_url" translatable="false"></string>
-    <string name="privacy_policy_url" translatable="false"></string>
-    <string name="docs_url" translatable="false"></string>
     <string name="vpn_channel_id">Kanał VPN</string>
 </resources>
