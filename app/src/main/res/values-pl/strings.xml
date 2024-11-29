@@ -178,4 +178,5 @@
     <string name="donate_url" translatable="false"></string>
     <string name="privacy_policy_url" translatable="false"></string>
     <string name="docs_url" translatable="false"></string>
+    <string name="vpn_channel_id">Kanał VPN</string>
 </resources>
