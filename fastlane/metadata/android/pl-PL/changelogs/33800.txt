@@ -1,0 +1,4 @@
+Co nowego:
+- Naprawiono błąd w interfejsie użytkownika edycji konfiguracji
+- Dodano powiadomienie o pierwszym uruchomieniu AOVPN systemu GrapheneOS 
+- Podniesienie wersji

@@ -1,0 +1,7 @@
+Ulepszenia:
+- Dodano potwierdzenie usunięcia tunelu
+- Dodano uprawnienia w tle dla trybu oszczędzania energii
+Poprawki:
+- Błąd wyłączania tunelu zamrożonego
+- Błąd w polu odbiorcy wiadomości e-mail
+- Edycja konfiguracji pustego DNS

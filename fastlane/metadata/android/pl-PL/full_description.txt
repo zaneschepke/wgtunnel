@@ -1,6 +1,14 @@
 Funkcje
 
--Dodawanie tuneli za pomocą pliku .conf, zip, ręcznego wprowadzania lub kodu QR
--Automatyczne łączenie się z VPN na podstawie SSID Wi-Fi, sieci Ethernet lub danych mobilnych
--Dzielenie tuneli w aplikacji z wyszukiwaniem
--
+- Dodawanie tuneli za pomocą pliku .conf, pliku zip, ręcznego wprowadzania lub kodu QR
+- Automatyczne łączenie się z VPN na podstawie SSID Wi-Fi, Ethernetu lub danych mobilnych
+- Podział tunelowania według aplikacji z wyszukiwaniem
+- Obsługa protokołu WireGuard dla trybów jądra i przestrzeni użytkownika
+- Obsługa protokołu Amnezia dla trybu przestrzeni użytkownika dla ochrony DPI/cenzury
+- Obsługa stałego VPN
+- Eksport tuneli protokołów Amnezia i WireGuard do pliku ZIP
+- Obsługa szybkiego kafelka dla przełączania VPN
+- Obsługa skrótów statycznych dla tunelu głównego w celu integracji automatyzacji
+- Obsługa automatyzacji intencji dla wszystkich tuneli
+- Automatyczne ponowne uruchomienie usługi po ponownym uruchomieniu
+- Środki oszczędzania baterii

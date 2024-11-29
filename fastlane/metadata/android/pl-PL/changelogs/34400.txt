@@ -1,0 +1,5 @@
+Co nowego:
+- Ulepszono nazewnictwo importowania tunelu
+- Naprawiono błąd stanu inicjalizacji automatycznego tunelowania
+- Ulepszono obsługę błędów
+- Naprawiono błąd importu ZIP protokołu Amnezia

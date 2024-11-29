@@ -1,0 +1,3 @@
+Ulepszenia:
+- Naprawiono niezapisywanie konfiguracji tworzenia
+- Podniesiono wersje

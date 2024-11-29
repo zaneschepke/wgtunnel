@@ -1,0 +1,5 @@
+Co nowego:
+- Naprawiono sterowanie tunelem w interfejsie AndroidTV
+- Naprawiono błąd blokady portretu
+- Naprawiono błąd pomijania blokady PIN
+- Naprawiono błąd automatycznego tunelowania kafelków

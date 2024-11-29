@@ -1,0 +1,5 @@
+Co nowego:
+- Poprawiona niezawodność automatycznego tunelowania
+- Poprawiona synchronizacja kafelków
+- Dodano zasoby AndroidTV
+- Dodano odcisk palca APK
