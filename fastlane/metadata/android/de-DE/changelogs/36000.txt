@@ -1,0 +1,6 @@
+Was ist neu?
+- UI-Aktualisierung
+- Verbesserungen der AndroidTV-Navigation
+- Behebung eines Fehlers, der den Akku entleert
+- Fehlerbehebung bei Wildcards mit optionaler Einstellung
+- Weitere Verbesserungen

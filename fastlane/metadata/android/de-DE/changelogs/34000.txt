@@ -1,5 +1,5 @@
 Was ist neu:
 - Auto-Tunnel Auswahl nach WLAN-Name
-- Auto-Tunnel Kontrolle durch Kacheln und Verknüpfungen
+- Auto-Tunnel Steuerung durch Kacheln und Verknüpfungen
 - Automatischer Neustart des Manuellen Tunnels nach einem Systemneustart
 - Verschiedene Fehlerbehebungen und Performanceverbesserungen

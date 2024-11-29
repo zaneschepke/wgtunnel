@@ -1,0 +1,6 @@
+Quoi de neuf :
+- Mise à jour de l'interface utilisateur
+- Améliorations de la navigation sur Android TV
+- Correction d'un bug de surconsommation de la batterie
+- Correction des wildcards avec réglage optionnel
+- Autres améliorations

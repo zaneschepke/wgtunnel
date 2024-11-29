@@ -1,5 +1,5 @@
 Was ist neu
 - Unterstützung für weitere Sprachen
-- bug-fix für auto-tunneling bei Mobilfunk
+- bug-fix für auto-tunneling bei mobilen Daten
 - für AndroidTV: Bug bei schwebendem Aktionsknopf behoben
 - andere Optimisation und Erweiterungen
