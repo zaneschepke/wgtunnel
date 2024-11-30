@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NetworkPing
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.SettingsEthernet
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -138,6 +139,28 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 									)
 								},
 								onClick = { optionsViewModel.onToggleIsMobileDataTunnel(config) },
+							),
+							SelectionItem(
+								Icons.Outlined.SettingsEthernet,
+								title = {
+									Text(
+										stringResource(R.string.ethernet_tunnel),
+										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+									)
+								},
+								description = {
+									Text(
+										stringResource(R.string.set_ethernet_tunnel),
+										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.outline),
+									)
+								},
+								trailing = {
+									ScaledSwitch(
+										config.isEthernetTunnel,
+										onClick = { optionsViewModel.onToggleIsEthernetTunnel(config) },
+									)
+								},
+								onClick = { optionsViewModel.onToggleIsEthernetTunnel(config) },
 							),
 							SelectionItem(
 								Icons.Outlined.NetworkPing,

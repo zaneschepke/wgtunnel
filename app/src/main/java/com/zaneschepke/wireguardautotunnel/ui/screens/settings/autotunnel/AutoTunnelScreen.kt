@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Filter1
 import androidx.compose.material.icons.outlined.NetworkPing
@@ -321,6 +322,30 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 						},
 						onClick = {
 							viewModel.onToggleRestartOnPing()
+						},
+					),
+					SelectionItem(
+						Icons.Outlined.AirplanemodeActive,
+						title = {
+							Text(
+								stringResource(R.string.stop_on_no_internet),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						description = {
+							Text(
+								stringResource(R.string.stop_on_internet_loss),
+								style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+							)
+						},
+						trailing = {
+							ScaledSwitch(
+								checked = uiState.settings.isStopOnNoInternetEnabled,
+								onClick = { viewModel.onToggleStopOnNoInternet() },
+							)
+						},
+						onClick = {
+							viewModel.onToggleStopOnNoInternet()
 						},
 					),
 				),

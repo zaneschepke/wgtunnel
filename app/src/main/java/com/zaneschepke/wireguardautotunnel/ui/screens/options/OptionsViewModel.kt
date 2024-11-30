@@ -77,4 +77,12 @@ constructor(
 			),
 		)
 	}
+
+	fun onToggleIsEthernetTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
+		if (tunnelConfig.isEthernetTunnel) {
+			appDataRepository.tunnels.updateEthernetTunnel(null)
+		} else {
+			appDataRepository.tunnels.updateEthernetTunnel(tunnelConfig)
+		}
+	}
 }

@@ -128,4 +128,12 @@ constructor(
 			)
 		}
 	}
+
+	fun onToggleStopOnNoInternet() = viewModelScope.launch {
+		with(settings.value) {
+			appDataRepository.settings.save(
+				copy(isStopOnNoInternetEnabled = !isStopOnNoInternetEnabled),
+			)
+		}
+	}
 }

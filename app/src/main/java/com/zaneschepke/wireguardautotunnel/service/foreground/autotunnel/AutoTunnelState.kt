@@ -26,8 +26,17 @@ data class AutoTunnelState(
 			vpnState.status.isUp() && preferredTunnel.id != vpnState.tunnelConfig?.id
 	}
 
+	private fun isEthernetTunnelChangeNeeded(): Boolean {
+		val preferredTunnel = preferredEthernetTunnel()
+		return preferredTunnel != null && vpnState.status.isUp() && preferredTunnel.id != vpnState.tunnelConfig?.id
+	}
+
 	private fun preferredMobileDataTunnel(): TunnelConfig? {
 		return tunnels.firstOrNull { it.isMobileDataTunnel } ?: tunnels.firstOrNull { it.isPrimaryTunnel }
+	}
+
+	private fun preferredEthernetTunnel(): TunnelConfig? {
+		return tunnels.firstOrNull { it.isEthernetTunnel } ?: tunnels.firstOrNull { it.isPrimaryTunnel }
 	}
 
 	private fun preferredWifiTunnel(): TunnelConfig? {
@@ -42,6 +51,14 @@ data class AutoTunnelState(
 		return isEthernetConnected && settings.isTunnelOnEthernetEnabled && vpnState.status.isDown()
 	}
 
+	private fun stopOnEthernet() : Boolean {
+		return isEthernetConnected && !settings.isTunnelOnEthernetEnabled && vpnState.status.isUp()
+	}
+
+	private fun isNoConnectivity(): Boolean {
+		return !isEthernetConnected && !isWifiConnected && !isMobileDataConnected
+	}
+
 	private fun stopOnMobileData(): Boolean {
 		return isMobileDataActive() && !settings.isTunnelOnMobileDataEnabled && vpnState.status.isUp()
 	}
@@ -52,6 +69,10 @@ data class AutoTunnelState(
 
 	private fun changeOnMobileData(): Boolean {
 		return isMobileDataActive() && settings.isTunnelOnMobileDataEnabled && isMobileTunnelDataChangeNeeded()
+	}
+
+	private fun changeOnEthernet(): Boolean {
+		return isEthernetConnected && settings.isTunnelOnEthernetEnabled && isEthernetTunnelChangeNeeded()
 	}
 
 	private fun stopOnWifi(): Boolean {
@@ -75,25 +96,23 @@ data class AutoTunnelState(
 		val vpnTunnel = vpnState.tunnelConfig
 		return if (preferred != null && vpnTunnel != null) {
 			preferred.id == vpnTunnel.id
-		} else {
-			true
-		}
+		} else true
 	}
 
-	// TODO add shutdown on no connectivity
 	fun asAutoTunnelEvent(): AutoTunnelEvent {
 		return when {
 			// ethernet scenarios
-			startOnEthernet() -> AutoTunnelEvent.Start()
+			stopOnEthernet() -> AutoTunnelEvent.Stop
+			startOnEthernet() || changeOnEthernet() -> AutoTunnelEvent.Start(preferredEthernetTunnel())
 			// mobile data scenarios
-			stopOnMobileData() -> AutoTunnelEvent.Stop(vpnState.tunnelConfig)
-			startOnMobileData() -> AutoTunnelEvent.Start(tunnels.firstOrNull { it.isMobileDataTunnel })
-			changeOnMobileData() -> AutoTunnelEvent.Start(preferredMobileDataTunnel())
+			stopOnMobileData() -> AutoTunnelEvent.Stop
+			startOnMobileData() || changeOnMobileData() -> AutoTunnelEvent.Start(preferredMobileDataTunnel())
 			// wifi scenarios
-			stopOnWifi() -> AutoTunnelEvent.Stop(vpnState.tunnelConfig)
-			stopOnTrustedWifi() -> AutoTunnelEvent.Stop(vpnState.tunnelConfig)
-			startOnUntrustedWifi() -> AutoTunnelEvent.Start(preferredWifiTunnel())
-			changeOnUntrustedWifi() -> AutoTunnelEvent.Start(preferredWifiTunnel())
+			stopOnWifi() -> AutoTunnelEvent.Stop
+			stopOnTrustedWifi() -> AutoTunnelEvent.Stop
+			startOnUntrustedWifi() || changeOnUntrustedWifi() -> AutoTunnelEvent.Start(preferredWifiTunnel())
+			// no connectivity
+			isNoConnectivity() && settings.isStopOnNoInternetEnabled -> AutoTunnelEvent.Stop
 			else -> AutoTunnelEvent.DoNothing
 		}
 	}
@@ -101,18 +120,14 @@ data class AutoTunnelState(
 	private fun isCurrentSSIDTrusted(): Boolean {
 		return if (settings.isWildcardsEnabled) {
 			settings.trustedNetworkSSIDs.isMatchingToWildcardList(currentNetworkSSID)
-		} else {
-			settings.trustedNetworkSSIDs.contains(currentNetworkSSID)
-		}
+		} else settings.trustedNetworkSSIDs.contains(currentNetworkSSID)
 	}
 
 	private fun getTunnelWithMatchingTunnelNetwork(): TunnelConfig? {
 		return tunnels.firstOrNull {
 			if (settings.isWildcardsEnabled) {
 				it.tunnelNetworks.isMatchingToWildcardList(currentNetworkSSID)
-			} else {
-				it.tunnelNetworks.contains(currentNetworkSSID)
-			}
+			} else it.tunnelNetworks.contains(currentNetworkSSID)
 		}
 	}
 }

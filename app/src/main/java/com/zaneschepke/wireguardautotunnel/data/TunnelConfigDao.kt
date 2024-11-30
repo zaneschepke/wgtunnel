@@ -44,6 +44,9 @@ interface TunnelConfigDao {
 	@Query("UPDATE TunnelConfig SET is_mobile_data_tunnel = 0 WHERE is_mobile_data_tunnel =1")
 	suspend fun resetMobileDataTunnel()
 
+	@Query("UPDATE TunnelConfig SET is_ethernet_tunnel = 0 WHERE is_ethernet_tunnel =1")
+	suspend fun resetEthernetTunnel()
+
 	@Query("SELECT * FROM TUNNELCONFIG WHERE is_primary_tunnel=1")
 	suspend fun findByPrimary(): TunnelConfigs
 

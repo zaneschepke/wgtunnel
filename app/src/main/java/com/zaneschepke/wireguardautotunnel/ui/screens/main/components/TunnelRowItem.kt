@@ -9,6 +9,7 @@ import androidx.compose.material.icons.rounded.CopyAll
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.SettingsEthernet
 import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
@@ -55,14 +56,12 @@ fun TunnelRowItem(
 	val itemFocusRequester = remember { FocusRequester() }
 	ExpandingRowListItem(
 		leading = {
-			val icon =
-				if (tunnel.isPrimaryTunnel) {
-					Icons.Rounded.Star
-				} else if (tunnel.isMobileDataTunnel) {
-					Icons.Rounded.Smartphone
-				} else {
-					Icons.Rounded.Circle
-				}
+			val icon = when {
+				tunnel.isPrimaryTunnel -> Icons.Rounded.Star
+				tunnel.isMobileDataTunnel -> Icons.Rounded.Smartphone
+				tunnel.isEthernetTunnel -> Icons.Rounded.SettingsEthernet
+				else -> Icons.Rounded.Circle
+			}
 			Icon(
 				icon,
 				icon.name,

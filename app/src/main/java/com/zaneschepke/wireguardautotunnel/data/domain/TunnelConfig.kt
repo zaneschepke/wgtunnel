@@ -58,6 +58,11 @@ data class TunnelConfig(
 		defaultValue = "null",
 	)
 	var pingIp: String? = null,
+	@ColumnInfo(
+		name = "is_ethernet_tunnel",
+		defaultValue = "false",
+	)
+	var isEthernetTunnel: Boolean = false,
 ) {
 
 	fun toAmConfig(): org.amnezia.awg.config.Config {

@@ -60,4 +60,9 @@ data class Settings(
 		defaultValue = "false",
 	)
 	val isWifiNameByShellEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "is_stop_on_no_internet_enabled",
+		defaultValue = "false",
+	)
+	val isStopOnNoInternetEnabled: Boolean = false,
 )

@@ -15,6 +15,8 @@ interface TunnelConfigRepository {
 
 	suspend fun updateMobileDataTunnel(tunnelConfig: TunnelConfig?)
 
+	suspend fun updateEthernetTunnel(tunnelConfig: TunnelConfig?)
+
 	suspend fun delete(tunnelConfig: TunnelConfig)
 
 	suspend fun getById(id: Int): TunnelConfig?

@@ -53,6 +53,19 @@ class RoomTunnelConfigRepository(
 		}
 	}
 
+	override suspend fun updateEthernetTunnel(tunnelConfig: TunnelConfig?) {
+		withContext(ioDispatcher) {
+			tunnelConfigDao.resetEthernetTunnel()
+			tunnelConfig?.let {
+				save(
+					it.copy(
+						isEthernetTunnel = true,
+					),
+				)
+			}
+		}
+	}
+
 	override suspend fun delete(tunnelConfig: TunnelConfig) {
 		withContext(ioDispatcher) {
 			tunnelConfigDao.delete(tunnelConfig)

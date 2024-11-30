@@ -178,4 +178,8 @@
 	<string name="configuration_change">Configuration change</string>
 	<string name="requires_app_relaunch">This change requires an app relaunch. Would you like to proceed?</string>
 	<string name="add_from_clipboard">Add from clipboard</string>
+	<string name="stop_on_no_internet">Stop on no internet</string>
+	<string name="stop_on_internet_loss">Stop tunnel on internet loss</string>
+	<string name="ethernet_tunnel">Ethernet tunnel</string>
+	<string name="set_ethernet_tunnel">Set as ethernet tunnel</string>
 </resources>
