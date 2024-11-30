@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.util.SingletonHolder
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import jakarta.inject.Inject

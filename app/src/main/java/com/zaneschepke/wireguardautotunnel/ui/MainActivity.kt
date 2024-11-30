@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity() {
 									navController,
 									enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
 									exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
-									startDestination = (if (appUiState.generalState.isPinLockEnabled == true) Route.Lock else Route.Main),
+									startDestination = (if (appUiState.generalState.isPinLockEnabled) Route.Lock else Route.Main),
 								) {
 									composable<Route.Main> {
 										MainScreen(

@@ -72,7 +72,7 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 				val lastActive = appDataRepository.getStartTunnelConfig()
 				lastActive?.let { tunnel ->
 					if (tunnel.isActive) {
-						tunnelService.get().stopTunnel(tunnel)
+						tunnelService.get().stopTunnel()
 					} else {
 						tunnelService.get().startTunnel(tunnel, true)
 					}

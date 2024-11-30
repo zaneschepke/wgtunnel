@@ -21,11 +21,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -53,7 +55,7 @@ constructor(
 
 	private var statsJob: Job? = null
 
-	private val runningHandle = AtomicBoolean(false)
+	private val mutex = Mutex()
 
 	private suspend fun backend(): Any {
 		val settings = appDataRepository.settings.getSettings()
@@ -92,77 +94,58 @@ constructor(
 		}
 	}
 
-	override suspend fun startTunnel(tunnelConfig: TunnelConfig, background: Boolean): Result<TunnelState> {
-		return withContext(ioDispatcher) {
-			if (runningHandle.get() && tunnelConfig == vpnState.value.tunnelConfig) {
-				Timber.w("Tunnel already running")
-				return@withContext Result.success(vpnState.value.status)
-			}
-			runningHandle.set(true)
-			onBeforeStart(tunnelConfig)
-			val settings = appDataRepository.settings.getSettings()
-			if (background || settings.isKernelEnabled) startBackgroundService()
-			setState(tunnelConfig, TunnelState.UP).onSuccess {
-				updateTunnelState(it)
-			}.onFailure {
-				Timber.e(it)
-				onStartFailed()
-			}
-		}
+	private fun isTunnelAlreadyRunning(tunnelConfig: TunnelConfig): Boolean {
+		val isRunning = tunnelConfig == _vpnState.value.tunnelConfig && _vpnState.value.status.isUp()
+		if (isRunning) Timber.w("Tunnel already running")
+		return isRunning
 	}
 
-	override suspend fun stopTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
-		return withContext(ioDispatcher) {
-			onBeforeStop(tunnelConfig)
-			setState(tunnelConfig, TunnelState.DOWN).onSuccess {
-				updateTunnelState(it)
-			}.onFailure {
-				Timber.e(it)
-				onStopFailed()
-			}.also {
-				stopBackgroundService()
-				runningHandle.set(false)
+	override suspend fun startTunnel(tunnelConfig: TunnelConfig?, background: Boolean) {
+		if (tunnelConfig == null) return
+		withContext(ioDispatcher) {
+			mutex.withLock {
+				if (isTunnelAlreadyRunning(tunnelConfig)) return@withContext
+				onBeforeStart(background)
+				setState(tunnelConfig, TunnelState.UP).onSuccess {
+					startStatsJob()
+					if (it.isUp()) appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
+					updateTunnelState(it, tunnelConfig)
+				}.onFailure {
+					Timber.e(it)
+				}
 			}
 		}
 	}
 
-	// use this when we just want to bounce tunnel and not change tunnelConfig active state
-	override suspend fun bounceTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
-		toggleTunnel(tunnelConfig)
-		delay(VPN_RESTART_DELAY)
-		return toggleTunnel(tunnelConfig)
-	}
-
-	private suspend fun toggleTunnel(tunnelConfig: TunnelConfig): Result<TunnelState> {
-		return withContext(ioDispatcher) {
-			setState(tunnelConfig, TunnelState.TOGGLE).onSuccess {
-				updateTunnelState(it)
-				resetBackendStatistics()
-			}.onFailure {
-				Timber.e(it)
+	override suspend fun stopTunnel() {
+		withContext(ioDispatcher) {
+			mutex.withLock {
+				if (_vpnState.value.status.isDown()) return@withContext
+				with(_vpnState.value) {
+					if (tunnelConfig == null) return@withContext
+					setState(tunnelConfig, TunnelState.DOWN).onSuccess {
+						updateTunnelState(it, null)
+						onStop(tunnelConfig)
+						stopBackgroundService()
+					}.onFailure {
+						Timber.e(it)
+					}
+				}
 			}
 		}
 	}
 
-	private suspend fun onStopFailed() {
-		_vpnState.value.tunnelConfig?.let {
-			appDataRepository.tunnels.save(it.copy(isActive = true))
-		}
+	override suspend fun bounceTunnel() {
+		if (_vpnState.value.tunnelConfig == null) return
+		val config = _vpnState.value.tunnelConfig
+		stopTunnel()
+		startTunnel(config)
 	}
 
-	private suspend fun onStartFailed() {
-		_vpnState.value.tunnelConfig?.let {
-			appDataRepository.tunnels.save(it.copy(isActive = false))
-		}
-		cancelStatsJob()
-		resetBackendStatistics()
-		runningHandle.set(false)
-	}
-
-	private suspend fun shutDownActiveTunnel(config: TunnelConfig) {
+	private suspend fun shutDownActiveTunnel() {
 		with(_vpnState.value) {
-			if (status == TunnelState.UP && tunnelConfig != config) {
-				tunnelConfig?.let { stopTunnel(it) }
+			if (status.isUp()) {
+				stopTunnel()
 			}
 		}
 	}
@@ -177,51 +160,35 @@ constructor(
 		serviceManager.requestTunnelTileUpdate()
 	}
 
-	private suspend fun onBeforeStart(tunnelConfig: TunnelConfig) {
-		shutDownActiveTunnel(tunnelConfig)
-		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
-		emitVpnStateConfig(tunnelConfig)
+	private suspend fun onBeforeStart(background: Boolean) {
+		shutDownActiveTunnel()
 		resetBackendStatistics()
-		startStatsJob()
+		val settings = appDataRepository.settings.getSettings()
+		if (background || settings.isKernelEnabled) startBackgroundService()
 	}
 
-	private suspend fun onBeforeStop(tunnelConfig: TunnelConfig) {
+	private suspend fun onStop(tunnelConfig: TunnelConfig) {
 		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
 		cancelStatsJob()
 		resetBackendStatistics()
 	}
 
-	private fun updateTunnelState(state: TunnelState) {
-		_vpnState.tryEmit(
-			_vpnState.value.copy(
-				status = state,
-			),
-		)
-		serviceManager.requestTunnelTileUpdate()
+	private fun updateTunnelState(state: TunnelState, tunnelConfig: TunnelConfig?) {
+		_vpnState.update {
+			it.copy(status = state, tunnelConfig = tunnelConfig)
+		}
 	}
 
 	private fun emitBackendStatistics(statistics: TunnelStatistics) {
-		_vpnState.tryEmit(
-			_vpnState.value.copy(
-				statistics = statistics,
-			),
-		)
-	}
-
-	private fun emitVpnStateConfig(tunnelConfig: TunnelConfig) {
-		_vpnState.tryEmit(
-			_vpnState.value.copy(
-				tunnelConfig = tunnelConfig,
-			),
-		)
+		_vpnState.update {
+			it.copy(statistics = statistics)
+		}
 	}
 
 	private fun resetBackendStatistics() {
-		_vpnState.tryEmit(
-			_vpnState.value.copy(
-				statistics = null,
-			),
-		)
+		_vpnState.update {
+			it.copy(statistics = null)
+		}
 	}
 
 	override suspend fun getState(): TunnelState {
@@ -265,16 +232,21 @@ constructor(
 	}
 
 	override fun onStateChange(newState: Tunnel.State) {
-		updateTunnelState(TunnelState.from(newState))
+		_vpnState.update {
+			it.copy(status = TunnelState.from(newState))
+		}
+		serviceManager.requestTunnelTileUpdate()
 	}
 
 	override fun onStateChange(state: State) {
-		updateTunnelState(TunnelState.from(state))
+		_vpnState.update {
+			it.copy(status = TunnelState.from(state))
+		}
+		serviceManager.requestTunnelTileUpdate()
 	}
 
 	companion object {
 		const val STATS_START_DELAY = 1_000L
 		const val VPN_STATISTIC_CHECK_INTERVAL = 1_000L
-		const val VPN_RESTART_DELAY = 1_000L
 	}
 }

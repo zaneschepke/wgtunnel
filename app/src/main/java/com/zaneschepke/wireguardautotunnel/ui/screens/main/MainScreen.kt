@@ -155,7 +155,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
 		val intent = if (uiState.settings.isKernelEnabled) null else VpnService.prepare(context)
 		if (intent != null) return vpnActivity.launch(intent)
-		if (!checked) viewModel.onTunnelStop(tunnel).also { return }
+		if (!checked) viewModel.onTunnelStop().also { return }
 		viewModel.onTunnelStart(tunnel, uiState.settings.isKernelEnabled)
 	}
 
@@ -249,8 +249,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
 				val isActive = uiState.tunnels.any {
-					it.id == tunnel.id &&
-						it.isActive
+					it.id == uiState.vpnState.tunnelConfig?.id &&
+						uiState.vpnState.status.isUp()
 				}
 				val expanded = uiState.generalState.isTunnelStatsExpanded
 				TunnelRowItem(

@@ -157,7 +157,7 @@
 				android:value="true" />
 		</service>
         <service
-            android:name=".service.foreground.AutoTunnelService"
+            android:name=".service.foreground.autotunnel.AutoTunnelService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="systemExempted"

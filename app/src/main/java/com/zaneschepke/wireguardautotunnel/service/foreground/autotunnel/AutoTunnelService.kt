@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.service.foreground
+package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel
 
 import android.content.Intent
 import android.net.NetworkCapabilities
@@ -15,6 +15,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.MainImmediateDispatcher
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.network.EthernetService
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
@@ -248,7 +249,7 @@ class AutoTunnelService : LifecycleService() {
 							if (results.contains(false)) {
 								Timber.i("Restarting VPN for ping failure")
 								val cooldown = vpnState.tunnelConfig.pingCooldown
-								tunnelService.get().bounceTunnel(vpnState.tunnelConfig)
+								tunnelService.get().bounceTunnel()
 								delay(cooldown ?: Constants.PING_COOLDOWN)
 								continue
 							}
@@ -271,15 +272,15 @@ class AutoTunnelService : LifecycleService() {
 					old.map { it.isActive } != new.map { it.isActive }
 				},
 			) { settings, tunnels ->
-				Timber.d("Tunnels or settings changed!")
-				autoTunnelStateFlow.value.copy(
-					settings = settings,
-					tunnels = tunnels,
-				)
-			}.collect {
-				Timber.d("got new settings: ${it.settings}")
-				manageJobsBySettings(it.settings)
-				autoTunnelStateFlow.emit(it)
+				Pair(settings, tunnels)
+			}.collect { pair ->
+				manageJobsBySettings(pair.first)
+				autoTunnelStateFlow.update {
+					it.copy(
+						settings = pair.first,
+						tunnels = pair.second,
+					)
+				}
 			}
 		}
 	}
@@ -287,12 +288,12 @@ class AutoTunnelService : LifecycleService() {
 	private suspend fun watchForVpnStateChanges() {
 		Timber.i("Starting vpn state watcher")
 		withContext(ioDispatcher) {
-			tunnelService.get().vpnState.distinctUntilChanged { old, new ->
-				old.tunnelConfig?.id == new.tunnelConfig?.id
-			}.collect { state ->
+			tunnelService.get().vpnState.collect { state ->
 				autoTunnelStateFlow.update {
 					it.copy(vpnState = state)
 				}
+				// TODO think about this
+				// What happens if we change the pinger setting while vpn is active?
 				state.tunnelConfig?.let {
 					val settings = appDataRepository.settings.getSettings()
 					if (it.isPingEnabled && !settings.isPingEnabled) {
@@ -455,100 +456,23 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	private suspend fun getMobileDataTunnel(): TunnelConfig? {
-		return appDataRepository.tunnels.findByMobileDataTunnel().firstOrNull()
-	}
-
 	private suspend fun handleNetworkEventChanges() {
 		withContext(ioDispatcher) {
-			Timber.i("Starting network event watcher")
-			autoTunnelStateFlow.collect { watcherState ->
-				val autoTunnel = "Auto-tunnel watcher"
-				// delay for rapid network state changes and then collect latest
-				delay(Constants.WATCHER_COLLECTION_DELAY)
-				val activeTunnel = watcherState.vpnState.tunnelConfig
-				val defaultTunnel = appDataRepository.getPrimaryOrFirstTunnel()
-				val isTunnelDown = tunnelService.get().getState() == TunnelState.DOWN
-				when {
-					watcherState.isEthernetConditionMet() -> {
-						Timber.i("$autoTunnel - tunnel on on ethernet condition met")
-						if (isTunnelDown) {
-							defaultTunnel?.let {
-								tunnelService.get().startTunnel(it)
-							}
-						}
+			Timber.i("Starting auto-tunnel network event watcher")
+			// allow manual overrides
+			autoTunnelStateFlow.distinctUntilChanged { old, new ->
+				old.copy(vpnState = new.vpnState) == new
+			}.collect { watcherState ->
+				when (val event = watcherState.asAutoTunnelEvent()) {
+					is AutoTunnelEvent.Start -> {
+						Timber.d("Start tunnel ${event.tunnelConfig?.name}")
+						tunnelService.get().startTunnel(event.tunnelConfig ?: appDataRepository.getPrimaryOrFirstTunnel())
 					}
-
-					watcherState.isMobileDataConditionMet() -> {
-						Timber.i("$autoTunnel - tunnel on mobile data condition met")
-						val mobileDataTunnel = getMobileDataTunnel()
-						val tunnel =
-							mobileDataTunnel ?: defaultTunnel
-						if (isTunnelDown || activeTunnel?.isMobileDataTunnel == false) {
-							tunnel?.let {
-								tunnelService.get().startTunnel(it)
-							}
-						}
+					is AutoTunnelEvent.Stop -> {
+						Timber.d("Stop tunnel")
+						tunnelService.get().stopTunnel()
 					}
-
-					watcherState.isTunnelOffOnMobileDataConditionMet() -> {
-						Timber.i("$autoTunnel - tunnel off on mobile data met, turning vpn off")
-						if (!isTunnelDown) {
-							activeTunnel?.let {
-								tunnelService.get().stopTunnel(it)
-							}
-						}
-					}
-
-					watcherState.isUntrustedWifiConditionMet() -> {
-						Timber.i("Untrusted wifi condition met")
-						if (activeTunnel == null || watcherState.isCurrentSSIDActiveTunnelNetwork() == false ||
-							isTunnelDown
-						) {
-							Timber.i(
-								"$autoTunnel - tunnel on ssid not associated with current tunnel condition met",
-							)
-							watcherState.getTunnelWithMatchingTunnelNetwork()?.let {
-								Timber.i("Found tunnel associated with this SSID, bringing tunnel up: ${it.name}")
-								if (isTunnelDown || activeTunnel?.id != it.id) {
-									tunnelService.get().startTunnel(it)
-								}
-							} ?: suspend {
-								Timber.i("No tunnel associated with this SSID, using defaults")
-								val default = appDataRepository.getPrimaryOrFirstTunnel()
-								if (default?.name != tunnelService.get().name || isTunnelDown) {
-									default?.let {
-										tunnelService.get().startTunnel(it)
-									}
-								}
-							}.invoke()
-						}
-					}
-
-					watcherState.isTrustedWifiConditionMet() -> {
-						Timber.i(
-							"$autoTunnel - tunnel off on trusted wifi condition met, turning vpn off",
-						)
-						if (!isTunnelDown) activeTunnel?.let { tunnelService.get().stopTunnel(it) }
-					}
-
-					watcherState.isTunnelOffOnWifiConditionMet() -> {
-						Timber.i(
-							"$autoTunnel - tunnel off on wifi condition met, turning vpn off",
-						)
-						if (!isTunnelDown) activeTunnel?.let { tunnelService.get().stopTunnel(it) }
-					}
-// TODO disable for this now
-// 					watcherState.isTunnelOffOnNoConnectivityMet() -> {
-// 						Timber.i(
-// 							"$autoTunnel - tunnel off on no connectivity met, turning vpn off",
-// 						)
-// 						if (!isTunnelDown) activeTunnel?.let { tunnelService.get().stopTunnel(it) }
-// 					}
-
-					else -> {
-						Timber.i("$autoTunnel - no condition met")
-					}
+					AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: no condition met")
 				}
 			}
 		}

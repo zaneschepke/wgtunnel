@@ -24,6 +24,14 @@ enum class TunnelState {
 		}
 	}
 
+	fun isDown(): Boolean {
+		return this == DOWN
+	}
+
+	fun isUp(): Boolean {
+		return this == UP
+	}
+
 	companion object {
 		fun from(state: Tunnel.State): TunnelState {
 			return when (state) {

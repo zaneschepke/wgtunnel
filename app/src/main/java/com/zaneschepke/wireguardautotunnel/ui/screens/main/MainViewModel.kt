@@ -72,9 +72,9 @@ constructor(
 		tunnelService.get().startTunnel(tunnelConfig, background)
 	}
 
-	fun onTunnelStop(tunnel: TunnelConfig) = viewModelScope.launch {
+	fun onTunnelStop() = viewModelScope.launch {
 		Timber.i("Stopping active tunnel")
-		tunnelService.get().stopTunnel(tunnel)
+		tunnelService.get().stopTunnel()
 	}
 
 	private fun generateQrCodeDefaultName(config: String): String {

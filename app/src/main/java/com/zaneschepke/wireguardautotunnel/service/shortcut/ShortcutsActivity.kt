@@ -4,9 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.service.foreground.Action
-import com.zaneschepke.wireguardautotunnel.service.foreground.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +46,7 @@ class ShortcutsActivity : ComponentActivity() {
 						tunnelConfig?.let {
 							when (intent.action) {
 								Action.START.name -> tunnelService.get().startTunnel(it, true)
-								Action.STOP.name -> tunnelService.get().stopTunnel(it)
+								Action.STOP.name -> tunnelService.get().stopTunnel()
 								else -> Unit
 							}
 						}
@@ -62,6 +61,11 @@ class ShortcutsActivity : ComponentActivity() {
 			}
 		}
 		finish()
+	}
+
+	enum class Action {
+		START,
+		STOP,
 	}
 
 	companion object {
