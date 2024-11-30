@@ -248,13 +248,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				uiState.tunnels,
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
-				val isActive = uiState.tunnels.any {
-					it.id == uiState.vpnState.tunnelConfig?.id &&
-						uiState.vpnState.status.isUp()
-				}
 				val expanded = uiState.generalState.isTunnelStatsExpanded
 				TunnelRowItem(
-					isActive,
+					tunnel.id == uiState.vpnState.tunnelConfig?.id &&
+						uiState.vpnState.status.isUp(),
 					expanded,
 					selectedTunnel?.id == tunnel.id,
 					tunnel,
