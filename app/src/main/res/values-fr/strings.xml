@@ -52,7 +52,7 @@
     <string name="listen_port">Écouter sur le port</string>
     <string name="random">(aléatoire)</string>
     <string name="optional_no_recommend">(optionnel, non recommandé)</string>
-    <string name="persistent_keepalive">Keepalive persistent</string>
+    <string name="persistent_keepalive">Keepalive persistant</string>
     <string name="optional">(optionnel)</string>
     <string name="preshared_key">Clé pré-partagée</string>
     <string name="cancel">Annuler</string>
@@ -60,7 +60,7 @@
     <string name="error_authentication_failed">Échec de l\'authentification</string>
     <string name="error_authorization_failed">Autorisation échouée</string>
     <string name="export_configs">Exporter les configs</string>
-    <string name="tunnel_on_wifi">Tunnel sur wifi non fiable</string>
+    <string name="tunnel_on_wifi">Tunnel sur wifi non approuvé</string>
     <string name="email_chooser">Envoyer un mail…</string>
     <string name="docs_description">Lire la documentation</string>
     <string name="email_description">Envoyer un mail</string>
@@ -74,7 +74,7 @@
     <string name="tunneling_apps">Applis de tunnel</string>
     <string name="included">inclus</string>
     <string name="excluded">exclu</string>
-    <string name="no_email_detected">Aucune appli de mail détectée</string>
+    <string name="no_email_detected">Aucune application de mail détectée</string>
     <string name="no_browser_detected">Aucun navigateur détecté</string>
     <string name="open_issue">Signaler un problème</string>
     <string name="incorrect_pin">Code PIN incorrect</string>
@@ -98,17 +98,17 @@
     <string name="app_settings">les réglages de l\'application</string>
     <string name="background_location_message2">afin de s\'assurer que ces permissions soient actives.</string>
     <string name="root_accepted">Accès au shell root autorisé</string>
-    <string name="set_custom_ping_ip">Personnaliser l\'ip de ping</string>
+    <string name="set_custom_ping_ip">Personnaliser l\'ip à pinguer</string>
     <string name="optional_default">"optionnel, par défaut : "</string>
     <string name="show_amnezia_properties">Voir les propriétés d\'Amnezia</string>
     <string name="never">jamais</string>
     <string name="handshake">handshake</string>
     <string name="logs">Journaux</string>
     <string name="error_invalid_code">Code QR invalide</string>
-    <string name="enabled_app_shortcuts">Activer les raccourcis de l\'app</string>
+    <string name="enabled_app_shortcuts">Activer les raccourcis</string>
     <string name="unknown_error">Une erreur inconnue s\'est produite</string>
     <string name="email_subject">Assistance WG Tunnel</string>
-    <string name="location_services_missing_message">L\'application détecte qu\'aucun service de localisation n\'est activé sur votre appareil. Selon votre appareil, cela peut empêcher la fonctionnalité « Wi-Fi de confiance » de lire le nom du Wi-Fi. Souhaitez-vous tout de même continuer ?</string>
+    <string name="location_services_missing_message">L\'application détecte qu\'aucun service de localisation n\'est activé sur votre appareil. Selon votre appareil, cela peut empêcher la fonctionnalité « Wi-Fi approuvés » de lire le nom du Wi-Fi. Souhaitez-vous tout de même continuer ?</string>
     <string name="yes">Oui</string>
     <string name="all">tout</string>
     <string name="set_primary_tunnel">Définir comme tunnel principal</string>
@@ -130,7 +130,7 @@
     <string name="always_on_message2">afin de s\'assurer que le VPN permanent est désactivé pour toutes les autres applis puis réessayer</string>
     <string name="chat_description">Rejoindre la communauté</string>
     <string name="background_location_message">L\'accès à la permission de localisation permanente et/ou la localisation précise est nécessaire pour cette fonctionnalité. Veuillez vérifier dans</string>
-    <string name="default_ping_ip">(facultatif, par défaut aux pairs)</string>
+    <string name="default_ping_ip">(facultatif, par défaut les pairs)</string>
     <string name="set_custom_ping_internal">Intervalle de ping (sec)</string>
     <string name="set_custom_ping_cooldown">Temps d\'attente avant redémarrage du ping (sec)</string>
     <string name="sec">sec</string>
@@ -149,7 +149,7 @@
     <string name="launch_app_settings">Ouvrir les paramètres de l\'appli</string>
     <string name="display_theme">Thème d\'affichage</string>
     <string name="selected">Sélectionné</string>
-    <string name="trusted_wifi_names">Nom wifi de confiance</string>
+    <string name="trusted_wifi_names">Nom wifi approuvés</string>
     <string name="add_wifi_name">Ajouter un nom de wifi</string>
     <string name="mobile_tunnel">Tunnel de données mobiles</string>
     <string name="skip">Passer</string>
@@ -159,7 +159,7 @@
     <string name="wifi_name_via_shell">Nom du Wifi via le shell</string>
     <string name="use_root_shell_for_wifi">Utiliser un shell root pour obtenir le nom du wifi</string>
     <string name="tunnel_running">Tunnel en cours d\'exécution</string>
-    <string name="monitoring_state_changes">Surveiller les changements d’état</string>
+    <string name="monitoring_state_changes">Surveille les changements d’état</string>
     <string name="donate">Faire un don au projet</string>
     <string name="local_logging">Journalisation locale</string>
     <string name="enable_local_logging">Activer la journalisation locale</string>
