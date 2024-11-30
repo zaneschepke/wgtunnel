@@ -51,11 +51,11 @@ data class AutoTunnelState(
 		return isEthernetConnected && settings.isTunnelOnEthernetEnabled && vpnState.status.isDown()
 	}
 
-	private fun stopOnEthernet() : Boolean {
+	private fun stopOnEthernet(): Boolean {
 		return isEthernetConnected && !settings.isTunnelOnEthernetEnabled && vpnState.status.isUp()
 	}
 
-	private fun isNoConnectivity(): Boolean {
+	fun isNoConnectivity(): Boolean {
 		return !isEthernetConnected && !isWifiConnected && !isMobileDataConnected
 	}
 
@@ -96,7 +96,9 @@ data class AutoTunnelState(
 		val vpnTunnel = vpnState.tunnelConfig
 		return if (preferred != null && vpnTunnel != null) {
 			preferred.id == vpnTunnel.id
-		} else true
+		} else {
+			true
+		}
 	}
 
 	fun asAutoTunnelEvent(): AutoTunnelEvent {
@@ -120,14 +122,23 @@ data class AutoTunnelState(
 	private fun isCurrentSSIDTrusted(): Boolean {
 		return if (settings.isWildcardsEnabled) {
 			settings.trustedNetworkSSIDs.isMatchingToWildcardList(currentNetworkSSID)
-		} else settings.trustedNetworkSSIDs.contains(currentNetworkSSID)
+		} else {
+			settings.trustedNetworkSSIDs.contains(currentNetworkSSID)
+		}
 	}
 
 	private fun getTunnelWithMatchingTunnelNetwork(): TunnelConfig? {
 		return tunnels.firstOrNull {
 			if (settings.isWildcardsEnabled) {
 				it.tunnelNetworks.isMatchingToWildcardList(currentNetworkSSID)
-			} else it.tunnelNetworks.contains(currentNetworkSSID)
+			} else {
+				it.tunnelNetworks.contains(currentNetworkSSID)
+			}
 		}
+	}
+
+	fun isPingEnabled(): Boolean {
+		return settings.isPingEnabled ||
+			(vpnState.status.isUp() && vpnState.tunnelConfig != null && tunnels.first { it.id == vpnState.tunnelConfig.id }.isPingEnabled)
 	}
 }

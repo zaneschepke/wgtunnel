@@ -133,7 +133,7 @@
 	<string name="tunnel_required">Feature requires at least one tunnel</string>
     <string name="background_location_message">Allow all the time location permission and/or precise location is required for this feature. Please see</string>
 	<string name="app_settings">app settings</string>
-	<string name="background_location_message2">to make sure these permissions are enabled.</string>
+	<string name="background_location_message2">to make sure these permissions are enabled</string>
 	<string name="root_accepted">Root shell accepted</string>
 	<string name="set_custom_ping_ip">Set custom ping ip</string>
 	<string name="default_ping_ip">(optional, defaults to peers)</string>

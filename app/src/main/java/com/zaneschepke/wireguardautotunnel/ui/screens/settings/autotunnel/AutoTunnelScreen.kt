@@ -72,16 +72,18 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 		isBackgroundLocationGranted = fineLocationState.status.isGranted
 	}
 
-	fun onAutoTunnelWifiChecked() {
-		if (uiState.settings.isTunnelOnWifiEnabled) viewModel.onToggleTunnelOnWifi().also { return }
-		when (false) {
-			isBackgroundLocationGranted -> showLocationDialog = true
-			fineLocationState.status.isGranted -> showLocationDialog = true
-			context.isLocationServicesEnabled() ->
-				showLocationServicesAlertDialog = true
-			else -> {
-				viewModel.onToggleTunnelOnWifi()
+	fun isWifiNameReadable(): Boolean {
+		return when {
+			!isBackgroundLocationGranted ||
+				!fineLocationState.status.isGranted -> {
+				showLocationDialog = true
+				false
 			}
+			!context.isLocationServicesEnabled() -> {
+				showLocationServicesAlertDialog = true
+				false
+			}
+			else -> true
 		}
 	}
 
@@ -118,14 +120,14 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 		topBar = {
 			TopNavBar(stringResource(R.string.auto_tunneling))
 		},
-	) {
+	) { padding ->
 		Column(
 			horizontalAlignment = Alignment.Start,
 			verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
 			modifier =
 			Modifier
 				.fillMaxSize()
-				.padding(it)
+				.padding(padding)
 				.padding(top = 24.dp.scaledHeight())
 				.padding(horizontal = 24.dp.scaledWidth()),
 		) {
@@ -148,14 +150,12 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 										enabled = !uiState.settings.isAlwaysOnVpnEnabled,
 										checked = uiState.settings.isTunnelOnWifiEnabled,
 										onClick = {
-											if (uiState.settings.isWifiNameByShellEnabled) viewModel.onToggleTunnelOnWifi().also { return@ScaledSwitch }
-											onAutoTunnelWifiChecked()
+											viewModel.onToggleTunnelOnWifi()
 										},
 									)
 								},
 								onClick = {
-									if (uiState.settings.isWifiNameByShellEnabled) viewModel.onToggleTunnelOnWifi().also { return@SelectionItem }
-									onAutoTunnelWifiChecked()
+									viewModel.onToggleTunnelOnWifi()
 								},
 							),
 							SelectionItem(
@@ -251,7 +251,9 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 											uiState.settings.trustedNetworkSSIDs,
 											onDelete = viewModel::onDeleteTrustedSSID,
 											currentText = currentText,
-											onSave = viewModel::onSaveTrustedSSID,
+											onSave = { ssid ->
+												if (uiState.settings.isWifiNameByShellEnabled || isWifiNameReadable()) viewModel.onSaveTrustedSSID(ssid)
+											},
 											onValueChange = { currentText = it },
 											supporting = {
 												if (uiState.settings.isWildcardsEnabled) {

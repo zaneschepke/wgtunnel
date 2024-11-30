@@ -252,7 +252,7 @@ constructor(
 
 	fun onCopyTunnel(tunnel: TunnelConfig) = viewModelScope.launch {
 		saveTunnel(
-			TunnelConfig(name = makeTunnelNameUnique(tunnel.name), wgQuick = tunnel.wgQuick, amQuick = tunnel.amQuick)
+			TunnelConfig(name = makeTunnelNameUnique(tunnel.name), wgQuick = tunnel.wgQuick, amQuick = tunnel.amQuick),
 		)
 	}
 
