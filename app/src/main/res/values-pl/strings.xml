@@ -39,13 +39,13 @@
     <string name="restart_at_boot">Uruchom ponownie przy rozruchu</string>
     <string name="never">nigdy</string>
     <string name="sec">sek.</string>
-    <string name="handshake">handshake</string>
+    <string name="handshake">uzgadnianie</string>
     <string name="show_amnezia_properties">Pokaż właściwości protokołu Amnezia</string>
     <string name="seconds">sek.</string>
     <string name="prominent_background_location_message">Ta funkcja wymaga pozwolenia na dostęp do lokalizacji w tle, aby włączyć monitorowanie SSID sieci Wi-Fi nawet wtedy, gdy aplikacja jest zamknięta. Więcej szczegółów znajdziesz w polityce prywatności znajdującej się na ekranie Obsługa.</string>
     <string name="optional">(opcjonalnie)</string>
     <string name="optional_no_recommend">(opcjonalnie, niezalecane)</string>
-    <string name="preshared_key">Klucz wstępnie współdzielony</string>
+    <string name="preshared_key">Klucz wstępnie udostępniony</string>
     <string name="location_services_missing_message">Aplikacja nie wykrywa żadnych usług lokalizacyjnych włączonych na tym urządzeniu. W zależności od urządzenia może to spowodować, że funkcja niezaufanej sieci Wi-Fi nie będzie w stanie odczytać nazwy sieci Wi-Fi. Czy chcesz kontynuować mimo to?</string>
     <string name="excluded">wykluczone</string>
     <string name="read_logs">Przeczytaj dzienniki</string>
