@@ -1,0 +1,14 @@
+Funksjoner
+
+- Legg til via .conf filer, zip, manuelt, eller QR kode
+- Koble til VPN automatisk etter Wi-Fi SSID, ethernet, eller mobilnettverk
+- Split tunneling av dine programmer, med søk
+- WireGuard støtte for kernel
+- Amnezia støtte for DPI/sensur beskyttelse
+- Alltid-På VPN
+- Eksporter Amnezia and WireGuard tunneler til zip
+- Snarveisbryter or VPN
+- Statisk snarvei for automatisk integrasjon av hovedtunnel
+- Støtte for automatisering av alle tunneler
+- Automatisk restart av tunnel etter restart
+- Batterisparende innstillinger
