@@ -49,7 +49,7 @@
     <string name="copy_public_key">Copier la clé publique</string>
     <string name="base64_key">clé base64</string>
     <string name="comma_separated_list">liste séparée par des virgules</string>
-    <string name="listen_port">Écouter sur le port</string>
+    <string name="listen_port">Port d\'écoute</string>
     <string name="random">(aléatoire)</string>
     <string name="optional_no_recommend">(optionnel, non recommandé)</string>
     <string name="persistent_keepalive">Keepalive persistant</string>
