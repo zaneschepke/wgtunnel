@@ -50,7 +50,7 @@ constructor(
 	private var tunnelChangesJob: Job? = null
 
 	@get:Synchronized @set:Synchronized
-	private var isKernelBackend : Boolean? = null
+	private var isKernelBackend: Boolean? = null
 
 	private val tunnelControlMutex = Mutex()
 
@@ -63,8 +63,8 @@ constructor(
 	}
 
 	private suspend fun backend(): Any {
-		val isKernelEnabled = isKernelBackend ?:
-		appDataRepository.settings.getSettings().isKernelEnabled
+		val isKernelEnabled = isKernelBackend
+			?: appDataRepository.settings.getSettings().isKernelEnabled
 		if (isKernelEnabled) return kernelBackend.get()
 		return amneziaBackend.get()
 	}
@@ -82,9 +82,13 @@ constructor(
 			when (val backend = backend()) {
 				is Backend -> backend.setState(this, tunnelState.toWgState(), TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)).let { TunnelState.from(it) }
 				is org.amnezia.awg.backend.Backend -> {
-					val config = if (tunnelConfig.amQuick.isBlank()) TunnelConfig.configFromAmQuick(
+					val config = if (tunnelConfig.amQuick.isBlank()) {
+						TunnelConfig.configFromAmQuick(
 							tunnelConfig.wgQuick,
-						) else TunnelConfig.configFromAmQuick(tunnelConfig.amQuick)
+						)
+					} else {
+						TunnelConfig.configFromAmQuick(tunnelConfig.amQuick)
+					}
 					backend.setState(this, tunnelState.toAmState(), config).let {
 						TunnelState.from(it)
 					}
@@ -113,7 +117,7 @@ constructor(
 						startActiveTunnelJobs()
 						if (it.isUp()) appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
 						updateTunnelState(it, tunnelConfig)
-				}
+					}
 				}.onFailure {
 					Timber.e(it)
 				}
@@ -147,12 +151,12 @@ constructor(
 		}
 	}
 
-	//utility to keep vpnService alive during rapid changes to prevent bad states
-	private suspend fun withServiceActive(callback : suspend () -> Unit) {
+	// utility to keep vpnService alive during rapid changes to prevent bad states
+	private suspend fun withServiceActive(callback: suspend () -> Unit) {
 		when (val backend = backend()) {
 			is org.amnezia.awg.backend.Backend -> {
 				val backendState = backend.backendState
-				if(backendState == org.amnezia.awg.backend.Backend.BackendState.INACTIVE) {
+				if (backendState == org.amnezia.awg.backend.Backend.BackendState.INACTIVE) {
 					backend.setBackendState(org.amnezia.awg.backend.Backend.BackendState.SERVICE_ACTIVE, emptyList())
 				}
 				callback()
@@ -186,14 +190,14 @@ constructor(
 		}
 	}
 
-	override suspend fun setBackendState(backendState: BackendState, allowedIps : Collection<String>) {
+	override suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
 		kotlin.runCatching {
 			when (val backend = backend()) {
 				is org.amnezia.awg.backend.Backend -> {
 					backend.setBackendState(backendState.asAmBackendState(), allowedIps)
 				}
 				is Backend -> {
-					//TODO not yet implemented
+					// TODO not yet implemented
 					Timber.d("Kernel backend state not yet implemented")
 				}
 				else -> Unit

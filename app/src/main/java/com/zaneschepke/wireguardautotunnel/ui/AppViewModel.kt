@@ -181,19 +181,22 @@ constructor(
 			appDataRepository.settings.save(
 				copy(
 					isVpnKillSwitchEnabled = enabled,
-					isLanOnKillSwitchEnabled = if(enabled) isLanOnKillSwitchEnabled else false
+					isLanOnKillSwitchEnabled = if (enabled) isLanOnKillSwitchEnabled else false,
 				),
 			)
 		}
 		handleVpnKillSwitchChange(enabled)
 	}
 
-	private suspend fun handleVpnKillSwitchChange(enabled : Boolean) {
+	private suspend fun handleVpnKillSwitchChange(enabled: Boolean) {
 		withContext(ioDispatcher) {
-			if(enabled) {
+			if (enabled) {
 				Timber.d("Starting kill switch")
-				val allowedIps = if(appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled)
-					TunnelConfig.IPV4_PUBLIC_NETWORKS else emptySet()
+				val allowedIps = if (appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled) {
+					TunnelConfig.IPV4_PUBLIC_NETWORKS
+				} else {
+					emptySet()
+				}
 				tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
 			} else {
 				Timber.d("Sending shutdown of kill switch")
@@ -208,7 +211,7 @@ constructor(
 				isLanOnKillSwitchEnabled = enabled,
 			),
 		)
-		val allowedIps = if(enabled) TunnelConfig.IPV4_PUBLIC_NETWORKS else emptySet()
+		val allowedIps = if (enabled) TunnelConfig.IPV4_PUBLIC_NETWORKS else emptySet()
 		Timber.d("Setting allowedIps $allowedIps")
 		tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
 	}
@@ -221,7 +224,6 @@ constructor(
 				),
 			)
 		}
-
 	}
 
 	private fun saveKernelMode(enabled: Boolean) = viewModelScope.launch {

@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
-inline fun <T> withVpnPermission(crossinline onSuccess: (t : T) -> Unit) : (t: T) -> Unit {
+inline fun <T> withVpnPermission(crossinline onSuccess: (t: T) -> Unit): (t: T) -> Unit {
 	val context = LocalContext.current
 
 	var showVpnPermissionDialog by remember { mutableStateOf(false) }
@@ -21,7 +21,7 @@ inline fun <T> withVpnPermission(crossinline onSuccess: (t : T) -> Unit) : (t: T
 		rememberLauncherForActivityResult(
 			ActivityResultContracts.StartActivityForResult(),
 			onResult = {
-				if(it.resultCode != RESULT_OK) showVpnPermissionDialog = true
+				if (it.resultCode != RESULT_OK) showVpnPermissionDialog = true
 			},
 		)
 
@@ -29,8 +29,10 @@ inline fun <T> withVpnPermission(crossinline onSuccess: (t : T) -> Unit) : (t: T
 
 	return {
 		val intent = VpnService.prepare(context)
-		if(intent != null) {
+		if (intent != null) {
 			vpnActivity.launch(intent)
-		} else onSuccess(it)
+		} else {
+			onSuccess(it)
+		}
 	}
 }

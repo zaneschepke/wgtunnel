@@ -39,7 +39,7 @@ class WireGuardAutoTunnel : Application() {
 	lateinit var settingsRepository: SettingsRepository
 
 	@Inject
-	lateinit var tunnelService : TunnelService
+	lateinit var tunnelService: TunnelService
 
 	@Inject
 	@IoDispatcher
@@ -62,7 +62,7 @@ class WireGuardAutoTunnel : Application() {
 			Timber.plant(ReleaseTree())
 		}
 		applicationScope.launch {
-			if(!settingsRepository.getSettings().isKernelEnabled) {
+			if (!settingsRepository.getSettings().isKernelEnabled) {
 				tunnelService.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
 			}
 

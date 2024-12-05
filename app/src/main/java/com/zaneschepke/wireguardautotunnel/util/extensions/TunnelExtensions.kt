@@ -88,10 +88,10 @@ fun RootShell.getCurrentWifiName(): String? {
 	return response.lastOrNull()
 }
 
-fun Backend.BackendState.asBackendState() : BackendState {
+fun Backend.BackendState.asBackendState(): BackendState {
 	return BackendState.valueOf(this.name)
 }
 
-fun BackendState.asAmBackendState() : Backend.BackendState {
+fun BackendState.asAmBackendState(): Backend.BackendState {
 	return Backend.BackendState.valueOf(this.name)
 }

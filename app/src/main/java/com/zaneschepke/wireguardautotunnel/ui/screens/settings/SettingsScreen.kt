@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ViewQuilt
 import androidx.compose.material.icons.filled.AppShortcut
-import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.FolderZip
@@ -50,7 +49,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.Forwar
 import com.zaneschepke.wireguardautotunnel.ui.theme.topPadding
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchNotificationSettings
-import com.zaneschepke.wireguardautotunnel.util.extensions.launchVpnSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
@@ -106,7 +104,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 					) {
 						focusManager.clearFocus()
 					}
-				} else Modifier
+				} else {
+					Modifier
+				},
 			),
 	) {
 		SurfaceSelectionGroupButton(

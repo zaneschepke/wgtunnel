@@ -74,11 +74,15 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 
 	val startAutoTunnel = withVpnPermission<Unit> { viewModel.onToggleAutoTunnel() }
 	val startTunnel = withVpnPermission<TunnelConfig> {
-		viewModel.onTunnelStart(it, uiState.settings.isKernelEnabled) }
+		viewModel.onTunnelStart(it, uiState.settings.isKernelEnabled)
+	}
 	val autoTunnelToggleBattery = withIgnoreBatteryOpt(uiState.generalState.isBatteryOptimizationDisableShown) {
-		if(!uiState.generalState.isBatteryOptimizationDisableShown) viewModel.setBatteryOptimizeDisableShown()
-		if (uiState.settings.isKernelEnabled) viewModel.onToggleAutoTunnel()
-		else startAutoTunnel.invoke(Unit)
+		if (!uiState.generalState.isBatteryOptimizationDisableShown) viewModel.setBatteryOptimizeDisableShown()
+		if (uiState.settings.isKernelEnabled) {
+			viewModel.onToggleAutoTunnel()
+		} else {
+			startAutoTunnel.invoke(Unit)
+		}
 	}
 
 	val nestedScrollConnection = remember {
@@ -116,8 +120,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
 		if (!checked) viewModel.onTunnelStop().also { return }
-		if (uiState.settings.isKernelEnabled) viewModel.onTunnelStart(tunnel, uiState.settings.isKernelEnabled)
-		else startTunnel.invoke(tunnel)
+		if (uiState.settings.isKernelEnabled) {
+			viewModel.onTunnelStart(tunnel, uiState.settings.isKernelEnabled)
+		} else {
+			startTunnel.invoke(tunnel)
+		}
 	}
 
 	Scaffold(

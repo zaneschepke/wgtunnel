@@ -38,9 +38,11 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 
 	fun toggleVpnKillSwitch() {
 		with(uiState.settings) {
-			if(isVpnKillSwitchEnabled) {
+			if (isVpnKillSwitchEnabled) {
 				appViewModel.onToggleVpnKillSwitch(false)
-			} else toggleVpnSwitch.invoke(true)
+			} else {
+				toggleVpnSwitch.invoke(true)
+			}
 		}
 	}
 
@@ -68,7 +70,12 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 				listOf(
 					SelectionItem(
 						Icons.Outlined.AdminPanelSettings,
-						title = { Text(stringResource(R.string.native_kill_switch), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
+						title = {
+							Text(
+								stringResource(R.string.native_kill_switch),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
 						onClick = { context.launchVpnSettings() },
 						trailing = {
 							ForwardButton { context.launchVpnSettings() }
@@ -78,37 +85,51 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 			)
 			SurfaceSelectionGroupButton(
 				buildList {
-					add(SelectionItem(
-						Icons.Outlined.VpnKey,
-						title = { Text(stringResource(R.string.vpn_kill_switch), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-						onClick = {
-							toggleVpnKillSwitch()
-						  },
-						trailing = {
-							ScaledSwitch(
-								uiState.settings.isVpnKillSwitchEnabled,
-								onClick = {
-									toggleVpnKillSwitch()
-								},
-							)
-						},
-					))
-					if(uiState.settings.isVpnKillSwitchEnabled) {
-						add(SelectionItem(
-							Icons.Outlined.Lan,
-							title = { Text(stringResource(R.string.allow_lan_traffic), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-							onClick = { toggleLanOnKillSwitch() },
+					add(
+						SelectionItem(
+							Icons.Outlined.VpnKey,
+							title = {
+								Text(
+									stringResource(R.string.vpn_kill_switch),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
+							},
+							onClick = {
+								toggleVpnKillSwitch()
+							},
 							trailing = {
 								ScaledSwitch(
-									uiState.settings.isLanOnKillSwitchEnabled,
+									uiState.settings.isVpnKillSwitchEnabled,
 									onClick = {
-										toggleLanOnKillSwitch()
+										toggleVpnKillSwitch()
 									},
 								)
 							},
-						))
+						),
+					)
+					if (uiState.settings.isVpnKillSwitchEnabled) {
+						add(
+							SelectionItem(
+								Icons.Outlined.Lan,
+								title = {
+									Text(
+										stringResource(R.string.allow_lan_traffic),
+										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+									)
+								},
+								onClick = { toggleLanOnKillSwitch() },
+								trailing = {
+									ScaledSwitch(
+										uiState.settings.isLanOnKillSwitchEnabled,
+										onClick = {
+											toggleLanOnKillSwitch()
+										},
+									)
+								},
+							),
+						)
 					}
-				}
+				},
 			)
 		}
 	}

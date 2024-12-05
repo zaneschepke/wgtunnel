@@ -33,10 +33,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
@@ -129,15 +127,16 @@ class AutoTunnelService : LifecycleService() {
 						old.map { it.isActive } != new.map { it.isActive }
 					},
 					tunnelService.get().vpnState.distinctUntilChanged { old, new ->
-						old != new  }
+						old != new
+					},
 				) { settings, tunnels, vpnState ->
 					Triple(settings, tunnels, vpnState)
-				}.collect{ triple ->
+				}.collect { triple ->
 					autoTunnelStateFlow.update {
 						it.copy(
 							settings = triple.first,
 							tunnels = triple.second,
-							vpnState = triple.third
+							vpnState = triple.third,
 						)
 					}
 				}
@@ -286,7 +285,6 @@ class AutoTunnelService : LifecycleService() {
 			}
 		}
 	}
-
 
 	private fun startNetworkJobs() {
 		Timber.i("Starting all network state jobs..")
