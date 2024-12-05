@@ -3,12 +3,14 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 import androidx.compose.ui.graphics.Color
 import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
+import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
+import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.config.Config
 import timber.log.Timber
 import java.net.InetAddress
@@ -84,4 +86,12 @@ fun RootShell.getCurrentWifiName(): String? {
 	val response = mutableListOf<String>()
 	this.run(response, "dumpsys wifi | grep -o \"SSID: [^,]*\" | cut -d ' ' -f2- | tr -d '\"'")
 	return response.lastOrNull()
+}
+
+fun Backend.BackendState.asBackendState() : BackendState {
+	return BackendState.valueOf(this.name)
+}
+
+fun BackendState.asAmBackendState() : Backend.BackendState {
+	return Backend.BackendState.valueOf(this.name)
 }

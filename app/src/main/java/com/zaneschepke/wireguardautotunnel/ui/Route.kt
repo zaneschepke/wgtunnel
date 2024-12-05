@@ -22,6 +22,9 @@ sealed class Route {
 	data object Display : Route()
 
 	@Serializable
+	data object KillSwitch : Route()
+
+	@Serializable
 	data object Language : Route()
 
 	@Serializable

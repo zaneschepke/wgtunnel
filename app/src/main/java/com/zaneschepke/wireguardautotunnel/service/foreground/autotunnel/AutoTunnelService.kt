@@ -33,11 +33,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.net.InetAddress
@@ -63,7 +65,7 @@ class AutoTunnelService : LifecycleService() {
 	lateinit var ethernetService: NetworkService<EthernetService>
 
 	@Inject
-	lateinit var appDataRepository: AppDataRepository
+	lateinit var appDataRepository: Provider<AppDataRepository>
 
 	@Inject
 	lateinit var notificationService: NotificationService
@@ -119,8 +121,27 @@ class AutoTunnelService : LifecycleService() {
 				launchWatcherNotification()
 				initWakeLock()
 			}
-			startSettingsJob()
-			startVpnStateJob()
+
+			lifecycleScope.launch(ioDispatcher) {
+				combine(
+					appDataRepository.get().settings.getSettingsFlow(),
+					appDataRepository.get().tunnels.getTunnelConfigsFlow().distinctUntilChanged { old, new ->
+						old.map { it.isActive } != new.map { it.isActive }
+					},
+					tunnelService.get().vpnState.distinctUntilChanged { old, new ->
+						old != new  }
+				) { settings, tunnels, vpnState ->
+					Triple(settings, tunnels, vpnState)
+				}.collect{ triple ->
+					autoTunnelStateFlow.update {
+						it.copy(
+							settings = triple.first,
+							tunnels = triple.second,
+							vpnState = triple.third
+						)
+					}
+				}
+			}
 			startNetworkJobs()
 			startPingStateJob()
 		}.onFailure {
@@ -172,14 +193,6 @@ class AutoTunnelService : LifecycleService() {
 					}
 				}
 			}
-	}
-
-	private fun startSettingsJob() = lifecycleScope.launch {
-		watchForSettingsChanges()
-	}
-
-	private fun startVpnStateJob() = lifecycleScope.launch {
-		watchForVpnStateChanges()
 	}
 
 	private fun startWifiJob() = lifecycleScope.launch {
@@ -274,34 +287,6 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	private suspend fun watchForSettingsChanges() {
-		Timber.i("Starting settings watcher")
-		withContext(ioDispatcher) {
-			appDataRepository.settings.getSettingsFlow().combine(
-				appDataRepository.tunnels.getTunnelConfigsFlow(),
-			) { settings, tunnels ->
-				Pair(settings, tunnels)
-			}.collect { pair ->
-				autoTunnelStateFlow.update {
-					it.copy(
-						settings = pair.first,
-						tunnels = pair.second,
-					)
-				}
-			}
-		}
-	}
-
-	private suspend fun watchForVpnStateChanges() {
-		Timber.i("Starting vpn state watcher")
-		withContext(ioDispatcher) {
-			tunnelService.get().vpnState.collect { state ->
-				autoTunnelStateFlow.update {
-					it.copy(vpnState = state)
-				}
-			}
-		}
-	}
 
 	private fun startNetworkJobs() {
 		Timber.i("Starting all network state jobs..")
@@ -392,7 +377,7 @@ class AutoTunnelService : LifecycleService() {
 							} else {
 								Timber.i("Detected valid SSID")
 							}
-							appDataRepository.appState.setCurrentSsid(name)
+							appDataRepository.get().appState.setCurrentSsid(name)
 							emitWifiSSID(name)
 						} ?: Timber.w("Failed to read ssid")
 					}
@@ -419,13 +404,11 @@ class AutoTunnelService : LifecycleService() {
 		withContext(ioDispatcher) {
 			Timber.i("Starting auto-tunnel network event watcher")
 			// ignore vpnState emits to allow manual overrides
-			autoTunnelStateFlow.distinctUntilChanged { old, new ->
-				old.copy(vpnState = new.vpnState) == new || old.tunnels.map { it.isActive } != new.tunnels.map { it.isActive }
-			}.collect { watcherState ->
+			autoTunnelStateFlow.collect { watcherState ->
 				when (val event = watcherState.asAutoTunnelEvent()) {
 					is AutoTunnelEvent.Start -> tunnelService.get().startTunnel(
 						event.tunnelConfig
-							?: appDataRepository.getPrimaryOrFirstTunnel(),
+							?: appDataRepository.get().getPrimaryOrFirstTunnel(),
 					)
 					is AutoTunnelEvent.Stop -> tunnelService.get().stopTunnel()
 					AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: no condition met")

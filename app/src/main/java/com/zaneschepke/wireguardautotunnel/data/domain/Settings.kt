@@ -65,4 +65,19 @@ data class Settings(
 		defaultValue = "false",
 	)
 	val isStopOnNoInternetEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "is_vpn_kill_switch_enabled",
+		defaultValue = "false",
+	)
+	val isVpnKillSwitchEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "is_kernel_kill_switch_enabled",
+		defaultValue = "false",
+	)
+	val isKernelKillSwitchEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "is_lan_on_kill_switch_enabled",
+		defaultValue = "false",
+	)
+	val isLanOnKillSwitchEnabled: Boolean = false,
 )

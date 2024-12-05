@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.main.components
+package com.zaneschepke.wireguardautotunnel.ui.common.permission.vpn
 
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme

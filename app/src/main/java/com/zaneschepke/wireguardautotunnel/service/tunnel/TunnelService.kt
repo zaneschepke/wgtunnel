@@ -12,13 +12,17 @@ interface TunnelService : Tunnel, org.amnezia.awg.backend.Tunnel {
 
 	suspend fun bounceTunnel()
 
+	suspend fun getBackendState() : BackendState
+
+	suspend fun setBackendState(backendState: BackendState, allowedIps : Collection<String>)
+
 	val vpnState: StateFlow<VpnState>
 
 	suspend fun runningTunnelNames(): Set<String>
 
 	suspend fun getState(): TunnelState
 
-	fun cancelStatsJob()
+	fun cancelActiveTunnelJobs()
 
-	fun startStatsJob()
+	fun startActiveTunnelJobs()
 }

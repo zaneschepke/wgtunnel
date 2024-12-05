@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.FolderZip
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Pin
 import androidx.compose.material.icons.outlined.Restore
+import androidx.compose.material.icons.outlined.VpnKeyOff
 import androidx.compose.material.icons.outlined.VpnLock
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -105,9 +106,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 					) {
 						focusManager.clearFocus()
 					}
-				} else {
-					Modifier
-				},
+				} else Modifier
 			),
 	) {
 		SurfaceSelectionGroupButton(
@@ -179,18 +178,18 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								onClick = { appViewModel.onToggleAlwaysOnVPN() },
 							),
 							SelectionItem(
-								Icons.Outlined.AdminPanelSettings,
+								Icons.Outlined.VpnKeyOff,
 								title = {
 									Text(
-										stringResource(R.string.kill_switch),
+										stringResource(R.string.kill_switch_options),
 										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 									)
 								},
 								onClick = {
-									context.launchVpnSettings()
+									navController.navigate(Route.KillSwitch)
 								},
 								trailing = {
-									ForwardButton { context.launchVpnSettings() }
+									ForwardButton { navController.navigate(Route.KillSwitch) }
 								},
 							),
 						),

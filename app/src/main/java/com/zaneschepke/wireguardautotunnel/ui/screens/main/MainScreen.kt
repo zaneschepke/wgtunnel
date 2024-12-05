@@ -1,13 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main
 
-import android.content.Intent
-import android.net.Uri
-import android.net.VpnService
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -51,15 +45,15 @@ import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
+import com.zaneschepke.wireguardautotunnel.ui.common.permission.vpn.withVpnPermission
+import com.zaneschepke.wireguardautotunnel.ui.common.permission.withIgnoreBatteryOpt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.AutoTunnelRowItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.GettingStartedLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImportSheet
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelRowItem
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.VpnDeniedDialog
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.isBatteryOptimizationsDisabled
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
@@ -73,29 +67,23 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	val snackbar = SnackbarController.current
 
 	var showBottomSheet by remember { mutableStateOf(false) }
-	var showVpnPermissionDialog by remember { mutableStateOf(false) }
 	var isFabVisible by rememberSaveable { mutableStateOf(true) }
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
 	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
 	val isRunningOnTv = remember { context.isRunningOnTv() }
 
+	val startAutoTunnel = withVpnPermission<Unit> { viewModel.onToggleAutoTunnel() }
+	val startTunnel = withVpnPermission<TunnelConfig> {
+		viewModel.onTunnelStart(it, uiState.settings.isKernelEnabled) }
+	val autoTunnelToggleBattery = withIgnoreBatteryOpt(uiState.generalState.isBatteryOptimizationDisableShown) {
+		if(!uiState.generalState.isBatteryOptimizationDisableShown) viewModel.setBatteryOptimizeDisableShown()
+		if (uiState.settings.isKernelEnabled) viewModel.onToggleAutoTunnel()
+		else startAutoTunnel.invoke(Unit)
+	}
+
 	val nestedScrollConnection = remember {
 		NestedScrollListener({ isFabVisible = false }, { isFabVisible = true })
 	}
-
-	val vpnActivity =
-		rememberLauncherForActivityResult(
-			ActivityResultContracts.StartActivityForResult(),
-			onResult = {
-				if (it.resultCode != RESULT_OK) showVpnPermissionDialog = true
-			},
-		)
-	val batteryActivity =
-		rememberLauncherForActivityResult(
-			ActivityResultContracts.StartActivityForResult(),
-		) { result: ActivityResult ->
-			viewModel.setBatteryOptimizeDisableShown()
-		}
 
 	val tunnelFileImportResultLauncher = rememberFileImportLauncherForResult(onNoFileExplorer = {
 		snackbar.showMessage(
@@ -112,8 +100,6 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		navController.navigate(Route.Scanner)
 	}
 
-	VpnDeniedDialog(showVpnPermissionDialog, onDismiss = { showVpnPermissionDialog = false })
-
 	if (showDeleteTunnelAlertDialog) {
 		InfoDialog(
 			onDismiss = { showDeleteTunnelAlertDialog = false },
@@ -128,35 +114,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		)
 	}
 
-	fun requestBatteryOptimizationsDisabled() {
-		val intent =
-			Intent().apply {
-				action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-				data = Uri.parse("package:${context.packageName}")
-			}
-		batteryActivity.launch(intent)
-	}
-
-	fun onAutoTunnelToggle() {
-		if (!uiState.generalState.isBatteryOptimizationDisableShown &&
-			!context.isBatteryOptimizationsDisabled() && !isRunningOnTv
-		) {
-			return requestBatteryOptimizationsDisabled()
-		}
-		val intent = if (!uiState.settings.isKernelEnabled) {
-			VpnService.prepare(context)
-		} else {
-			null
-		}
-		if (intent != null) return vpnActivity.launch(intent)
-		viewModel.onToggleAutoTunnel()
-	}
-
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
-		val intent = if (uiState.settings.isKernelEnabled) null else VpnService.prepare(context)
-		if (intent != null) return vpnActivity.launch(intent)
 		if (!checked) viewModel.onTunnelStop().also { return }
-		viewModel.onTunnelStart(tunnel, uiState.settings.isKernelEnabled)
+		if (uiState.settings.isKernelEnabled) viewModel.onTunnelStart(tunnel, uiState.settings.isKernelEnabled)
+		else startTunnel.invoke(tunnel)
 	}
 
 	Scaffold(
@@ -239,9 +200,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				}
 			} else {
 				item {
-					AutoTunnelRowItem(uiState, {
-						onAutoTunnelToggle()
-					})
+					AutoTunnelRowItem(uiState) {
+						autoTunnelToggleBattery.invoke()
+					}
 				}
 			}
 			items(
