@@ -104,4 +104,19 @@
 	<string name="listen_port">Naslouchací port</string>
     <string name="auto">(automaticky)</string>
     <string name="kernel">Kernel</string>
+    <string name="persistent_keepalive">Udržování spojení</string>
+    <string name="restart_at_boot">Restartovat při spuštění</string>
+    <string name="show_amnezia_properties">Zobrazit Amnezia možnosti</string>
+    <string name="language">Jazyk</string>
+    <string name="light">Světlé</string>
+    <string name="vpn_channel_id">VPN Kanál</string>
+    <string name="appearance">Vzhled</string>
+    <string name="display_theme">Téma zobrazení</string>
+    <string name="dark">Tmavé</string>
+    <string name="dynamic">Podle systému</string>
+    <string name="notifications">Oznámení</string>
+    <string name="kill_switch">Vypínač</string>
+    <string name="wifi_name_via_shell">Název WiFi přes shell</string>
+    <string name="use_root_shell_for_wifi">Použít root shell pro získání názvu WiFi</string>
+    <string name="add_from_clipboard">Přidat ze schránky</string>
 </resources>
