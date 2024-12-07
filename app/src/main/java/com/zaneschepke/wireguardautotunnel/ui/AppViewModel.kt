@@ -9,10 +9,12 @@ import com.wireguard.android.util.RootShell
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
@@ -34,6 +36,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
 import javax.inject.Provider
@@ -80,7 +83,7 @@ constructor(
 	init {
 		viewModelScope.launch {
 			initPin()
-			initAutoTunnel()
+			initServices()
 			initTunnel()
 			appReadyCheck()
 		}
@@ -94,7 +97,7 @@ constructor(
 	}
 
 	private suspend fun initTunnel() {
-		if (tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startStatsJob()
+		if (tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startActiveTunnelJobs()
 		val activeTunnels = appDataRepository.tunnels.getActive()
 		if (activeTunnels.isNotEmpty() &&
 			tunnelService.get().getState() == TunnelState.DOWN
@@ -108,9 +111,12 @@ constructor(
 		if (isPinEnabled) PinManager.initialize(WireGuardAutoTunnel.instance)
 	}
 
-	private suspend fun initAutoTunnel() {
-		val settings = appDataRepository.settings.getSettings()
-		if (settings.isAutoTunnelEnabled) serviceManager.startAutoTunnel(false)
+	private suspend fun initServices() {
+		withContext(ioDispatcher) {
+			val settings = appDataRepository.settings.getSettings()
+			handleVpnKillSwitchChange(settings.isVpnKillSwitchEnabled)
+			if (settings.isAutoTunnelEnabled) serviceManager.startAutoTunnel(false)
+		}
 	}
 
 	fun onPinLockDisabled() = viewModelScope.launch(ioDispatcher) {
@@ -170,10 +176,50 @@ constructor(
 		}
 	}
 
+	fun onToggleVpnKillSwitch(enabled: Boolean) = viewModelScope.launch {
+		with(uiState.value.settings) {
+			appDataRepository.settings.save(
+				copy(
+					isVpnKillSwitchEnabled = enabled,
+					isLanOnKillSwitchEnabled = if (enabled) isLanOnKillSwitchEnabled else false,
+				),
+			)
+		}
+		handleVpnKillSwitchChange(enabled)
+	}
+
+	private suspend fun handleVpnKillSwitchChange(enabled: Boolean) {
+		withContext(ioDispatcher) {
+			if (enabled) {
+				Timber.d("Starting kill switch")
+				val allowedIps = if (appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled) {
+					TunnelConfig.IPV4_PUBLIC_NETWORKS
+				} else {
+					emptySet()
+				}
+				tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
+			} else {
+				Timber.d("Sending shutdown of kill switch")
+				tunnelService.get().setBackendState(BackendState.SERVICE_ACTIVE, emptySet())
+			}
+		}
+	}
+
+	fun onToggleLanOnKillSwitch(enabled: Boolean) = viewModelScope.launch(ioDispatcher) {
+		appDataRepository.settings.save(
+			uiState.value.settings.copy(
+				isLanOnKillSwitchEnabled = enabled,
+			),
+		)
+		val allowedIps = if (enabled) TunnelConfig.IPV4_PUBLIC_NETWORKS else emptySet()
+		Timber.d("Setting allowedIps $allowedIps")
+		tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
+	}
+
 	fun onToggleShortcutsEnabled() = viewModelScope.launch {
 		with(uiState.value.settings) {
 			appDataRepository.settings.save(
-				this.copy(
+				copy(
 					isShortcutsEnabled = !isShortcutsEnabled,
 				),
 			)

@@ -1,23 +1,21 @@
-package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel
+package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
+import timber.log.Timber
 
 data class AutoTunnelState(
 	val vpnState: VpnState = VpnState(),
-	val isWifiConnected: Boolean = false,
-	val isEthernetConnected: Boolean = false,
-	val isMobileDataConnected: Boolean = false,
-	val currentNetworkSSID: String = "",
+	val networkState: NetworkState = NetworkState(),
 	val settings: Settings = Settings(),
 	val tunnels: TunnelConfigs = emptyList(),
 ) {
 
 	private fun isMobileDataActive(): Boolean {
-		return !isEthernetConnected && !isWifiConnected && isMobileDataConnected
+		return !networkState.isEthernetConnected && !networkState.isWifiConnected && networkState.isMobileDataConnected
 	}
 
 	private fun isMobileTunnelDataChangeNeeded(): Boolean {
@@ -44,19 +42,19 @@ data class AutoTunnelState(
 	}
 
 	private fun isWifiActive(): Boolean {
-		return !isEthernetConnected && isWifiConnected
+		return !networkState.isEthernetConnected && networkState.isWifiConnected
 	}
 
 	private fun startOnEthernet(): Boolean {
-		return isEthernetConnected && settings.isTunnelOnEthernetEnabled && vpnState.status.isDown()
+		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && vpnState.status.isDown()
 	}
 
 	private fun stopOnEthernet(): Boolean {
-		return isEthernetConnected && !settings.isTunnelOnEthernetEnabled && vpnState.status.isUp()
+		return networkState.isEthernetConnected && !settings.isTunnelOnEthernetEnabled && vpnState.status.isUp()
 	}
 
 	fun isNoConnectivity(): Boolean {
-		return !isEthernetConnected && !isWifiConnected && !isMobileDataConnected
+		return !networkState.isEthernetConnected && !networkState.isWifiConnected && !networkState.isMobileDataConnected
 	}
 
 	private fun stopOnMobileData(): Boolean {
@@ -72,7 +70,7 @@ data class AutoTunnelState(
 	}
 
 	private fun changeOnEthernet(): Boolean {
-		return isEthernetConnected && settings.isTunnelOnEthernetEnabled && isEthernetTunnelChangeNeeded()
+		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && isEthernetTunnelChangeNeeded()
 	}
 
 	private fun stopOnWifi(): Boolean {
@@ -84,6 +82,7 @@ data class AutoTunnelState(
 	}
 
 	private fun startOnUntrustedWifi(): Boolean {
+		Timber.d("Is tunnel on wifi enabled ${settings.isTunnelOnWifiEnabled}")
 		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.status.isDown() && !isCurrentSSIDTrusted()
 	}
 
@@ -120,19 +119,23 @@ data class AutoTunnelState(
 	}
 
 	private fun isCurrentSSIDTrusted(): Boolean {
+		return networkState.wifiName?.let {
+			hasTrustedWifiName(it)
+		} == true
+	}
+
+	private fun hasTrustedWifiName(wifiName: String, wifiNames: List<String> = settings.trustedNetworkSSIDs): Boolean {
 		return if (settings.isWildcardsEnabled) {
-			settings.trustedNetworkSSIDs.isMatchingToWildcardList(currentNetworkSSID)
+			wifiNames.isMatchingToWildcardList(wifiName)
 		} else {
-			settings.trustedNetworkSSIDs.contains(currentNetworkSSID)
+			wifiNames.contains(wifiName)
 		}
 	}
 
 	private fun getTunnelWithMatchingTunnelNetwork(): TunnelConfig? {
-		return tunnels.firstOrNull {
-			if (settings.isWildcardsEnabled) {
-				it.tunnelNetworks.isMatchingToWildcardList(currentNetworkSSID)
-			} else {
-				it.tunnelNetworks.contains(currentNetworkSSID)
+		return networkState.wifiName?.let { wifiName ->
+			tunnels.firstOrNull {
+				hasTrustedWifiName(wifiName, it.tunnelNetworks)
 			}
 		}
 	}

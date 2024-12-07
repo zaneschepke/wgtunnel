@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel
+package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model
 
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 

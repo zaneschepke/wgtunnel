@@ -12,15 +12,15 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
+import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
+import com.zaneschepke.wireguardautotunnel.util.extensions.asBackendState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -35,7 +35,7 @@ class WireGuardTunnel
 @Inject
 constructor(
 	private val amneziaBackend: Provider<org.amnezia.awg.backend.Backend>,
-	tunnelConfigRepository: TunnelConfigRepository,
+	private val tunnelConfigRepository: TunnelConfigRepository,
 	@Kernel private val kernelBackend: Provider<Backend>,
 	private val appDataRepository: AppDataRepository,
 	@ApplicationScope private val applicationScope: CoroutineScope,
@@ -44,22 +44,28 @@ constructor(
 ) : TunnelService {
 
 	private val _vpnState = MutableStateFlow(VpnState())
-	override val vpnState: StateFlow<VpnState> = _vpnState.combine(
-		tunnelConfigRepository.getTunnelConfigsFlow(),
-	) {
-			vpnState, tunnels ->
-		vpnState.copy(
-			tunnelConfig = tunnels.firstOrNull { it.id == vpnState.tunnelConfig?.id },
-		)
-	}.stateIn(applicationScope, SharingStarted.Eagerly, VpnState())
+	override val vpnState: StateFlow<VpnState> = _vpnState.asStateFlow()
 
 	private var statsJob: Job? = null
+	private var tunnelChangesJob: Job? = null
 
-	private val mutex = Mutex()
+	@get:Synchronized @set:Synchronized
+	private var isKernelBackend: Boolean? = null
+
+	private val tunnelControlMutex = Mutex()
+
+	init {
+		applicationScope.launch(ioDispatcher) {
+			appDataRepository.settings.getSettingsFlow().collect {
+				isKernelBackend = it.isKernelEnabled
+			}
+		}
+	}
 
 	private suspend fun backend(): Any {
-		val settings = appDataRepository.settings.getSettings()
-		if (settings.isKernelEnabled) return kernelBackend.get()
+		val isKernelEnabled = isKernelBackend
+			?: appDataRepository.settings.getSettings().isKernelEnabled
+		if (isKernelEnabled) return kernelBackend.get()
 		return amneziaBackend.get()
 	}
 
@@ -103,13 +109,15 @@ constructor(
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig?, background: Boolean) {
 		if (tunnelConfig == null) return
 		withContext(ioDispatcher) {
-			mutex.withLock {
-				if (isTunnelAlreadyRunning(tunnelConfig)) return@withContext
+			if (isTunnelAlreadyRunning(tunnelConfig)) return@withContext
+			withServiceActive {
 				onBeforeStart(background)
-				setState(tunnelConfig, TunnelState.UP).onSuccess {
-					startStatsJob()
-					if (it.isUp()) appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
-					updateTunnelState(it, tunnelConfig)
+				tunnelControlMutex.withLock {
+					setState(tunnelConfig, TunnelState.UP).onSuccess {
+						startActiveTunnelJobs()
+						if (it.isUp()) appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
+						updateTunnelState(it, tunnelConfig)
+					}
 				}.onFailure {
 					Timber.e(it)
 				}
@@ -119,10 +127,10 @@ constructor(
 
 	override suspend fun stopTunnel() {
 		withContext(ioDispatcher) {
-			mutex.withLock {
-				if (_vpnState.value.status.isDown()) return@withContext
-				with(_vpnState.value) {
-					if (tunnelConfig == null) return@withContext
+			if (_vpnState.value.status.isDown()) return@withContext
+			with(_vpnState.value) {
+				if (tunnelConfig == null) return@withContext
+				tunnelControlMutex.withLock {
 					setState(tunnelConfig, TunnelState.DOWN).onSuccess {
 						updateTunnelState(it, null)
 						onStop(tunnelConfig)
@@ -135,11 +143,64 @@ constructor(
 		}
 	}
 
+	private suspend fun toggleTunnel(tunnelConfig: TunnelConfig) {
+		withContext(ioDispatcher) {
+			tunnelControlMutex.withLock {
+				setState(tunnelConfig, TunnelState.TOGGLE)
+			}
+		}
+	}
+
+	// utility to keep vpnService alive during rapid changes to prevent bad states
+	private suspend fun withServiceActive(callback: suspend () -> Unit) {
+		when (val backend = backend()) {
+			is org.amnezia.awg.backend.Backend -> {
+				val backendState = backend.backendState
+				if (backendState == org.amnezia.awg.backend.Backend.BackendState.INACTIVE) {
+					backend.setBackendState(org.amnezia.awg.backend.Backend.BackendState.SERVICE_ACTIVE, emptyList())
+				}
+				callback()
+			}
+			is Backend -> {
+				callback()
+			}
+		}
+	}
+
 	override suspend fun bounceTunnel() {
-		if (_vpnState.value.tunnelConfig == null) return
-		val config = _vpnState.value.tunnelConfig
-		stopTunnel()
-		startTunnel(config)
+		_vpnState.value.tunnelConfig?.let {
+			withServiceActive {
+				toggleTunnel(it)
+				toggleTunnel(it)
+			}
+		}
+	}
+
+	override suspend fun getBackendState(): BackendState {
+		return when (val backend = backend()) {
+			is org.amnezia.awg.backend.Backend -> {
+				backend.backendState.asBackendState()
+			}
+			is Backend -> {
+				BackendState.SERVICE_ACTIVE
+			}
+			else -> BackendState.INACTIVE
+		}
+	}
+
+	override suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
+		kotlin.runCatching {
+			when (val backend = backend()) {
+				is org.amnezia.awg.backend.Backend -> {
+					backend.setBackendState(backendState.asAmBackendState(), allowedIps)
+				}
+				is Backend -> {
+					// TODO not yet implemented
+					Timber.d("Kernel backend state not yet implemented")
+				}
+				else -> Unit
+			}
+		}
 	}
 
 	private suspend fun shutDownActiveTunnel() {
@@ -169,7 +230,7 @@ constructor(
 
 	private suspend fun onStop(tunnelConfig: TunnelConfig) {
 		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
-		cancelStatsJob()
+		cancelActiveTunnelJobs()
 		resetBackendStatistics()
 	}
 
@@ -179,7 +240,13 @@ constructor(
 		}
 	}
 
-	private fun emitBackendStatistics(statistics: TunnelStatistics) {
+	private fun updateTunnelConfig(tunnelConfig: TunnelConfig?) {
+		_vpnState.update {
+			it.copy(tunnelConfig = tunnelConfig)
+		}
+	}
+
+	private fun updateBackendStatistics(statistics: TunnelStatistics) {
 		_vpnState.update {
 			it.copy(statistics = statistics)
 		}
@@ -199,12 +266,14 @@ constructor(
 		}
 	}
 
-	override fun cancelStatsJob() {
+	override fun cancelActiveTunnelJobs() {
 		statsJob?.cancel()
+		tunnelChangesJob?.cancel()
 	}
 
-	override fun startStatsJob() {
+	override fun startActiveTunnelJobs() {
 		statsJob = startTunnelStatisticsJob()
+		tunnelChangesJob = startTunnelConfigChangesJob()
 	}
 
 	override fun getName(): String {
@@ -216,11 +285,11 @@ constructor(
 		delay(STATS_START_DELAY)
 		while (true) {
 			when (backend) {
-				is Backend -> emitBackendStatistics(
+				is Backend -> updateBackendStatistics(
 					WireGuardStatistics(backend.getStatistics(this@WireGuardTunnel)),
 				)
 				is org.amnezia.awg.backend.Backend -> {
-					emitBackendStatistics(
+					updateBackendStatistics(
 						AmneziaStatistics(
 							backend.getStatistics(this@WireGuardTunnel),
 						),
@@ -228,6 +297,22 @@ constructor(
 				}
 			}
 			delay(VPN_STATISTIC_CHECK_INTERVAL)
+		}
+	}
+
+	private fun startTunnelConfigChangesJob() = applicationScope.launch(ioDispatcher) {
+		tunnelConfigRepository.getTunnelConfigsFlow().collect {
+			with(_vpnState.value) {
+				if (status.isDown() || tunnelConfig == null) return@collect
+				val vpnConfigFromStorage = it.first { it.id == tunnelConfig.id }
+				val isRestartNeeded = vpnConfigFromStorage.wgQuick != tunnelConfig.wgQuick ||
+					vpnConfigFromStorage.amQuick != tunnelConfig.amQuick
+				updateTunnelConfig(vpnConfigFromStorage)
+				if (isRestartNeeded) {
+					Timber.d("Bouncing tunnel on config change")
+					bounceTunnel()
+				}
+			}
 		}
 	}
 

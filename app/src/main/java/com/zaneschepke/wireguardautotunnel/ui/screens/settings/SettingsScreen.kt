@@ -12,13 +12,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ViewQuilt
 import androidx.compose.material.icons.filled.AppShortcut
-import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.FolderZip
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Pin
 import androidx.compose.material.icons.outlined.Restore
+import androidx.compose.material.icons.outlined.VpnKeyOff
 import androidx.compose.material.icons.outlined.VpnLock
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,7 +49,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.Forwar
 import com.zaneschepke.wireguardautotunnel.ui.theme.topPadding
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchNotificationSettings
-import com.zaneschepke.wireguardautotunnel.util.extensions.launchVpnSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
@@ -179,18 +178,18 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								onClick = { appViewModel.onToggleAlwaysOnVPN() },
 							),
 							SelectionItem(
-								Icons.Outlined.AdminPanelSettings,
+								Icons.Outlined.VpnKeyOff,
 								title = {
 									Text(
-										stringResource(R.string.kill_switch),
+										stringResource(R.string.kill_switch_options),
 										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 									)
 								},
 								onClick = {
-									context.launchVpnSettings()
+									navController.navigate(Route.KillSwitch)
 								},
 								trailing = {
-									ForwardButton { context.launchVpnSettings() }
+									ForwardButton { navController.navigate(Route.KillSwitch) }
 								},
 							),
 						),

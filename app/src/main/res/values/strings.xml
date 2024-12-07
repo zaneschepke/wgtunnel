@@ -182,4 +182,9 @@
 	<string name="stop_on_internet_loss">Stop tunnel on internet loss</string>
 	<string name="ethernet_tunnel">Ethernet tunnel</string>
 	<string name="set_ethernet_tunnel">Set as ethernet tunnel</string>
+	<string name="native_kill_switch">Native kill switch</string>
+	<string name="vpn_kill_switch">VPN kill switch</string>
+	<string name="kill_switch_options">Kill switch options</string>
+	<string name="allow_lan_traffic">Allow LAN traffic</string>
+	<string name="bypass_lan_for_kill_switch">Bypass LAN for kill switch</string>
 </resources>

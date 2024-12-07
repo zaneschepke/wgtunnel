@@ -7,8 +7,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.ReleaseTree
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
@@ -33,6 +36,12 @@ class WireGuardAutoTunnel : Application() {
 	lateinit var appStateRepository: AppStateRepository
 
 	@Inject
+	lateinit var settingsRepository: SettingsRepository
+
+	@Inject
+	lateinit var tunnelService: TunnelService
+
+	@Inject
 	@IoDispatcher
 	lateinit var ioDispatcher: CoroutineDispatcher
 
@@ -53,6 +62,10 @@ class WireGuardAutoTunnel : Application() {
 			Timber.plant(ReleaseTree())
 		}
 		applicationScope.launch {
+			if (!settingsRepository.getSettings().isKernelEnabled) {
+				tunnelService.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
+			}
+
 			appStateRepository.getLocale()?.let {
 				val locale = LocaleUtil.getLocaleFromPrefCode(it)
 				val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(locale)
@@ -67,6 +80,13 @@ class WireGuardAutoTunnel : Application() {
 				}
 			}
 		}
+	}
+
+	override fun onTerminate() {
+		applicationScope.launch {
+			tunnelService.setBackendState(BackendState.INACTIVE, emptyList())
+		}
+		super.onTerminate()
 	}
 
 	companion object {

@@ -38,14 +38,6 @@ class DataStoreAppStateRepository(
 		dataStoreManager.saveToDataStore(DataStoreManager.batteryDisableShown, shown)
 	}
 
-	override suspend fun getCurrentSsid(): String? {
-		return dataStoreManager.getFromStore(DataStoreManager.currentSSID)
-	}
-
-	override suspend fun setCurrentSsid(ssid: String) {
-		dataStoreManager.saveToDataStore(DataStoreManager.currentSSID, ssid)
-	}
-
 	override suspend fun isTunnelStatsExpanded(): Boolean {
 		return dataStoreManager.getFromStore(DataStoreManager.tunnelStatsExpanded)
 			?: GeneralState.IS_TUNNEL_STATS_EXPANDED
