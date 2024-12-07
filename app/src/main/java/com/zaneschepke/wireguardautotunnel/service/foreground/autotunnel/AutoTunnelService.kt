@@ -9,12 +9,16 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.MainImmediateDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.AutoTunnelEvent
+import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.AutoTunnelState
+import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.NetworkState
 import com.zaneschepke.wireguardautotunnel.service.network.EthernetService
 import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
@@ -23,6 +27,7 @@ import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.getCurrentWifiName
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
@@ -32,12 +37,12 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.net.InetAddress
@@ -92,6 +97,7 @@ class AutoTunnelService : LifecycleService() {
 
 	override fun onCreate() {
 		super.onCreate()
+		serviceManager.autoTunnelService.complete(this)
 		lifecycleScope.launch(mainImmediateDispatcher) {
 			kotlin.runCatching {
 				launchWatcherNotification()
@@ -103,7 +109,6 @@ class AutoTunnelService : LifecycleService() {
 
 	override fun onBind(intent: Intent): IBinder? {
 		super.onBind(intent)
-		// We don't provide binding, so return null
 		return null
 	}
 
@@ -119,29 +124,8 @@ class AutoTunnelService : LifecycleService() {
 				launchWatcherNotification()
 				initWakeLock()
 			}
-
-			lifecycleScope.launch(ioDispatcher) {
-				combine(
-					appDataRepository.get().settings.getSettingsFlow(),
-					appDataRepository.get().tunnels.getTunnelConfigsFlow().distinctUntilChanged { old, new ->
-						old.map { it.isActive } != new.map { it.isActive }
-					},
-					tunnelService.get().vpnState.distinctUntilChanged { old, new ->
-						old != new
-					},
-				) { settings, tunnels, vpnState ->
-					Triple(settings, tunnels, vpnState)
-				}.collect { triple ->
-					autoTunnelStateFlow.update {
-						it.copy(
-							settings = triple.first,
-							tunnels = triple.second,
-							vpnState = triple.third,
-						)
-					}
-				}
-			}
-			startNetworkJobs()
+			startAutoTunnelJob()
+			startAutoTunnelStateJob()
 			startPingStateJob()
 		}.onFailure {
 			Timber.e(it)
@@ -149,11 +133,7 @@ class AutoTunnelService : LifecycleService() {
 	}
 
 	fun stop() {
-		wakeLock?.let {
-			if (it.isHeld) {
-				it.release()
-			}
-		}
+		wakeLock?.let { if (it.isHeld) it.release() }
 		stopSelf()
 	}
 
@@ -180,38 +160,21 @@ class AutoTunnelService : LifecycleService() {
 	}
 
 	private fun initWakeLock() {
-		wakeLock =
-			(getSystemService(POWER_SERVICE) as PowerManager).run {
-				val tag = this.javaClass.name
-				newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
-					try {
-						Timber.i("Initiating wakelock with 10 min timeout")
-						acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
-					} finally {
-						release()
-					}
+		wakeLock = (getSystemService(POWER_SERVICE) as PowerManager).run {
+			val tag = this.javaClass.name
+			newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag::lock").apply {
+				try {
+					Timber.i("Initiating wakelock with 10 min timeout")
+					acquire(Constants.BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT)
+				} finally {
+					release()
 				}
 			}
-	}
-
-	private fun startWifiJob() = lifecycleScope.launch {
-		watchForWifiConnectivityChanges()
-	}
-
-	private fun startMobileDataJob() = lifecycleScope.launch {
-		watchForMobileDataConnectivityChanges()
-	}
-
-	private fun startEthernetJob() = lifecycleScope.launch {
-		watchForEthernetConnectivityChanges()
+		}
 	}
 
 	private fun startPingJob() = lifecycleScope.launch {
 		watchForPingFailure()
-	}
-
-	private fun startNetworkEventJob() = lifecycleScope.launch {
-		handleNetworkEventChanges()
 	}
 
 	private fun startPingStateJob() = lifecycleScope.launch {
@@ -220,30 +183,6 @@ class AutoTunnelService : LifecycleService() {
 				pingJob.onNotRunning { pingJob = startPingJob() }
 			} else {
 				if (!pingTunnelRestartActive.get()) cancelAndResetPingJob()
-			}
-		}
-	}
-
-	private suspend fun watchForMobileDataConnectivityChanges() {
-		withContext(ioDispatcher) {
-			Timber.i("Starting mobile data watcher")
-			mobileDataService.networkStatus.collect { status ->
-				when (status) {
-					is NetworkStatus.Available -> {
-						Timber.i("Gained Mobile data connection")
-						emitMobileDataConnected(true)
-					}
-
-					is NetworkStatus.CapabilitiesChanged -> {
-						emitMobileDataConnected(true)
-						Timber.i("Mobile data capabilities changed")
-					}
-
-					is NetworkStatus.Unavailable -> {
-						emitMobileDataConnected(false)
-						Timber.i("Lost mobile data connection")
-					}
-				}
 			}
 		}
 	}
@@ -286,12 +225,17 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	private fun startNetworkJobs() {
-		Timber.i("Starting all network state jobs..")
-		startWifiJob()
-		startEthernetJob()
-		startMobileDataJob()
-		startNetworkEventJob()
+	private fun startAutoTunnelStateJob() = lifecycleScope.launch(ioDispatcher) {
+		combine(
+			combineSettings(),
+			combineNetworkEventsJob(),
+		) { double, networkState ->
+			AutoTunnelState(tunnelService.get().vpnState.value, networkState, double.first, double.second)
+		}.collect { state ->
+			autoTunnelStateFlow.update {
+				it.copy(state.vpnState, state.networkState, state.settings, state.tunnels)
+			}
+		}
 	}
 
 	private fun cancelAndResetPingJob() {
@@ -299,94 +243,34 @@ class AutoTunnelService : LifecycleService() {
 		pingJob = null
 	}
 
-	private fun emitEthernetConnected(connected: Boolean) {
-		autoTunnelStateFlow.update {
-			it.copy(
-				isEthernetConnected = connected,
+	private fun combineNetworkEventsJob(): Flow<NetworkState> {
+		return combine(
+			wifiService.networkStatus,
+			mobileDataService.networkStatus,
+			ethernetService.networkStatus,
+		) { wifi, mobileData, ethernet ->
+			NetworkState(
+				wifi.isConnected,
+				mobileData.isConnected,
+				ethernet.isConnected,
+				when (wifi) {
+					is NetworkStatus.CapabilitiesChanged -> getWifiSSID(wifi.networkCapabilities)
+					is NetworkStatus.Available -> autoTunnelStateFlow.value.networkState.wifiName
+					is NetworkStatus.Unavailable -> null
+				},
 			)
-		}
+		}.distinctUntilChanged()
 	}
 
-	private fun emitWifiConnected(connected: Boolean) {
-		autoTunnelStateFlow.update {
-			it.copy(
-				isWifiConnected = connected,
-			)
-		}
-	}
-
-	private fun emitWifiSSID(ssid: String) {
-		autoTunnelStateFlow.update {
-			it.copy(
-				currentNetworkSSID = ssid,
-			)
-		}
-	}
-
-	private fun emitMobileDataConnected(connected: Boolean) {
-		autoTunnelStateFlow.update {
-			it.copy(
-				isMobileDataConnected = connected,
-			)
-		}
-	}
-
-	private suspend fun watchForEthernetConnectivityChanges() {
-		withContext(ioDispatcher) {
-			Timber.i("Starting ethernet data watcher")
-			ethernetService.networkStatus.collect { status ->
-				when (status) {
-					is NetworkStatus.Available -> {
-						Timber.i("Gained Ethernet connection")
-						emitEthernetConnected(true)
-					}
-
-					is NetworkStatus.CapabilitiesChanged -> {
-						Timber.i("Ethernet capabilities changed")
-						emitEthernetConnected(true)
-					}
-
-					is NetworkStatus.Unavailable -> {
-						emitEthernetConnected(false)
-						Timber.i("Lost Ethernet connection")
-					}
-				}
-			}
-		}
-	}
-
-	private suspend fun watchForWifiConnectivityChanges() {
-		withContext(ioDispatcher) {
-			Timber.i("Starting wifi watcher")
-			wifiService.networkStatus.collect { status ->
-				when (status) {
-					is NetworkStatus.Available -> {
-						Timber.i("Gained Wi-Fi connection")
-						emitWifiConnected(true)
-					}
-
-					is NetworkStatus.CapabilitiesChanged -> {
-						Timber.i("Wifi capabilities changed")
-						emitWifiConnected(true)
-						val ssid = getWifiSSID(status.networkCapabilities)
-						ssid?.let { name ->
-							if (name.contains(Constants.UNREADABLE_SSID)) {
-								Timber.w("SSID unreadable: missing permissions")
-							} else {
-								Timber.i("Detected valid SSID")
-							}
-							appDataRepository.get().appState.setCurrentSsid(name)
-							emitWifiSSID(name)
-						} ?: Timber.w("Failed to read ssid")
-					}
-
-					is NetworkStatus.Unavailable -> {
-						emitWifiConnected(false)
-						Timber.i("Lost Wi-Fi connection")
-					}
-				}
-			}
-		}
+	private fun combineSettings(): Flow<Pair<Settings, TunnelConfigs>> {
+		return combine(
+			appDataRepository.get().settings.getSettingsFlow(),
+			appDataRepository.get().tunnels.getTunnelConfigsFlow().distinctUntilChanged { old, new ->
+				old.map { it.isActive } != new.map { it.isActive }
+			},
+		) { settings, tunnels ->
+			Pair(settings, tunnels)
+		}.distinctUntilChanged()
 	}
 
 	private suspend fun getWifiSSID(networkCapabilities: NetworkCapabilities): String? {
@@ -394,23 +278,27 @@ class AutoTunnelService : LifecycleService() {
 			with(autoTunnelStateFlow.value.settings) {
 				if (isWifiNameByShellEnabled) return@withContext rootShell.get().getCurrentWifiName()
 				wifiService.getNetworkName(networkCapabilities)
+			}.also {
+				if (it?.contains(Constants.UNREADABLE_SSID) == true) {
+					Timber.w("SSID unreadable: missing permissions")
+				} else {
+					Timber.i("Detected valid SSID")
+				}
 			}
 		}
 	}
 
-	private suspend fun handleNetworkEventChanges() {
-		withContext(ioDispatcher) {
-			Timber.i("Starting auto-tunnel network event watcher")
-			// ignore vpnState emits to allow manual overrides
-			autoTunnelStateFlow.collect { watcherState ->
-				when (val event = watcherState.asAutoTunnelEvent()) {
-					is AutoTunnelEvent.Start -> tunnelService.get().startTunnel(
-						event.tunnelConfig
-							?: appDataRepository.get().getPrimaryOrFirstTunnel(),
-					)
-					is AutoTunnelEvent.Stop -> tunnelService.get().stopTunnel()
-					AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: no condition met")
-				}
+	private fun startAutoTunnelJob() = lifecycleScope.launch(ioDispatcher) {
+		Timber.i("Starting auto-tunnel network event watcher")
+		autoTunnelStateFlow.collect { watcherState ->
+			Timber.d("New auto tunnel state emitted")
+			when (val event = watcherState.asAutoTunnelEvent()) {
+				is AutoTunnelEvent.Start -> tunnelService.get().startTunnel(
+					event.tunnelConfig
+						?: appDataRepository.get().getPrimaryOrFirstTunnel(),
+				)
+				is AutoTunnelEvent.Stop -> tunnelService.get().stopTunnel()
+				AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: no condition met")
 			}
 		}
 	}

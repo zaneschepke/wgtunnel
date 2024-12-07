@@ -160,10 +160,8 @@ constructor(
 					backend.setBackendState(org.amnezia.awg.backend.Backend.BackendState.SERVICE_ACTIVE, emptyList())
 				}
 				callback()
-				backend.setBackendState(backendState, emptyList())
 			}
 			is Backend -> {
-				Timber.d("Is kernel backend!")
 				callback()
 			}
 		}
@@ -248,7 +246,7 @@ constructor(
 		}
 	}
 
-	private fun emitBackendStatistics(statistics: TunnelStatistics) {
+	private fun updateBackendStatistics(statistics: TunnelStatistics) {
 		_vpnState.update {
 			it.copy(statistics = statistics)
 		}
@@ -287,11 +285,11 @@ constructor(
 		delay(STATS_START_DELAY)
 		while (true) {
 			when (backend) {
-				is Backend -> emitBackendStatistics(
+				is Backend -> updateBackendStatistics(
 					WireGuardStatistics(backend.getStatistics(this@WireGuardTunnel)),
 				)
 				is org.amnezia.awg.backend.Backend -> {
-					emitBackendStatistics(
+					updateBackendStatistics(
 						AmneziaStatistics(
 							backend.getStatistics(this@WireGuardTunnel),
 						),

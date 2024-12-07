@@ -4,10 +4,11 @@ import android.net.Network
 import android.net.NetworkCapabilities
 
 sealed class NetworkStatus {
-	class Available(val network: Network) : NetworkStatus()
+	abstract val isConnected: Boolean
+	class Available(val network: Network, override val isConnected: Boolean = true) : NetworkStatus()
 
-	class Unavailable(val network: Network) : NetworkStatus()
+	class Unavailable(override val isConnected: Boolean = false) : NetworkStatus()
 
-	class CapabilitiesChanged(val network: Network, val networkCapabilities: NetworkCapabilities) :
+	class CapabilitiesChanged(val network: Network, val networkCapabilities: NetworkCapabilities, override val isConnected: Boolean = true) :
 		NetworkStatus()
 }

@@ -186,4 +186,5 @@
 	<string name="vpn_kill_switch">VPN kill switch</string>
 	<string name="kill_switch_options">Kill switch options</string>
 	<string name="allow_lan_traffic">Allow LAN traffic</string>
+	<string name="bypass_lan_for_kill_switch">Bypass LAN for kill switch</string>
 </resources>

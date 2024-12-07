@@ -118,6 +118,12 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 									)
 								},
 								onClick = { toggleLanOnKillSwitch() },
+								description = {
+									Text(
+										stringResource(R.string.bypass_lan_for_kill_switch),
+										style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+									)
+								},
 								trailing = {
 									ScaledSwitch(
 										uiState.settings.isLanOnKillSwitchEnabled,
