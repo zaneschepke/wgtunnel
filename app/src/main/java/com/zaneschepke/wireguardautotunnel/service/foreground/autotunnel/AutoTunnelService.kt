@@ -41,6 +41,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -259,7 +261,7 @@ class AutoTunnelService : LifecycleService() {
 					is NetworkStatus.Unavailable -> null
 				},
 			)
-		}.distinctUntilChanged()
+		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }
 	}
 
 	private fun combineSettings(): Flow<Pair<Settings, TunnelConfigs>> {
