@@ -2,11 +2,8 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.langu
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
@@ -53,7 +50,7 @@ fun LanguageScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 			modifier =
 			Modifier
 				.fillMaxSize().padding(padding)
-				.padding(horizontal = 24.dp.scaledWidth()).windowInsetsPadding(WindowInsets.navigationBars),
+				.padding(horizontal = 24.dp.scaledWidth())
 		) {
 			item {
 				Box(modifier = Modifier.padding(top = 24.dp.scaledHeight())) {
