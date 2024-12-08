@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.os.ConfigurationCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
@@ -57,6 +58,7 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
+import java.text.Collator
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -71,6 +73,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
 	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
 	val isRunningOnTv = remember { context.isRunningOnTv() }
+
+	val currentLocale = ConfigurationCompat.getLocales(context.resources.configuration)[0]
+	val collator = Collator.getInstance(currentLocale)
+
+	val sortedTunnels = remember(uiState.tunnels) {
+		uiState.tunnels.sortedWith(compareBy(collator) { it.name })
+	}
 
 	val startAutoTunnel = withVpnPermission<Unit> { viewModel.onToggleAutoTunnel() }
 	val startTunnel = withVpnPermission<TunnelConfig> {
@@ -213,7 +222,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				}
 			}
 			items(
-				uiState.tunnels,
+				sortedTunnels,
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
 				val expanded = uiState.generalState.isTunnelStatsExpanded

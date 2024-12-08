@@ -1,7 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
@@ -20,7 +18,6 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
-import com.zaneschepke.wireguardautotunnel.util.LocaleUtil.OPTION_PHONE_LANGUAGE
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -159,11 +156,11 @@ constructor(
 	}
 
 	fun onLocaleChange(localeTag: String) = viewModelScope.launch {
-		val locale = LocaleUtil.getLocaleFromPrefCode(localeTag)
-		val storageLocale = if (localeTag == OPTION_PHONE_LANGUAGE) OPTION_PHONE_LANGUAGE else locale
-		appDataRepository.appState.setLocale(storageLocale)
-		val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(locale)
-		AppCompatDelegate.setApplicationLocales(appLocale)
+		appDataRepository.appState.setLocale(localeTag)
+		LocaleUtil.changeLocale(localeTag)
+		_configurationChange.update {
+			true
+		}
 	}
 
 	fun onToggleRestartAtBoot() = viewModelScope.launch {

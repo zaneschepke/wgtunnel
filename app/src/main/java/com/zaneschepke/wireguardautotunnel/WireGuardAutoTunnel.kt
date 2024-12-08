@@ -3,8 +3,6 @@ package com.zaneschepke.wireguardautotunnel
 import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
@@ -65,11 +63,8 @@ class WireGuardAutoTunnel : Application() {
 			if (!settingsRepository.getSettings().isKernelEnabled) {
 				tunnelService.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
 			}
-
 			appStateRepository.getLocale()?.let {
-				val locale = LocaleUtil.getLocaleFromPrefCode(it)
-				val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(locale)
-				AppCompatDelegate.setApplicationLocales(appLocale)
+				LocaleUtil.changeLocale(it)
 			}
 		}
 		if (!isRunningOnTv()) {
