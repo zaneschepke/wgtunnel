@@ -7,6 +7,7 @@ import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
+import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
@@ -20,8 +21,6 @@ class TunnelBackgroundService : LifecycleService() {
 
 	@Inject
 	lateinit var serviceManager: ServiceManager
-
-	private val foregroundId = 123
 
 	override fun onCreate() {
 		super.onCreate()
@@ -42,7 +41,7 @@ class TunnelBackgroundService : LifecycleService() {
 	fun start() {
 		ServiceCompat.startForeground(
 			this,
-			foregroundId,
+			NotificationService.KERNEL_SERVICE_NOTIFICATION_ID,
 			createNotification(),
 			Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
 		)
@@ -60,8 +59,7 @@ class TunnelBackgroundService : LifecycleService() {
 
 	private fun createNotification(): Notification {
 		return notificationService.createNotification(
-			getString(R.string.vpn_channel_id),
-			getString(R.string.vpn_channel_name),
+			WireGuardNotification.NotificationChannels.VPN,
 			getString(R.string.tunnel_running),
 			description = "",
 		)

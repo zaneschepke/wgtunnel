@@ -81,7 +81,6 @@
     <string name="version">Version</string>
     <string name="settings">Einstellungen</string>
     <string name="support">Unterstützung</string>
-    <string name="watcher_channel_id">Wächterkanal</string>
     <string name="error_authentication_failed">Authentifizierung fehlgeschlagen</string>
     <string name="export_configs">Konfigurationen exportieren</string>
     <string name="unknown_error">Unbekannter Fehler aufgetreten</string>
@@ -99,7 +98,6 @@
     <string name="set_primary_tunnel">Als Primären Tunnel setzen</string>
     <string name="vpn_channel_id">VPN Kanal</string>
     <string name="vpn_channel_name">VPN Benachrichtigungskanal</string>
-    <string name="watcher_channel_name">Wächterbenachrichtigungskanal</string>
     <string name="turn_off_tunnel">Aktion erfordert deaktivierten Tunnel</string>
     <string name="kernel">Kernel</string>
     <string name="use_kernel">Kernelmodul verwenden</string>

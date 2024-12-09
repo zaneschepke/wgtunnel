@@ -204,5 +204,10 @@
 				<action android:name="com.wireguard.android.action.REFRESH_TUNNEL_STATES" />
 			</intent-filter>
 		</receiver>
+		<receiver
+			android:name=".receiver.NotificationActionReceiver"
+			android:exported="false"
+			android:permission="${applicationId}.permission.CONTROL_TUNNELS">
+		</receiver>
     </application>
 </manifest>

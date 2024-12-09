@@ -63,8 +63,6 @@
     <string name="app_name">WG Tunnel</string>
     <string name="vpn_channel_id">Канал VPN</string>
     <string name="vpn_channel_name">Канал уведомлений VPN</string>
-    <string name="watcher_channel_id">Канал наблюдателя</string>
-    <string name="watcher_channel_name">Канал уведомлений наблюдателя</string>
     <string name="tunnels">Туннели</string>
     <string name="okay">Хорошо</string>
     <string name="prominent_background_location_title">Фоновая передача местоположения</string>

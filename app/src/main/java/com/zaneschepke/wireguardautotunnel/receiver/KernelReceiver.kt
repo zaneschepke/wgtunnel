@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -26,6 +26,9 @@ class KernelReceiver : BroadcastReceiver() {
 	@Inject
 	lateinit var tunnelConfigRepository: TunnelConfigRepository
 
+	@Inject
+	lateinit var serviceManager: ServiceManager
+
 	override fun onReceive(context: Context, intent: Intent) {
 		val action = intent.action ?: return
 		applicationScope.launch {
@@ -37,7 +40,7 @@ class KernelReceiver : BroadcastReceiver() {
 						tunnelConfigRepository.save(it.copy(isActive = true))
 					}
 				}
-				context.requestTunnelTileServiceStateUpdate()
+				serviceManager.updateTunnelTile()
 			}
 		}
 	}

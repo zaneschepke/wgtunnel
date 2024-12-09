@@ -3,8 +3,6 @@
     <string name="app_name">WG Tunnel</string>
     <string name="vpn_channel_id">VPN Kanalı</string>
     <string name="vpn_channel_name">VPN Bildirim Kanalı</string>
-    <string name="watcher_channel_id">İzleyici Kanalı</string>
-    <string name="watcher_channel_name">İzleyici Bildirim Kanalı</string>
     <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
     <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>

@@ -2,9 +2,7 @@
     <string name="app_name">WG Tunnel</string>
     <string name="vpn_channel_id">VPN Channel</string>
     <string name="vpn_channel_name">VPN Notification Channel</string>
-    <string name="watcher_channel_id">Watcher Channel</string>
-    <string name="watcher_channel_name">Watcher Notification Channel</string>
-    <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
+	<string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
     <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
     <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
 	<string name="docs_wildcards" translatable="false" >https://zaneschepke.com/wgtunnel-docs/features.html#wildcard-wi-fi-name-support</string>
@@ -82,7 +80,7 @@
     <string name="error_no_file_explorer">No file explorer installed</string>
     <string name="error_invalid_code">Invalid QR code</string>
     <string name="location_services_missing_message">The app is not detecting any location services enabled on your device. Depending on the device, this could cause the untrusted wifi feature to fail to read the wifi name. Would you like to continue anyways?</string>
-    <string name="auto_tunnel_title">Auto-tunnel Service</string>
+    <string name="auto_tunnel_title">Auto-tunnel service</string>
     <string name="delete_tunnel">Delete tunnel</string>
     <string name="delete_tunnel_message">Are you sure you would like to delete this tunnel?</string>
     <string name="yes">Yes</string>
@@ -187,4 +185,9 @@
 	<string name="kill_switch_options">Kill switch options</string>
 	<string name="allow_lan_traffic">Allow LAN traffic</string>
 	<string name="bypass_lan_for_kill_switch">Bypass LAN for kill switch</string>
+	<string name="vpn_channel_description">A channel for VPN state notifications</string>
+	<string name="auto_tunnel_channel_id">Auto-tunnel Channel</string>
+	<string name="auto_tunnel_channel_name">Auto-tunnel Notification Channel</string>
+	<string name="auto_tunnel_channel_description">A channel for auto-tunnel state notifications</string>
+	<string name="stop">stop</string>
 </resources>

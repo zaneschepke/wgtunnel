@@ -9,6 +9,7 @@ import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.Kernel
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
@@ -41,6 +42,7 @@ constructor(
 	@ApplicationScope private val applicationScope: CoroutineScope,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	private val serviceManager: ServiceManager,
+	private val notificationService: NotificationService,
 ) : TunnelService {
 
 	private val _vpnState = MutableStateFlow(VpnState())
@@ -161,9 +163,7 @@ constructor(
 				}
 				callback()
 			}
-			is Backend -> {
-				callback()
-			}
+			is Backend -> callback()
 		}
 	}
 
@@ -181,9 +181,7 @@ constructor(
 			is org.amnezia.awg.backend.Backend -> {
 				backend.backendState.asBackendState()
 			}
-			is Backend -> {
-				BackendState.SERVICE_ACTIVE
-			}
+			is Backend -> BackendState.SERVICE_ACTIVE
 			else -> BackendState.INACTIVE
 		}
 	}
@@ -213,12 +211,12 @@ constructor(
 
 	private suspend fun startBackgroundService() {
 		serviceManager.startBackgroundService()
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
-	private fun stopBackgroundService() {
+	private suspend fun stopBackgroundService() {
 		serviceManager.stopBackgroundService()
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
 	private suspend fun onBeforeStart(background: Boolean) {
@@ -320,14 +318,14 @@ constructor(
 		_vpnState.update {
 			it.copy(status = TunnelState.from(newState))
 		}
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
 	override fun onStateChange(state: State) {
 		_vpnState.update {
 			it.copy(status = TunnelState.from(state))
 		}
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
 	companion object {

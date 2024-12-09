@@ -2,21 +2,25 @@ package com.zaneschepke.wireguardautotunnel.service.notification
 
 import android.app.Notification
 import android.app.NotificationManager
-import android.app.PendingIntent
+import androidx.core.app.NotificationCompat
+import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification.NotificationChannels
 
 interface NotificationService {
 	fun createNotification(
-		channelId: String,
-		channelName: String,
+		channel: NotificationChannels,
 		title: String = "",
-		action: PendingIntent? = null,
-		actionText: String? = null,
-		description: String,
+		actions: Collection<NotificationCompat.Action> = emptyList(),
+		description: String = "",
 		showTimestamp: Boolean = false,
 		importance: Int = NotificationManager.IMPORTANCE_HIGH,
-		vibration: Boolean = false,
 		onGoing: Boolean = true,
-		lights: Boolean = true,
 		onlyAlertOnce: Boolean = true,
 	): Notification
+
+	fun createNotificationAction(action: NotificationAction): NotificationCompat.Action
+
+	companion object {
+		const val KERNEL_SERVICE_NOTIFICATION_ID = 123
+		const val AUTO_TUNNEL_NOTIFICATION_ID = 122
+	}
 }

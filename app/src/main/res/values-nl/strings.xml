@@ -15,8 +15,6 @@
     <string name="icon">Icoon</string>
     <string name="include">Meenemen</string>
     <string name="addresses">Adres</string>
-    <string name="watcher_channel_id">Watcher Kanaal</string>
-    <string name="watcher_channel_name">Watcher Notificatiekanaal</string>
     <string name="peer">Peer (extern systeem)</string>
     <string name="allowed_ips">Allowed IPs</string>
     <string name="always_on_vpn_support">Altijd-aan VPN toestaan</string>
