@@ -1,7 +1,7 @@
 object Constants {
-	const val VERSION_NAME = "3.6.1"
+	const val VERSION_NAME = "3.6.2"
     const val JVM_TARGET = "17"
-    const val VERSION_CODE = 36100
+    const val VERSION_CODE = 36200
     const val TARGET_SDK = 35
     const val MIN_SDK = 26
     const val APP_ID = "com.zaneschepke.wireguardautotunnel"

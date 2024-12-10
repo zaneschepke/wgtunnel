@@ -1,0 +1,5 @@
+What's new:
+- Added VPN kill switch w/LAN bypass
+- Improved auto tunnel speed and reliability
+- Improved tile sync
+- Various bug fixes and improvements
