@@ -20,7 +20,7 @@ import javax.inject.Inject
 class WireGuardNotification
 @Inject
 constructor(
-	@ApplicationContext private val context: Context,
+	@ApplicationContext override val context: Context,
 ) : NotificationService {
 
 	enum class NotificationChannels {
@@ -28,8 +28,7 @@ constructor(
 		AUTO_TUNNEL,
 	}
 
-	private val notificationManager =
-		context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+	private val notificationManager = NotificationManagerCompat.from(context)
 
 	override fun createNotification(
 		channel: NotificationChannels,
@@ -72,21 +71,16 @@ constructor(
 		).build()
 	}
 
-	fun Notification.show(notificationId: Int = defaultId()) {
-		val notification = this
-		with(NotificationManagerCompat.from(context)) {
+	override fun remove(notificationId: Int) {
+		notificationManager.cancel(notificationId)
+	}
+
+	override fun show(notificationId: Int, notification: Notification) {
+		with(notificationManager) {
 			if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
 				return
 			}
 			notify(notificationId, notification)
-		}
-	}
-
-	fun Notification.defaultId(): Int {
-		return when (this.channelId) {
-			context.getString(R.string.vpn_channel_id) -> 100
-			context.getString(R.string.auto_tunnel_channel_id) -> 101
-			else -> 102
 		}
 	}
 
