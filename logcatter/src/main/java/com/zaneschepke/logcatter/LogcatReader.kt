@@ -1,26 +1,30 @@
 package com.zaneschepke.logcatter
 
-import android.content.Context
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.logcatter.model.LogMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-object LogcatCollector {
+object LogcatReader {
 
 	private const val MAX_FILE_SIZE = 2097152L // 2MB
 	private const val MAX_FOLDER_SIZE = 10485760L // 10MB
@@ -40,7 +44,7 @@ object LogcatCollector {
 		var logcatPath = ""
 	}
 
-	fun init(maxFileSize: Long = MAX_FILE_SIZE, maxFolderSize: Long = MAX_FOLDER_SIZE, context: Context): LogReader {
+	fun init(maxFileSize: Long = MAX_FILE_SIZE, maxFolderSize: Long = MAX_FOLDER_SIZE, storageDir: String): LogReader {
 		if (maxFileSize > maxFolderSize) {
 			throw IllegalStateException("maxFileSize must be less than maxFolderSize")
 		}
@@ -48,13 +52,11 @@ object LogcatCollector {
 			LogcatHelperInit.maxFileSize = maxFileSize
 			LogcatHelperInit.maxFolderSize = maxFolderSize
 			LogcatHelperInit.pID = android.os.Process.myPid()
-			context.getExternalFilesDir(null)?.let {
-				LogcatHelperInit.publicAppDirectory = it.absolutePath
-				LogcatHelperInit.logcatPath = LogcatHelperInit.publicAppDirectory + File.separator + "logs"
-				val logDirectory = File(LogcatHelperInit.logcatPath)
-				if (!logDirectory.exists()) {
-					logDirectory.mkdir()
-				}
+			LogcatHelperInit.publicAppDirectory = storageDir
+			LogcatHelperInit.logcatPath = LogcatHelperInit.publicAppDirectory + File.separator + "logs"
+			val logDirectory = File(LogcatHelperInit.logcatPath)
+			if (!logDirectory.exists()) {
+				logDirectory.mkdir()
 			}
 			return Logcat
 		}
@@ -62,7 +64,12 @@ object LogcatCollector {
 
 	internal object Logcat : LogReader {
 
-		private var logcatReader: LogcatReader? = null
+		private lateinit var logcatReader: LogcatReader
+
+		override fun initialize(onLogMessage: ((message: LogMessage) -> Unit)?) {
+			logcatReader = LogcatReader(LogcatHelperInit.pID.toString(), LogcatHelperInit.logcatPath, onLogMessage)
+			ProcessLifecycleOwner.get().lifecycle.addObserver(logcatReader)
+		}
 
 		private fun obfuscator(log: String): String {
 			return findKeyRegex.replace(log, "<crypto-key>").let { first ->
@@ -72,22 +79,10 @@ object LogcatCollector {
 			}.let { last -> findIpv4AddressRegex.replace(last, "<ipv4-address>") }
 		}
 
-		override suspend fun start(onLogMessage: ((message: LogMessage) -> Unit)?) {
-			logcatReader ?: run {
-				logcatReader = LogcatReader(LogcatHelperInit.pID.toString(), LogcatHelperInit.logcatPath, onLogMessage)
-			}
-			logcatReader?.run()
-		}
-
-		override fun stop() {
-			logcatReader?.stop()
-			logcatReader = null
-		}
-
 		override fun zipLogFiles(path: String) {
-			logcatReader?.pause()
+			logcatReader.cancel()
 			zipAll(path)
-			logcatReader?.resume()
+			logcatReader.onCreate(ProcessLifecycleOwner.get())
 		}
 
 		private fun zipAll(zipFilePath: String) {
@@ -110,10 +105,10 @@ object LogcatCollector {
 		@OptIn(ExperimentalCoroutinesApi::class)
 		override suspend fun deleteAndClearLogs() {
 			withContext(ioDispatcher) {
-				logcatReader?.pause()
+				logcatReader.cancel()
 				_bufferedLogs.resetReplayCache()
-				logcatReader?.deleteAllFiles()
-				logcatReader?.resume()
+				logcatReader.deleteAllFiles()
+				logcatReader.onCreate(ProcessLifecycleOwner.get())
 			}
 		}
 
@@ -134,57 +129,25 @@ object LogcatCollector {
 			pID: String,
 			private val logcatPath: String,
 			private val callback: ((input: LogMessage) -> Unit)?,
-		) {
+		) : DefaultLifecycleObserver {
 			private var logcatProc: Process? = null
 			private var reader: BufferedReader? = null
 
-			@get:Synchronized @set:Synchronized
-			private var paused = false
-
-			@get:Synchronized @set:Synchronized
-			private var stopped = false
-			private var command = ""
-			private var clearLogCommand = ""
+			private val command = "logcat -v epoch | grep \"($pID)\""
+			private val clearLogCommand = "logcat -c"
+			private var logJob: Job? = null
 			private var outputStream: FileOutputStream? = null
 
-			init {
-				try {
-					outputStream = FileOutputStream(createLogFile(logcatPath))
-				} catch (e: FileNotFoundException) {
-					Timber.e(e)
-				}
-
-				command = "logcat -v epoch | grep \"($pID)\""
-				clearLogCommand = "logcat -c"
-			}
-
-			fun pause() {
-				paused = true
-			}
-			fun stop() {
-				stopped = true
-			}
-
-			fun resume() {
-				paused = false
-			}
-
-			fun clear() {
-				Runtime.getRuntime().exec(clearLogCommand)
-			}
-
-			suspend fun run() {
-				withContext(ioDispatcher) {
-					paused = false
-					stopped = false
-					if (outputStream == null) return@withContext
+			override fun onCreate(owner: LifecycleOwner) {
+				super.onCreate(owner)
+				logJob = owner.lifecycleScope.launch(ioDispatcher) {
 					try {
+						if (outputStream == null) outputStream = createNewLogFileStream()
 						clear()
 						logcatProc = Runtime.getRuntime().exec(command)
 						reader = BufferedReader(InputStreamReader(logcatProc!!.inputStream), 1024)
-						var line: String?
-						while (!stopped) {
-							if (paused) continue
+						var line: String? = null
+						while (true) {
 							line = reader?.readLine()
 							if (line.isNullOrEmpty()) continue
 							outputStream?.let {
@@ -196,8 +159,8 @@ object LogcatCollector {
 									deleteOldestFile()
 								}
 								line.let { text ->
-									val obfuscated = obfuscator(text)
-									it.write((obfuscated + System.lineSeparator()).toByteArray())
+									val sanitized = obfuscator(text)
+									it.write((sanitized + System.lineSeparator()).toByteArray())
 									try {
 										val logMessage = LogMessage.from(text)
 										_bufferedLogs.tryEmit(logMessage)
@@ -214,19 +177,34 @@ object LogcatCollector {
 					} catch (e: IOException) {
 						Timber.e(e)
 					} finally {
-						logcatProc?.destroy()
-						logcatProc = null
-
-						try {
-							reader?.close()
-							outputStream?.close()
-							reader = null
-							outputStream = null
-						} catch (e: IOException) {
-							Timber.e(e)
-						}
+						reset()
 					}
 				}
+				logJob?.invokeOnCompletion {
+					reset()
+				}
+			}
+
+			override fun onDestroy(owner: LifecycleOwner) {
+				super.onDestroy(owner)
+				logJob?.cancel()
+			}
+
+			fun cancel() {
+				logJob?.cancel()
+			}
+
+			private fun reset() {
+				logcatProc?.destroy()
+				logcatProc = null
+				reader?.close()
+				outputStream?.close()
+				reader = null
+				outputStream = null
+			}
+
+			fun clear() {
+				Runtime.getRuntime().exec(clearLogCommand)
 			}
 
 			private fun getFolderSize(path: String): Long {
@@ -266,7 +244,6 @@ object LogcatCollector {
 				directory.listFiles()?.toMutableList()?.run {
 					this.forEach { it.delete() }
 				}
-				outputStream = createNewLogFileStream()
 			}
 		}
 	}

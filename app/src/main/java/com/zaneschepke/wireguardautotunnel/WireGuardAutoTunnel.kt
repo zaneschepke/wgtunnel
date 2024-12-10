@@ -8,6 +8,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.module.MainDispatcher
 import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
@@ -17,6 +18,7 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -43,6 +45,10 @@ class WireGuardAutoTunnel : Application() {
 	@IoDispatcher
 	lateinit var ioDispatcher: CoroutineDispatcher
 
+	@Inject
+	@MainDispatcher
+	lateinit var mainDispatcher: CoroutineDispatcher
+
 	override fun onCreate() {
 		super.onCreate()
 		instance = this
@@ -59,20 +65,17 @@ class WireGuardAutoTunnel : Application() {
 		} else {
 			Timber.plant(ReleaseTree())
 		}
+
 		applicationScope.launch {
+			withContext(mainDispatcher) {
+				if (appStateRepository.isLocalLogsEnabled() && !isRunningOnTv()) logReader.initialize()
+			}
 			if (!settingsRepository.getSettings().isKernelEnabled) {
 				tunnelService.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
 			}
+
 			appStateRepository.getLocale()?.let {
 				LocaleUtil.changeLocale(it)
-			}
-		}
-		if (!isRunningOnTv()) {
-			applicationScope.launch(ioDispatcher) {
-				if (appStateRepository.isLocalLogsEnabled()) {
-					Timber.d("Starting logger")
-					logReader.start()
-				}
 			}
 		}
 	}

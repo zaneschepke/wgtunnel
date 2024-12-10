@@ -49,6 +49,7 @@ dependencies {
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 
+	implementation(libs.androidx.lifecycle.process)
 	// logging
 	implementation(libs.timber)
 }

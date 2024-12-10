@@ -141,7 +141,6 @@ constructor(
 	}
 
 	private suspend fun onLoggerStop() {
-		logReader.stop()
 		logReader.deleteAndClearLogs()
 	}
 

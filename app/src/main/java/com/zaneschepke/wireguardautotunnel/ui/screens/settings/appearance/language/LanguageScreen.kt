@@ -50,7 +50,7 @@ fun LanguageScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 			modifier =
 			Modifier
 				.fillMaxSize().padding(padding)
-				.padding(horizontal = 24.dp.scaledWidth())
+				.padding(horizontal = 24.dp.scaledWidth()),
 		) {
 			item {
 				Box(modifier = Modifier.padding(top = 24.dp.scaledHeight())) {
