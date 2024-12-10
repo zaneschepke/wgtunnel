@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="vpn_channel_id">Canal VPN</string>
-    <string name="watcher_channel_id">Canal de surveillance</string>
-    <string name="watcher_channel_name">Canal de notification de surveillance</string>
     <string name="turn_off_tunnel">Cette action nécessite la désactivation du tunnel</string>
     <string name="no_tunnels">Aucun tunnel n\'a été ajouté pour le moment !</string>
     <string name="tunnels">Tunnels</string>

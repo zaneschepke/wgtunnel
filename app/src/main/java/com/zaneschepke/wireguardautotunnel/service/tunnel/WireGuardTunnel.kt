@@ -9,6 +9,8 @@ import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.Kernel
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
+import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
@@ -27,6 +29,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
+import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService.Companion.VPN_NOTIFICATION_ID
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Provider
@@ -41,6 +46,7 @@ constructor(
 	@ApplicationScope private val applicationScope: CoroutineScope,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	private val serviceManager: ServiceManager,
+	private val notificationService: NotificationService,
 ) : TunnelService {
 
 	private val _vpnState = MutableStateFlow(VpnState())
@@ -116,6 +122,16 @@ constructor(
 					setState(tunnelConfig, TunnelState.UP).onSuccess {
 						startActiveTunnelJobs()
 						if (it.isUp()) appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
+						with(notificationService) {
+							val notification = createNotification(
+								WireGuardNotification.NotificationChannels.VPN,
+								title = "${context.getString(R.string.tunnel_running)} - ${tunnelConfig.name}",
+								actions = listOf(
+									notificationService.createNotificationAction(NotificationAction.TUNNEL_OFF),
+								),
+							)
+							show(VPN_NOTIFICATION_ID, notification)
+						}
 						updateTunnelState(it, tunnelConfig)
 					}
 				}.onFailure {
@@ -134,6 +150,7 @@ constructor(
 					setState(tunnelConfig, TunnelState.DOWN).onSuccess {
 						updateTunnelState(it, null)
 						onStop(tunnelConfig)
+						notificationService.remove(VPN_NOTIFICATION_ID)
 						stopBackgroundService()
 					}.onFailure {
 						Timber.e(it)
@@ -161,9 +178,7 @@ constructor(
 				}
 				callback()
 			}
-			is Backend -> {
-				callback()
-			}
+			is Backend -> callback()
 		}
 	}
 
@@ -181,9 +196,7 @@ constructor(
 			is org.amnezia.awg.backend.Backend -> {
 				backend.backendState.asBackendState()
 			}
-			is Backend -> {
-				BackendState.SERVICE_ACTIVE
-			}
+			is Backend -> BackendState.SERVICE_ACTIVE
 			else -> BackendState.INACTIVE
 		}
 	}
@@ -213,12 +226,12 @@ constructor(
 
 	private suspend fun startBackgroundService() {
 		serviceManager.startBackgroundService()
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
 	private fun stopBackgroundService() {
 		serviceManager.stopBackgroundService()
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
 	private suspend fun onBeforeStart(background: Boolean) {
@@ -320,14 +333,14 @@ constructor(
 		_vpnState.update {
 			it.copy(status = TunnelState.from(newState))
 		}
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
 	override fun onStateChange(state: State) {
 		_vpnState.update {
 			it.copy(status = TunnelState.from(state))
 		}
-		serviceManager.requestTunnelTileUpdate()
+		serviceManager.updateTunnelTile()
 	}
 
 	companion object {

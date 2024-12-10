@@ -24,7 +24,9 @@ import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.service.network.WifiService
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
+import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
@@ -53,7 +55,6 @@ import javax.inject.Provider
 
 @AndroidEntryPoint
 class AutoTunnelService : LifecycleService() {
-	private val foregroundId = 122
 
 	@Inject
 	@AppShell
@@ -147,14 +148,16 @@ class AutoTunnelService : LifecycleService() {
 	private fun launchWatcherNotification(description: String = getString(R.string.monitoring_state_changes)) {
 		val notification =
 			notificationService.createNotification(
-				channelId = getString(R.string.watcher_channel_id),
-				channelName = getString(R.string.watcher_channel_name),
+				WireGuardNotification.NotificationChannels.AUTO_TUNNEL,
 				title = getString(R.string.auto_tunnel_title),
 				description = description,
+				actions = listOf(
+					notificationService.createNotificationAction(NotificationAction.AUTO_TUNNEL_OFF),
+				),
 			)
 		ServiceCompat.startForeground(
 			this,
-			foregroundId,
+			NotificationService.AUTO_TUNNEL_NOTIFICATION_ID,
 			notification,
 			Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
 		)

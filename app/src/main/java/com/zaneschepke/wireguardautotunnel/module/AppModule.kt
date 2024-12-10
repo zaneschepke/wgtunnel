@@ -2,6 +2,8 @@ package com.zaneschepke.wireguardautotunnel.module
 
 import android.content.Context
 import com.zaneschepke.logcatter.LogReader
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
+import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.logcatter.LogcatReader
 import dagger.Module
 import dagger.Provides
@@ -26,5 +28,11 @@ class AppModule {
 	@Provides
 	fun provideLogCollect(@ApplicationContext context: Context): LogReader {
 		return LogcatReader.init(storageDir = context.filesDir.absolutePath)
+	}
+
+	@Singleton
+	@Provides
+	fun provideNotificationService(@ApplicationContext context: Context): NotificationService {
+		return WireGuardNotification(context)
 	}
 }

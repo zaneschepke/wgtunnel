@@ -159,18 +159,7 @@ constructor(
 	}
 
 	fun onToggleAutoTunnel() = viewModelScope.launch {
-		val settings = appDataRepository.settings.getSettings()
-		val toggled = !settings.isAutoTunnelEnabled
-		if (toggled) {
-			serviceManager.startAutoTunnel(false)
-		} else {
-			serviceManager.stopAutoTunnel()
-		}
-		appDataRepository.settings.save(
-			settings.copy(
-				isAutoTunnelEnabled = toggled,
-			),
-		)
+		serviceManager.toggleAutoTunnel(false)
 	}
 
 	private suspend fun saveTunnelsFromZipUri(uri: Uri, context: Context) {

@@ -1,105 +1,134 @@
 package com.zaneschepke.wireguardautotunnel.service.notification
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.MainActivity
+import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class WireGuardNotification
 @Inject
 constructor(
-	@ApplicationContext private val context: Context,
-) :
-	NotificationService {
-	private val notificationManager =
-		context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+	@ApplicationContext override val context: Context,
+) : NotificationService {
 
-	private val watcherBuilder: NotificationCompat.Builder =
-		NotificationCompat.Builder(
-			context,
-			context.getString(R.string.watcher_channel_id),
-		)
-	private val tunnelBuilder: NotificationCompat.Builder =
-		NotificationCompat.Builder(
-			context,
-			context.getString(R.string.vpn_channel_id),
-		)
+	enum class NotificationChannels {
+		VPN,
+		AUTO_TUNNEL,
+	}
+
+	private val notificationManager = NotificationManagerCompat.from(context)
 
 	override fun createNotification(
-		channelId: String,
-		channelName: String,
+		channel: NotificationChannels,
 		title: String,
-		action: PendingIntent?,
-		actionText: String?,
+		actions: Collection<NotificationCompat.Action>,
 		description: String,
 		showTimestamp: Boolean,
 		importance: Int,
-		vibration: Boolean,
 		onGoing: Boolean,
-		lights: Boolean,
 		onlyAlertOnce: Boolean,
 	): Notification {
-		val channel =
-			NotificationChannel(
-				channelId,
-				channelName,
-				importance,
-			)
-				.let {
-					it.description = title
-					it.enableLights(lights)
-					it.lightColor = Color.RED
-					it.enableVibration(vibration)
-					it.vibrationPattern = longArrayOf(100, 200, 300)
-					it
-				}
-		notificationManager.createNotificationChannel(channel)
-		val pendingIntent: PendingIntent =
-			Intent(context, MainActivity::class.java).let { notificationIntent ->
-				PendingIntent.getActivity(
+		notificationManager.createNotificationChannel(channel.asChannel())
+		return channel.asBuilder().apply {
+			actions.forEach {
+				addAction(it)
+			}
+			setContentTitle(title)
+			setContentText(description)
+			setOnlyAlertOnce(onlyAlertOnce)
+			setOngoing(onGoing)
+			setPriority(NotificationCompat.PRIORITY_HIGH)
+			setShowWhen(showTimestamp)
+			setSmallIcon(R.drawable.ic_launcher)
+		}.build()
+	}
+
+	override fun createNotificationAction(notificationAction: NotificationAction): NotificationCompat.Action {
+		val pendingIntent = PendingIntent.getBroadcast(
+			context,
+			0,
+			Intent(context, NotificationActionReceiver::class.java).apply {
+				action = notificationAction.name
+			},
+			PendingIntent.FLAG_IMMUTABLE,
+		)
+		return NotificationCompat.Action.Builder(
+			R.drawable.ic_launcher,
+			notificationAction.title(context).uppercase(),
+			pendingIntent,
+		).build()
+	}
+
+	override fun remove(notificationId: Int) {
+		notificationManager.cancel(notificationId)
+	}
+
+	override fun show(notificationId: Int, notification: Notification) {
+		with(notificationManager) {
+			if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				return
+			}
+			notify(notificationId, notification)
+		}
+	}
+
+	fun NotificationChannels.asBuilder(): NotificationCompat.Builder {
+		return when (this) {
+			NotificationChannels.VPN -> {
+				NotificationCompat.Builder(
 					context,
-					0,
-					notificationIntent,
-					PendingIntent.FLAG_IMMUTABLE,
+					context.getString(R.string.auto_tunnel_channel_id),
 				)
 			}
+			NotificationChannels.AUTO_TUNNEL -> {
+				NotificationCompat.Builder(
+					context,
+					context.getString(R.string.vpn_channel_id),
+				)
+			}
+		}
+	}
 
-		val builder =
-			when (channelId) {
-				context.getString(R.string.watcher_channel_id) -> watcherBuilder
-				context.getString(R.string.vpn_channel_id) -> tunnelBuilder
-				else -> {
-					NotificationCompat.Builder(
-						context,
-						channelId,
-					)
+	fun NotificationChannels.asChannel(): NotificationChannel {
+		return when (this) {
+			NotificationChannels.VPN -> {
+				NotificationChannel(
+					context.getString(R.string.vpn_channel_id),
+					context.getString(R.string.vpn_channel_name),
+					NotificationManager.IMPORTANCE_HIGH,
+				).apply {
+					description = context.getString(R.string.vpn_channel_description)
+					enableLights(true)
+					lightColor = Color.WHITE
+					enableVibration(false)
+					vibrationPattern = longArrayOf(100, 200, 300)
 				}
 			}
-
-		return builder.let {
-			if (action != null && actionText != null) {
-				it.addAction(
-					NotificationCompat.Action.Builder(0, actionText, action).build(),
-				)
-				it.setAutoCancel(true)
+			NotificationChannels.AUTO_TUNNEL -> {
+				NotificationChannel(
+					context.getString(R.string.auto_tunnel_channel_id),
+					context.getString(R.string.auto_tunnel_channel_name),
+					NotificationManager.IMPORTANCE_HIGH,
+				).apply {
+					description = context.getString(R.string.auto_tunnel_channel_description)
+					enableLights(true)
+					lightColor = Color.WHITE
+					enableVibration(false)
+					vibrationPattern = longArrayOf(100, 200, 300)
+				}
 			}
-			it.setContentTitle(title)
-				.setContentText(description)
-				.setOnlyAlertOnce(onlyAlertOnce)
-				.setContentIntent(pendingIntent)
-				.setOngoing(onGoing)
-				.setPriority(NotificationCompat.PRIORITY_HIGH)
-				.setShowWhen(showTimestamp)
-				.setSmallIcon(R.drawable.ic_launcher)
-				.build()
 		}
 	}
 }

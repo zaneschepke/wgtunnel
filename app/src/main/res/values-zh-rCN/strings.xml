@@ -97,12 +97,10 @@
     <string name="no_browser_detected">没有安装浏览器</string>
     <string name="incorrect_pin">密码不正确</string>
     <string name="set_custom_ping_ip">自定义 Ping 的目标 ip</string>
-    <string name="watcher_channel_name">守护者通知频道</string>
     <string name="vpn_channel_id">VPN 频道</string>
     <string name="junk_packet_count">无效包计数</string>
     <string name="app_name">WG Tunnel</string>
     <string name="vpn_channel_name">VPN 通知频道</string>
-    <string name="watcher_channel_id">守护者频道</string>
     <string name="open_issue">查看问题</string>
     <string name="read_logs">查看日志</string>
     <string name="auto">(自动)</string>

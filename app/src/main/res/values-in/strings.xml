@@ -6,7 +6,6 @@
     <string name="kernel">Kernel</string>
     <string name="init_packet_junk_size">Ukuran sampah paket init</string>
     <string name="app_name">WG Tunnel</string>
-    <string name="watcher_channel_name">Notifikasi Saluran Pengamat</string>
     <string name="error_file_extension">File bukan .conf atau .zip</string>
     <string name="turn_off_tunnel">Aksi memerlukan tunnel mati</string>
     <string name="no_tunnels">Belum ada tunnel yang ditambahkan!</string>
@@ -99,7 +98,6 @@
     <string name="handshake">handshake</string>
     <string name="vpn_channel_id">Saluran VPN</string>
     <string name="vpn_channel_name">Notifikasi Saluran VPN</string>
-    <string name="watcher_channel_id">Saluran Pengamat</string>
     <string name="prominent_background_location_message">Fitur ini memerlukan izin lokasi latar belakang untuk mengaktifkan pemantauan SSID Wi-Fi bahkan saat aplikasi ditutup. Untuk detail lebih lanjut, silakan lihat Kebijakan Privasi yang ditautkan di layar Dukungan.</string>
     <string name="copy_public_key">Salin kunci publik</string>
     <string name="base64_key">kunci base64</string>

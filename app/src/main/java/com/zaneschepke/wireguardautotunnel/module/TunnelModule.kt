@@ -10,6 +10,7 @@ import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
 import dagger.Module
@@ -76,6 +77,7 @@ class TunnelModule {
 		@ApplicationScope applicationScope: CoroutineScope,
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
 		serviceManager: ServiceManager,
+		notificationService: NotificationService,
 	): TunnelService {
 		return WireGuardTunnel(
 			amneziaBackend,
@@ -85,12 +87,17 @@ class TunnelModule {
 			applicationScope,
 			ioDispatcher,
 			serviceManager,
+			notificationService,
 		)
 	}
 
 	@Singleton
 	@Provides
-	fun provideServiceManager(@ApplicationContext context: Context): ServiceManager {
-		return ServiceManager.getInstance(context)
+	fun provideServiceManager(
+		@ApplicationContext context: Context,
+		@IoDispatcher ioDispatcher: CoroutineDispatcher,
+		appDataRepository: AppDataRepository,
+	): ServiceManager {
+		return ServiceManager(context, ioDispatcher, appDataRepository)
 	}
 }
