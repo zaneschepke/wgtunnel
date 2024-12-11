@@ -85,6 +85,7 @@ constructor(
 
 	private suspend fun setState(tunnelConfig: TunnelConfig, tunnelState: TunnelState): Result<TunnelState> {
 		return runCatching {
+			updateTunnelConfig(tunnelConfig) //need so kernel can get tunnel name or it breaks kernel
 			when (val backend = backend()) {
 				is Backend -> backend.setState(this, tunnelState.toWgState(), TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)).let { TunnelState.from(it) }
 				is org.amnezia.awg.backend.Backend -> {
@@ -102,6 +103,7 @@ constructor(
 				else -> throw NotImplementedError()
 			}
 		}.onFailure {
+			//TODO add better error message and comms to user
 			Timber.e(it)
 		}
 	}

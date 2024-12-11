@@ -25,7 +25,9 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionIte
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.permission.vpn.withVpnPermission
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchVpnSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
@@ -39,6 +41,8 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 
 	fun toggleVpnKillSwitch() {
 		with(uiState.settings) {
+			//TODO improve this error message
+			if(isKernelEnabled) return SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
 			if (isVpnKillSwitchEnabled) {
 				appViewModel.onToggleVpnKillSwitch(false)
 			} else {
