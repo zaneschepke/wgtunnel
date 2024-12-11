@@ -237,6 +237,7 @@ constructor(
 			if (!isKernelEnabled) {
 				requestRoot().onSuccess {
 					if (!isKernelSupported()) return@onSuccess SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
+					tunnelService.get().setBackendState(BackendState.INACTIVE, emptyList())
 					appDataRepository.settings.save(
 						copy(
 							isKernelEnabled = true,
