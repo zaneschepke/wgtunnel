@@ -1,0 +1,3 @@
+What's new:
+- Fixed kernel mode toggle bug
+- Fixed notification crash bug
