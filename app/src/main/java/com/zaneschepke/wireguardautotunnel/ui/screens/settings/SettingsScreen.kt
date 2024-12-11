@@ -151,50 +151,51 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 					),
 				)
 				if (!isRunningOnTv) {
-					addAll(
-						listOf(
-							SelectionItem(
-								Icons.Outlined.VpnLock,
-								{
-									ScaledSwitch(
-										enabled = !(
-											(
-												uiState.settings.isTunnelOnWifiEnabled ||
-													uiState.settings.isTunnelOnEthernetEnabled ||
-													uiState.settings.isTunnelOnMobileDataEnabled
-												) &&
-												uiState.settings.isAutoTunnelEnabled
-											),
-										onClick = { appViewModel.onToggleAlwaysOnVPN() },
-										checked = uiState.settings.isAlwaysOnVpnEnabled,
-									)
-								},
-								title = {
-									Text(
-										stringResource(R.string.always_on_vpn_support),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								onClick = { appViewModel.onToggleAlwaysOnVPN() },
-							),
-							SelectionItem(
-								Icons.Outlined.VpnKeyOff,
-								title = {
-									Text(
-										stringResource(R.string.kill_switch_options),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								onClick = {
-									navController.navigate(Route.KillSwitch)
-								},
-								trailing = {
-									ForwardButton { navController.navigate(Route.KillSwitch) }
-								},
-							),
+					add(
+						SelectionItem(
+							Icons.Outlined.VpnLock,
+							{
+								ScaledSwitch(
+									enabled = !(
+										(
+											uiState.settings.isTunnelOnWifiEnabled ||
+												uiState.settings.isTunnelOnEthernetEnabled ||
+												uiState.settings.isTunnelOnMobileDataEnabled
+											) &&
+											uiState.settings.isAutoTunnelEnabled
+										),
+									onClick = { appViewModel.onToggleAlwaysOnVPN() },
+									checked = uiState.settings.isAlwaysOnVpnEnabled,
+								)
+							},
+							title = {
+								Text(
+									stringResource(R.string.always_on_vpn_support),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
+							},
+							onClick = { appViewModel.onToggleAlwaysOnVPN() },
 						),
 					)
 				}
+				add(
+					SelectionItem(
+						Icons.Outlined.VpnKeyOff,
+						title = {
+							Text(
+								stringResource(R.string.kill_switch_options),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						onClick = {
+							navController.navigate(Route.KillSwitch)
+						},
+						trailing = {
+							ForwardButton { navController.navigate(Route.KillSwitch) }
+						},
+					),
+				)
+
 				add(
 					SelectionItem(
 						Icons.Outlined.Restore,

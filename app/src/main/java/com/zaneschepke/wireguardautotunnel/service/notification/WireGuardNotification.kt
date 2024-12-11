@@ -86,13 +86,13 @@ constructor(
 
 	fun NotificationChannels.asBuilder(): NotificationCompat.Builder {
 		return when (this) {
-			NotificationChannels.VPN -> {
+			NotificationChannels.AUTO_TUNNEL -> {
 				NotificationCompat.Builder(
 					context,
 					context.getString(R.string.auto_tunnel_channel_id),
 				)
 			}
-			NotificationChannels.AUTO_TUNNEL -> {
+			NotificationChannels.VPN -> {
 				NotificationCompat.Builder(
 					context,
 					context.getString(R.string.vpn_channel_id),
