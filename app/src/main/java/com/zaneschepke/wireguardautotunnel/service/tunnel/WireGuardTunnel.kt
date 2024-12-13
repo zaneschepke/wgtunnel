@@ -85,7 +85,6 @@ constructor(
 
 	private suspend fun setState(tunnelConfig: TunnelConfig, tunnelState: TunnelState): Result<TunnelState> {
 		return runCatching {
-			updateTunnelConfig(tunnelConfig) //need so kernel can get tunnel name or it breaks kernel
 			when (val backend = backend()) {
 				is Backend -> backend.setState(this, tunnelState.toWgState(), TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)).let { TunnelState.from(it) }
 				is org.amnezia.awg.backend.Backend -> {
@@ -103,7 +102,7 @@ constructor(
 				else -> throw NotImplementedError()
 			}
 		}.onFailure {
-			//TODO add better error message and comms to user
+			// TODO add better error message and comms to user
 			Timber.e(it)
 		}
 	}
@@ -115,26 +114,15 @@ constructor(
 	}
 
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig?, background: Boolean) {
-		if (tunnelConfig == null) return
 		withContext(ioDispatcher) {
-			if (isTunnelAlreadyRunning(tunnelConfig)) return@withContext
+			if (tunnelConfig == null || isTunnelAlreadyRunning(tunnelConfig)) return@withContext
+			updateTunnelConfig(tunnelConfig) // need to update this here
 			withServiceActive {
-				onBeforeStart(background)
+				onBeforeStart()
 				tunnelControlMutex.withLock {
 					setState(tunnelConfig, TunnelState.UP).onSuccess {
-						startActiveTunnelJobs()
-						if (it.isUp()) appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
-						with(notificationService) {
-							val notification = createNotification(
-								WireGuardNotification.NotificationChannels.VPN,
-								title = "${context.getString(R.string.tunnel_running)} - ${tunnelConfig.name}",
-								actions = listOf(
-									notificationService.createNotificationAction(NotificationAction.TUNNEL_OFF),
-								),
-							)
-							show(VPN_NOTIFICATION_ID, notification)
-						}
 						updateTunnelState(it, tunnelConfig)
+						onTunnelStart(tunnelConfig)
 					}
 				}.onFailure {
 					Timber.e(it)
@@ -150,10 +138,8 @@ constructor(
 				if (tunnelConfig == null) return@withContext
 				tunnelControlMutex.withLock {
 					setState(tunnelConfig, TunnelState.DOWN).onSuccess {
+						onTunnelStop(tunnelConfig)
 						updateTunnelState(it, null)
-						onStop(tunnelConfig)
-						notificationService.remove(VPN_NOTIFICATION_ID)
-						stopBackgroundService()
 					}.onFailure {
 						Timber.e(it)
 					}
@@ -218,33 +204,45 @@ constructor(
 		}
 	}
 
-	private suspend fun shutDownActiveTunnel() {
+	private suspend fun onBeforeStart() {
 		with(_vpnState.value) {
-			if (status.isUp()) {
-				stopTunnel()
-			}
+			if (status.isUp()) stopTunnel() else clearJobsAndStats()
+			if (isKernelBackend == true) serviceManager.startBackgroundService(tunnelConfig)
 		}
 	}
 
-	private suspend fun startBackgroundService() {
-		serviceManager.startBackgroundService()
-		serviceManager.updateTunnelTile()
+	private suspend fun onTunnelStart(tunnelConfig: TunnelConfig) {
+		startActiveTunnelJobs()
+		if (_vpnState.value.status.isUp()) {
+			appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
+		}
+		if (isKernelBackend == false) launchUserspaceTunnelNotification()
 	}
 
-	private fun stopBackgroundService() {
-		serviceManager.stopBackgroundService()
-		serviceManager.updateTunnelTile()
+	private fun launchUserspaceTunnelNotification() {
+		with(notificationService) {
+			val notification = createNotification(
+				WireGuardNotification.NotificationChannels.VPN,
+				title = "${context.getString(R.string.tunnel_running)} - ${_vpnState.value.tunnelConfig?.name}",
+				actions = listOf(
+					notificationService.createNotificationAction(NotificationAction.TUNNEL_OFF),
+				),
+			)
+			show(VPN_NOTIFICATION_ID, notification)
+		}
 	}
 
-	private suspend fun onBeforeStart(background: Boolean) {
-		shutDownActiveTunnel()
-		resetBackendStatistics()
-		val settings = appDataRepository.settings.getSettings()
-		if (background || settings.isKernelEnabled) startBackgroundService()
-	}
-
-	private suspend fun onStop(tunnelConfig: TunnelConfig) {
+	private suspend fun onTunnelStop(tunnelConfig: TunnelConfig) {
 		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
+		if (isKernelBackend == true) {
+			serviceManager.stopBackgroundService()
+		} else {
+			notificationService.remove(VPN_NOTIFICATION_ID)
+		}
+		clearJobsAndStats()
+	}
+
+	private fun clearJobsAndStats() {
 		cancelActiveTunnelJobs()
 		resetBackendStatistics()
 	}
@@ -303,13 +301,11 @@ constructor(
 				is Backend -> updateBackendStatistics(
 					WireGuardStatistics(backend.getStatistics(this@WireGuardTunnel)),
 				)
-				is org.amnezia.awg.backend.Backend -> {
-					updateBackendStatistics(
-						AmneziaStatistics(
-							backend.getStatistics(this@WireGuardTunnel),
-						),
-					)
-				}
+				is org.amnezia.awg.backend.Backend -> updateBackendStatistics(
+					AmneziaStatistics(
+						backend.getStatistics(this@WireGuardTunnel),
+					),
+				)
 			}
 			delay(VPN_STATISTIC_CHECK_INTERVAL)
 		}

@@ -41,8 +41,8 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 
 	fun toggleVpnKillSwitch() {
 		with(uiState.settings) {
-			//TODO improve this error message
-			if(isKernelEnabled) return SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
+			// TODO improve this error message
+			if (isKernelEnabled) return SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
 			if (isVpnKillSwitchEnabled) {
 				appViewModel.onToggleVpnKillSwitch(false)
 			} else {

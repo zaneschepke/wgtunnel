@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.service.foreground
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.service.tile.AutoTunnelControlTile
@@ -58,12 +59,12 @@ class ServiceManager
 		}
 	}
 
-	suspend fun startBackgroundService() {
+	suspend fun startBackgroundService(tunnelConfig: TunnelConfig?) {
 		if (backgroundService.isCompleted) return
 		kotlin.runCatching {
 			startService(TunnelBackgroundService::class.java, true)
 			backgroundService.await()
-			backgroundService.getCompleted().start()
+			backgroundService.getCompleted().start(tunnelConfig)
 		}.onFailure {
 			Timber.e(it)
 		}
@@ -85,7 +86,7 @@ class ServiceManager
 		}
 	}
 
-	fun updateAutoTunnelTile() {
+	private fun updateAutoTunnelTile() {
 		if (autoTunnelTile.isCompleted) {
 			autoTunnelTile.getCompleted().updateTileState()
 		} else {
