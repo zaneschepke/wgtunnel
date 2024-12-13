@@ -6,6 +6,8 @@ import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -24,12 +26,11 @@ class TunnelBackgroundService : LifecycleService() {
 
 	override fun onCreate() {
 		super.onCreate()
-		start()
+		serviceManager.backgroundService.complete(this)
 	}
 
 	override fun onBind(intent: Intent): IBinder? {
 		super.onBind(intent)
-		// We don't provide binding, so return null
 		return null
 	}
 
@@ -38,11 +39,11 @@ class TunnelBackgroundService : LifecycleService() {
 		return super.onStartCommand(intent, flags, startId)
 	}
 
-	fun start() {
+	fun start(tunnelConfig: TunnelConfig?) {
 		ServiceCompat.startForeground(
 			this,
 			NotificationService.KERNEL_SERVICE_NOTIFICATION_ID,
-			createNotification(),
+			createNotification(tunnelConfig),
 			Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,
 		)
 	}
@@ -57,11 +58,13 @@ class TunnelBackgroundService : LifecycleService() {
 		super.onDestroy()
 	}
 
-	private fun createNotification(): Notification {
+	private fun createNotification(tunnelConfig: TunnelConfig?): Notification {
 		return notificationService.createNotification(
 			WireGuardNotification.NotificationChannels.VPN,
-			getString(R.string.tunnel_running),
-			description = "",
+			title = "${getString(R.string.tunnel_running)} - ${tunnelConfig?.name}",
+			actions = listOf(
+				notificationService.createNotificationAction(NotificationAction.TUNNEL_OFF),
+			),
 		)
 	}
 }
