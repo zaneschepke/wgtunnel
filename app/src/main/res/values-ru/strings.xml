@@ -8,8 +8,8 @@
     <string name="peer">Пир</string>
     <string name="privacy_policy">Посмотреть политику конфиденциальности</string>
     <string name="icon">Иконка</string>
-    <string name="add_from_qr">Добавить из QR</string>
-    <string name="qr_scan">Сканировать QR</string>
+    <string name="add_from_qr">Добавить из QR-кода</string>
+    <string name="qr_scan">Сканировать QR-код</string>
     <string name="auto_tunneling">Автотуннелирование</string>
     <string name="no_tunnels">Туннели ещё не добавлены!</string>
     <string name="open_file">Открыть файл</string>
@@ -153,7 +153,7 @@
     <string name="use_wildcards">Использовать подстановочные знаки в имени</string>
     <string name="appearance">Внешний вид</string>
     <string name="notifications">Уведомления</string>
-    <string name="kill_switch">Экстренный разрыв соединения</string>
+    <string name="kill_switch">Экстренное отключение</string>
     <string name="dark">Тёмная</string>
     <string name="display_theme">Тема</string>
     <string name="selected">Выбрано</string>
