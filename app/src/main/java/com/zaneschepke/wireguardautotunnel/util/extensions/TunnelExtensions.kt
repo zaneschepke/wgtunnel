@@ -84,8 +84,8 @@ fun Config.toWgQuickString(): String {
 
 fun RootShell.getCurrentWifiName(): String? {
 	val response = mutableListOf<String>()
-	this.run(response, "dumpsys wifi | grep -o \"SSID: [^,]*\" | cut -d ' ' -f2- | tr -d '\"'")
-	return response.lastOrNull()
+	this.run(response, "dumpsys wifi | grep 'Supplicant state: COMPLETED' | grep -o 'SSID: [^,]*' | cut -d ' ' -f2- | tr -d '\"'")
+	return response.firstOrNull()
 }
 
 fun Backend.BackendState.asBackendState(): BackendState {
