@@ -56,7 +56,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 @Composable
 fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiState: AppUiState, tunnelId: Int) {
 	val navController = LocalNavController.current
-	val config = appUiState.tunnels.first { it.id == tunnelId }
+	val config = remember { appUiState.tunnels.first { it.id == tunnelId } }
 
 	var currentText by remember { mutableStateOf("") }
 

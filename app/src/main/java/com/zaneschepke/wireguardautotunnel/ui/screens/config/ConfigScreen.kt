@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,7 +56,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
@@ -65,17 +69,44 @@ import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.config.components.ApplicationSelectionDialog
+import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.InterfaceProxy
+import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 @Composable
-fun ConfigScreen(tunnelId: Int) {
-	val viewModel = hiltViewModel<ConfigViewModel, ConfigViewModel.ConfigViewModelFactory> { factory ->
-		factory.create(tunnelId)
+fun ConfigScreen(appUiState : AppUiState, tunnelId: Int, viewModel: ConfigViewModel = hiltViewModel()) {
+
+	val tunnelConfig by remember { derivedStateOf {
+		appUiState.tunnels.first { it.id == tunnelId }
+	} }
+
+	val configPair by remember { derivedStateOf {
+		Pair(tunnelConfig.name,tunnelConfig.toAmConfig()) }
 	}
+
+	var tunnelName by remember {
+		mutableStateOf(configPair.first)
+	}
+
+	var interfaceState by remember {
+		mutableStateOf(InterfaceProxy.from(configPair.second.`interface`))
+	}
+
+	var showAmneziaValues by remember {
+		mutableStateOf(configPair.second.`interface`.junkPacketCount.isPresent)
+	}
+
+	val peersState = remember {
+		mutableStateListOf<PeerProxy>().apply {
+			addAll(configPair.second.peers.map { PeerProxy.from(it) })
+		}
+	}
+
 
 	val context = LocalContext.current
 	val snackbar = SnackbarController.current
@@ -83,28 +114,11 @@ fun ConfigScreen(tunnelId: Int) {
 	val keyboardController = LocalSoftwareKeyboardController.current
 	val navController = LocalNavController.current
 
-	var showApplicationsDialog by remember { mutableStateOf(false) }
 	var showAuthPrompt by remember { mutableStateOf(false) }
 	var isAuthenticated by remember { mutableStateOf(false) }
 
-	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-	var configType by remember { mutableStateOf<ConfigType?>(null) }
-	val derivedConfigType = remember {
-		derivedStateOf {
-			configType ?: if (!uiState.isAmneziaEnabled) ConfigType.WIREGUARD else ConfigType.AMNEZIA
-		}
-	}
-	val saved by viewModel.saved.collectAsStateWithLifecycle(null)
-
-	LaunchedEffect(saved) {
-		if (saved == true) {
-			navController.navigate(Route.Main)
-		}
-	}
-
 	LaunchedEffect(Unit) {
-		delay(2_000L)
-		viewModel.cleanUpUninstalledApps()
+		viewModel.cleanUpUninstalledApps(tunnelConfig)
 	}
 
 	val keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
@@ -114,25 +128,6 @@ fun ConfigScreen(tunnelId: Int) {
 	val fillMaxWidth = .85f
 	val screenPadding = 5.dp
 
-	val applicationButtonText =
-		buildAnnotatedString {
-			append(stringResource(id = R.string.tunneling_apps))
-			append(": ")
-			if (uiState.isAllApplicationsEnabled) {
-				append(stringResource(id = R.string.all))
-			} else {
-				append("${uiState.checkedPackageNames.size} ")
-				(
-					if (uiState.include) {
-						append(stringResource(id = R.string.included))
-					} else {
-						append(
-							stringResource(id = R.string.excluded),
-						)
-					}
-					)
-			}
-		}
 
 	if (showAuthPrompt) {
 		AuthorizationPrompt(
@@ -155,12 +150,6 @@ fun ConfigScreen(tunnelId: Int) {
 		)
 	}
 
-	if (showApplicationsDialog) {
-		ApplicationSelectionDialog(viewModel, uiState) {
-			showApplicationsDialog = false
-		}
-	}
-
 	Scaffold(
 		topBar = {
 			TopNavBar(stringResource(R.string.edit_tunnel))
@@ -169,7 +158,24 @@ fun ConfigScreen(tunnelId: Int) {
 		floatingActionButton = {
 			FloatingActionButton(
 				onClick = {
-					viewModel.onSaveAllChanges()
+					runCatching {
+						viewModel.saveConfigChanges(
+							tunnelConfig.copy(
+								name = tunnelName,
+								wgQuick = Config.Builder().apply {
+									addPeers(peersState.map { it.toWgPeer() })
+									setInterface(interfaceState.toWgInterface())
+								}.build().toWgQuickString(true),
+								amQuick = org.amnezia.awg.config.Config.Builder().apply {
+									addPeers(peersState.map { it.toAmPeer() })
+									setInterface(interfaceState.toAmInterface())
+								}.build().toAwgQuickString(true)
+							)
+						)
+					}.onFailure {
+						Timber.e(it)
+						snackbar.showMessage(it.message ?: context.getString(R.string.unknown_error))
+					}
 				},
 				containerColor = MaterialTheme.colorScheme.primary,
 				shape = RoundedCornerShape(16.dp),
@@ -223,12 +229,12 @@ fun ConfigScreen(tunnelId: Int) {
 						)
 						ConfigurationToggle(
 							stringResource(id = R.string.show_amnezia_properties),
-							checked = derivedConfigType.value == ConfigType.AMNEZIA,
-							onCheckChanged = { configType = if (it) ConfigType.AMNEZIA else ConfigType.WIREGUARD },
+							checked = showAmneziaValues,
+							onCheckChanged = { showAmneziaValues = it },
 						)
 						ConfigurationTextBox(
-							value = uiState.tunnelName,
-							onValueChange = viewModel::onTunnelNameChange,
+							value = tunnelName,
+							onValueChange = { tunnelName = it },
 							keyboardActions = keyboardActions,
 							label = stringResource(R.string.name),
 							hint = stringResource(R.string.tunnel_name).lowercase(),
@@ -241,7 +247,7 @@ fun ConfigScreen(tunnelId: Int) {
 							Modifier
 								.fillMaxWidth()
 								.clickable { showAuthPrompt = true },
-							value = uiState.interfaceProxy.privateKey,
+							value = interfaceState.privateKey,
 							visualTransformation =
 							if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated) {
 								VisualTransformation.None
@@ -249,11 +255,13 @@ fun ConfigScreen(tunnelId: Int) {
 								PasswordVisualTransformation()
 							},
 							enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
-							onValueChange = { value -> viewModel.onPrivateKeyChange(value) },
+							onValueChange = { interfaceState = interfaceState.copy(privateKey = it) },
 							trailingIcon = {
 								IconButton(
 									modifier = Modifier.focusRequester(FocusRequester.Default),
-									onClick = { viewModel.generateKeyPair() },
+									onClick = {
+										//TODO handle recreate of key
+									},
 								) {
 									Icon(
 										Icons.Rounded.Refresh,
@@ -273,15 +281,17 @@ fun ConfigScreen(tunnelId: Int) {
 							Modifier
 								.fillMaxWidth()
 								.focusRequester(FocusRequester.Default),
-							value = uiState.interfaceProxy.publicKey,
+							value = interfaceState.publicKey,
 							enabled = false,
-							onValueChange = {},
+							onValueChange = {
+								interfaceState = interfaceState.copy(publicKey = it)
+							},
 							trailingIcon = {
 								IconButton(
 									modifier = Modifier.focusRequester(FocusRequester.Default),
 									onClick = {
 										clipboardManager.setText(
-											AnnotatedString(uiState.interfaceProxy.publicKey),
+											AnnotatedString(interfaceState.publicKey),
 										)
 									},
 								) {
@@ -299,8 +309,10 @@ fun ConfigScreen(tunnelId: Int) {
 							keyboardActions = keyboardActions,
 						)
 						ConfigurationTextBox(
-							value = uiState.interfaceProxy.addresses,
-							onValueChange = viewModel::onAddressesChanged,
+							value = interfaceState.addresses,
+							onValueChange = {
+								interfaceState = interfaceState.copy(addresses = it)
+							},
 							keyboardActions = keyboardActions,
 							label = stringResource(R.string.addresses),
 							hint = stringResource(R.string.comma_separated_list),
@@ -310,8 +322,10 @@ fun ConfigScreen(tunnelId: Int) {
 								.padding(end = 5.dp),
 						)
 						ConfigurationTextBox(
-							value = uiState.interfaceProxy.listenPort,
-							onValueChange = viewModel::onListenPortChanged,
+							value = interfaceState.listenPort,
+							onValueChange = {
+								interfaceState = interfaceState.copy(listenPort = it)
+							},
 							keyboardActions = keyboardActions,
 							label = stringResource(R.string.listen_port),
 							hint = stringResource(R.string.random),
@@ -319,8 +333,10 @@ fun ConfigScreen(tunnelId: Int) {
 						)
 						Row(modifier = Modifier.fillMaxWidth()) {
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.dnsServers,
-								onValueChange = viewModel::onDnsServersChanged,
+								value = interfaceState.dnsServers,
+								onValueChange = {
+									interfaceState = interfaceState.copy(dnsServers = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.dns_servers),
 								hint = stringResource(R.string.comma_separated_list),
@@ -330,18 +346,22 @@ fun ConfigScreen(tunnelId: Int) {
 									.padding(end = 5.dp),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.mtu,
-								onValueChange = viewModel::onMtuChanged,
+								value = interfaceState.mtu,
+								onValueChange = {
+									interfaceState = interfaceState.copy(mtu = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.mtu),
 								hint = stringResource(R.string.auto),
 								modifier = Modifier.width(IntrinsicSize.Min),
 							)
 						}
-						if (derivedConfigType.value == ConfigType.AMNEZIA) {
+						if (showAmneziaValues) {
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.junkPacketCount,
-								onValueChange = viewModel::onJunkPacketCountChanged,
+								value = interfaceState.junkPacketCount,
+								onValueChange = {
+									interfaceState = interfaceState.copy(junkPacketCount = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.junk_packet_count),
 								hint = stringResource(R.string.junk_packet_count).lowercase(),
@@ -350,8 +370,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.junkPacketMinSize,
-								onValueChange = viewModel::onJunkPacketMinSizeChanged,
+								value = interfaceState.junkPacketMinSize,
+								onValueChange = {
+									interfaceState = interfaceState.copy(junkPacketMinSize = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.junk_packet_minimum_size),
 								hint =
@@ -363,8 +385,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.junkPacketMaxSize,
-								onValueChange = viewModel::onJunkPacketMaxSizeChanged,
+								value = interfaceState.junkPacketMaxSize,
+								onValueChange = {
+									interfaceState = interfaceState.copy(junkPacketMaxSize = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.junk_packet_maximum_size),
 								hint =
@@ -376,8 +400,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.initPacketJunkSize,
-								onValueChange = viewModel::onInitPacketJunkSizeChanged,
+								value = interfaceState.initPacketJunkSize,
+								onValueChange = {
+									interfaceState = interfaceState.copy(initPacketJunkSize = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.init_packet_junk_size),
 								hint = stringResource(R.string.init_packet_junk_size).lowercase(),
@@ -386,8 +412,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.responsePacketJunkSize,
-								onValueChange = viewModel::onResponsePacketJunkSize,
+								value = interfaceState.responsePacketJunkSize,
+								onValueChange = {
+									interfaceState = interfaceState.copy(responsePacketJunkSize = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.response_packet_junk_size),
 								hint =
@@ -399,8 +427,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.initPacketMagicHeader,
-								onValueChange = viewModel::onInitPacketMagicHeader,
+								value = interfaceState.initPacketMagicHeader,
+								onValueChange = {
+									interfaceState = interfaceState.copy(initPacketMagicHeader = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.init_packet_magic_header),
 								hint =
@@ -412,8 +442,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.responsePacketMagicHeader,
-								onValueChange = viewModel::onResponsePacketMagicHeader,
+								value = interfaceState.responsePacketMagicHeader,
+								onValueChange = {
+									interfaceState = interfaceState.copy(responsePacketMagicHeader = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.response_packet_magic_header),
 								hint =
@@ -425,8 +457,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.underloadPacketMagicHeader,
-								onValueChange = viewModel::onUnderloadPacketMagicHeader,
+								value = interfaceState.underloadPacketMagicHeader,
+								onValueChange = {
+									interfaceState = interfaceState.copy(underloadPacketMagicHeader = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.underload_packet_magic_header),
 								hint =
@@ -438,8 +472,10 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 							ConfigurationTextBox(
-								value = uiState.interfaceProxy.transportPacketMagicHeader,
-								onValueChange = viewModel::onTransportPacketMagicHeader,
+								value = interfaceState.transportPacketMagicHeader,
+								onValueChange = {
+									interfaceState = interfaceState.copy(transportPacketMagicHeader = it)
+								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.transport_packet_magic_header),
 								hint =
@@ -451,21 +487,9 @@ fun ConfigScreen(tunnelId: Int) {
 									.fillMaxWidth(),
 							)
 						}
-						Row(
-							verticalAlignment = Alignment.CenterVertically,
-							modifier =
-							Modifier
-								.fillMaxSize()
-								.padding(top = 5.dp),
-							horizontalArrangement = Arrangement.Center,
-						) {
-							TextButton(onClick = { showApplicationsDialog = true }) {
-								Text(applicationButtonText.text)
-							}
-						}
 					}
 				}
-				uiState.proxyPeers.forEachIndexed { index, peer ->
+				peersState.forEachIndexed { index, peer ->
 					Surface(
 						tonalElevation = 2.dp,
 						shadowElevation = 2.dp,
@@ -503,7 +527,9 @@ fun ConfigScreen(tunnelId: Int) {
 									stringResource(R.string.peer),
 									padding = screenPadding,
 								)
-								IconButton(onClick = { viewModel.onDeletePeer(index) }) {
+								IconButton(onClick = {
+									peersState.removeAt(index)
+								}) {
 									val icon = Icons.Rounded.Delete
 									Icon(icon, icon.name)
 								}
@@ -512,7 +538,7 @@ fun ConfigScreen(tunnelId: Int) {
 							ConfigurationTextBox(
 								value = peer.publicKey,
 								onValueChange = { value ->
-									viewModel.onPeerPublicKeyChange(index, value)
+									peersState[index] = peersState[index].copy(publicKey = value)
 								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.public_key),
@@ -522,7 +548,7 @@ fun ConfigScreen(tunnelId: Int) {
 							ConfigurationTextBox(
 								value = peer.preSharedKey,
 								onValueChange = { value ->
-									viewModel.onPreSharedKeyChange(index, value)
+									peersState[index] = peersState[index].copy(preSharedKey = value)
 								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.preshared_key),
@@ -534,7 +560,7 @@ fun ConfigScreen(tunnelId: Int) {
 								value = peer.persistentKeepalive,
 								enabled = true,
 								onValueChange = { value ->
-									viewModel.onPersistentKeepaliveChanged(index, value)
+									peersState[index] = peersState[index].copy(persistentKeepalive = value)
 								},
 								trailingIcon = {
 									Text(
@@ -553,7 +579,7 @@ fun ConfigScreen(tunnelId: Int) {
 							ConfigurationTextBox(
 								value = peer.endpoint,
 								onValueChange = { value ->
-									viewModel.onEndpointChange(index, value)
+									peersState[index] = peersState[index].copy(endpoint = value)
 								},
 								keyboardActions = keyboardActions,
 								label = stringResource(R.string.endpoint),
@@ -565,7 +591,7 @@ fun ConfigScreen(tunnelId: Int) {
 								value = peer.allowedIps,
 								enabled = true,
 								onValueChange = { value ->
-									viewModel.onAllowedIpsChange(index, value)
+									peersState[index] = peersState[index].copy(allowedIps = value)
 								},
 								label = { Text(stringResource(R.string.allowed_ips)) },
 								singleLine = true,
@@ -590,7 +616,9 @@ fun ConfigScreen(tunnelId: Int) {
 						verticalAlignment = Alignment.CenterVertically,
 						horizontalArrangement = Arrangement.Center,
 					) {
-						TextButton(onClick = { viewModel.addEmptyPeer() }) {
+						TextButton(onClick = {
+							peersState.add(PeerProxy())
+						}) {
 							Text(stringResource(R.string.add_peer))
 						}
 					}

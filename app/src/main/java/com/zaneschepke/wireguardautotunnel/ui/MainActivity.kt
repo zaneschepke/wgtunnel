@@ -190,6 +190,7 @@ class MainActivity : AppCompatActivity() {
 									composable<Route.Config> {
 										val args = it.toRoute<Route.Config>()
 										ConfigScreen(
+											appUiState,
 											tunnelId = args.id,
 										)
 									}

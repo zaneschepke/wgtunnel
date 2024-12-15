@@ -69,6 +69,10 @@ data class TunnelConfig(
 		return configFromAmQuick(if (amQuick != "") amQuick else wgQuick)
 	}
 
+	fun toWgConfig(): Config {
+		return configFromWgQuick(wgQuick)
+	}
+
 	companion object {
 
 		fun configFromWgQuick(wgQuick: String): Config {
