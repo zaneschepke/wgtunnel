@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.config.model
+package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model
 
 import com.wireguard.config.Interface
 

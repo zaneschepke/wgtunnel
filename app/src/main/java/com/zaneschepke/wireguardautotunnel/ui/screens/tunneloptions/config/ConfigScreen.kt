@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.config
+package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
@@ -49,18 +49,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
@@ -68,14 +64,11 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
-import com.zaneschepke.wireguardautotunnel.ui.screens.config.components.ApplicationSelectionDialog
-import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.InterfaceProxy
-import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigType
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import kotlinx.coroutines.delay
 import timber.log.Timber
 
 @Composable

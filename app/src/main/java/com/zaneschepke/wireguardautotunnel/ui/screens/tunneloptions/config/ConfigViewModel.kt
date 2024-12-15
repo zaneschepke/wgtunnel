@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.config
+package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config
 
 import android.Manifest
 import android.content.pm.PackageInfo
@@ -6,39 +6,16 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wireguard.config.Config
-import com.wireguard.config.Interface
-import com.wireguard.config.Peer
-import com.wireguard.crypto.Key
-import com.wireguard.crypto.KeyPair
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.InterfaceProxy
-import com.zaneschepke.wireguardautotunnel.ui.screens.config.model.PeerProxy
-import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue
-import com.zaneschepke.wireguardautotunnel.util.extensions.removeAt
-import com.zaneschepke.wireguardautotunnel.util.extensions.update
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -85,7 +62,7 @@ constructor(
 		}
 	}
 
-	fun getPackageLabel(packageInfo: PackageInfo): String {
+	private fun getPackageLabel(packageInfo: PackageInfo): String {
 		return packageInfo.applicationInfo?.loadLabel(packageManager).toString()
 	}
 

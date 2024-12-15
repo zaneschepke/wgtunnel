@@ -1,13 +1,13 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.config.model
+package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model
 
 import com.wireguard.config.Peer
 
 data class PeerProxy(
-	val publicKey: String = "",
-	val preSharedKey: String = "",
-	val persistentKeepalive: String = "",
-	val endpoint: String = "",
-	val allowedIps: String = IPV4_WILDCARD.joinToString(", ").trim(),
+    val publicKey: String = "",
+    val preSharedKey: String = "",
+    val persistentKeepalive: String = "",
+    val endpoint: String = "",
+    val allowedIps: String = IPV4_WILDCARD.joinToString(", ").trim(),
 ) {
 	fun toWgPeer() : Peer {
 		return Peer.Builder().apply {
