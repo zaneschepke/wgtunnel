@@ -34,7 +34,7 @@
     <string name="all">все</string>
     <string name="no_email_detected">Приложение для отправки почты не обнаружено</string>
     <string name="enter_pin">Введите PIN-код</string>
-    <string name="enable_app_lock">Включить блокировку приложения</string>
+    <string name="enable_app_lock">Защита приложения</string>
     <string name="restart_on_ping">Перезапуск при сбое пинга (бета)</string>
     <string name="settings">Настройки</string>
     <string name="support">Поддержка</string>
