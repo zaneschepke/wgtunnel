@@ -1,12 +1,15 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Context.POWER_SERVICE
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.service.quicksettings.TileService
@@ -168,24 +171,6 @@ fun Context.launchAppSettings() {
 	}
 }
 
-// fun Context.startTunnelBackground(tunnelId: Int) {
-// 	sendBroadcast(
-// 		Intent(this, BackgroundActionReceiver::class.java).apply {
-// 			action = BackgroundActionReceiver.ACTION_CONNECT
-// 			putExtra(BackgroundActionReceiver.TUNNEL_ID_EXTRA_KEY, tunnelId)
-// 		},
-// 	)
-// }
-//
-// fun Context.stopTunnelBackground(tunnelId: Int) {
-// 	sendBroadcast(
-// 		Intent(this, BackgroundActionReceiver::class.java).apply {
-// 			action = BackgroundActionReceiver.ACTION_DISCONNECT
-// 			putExtra(BackgroundActionReceiver.TUNNEL_ID_EXTRA_KEY, tunnelId)
-// 		},
-// 	)
-// }
-
 fun Context.requestTunnelTileServiceStateUpdate() {
 	TileService.requestListeningState(
 		this,
@@ -198,4 +183,16 @@ fun Context.requestAutoTunnelTileServiceUpdate() {
 		this,
 		ComponentName(this, AutoTunnelControlTile::class.java),
 	)
+}
+
+fun Context.getAllInternetCapablePackages(): List<PackageInfo> {
+	val permissions = arrayOf(Manifest.permission.INTERNET)
+	return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+		packageManager.getPackagesHoldingPermissions(
+			permissions,
+			PackageManager.PackageInfoFlags.of(0L),
+		)
+	} else {
+		packageManager.getPackagesHoldingPermissions(permissions, 0)
+	}
 }

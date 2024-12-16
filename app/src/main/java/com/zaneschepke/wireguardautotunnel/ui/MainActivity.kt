@@ -41,9 +41,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
-import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.pinlock.PinLockScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.scanner.ScannerScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
@@ -55,6 +53,8 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.Locati
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSwitchScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.OptionsScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.splittunnel.SplitTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.tunnelautotunnel.TunnelAutoTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme

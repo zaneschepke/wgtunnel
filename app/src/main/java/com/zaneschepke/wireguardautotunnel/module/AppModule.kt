@@ -2,9 +2,9 @@ package com.zaneschepke.wireguardautotunnel.module
 
 import android.content.Context
 import com.zaneschepke.logcatter.LogReader
+import com.zaneschepke.logcatter.LogcatReader
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
-import com.zaneschepke.logcatter.LogcatReader
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

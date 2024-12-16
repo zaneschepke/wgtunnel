@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel
 
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.Tunnel.State
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
@@ -9,7 +10,9 @@ import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.Kernel
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
+import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService.Companion.VPN_NOTIFICATION_ID
 import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
@@ -29,9 +32,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
-import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService.Companion.VPN_NOTIFICATION_ID
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Provider

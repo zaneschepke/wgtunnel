@@ -9,8 +9,8 @@ data class InterfaceProxy(
 	val dnsServers: String = "",
 	val listenPort: String = "",
 	val mtu: String = "",
-	val includedApplications : Set<String> = emptySet(),
-	val excludedApplication : Set<String> = emptySet(),
+	val includedApplications: Set<String> = emptySet(),
+	val excludedApplication: Set<String> = emptySet(),
 	val junkPacketCount: String = "",
 	val junkPacketMinSize: String = "",
 	val junkPacketMaxSize: String = "",
@@ -22,36 +22,36 @@ data class InterfaceProxy(
 	val transportPacketMagicHeader: String = "",
 ) {
 
-	fun toWgInterface() : Interface {
+	fun toWgInterface(): Interface {
 		return Interface.Builder().apply {
 			parsePrivateKey(privateKey)
 			parseAddresses(addresses)
 			parseDnsServers(dnsServers)
-			if(mtu.isNotBlank()) parseMtu(mtu)
-			if(listenPort.isNotBlank()) parseListenPort(listenPort)
+			if (mtu.isNotBlank()) parseMtu(mtu)
+			if (listenPort.isNotBlank()) parseListenPort(listenPort)
 			includeApplications(includedApplications)
 			excludeApplications(excludedApplication)
 		}.build()
 	}
 
-	fun toAmInterface() : org.amnezia.awg.config.Interface {
+	fun toAmInterface(): org.amnezia.awg.config.Interface {
 		return org.amnezia.awg.config.Interface.Builder().apply {
 			parsePrivateKey(privateKey)
 			parseAddresses(addresses)
 			parseDnsServers(dnsServers)
-			if(mtu.isNotBlank()) parseMtu(mtu)
-			if(listenPort.isNotBlank()) parseListenPort(listenPort)
+			if (mtu.isNotBlank()) parseMtu(mtu)
+			if (listenPort.isNotBlank()) parseListenPort(listenPort)
 			includeApplications(includedApplications)
 			excludeApplications(excludedApplication)
-			if(junkPacketCount.isNotBlank()) parseJunkPacketCount(junkPacketCount)
-			if(junkPacketMinSize.isNotBlank()) parseJunkPacketMinSize(junkPacketMinSize)
-			if(junkPacketMaxSize.isNotBlank()) parseJunkPacketMaxSize(junkPacketMaxSize)
-			if(initPacketJunkSize.isNotBlank()) parseInitPacketJunkSize(initPacketJunkSize)
-			if(responsePacketJunkSize.isNotBlank()) parseResponsePacketJunkSize(responsePacketJunkSize)
-			if(initPacketMagicHeader.isNotBlank()) parseInitPacketMagicHeader(initPacketMagicHeader)
-			if(responsePacketMagicHeader.isNotBlank()) parseResponsePacketMagicHeader(responsePacketMagicHeader)
-			if(underloadPacketMagicHeader.isNotBlank()) parseUnderloadPacketMagicHeader(underloadPacketMagicHeader)
-			if(transportPacketMagicHeader.isNotBlank()) parseTransportPacketMagicHeader(transportPacketMagicHeader)
+			if (junkPacketCount.isNotBlank()) parseJunkPacketCount(junkPacketCount)
+			if (junkPacketMinSize.isNotBlank()) parseJunkPacketMinSize(junkPacketMinSize)
+			if (junkPacketMaxSize.isNotBlank()) parseJunkPacketMaxSize(junkPacketMaxSize)
+			if (initPacketJunkSize.isNotBlank()) parseInitPacketJunkSize(initPacketJunkSize)
+			if (responsePacketJunkSize.isNotBlank()) parseResponsePacketJunkSize(responsePacketJunkSize)
+			if (initPacketMagicHeader.isNotBlank()) parseInitPacketMagicHeader(initPacketMagicHeader)
+			if (responsePacketMagicHeader.isNotBlank()) parseResponsePacketMagicHeader(responsePacketMagicHeader)
+			if (underloadPacketMagicHeader.isNotBlank()) parseUnderloadPacketMagicHeader(underloadPacketMagicHeader)
+			if (transportPacketMagicHeader.isNotBlank()) parseTransportPacketMagicHeader(transportPacketMagicHeader)
 		}.build()
 	}
 
@@ -73,7 +73,7 @@ data class InterfaceProxy(
 				},
 				mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
 				includedApplications = i.includedApplications,
-				excludedApplication = i.excludedApplications
+				excludedApplication = i.excludedApplications,
 			)
 		}
 

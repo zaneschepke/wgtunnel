@@ -32,7 +32,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -72,14 +71,17 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import timber.log.Timber
 
 @Composable
-fun ConfigScreen(appUiState : AppUiState, tunnelId: Int, viewModel: ConfigViewModel = hiltViewModel()) {
+fun ConfigScreen(appUiState: AppUiState, tunnelId: Int, viewModel: ConfigViewModel = hiltViewModel()) {
+	val tunnelConfig by remember {
+		derivedStateOf {
+			appUiState.tunnels.first { it.id == tunnelId }
+		}
+	}
 
-	val tunnelConfig by remember { derivedStateOf {
-		appUiState.tunnels.first { it.id == tunnelId }
-	} }
-
-	val configPair by remember { derivedStateOf {
-		Pair(tunnelConfig.name,tunnelConfig.toAmConfig()) }
+	val configPair by remember {
+		derivedStateOf {
+			Pair(tunnelConfig.name, tunnelConfig.toAmConfig())
+		}
 	}
 
 	var tunnelName by remember {
@@ -100,7 +102,6 @@ fun ConfigScreen(appUiState : AppUiState, tunnelId: Int, viewModel: ConfigViewMo
 		}
 	}
 
-
 	val context = LocalContext.current
 	val snackbar = SnackbarController.current
 	val clipboardManager: ClipboardManager = LocalClipboardManager.current
@@ -110,17 +111,12 @@ fun ConfigScreen(appUiState : AppUiState, tunnelId: Int, viewModel: ConfigViewMo
 	var showAuthPrompt by remember { mutableStateOf(false) }
 	var isAuthenticated by remember { mutableStateOf(false) }
 
-	LaunchedEffect(Unit) {
-		viewModel.cleanUpUninstalledApps(tunnelConfig)
-	}
-
 	val keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
 	val keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
 
 	val fillMaxHeight = .85f
 	val fillMaxWidth = .85f
 	val screenPadding = 5.dp
-
 
 	if (showAuthPrompt) {
 		AuthorizationPrompt(
@@ -162,8 +158,8 @@ fun ConfigScreen(appUiState : AppUiState, tunnelId: Int, viewModel: ConfigViewMo
 								amQuick = org.amnezia.awg.config.Config.Builder().apply {
 									addPeers(peersState.map { it.toAmPeer() })
 									setInterface(interfaceState.toAmInterface())
-								}.build().toAwgQuickString(true)
-							)
+								}.build().toAwgQuickString(true),
+							),
 						)
 					}.onFailure {
 						Timber.e(it)
@@ -253,7 +249,7 @@ fun ConfigScreen(appUiState : AppUiState, tunnelId: Int, viewModel: ConfigViewMo
 								IconButton(
 									modifier = Modifier.focusRequester(FocusRequester.Default),
 									onClick = {
-										//TODO handle recreate of key
+										// TODO handle recreate of key
 									},
 								) {
 									Icon(
