@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.options
+package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.tunnelautotunnel
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,14 +11,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NetworkPing
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.SettingsEthernet
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,13 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
-import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.TrustedNetworkTextBox
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WildcardsLabel
@@ -54,9 +48,8 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
-fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiState: AppUiState, tunnelId: Int) {
-	val navController = LocalNavController.current
-	val config = appUiState.tunnels.first { it.id == tunnelId }
+fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunnelViewModel: TunnelAutoTunnelViewModel = hiltViewModel()) {
+	val config = remember { appUiState.tunnels.first { it.id == tunnelId } }
 
 	var currentText by remember { mutableStateOf("") }
 
@@ -65,59 +58,24 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 	}
 	Scaffold(
 		topBar = {
-			TopNavBar(config.name, trailing = {
-				IconButton(onClick = {
-					navController.navigate(
-						Route.Config(config.id),
-					)
-				}) {
-					val icon = Icons.Outlined.Edit
-					Icon(
-						imageVector = icon,
-						contentDescription = icon.name,
-					)
-				}
-			})
+			TopNavBar(config.name)
 		},
-	) {
+	) { padding ->
 		Column(
 			horizontalAlignment = Alignment.Start,
 			verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
 			modifier =
 			Modifier
 				.fillMaxSize()
-				.padding(it)
+				.padding(padding)
 				.verticalScroll(rememberScrollState())
 				.padding(top = 24.dp.scaledHeight())
 				.padding(horizontal = 24.dp.scaledWidth()),
 		) {
-			GroupLabel(stringResource(R.string.auto_tunneling))
 			SurfaceSelectionGroupButton(
 				buildList {
 					addAll(
 						listOf(
-							SelectionItem(
-								Icons.Outlined.Star,
-								title = {
-									Text(
-										stringResource(R.string.primary_tunnel),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								description = {
-									Text(
-										stringResource(R.string.set_primary_tunnel),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.outline),
-									)
-								},
-								trailing = {
-									ScaledSwitch(
-										config.isPrimaryTunnel,
-										onClick = { optionsViewModel.onTogglePrimaryTunnel(config) },
-									)
-								},
-								onClick = { optionsViewModel.onTogglePrimaryTunnel(config) },
-							),
 							SelectionItem(
 								Icons.Outlined.PhoneAndroid,
 								title = {
@@ -129,16 +87,16 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 								description = {
 									Text(
 										stringResource(R.string.mobile_data_tunnel),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.outline),
+										style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
 									)
 								},
 								trailing = {
 									ScaledSwitch(
 										config.isMobileDataTunnel,
-										onClick = { optionsViewModel.onToggleIsMobileDataTunnel(config) },
+										onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(config) },
 									)
 								},
-								onClick = { optionsViewModel.onToggleIsMobileDataTunnel(config) },
+								onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(config) },
 							),
 							SelectionItem(
 								Icons.Outlined.SettingsEthernet,
@@ -151,16 +109,16 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 								description = {
 									Text(
 										stringResource(R.string.set_ethernet_tunnel),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.outline),
+										style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
 									)
 								},
 								trailing = {
 									ScaledSwitch(
 										config.isEthernetTunnel,
-										onClick = { optionsViewModel.onToggleIsEthernetTunnel(config) },
+										onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(config) },
 									)
 								},
-								onClick = { optionsViewModel.onToggleIsEthernetTunnel(config) },
+								onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(config) },
 							),
 							SelectionItem(
 								Icons.Outlined.NetworkPing,
@@ -173,10 +131,10 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 								trailing = {
 									ScaledSwitch(
 										checked = config.isPingEnabled,
-										onClick = { optionsViewModel.onToggleRestartOnPing(config) },
+										onClick = { tunnelAutoTunnelViewModel.onToggleRestartOnPing(config) },
 									)
 								},
-								onClick = { optionsViewModel.onToggleRestartOnPing(config) },
+								onClick = { tunnelAutoTunnelViewModel.onToggleRestartOnPing(config) },
 							),
 						),
 					)
@@ -191,7 +149,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 										stringResource(R.string.default_ping_ip),
 										isErrorValue = { !it.isNullOrBlank() && !it.isValidIpv4orIpv6Address() },
 										onSubmit = {
-											optionsViewModel.saveTunnelChanges(
+											tunnelAutoTunnelViewModel.saveTunnelChanges(
 												config.copy(pingIp = it.ifBlank { null }),
 											)
 										},
@@ -209,7 +167,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 										),
 										isErrorValue = ::isSecondsError,
 										onSubmit = {
-											optionsViewModel.saveTunnelChanges(
+											tunnelAutoTunnelViewModel.saveTunnelChanges(
 												config.copy(pingInterval = if (it.isBlank()) null else it.toLong() * 1000),
 											)
 										},
@@ -223,7 +181,7 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 										),
 										isErrorValue = ::isSecondsError,
 										onSubmit = {
-											optionsViewModel.saveTunnelChanges(
+											tunnelAutoTunnelViewModel.saveTunnelChanges(
 												config.copy(pingCooldown = if (it.isBlank()) null else it.toLong() * 1000),
 											)
 										},
@@ -237,7 +195,9 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 							title = {
 								Row(
 									verticalAlignment = Alignment.CenterVertically,
-									modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp.scaledHeight()),
+									modifier = Modifier
+										.fillMaxWidth()
+										.padding(vertical = 4.dp.scaledHeight()),
 								) {
 									Row(
 										verticalAlignment = Alignment.CenterVertically,
@@ -270,9 +230,9 @@ fun OptionsScreen(optionsViewModel: OptionsViewModel = hiltViewModel(), appUiSta
 							description = {
 								TrustedNetworkTextBox(
 									config.tunnelNetworks,
-									onDelete = { optionsViewModel.onDeleteRunSSID(it, config) },
+									onDelete = { tunnelAutoTunnelViewModel.onDeleteRunSSID(it, config) },
 									currentText = currentText,
-									onSave = { optionsViewModel.onSaveRunSSID(it, config) },
+									onSave = { tunnelAutoTunnelViewModel.onSaveRunSSID(it, config) },
 									onValueChange = { currentText = it },
 									supporting = {
 										if (appUiState.settings.isWildcardsEnabled) {

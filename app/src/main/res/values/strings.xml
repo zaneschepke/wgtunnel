@@ -190,4 +190,8 @@
 	<string name="auto_tunnel_channel_name">Auto-tunnel Notification Channel</string>
 	<string name="auto_tunnel_channel_description">A channel for auto-tunnel state notifications</string>
 	<string name="stop">stop</string>
+    <string name="config">Config</string>
+	<string name="splt_tunneling">Split tunneling</string>
+	<string name="tunnel_specific_settings">Tunnel specific settings</string>
+	<string name="quick_actions">Quick actions</string>
 </resources>

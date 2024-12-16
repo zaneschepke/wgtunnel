@@ -95,7 +95,7 @@ fun TunnelRowItem(
 					IconButton(
 						onClick = {
 							navController.navigate(
-								Route.Option(tunnel.id),
+								Route.TunnelOptions(tunnel.id),
 							)
 						},
 					) {
@@ -128,7 +128,7 @@ fun TunnelRowItem(
 							onClick = {
 								onHold()
 								navController.navigate(
-									Route.Option(tunnel.id),
+									Route.TunnelOptions(tunnel.id),
 								)
 							},
 						) {

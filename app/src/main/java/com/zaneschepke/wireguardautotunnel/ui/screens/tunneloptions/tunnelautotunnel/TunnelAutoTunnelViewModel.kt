@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.options
+package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.tunnelautotunnel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class OptionsViewModel
+class TunnelAutoTunnelViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
