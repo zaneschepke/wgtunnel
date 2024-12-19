@@ -5,7 +5,6 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
-import timber.log.Timber
 
 data class AutoTunnelState(
 	val vpnState: VpnState = VpnState(),
@@ -82,7 +81,6 @@ data class AutoTunnelState(
 	}
 
 	private fun startOnUntrustedWifi(): Boolean {
-		Timber.d("Is tunnel on wifi enabled ${settings.isTunnelOnWifiEnabled}")
 		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.status.isDown() && !isCurrentSSIDTrusted()
 	}
 

@@ -11,8 +11,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import timber.log.Timber
 
 abstract class BaseNetworkService<T : BaseNetworkService<T>>(
@@ -25,7 +25,7 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
 	val wifiManager =
 		context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-	fun checkHasCapability(networkCapability: Int): Boolean {
+	private fun checkHasCapability(networkCapability: Int): Boolean {
 		val network = connectivityManager.activeNetwork
 		val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
 		return networkCapabilities?.hasTransport(networkCapability) == true
@@ -33,9 +33,6 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
 
 	override val networkStatus =
 		callbackFlow {
-			if (!checkHasCapability(networkCapability)) {
-				trySend(NetworkStatus.Unavailable())
-			}
 			val networkStatusCallback =
 				when (Build.VERSION.SDK_INT) {
 					in Build.VERSION_CODES.S..Int.MAX_VALUE -> {
@@ -92,10 +89,13 @@ abstract class BaseNetworkService<T : BaseNetworkService<T>>(
 			connectivityManager.registerNetworkCallback(request, networkStatusCallback)
 
 			awaitClose { connectivityManager.unregisterNetworkCallback(networkStatusCallback) }
+		}.onStart {
+			// needed for services that are not yet available as it will impact later combine flows if we don't emit
+			emit(NetworkStatus.Unavailable())
 		}.catch {
 			Timber.e(it)
-			// conflate for backpressure
-		}.conflate()
+			emit(NetworkStatus.Unavailable())
+		}
 }
 
 inline fun <Result> Flow<NetworkStatus>.map(

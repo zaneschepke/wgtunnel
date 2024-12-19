@@ -37,13 +37,16 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.onNotRunning
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -89,7 +92,9 @@ class AutoTunnelService : LifecycleService() {
 	@MainImmediateDispatcher
 	lateinit var mainImmediateDispatcher: CoroutineDispatcher
 
-	private val autoTunnelStateFlow = MutableStateFlow(AutoTunnelState())
+	private val defaultState = AutoTunnelState()
+
+	private val autoTunnelStateFlow = MutableStateFlow(defaultState)
 
 	private var wakeLock: PowerManager.WakeLock? = null
 
@@ -183,6 +188,7 @@ class AutoTunnelService : LifecycleService() {
 
 	private fun startPingStateJob() = lifecycleScope.launch {
 		autoTunnelStateFlow.collect {
+			if (it == defaultState) return@collect
 			if (it.isPingEnabled()) {
 				pingJob.onNotRunning { pingJob = startPingJob() }
 			} else {
@@ -237,7 +243,7 @@ class AutoTunnelService : LifecycleService() {
 			AutoTunnelState(tunnelService.get().vpnState.value, networkState, double.first, double.second)
 		}.collect { state ->
 			autoTunnelStateFlow.update {
-				it.copy(state.vpnState, state.networkState, state.settings, state.tunnels)
+				it.copy(vpnState = state.vpnState, networkState = state.networkState, settings = state.settings, tunnels = state.tunnels)
 			}
 		}
 	}
@@ -247,6 +253,7 @@ class AutoTunnelService : LifecycleService() {
 		pingJob = null
 	}
 
+	@OptIn(FlowPreview::class)
 	private fun combineNetworkEventsJob(): Flow<NetworkState> {
 		return combine(
 			wifiService.networkStatus,
@@ -263,14 +270,15 @@ class AutoTunnelService : LifecycleService() {
 					is NetworkStatus.Unavailable -> null
 				},
 			)
-		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }
+		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }.debounce(500L)
 	}
 
 	private fun combineSettings(): Flow<Pair<Settings, TunnelConfigs>> {
 		return combine(
 			appDataRepository.get().settings.getSettingsFlow(),
-			appDataRepository.get().tunnels.getTunnelConfigsFlow().distinctUntilChanged { old, new ->
-				old.map { it.isActive } != new.map { it.isActive }
+			appDataRepository.get().tunnels.getTunnelConfigsFlow().map { tunnels ->
+				// isActive is ignored for equality checks so user can manually toggle off tunnel with auto-tunnel
+				tunnels.map { it.copy(isActive = false) }
 			},
 		) { settings, tunnels ->
 			Pair(settings, tunnels)
@@ -279,22 +287,31 @@ class AutoTunnelService : LifecycleService() {
 
 	private suspend fun getWifiSSID(networkCapabilities: NetworkCapabilities): String? {
 		return withContext(ioDispatcher) {
-			with(autoTunnelStateFlow.value.settings) {
-				if (isWifiNameByShellEnabled) return@withContext rootShell.get().getCurrentWifiName()
-				wifiService.getNetworkName(networkCapabilities)
-			}.also {
-				if (it?.contains(Constants.UNREADABLE_SSID) == true) {
-					Timber.w("SSID unreadable: missing permissions")
-				} else {
-					Timber.i("Detected valid SSID")
-				}
+			val settings = settings()
+			if (settings.isWifiNameByShellEnabled) return@withContext rootShell.get().getCurrentWifiName()
+			wifiService.getNetworkName(networkCapabilities)
+		}.also {
+			if (it?.contains(Constants.UNREADABLE_SSID) == true) {
+				Timber.w("SSID unreadable: missing permissions")
+			} else {
+				Timber.i("Detected valid SSID")
 			}
 		}
 	}
 
+	private suspend fun settings(): Settings {
+		return if (autoTunnelStateFlow.value == defaultState) {
+			appDataRepository.get().settings.getSettings()
+		} else {
+			autoTunnelStateFlow.value.settings
+		}
+	}
+
+	@OptIn(FlowPreview::class)
 	private fun startAutoTunnelJob() = lifecycleScope.launch(ioDispatcher) {
 		Timber.i("Starting auto-tunnel network event watcher")
-		autoTunnelStateFlow.collect { watcherState ->
+		autoTunnelStateFlow.debounce(1000L).collect { watcherState ->
+			if (watcherState == defaultState) return@collect
 			Timber.d("New auto tunnel state emitted")
 			when (val event = watcherState.asAutoTunnelEvent()) {
 				is AutoTunnelEvent.Start -> tunnelService.get().startTunnel(
