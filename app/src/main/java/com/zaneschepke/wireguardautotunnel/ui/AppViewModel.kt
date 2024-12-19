@@ -81,7 +81,9 @@ constructor(
 		viewModelScope.launch {
 			initPin()
 			initServices()
-			initTunnel()
+			launch {
+				initTunnel()
+			}
 			appReadyCheck()
 		}
 	}
