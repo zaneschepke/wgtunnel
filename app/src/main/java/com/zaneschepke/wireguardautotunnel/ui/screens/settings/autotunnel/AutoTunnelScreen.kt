@@ -106,7 +106,7 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 		showLocationServicesAlertDialog,
 		onDismiss = { showLocationServicesAlertDialog = false },
 		onAttest = {
-			viewModel.onToggleTunnelOnWifi()
+			showLocationServicesAlertDialog = false
 		},
 	)
 
