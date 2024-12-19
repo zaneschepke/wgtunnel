@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.receiver.NotificationActionReceiver
+import com.zaneschepke.wireguardautotunnel.ui.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -46,6 +47,8 @@ constructor(
 				addAction(it)
 			}
 			setContentTitle(title)
+			setContentIntent(PendingIntent.getActivity(context, 0,
+				Intent(context, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
 			setContentText(description)
 			setOnlyAlertOnce(onlyAlertOnce)
 			setOngoing(onGoing)
@@ -84,7 +87,7 @@ constructor(
 		}
 	}
 
-	fun NotificationChannels.asBuilder(): NotificationCompat.Builder {
+	private fun NotificationChannels.asBuilder(): NotificationCompat.Builder {
 		return when (this) {
 			NotificationChannels.AUTO_TUNNEL -> {
 				NotificationCompat.Builder(
@@ -101,7 +104,7 @@ constructor(
 		}
 	}
 
-	fun NotificationChannels.asChannel(): NotificationChannel {
+	private fun NotificationChannels.asChannel(): NotificationChannel {
 		return when (this) {
 			NotificationChannels.VPN -> {
 				NotificationChannel(

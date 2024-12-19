@@ -19,7 +19,7 @@ interface NotificationService {
 		onlyAlertOnce: Boolean = true,
 	): Notification
 
-	fun createNotificationAction(action: NotificationAction): NotificationCompat.Action
+	fun createNotificationAction(notificationAction: NotificationAction): NotificationCompat.Action
 
 	fun remove(notificationId: Int)
 
