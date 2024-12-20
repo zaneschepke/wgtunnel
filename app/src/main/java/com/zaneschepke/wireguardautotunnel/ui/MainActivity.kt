@@ -194,6 +194,7 @@ class MainActivity : AppCompatActivity() {
 										ConfigScreen(
 											appUiState,
 											tunnelId = args.id,
+											appViewModel = viewModel,
 										)
 									}
 									composable<Route.TunnelOptions> {
@@ -216,7 +217,7 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.SplitTunnel> {
 										val args = it.toRoute<Route.SplitTunnel>()
-										SplitTunnelScreen(appUiState, args.id)
+										SplitTunnelScreen(appUiState, args.id, viewModel)
 									}
 									composable<Route.TunnelAutoTunnel> {
 										val args = it.toRoute<Route.SplitTunnel>()

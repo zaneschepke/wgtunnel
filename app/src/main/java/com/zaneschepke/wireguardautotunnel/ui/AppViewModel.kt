@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
+import com.wireguard.config.Config
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
@@ -16,13 +17,17 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -50,6 +55,15 @@ constructor(
 	private val logReader: LogReader,
 ) : ViewModel() {
 
+	private val _popBackStack = MutableSharedFlow<Boolean>()
+	val popBackStack = _popBackStack.asSharedFlow()
+
+	private val _isAppReady = MutableStateFlow(false)
+	val isAppReady = _isAppReady.asStateFlow()
+
+	private val _configurationChange = MutableStateFlow(false)
+	val configurationChange = _configurationChange.asStateFlow()
+
 	val uiState =
 		combine(
 			appDataRepository.settings.getSettingsFlow(),
@@ -70,12 +84,6 @@ constructor(
 			SharingStarted.WhileSubscribed(Constants.SUBSCRIPTION_TIMEOUT),
 			AppUiState(),
 		)
-
-	private val _isAppReady = MutableStateFlow(false)
-	val isAppReady = _isAppReady.asStateFlow()
-
-	private val _configurationChange = MutableStateFlow(false)
-	val configurationChange = _configurationChange.asStateFlow()
 
 	init {
 		viewModelScope.launch {
@@ -257,7 +265,7 @@ constructor(
 		}
 	}
 
-	private suspend fun requestRoot(): Result<Unit> {
+	suspend fun requestRoot(): Result<Unit> {
 		return withContext(ioDispatcher) {
 			kotlin.runCatching {
 				rootShell.get().start()
@@ -266,5 +274,60 @@ constructor(
 				SnackbarController.showMessage(StringValue.StringResource(R.string.error_root_denied))
 			}
 		}
+	}
+
+	fun saveConfigChanges(config: TunnelConfig, peers: List<PeerProxy>? = null, `interface`: InterfaceProxy? = null) = viewModelScope.launch(
+		ioDispatcher,
+	) {
+		runCatching {
+			val amConfig = config.toAmConfig()
+			val wgConfig = config.toWgConfig()
+			rebuildConfigsAndSave(config, amConfig, wgConfig, peers, `interface`)
+			_popBackStack.emit(true)
+			SnackbarController.showMessage(StringValue.StringResource(R.string.config_changes_saved))
+		}.onFailure {
+			Timber.e(it)
+			SnackbarController.showMessage(
+				it.message?.let { message ->
+					(StringValue.DynamicString(message))
+				} ?: StringValue.StringResource(R.string.unknown_error),
+			)
+		}
+	}
+
+	fun cleanUpUninstalledApps(tunnelConfig: TunnelConfig, packages: List<String>) = viewModelScope.launch(ioDispatcher) {
+		runCatching {
+			val amConfig = tunnelConfig.toAmConfig()
+			val wgConfig = tunnelConfig.toWgConfig()
+			val proxy = InterfaceProxy.from(amConfig.`interface`)
+			if (proxy.includedApplications.isEmpty() && proxy.excludedApplications.isEmpty()) return@launch
+			if (proxy.includedApplications.retainAll(packages.toSet()) || proxy.excludedApplications.retainAll(packages.toSet())) {
+				Timber.i("Removing split tunnel package for app that no longer exists on the device")
+				rebuildConfigsAndSave(tunnelConfig, amConfig, wgConfig, `interface` = proxy)
+			}
+		}.onFailure {
+			Timber.e(it)
+		}
+	}
+
+	private suspend fun rebuildConfigsAndSave(
+		config: TunnelConfig,
+		amConfig: org.amnezia.awg.config.Config,
+		wgConfig: Config,
+		peers: List<PeerProxy>? = null,
+		`interface`: InterfaceProxy? = null,
+	) {
+		appDataRepository.tunnels.save(
+			config.copy(
+				wgQuick = Config.Builder().apply {
+					addPeers(peers?.map { it.toWgPeer() } ?: wgConfig.peers)
+					setInterface(`interface`?.toWgInterface() ?: wgConfig.`interface`)
+				}.build().toWgQuickString(true),
+				amQuick = org.amnezia.awg.config.Config.Builder().apply {
+					addPeers(peers?.map { it.toAmPeer() } ?: amConfig.peers)
+					setInterface(`interface`?.toAmInterface() ?: amConfig.`interface`)
+				}.build().toAwgQuickString(true),
+			),
+		)
 	}
 }

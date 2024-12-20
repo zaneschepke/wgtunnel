@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +37,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,15 +45,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.SelectionItemButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
@@ -60,7 +63,7 @@ import java.text.Collator
 import java.util.Locale
 
 @Composable
-fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: SplitTunnelViewModel = hiltViewModel()) {
+fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 
@@ -68,31 +71,30 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: SplitTun
 
 	val collator = Collator.getInstance(Locale.getDefault())
 
-	val saved by viewModel.saved.collectAsStateWithLifecycle(false)
+	val popBackStack by viewModel.popBackStack.collectAsStateWithLifecycle(false)
+
+	LaunchedEffect(popBackStack) {
+		if (popBackStack) navController.popBackStack()
+	}
 
 	val config by remember { derivedStateOf { appUiState.tunnels.first { it.id == tunnelId } } }
 
-	val derivedSplitOption = remember {
-		derivedStateOf {
-			config.toWgConfig().let {
-				when {
-					it.`interface`.excludedApplications.isNotEmpty() -> Pair(SplitOptions.EXCLUDE, it.`interface`.excludedApplications)
-					it.`interface`.includedApplications.isNotEmpty() -> Pair(SplitOptions.INCLUDE, it.`interface`.includedApplications)
-					else -> Pair(SplitOptions.ALL, emptySet<String>())
-				}
-			}
+	var proxyInterface by remember { mutableStateOf(InterfaceProxy()) }
+
+	var selectedSplitOption by remember { mutableStateOf(SplitOptions.ALL) }
+
+	val selectedPackages = remember { mutableStateListOf<String>() }
+
+	LaunchedEffect(Unit) {
+		proxyInterface = InterfaceProxy.from(config.toWgConfig().`interface`)
+		val pair = when {
+			proxyInterface.excludedApplications.isNotEmpty() -> Pair(SplitOptions.EXCLUDE, proxyInterface.excludedApplications)
+			proxyInterface.includedApplications.isNotEmpty() -> Pair(SplitOptions.INCLUDE, proxyInterface.includedApplications)
+			else -> Pair(SplitOptions.ALL, mutableSetOf())
 		}
+		selectedSplitOption = pair.first
+		selectedPackages.addAll(pair.second)
 	}
-
-	var selectedSplitOption by remember { mutableStateOf(derivedSplitOption.value.first) }
-
-	val derivedSelectedPackages by remember {
-		derivedStateOf {
-			if (selectedSplitOption == derivedSplitOption.value.first) derivedSplitOption.value.second else emptySet()
-		}
-	}
-
-	val selectedPackage = remember { mutableStateListOf<String>().apply { addAll(derivedSelectedPackages) } }
 
 	val packages = remember {
 		context.getAllInternetCapablePackages().filter { it.applicationInfo != null }.map { pack ->
@@ -104,39 +106,37 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: SplitTun
 		}
 	}
 
-	val sortedPackages = remember {
-		mutableStateListOf<SplitTunnelApp>().apply {
-			addAll(packages.sortedWith(compareBy(collator) { it.name }))
-		}
-	}
-
 	var query: String by remember { mutableStateOf("") }
 
-	val queriedApps by remember {
+	val sortedPackages by remember {
 		derivedStateOf {
-			sortedPackages.filter { app ->
-				app.name.contains(query, ignoreCase = true)
-			}
+			packages.sortedWith(compareBy(collator) { it.name }).filter { it.name.contains(query) }.toMutableStateList()
 		}
 	}
 
 	LaunchedEffect(Unit) {
-// 		viewModel.cleanUpUninstalledApps(tunnelConfig)
-	}
-
-	LaunchedEffect(saved) {
-		if (saved) navController.popBackStack()
+		// clean up any split tunnel packages for apps that were uninstalled
+		viewModel.cleanUpUninstalledApps(config, packages.map { it.`package` })
 	}
 
 	Scaffold(
 		topBar = {
 			TopNavBar(stringResource(R.string.tunneling_apps), trailing = {
 				IconButton(onClick = {
-					when (selectedSplitOption) {
-						SplitOptions.INCLUDE -> viewModel.saveSplitTunnelConfig(selectedPackage, emptySet(), config)
-						SplitOptions.ALL -> viewModel.saveSplitTunnelConfig(emptySet(), emptySet(), config)
-						SplitOptions.EXCLUDE -> viewModel.saveSplitTunnelConfig(emptySet(), selectedPackage, config)
+					proxyInterface.apply {
+						includedApplications.clear()
+						excludedApplications.clear()
 					}
+					when (selectedSplitOption) {
+						SplitOptions.INCLUDE -> proxyInterface.includedApplications.apply {
+							addAll(selectedPackages)
+						}
+						SplitOptions.EXCLUDE -> proxyInterface.excludedApplications.apply {
+							addAll(selectedPackages)
+						}
+						SplitOptions.ALL -> Unit
+					}
+					viewModel.saveConfigChanges(config, `interface` = proxyInterface)
 				}) {
 					val icon = Icons.Outlined.Save
 					Icon(
@@ -189,6 +189,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: SplitTun
 							entry.text().asString(context)
 								.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
 							color = MaterialTheme.colorScheme.onBackground,
+							style = MaterialTheme.typography.labelMedium,
 						)
 					}
 				}
@@ -201,7 +202,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: SplitTun
 						.fillMaxWidth(),
 				) {
 					CustomTextField(
-						textStyle = MaterialTheme.typography.bodySmall.copy(
+						textStyle = MaterialTheme.typography.labelMedium.copy(
 							color = MaterialTheme.colorScheme.onBackground,
 						),
 						value = query,
@@ -229,11 +230,12 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: SplitTun
 					LazyColumn(
 						horizontalAlignment = Alignment.CenterHorizontally,
 						verticalArrangement = Arrangement.Top,
+						contentPadding = PaddingValues(top = 10.dp),
 					) {
-						items(queriedApps, key = { it.`package` }) { app ->
-							val checked = selectedPackage.contains(app.`package`)
+						items(sortedPackages, key = { it.`package` }) { app ->
+							val checked = selectedPackages.contains(app.`package`)
 							val onClick = {
-								if (checked) selectedPackage.remove(app.`package`) else selectedPackage.add(app.`package`)
+								if (checked) selectedPackages.remove(app.`package`) else selectedPackages.add(app.`package`)
 							}
 							SelectionItemButton(
 								{

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,12 +16,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,12 +29,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -52,26 +51,36 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.wireguard.config.Config
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
+import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.ui.common.text.SectionTitle
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import timber.log.Timber
+import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+import kotlinx.coroutines.launch
+import org.amnezia.awg.crypto.KeyPair
 
 @Composable
-fun ConfigScreen(appUiState: AppUiState, tunnelId: Int, viewModel: ConfigViewModel = hiltViewModel()) {
+fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: Int) {
+	val context = LocalContext.current
+	val snackbar = SnackbarController.current
+	val clipboardManager: ClipboardManager = LocalClipboardManager.current
+	val keyboardController = LocalSoftwareKeyboardController.current
+	val navController = LocalNavController.current
+	val scope = rememberCoroutineScope()
+
+	val popBackStack by appViewModel.popBackStack.collectAsStateWithLifecycle(false)
+
 	val tunnelConfig by remember {
 		derivedStateOf {
 			appUiState.tunnels.first { it.id == tunnelId }
@@ -96,27 +105,19 @@ fun ConfigScreen(appUiState: AppUiState, tunnelId: Int, viewModel: ConfigViewMod
 		mutableStateOf(configPair.second.`interface`.junkPacketCount.isPresent)
 	}
 
-	val peersState = remember {
-		mutableStateListOf<PeerProxy>().apply {
-			addAll(configPair.second.peers.map { PeerProxy.from(it) })
-		}
+	var showScripts by remember {
+		mutableStateOf(false)
 	}
 
-	val context = LocalContext.current
-	val snackbar = SnackbarController.current
-	val clipboardManager: ClipboardManager = LocalClipboardManager.current
-	val keyboardController = LocalSoftwareKeyboardController.current
-	val navController = LocalNavController.current
+	val peersState = remember {
+		configPair.second.peers.map { PeerProxy.from(it) }.toMutableStateList()
+	}
 
 	var showAuthPrompt by remember { mutableStateOf(false) }
 	var isAuthenticated by remember { mutableStateOf(false) }
 
 	val keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
 	val keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
-
-	val fillMaxHeight = .85f
-	val fillMaxWidth = .85f
-	val screenPadding = 5.dp
 
 	if (showAuthPrompt) {
 		AuthorizationPrompt(
@@ -139,477 +140,520 @@ fun ConfigScreen(appUiState: AppUiState, tunnelId: Int, viewModel: ConfigViewMod
 		)
 	}
 
+	LaunchedEffect(popBackStack) {
+		if (popBackStack) navController.popBackStack()
+	}
+
 	Scaffold(
 		topBar = {
-			TopNavBar(stringResource(R.string.edit_tunnel))
-		},
-		floatingActionButtonPosition = FabPosition.End,
-		floatingActionButton = {
-			FloatingActionButton(
-				onClick = {
-					runCatching {
-						viewModel.saveConfigChanges(
-							tunnelConfig.copy(
-								name = tunnelName,
-								wgQuick = Config.Builder().apply {
-									addPeers(peersState.map { it.toWgPeer() })
-									setInterface(interfaceState.toWgInterface())
-								}.build().toWgQuickString(true),
-								amQuick = org.amnezia.awg.config.Config.Builder().apply {
-									addPeers(peersState.map { it.toAmPeer() })
-									setInterface(interfaceState.toAmInterface())
-								}.build().toAwgQuickString(true),
-							),
-						)
-					}.onFailure {
-						Timber.e(it)
-						snackbar.showMessage(it.message ?: context.getString(R.string.unknown_error))
-					}
-				},
-				containerColor = MaterialTheme.colorScheme.primary,
-				shape = RoundedCornerShape(16.dp),
-			) {
-				Icon(
-					imageVector = Icons.Rounded.Save,
-					contentDescription = stringResource(id = R.string.save_changes),
-					tint = MaterialTheme.colorScheme.background,
-				)
-			}
+			TopNavBar(stringResource(R.string.edit_tunnel), trailing = {
+				IconButton(onClick = {
+					appViewModel.saveConfigChanges(
+						tunnelConfig.copy(
+							name = tunnelName,
+						),
+						peers = peersState,
+						`interface` = interfaceState,
+					)
+				}) {
+					val icon = Icons.Outlined.Save
+					Icon(
+						imageVector = icon,
+						contentDescription = icon.name,
+					)
+				}
+			})
 		},
 	) { padding ->
-		Column(Modifier.padding(padding)) {
-			Column(
-				horizontalAlignment = Alignment.CenterHorizontally,
-				verticalArrangement = Arrangement.Top,
-				modifier =
-				Modifier
-					.verticalScroll(rememberScrollState())
-					.weight(1f, true)
-					.fillMaxSize(),
+		Column(
+			horizontalAlignment = Alignment.Start,
+			verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
+			modifier =
+			Modifier
+				.fillMaxSize()
+				.padding(padding)
+				.verticalScroll(rememberScrollState())
+				.padding(top = 24.dp.scaledHeight())
+				.padding(horizontal = 24.dp.scaledWidth()),
+		) {
+			Surface(
+				shape = RoundedCornerShape(12.dp),
+				color = MaterialTheme.colorScheme.surface,
 			) {
-				Surface(
-					tonalElevation = 2.dp,
-					shadowElevation = 2.dp,
-					shape = RoundedCornerShape(12.dp),
-					color = MaterialTheme.colorScheme.surface,
-					modifier =
-					(
-						if (context.isRunningOnTv()) {
-							Modifier
-								.fillMaxHeight(fillMaxHeight)
-								.fillMaxWidth(fillMaxWidth)
-						} else {
-							Modifier.fillMaxWidth(fillMaxWidth)
-						}
-						)
-						.padding(bottom = 10.dp.scaledHeight()).padding(top = 24.dp.scaledHeight()),
+				Column(
+					horizontalAlignment = Alignment.Start,
+					verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top),
+					modifier = Modifier
+						.padding(16.dp.scaledWidth())
+						.focusGroup(),
 				) {
-					Column(
-						horizontalAlignment = Alignment.Start,
-						verticalArrangement = Arrangement.Top,
+					GroupLabel(
+						stringResource(R.string.interface_),
+					)
+					ConfigurationToggle(
+						stringResource(id = R.string.show_amnezia_properties),
+						checked = showAmneziaValues,
+						onCheckChanged = {
+							if (appUiState.settings.isKernelEnabled) {
+								snackbar.showMessage(context.getString(R.string.amnezia_kernel_message))
+							} else {
+								showAmneziaValues = it
+							}
+						},
+					)
+					ConfigurationToggle(
+						stringResource(id = R.string.show_scripts),
+						checked = showScripts,
+						onCheckChanged = { checked ->
+							if (appUiState.settings.isKernelEnabled) {
+								showScripts = checked
+							} else {
+								scope.launch {
+									appViewModel.requestRoot().onSuccess {
+										showScripts = checked
+									}
+								}
+							}
+						},
+					)
+					ConfigurationTextBox(
+						value = tunnelName,
+						onValueChange = { tunnelName = it },
+						keyboardActions = keyboardActions,
+						label = stringResource(R.string.name),
+						hint = stringResource(R.string.tunnel_name).lowercase(),
 						modifier =
 						Modifier
-							.padding(15.dp)
-							.focusGroup(),
+							.fillMaxWidth(),
+					)
+					OutlinedTextField(
+						textStyle = MaterialTheme.typography.labelLarge,
+						modifier =
+						Modifier
+							.fillMaxWidth()
+							.clickable { showAuthPrompt = true },
+						value = interfaceState.privateKey,
+						visualTransformation =
+						if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated) {
+							VisualTransformation.None
+						} else {
+							PasswordVisualTransformation()
+						},
+						enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
+						onValueChange = { interfaceState = interfaceState.copy(privateKey = it) },
+						trailingIcon = {
+							IconButton(
+								enabled = isAuthenticated,
+								modifier = Modifier.focusRequester(FocusRequester.Default),
+								onClick = {
+									val keypair = KeyPair()
+									interfaceState = interfaceState.copy(
+										privateKey = keypair.privateKey.toBase64(),
+										publicKey = keypair.publicKey.toBase64(),
+									)
+								},
+							) {
+								Icon(
+									Icons.Rounded.Refresh,
+									stringResource(R.string.rotate_keys),
+									tint = if (isAuthenticated) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
+								)
+							}
+						},
+						label = { Text(stringResource(R.string.private_key)) },
+						singleLine = true,
+						placeholder = {
+							Text(
+								stringResource(R.string.base64_key),
+								style = MaterialTheme.typography.labelLarge,
+								color = MaterialTheme.colorScheme.outline,
+							)
+						},
+						keyboardOptions = keyboardOptions,
+						keyboardActions = keyboardActions,
+					)
+					OutlinedTextField(
+						textStyle = MaterialTheme.typography.labelLarge,
+						modifier =
+						Modifier
+							.fillMaxWidth()
+							.focusRequester(FocusRequester.Default),
+						value = interfaceState.publicKey,
+						enabled = false,
+						onValueChange = {
+							interfaceState = interfaceState.copy(publicKey = it)
+						},
+						trailingIcon = {
+							IconButton(
+								modifier = Modifier.focusRequester(FocusRequester.Default),
+								onClick = {
+									clipboardManager.setText(
+										AnnotatedString(interfaceState.publicKey),
+									)
+								},
+							) {
+								Icon(
+									Icons.Rounded.ContentCopy,
+									stringResource(R.string.copy_public_key),
+									tint = MaterialTheme.colorScheme.onSurface,
+								)
+							}
+						},
+						label = { Text(stringResource(R.string.public_key)) },
+						singleLine = true,
+						placeholder = {
+							Text(
+								stringResource(R.string.base64_key),
+								style = MaterialTheme.typography.labelLarge,
+								color = MaterialTheme.colorScheme.outline,
+							)
+						},
+						keyboardOptions = keyboardOptions,
+						keyboardActions = keyboardActions,
+					)
+					ConfigurationTextBox(
+						value = interfaceState.addresses,
+						onValueChange = {
+							interfaceState = interfaceState.copy(addresses = it)
+						},
+						keyboardActions = keyboardActions,
+						label = stringResource(R.string.addresses),
+						hint = stringResource(R.string.comma_separated_list),
+						modifier =
+						Modifier
+							.fillMaxWidth()
+							.padding(end = 5.dp),
+					)
+					ConfigurationTextBox(
+						value = interfaceState.listenPort,
+						onValueChange = {
+							interfaceState = interfaceState.copy(listenPort = it)
+						},
+						keyboardActions = keyboardActions,
+						label = stringResource(R.string.listen_port),
+						hint = stringResource(R.string.random),
+						modifier = Modifier.fillMaxWidth(),
+					)
+					Row(
+						modifier = Modifier.fillMaxWidth(),
+						horizontalArrangement = Arrangement.spacedBy(5.dp),
 					) {
-						SectionTitle(
-							stringResource(R.string.interface_),
-							padding = screenPadding,
-						)
-						ConfigurationToggle(
-							stringResource(id = R.string.show_amnezia_properties),
-							checked = showAmneziaValues,
-							onCheckChanged = { showAmneziaValues = it },
+						ConfigurationTextBox(
+							value = interfaceState.dnsServers,
+							onValueChange = {
+								interfaceState = interfaceState.copy(dnsServers = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.dns_servers),
+							hint = stringResource(R.string.comma_separated_list),
+							modifier =
+							Modifier
+								.fillMaxWidth(3 / 5f)
+								.padding(end = 5.dp),
 						)
 						ConfigurationTextBox(
-							value = tunnelName,
-							onValueChange = { tunnelName = it },
+							value = interfaceState.mtu,
+							onValueChange = {
+								interfaceState = interfaceState.copy(mtu = it)
+							},
 							keyboardActions = keyboardActions,
-							label = stringResource(R.string.name),
-							hint = stringResource(R.string.tunnel_name).lowercase(),
+							label = stringResource(R.string.mtu),
+							hint = stringResource(R.string.auto),
+							modifier = Modifier.width(IntrinsicSize.Min),
+						)
+					}
+					if (showScripts) {
+						ConfigurationTextBox(
+							value = interfaceState.preUp,
+							onValueChange = {
+								interfaceState = interfaceState.copy(preUp = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.pre_up),
+							hint = stringResource(R.string.comma_separated_list).lowercase(),
+							modifier = Modifier.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.postUp,
+							onValueChange = {
+								interfaceState = interfaceState.copy(postUp = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.post_up),
+							hint = stringResource(R.string.comma_separated_list).lowercase(),
+							modifier = Modifier.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.preDown,
+							onValueChange = {
+								interfaceState = interfaceState.copy(preDown = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.pre_down),
+							hint = stringResource(R.string.comma_separated_list).lowercase(),
+							modifier = Modifier.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.postDown,
+							onValueChange = {
+								interfaceState = interfaceState.copy(postDown = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.post_down),
+							hint = stringResource(R.string.comma_separated_list).lowercase(),
+							modifier = Modifier.fillMaxWidth(),
+						)
+					}
+					if (showAmneziaValues) {
+						ConfigurationTextBox(
+							value = interfaceState.junkPacketCount,
+							onValueChange = {
+								interfaceState = interfaceState.copy(junkPacketCount = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.junk_packet_count),
+							hint = stringResource(R.string.junk_packet_count).lowercase(),
 							modifier =
 							Modifier
 								.fillMaxWidth(),
 						)
-						OutlinedTextField(
-							modifier =
-							Modifier
-								.fillMaxWidth()
-								.clickable { showAuthPrompt = true },
-							value = interfaceState.privateKey,
-							visualTransformation =
-							if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated) {
-								VisualTransformation.None
-							} else {
-								PasswordVisualTransformation()
-							},
-							enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
-							onValueChange = { interfaceState = interfaceState.copy(privateKey = it) },
-							trailingIcon = {
-								IconButton(
-									modifier = Modifier.focusRequester(FocusRequester.Default),
-									onClick = {
-										// TODO handle recreate of key
-									},
-								) {
-									Icon(
-										Icons.Rounded.Refresh,
-										stringResource(R.string.rotate_keys),
-										tint = MaterialTheme.colorScheme.onSurface,
-									)
-								}
-							},
-							label = { Text(stringResource(R.string.private_key)) },
-							singleLine = true,
-							placeholder = { Text(stringResource(R.string.base64_key)) },
-							keyboardOptions = keyboardOptions,
-							keyboardActions = keyboardActions,
-						)
-						OutlinedTextField(
-							modifier =
-							Modifier
-								.fillMaxWidth()
-								.focusRequester(FocusRequester.Default),
-							value = interfaceState.publicKey,
-							enabled = false,
+						ConfigurationTextBox(
+							value = interfaceState.junkPacketMinSize,
 							onValueChange = {
-								interfaceState = interfaceState.copy(publicKey = it)
+								interfaceState = interfaceState.copy(junkPacketMinSize = it)
 							},
-							trailingIcon = {
-								IconButton(
-									modifier = Modifier.focusRequester(FocusRequester.Default),
-									onClick = {
-										clipboardManager.setText(
-											AnnotatedString(interfaceState.publicKey),
-										)
-									},
-								) {
-									Icon(
-										Icons.Rounded.ContentCopy,
-										stringResource(R.string.copy_public_key),
-										tint = MaterialTheme.colorScheme.onSurface,
-									)
-								}
-							},
-							label = { Text(stringResource(R.string.public_key)) },
-							singleLine = true,
-							placeholder = { Text(stringResource(R.string.base64_key)) },
-							keyboardOptions = keyboardOptions,
 							keyboardActions = keyboardActions,
+							label = stringResource(R.string.junk_packet_minimum_size),
+							hint =
+							stringResource(
+								R.string.junk_packet_minimum_size,
+							).lowercase(),
+							modifier =
+							Modifier
+								.fillMaxWidth(),
 						)
 						ConfigurationTextBox(
-							value = interfaceState.addresses,
+							value = interfaceState.junkPacketMaxSize,
 							onValueChange = {
-								interfaceState = interfaceState.copy(addresses = it)
+								interfaceState = interfaceState.copy(junkPacketMaxSize = it)
 							},
 							keyboardActions = keyboardActions,
-							label = stringResource(R.string.addresses),
-							hint = stringResource(R.string.comma_separated_list),
+							label = stringResource(R.string.junk_packet_maximum_size),
+							hint =
+							stringResource(
+								R.string.junk_packet_maximum_size,
+							).lowercase(),
 							modifier =
 							Modifier
-								.fillMaxWidth()
-								.padding(end = 5.dp),
+								.fillMaxWidth(),
 						)
 						ConfigurationTextBox(
-							value = interfaceState.listenPort,
+							value = interfaceState.initPacketJunkSize,
 							onValueChange = {
-								interfaceState = interfaceState.copy(listenPort = it)
+								interfaceState = interfaceState.copy(initPacketJunkSize = it)
 							},
 							keyboardActions = keyboardActions,
-							label = stringResource(R.string.listen_port),
-							hint = stringResource(R.string.random),
+							label = stringResource(R.string.init_packet_junk_size),
+							hint = stringResource(R.string.init_packet_junk_size).lowercase(),
+							modifier =
+							Modifier
+								.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.responsePacketJunkSize,
+							onValueChange = {
+								interfaceState = interfaceState.copy(responsePacketJunkSize = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.response_packet_junk_size),
+							hint =
+							stringResource(
+								R.string.response_packet_junk_size,
+							).lowercase(),
+							modifier =
+							Modifier
+								.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.initPacketMagicHeader,
+							onValueChange = {
+								interfaceState = interfaceState.copy(initPacketMagicHeader = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.init_packet_magic_header),
+							hint =
+							stringResource(
+								R.string.init_packet_magic_header,
+							).lowercase(),
+							modifier =
+							Modifier
+								.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.responsePacketMagicHeader,
+							onValueChange = {
+								interfaceState = interfaceState.copy(responsePacketMagicHeader = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.response_packet_magic_header),
+							hint =
+							stringResource(
+								R.string.response_packet_magic_header,
+							).lowercase(),
+							modifier =
+							Modifier
+								.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.underloadPacketMagicHeader,
+							onValueChange = {
+								interfaceState = interfaceState.copy(underloadPacketMagicHeader = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.underload_packet_magic_header),
+							hint =
+							stringResource(
+								R.string.underload_packet_magic_header,
+							).lowercase(),
+							modifier =
+							Modifier
+								.fillMaxWidth(),
+						)
+						ConfigurationTextBox(
+							value = interfaceState.transportPacketMagicHeader,
+							onValueChange = {
+								interfaceState = interfaceState.copy(transportPacketMagicHeader = it)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.transport_packet_magic_header),
+							hint =
+							stringResource(
+								R.string.transport_packet_magic_header,
+							).lowercase(),
+							modifier =
+							Modifier
+								.fillMaxWidth(),
+						)
+					}
+				}
+			}
+			peersState.forEachIndexed { index, peer ->
+				Surface(
+					shape = RoundedCornerShape(12.dp),
+					color = MaterialTheme.colorScheme.surface,
+				) {
+					Column(
+						horizontalAlignment = Alignment.Start,
+						verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top),
+						modifier = Modifier
+							.padding(16.dp.scaledWidth())
+							.focusGroup(),
+					) {
+						Row(
+							horizontalArrangement = Arrangement.SpaceBetween,
+							verticalAlignment = Alignment.CenterVertically,
+							modifier =
+							Modifier.fillMaxWidth(),
+						) {
+							GroupLabel(
+								stringResource(R.string.peer),
+							)
+							IconButton(onClick = {
+								peersState.removeAt(index)
+							}) {
+								val icon = Icons.Rounded.Delete
+								Icon(icon, icon.name)
+							}
+						}
+
+						ConfigurationTextBox(
+							value = peer.publicKey,
+							onValueChange = { value ->
+								peersState[index] = peersState[index].copy(publicKey = value)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.public_key),
+							hint = stringResource(R.string.base64_key),
 							modifier = Modifier.fillMaxWidth(),
 						)
-						Row(modifier = Modifier.fillMaxWidth()) {
-							ConfigurationTextBox(
-								value = interfaceState.dnsServers,
-								onValueChange = {
-									interfaceState = interfaceState.copy(dnsServers = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.dns_servers),
-								hint = stringResource(R.string.comma_separated_list),
-								modifier =
-								Modifier
-									.fillMaxWidth(3 / 5f)
-									.padding(end = 5.dp),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.mtu,
-								onValueChange = {
-									interfaceState = interfaceState.copy(mtu = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.mtu),
-								hint = stringResource(R.string.auto),
-								modifier = Modifier.width(IntrinsicSize.Min),
-							)
-						}
-						if (showAmneziaValues) {
-							ConfigurationTextBox(
-								value = interfaceState.junkPacketCount,
-								onValueChange = {
-									interfaceState = interfaceState.copy(junkPacketCount = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.junk_packet_count),
-								hint = stringResource(R.string.junk_packet_count).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.junkPacketMinSize,
-								onValueChange = {
-									interfaceState = interfaceState.copy(junkPacketMinSize = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.junk_packet_minimum_size),
-								hint =
-								stringResource(
-									R.string.junk_packet_minimum_size,
-								).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.junkPacketMaxSize,
-								onValueChange = {
-									interfaceState = interfaceState.copy(junkPacketMaxSize = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.junk_packet_maximum_size),
-								hint =
-								stringResource(
-									R.string.junk_packet_maximum_size,
-								).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.initPacketJunkSize,
-								onValueChange = {
-									interfaceState = interfaceState.copy(initPacketJunkSize = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.init_packet_junk_size),
-								hint = stringResource(R.string.init_packet_junk_size).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.responsePacketJunkSize,
-								onValueChange = {
-									interfaceState = interfaceState.copy(responsePacketJunkSize = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.response_packet_junk_size),
-								hint =
-								stringResource(
-									R.string.response_packet_junk_size,
-								).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.initPacketMagicHeader,
-								onValueChange = {
-									interfaceState = interfaceState.copy(initPacketMagicHeader = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.init_packet_magic_header),
-								hint =
-								stringResource(
-									R.string.init_packet_magic_header,
-								).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.responsePacketMagicHeader,
-								onValueChange = {
-									interfaceState = interfaceState.copy(responsePacketMagicHeader = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.response_packet_magic_header),
-								hint =
-								stringResource(
-									R.string.response_packet_magic_header,
-								).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.underloadPacketMagicHeader,
-								onValueChange = {
-									interfaceState = interfaceState.copy(underloadPacketMagicHeader = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.underload_packet_magic_header),
-								hint =
-								stringResource(
-									R.string.underload_packet_magic_header,
-								).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = interfaceState.transportPacketMagicHeader,
-								onValueChange = {
-									interfaceState = interfaceState.copy(transportPacketMagicHeader = it)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.transport_packet_magic_header),
-								hint =
-								stringResource(
-									R.string.transport_packet_magic_header,
-								).lowercase(),
-								modifier =
-								Modifier
-									.fillMaxWidth(),
-							)
-						}
-					}
-				}
-				peersState.forEachIndexed { index, peer ->
-					Surface(
-						tonalElevation = 2.dp,
-						shadowElevation = 2.dp,
-						shape = RoundedCornerShape(12.dp),
-						color = MaterialTheme.colorScheme.surface,
-						modifier =
-						(
-							if (context.isRunningOnTv()) {
-								Modifier
-									.fillMaxHeight(fillMaxHeight)
-									.fillMaxWidth(fillMaxWidth)
-							} else {
-								Modifier.fillMaxWidth(fillMaxWidth)
-							}
-							)
-							.padding(top = 10.dp, bottom = 10.dp),
-					) {
-						Column(
-							horizontalAlignment = Alignment.Start,
-							verticalArrangement = Arrangement.Top,
-							modifier =
-							Modifier
-								.padding(horizontal = 15.dp)
-								.padding(bottom = 10.dp),
-						) {
-							Row(
-								horizontalArrangement = Arrangement.SpaceBetween,
-								verticalAlignment = Alignment.CenterVertically,
-								modifier =
-								Modifier
-									.fillMaxWidth()
-									.padding(horizontal = 5.dp),
-							) {
-								SectionTitle(
-									stringResource(R.string.peer),
-									padding = screenPadding,
+						ConfigurationTextBox(
+							value = peer.preSharedKey,
+							onValueChange = { value ->
+								peersState[index] = peersState[index].copy(preSharedKey = value)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.preshared_key),
+							hint = stringResource(R.string.optional),
+							modifier = Modifier.fillMaxWidth(),
+						)
+						OutlinedTextField(
+							textStyle = MaterialTheme.typography.labelLarge,
+							modifier = Modifier.fillMaxWidth(),
+							value = peer.persistentKeepalive,
+							enabled = true,
+							onValueChange = { value ->
+								peersState[index] = peersState[index].copy(persistentKeepalive = value)
+							},
+							trailingIcon = {
+								Text(
+									stringResource(R.string.seconds),
+									modifier = Modifier.padding(end = 10.dp),
+									style = MaterialTheme.typography.labelMedium,
 								)
-								IconButton(onClick = {
-									peersState.removeAt(index)
-								}) {
-									val icon = Icons.Rounded.Delete
-									Icon(icon, icon.name)
-								}
-							}
-
-							ConfigurationTextBox(
-								value = peer.publicKey,
-								onValueChange = { value ->
-									peersState[index] = peersState[index].copy(publicKey = value)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.public_key),
-								hint = stringResource(R.string.base64_key),
-								modifier = Modifier.fillMaxWidth(),
-							)
-							ConfigurationTextBox(
-								value = peer.preSharedKey,
-								onValueChange = { value ->
-									peersState[index] = peersState[index].copy(preSharedKey = value)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.preshared_key),
-								hint = stringResource(R.string.optional),
-								modifier = Modifier.fillMaxWidth(),
-							)
-							OutlinedTextField(
-								modifier = Modifier.fillMaxWidth(),
-								value = peer.persistentKeepalive,
-								enabled = true,
-								onValueChange = { value ->
-									peersState[index] = peersState[index].copy(persistentKeepalive = value)
-								},
-								trailingIcon = {
-									Text(
-										stringResource(R.string.seconds),
-										modifier = Modifier.padding(end = 10.dp),
-									)
-								},
-								label = { Text(stringResource(R.string.persistent_keepalive)) },
-								singleLine = true,
-								placeholder = {
-									Text(stringResource(R.string.optional_no_recommend))
-								},
-								keyboardOptions = keyboardOptions,
-								keyboardActions = keyboardActions,
-							)
-							ConfigurationTextBox(
-								value = peer.endpoint,
-								onValueChange = { value ->
-									peersState[index] = peersState[index].copy(endpoint = value)
-								},
-								keyboardActions = keyboardActions,
-								label = stringResource(R.string.endpoint),
-								hint = stringResource(R.string.endpoint).lowercase(),
-								modifier = Modifier.fillMaxWidth(),
-							)
-							OutlinedTextField(
-								modifier = Modifier.fillMaxWidth(),
-								value = peer.allowedIps,
-								enabled = true,
-								onValueChange = { value ->
-									peersState[index] = peersState[index].copy(allowedIps = value)
-								},
-								label = { Text(stringResource(R.string.allowed_ips)) },
-								singleLine = true,
-								placeholder = {
-									Text(stringResource(R.string.comma_separated_list))
-								},
-								keyboardOptions = keyboardOptions,
-								keyboardActions = keyboardActions,
-							)
-						}
+							},
+							label = { Text(stringResource(R.string.persistent_keepalive), style = MaterialTheme.typography.labelMedium) },
+							singleLine = true,
+							placeholder = {
+								Text(stringResource(R.string.optional_no_recommend), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.outline)
+							},
+							keyboardOptions = keyboardOptions,
+							keyboardActions = keyboardActions,
+						)
+						ConfigurationTextBox(
+							value = peer.endpoint,
+							onValueChange = { value ->
+								peersState[index] = peersState[index].copy(endpoint = value)
+							},
+							keyboardActions = keyboardActions,
+							label = stringResource(R.string.endpoint),
+							hint = stringResource(R.string.endpoint).lowercase(),
+							modifier = Modifier.fillMaxWidth(),
+						)
+						OutlinedTextField(
+							textStyle = MaterialTheme.typography.labelLarge,
+							modifier = Modifier.fillMaxWidth(),
+							value = peer.allowedIps,
+							enabled = true,
+							onValueChange = { value ->
+								peersState[index] = peersState[index].copy(allowedIps = value)
+							},
+							label = { Text(stringResource(R.string.allowed_ips)) },
+							singleLine = true,
+							placeholder = {
+								Text(stringResource(R.string.comma_separated_list), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.outline)
+							},
+							keyboardOptions = keyboardOptions,
+							keyboardActions = keyboardActions,
+						)
 					}
 				}
+			}
+			Row(
+				horizontalArrangement = Arrangement.SpaceEvenly,
+				verticalAlignment = Alignment.CenterVertically,
+				modifier =
+				Modifier
+					.fillMaxSize()
+					.padding(bottom = 140.dp),
+			) {
 				Row(
-					horizontalArrangement = Arrangement.SpaceEvenly,
 					verticalAlignment = Alignment.CenterVertically,
-					modifier =
-					Modifier
-						.fillMaxSize()
-						.padding(bottom = 140.dp),
+					horizontalArrangement = Arrangement.Center,
 				) {
-					Row(
-						verticalAlignment = Alignment.CenterVertically,
-						horizontalArrangement = Arrangement.Center,
-					) {
-						TextButton(onClick = {
-							peersState.add(PeerProxy())
-						}) {
-							Text(stringResource(R.string.add_peer))
-						}
+					TextButton(onClick = {
+						peersState.add(PeerProxy())
+					}) {
+						Text(stringResource(R.string.add_peer))
 					}
 				}
 			}

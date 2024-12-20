@@ -59,7 +59,7 @@ fun SelectionItemButton(
 			}
 			Text(
 				buttonText,
-				style = MaterialTheme.typography.bodyMedium,
+				style = MaterialTheme.typography.labelMedium,
 				color = MaterialTheme.colorScheme.onSurface,
 				modifier = Modifier.fillMaxWidth(3 / 4f),
 				maxLines = 2,

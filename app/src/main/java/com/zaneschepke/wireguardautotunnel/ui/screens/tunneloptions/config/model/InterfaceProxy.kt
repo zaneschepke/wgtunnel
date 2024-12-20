@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model
 
 import com.wireguard.config.Interface
+import com.zaneschepke.wireguardautotunnel.util.extensions.toTrimmedList
 
 data class InterfaceProxy(
 	val privateKey: String = "",
@@ -9,8 +10,8 @@ data class InterfaceProxy(
 	val dnsServers: String = "",
 	val listenPort: String = "",
 	val mtu: String = "",
-	val includedApplications: Set<String> = emptySet(),
-	val excludedApplication: Set<String> = emptySet(),
+	val includedApplications: MutableSet<String> = mutableSetOf(),
+	val excludedApplications: MutableSet<String> = mutableSetOf(),
 	val junkPacketCount: String = "",
 	val junkPacketMinSize: String = "",
 	val junkPacketMaxSize: String = "",
@@ -20,29 +21,41 @@ data class InterfaceProxy(
 	val responsePacketMagicHeader: String = "",
 	val underloadPacketMagicHeader: String = "",
 	val transportPacketMagicHeader: String = "",
+	val preUp: String = "",
+	val postUp: String = "",
+	val preDown: String = "",
+	val postDown: String = "",
 ) {
 
 	fun toWgInterface(): Interface {
 		return Interface.Builder().apply {
-			parsePrivateKey(privateKey)
 			parseAddresses(addresses)
-			parseDnsServers(dnsServers)
+			parsePrivateKey(privateKey)
+			if (dnsServers.isNotBlank()) parseDnsServers(dnsServers)
 			if (mtu.isNotBlank()) parseMtu(mtu)
 			if (listenPort.isNotBlank()) parseListenPort(listenPort)
 			includeApplications(includedApplications)
-			excludeApplications(excludedApplication)
+			excludeApplications(excludedApplications)
+			preUp.toTrimmedList().forEach { parsePreUp(it) }
+			postUp.toTrimmedList().forEach { parsePostUp(it) }
+			preDown.toTrimmedList().forEach { parsePreDown(it) }
+			postDown.toTrimmedList().forEach { parsePostDown(it) }
 		}.build()
 	}
 
 	fun toAmInterface(): org.amnezia.awg.config.Interface {
 		return org.amnezia.awg.config.Interface.Builder().apply {
-			parsePrivateKey(privateKey)
 			parseAddresses(addresses)
-			parseDnsServers(dnsServers)
+			parsePrivateKey(privateKey)
+			if (dnsServers.isNotBlank()) parseDnsServers(dnsServers)
 			if (mtu.isNotBlank()) parseMtu(mtu)
 			if (listenPort.isNotBlank()) parseListenPort(listenPort)
 			includeApplications(includedApplications)
-			excludeApplications(excludedApplication)
+			excludeApplications(excludedApplications)
+			preUp.toTrimmedList().forEach { parsePreUp(it) }
+			postUp.toTrimmedList().forEach { parsePostUp(it) }
+			preDown.toTrimmedList().forEach { parsePreDown(it) }
+			postDown.toTrimmedList().forEach { parsePostDown(it) }
 			if (junkPacketCount.isNotBlank()) parseJunkPacketCount(junkPacketCount)
 			if (junkPacketMinSize.isNotBlank()) parseJunkPacketMinSize(junkPacketMinSize)
 			if (junkPacketMaxSize.isNotBlank()) parseJunkPacketMaxSize(junkPacketMaxSize)
@@ -72,8 +85,8 @@ data class InterfaceProxy(
 					""
 				},
 				mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
-				includedApplications = i.includedApplications,
-				excludedApplication = i.excludedApplications,
+				includedApplications = i.includedApplications.toMutableSet(),
+				excludedApplications = i.excludedApplications.toMutableSet(),
 			)
 		}
 
@@ -90,8 +103,8 @@ data class InterfaceProxy(
 					""
 				},
 				mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
-				includedApplications = i.includedApplications,
-				excludedApplication = i.excludedApplications,
+				includedApplications = i.includedApplications.toMutableSet(),
+				excludedApplications = i.excludedApplications.toMutableSet(),
 				junkPacketCount =
 				if (i.junkPacketCount.isPresent) {
 					i.junkPacketCount.get()
