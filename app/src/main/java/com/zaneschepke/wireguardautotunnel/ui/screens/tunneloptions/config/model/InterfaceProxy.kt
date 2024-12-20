@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model
 
 import com.wireguard.config.Interface
+import com.zaneschepke.wireguardautotunnel.util.extensions.joinAndTrim
 import com.zaneschepke.wireguardautotunnel.util.extensions.toTrimmedList
 
 data class InterfaceProxy(
@@ -76,7 +77,7 @@ data class InterfaceProxy(
 				addresses = i.addresses.joinToString(", ").trim(),
 				dnsServers = listOf(
 					i.dnsServers.joinToString(", ").replace("/", "").trim(),
-					i.dnsSearchDomains.joinToString(", ").trim(),
+					i.dnsSearchDomains.joinAndTrim(),
 				).filter { it.isNotEmpty() }.joinToString(", "),
 				listenPort =
 				if (i.listenPort.isPresent) {
@@ -87,6 +88,10 @@ data class InterfaceProxy(
 				mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
 				includedApplications = i.includedApplications.toMutableSet(),
 				excludedApplications = i.excludedApplications.toMutableSet(),
+				preUp = i.preUp.joinAndTrim(),
+				postUp = i.postUp.joinAndTrim(),
+				preDown = i.preDown.joinAndTrim(),
+				postDown = i.postDown.joinAndTrim(),
 			)
 		}
 
@@ -105,6 +110,10 @@ data class InterfaceProxy(
 				mtu = if (i.mtu.isPresent) i.mtu.get().toString().trim() else "",
 				includedApplications = i.includedApplications.toMutableSet(),
 				excludedApplications = i.excludedApplications.toMutableSet(),
+				preUp = i.preUp.joinAndTrim(),
+				postUp = i.postUp.joinAndTrim(),
+				preDown = i.preDown.joinAndTrim(),
+				postDown = i.postDown.joinAndTrim(),
 				junkPacketCount =
 				if (i.junkPacketCount.isPresent) {
 					i.junkPacketCount.get()

@@ -58,6 +58,10 @@ fun String.replaceUnescapedChar(charToReplace: String, replacement: String): Str
 	}
 }
 
+fun Iterable<String>.joinAndTrim() : String {
+	return this.joinToString(", ").trim()
+}
+
 fun String.toTrimmedList(): List<String> {
 	return this.split(",").map { it.trim() }.filter { it.isNotEmpty() }
 }
