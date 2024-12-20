@@ -1,14 +1,34 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.config.model
+package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model
 
 import com.wireguard.config.Peer
+import com.zaneschepke.wireguardautotunnel.util.extensions.joinAndTrim
 
 data class PeerProxy(
 	val publicKey: String = "",
 	val preSharedKey: String = "",
 	val persistentKeepalive: String = "",
 	val endpoint: String = "",
-	val allowedIps: String = IPV4_WILDCARD.joinToString(", ").trim(),
+	val allowedIps: String = IPV4_WILDCARD.joinAndTrim(),
 ) {
+	fun toWgPeer(): Peer {
+		return Peer.Builder().apply {
+			parsePublicKey(publicKey)
+			if (preSharedKey.isNotBlank()) parsePreSharedKey(preSharedKey)
+			if (persistentKeepalive.isNotBlank()) parsePersistentKeepalive(persistentKeepalive)
+			parseEndpoint(endpoint)
+			parseAllowedIPs(allowedIps)
+		}.build()
+	}
+	fun toAmPeer(): org.amnezia.awg.config.Peer {
+		return org.amnezia.awg.config.Peer.Builder().apply {
+			parsePublicKey(publicKey)
+			if (preSharedKey.isNotBlank()) parsePreSharedKey(preSharedKey)
+			if (persistentKeepalive.isNotBlank()) parsePersistentKeepalive(persistentKeepalive)
+			parseEndpoint(endpoint)
+			parseAllowedIPs(allowedIps)
+		}.build()
+	}
+
 	companion object {
 		fun from(peer: Peer): PeerProxy {
 			return PeerProxy(

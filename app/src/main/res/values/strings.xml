@@ -190,4 +190,14 @@
 	<string name="auto_tunnel_channel_name">Auto-tunnel Notification Channel</string>
 	<string name="auto_tunnel_channel_description">A channel for auto-tunnel state notifications</string>
 	<string name="stop">stop</string>
+    <string name="config">Config</string>
+	<string name="splt_tunneling">Split tunneling</string>
+	<string name="tunnel_specific_settings">Tunnel specific settings</string>
+	<string name="quick_actions">Quick actions</string>
+    <string name="show_scripts">Show scripts</string>
+	<string name="pre_up">Pre up</string>
+	<string name="post_up">Post up</string>
+	<string name="pre_down">Pre down</string>
+	<string name="post_down">Post down</string>
+    <string name="amnezia_kernel_message">Amnezia unavailable in kernel mode</string>
 </resources>

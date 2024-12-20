@@ -31,7 +31,7 @@ sealed class Route {
 	data object Main : Route()
 
 	@Serializable
-	data class Option(
+	data class TunnelOptions(
 		val id: Int,
 	) : Route()
 
@@ -43,6 +43,16 @@ sealed class Route {
 
 	@Serializable
 	data class Config(
+		val id: Int,
+	) : Route()
+
+	@Serializable
+	data class SplitTunnel(
+		val id: Int,
+	) : Route()
+
+	@Serializable
+	data class TunnelAutoTunnel(
 		val id: Int,
 	) : Route()
 

@@ -51,20 +51,17 @@ fun String.replaceUnescapedChar(charToReplace: String, replacement: String): Str
 			this[matchResult.range.first - 1] != '\\' ||
 			(matchResult.range.first > 1 && this[matchResult.range.first - 2] == '\\')
 		) {
-			replacement.toString()
+			replacement
 		} else {
 			matchResult.value
 		}
 	}
 }
 
-fun String.isCharacterEscaped(index: Int): Boolean {
-	if (index <= 0) return false
-	var backslashCount = 0
-	var currentIndex = index - 1
-	while (currentIndex >= 0 && this[currentIndex] == '\\') {
-		backslashCount++
-		currentIndex--
-	}
-	return backslashCount % 2 != 0
+fun Iterable<String>.joinAndTrim(): String {
+	return this.joinToString(", ").trim()
+}
+
+fun String.toTrimmedList(): List<String> {
+	return this.split(",").map { it.trim() }.filter { it.isNotEmpty() }
 }

@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.ui.common.config
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,19 +24,20 @@ fun ConfigurationTextBox(
 		capitalization = KeyboardCapitalization.None,
 		imeAction = ImeAction.Done,
 	),
-	trailing: @Composable () -> Unit = {},
+	trailing: (@Composable () -> Unit)? = null,
 	interactionSource: MutableInteractionSource? = null,
 ) {
 	OutlinedTextField(
 		isError = isError,
+		textStyle = MaterialTheme.typography.labelLarge,
 		modifier = modifier,
 		value = value,
 		singleLine = true,
 		interactionSource = interactionSource,
 		onValueChange = { onValueChange(it) },
-		label = { Text(label) },
+		label = { Text(label, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelMedium) },
 		maxLines = 1,
-		placeholder = { Text(hint) },
+		placeholder = { Text(hint, color = MaterialTheme.colorScheme.outline, style = MaterialTheme.typography.labelLarge) },
 		keyboardOptions = keyboardOptions,
 		keyboardActions = keyboardActions,
 		trailingIcon = trailing,
