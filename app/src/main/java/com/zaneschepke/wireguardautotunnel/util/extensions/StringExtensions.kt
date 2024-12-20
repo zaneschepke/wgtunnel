@@ -58,7 +58,7 @@ fun String.replaceUnescapedChar(charToReplace: String, replacement: String): Str
 	}
 }
 
-fun Iterable<String>.joinAndTrim() : String {
+fun Iterable<String>.joinAndTrim(): String {
 	return this.joinToString(", ").trim()
 }
 
