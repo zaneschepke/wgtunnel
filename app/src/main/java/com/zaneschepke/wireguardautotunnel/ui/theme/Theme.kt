@@ -21,9 +21,11 @@ private val DarkColorScheme =
 		primary = ThemeColors.Dark.primary,
 		surface = ThemeColors.Dark.surface,
 		background = ThemeColors.Dark.background,
-		secondaryContainer = ThemeColors.Dark.secondary,
+		secondary = ThemeColors.Dark.secondary,
 		onSurface = ThemeColors.Dark.onSurface,
 		onSecondaryContainer = ThemeColors.Dark.primary,
+		outline = ThemeColors.Dark.outline,
+		onBackground = ThemeColors.Dark.onBackground,
 	)
 
 private val LightColorScheme =
@@ -31,9 +33,11 @@ private val LightColorScheme =
 		primary = ThemeColors.Light.primary,
 		surface = ThemeColors.Light.surface,
 		background = ThemeColors.Light.background,
-		secondaryContainer = ThemeColors.Light.secondary,
+		secondary = ThemeColors.Light.secondary,
 		onSurface = ThemeColors.Light.onSurface,
 		onSecondaryContainer = ThemeColors.Light.primary,
+		outline = ThemeColors.Light.outline,
+		onBackground = ThemeColors.Light.onBackground,
 	)
 
 enum class Theme {

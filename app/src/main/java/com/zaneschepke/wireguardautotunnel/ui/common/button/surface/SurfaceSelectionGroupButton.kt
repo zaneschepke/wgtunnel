@@ -52,6 +52,7 @@ fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
 								icon,
 								icon.name,
 								modifier = Modifier.size(iconSize),
+								tint = MaterialTheme.colorScheme.onSurface,
 							)
 						}
 						Column(
@@ -80,7 +81,7 @@ fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
 					}
 				}
 			}
-			if (index + 1 != items.size) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+			if (index + 1 != items.size) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
 		}
 	}
 }

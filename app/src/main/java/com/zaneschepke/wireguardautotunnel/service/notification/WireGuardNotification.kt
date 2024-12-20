@@ -47,8 +47,14 @@ constructor(
 				addAction(it)
 			}
 			setContentTitle(title)
-			setContentIntent(PendingIntent.getActivity(context, 0,
-				Intent(context, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT))
+			setContentIntent(
+				PendingIntent.getActivity(
+					context,
+					0,
+					Intent(context, MainActivity::class.java),
+					PendingIntent.FLAG_IMMUTABLE,
+				),
+			)
 			setContentText(description)
 			setOnlyAlertOnce(onlyAlertOnce)
 			setOngoing(onGoing)

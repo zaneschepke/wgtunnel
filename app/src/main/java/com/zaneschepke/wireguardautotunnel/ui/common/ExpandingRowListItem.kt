@@ -55,7 +55,13 @@ fun ExpandingRowListItem(
 					modifier = Modifier.fillMaxWidth(13 / 20f),
 				) {
 					leading()
-					Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelLarge)
+					Text(
+						text,
+						maxLines = 1,
+						overflow = TextOverflow.Ellipsis,
+						style = MaterialTheme.typography.labelLarge,
+						color = MaterialTheme.colorScheme.onBackground,
+					)
 				}
 				trailing()
 			}

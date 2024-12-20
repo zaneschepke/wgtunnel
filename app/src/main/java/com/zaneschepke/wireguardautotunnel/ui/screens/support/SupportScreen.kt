@@ -174,7 +174,7 @@ fun SupportScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 							title = {
 								Text(
 									stringResource(R.string.chat_description),
-									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+									style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.onSurface),
 								)
 							},
 							trailing = {

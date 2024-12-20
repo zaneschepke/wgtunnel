@@ -2,8 +2,9 @@ package com.zaneschepke.wireguardautotunnel.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val OffWhite = Color(0xFFE5E1E5)
-val LightGrey = Color(0xFFCAC4D0)
+val OffWhite = Color(0xFFF2F2F4)
+val CoolGray = Color(0xFF8D9D9F)
+val LightGrey = Color(0xFFECEDEF)
 val Aqua = Color(0xFF76BEBD)
 val SilverTree = Color(0xFF6DB58B)
 val Plantation = Color(0xFF264A49)
@@ -18,14 +19,18 @@ sealed class ThemeColors(
 	val primary: Color,
 	val secondary: Color,
 	val onSurface: Color,
+	val onBackground: Color,
+	val outline: Color,
 ) {
 
 	data object Light : ThemeColors(
-		background = LightGrey,
+		background = LightGrey.copy(alpha = 0.95f),
 		surface = OffWhite,
-		primary = Plantation,
-		secondary = OffWhite,
+		primary = Aqua,
+		secondary = LightGrey,
 		onSurface = BalticSea,
+		outline = Plantation.copy(alpha = .75f),
+		onBackground = BalticSea,
 	)
 
 	data object Dark : ThemeColors(
@@ -34,5 +39,7 @@ sealed class ThemeColors(
 		primary = Aqua,
 		secondary = Plantation,
 		onSurface = OffWhite,
+		outline = CoolGray,
+		onBackground = OffWhite,
 	)
 }

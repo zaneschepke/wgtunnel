@@ -60,8 +60,10 @@ fun LanguageScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 							appViewModel.onLocaleChange(LocaleUtil.OPTION_PHONE_LANGUAGE)
 						},
 						trailing = {
-							if (appUiState.generalState.locale == LocaleUtil.OPTION_PHONE_LANGUAGE) {
-								SelectedLabel()
+							with(appUiState.generalState.locale) {
+								if (this == LocaleUtil.OPTION_PHONE_LANGUAGE || this == null) {
+									SelectedLabel()
+								}
 							}
 						},
 						ripple = false,
