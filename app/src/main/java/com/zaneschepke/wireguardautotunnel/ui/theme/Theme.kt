@@ -74,14 +74,18 @@ fun WireguardAutoTunnelTheme(theme: Theme = Theme.AUTOMATIC, content: @Composabl
 			}
 		}
 	}
+
 	val view = LocalView.current
 	if (!view.isInEditMode) {
 		SideEffect {
 			val window = (view.context as Activity).window
 			WindowCompat.setDecorFitsSystemWindows(window, false)
-			window.statusBarColor = Color.Transparent.toArgb()
 			window.navigationBarColor = Color.Transparent.toArgb()
-			WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isDark
+			window.statusBarColor = Color.Transparent.toArgb()
+			WindowCompat.getInsetsController(window, window.decorView).apply {
+				isAppearanceLightStatusBars = !isDark
+				isAppearanceLightNavigationBars = !isDark
+			}
 		}
 	}
 

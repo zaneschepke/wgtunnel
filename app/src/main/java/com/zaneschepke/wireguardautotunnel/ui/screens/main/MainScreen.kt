@@ -198,10 +198,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		)
 		LazyColumn(
 			horizontalAlignment = Alignment.Start,
-			verticalArrangement = Arrangement.spacedBy(5.dp.scaledHeight(), Alignment.Top),
+			verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top),
 			modifier =
 			Modifier
-				.fillMaxSize().padding(padding)
+				.fillMaxSize().padding(padding).padding(top = 24.dp.scaledHeight())
 				.overscroll(ScrollableDefaults.overscrollEffect())
 				.nestedScroll(nestedScrollConnection),
 			state = rememberLazyListState(0, uiState.tunnels.count()),

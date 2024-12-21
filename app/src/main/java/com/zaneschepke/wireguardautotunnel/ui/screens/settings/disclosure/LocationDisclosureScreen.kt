@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.rounded.PermScanWifi
@@ -27,7 +28,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionIte
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
-import com.zaneschepke.wireguardautotunnel.ui.theme.topPadding
 import com.zaneschepke.wireguardautotunnel.util.extensions.goFromRoot
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
@@ -46,7 +46,8 @@ fun LocationDisclosureScreen(appViewModel: AppViewModel, appUiState: AppUiState)
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
 		modifier =
-		Modifier.fillMaxSize().padding(top = topPadding).padding(horizontal = 24.dp.scaledWidth()),
+		Modifier.fillMaxSize().systemBarsPadding().padding(top = 24.dp.scaledHeight())
+			.padding(horizontal = 24.dp.scaledWidth()),
 	) {
 		val icon = Icons.Rounded.PermScanWifi
 		Icon(

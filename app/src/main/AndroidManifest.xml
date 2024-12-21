@@ -68,6 +68,7 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
+			android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.WireguardAutoTunnel"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			>
