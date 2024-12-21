@@ -118,11 +118,11 @@ constructor(
 			if (tunnelConfig == null || isTunnelAlreadyRunning(tunnelConfig)) return@withContext
 			updateTunnelConfig(tunnelConfig) // need to update this here
 			withServiceActive {
-				onBeforeStart()
+				onBeforeStart(background)
 				tunnelControlMutex.withLock {
 					setState(tunnelConfig, TunnelState.UP).onSuccess {
 						updateTunnelState(it, tunnelConfig)
-						onTunnelStart(tunnelConfig)
+						onTunnelStart(tunnelConfig, background)
 					}
 				}.onFailure {
 					Timber.e(it)
@@ -204,19 +204,19 @@ constructor(
 		}
 	}
 
-	private suspend fun onBeforeStart() {
+	private suspend fun onBeforeStart(background: Boolean) {
 		with(_vpnState.value) {
 			if (status.isUp()) stopTunnel() else clearJobsAndStats()
-			if (isKernelBackend == true) serviceManager.startBackgroundService(tunnelConfig)
+			if (isKernelBackend == true || background) serviceManager.startBackgroundService(tunnelConfig)
 		}
 	}
 
-	private suspend fun onTunnelStart(tunnelConfig: TunnelConfig) {
+	private suspend fun onTunnelStart(tunnelConfig: TunnelConfig, background: Boolean) {
 		startActiveTunnelJobs()
 		if (_vpnState.value.status.isUp()) {
 			appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
 		}
-		if (isKernelBackend == false) launchUserspaceTunnelNotification()
+		if (isKernelBackend == false && !background) launchUserspaceTunnelNotification()
 	}
 
 	private fun launchUserspaceTunnelNotification() {
@@ -233,13 +233,12 @@ constructor(
 	}
 
 	private suspend fun onTunnelStop(tunnelConfig: TunnelConfig) {
-		appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
-		if (isKernelBackend == true) {
+		runCatching {
+			appDataRepository.tunnels.save(tunnelConfig.copy(isActive = false))
 			serviceManager.stopBackgroundService()
-		} else {
 			notificationService.remove(VPN_NOTIFICATION_ID)
+			clearJobsAndStats()
 		}
-		clearJobsAndStats()
 	}
 
 	private fun clearJobsAndStats() {
