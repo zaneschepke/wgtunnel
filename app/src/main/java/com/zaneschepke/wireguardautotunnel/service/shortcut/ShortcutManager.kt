@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.service.shortcut
 
 interface ShortcutManager {
-	fun addShortcuts()
-	fun removeShortcuts()
+	suspend fun addShortcuts()
+	suspend fun removeShortcuts()
 }

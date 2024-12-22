@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
@@ -19,9 +20,11 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.splittunnel.SplitTunnelApp
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.StringValue
+import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -63,6 +66,9 @@ constructor(
 
 	private val _configurationChange = MutableStateFlow(false)
 	val configurationChange = _configurationChange.asStateFlow()
+
+	private val _splitTunnelApps = MutableStateFlow<List<SplitTunnelApp>>(emptyList())
+	val splitTunnelApps = _splitTunnelApps.asStateFlow()
 
 	val uiState =
 		combine(
@@ -264,6 +270,19 @@ constructor(
 	private suspend fun isKernelSupported(): Boolean {
 		return withContext(ioDispatcher) {
 			WgQuickBackend.hasKernelSupport()
+		}
+	}
+
+	suspend fun getEmitSplitTunnelApps(context: Context) {
+		withContext(ioDispatcher) {
+			val apps = context.getAllInternetCapablePackages().filter { it.applicationInfo != null }.map { pack ->
+				SplitTunnelApp(
+					context.packageManager.getApplicationIcon(pack.applicationInfo!!),
+					context.packageManager.getApplicationLabel(pack.applicationInfo!!).toString(),
+					pack.packageName,
+				)
+			}
+			_splitTunnelApps.emit(apps)
 		}
 	}
 

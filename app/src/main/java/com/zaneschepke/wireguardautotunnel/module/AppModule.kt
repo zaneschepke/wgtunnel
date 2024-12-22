@@ -40,7 +40,7 @@ class AppModule {
 
 	@Singleton
 	@Provides
-	fun provideShortcutManager(@ApplicationContext context: Context): ShortcutManager {
-		return DynamicShortcutManager(context)
+	fun provideShortcutManager(@ApplicationContext context: Context, @IoDispatcher ioDispatcher: CoroutineDispatcher): ShortcutManager {
+		return DynamicShortcutManager(context, ioDispatcher)
 	}
 }

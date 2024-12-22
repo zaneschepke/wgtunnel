@@ -115,6 +115,10 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 
+			LaunchedEffect(Unit) {
+				viewModel.getEmitSplitTunnelApps(this@MainActivity)
+			}
+
 			LaunchedEffect(appUiState.autoTunnelActive) {
 				requestAutoTunnelTileServiceUpdate()
 			}

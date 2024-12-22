@@ -56,7 +56,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
-import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import java.text.Collator
@@ -79,6 +78,8 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 
 	val config by remember { derivedStateOf { appUiState.tunnels.first { it.id == tunnelId } } }
 
+	val splitTunnelApps by viewModel.splitTunnelApps.collectAsStateWithLifecycle()
+
 	var proxyInterface by remember { mutableStateOf(InterfaceProxy()) }
 
 	var selectedSplitOption by remember { mutableStateOf(SplitOptions.ALL) }
@@ -96,27 +97,17 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 		selectedPackages.addAll(pair.second)
 	}
 
-	val packages = remember {
-		context.getAllInternetCapablePackages().filter { it.applicationInfo != null }.map { pack ->
-			SplitTunnelApp(
-				context.packageManager.getApplicationIcon(pack.applicationInfo!!),
-				context.packageManager.getApplicationLabel(pack.applicationInfo!!).toString(),
-				pack.packageName,
-			)
-		}
-	}
-
 	var query: String by remember { mutableStateOf("") }
 
 	val sortedPackages by remember {
 		derivedStateOf {
-			packages.sortedWith(compareBy(collator) { it.name }).filter { it.name.contains(query) }.toMutableStateList()
+			splitTunnelApps.sortedWith(compareBy(collator) { it.name }).filter { it.name.contains(query) }.toMutableStateList()
 		}
 	}
 
 	LaunchedEffect(Unit) {
 		// clean up any split tunnel packages for apps that were uninstalled
-		viewModel.cleanUpUninstalledApps(config, packages.map { it.`package` })
+		viewModel.cleanUpUninstalledApps(config, splitTunnelApps.map { it.`package` })
 	}
 
 	Scaffold(

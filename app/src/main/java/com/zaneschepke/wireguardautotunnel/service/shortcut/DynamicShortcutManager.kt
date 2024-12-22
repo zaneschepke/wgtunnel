@@ -6,14 +6,21 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
-class DynamicShortcutManager(private val context: Context) : ShortcutManager {
-	override fun addShortcuts() {
-		ShortcutManagerCompat.setDynamicShortcuts(context, createShortcuts())
+class DynamicShortcutManager(private val context: Context, @IoDispatcher private val ioDispatcher: CoroutineDispatcher) : ShortcutManager {
+	override suspend fun addShortcuts() {
+		withContext(ioDispatcher) {
+			ShortcutManagerCompat.setDynamicShortcuts(context, createShortcuts())
+		}
 	}
 
-	override fun removeShortcuts() {
-		ShortcutManagerCompat.removeDynamicShortcuts(context, createShortcuts().map { it.id })
+	override suspend fun removeShortcuts() {
+		withContext(ioDispatcher) {
+			ShortcutManagerCompat.removeDynamicShortcuts(context, createShortcuts().map { it.id })
+		}
 	}
 
 	private fun createShortcuts(): List<ShortcutInfoCompat> {
