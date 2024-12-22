@@ -27,6 +27,10 @@ features. Built using the [wireguard-android](https://github.com/WireGuard/wireg
 library and [Jetpack Compose](https://developer.android.com/jetpack/compose), this application was
 inspired by the official [WireGuard Android](https://github.com/WireGuard/wireguard-android) app.
 
+## Explanation
+[中文](README-zh.md)
+
+
 </div>
 
 <div align="center">
