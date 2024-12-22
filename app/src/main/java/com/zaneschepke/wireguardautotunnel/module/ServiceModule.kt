@@ -13,15 +13,19 @@ import dagger.hilt.android.scopes.ServiceScoped
 @Module
 @InstallIn(ServiceComponent::class)
 abstract class ServiceModule {
-	@Binds
-	@ServiceScoped
-	abstract fun provideWifiService(wifiService: WifiService): NetworkService<WifiService>
 
 	@Binds
+	@Wifi
 	@ServiceScoped
-	abstract fun provideMobileDataService(mobileDataService: MobileDataService): NetworkService<MobileDataService>
+	abstract fun provideWifiService(wifiService: WifiService): NetworkService
 
 	@Binds
+	@MobileData
 	@ServiceScoped
-	abstract fun provideEthernetService(ethernetService: EthernetService): NetworkService<EthernetService>
+	abstract fun provideMobileDataService(mobileDataService: MobileDataService): NetworkService
+
+	@Binds
+	@Ethernet
+	@ServiceScoped
+	abstract fun provideEthernetService(ethernetService: EthernetService): NetworkService
 }

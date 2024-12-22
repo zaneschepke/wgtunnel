@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel
 
 import android.content.Intent
-import android.net.NetworkCapabilities
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
@@ -13,17 +12,16 @@ import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
+import com.zaneschepke.wireguardautotunnel.module.Ethernet
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.MainImmediateDispatcher
+import com.zaneschepke.wireguardautotunnel.module.MobileData
+import com.zaneschepke.wireguardautotunnel.module.Wifi
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.AutoTunnelEvent
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.AutoTunnelState
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.NetworkState
-import com.zaneschepke.wireguardautotunnel.service.network.EthernetService
-import com.zaneschepke.wireguardautotunnel.service.network.MobileDataService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
-import com.zaneschepke.wireguardautotunnel.service.network.NetworkStatus
-import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
@@ -31,7 +29,6 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
-import com.zaneschepke.wireguardautotunnel.util.extensions.getCurrentWifiName
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import com.zaneschepke.wireguardautotunnel.util.extensions.onNotRunning
 import dagger.hilt.android.AndroidEntryPoint
@@ -64,13 +61,16 @@ class AutoTunnelService : LifecycleService() {
 	lateinit var rootShell: Provider<RootShell>
 
 	@Inject
-	lateinit var wifiService: NetworkService<WifiService>
+	@Wifi
+	lateinit var wifiService: NetworkService
 
 	@Inject
-	lateinit var mobileDataService: NetworkService<MobileDataService>
+	@MobileData
+	lateinit var mobileDataService: NetworkService
 
 	@Inject
-	lateinit var ethernetService: NetworkService<EthernetService>
+	@Ethernet
+	lateinit var ethernetService: NetworkService
 
 	@Inject
 	lateinit var appDataRepository: Provider<AppDataRepository>
@@ -242,6 +242,7 @@ class AutoTunnelService : LifecycleService() {
 		) { double, networkState ->
 			AutoTunnelState(tunnelService.get().vpnState.value, networkState, double.first, double.second)
 		}.collect { state ->
+			Timber.d("Network state: ${state.networkState}")
 			autoTunnelStateFlow.update {
 				it.copy(vpnState = state.vpnState, networkState = state.networkState, settings = state.settings, tunnels = state.tunnels)
 			}
@@ -256,19 +257,14 @@ class AutoTunnelService : LifecycleService() {
 	@OptIn(FlowPreview::class)
 	private fun combineNetworkEventsJob(): Flow<NetworkState> {
 		return combine(
-			wifiService.networkStatus,
-			mobileDataService.networkStatus,
-			ethernetService.networkStatus,
-		) { wifi, mobileData, ethernet ->
+			wifiService.status,
+			mobileDataService.status,
+		) { wifi, mobileData ->
 			NetworkState(
-				wifi.isConnected,
-				mobileData.isConnected,
-				ethernet.isConnected,
-				when (wifi) {
-					is NetworkStatus.CapabilitiesChanged -> getWifiSSID(wifi.networkCapabilities)
-					is NetworkStatus.Available -> autoTunnelStateFlow.value.networkState.wifiName
-					is NetworkStatus.Unavailable -> null
-				},
+				wifi.available,
+				mobileData.available,
+				false,
+				wifi.name
 			)
 		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }.debounce(500L)
 	}
@@ -283,28 +279,6 @@ class AutoTunnelService : LifecycleService() {
 		) { settings, tunnels ->
 			Pair(settings, tunnels)
 		}.distinctUntilChanged()
-	}
-
-	private suspend fun getWifiSSID(networkCapabilities: NetworkCapabilities): String? {
-		return withContext(ioDispatcher) {
-			val settings = settings()
-			if (settings.isWifiNameByShellEnabled) return@withContext rootShell.get().getCurrentWifiName()
-			wifiService.getNetworkName(networkCapabilities)
-		}.also {
-			if (it?.contains(Constants.UNREADABLE_SSID) == true) {
-				Timber.w("SSID unreadable: missing permissions")
-			} else {
-				Timber.i("Detected valid SSID")
-			}
-		}
-	}
-
-	private suspend fun settings(): Settings {
-		return if (autoTunnelStateFlow.value == defaultState) {
-			appDataRepository.get().settings.getSettings()
-		} else {
-			autoTunnelStateFlow.value.settings
-		}
 	}
 
 	@OptIn(FlowPreview::class)
