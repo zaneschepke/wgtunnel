@@ -264,7 +264,7 @@ class AutoTunnelService : LifecycleService() {
 				wifi.available,
 				mobileData.available,
 				false,
-				wifi.name
+				wifi.name,
 			)
 		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }.debounce(500L)
 	}

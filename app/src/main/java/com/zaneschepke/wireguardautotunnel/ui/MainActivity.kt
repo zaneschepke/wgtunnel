@@ -40,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
+import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
@@ -77,6 +78,9 @@ class MainActivity : AppCompatActivity() {
 
 	@Inject
 	lateinit var tunnelService: TunnelService
+
+	@Inject
+	lateinit var shortcutManager: ShortcutManager
 
 	@OptIn(ExperimentalLayoutApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,6 +122,10 @@ class MainActivity : AppCompatActivity() {
 			with(appUiState.settings) {
 				LaunchedEffect(isAutoTunnelEnabled) {
 					this@MainActivity.requestAutoTunnelTileServiceUpdate()
+				}
+				LaunchedEffect(isShortcutsEnabled) {
+					if (!isShortcutsEnabled) return@LaunchedEffect shortcutManager.removeShortcuts()
+					shortcutManager.addShortcuts()
 				}
 			}
 

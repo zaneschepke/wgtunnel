@@ -30,13 +30,13 @@ class WifiService
 constructor(
 	@ApplicationContext private val context: Context,
 	private val settingsRepository: SettingsRepository,
-	@AppShell private val rootShell: Provider<RootShell>
+	@AppShell private val rootShell: Provider<RootShell>,
 ) : NetworkService {
 
 	val mutex = Mutex()
 
-	private var ssid : String? = null
-	private var available : Boolean = false
+	private var ssid: String? = null
+	private var available: Boolean = false
 
 	private val connectivityManager =
 		context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -105,12 +105,12 @@ constructor(
 		Timber.e(it)
 		emit(NetworkStatus.Unavailable())
 	}.transform {
-		when(it) {
+		when (it) {
 			is NetworkStatus.Available -> mutex.withLock {
 				available = true
 			}
 			is NetworkStatus.CapabilitiesChanged -> mutex.withLock {
-				if(available) {
+				if (available) {
 					available = false
 					Timber.d("Getting SSID from capabilities")
 					ssid = getNetworkName(it.networkCapabilities)
@@ -122,7 +122,7 @@ constructor(
 	}
 
 	private suspend fun getNetworkName(networkCapabilities: NetworkCapabilities): String? {
-		if(settingsRepository.getSettings().isWifiNameByShellEnabled) return rootShell.get().getCurrentWifiName()
+		if (settingsRepository.getSettings().isWifiNameByShellEnabled) return rootShell.get().getCurrentWifiName()
 		var ssid = networkCapabilities.getWifiName()
 		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
 			val wifiManager =

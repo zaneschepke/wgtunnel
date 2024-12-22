@@ -5,6 +5,8 @@ import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.logcatter.LogcatReader
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
+import com.zaneschepke.wireguardautotunnel.service.shortcut.DynamicShortcutManager
+import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,5 +36,11 @@ class AppModule {
 	@Provides
 	fun provideNotificationService(@ApplicationContext context: Context): NotificationService {
 		return WireGuardNotification(context)
+	}
+
+	@Singleton
+	@Provides
+	fun provideShortcutManager(@ApplicationContext context: Context): ShortcutManager {
+		return DynamicShortcutManager(context)
 	}
 }
