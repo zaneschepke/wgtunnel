@@ -1,1 +1,1 @@
-Une appli alternative pour clients VPN WireGuard avec plus de fonctionnalités
+Une alternative pour clients VPN WireGuard avec fonctionnalités supplémentaires

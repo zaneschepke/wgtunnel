@@ -1,0 +1,6 @@
+Co nowego:
+- Poprawa niezawodności automatycznego tunelowania
+- Dodanie obsługi jasnych/ciemnych/dynamicznych motywów
+- Dodanie obsługi skryptów przed/po włączeniu/wyłącz
+- Usunięcie trwałego powiadomienia o tunelu
+- Różne inne poprawki i ulepszenia

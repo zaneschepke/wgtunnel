@@ -1,0 +1,5 @@
+Ulepszenia:
+- Dodano podstawową obsługę jądra protokołu WireGuard
+- Ulepszony przepływ ujawniania lokalizacji
+- Naprawiono błąd uprawnień automatycznego tunelowania
+- Różne inne poprawki błędów interfejsu użytkownika

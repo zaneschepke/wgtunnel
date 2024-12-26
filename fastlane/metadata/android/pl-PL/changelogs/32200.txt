@@ -1,0 +1,5 @@
+Ulepszenia:
+- Dodanie statystyk tunelu do ekranu głównego
+- Ulepszenie nawigacji AndroidTV na ekranie ustawień
+- Usunięcie wibracji powiadomień
+- Różne inne poprawki błędów

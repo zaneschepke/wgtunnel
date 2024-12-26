@@ -1,0 +1,5 @@
+Co nowego:
+- Ulepszono przepływ pierwszego uruchomienia
+- Przejście na fork biblioteki protokołu Wireguard
+- Żądanie zezwolenia VPN przy pierwszym uruchomieniu VPN
+- Podniesienie wersji

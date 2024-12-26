@@ -1,0 +1,5 @@
+Ulepszenia:
+- Dodano obsługę automatycznego tunelowania tylko dla danych mobilnych
+- Ulepszono interfejs użytkownika ekranu pomocy technicznej
+- Zaktualizowano łącza do zasobów
+- Różne inne poprawki błędów

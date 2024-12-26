@@ -1,0 +1,7 @@
+Co nowego:
+- Dodano tunel ze schowka
+- Dodano tłumaczenia
+- Naprawiono błąd rozładowywania akumulatora
+- Naprawiono błąd usuwania
+- Ulepszono synchronizację kafelków tunelu
+- Inne poprawki i ulepszenia

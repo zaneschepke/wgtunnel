@@ -1,0 +1,6 @@
+Co nowego:
+- Aktualizacja interfejsu użytkownika
+- Ulepszenia nawigacji AndroidTV
+- Naprawiono błąd rozładowania akumulatora
+- Naprawiono symbole wieloznaczne z opcjonalnym ustawieniem
+- Inne ulepszenia

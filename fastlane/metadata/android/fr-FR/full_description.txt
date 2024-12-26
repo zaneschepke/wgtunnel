@@ -1,14 +1,14 @@
 Fonctionnalités
 
-- Ajoutez des tunnels à l'aide d'un fichier .conf, zip, par entrée manuelle ou par code QR
-- Connexion automatique au VPN en fonction du SSID de votre Wi-Fi, de l'usage d'Ethernet ou de l'usage des données mobiles
-- Division des tunnels en fonction de l'application avec recherche
-- Prise en charge de WireGuard pour les modes noyau et espace utilisateur
-- Prise en charge d'Amnezia pour la protection contre l'inspection profonde de paquets et la censure
-- Prise en charge du VPN permanent
-- Export des tunnels Amnezia et WireGuard en zip
-- Prise en charge des réglages rapides pour l'activation du VPN 
-- Prise en charge des raccourcis statiques pour le tunnel principal permettant l'intégration automatisée.
-- Prise en charge de l'automatisation des intentions pour tous les tunnels
-- Redémarrage automatique des services après redémarrage du téléphone 
-- Mesures de préservation de la batterie
+- Permet l'ajout de tunnels à l'aide d'un fichier .conf, zip, par entrée manuelle ou par code QR
+- Se connecte automatiquement au VPN en fonction du SSID de votre Wi-Fi, de l'usage d'Ethernet ou de l'usage des données mobiles
+- Divise les tunnels en fonction de l'application avec recherche
+- Prend en charge les modes noyau et espace utilisateur de WireGuard
+- Prend en charge Amnezia pour la protection contre l'inspection profonde de paquets ou contre la censure
+- Prend en charge le VPN permanent
+- Permet l'export des tunnels Amnezia et WireGuard en zip
+- Permet l'activation du VPN depuis la barre de réglages rapide
+- Prend en charge les raccourcis statiques pour le tunnel principal permettant l'intégration automatisée.
+- Prend en charge l'automatisation des intentions pour tous les tunnels
+- Redémarre automatiquement les services après un redémarrage du téléphone
+- Préserve la batterie

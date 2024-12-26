@@ -1,0 +1,2 @@
+Co nowego:
+- To jest wersja testowa CI

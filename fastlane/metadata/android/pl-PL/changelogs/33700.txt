@@ -1,0 +1,2 @@
+Co nowego:
+- Naprawiono błąd interfejsu użytkownika wyświetlania tunelu
