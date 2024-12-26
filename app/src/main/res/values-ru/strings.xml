@@ -60,8 +60,7 @@
     <string name="error_file_extension">Файл не имеет расширение .conf или .zip</string>
     <string name="random">(случайно)</string>
     <string name="app_name">WG Tunnel</string>
-    <string name="vpn_channel_id">Канал VPN</string>
-    <string name="vpn_channel_name">Канал уведомлений VPN</string>
+	<string name="vpn_channel_name">Канал уведомлений VPN</string>
     <string name="tunnels">Туннели</string>
     <string name="okay">Хорошо</string>
     <string name="prominent_background_location_title">Фоновая передача местоположения</string>

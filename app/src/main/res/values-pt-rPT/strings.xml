@@ -97,8 +97,7 @@
     <string name="auto_tunnel_title">Serviço de Auto-túnel</string>
     <string name="error_no_file_explorer">Nenhum explorador de ficheiros instalado</string>
     <string name="app_name">WG Tunnel</string>
-    <string name="vpn_channel_id">Canal de VPN</string>
-    <string name="vpn_channel_name">Canal de notificações VPN</string>
+	<string name="vpn_channel_name">Canal de notificações VPN</string>
     <string name="prominent_background_location_message">Este recurso precisa de permissões de localização em segundo plano para ativar o monitoramento do SSID da rede Wi-Fi mesmo quando a aplicação está fechado. Para mais pormenores, por favor veja a Política de Privacidade no ecrã de Suporte.</string>
     <string name="trusted_ssid_value_description">Envie o SSID</string>
     <string name="add_tunnels_text">Adicionar a partir de ficheiro ou zip</string>

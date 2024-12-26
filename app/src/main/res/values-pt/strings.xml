@@ -108,8 +108,7 @@
     <string name="see_the">Veja o</string>
     <string name="getting_started_guide">guia de início rápido</string>
     <string name="error_file_format">Formato de configuração inválido</string>
-    <string name="vpn_channel_id">Canal de VPN</string>
-    <string name="vpn_channel_name">Canal de notificações VPN</string>
+	<string name="vpn_channel_name">Canal de notificações VPN</string>
     <string name="set_custom_ping_ip">Definir ip ping personalizado</string>
     <string name="vpn_denied_dialog_title">Permissão negada</string>
     <string name="vpn_settings">Configurações do sistema VPN</string>

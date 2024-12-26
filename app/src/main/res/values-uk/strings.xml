@@ -32,8 +32,7 @@
     <string name="getting_started_guide">інструкція щодо початку роботи</string>
     <string name="error_file_format">некоректний формат конфігурації тунелю</string>
     <string name="vpn_channel_name">Канал сповіщення VPN</string>
-    <string name="vpn_channel_id">Канал VPN</string>
-    <string name="error_file_extension">Файл не є .conf або .zip файлом</string>
+	<string name="error_file_extension">Файл не є .conf або .zip файлом</string>
     <string name="turn_off_tunnel">Дія потребує вимкнення тунелю</string>
     <string name="tunnel_mobile_data">Тунелювати мобільні дані</string>
     <string name="privacy_policy">Переглянути політику конфіденційності</string>

@@ -95,8 +95,7 @@
     <string name="restart_on_ping">Neustart bei PING Fehler (Beta)</string>
     <string name="edit_tunnel">Tunnel bearbeiten</string>
     <string name="set_primary_tunnel">Als Primären Tunnel setzen</string>
-    <string name="vpn_channel_id">VPN Kanal</string>
-    <string name="vpn_channel_name">VPN Benachrichtigungskanal</string>
+	<string name="vpn_channel_name">VPN Benachrichtigungskanal</string>
     <string name="turn_off_tunnel">Aktion erfordert deaktivierten Tunnel</string>
     <string name="kernel">Kernel</string>
     <string name="use_kernel">Kernelmodul verwenden</string>

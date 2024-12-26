@@ -4,8 +4,7 @@
     <string name="turn_off_tunnel">Actie vereist uitgeschakelde tunnel</string>
     <string name="tunnel_mobile_data">Tunnel bij mobiele data</string>
     <string name="app_name">WG Tunnel</string>
-    <string name="vpn_channel_id">VPN Kanaal</string>
-    <string name="vpn_channel_name">VPN Notificatiekanaal</string>
+	<string name="vpn_channel_name">VPN Notificatiekanaal</string>
     <string name="tunnels">Tunnels</string>
     <string name="privacy_policy">Bekijk privacybeleid</string>
     <string name="tunnel_on_ethernet">Tunnel bij ethernet</string>
