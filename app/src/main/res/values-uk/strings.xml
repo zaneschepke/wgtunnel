@@ -55,8 +55,7 @@
     <string name="name">Ім\'я</string>
     <string name="always_on_vpn_support">Дозволили Always-ON VPN</string>
     <string name="location_services_not_detected">Сервіси місце знаходження не знайдено</string>
-    <string name="db_name">wg-tunnel-db</string>
-    <string name="auto_tunneling">Авто-тунелювання</string>
+	<string name="auto_tunneling">Авто-тунелювання</string>
     <string name="vpn_on">VPN увімк.</string>
     <string name="vpn_off">VPN вимк.</string>
     <string name="create_import">Створити з нуля</string>

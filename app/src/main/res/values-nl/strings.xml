@@ -45,7 +45,6 @@
     <string name="save_changes">Opslaan</string>
     <string name="dns_servers">DNS servers</string>
     <string name="mtu">MTU</string>
-    <string name="db_name">wg-tunnel-db</string>
     <string name="vpn_on">VPN aan</string>
     <string name="done">Gereed</string>
     <string name="interface_">Interface</string>

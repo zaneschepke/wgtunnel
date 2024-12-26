@@ -111,7 +111,6 @@
     <string name="public_key">Chave pública</string>
     <string name="addresses">Endereços</string>
     <string name="peer">Par</string>
-    <string name="db_name">wg-tunnel-db</string>
     <string name="rotate_keys">Revezar chaves</string>
     <string name="private_key">Chave privada</string>
     <string name="copy_public_key">Copiar chave pública</string>

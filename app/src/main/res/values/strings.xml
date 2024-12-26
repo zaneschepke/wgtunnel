@@ -41,7 +41,7 @@
     <string name="always_on_vpn_support">Allow Always-On VPN </string>
     <string name="location_services_not_detected">Location Services Not Detected</string>
     <string name="hint_search_packages">Search packages</string>
-    <string name="db_name">wg-tunnel-db</string>
+    <string name="db_name" translatable="false">wg-tunnel-db</string>
     <string name="auto_tunneling">Auto-tunneling</string>
     <string name="vpn_on">VPN on</string>
     <string name="vpn_off">VPN off</string>

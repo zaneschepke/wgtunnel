@@ -26,8 +26,7 @@
     <string name="always_on_vpn_support">允许VPN始终在线</string>
     <string name="location_services_not_detected">定位服务未开启</string>
     <string name="hint_search_packages">查找软件包</string>
-    <string name="db_name">wg-tunnel 数据库</string>
-    <string name="done">完成</string>
+	<string name="done">完成</string>
     <string name="rotate_keys">轮换秘钥</string>
     <string name="create_import">手动创建</string>
     <string name="private_key">私钥</string>

@@ -51,8 +51,7 @@
     <string name="auto_tunnel_title">Сервис автотуннелирования</string>
     <string name="create_import">Создать с нуля</string>
     <string name="private_key">Закрытый ключ</string>
-    <string name="db_name">wg-tunnel-db</string>
-    <string name="base64_key">Ключ в base64</string>
+	<string name="base64_key">Ключ в base64</string>
     <string name="error_no_file_explorer">Не найден файловый менеджер</string>
     <string name="delete_tunnel_message">Вы действительно хотите удалить этот туннель?</string>
     <string name="version">Версия</string>

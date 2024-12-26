@@ -48,8 +48,7 @@
     <string name="always_on_vpn_support">Permitir VPN siempre-activada</string>
     <string name="location_services_not_detected">Servicios de Ubicación No Detectados</string>
     <string name="hint_search_packages">Buscar paquetes</string>
-    <string name="db_name">wg-tunnel-db</string>
-    <string name="auto_tunneling">Túnel-automático</string>
+	<string name="auto_tunneling">Túnel-automático</string>
     <string name="vpn_on">VPN on</string>
     <string name="vpn_off">VPN off</string>
     <string name="create_import">Crear desde cero</string>

@@ -43,8 +43,7 @@
     <string name="config_changes_saved">Changements de la configuration sauvegardés.</string>
     <string name="public_key">Clé publique</string>
     <string name="addresses">Adresses</string>
-    <string name="db_name">wg-tunnel-db</string>
-    <string name="vpn_on">VPN allumé</string>
+	<string name="vpn_on">VPN allumé</string>
     <string name="create_import">Créer à partir de zéro</string>
     <string name="private_key">Clé privée</string>
     <string name="interface_">Interface</string>
