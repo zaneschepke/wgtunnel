@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tunnel_on_ethernet">Túnel na ethernet</string>
-    <string name="save_changes">Gravar</string>
     <string name="public_key">Chave pública</string>
     <string name="addresses">Endereços</string>
     <string name="dns_servers">Servidores DNS</string>
@@ -18,7 +17,6 @@
     <string name="error_no_file_explorer">Nenhum explorador de ficheiros instalado</string>
     <string name="error_invalid_code">Código QR inválido</string>
     <string name="auto_tunnel_title">Serviço de Auto-túnel</string>
-    <string name="excluded">excluído</string>
     <string name="all">todos</string>
     <string name="enter_pin">Digite o seu pin</string>
     <string name="use_tunnel_on_wifi_name">Usar túnel em wifi com nome</string>
@@ -44,8 +42,6 @@
     <string name="open_file">Abrir Ficheiro</string>
     <string name="add_from_qr">Adicionar a partir de código QR</string>
     <string name="add_tunnels_text">Adicionar a partir de ficheiro ou zip</string>
-    <string name="tunnel_all">Todas as aplicações pelo túnel</string>
-    <string name="icon">Ícone</string>
     <string name="qr_scan">Escanear o código QR</string>
     <string name="tunnel_name">Nome do Túnel</string>
     <string name="config_changes_saved">Mudanças nas configurações gravadas.</string>
@@ -62,7 +58,6 @@
     <string name="vpn_off">VPN desligada</string>
     <string name="listen_port">Porta de escuta</string>
     <string name="turn_on_tunnel">Esta ação precisa um túnel ativo</string>
-    <string name="done">Feito</string>
     <string name="add_peer">Adicionar par</string>
     <string name="interface_">Interface</string>
     <string name="copy_public_key">Copiar chave pública</string>
@@ -87,7 +82,6 @@
     <string name="docs_description">Ler a documentação</string>
     <string name="error_root_denied">Shell Root negado</string>
     <string name="location_services_missing_message">A aplicação não detetou o serviço de localização ativado no seu dispositivo. Dependendo do dispositivo, isto pode causar que a função de Wi-Fi não confiável falhe em ler o nome do Wi-Fi. Quer continuar mesmo assim?</string>
-    <string name="included">incluso</string>
     <string name="open_issue">Abrir um problema</string>
     <string name="tunneling_apps">Aplicações com túnel</string>
     <string name="no_email_detected">Nenhuma aplicação de email detetado</string>

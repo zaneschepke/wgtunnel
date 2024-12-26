@@ -21,10 +21,7 @@
     <string name="tunnel_name">Tunnel-Name</string>
     <string name="exclude">Ausschließen</string>
     <string name="include">Einschließen</string>
-    <string name="tunnel_all">Alle Apps tunneln</string>
     <string name="config_changes_saved">Konfigurationsänderungen gespeichert.</string>
-    <string name="save_changes">Speichern</string>
-    <string name="icon">Symbol</string>
     <string name="public_key">Öffentlicher Schlüssel</string>
     <string name="addresses">Adressen</string>
     <string name="dns_servers">DNS-Server</string>
@@ -40,7 +37,6 @@
     <string name="vpn_off">VPN aus</string>
     <string name="create_import">Von Grund auf neu erstellen</string>
     <string name="add_peer">Peer hinzufügen</string>
-    <string name="done">Erledigt</string>
     <string name="rotate_keys">Schlüssel rotieren</string>
     <string name="private_key">Privater Schlüssel</string>
     <string name="copy_public_key">Öffentlichen Schlüssel kopieren</string>
@@ -68,7 +64,6 @@
     <string name="auto_tunnel_title">Auto-Tunnel Service</string>
     <string name="delete_tunnel_message">Bist du sicher, dass du den Tunnel löschen möchtest?</string>
     <string name="yes">Ja</string>
-    <string name="excluded">ausgeschlossen</string>
     <string name="all">alle</string>
     <string name="no_browser_detected">Keinen Browser erkannt</string>
     <string name="open_issue">Issue öffnen</string>
@@ -87,7 +82,6 @@
     <string name="error_authorization_failed">Autorisierung fehlgeschlagen</string>
     <string name="error_invalid_code">Ungültiger QR Code</string>
     <string name="tunneling_apps">Getunnelte Apps</string>
-    <string name="included">eingeschlossen</string>
     <string name="no_email_detected">Keine E-Mail-App erkannt</string>
     <string name="create_pin">PIN erstellen</string>
     <string name="use_tunnel_on_wifi_name">Tunnel für WLAN-Namen verwenden</string>
@@ -137,8 +131,7 @@
     <string name="kernel_not_supported">Kernel nicht unterstützt</string>
     <string name="trusted_wifi_names">Vertrauenswürdige WLAN Namen</string>
     <string name="requires_app_relaunch">Diese Änderung erfordert einen Neustart der App. Möchten Sie fortfahren?</string>
-    <string name="selected">Ausgewählt</string>
-    <string name="use_root_shell_for_wifi">Root-Shell verwenden, um WLAN-Namen zu ermitteln</string>
+	<string name="use_root_shell_for_wifi">Root-Shell verwenden, um WLAN-Namen zu ermitteln</string>
     <string name="light">Hell</string>
     <string name="add_wifi_name">WLAN Namen hinzufügen</string>
     <string name="dark">Dunkel</string>

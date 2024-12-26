@@ -26,7 +26,6 @@
     <string name="create_import">Buat dari awal</string>
     <string name="turn_on_tunnel">Tindakan memerlukan tunnel aktif</string>
     <string name="add_peer">Tambahkan rekan</string>
-    <string name="done">Selesai</string>
     <string name="interface_">Interface</string>
     <string name="rotate_keys">Putar tombol</string>
     <string name="private_key">Kunci privat</string>
@@ -57,7 +56,6 @@
     <string name="auto_tunnel_title">Layanan Auto-tunnel</string>
     <string name="yes">Ya</string>
     <string name="tunneling_apps">Aplikasi tunneling</string>
-    <string name="included">termasuk</string>
     <string name="incorrect_pin">Pin salah</string>
     <string name="pin_created">Pin berhasil dibuat</string>
     <string name="enter_pin">Masukkan pin Anda</string>
@@ -106,7 +104,6 @@
     <string name="delete_tunnel_message">Apakah Anda yakin ingin menghapus tunnel ini?</string>
     <string name="no_email_detected">Tidak ada aplikasi email yang terdeteksi</string>
     <string name="no_browser_detected">Tidak ada browser yang terdeteksi</string>
-    <string name="excluded">dikecualikan</string>
     <string name="all">semua</string>
     <string name="open_issue">Membuka masalah</string>
     <string name="read_logs">Baca log</string>

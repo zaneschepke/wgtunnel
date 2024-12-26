@@ -26,11 +26,8 @@
     <string name="tunnel_name">Tunnel Name</string>
     <string name="exclude">Exclude</string>
     <string name="include">Include</string>
-    <string name="tunnel_all">Tunnel all applications</string>
-    <string name="config_changes_saved">Configuration changes saved.</string>
-    <string name="save_changes">Save</string>
-    <string name="icon">Icon</string>
-    <string name="public_key">Public key</string>
+	<string name="config_changes_saved">Configuration changes saved.</string>
+	<string name="public_key">Public key</string>
     <string name="addresses">Addresses</string>
     <string name="dns_servers">DNS servers</string>
     <string name="mtu">MTU</string>
@@ -48,8 +45,7 @@
     <string name="create_import">Create from scratch</string>
     <string name="turn_on_tunnel">Action requires active tunnel</string>
     <string name="add_peer">Add peer</string>
-    <string name="done">Done</string>
-    <string name="interface_">Interface</string>
+	<string name="interface_">Interface</string>
     <string name="rotate_keys">Rotate keys</string>
     <string name="private_key">Private key</string>
     <string name="copy_public_key">Copy public key</string>
@@ -85,9 +81,7 @@
     <string name="delete_tunnel_message">Are you sure you would like to delete this tunnel?</string>
     <string name="yes">Yes</string>
     <string name="tunneling_apps">Tunneling apps</string>
-    <string name="included">included</string>
-    <string name="excluded">excluded</string>
-    <string name="all">all</string>
+	<string name="all">all</string>
     <string name="no_email_detected">No email app detected</string>
     <string name="no_browser_detected">No browser detected</string>
     <string name="open_issue">Open an issue</string>
@@ -152,8 +146,7 @@
 	<string name="dynamic">Dynamic</string>
 	<string name="language">Language</string>
 	<string name="display_theme">Display theme</string>
-	<string name="selected">Selected</string>
-    <string name="trusted_wifi_names">Trusted wifi names</string>
+	<string name="trusted_wifi_names">Trusted wifi names</string>
 	<string name="add_wifi_name">Add wifi name</string>
 	<string name="on_demand_rules">On demand tunnel rules</string>
 	<string name="primary_tunnel">Primary tunnel</string>
@@ -190,11 +183,9 @@
 	<string name="auto_tunnel_channel_name">Auto-tunnel Notification Channel</string>
 	<string name="auto_tunnel_channel_description">A channel for auto-tunnel state notifications</string>
 	<string name="stop">stop</string>
-    <string name="config">Config</string>
 	<string name="splt_tunneling">Split tunneling</string>
 	<string name="tunnel_specific_settings">Tunnel specific settings</string>
-	<string name="quick_actions">Quick actions</string>
-    <string name="show_scripts">Show scripts</string>
+	<string name="show_scripts">Show scripts</string>
 	<string name="pre_up">Pre up</string>
 	<string name="post_up">Post up</string>
 	<string name="pre_down">Pre down</string>

@@ -11,9 +11,7 @@
     <string name="qr_scan">Сканувати QR</string>
     <string name="tunnel_name">Ім\'я тунелю</string>
     <string name="include">Включити</string>
-    <string name="tunnel_all">Тунель для всіх додатків</string>
     <string name="config_changes_saved">Зміни налаштувань збережено.</string>
-    <string name="icon">Іконка</string>
     <string name="turn_on_tunnel">Дія потребує активного тунелю</string>
     <string name="rotate_keys">Оновити ключі</string>
     <string name="private_key">Закритий ключ</string>
@@ -42,7 +40,6 @@
     <string name="open_file">Відкрити файл</string>
     <string name="exclude">Виключити</string>
     <string name="add_from_qr">Додати з QR коду</string>
-    <string name="save_changes">Зберегти</string>
     <string name="public_key">Публічний ключ</string>
     <string name="addresses">Адреса</string>
     <string name="allowed_ips">Дозволені IP</string>
@@ -59,7 +56,6 @@
     <string name="vpn_off">VPN вимк.</string>
     <string name="create_import">Створити з нуля</string>
     <string name="add_peer">Додати peer</string>
-    <string name="done">Готово</string>
     <string name="interface_">Інтерфейс</string>
     <string name="copy_public_key">Копіювати відкритий ключ</string>
     <string name="listen_port">Слухати порт</string>
@@ -81,11 +77,9 @@
     <string name="auto_tunnel_title">Сервіс авто-тунелювання</string>
     <string name="delete_tunnel">Видалити тунель</string>
     <string name="location_services_missing_message">Додаток не знайшов служб місце знаходження на вашому пристрої. На деяких пристроях це може привести до неможливості визначення назви мережі Wi-Fi і помилок функції недовірених Wi-Fi мереж. Все рівно хочете продовжити?</string>
-    <string name="included">включено</string>
     <string name="delete_tunnel_message">Ви дійсно хочете видалити цей тунель?</string>
     <string name="yes">Так</string>
     <string name="tunneling_apps">Тунельовані додатки</string>
-    <string name="excluded">виключено</string>
     <string name="auto">(авто)</string>
     <string name="all">всі</string>
     <string name="no_email_detected">Програми для надсилання email не знайдено</string>

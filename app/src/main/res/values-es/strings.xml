@@ -4,12 +4,10 @@
     <string name="email_chooser">Enviar un email…</string>
     <string name="kernel">Kernel</string>
     <string name="add_peer">Añadir peer</string>
-    <string name="done">Hecho</string>
     <string name="copy_public_key">Copiar public key</string>
     <string name="base64_key">clave base64</string>
     <string name="tunnel_on_wifi">Túnel en Wi-Fi no de confianza</string>
     <string name="location_services_missing_message">La app no detecta activado el servicio de ubicación en tu dispositivo. Dependiendo del dispositivo, esto podría hacer que la característica de Wi-Fi no de confianza falle al leer el nombre Wi-Fi. ¿Quieres continuar de todas formas?</string>
-    <string name="excluded">excluida(s)</string>
     <string name="all">todas</string>
     <string name="mobile_data_tunnel">Establecer como túnel en datos móviles</string>
     <string name="use_tunnel_on_wifi_name">Usar tunnel en nombre Wi-Fi</string>
@@ -24,10 +22,7 @@
     <string name="tunnel_name">Nombre de túnel</string>
     <string name="exclude">Excluir</string>
     <string name="include">Incluir</string>
-    <string name="tunnel_all">Todas las apps por el túnel</string>
     <string name="config_changes_saved">Cambios de configuración guardados.</string>
-    <string name="save_changes">Guardar</string>
-    <string name="icon">Icono</string>
     <string name="mtu">MTU</string>
     <string name="dns_servers">DNS servers</string>
     <string name="addresses">Addresses</string>
@@ -82,7 +77,6 @@
     <string name="delete_tunnel_message">¿Estás seguro de que quieres eliminar este túnel?</string>
     <string name="yes">Sí</string>
     <string name="tunneling_apps">Apps por el túnel</string>
-    <string name="included">incluida(s)</string>
     <string name="no_email_detected">Ninguna app de email detectada</string>
     <string name="no_browser_detected">Ningún navegador detectado</string>
     <string name="open_issue">Abrir una incidencia</string>

@@ -14,8 +14,6 @@
     <string name="qr_scan">扫描二维码</string>
     <string name="tunnel_name">隧道名称</string>
     <string name="include">包含</string>
-    <string name="tunnel_all">全局代理</string>
-    <string name="icon">图标</string>
     <string name="public_key">公钥</string>
     <string name="addresses">地址</string>
     <string name="dns_servers">DNS 服务器</string>
@@ -26,7 +24,6 @@
     <string name="always_on_vpn_support">允许 VPN 始终在线</string>
     <string name="location_services_not_detected">定位服务未开启</string>
     <string name="hint_search_packages">查找软件包</string>
-	<string name="done">完成</string>
     <string name="rotate_keys">轮换秘钥</string>
     <string name="create_import">手动创建</string>
     <string name="private_key">私钥</string>
@@ -66,7 +63,6 @@
     <string name="error_ssid_exists">SSID 已经存在</string>
     <string name="open_file">打开文件</string>
     <string name="config_changes_saved">设置已保存。</string>
-    <string name="save_changes">保存</string>
     <string name="interface_">接口</string>
     <string name="email_subject">WG Tunnel 支持</string>
     <string name="auto_tunnel_title">自动连接服务</string>
@@ -75,8 +71,6 @@
     <string name="location_services_missing_message">此应用不会在您的设备上检测任何已开启的定位服务。根据不同的设备，可能会导致无法获得不可信 WiFi 的名称。您想继续吗？</string>
     <string name="yes">是</string>
     <string name="tunneling_apps">正在使用隧道的应用</string>
-    <string name="included">已包含</string>
-    <string name="excluded">排除</string>
     <string name="all">全部</string>
     <string name="no_email_detected">未安装邮件应用</string>
     <string name="enable_app_lock">锁定应用</string>
@@ -96,7 +90,6 @@
     <string name="no_browser_detected">没有安装浏览器</string>
     <string name="incorrect_pin">密码不正确</string>
     <string name="set_custom_ping_ip">自定义 Ping 的目标 ip</string>
-    <string name="watcher_channel_name">守护者通知频道</string>
     <string name="junk_packet_count">无效包计数</string>
     <string name="app_name">WG Tunnel</string>
     <string name="vpn_channel_name">VPN 通知频道</string>
@@ -150,7 +143,6 @@
     <string name="unsure_how">如果您不确定如何进行</string>
     <string name="see_the">请查阅</string>
     <string name="getting_started_guide">入门指南</string>
-    <string name="selected">已选择</string>
     <string name="on_demand_rules">自定义隧道规则</string>
     <string name="skip">取消</string>
     <string name="launch_app_settings">打开应用设置</string>

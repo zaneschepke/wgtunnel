@@ -2,10 +2,7 @@
 <resources>
     <string name="app_name">WG Tunnel</string>
 	<string name="vpn_channel_name">VPN Bildirim Kanalı</string>
-    <string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
-    <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
-    <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
-    <string name="error_file_extension">Dosya .conf veya .zip değil</string>
+	<string name="error_file_extension">Dosya .conf veya .zip değil</string>
     <string name="turn_off_tunnel">İşlem için tünelin kapalı olması gerekiyor</string>
     <string name="no_tunnels">Henüz tünel eklenmedi!</string>
     <string name="tunnels">Tüneller</string>
@@ -24,10 +21,7 @@
     <string name="tunnel_name">Tünel Adı</string>
     <string name="exclude">Hariç tut</string>
     <string name="include">Dahil et</string>
-    <string name="tunnel_all">Tüm uygulamaları tünelle</string>
     <string name="config_changes_saved">Yapılandırma değişiklikleri kaydedildi.</string>
-    <string name="save_changes">Kaydet</string>
-    <string name="icon">Simge</string>
     <string name="public_key">Genel anahtar</string>
     <string name="addresses">Adresler</string>
     <string name="dns_servers">DNS sunucuları</string>
@@ -45,7 +39,6 @@
     <string name="create_import">Sıfırdan oluştur</string>
     <string name="turn_on_tunnel">İşlem için aktif tünel gerekiyor</string>
     <string name="add_peer">Eş ekle</string>
-    <string name="done">Tamam</string>
     <string name="interface_">Arayüz</string>
     <string name="rotate_keys">Anahtarları döndür</string>
     <string name="private_key">Özel anahtar</string>
@@ -66,8 +59,7 @@
     <string name="export_configs">Yapılandırmaları dışa aktar</string>
     <string name="unknown_error">Bilinmeyen bir hata oluştu</string>
     <string name="tunnel_on_wifi">Güvenilmeyen wifi\'da tünel</string>
-    <string name="my_email" translatable="false">support@zaneschepke.com</string>
-    <string name="email_subject">WG Tunnel Desteği</string>
+	<string name="email_subject">WG Tunnel Desteği</string>
     <string name="email_chooser">E-posta gönder…</string>
     <string name="docs_description">Belgeleri oku</string>
     <string name="email_description">Bana e-posta gönder</string>
@@ -82,8 +74,6 @@
     <string name="delete_tunnel_message">Bu tüneli silmek istediğinizden emin misiniz?</string>
     <string name="yes">Evet</string>
     <string name="tunneling_apps">Tünellenen uygulamalar</string>
-    <string name="included">dahil</string>
-    <string name="excluded">hariç</string>
     <string name="all">tümü</string>
     <string name="no_email_detected">E-posta uygulaması algılanmadı</string>
     <string name="no_browser_detected">Tarayıcı algılanmadı</string>
@@ -113,11 +103,9 @@
     <string name="response_packet_magic_header">Yanıt paketi sihirli başlığı</string>
     <string name="transport_packet_magic_header">Taşıma paketi sihirli başlığı</string>
     <string name="underload_packet_magic_header">Düşük yük paketi sihirli başlığı</string>
-    <string name="telegram_url" translatable="false">https://t.me/wgtunnel</string>
-    <string name="unsure_how">nasıl devam edeceğinizden emin değilseniz</string>
+	<string name="unsure_how">nasıl devam edeceğinizden emin değilseniz</string>
     <string name="see_the">Bakın:</string>
-    <string name="getting_started_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/getting-started.html</string>
-    <string name="getting_started_guide">başlangıç kılavuzu</string>
+	<string name="getting_started_guide">başlangıç kılavuzu</string>
     <string name="error_file_format">Geçersiz tünel yapılandırma formatı</string>
     <string name="restart_at_boot">Önyüklemede yeniden başlat</string>
 </resources>

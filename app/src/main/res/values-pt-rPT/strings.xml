@@ -10,7 +10,6 @@
     <string name="background_location_message2">para garantir que essas permissões estejam ativadas.</string>
     <string name="optional_no_recommend">(opcional, não recomendado)</string>
     <string name="dns_servers">Servidores DNS</string>
-    <string name="save_changes">Gravar</string>
     <string name="add_from_qr">Adicionar a partir de código QR</string>
     <string name="tunnels">Túneis</string>
     <string name="email_description">Me envie um email</string>
@@ -44,7 +43,6 @@
     <string name="delete_tunnel_message">Tem certeza que quer apagar este túnel?</string>
     <string name="yes">Sim</string>
     <string name="tunneling_apps">Aplicações com túnel</string>
-    <string name="excluded">excluído</string>
     <string name="all">todos</string>
     <string name="auto">(automático)</string>
     <string name="pin_created">Pin criado com sucesso</string>
@@ -78,7 +76,6 @@
     <string name="vpn_on">VPN ligada</string>
     <string name="vpn_off">VPN desligada</string>
     <string name="add_peer">Adicionar par</string>
-    <string name="done">Feito</string>
     <string name="interface_">Interface</string>
     <string name="base64_key">Chave base64</string>
     <string name="persistent_keepalive">Manter a conexão persistente (keepalive)</string>
@@ -87,7 +84,6 @@
     <string name="error_ssid_exists">SSID já existe</string>
     <string name="error_root_denied">Shell Root negado</string>
     <string name="delete_tunnel">Apagar túnel</string>
-    <string name="included">incluso</string>
     <string name="junk_packet_maximum_size">Tamanho máximo de pacote-lixo</string>
     <string name="init_packet_junk_size">Tamanho de pacote-lixo inicial</string>
     <string name="vpn_denied_dialog_title">Permissão negada</string>
@@ -104,9 +100,7 @@
     <string name="open_file">Abrir Ficheiro</string>
     <string name="exclude">Excluir</string>
     <string name="include">Incluir</string>
-    <string name="tunnel_all">Todas as aplicações pelo túnel</string>
     <string name="config_changes_saved">Mudanças nas configurações gravadas.</string>
-    <string name="icon">Ícone</string>
     <string name="public_key">Chave pública</string>
     <string name="addresses">Endereços</string>
     <string name="peer">Par</string>

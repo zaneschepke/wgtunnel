@@ -7,7 +7,6 @@
     <string name="name">Имя</string>
     <string name="peer">Пир</string>
     <string name="privacy_policy">Посмотреть политику конфиденциальности</string>
-    <string name="icon">Иконка</string>
     <string name="add_from_qr">Добавить из QR-кода</string>
     <string name="qr_scan">Сканировать QR-код</string>
     <string name="auto_tunneling">Автотуннелирование</string>
@@ -15,9 +14,7 @@
     <string name="open_file">Открыть файл</string>
     <string name="exclude">Исключить</string>
     <string name="include">Включить</string>
-    <string name="tunnel_all">Туннель для всех приложений</string>
     <string name="config_changes_saved">Изменения конфигурации сохранены.</string>
-    <string name="save_changes">Сохранить</string>
     <string name="addresses">Адреса</string>
     <string name="dns_servers">DNS-серверы</string>
     <string name="allowed_ips">Разрешённые IP</string>
@@ -30,7 +27,6 @@
     <string name="optional">(необязательно)</string>
     <string name="optional_no_recommend">(необязательно, не рекомендуется)</string>
     <string name="tunneling_apps">Туннелируемые приложения</string>
-    <string name="excluded">исключено</string>
     <string name="all">все</string>
     <string name="no_email_detected">Приложение для отправки почты не обнаружено</string>
     <string name="enter_pin">Введите PIN-код</string>
@@ -47,7 +43,6 @@
     <string name="cancel">Отмена</string>
     <string name="docs_description">Посмотреть документацию</string>
     <string name="email_chooser">Отправить письмо…</string>
-    <string name="included">включено</string>
     <string name="auto_tunnel_title">Сервис автотуннелирования</string>
     <string name="create_import">Создать с нуля</string>
     <string name="private_key">Закрытый ключ</string>
@@ -86,7 +81,6 @@
     <string name="yes">Да</string>
     <string name="use_tunnel_on_wifi_name">Использовать туннель в сети Wi-Fi</string>
     <string name="prominent_background_location_message">Эта функция требует фоновый доступ к местоположению для отслеживания имён сетей Wi-Fi, даже когда приложение закрыто. Для получения дополнительной информации, прочтите политику конфиденциальности на экране поддержки.</string>
-    <string name="done">Готово</string>
     <string name="copy_public_key">Копировать открытый ключ</string>
     <string name="error_authorization_failed">Не удалось пройти аутентификацию</string>
     <string name="enabled_app_shortcuts">Включить ярлыки приложения</string>
@@ -156,7 +150,6 @@
     <string name="kill_switch">Экстренное отключение</string>
     <string name="dark">Тёмная</string>
     <string name="display_theme">Тема</string>
-    <string name="selected">Выбрано</string>
     <string name="add_wifi_name">Добавить сеть Wi-Fi</string>
     <string name="launch_app_settings">Настройки запуска приложения</string>
     <string name="on_demand_rules">Правила туннеля по запросу</string>

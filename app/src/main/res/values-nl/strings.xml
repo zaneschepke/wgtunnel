@@ -11,7 +11,6 @@
     <string name="no_tunnels">Nog geen tunnels geconfigureerd!</string>
     <string name="okay">Oke</string>
     <string name="error_authentication_failed">Authenticatie mislukt</string>
-    <string name="icon">Icoon</string>
     <string name="include">Meenemen</string>
     <string name="addresses">Adres</string>
     <string name="peer">Peer (extern systeem)</string>
@@ -35,17 +34,14 @@
     <string name="add_from_qr">Toevoegen met QR code</string>
     <string name="qr_scan">QR scannen</string>
     <string name="exclude">Uitsluiten</string>
-    <string name="tunnel_all">Alle applicaties tunnelen</string>
     <string name="config_changes_saved">Configuratiewijzigingen opgeslagen.</string>
     <string name="comma_separated_list">Komma-gescheiden lijst</string>
     <string name="open_file">Bestand openen</string>
     <string name="public_key">Publieke sleutel</string>
     <string name="tunnel_name">Tunnelnaam</string>
-    <string name="save_changes">Opslaan</string>
     <string name="dns_servers">DNS servers</string>
     <string name="mtu">MTU</string>
     <string name="vpn_on">VPN aan</string>
-    <string name="done">Gereed</string>
     <string name="interface_">Interface</string>
     <string name="create_import">Nieuw beginnen</string>
     <string name="rotate_keys">Sleutels roteren</string>
@@ -60,7 +56,6 @@
     <string name="preshared_key">Pre-shared key</string>
     <string name="auto_tunnel_title">Auto-tunnel service</string>
     <string name="error_invalid_code">Ongeldige QR code</string>
-    <string name="included">inclusief</string>
     <string name="open_issue">Open een melding</string>
     <string name="create_pin">Stel PIN in</string>
     <string name="enable_app_lock">Schakel app-lock in</string>
@@ -88,7 +83,6 @@
     <string name="junk_packet_count">Junk packetteller</string>
     <string name="incorrect_pin">Foutieve PIN</string>
     <string name="enter_pin">Vul PIN in</string>
-    <string name="excluded">exclusief</string>
     <string name="pin_created">PIN aangemaakt</string>
     <string name="use_tunnel_on_wifi_name">Gebruik tunnel bij WiFi naam</string>
     <string name="error_file_format">Ongeldige tunnelconfiguratie</string>

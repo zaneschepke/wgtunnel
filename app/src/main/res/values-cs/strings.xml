@@ -12,8 +12,7 @@
     <string name="tunnel_name">Název tunelu</string>
     <string name="exclude">Vyloučit</string>
     <string name="include">Zahrnout</string>
-    <string name="save_changes">Uložit</string>
-    <string name="endpoint">Koncový bod</string>
+	<string name="endpoint">Koncový bod</string>
     <string name="always_on_vpn_support">Povolit trvalé připojení VPN</string>
     <string name="location_services_not_detected">Služby polohy nebyly detekovány</string>
     <string name="hint_search_packages">Hledat balíčky</string>
@@ -63,10 +62,8 @@
     <string name="tunnel_on_ethernet">Tunelovat na ethernetu</string>
     <string name="prominent_background_location_message">Tato funkce vyžaduje oprávnění pro přístup k poloze na pozadí pro zapnutí monitorování Wi-Fi SSID, i když je aplikace zavřená. Pro více detailů, podívejte se prosím na zásady soukromí umístěné v kategorii Podpora.</string>
     <string name="tunnels">Tunely</string>
-    <string name="tunnel_all">Tunelovat všechny aplikace</string>
-    <string name="config_changes_saved">Změny v konfiguraci uloženy.</string>
-    <string name="icon">Ikona</string>
-    <string name="public_key">Veřejný klíč</string>
+	<string name="config_changes_saved">Změny v konfiguraci uloženy.</string>
+	<string name="public_key">Veřejný klíč</string>
     <string name="addresses">Adresy</string>
     <string name="dns_servers">DNS servery</string>
     <string name="allowed_ips">Povolené IP adresy</string>
@@ -74,8 +71,7 @@
     <string name="auto_tunneling">Automatické tunelování</string>
     <string name="turn_on_tunnel">Akce vyžaduje aktivní tunel</string>
     <string name="interface_">Rozhraní</string>
-    <string name="done">Hotovo</string>
-    <string name="rotate_keys">Rotovat klíče</string>
+	<string name="rotate_keys">Rotovat klíče</string>
     <string name="private_key">Soukromý klíč</string>
     <string name="copy_public_key">Kopírovat veřejný klíč</string>
     <string name="base64_key">base64 klíč</string>
@@ -87,9 +83,7 @@
     <string name="yes">Ano</string>
     <string name="tunneling_apps">Tunelování aplikací</string>
     <string name="all">vše</string>
-    <string name="included">zahrnuto</string>
-    <string name="excluded">vyloučeno</string>
-    <string name="no_email_detected">Žádná emailová aplikace nebyla nalezena</string>
+	<string name="no_email_detected">Žádná emailová aplikace nebyla nalezena</string>
     <string name="no_browser_detected">Žádný prohlížeč nebyl nalezen</string>
     <string name="read_logs">Přečíst si logy</string>
     <string name="pin_created">PIN úspěšně vytvořen</string>
@@ -109,8 +103,7 @@
     <string name="show_amnezia_properties">Zobrazit Amnezia možnosti</string>
     <string name="language">Jazyk</string>
     <string name="light">Světlé</string>
-    <string name="vpn_channel_id">VPN Kanál</string>
-    <string name="appearance">Vzhled</string>
+	<string name="appearance">Vzhled</string>
     <string name="display_theme">Téma zobrazení</string>
     <string name="dark">Tmavé</string>
     <string name="dynamic">Podle systému</string>

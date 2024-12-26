@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="error_file_extension">Il file non è .conf o .zip</string>
-    <string name="save_changes">Salva</string>
     <string name="allowed_ips">IP consentiti</string>
     <string name="endpoint">Endpoint</string>
-    <string name="done">Fatto</string>
     <string name="interface_">Interfaccia</string>
     <string name="rotate_keys">Ruota chiavi</string>
     <string name="private_key">Chiave privata</string>
@@ -15,12 +13,8 @@
     <string name="error_no_file_explorer">Nessun esploratore di file installato</string>
     <string name="error_invalid_code">QR code non valido</string>
     <string name="app_name">Tunnel WG</string>
-    <string name="vpn_channel_id">Canale VPN</string>
-    <string name="vpn_channel_name">Canale di notifica VPN</string>
-    <string name="watcher_channel_id">Canale d\'osservazione</string>
-    <string name="watcher_channel_name">Canale di notifica d\'osservazione</string>
-    <string name="turn_off_tunnel">L\'operaz. richiede la disatt. del tunnel</string>
-    <string name="icon">Icona</string>
+	<string name="vpn_channel_name">Canale di notifica VPN</string>
+	<string name="turn_off_tunnel">L\'operaz. richiede la disatt. del tunnel</string>
     <string name="public_key">Chiave pubblica</string>
     <string name="addresses">Indirizzi</string>
     <string name="dns_servers">Server DNS</string>
@@ -47,8 +41,7 @@
     <string name="always_on_vpn_support">Permetti VPN sempre attiva</string>
     <string name="location_services_not_detected">Servizi di localizzazione non rilevati</string>
     <string name="hint_search_packages">Cerca pacchetti</string>
-    <string name="db_name">wg-tunnel-db</string>
-    <string name="auto_tunneling">Tunnel automatico</string>
+	<string name="auto_tunneling">Tunnel automatico</string>
     <string name="vpn_on">VPN on</string>
     <string name="vpn_off">VPN off</string>
     <string name="create_import">Crea da zero</string>

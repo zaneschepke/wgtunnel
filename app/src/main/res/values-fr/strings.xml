@@ -12,9 +12,6 @@
     <string name="open_file">Fichier ouvert</string>
     <string name="qr_scan">Scan du code QR</string>
     <string name="exclude">Exclure</string>
-    <string name="tunnel_all">Tunneliser toutes les applications</string>
-    <string name="save_changes">Sauvegarder</string>
-    <string name="icon">Icône</string>
     <string name="dns_servers">Serveurs DNS</string>
     <string name="mtu">MTU</string>
     <string name="peer">Pair</string>
@@ -28,7 +25,6 @@
     <string name="vpn_off">VPN éteint</string>
     <string name="turn_on_tunnel">Cette action nécessite un tunnel actif</string>
     <string name="add_peer">Ajouter un pair</string>
-    <string name="done">Terminé</string>
     <string name="rotate_keys">Rotation des clés</string>
     <string name="error_file_extension">Le fichier n\'est pas un .conf ou .zip</string>
     <string name="vpn_channel_name">Canal de notifications VPN</string>
@@ -72,8 +68,6 @@
     <string name="delete_tunnel">Supprimer un tunnel</string>
     <string name="delete_tunnel_message">Êtes-vous sûr de vouloir supprimer ce tunnel ?</string>
     <string name="tunneling_apps">Applis de tunnel</string>
-    <string name="included">inclus</string>
-    <string name="excluded">exclu</string>
     <string name="no_email_detected">Aucune application de mail détectée</string>
     <string name="no_browser_detected">Aucun navigateur détecté</string>
     <string name="open_issue">Signaler un problème</string>
@@ -148,7 +142,6 @@
     <string name="on_demand_rules">Règles de tunnel à la demande</string>
     <string name="launch_app_settings">Ouvrir les paramètres de l\'appli</string>
     <string name="display_theme">Thème d\'affichage</string>
-    <string name="selected">Sélectionné</string>
     <string name="trusted_wifi_names">Nom wifi approuvés</string>
     <string name="add_wifi_name">Ajouter un nom de wifi</string>
     <string name="mobile_tunnel">Tunnel de données mobiles</string>
