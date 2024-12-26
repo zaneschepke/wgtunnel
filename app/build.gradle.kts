@@ -31,6 +31,14 @@ android {
 		generateLocaleConfig = true
 	}
 
+	//reproducibility
+	dependenciesInfo {
+		// Disables dependency metadata when building APKs.
+		includeInApk = false
+		// Disables dependency metadata when building Android App Bundles.
+		includeInBundle = false
+	}
+
 	defaultConfig {
 		applicationId = Constants.APP_ID
 		minSdk = Constants.MIN_SDK
