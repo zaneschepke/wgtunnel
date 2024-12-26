@@ -31,6 +31,8 @@ on:
         required: false
         default: nightly
   workflow_call:
+env:
+  UPLOAD_DIR_ANDROID: android_artifacts
 
 jobs:
   check_commits:
@@ -53,46 +55,31 @@ jobs:
           # This script checks for commits newer than 23 hours ago
           NEW_COMMITS=$(git rev-list --count --after="$(date -Iseconds -d '23 hours ago')" ${{ github.sha }})
           echo "new_commits=$NEW_COMMITS" >> $GITHUB_OUTPUT
+
   build:
-    needs: check_commits
+    if: ${{ inputs.release_type != 'none' }}
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
+
+  publish:
+    needs: 
+      - check_commits
+      - build
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: Build Signed APK
     runs-on: ubuntu-latest
     env:
-      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-      KEY_STORE_FILE: 'android_keystore.jks'
-      KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
       GH_USER: ${{ secrets.GH_USER }}
       # GH needed for gh cli
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       GH_REPO: ${{ github.repository }}
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: gradle
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
-
-      # Here we need to decode keystore.jks from base64 string and place it
-      # in the folder specified in the release signing configuration
-      - name: Decode Keystore
-        id: decode_keystore
-        uses: timheuer/base64-to-file@v1.2
-        with:
-          fileName: ${{ env.KEY_STORE_FILE }}
-          fileDir: ${{ env.KEY_STORE_LOCATION }}
-          encodedString: ${{ secrets.KEYSTORE }}
 
       # update latest tag
       - name: Set latest tag
@@ -120,37 +107,6 @@ jobs:
           fromTag: "latest"
           writeToFile: false  # we won't write to file, just output
 
-      # create keystore path for gradle to read
-      - name: Create keystore path env var
-        run: |
-          store_path=${{ env.KEY_STORE_LOCATION }}${{ env.KEY_STORE_FILE }}
-          echo "KEY_STORE_PATH=$store_path" >> $GITHUB_ENV
-
-      - name: Create service_account.json
-        id: createServiceAccount
-        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service_account.json
-
-      # Build and sign APK ("-x test" argument is used to skip tests)
-      # add fdroid flavor for apk upload
-      - name: Build Fdroid Release APK
-        if: ${{ inputs.release_type != '' && inputs.release_type == 'release' }}
-        run: ./gradlew :app:assembleFdroidRelease -x test
-
-      - name: Build Fdroid Prerelease APK
-        if: ${{ inputs.release_type != '' && inputs.release_type == 'prerelease' }}
-        run: ./gradlew :app:assembleFdroidPrerelease -x test
-
-      - name: Build Fdroid Nightly APK
-        if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly' }}
-        run: ./gradlew :app:assembleFdroidNightly -x test
-
-      - if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly' }}
-        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/nightly/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
-      - if: ${{ inputs.release_type != '' && inputs.release_type == 'release' }}
-        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/release/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
-      - if: ${{ inputs.release_type != '' && inputs.release_type == 'prerelease' }}
-        run: echo "APK_PATH=$(find . -regex '^.*/build/outputs/apk/fdroid/prerelease/.*\.apk$' -type f | head -1)" >> $GITHUB_ENV
-
       - name: Get version code
         if: ${{ inputs.release_type == 'release' }}
         run: |
@@ -172,25 +128,14 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
 
-      # Save the APK after the Build job is complete to publish it as a Github release in the next job
-      - name: Upload APK
-        uses: actions/upload-artifact@v4.5.0
-        with:
-          name: wgtunnel
-          path: ${{ env.APK_PATH }}
-
-      - name: Download APK from build
+      - name: Make download dir
+        run: mkdir ${{ github.workspace }}/temp
+  
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: wgtunnel
-
-      - name: Repository Dispatch for my F-Droid repo
-        uses: peter-evans/repository-dispatch@v3
-        if: ${{ inputs.release_type == 'release' }}
-        with:
-          token: ${{ secrets.PAT }}
-          repository: zaneschepke/fdroid
-          event-type: fdroid-update
+          name: ${{ env.UPLOAD_DIR_ANDROID }}
+          path: ${{ github.workspace }}/temp
 
       # Setup TAG_NAME, which is used as a general "name"
       - if: github.event_name == 'workflow_dispatch'
@@ -221,7 +166,9 @@ jobs:
 
       - name: Get checksum
         id: checksum
-        run: echo "checksum=$(apksigner verify -print-certs ${{ env.APK_PATH }} | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")" >> $GITHUB_OUTPUT
+        run: |
+          file_path=$(find ${{ github.workspace }}/temp -type f -iname "*.apk" | tail -n1)
+          echo "checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")" >> $GITHUB_OUTPUT
 
 
       - name: Create Release with Fastlane changelog notes
@@ -245,6 +192,19 @@ jobs:
           make_latest: ${{ inputs.release_type == 'release' }}
           files: ${{ github.workspace }}/${{ env.APK_PATH }}
 
+  publish-fdroid:
+    runs-on: ubuntu-latest
+    needs:
+      - publish-github
+    if: inputs.release_type == 'release'
+    steps:
+      - name: Dispatch update for fdroid repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.ANDROID_PAT }}
+          repository: zaneschepke/fdroid
+          event-type: fdroid-update
+  
   publish-play:
     if: ${{ inputs.track != 'none' && inputs.track != '' }}
     name: Publish to Google Play
