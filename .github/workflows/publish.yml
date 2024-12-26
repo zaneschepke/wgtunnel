@@ -1,4 +1,4 @@
-name: release-android
+name: publish
 
 on:
   schedule:
@@ -64,7 +64,7 @@ jobs:
       build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
 
   publish:
-    needs: 
+    needs:
       - check_commits
       - build
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
@@ -130,7 +130,7 @@ jobs:
 
       - name: Make download dir
         run: mkdir ${{ github.workspace }}/temp
-  
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -204,7 +204,7 @@ jobs:
           token: ${{ secrets.ANDROID_PAT }}
           repository: zaneschepke/fdroid
           event-type: fdroid-update
-  
+
   publish-play:
     if: ${{ inputs.track != 'none' && inputs.track != '' }}
     name: Publish to Google Play
