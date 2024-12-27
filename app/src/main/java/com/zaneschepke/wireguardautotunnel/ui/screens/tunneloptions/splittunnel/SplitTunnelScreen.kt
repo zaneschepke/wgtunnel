@@ -101,7 +101,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 
 	val sortedPackages by remember {
 		derivedStateOf {
-			splitTunnelApps.sortedWith(compareBy(collator) { it.name }).filter { it.name.contains(query) }.toMutableStateList()
+			splitTunnelApps.sortedWith(compareBy(collator) { it.name }).filter { it.name.lowercase().contains(query.lowercase()) }.toMutableStateList()
 		}
 	}
 
