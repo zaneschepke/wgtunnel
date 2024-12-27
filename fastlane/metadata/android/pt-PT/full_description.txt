@@ -1,4 +1,4 @@
-Recursos
+Features
 
 - Adiciona túneis por ficheiros .conf, zip, manualmente ou por código QR
 - Auto connecta à VPN baseado no nome (SSID) do Wi-Fi, ethernet ou dados móveis
