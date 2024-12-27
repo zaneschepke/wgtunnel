@@ -1,7 +1,5 @@
 files:
   - source: /fastlane/metadata/android/en-US/*.txt
     translation: /fastlane/metadata/android/%locale%/%original_file_name%
-  - source: /fastlane/metadata/android/en-US/changelogs/*.txt
-    translation: /fastlane/metadata/android/%locale%/changelogs/%original_file_name%
   - source: /app/src/main/res/values/strings.xml
     translation: /app/src/main/res/values-%locale%/%original_file_name%
