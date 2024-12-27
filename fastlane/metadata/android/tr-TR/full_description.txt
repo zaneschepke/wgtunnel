@@ -4,8 +4,9 @@
 - Wi-Fi SSID'ye, ethernet'e veya mobil veriye dayalı VPN'ye otomatik bağlanma
 - Uygulama bazında split tunneling ve arama desteği
 - Kernel ve kullanıcı alanı modları için WireGuard desteği
+- Amnezia support for userspace mode for DPI/censorship protection
 - Her zaman açık VPN desteği
-- Tünelleri zip olarak dışa aktarma
+- Export Amnezia and WireGuard tunnels to zip
 - VPN geçişleri için hızlı kısayol desteği
 - Otomasyon entegrasyonu için birincil tünel için statik kısayollar desteği
 - Tüm tüneller için Intent otomasyon desteği
