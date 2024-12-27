@@ -31,7 +31,7 @@ android {
 		generateLocaleConfig = true
 	}
 
-	//reproducibility
+	// reproducibility
 	dependenciesInfo {
 		// Disables dependency metadata when building APKs.
 		includeInApk = false

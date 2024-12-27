@@ -49,7 +49,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunnelViewModel: TunnelAutoTunnelViewModel = hiltViewModel()) {
-	val config = remember { appUiState.tunnels.first { it.id == tunnelId } }
+	val config = appUiState.tunnels.first { it.id == tunnelId }
 
 	var currentText by remember { mutableStateOf("") }
 

@@ -76,7 +76,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 		if (popBackStack) navController.popBackStack()
 	}
 
-	val config by remember { derivedStateOf { appUiState.tunnels.first { it.id == tunnelId } } }
+	val config = appUiState.tunnels.first { it.id == tunnelId }
 
 	val splitTunnelApps by viewModel.splitTunnelApps.collectAsStateWithLifecycle()
 
