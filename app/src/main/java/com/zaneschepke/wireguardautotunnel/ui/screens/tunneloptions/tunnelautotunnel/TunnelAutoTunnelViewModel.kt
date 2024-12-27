@@ -61,15 +61,6 @@ constructor(
 		}
 	}
 
-	fun onTogglePrimaryTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
-		appDataRepository.tunnels.updatePrimaryTunnel(
-			when (tunnelConfig.isPrimaryTunnel) {
-				true -> null
-				false -> tunnelConfig
-			},
-		)
-	}
-
 	fun onToggleRestartOnPing(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		appDataRepository.tunnels.save(
 			tunnelConfig.copy(

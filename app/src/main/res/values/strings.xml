@@ -191,4 +191,7 @@
 	<string name="pre_down">Pre down</string>
 	<string name="post_down">Post down</string>
     <string name="amnezia_kernel_message">Amnezia unavailable in kernel mode</string>
+    <string name="enable_amnezia">Enable Amnezia</string>
+	<string name="wg_compat_mode">WG compatibility mode</string>
+	<string name="quick_actions">Quick actions</string>
 </resources>

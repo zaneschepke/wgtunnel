@@ -87,7 +87,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 	val selectedPackages = remember { mutableStateListOf<String>() }
 
 	LaunchedEffect(Unit) {
-		proxyInterface = InterfaceProxy.from(config.toWgConfig().`interface`)
+		proxyInterface = InterfaceProxy.from(config.toAmConfig().`interface`)
 		val pair = when {
 			proxyInterface.excludedApplications.isNotEmpty() -> Pair(SplitOptions.EXCLUDE, proxyInterface.excludedApplications)
 			proxyInterface.includedApplications.isNotEmpty() -> Pair(SplitOptions.INCLUDE, proxyInterface.includedApplications)

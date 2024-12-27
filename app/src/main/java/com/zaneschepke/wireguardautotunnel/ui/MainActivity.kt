@@ -227,6 +227,7 @@ class MainActivity : AppCompatActivity() {
 										OptionsScreen(
 											tunnelId = args.id,
 											appUiState = appUiState,
+											appViewModel = viewModel,
 										)
 									}
 									composable<Route.Lock> {

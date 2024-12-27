@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.CallSplit
+import androidx.compose.material.icons.outlined.Adjust
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Star
@@ -24,23 +25,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
+import com.zaneschepke.wireguardautotunnel.util.extensions.isWgCompatibilityMode
+import com.zaneschepke.wireguardautotunnel.util.extensions.resetAmneziaProperties
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+import com.zaneschepke.wireguardautotunnel.util.extensions.toAmneziaCompatibilityConfig
 
 @Composable
-fun OptionsScreen(tunnelOptionsViewModel: TunnelOptionsViewModel = hiltViewModel(), appUiState: AppUiState, tunnelId: Int) {
+fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: Int) {
 	val navController = LocalNavController.current
 	val config = appUiState.tunnels.first { it.id == tunnelId }
+
+	// TODO optimize
+
+	val amConfig = config.toAmConfig()
+
+	val isAmneziaCompatibilityEnabled = amConfig.`interface`.isWgCompatibilityMode()
 
 	var currentText by remember { mutableStateOf("") }
 
@@ -82,10 +94,10 @@ fun OptionsScreen(tunnelOptionsViewModel: TunnelOptionsViewModel = hiltViewModel
 						trailing = {
 							ScaledSwitch(
 								config.isPrimaryTunnel,
-								onClick = { tunnelOptionsViewModel.onTogglePrimaryTunnel(config) },
+								onClick = { appViewModel.onTogglePrimaryTunnel(config) },
 							)
 						},
-						onClick = { tunnelOptionsViewModel.onTogglePrimaryTunnel(config) },
+						onClick = { appViewModel.onTogglePrimaryTunnel(config) },
 					),
 					SelectionItem(
 						Icons.Outlined.Bolt,
@@ -140,7 +152,38 @@ fun OptionsScreen(tunnelOptionsViewModel: TunnelOptionsViewModel = hiltViewModel
 					),
 				),
 			)
-// 			GroupLabel(stringResource(R.string.quick_actions))
+			val amneziaClick = {
+				val proxy = InterfaceProxy.from(amConfig.`interface`)
+				val `interface` = if (!isAmneziaCompatibilityEnabled) proxy.toAmneziaCompatibilityConfig() else proxy.resetAmneziaProperties()
+				appViewModel.saveConfigChanges(config, `interface` = `interface`)
+			}
+			GroupLabel(stringResource(R.string.quick_actions))
+			SurfaceSelectionGroupButton(
+				listOf(
+					SelectionItem(
+						Icons.Outlined.Adjust,
+						title = {
+							Text(
+								stringResource(R.string.enable_amnezia),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						description = {
+							Text(
+								stringResource(R.string.wg_compat_mode),
+								style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+							)
+						},
+						trailing = {
+							ScaledSwitch(
+								isAmneziaCompatibilityEnabled,
+								onClick = { amneziaClick() },
+							)
+						},
+						onClick = { amneziaClick() },
+					),
+				),
+			)
 		}
 	}
 }

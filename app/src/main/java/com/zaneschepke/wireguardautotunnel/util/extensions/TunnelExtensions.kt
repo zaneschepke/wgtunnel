@@ -6,14 +6,17 @@ import com.wireguard.config.Peer
 import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.config.Config
+import org.amnezia.awg.config.Interface
 import timber.log.Timber
 import java.net.InetAddress
+import kotlin.jvm.optionals.getOrNull
 
 fun TunnelStatistics.mapPeerStats(): Map<org.amnezia.awg.crypto.Key, TunnelStatistics.PeerStats?> {
 	return this.getPeers().associateWith { key -> (this.peerStats(key)) }
@@ -94,4 +97,46 @@ fun Backend.BackendState.asBackendState(): BackendState {
 
 fun BackendState.asAmBackendState(): Backend.BackendState {
 	return Backend.BackendState.valueOf(this.name)
+}
+
+fun Interface.isWgCompatibilityMode(): Boolean {
+	return (
+		junkPacketCount.getOrNull() in 3..<5 &&
+			junkPacketMinSize.getOrNull() == 40 &&
+			junkPacketMaxSize.getOrNull() == 70 &&
+			with(initPacketJunkSize.getOrNull()) { this == 0 || this == null } &&
+			with(responsePacketJunkSize.getOrNull()) { this == 0 || this == null } &&
+			initPacketMagicHeader.getOrNull() == 1L &&
+			responsePacketMagicHeader.getOrNull() == 2L &&
+			underloadPacketMagicHeader.getOrNull() == 3L &&
+			transportPacketMagicHeader.getOrNull() == 4L
+		)
+}
+
+fun InterfaceProxy.toAmneziaCompatibilityConfig(): InterfaceProxy {
+	return copy(
+		junkPacketCount = "4",
+		junkPacketMinSize = "40",
+		junkPacketMaxSize = "70",
+		initPacketJunkSize = "0",
+		responsePacketJunkSize = "0",
+		initPacketMagicHeader = "1",
+		responsePacketMagicHeader = "2",
+		underloadPacketMagicHeader = "3",
+		transportPacketMagicHeader = "4",
+	)
+}
+
+fun InterfaceProxy.resetAmneziaProperties(): InterfaceProxy {
+	return copy(
+		junkPacketCount = "",
+		junkPacketMinSize = "",
+		junkPacketMaxSize = "",
+		initPacketJunkSize = "",
+		responsePacketJunkSize = "",
+		initPacketMagicHeader = "",
+		responsePacketMagicHeader = "",
+		underloadPacketMagicHeader = "",
+		transportPacketMagicHeader = "",
+	)
 }
