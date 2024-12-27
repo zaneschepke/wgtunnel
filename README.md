@@ -2,7 +2,7 @@
 WG Tunnel
 </h1>
 
-<div style="text-align: center;">
+<div align="center">
   An alternative Android client app for WireGuard and Amnezia VPN
   <br />
   <br />
@@ -16,14 +16,14 @@ WG Tunnel
 
 <br/>
 
-<div style="text-align: center;">
+<div align="center">
 
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/rbRRNh6H7V)
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/wgtunnel)
 
 </div>
 
-<div style="text-align: center;">
+<div align="center">
 
 [![Google Play](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.zaneschepke.wireguardautotunnel)
 [![F-Droid](https://img.shields.io/static/v1?style=for-the-badge&message=F-Droid&color=1976D2&logo=F-Droid&logoColor=FFFFFF&label=)](https://f-droid.org/packages/com.zaneschepke.wireguardautotunnel/)
@@ -49,11 +49,9 @@ WG Tunnel
 
 ## About
 Inspired by the official [wireguard-android](https://github.com/WireGuard/wireguard-android) app, WG Tunnel was created to address features and support missing from the official app. This app combines support for both [WireGuard®](https://www.wireguard.com/)
-and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/), with its primary feature of auto-tunneling (on-demand tunneling). 
+and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/), with its primary feature of auto-tunneling (on-demand tunneling).
 
 </div>
-
-<div style="text-align: center;">
 
 <div style="text-align: left;">
 
@@ -62,9 +60,9 @@ and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/), with its pr
 Thank you to the following:
 
 - All of the users that have helped contribute to the project with ideas, translations, feedback, bug reports, testing, and donations.
-- WireGuard® - © Jason A. Donenfeld (https://github.com/WireGuard/wireguard-android)
+- [WireGuard®](https://www.wireguard.com/) - © Jason A. Donenfeld (https://github.com/WireGuard/wireguard-android)
 
-- Amnezia - Amnezia Team (https://github.com/amnezia-vpn/amneziawg-android)
+- [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) - Amnezia Team (https://github.com/amnezia-vpn/amneziawg-android)
 
 ## Screenshots
 
