@@ -2,7 +2,7 @@
 WG Tunnel
 </h1>
 
-<div style="text-align: center;">
+<div align="center">
   An alternative Android client app for WireGuard and Amnezia VPN
   <br />
   <br />
@@ -16,7 +16,7 @@ WG Tunnel
 
 <br/>
 
-<div style="text-align: center;">
+<div align="center">
 
   An alternative Android client app for [WireGuard®](https://www.wireguard.com/)
 and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/)
