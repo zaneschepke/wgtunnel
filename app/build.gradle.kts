@@ -219,7 +219,6 @@ dependencies {
 
 	// shortcuts
 	implementation(libs.androidx.core)
-	implementation(libs.androidx.core.google.shortcuts)
 
 	// splash
 	implementation(libs.androidx.core.splashscreen)
