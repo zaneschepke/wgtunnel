@@ -195,7 +195,7 @@ jobs:
   publish-fdroid:
     runs-on: ubuntu-latest
     needs:
-      - publish-github
+      - build
     if: inputs.release_type == 'release'
     steps:
       - name: Dispatch update for fdroid repo
