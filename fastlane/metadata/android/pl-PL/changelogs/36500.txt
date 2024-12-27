@@ -1,0 +1,6 @@
+Co nowego:
+- Poprawki niezawodności automatycznego tunelowania
+- Naprawiono zapis podzielonego tunelu i poprawiono wydajności
+- Naprawiono błąd trybu jądra
+- Naprawiono błąd kafelków
+- Różne inne poprawki i ulepszenia

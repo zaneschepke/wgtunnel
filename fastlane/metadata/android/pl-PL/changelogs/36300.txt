@@ -1,0 +1,3 @@
+Co nowego:
+- Naprawiono błąd przełączania trybu jądra
+- Naprawiono błąd awarii powiadomień

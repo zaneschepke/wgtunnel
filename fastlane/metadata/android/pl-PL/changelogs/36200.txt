@@ -1,0 +1,5 @@
+Co nowego:
+- Dodano wyłącznik awaryjny VPN z pominięciem LAN
+- Ulepszono prędkość i niezawodność automatycznego tunelowania
+- Ulepszono kafelki synchronizacji
+- Różne poprawki błędów i ulepszenia
