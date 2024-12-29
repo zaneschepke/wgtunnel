@@ -155,7 +155,7 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 			val amneziaClick = {
 				val proxy = InterfaceProxy.from(amConfig.`interface`)
 				val `interface` = if (!isAmneziaCompatibilityEnabled) proxy.toAmneziaCompatibilityConfig() else proxy.resetAmneziaProperties()
-				appViewModel.saveConfigChanges(config, `interface` = `interface`)
+				appViewModel.updateExistingTunnelConfig(config, `interface` = `interface`)
 			}
 			GroupLabel(stringResource(R.string.quick_actions))
 			SurfaceSelectionGroupButton(

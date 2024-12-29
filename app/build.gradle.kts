@@ -14,7 +14,7 @@ val versionCodeIncrement = with(getBuildTaskName().lowercase()) {
 	when {
 		this.contains(Constants.NIGHTLY) || this.contains(Constants.PRERELEASE) -> {
 			if (versionFile.exists()) {
-				versionFile.readText().toInt() + 1
+				versionFile.readText().trim().toInt() + 1
 			} else {
 				1
 			}

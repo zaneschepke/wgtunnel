@@ -127,7 +127,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 						}
 						SplitOptions.ALL -> Unit
 					}
-					viewModel.saveConfigChanges(config, `interface` = proxyInterface)
+					viewModel.updateExistingTunnelConfig(config, `interface` = proxyInterface)
 				}) {
 					val icon = Icons.Outlined.Save
 					Icon(

@@ -83,13 +83,13 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 
 	val tunnelConfig by remember {
 		derivedStateOf {
-			appUiState.tunnels.first { it.id == tunnelId }
+			appUiState.tunnels.firstOrNull { it.id == tunnelId }
 		}
 	}
 
 	val configPair by remember {
 		derivedStateOf {
-			Pair(tunnelConfig.name, tunnelConfig.toAmConfig())
+			Pair(tunnelConfig?.name ?: "", tunnelConfig?.toAmConfig())
 		}
 	}
 
@@ -98,11 +98,11 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 	}
 
 	var interfaceState by remember {
-		mutableStateOf(InterfaceProxy.from(configPair.second.`interface`))
+		mutableStateOf(configPair.second?.let { InterfaceProxy.from(it.`interface`) } ?: InterfaceProxy())
 	}
 
 	var showAmneziaValues by remember {
-		mutableStateOf(configPair.second.`interface`.junkPacketCount.isPresent)
+		mutableStateOf(configPair.second?.`interface`?.junkPacketCount?.isPresent == true)
 	}
 
 	var showScripts by remember {
@@ -110,7 +110,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 	}
 
 	val peersState = remember {
-		configPair.second.peers.map { PeerProxy.from(it) }.toMutableStateList()
+		(configPair.second?.peers?.map { PeerProxy.from(it) } ?: listOf(PeerProxy())).toMutableStateList()
 	}
 
 	var showAuthPrompt by remember { mutableStateOf(false) }
@@ -148,13 +148,14 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 		topBar = {
 			TopNavBar(stringResource(R.string.edit_tunnel), trailing = {
 				IconButton(onClick = {
-					appViewModel.saveConfigChanges(
-						tunnelConfig.copy(
-							name = tunnelName,
-						),
-						peers = peersState,
-						`interface` = interfaceState,
-					)
+					tunnelConfig?.let {
+						appViewModel.updateExistingTunnelConfig(
+							it,
+							tunnelName,
+							peersState,
+							interfaceState,
+						)
+					} ?: appViewModel.saveNewTunnel(tunnelName, peersState, interfaceState)
 				}) {
 					val icon = Icons.Outlined.Save
 					Icon(
@@ -226,6 +227,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 						Modifier
 							.fillMaxWidth(),
 					)
+					val privateKeyEnabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated
 					OutlinedTextField(
 						textStyle = MaterialTheme.typography.labelLarge,
 						modifier =
@@ -234,16 +236,16 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 							.clickable { showAuthPrompt = true },
 						value = interfaceState.privateKey,
 						visualTransformation =
-						if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated) {
+						if (privateKeyEnabled) {
 							VisualTransformation.None
 						} else {
 							PasswordVisualTransformation()
 						},
-						enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
+						enabled = privateKeyEnabled,
 						onValueChange = { interfaceState = interfaceState.copy(privateKey = it) },
 						trailingIcon = {
 							IconButton(
-								enabled = isAuthenticated,
+								enabled = privateKeyEnabled,
 								modifier = Modifier.focusRequester(FocusRequester.Default),
 								onClick = {
 									val keypair = KeyPair()
@@ -256,7 +258,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 								Icon(
 									Icons.Rounded.Refresh,
 									stringResource(R.string.rotate_keys),
-									tint = if (isAuthenticated) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
+									tint = if (privateKeyEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
 								)
 							}
 						},
