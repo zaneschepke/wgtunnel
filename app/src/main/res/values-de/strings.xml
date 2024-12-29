@@ -33,7 +33,7 @@
     <string name="always_on_vpn_support">Always-On VPN erlauben</string>
     <string name="location_services_not_detected">Standortdienste nicht erkannt</string>
     <string name="hint_search_packages">Pakete suchen</string>
-	<string name="vpn_on">VPN an</string>
+    <string name="vpn_on">VPN an</string>
     <string name="vpn_off">VPN aus</string>
     <string name="create_import">Von Grund auf neu erstellen</string>
     <string name="add_peer">Peer hinzufügen</string>
@@ -60,7 +60,7 @@
     <string name="email_description">Sende mir eine E-Mail</string>
     <string name="error_root_denied">Root Shell verweigert</string>
     <string name="error_no_file_explorer">Kein Datei-Explorer installiert</string>
-    <string name="location_services_missing_message">Die App erkennt keine auf deinem Gerät aktivierten Standortdienste. Je nach Gerät kann dies dazu führen, dass die Funktion \"Nicht vertrauenswürdiges WLAN\" den WLAN-Namen nicht lesen kann. Möchtest du trotzdem fortfahren?</string>
+    <string name="location_services_missing_message">Die App erkennt keine auf deinem Gerät aktivierten Standortdienste. Je nach Gerät kann dies dazu führen, dass die Funktion nicht vertrauenswürdiges WLAN den WLAN-Namen nicht lesen kann. Möchtest du trotzdem fortfahren?</string>
     <string name="auto_tunnel_title">Auto-Tunnel Service</string>
     <string name="delete_tunnel_message">Bist du sicher, dass du den Tunnel löschen möchtest?</string>
     <string name="yes">Ja</string>
@@ -89,7 +89,7 @@
     <string name="restart_on_ping">Neustart bei PING Fehler (Beta)</string>
     <string name="edit_tunnel">Tunnel bearbeiten</string>
     <string name="set_primary_tunnel">Als Primären Tunnel setzen</string>
-	<string name="vpn_channel_name">VPN Benachrichtigungskanal</string>
+    <string name="vpn_channel_name">VPN Benachrichtigungskanal</string>
     <string name="turn_off_tunnel">Aktion erfordert deaktivierten Tunnel</string>
     <string name="kernel">Kernel</string>
     <string name="use_kernel">Kernelmodul verwenden</string>
@@ -121,7 +121,7 @@
     <string name="tunnel_required">Feature erfordert mindestens einen Tunnel</string>
     <string name="sec">Sek</string>
     <string name="app_settings">App-Einstellungen</string>
-    <string name="background_location_message2">um sicherzustellen, dass diese Berechtigungen aktiviert sind.</string>
+    <string name="background_location_message2">um sicherzustellen, dass diese Berechtigungen aktiviert sind</string>
     <string name="root_accepted">Root-Shell akzeptiert</string>
     <string name="show_amnezia_properties">Amnezia-Eigenschaften anzeigen</string>
     <string name="never">nie</string>
@@ -131,7 +131,7 @@
     <string name="kernel_not_supported">Kernel nicht unterstützt</string>
     <string name="trusted_wifi_names">Vertrauenswürdige WLAN Namen</string>
     <string name="requires_app_relaunch">Diese Änderung erfordert einen Neustart der App. Möchten Sie fortfahren?</string>
-	<string name="use_root_shell_for_wifi">Root-Shell verwenden, um WLAN-Namen zu ermitteln</string>
+    <string name="use_root_shell_for_wifi">Root-Shell verwenden, um WLAN-Namen zu ermitteln</string>
     <string name="light">Hell</string>
     <string name="add_wifi_name">WLAN Namen hinzufügen</string>
     <string name="dark">Dunkel</string>
@@ -160,4 +160,28 @@
     <string name="use_wildcards">Wildcards für Namen verwenden</string>
     <string name="stop_auto">Auto-Tunnel stoppen</string>
     <string name="monitoring_state_changes">Überwache Statusänderungen</string>
+    <string name="stop_on_no_internet">Stopp bei fehlendem Internet</string>
+    <string name="ethernet_tunnel">Ethernet Tunnel</string>
+    <string name="set_ethernet_tunnel">Als Ethernettunnel einstellen</string>
+    <string name="native_kill_switch">Nativer Notschalter</string>
+    <string name="vpn_kill_switch">VPN Notschalter</string>
+    <string name="kill_switch_options">Notschalteroptionen</string>
+    <string name="allow_lan_traffic">LAN Verkehr erlauben</string>
+    <string name="vpn_channel_description">Ein Kanal für VPN-Statusbenachrichtigungen</string>
+    <string name="auto_tunnel_channel_name">Auto-Tunnel-Benachrichtigungskanal</string>
+    <string name="auto_tunnel_channel_description">Ein Kanal für Auto-Tunnel Statusbenachrichtigungen</string>
+    <string name="stop">Stopp</string>
+    <string name="splt_tunneling">Gesplitteter Tinnel</string>
+    <string name="tunnel_specific_settings">Tunnelspezifische Einstellungen</string>
+    <string name="show_scripts">Skripte anzeigen</string>
+    <string name="pre_up">Vor Aktivierung</string>
+    <string name="post_up">Nach Aktivierung</string>
+    <string name="pre_down">Vor Deaktivierung</string>
+    <string name="post_down">Nach Deaktivierung</string>
+    <string name="amnezia_kernel_message">Amnezia ist im Kernel-Modus nicht verfügbar</string>
+    <string name="enable_amnezia">Amnezia aktivieren</string>
+    <string name="wg_compat_mode">WG Kompatibilitätsmodus</string>
+    <string name="quick_actions">Schnellaktionen</string>
+    <string name="stop_on_internet_loss">Tunnel bei Internetverlust stoppen</string>
+    <string name="bypass_lan_for_kill_switch">LAN umgehen für Notschalter</string>
 </resources>
