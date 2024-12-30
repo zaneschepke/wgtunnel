@@ -7,7 +7,7 @@
     <string name="peer">Peer</string>
     <string name="background_location_message2">w celu upewnienia się, że uprawnienia te są włączone.</string>
     <string name="rotate_keys">Rotuj klucze</string>
-	<string name="tunnel_on_ethernet">Tunel przez sieć ethernetową</string>
+    <string name="tunnel_on_ethernet">Tunel przez sieć ethernetową</string>
     <string name="public_key">Klucz publiczny</string>
     <string name="addresses">Adresy</string>
     <string name="mtu">MTU</string>
@@ -54,7 +54,7 @@
     <string name="vpn_channel_name">Kanał powiadomień VPN</string>
     <string name="create_import">Utwórz od nowa</string>
     <string name="error_invalid_code">Nieprawidłowy kod QR</string>
-	<string name="always_on_message">Zezwolenie na połączenie VPN zostało odrzucone. Sprawdź</string>
+    <string name="always_on_message">Zezwolenie na połączenie VPN zostało odrzucone. Sprawdź</string>
     <string name="persistent_keepalive">Trwałe utrzymywanie połączenia</string>
     <string name="vpn_settings">Ustawienia systemowe VPN</string>
     <string name="no_browser_detected">Nie wykryto przeglądarki</string>
@@ -161,4 +161,28 @@
     <string name="set_primary_tunnel">Ustaw jako tunel podstawowy</string>
     <string name="mobile_data_tunnel">Ustaw jako tunel mobilnej transmisji danych</string>
     <string name="vpn_channel_id">Kanał VPN</string>
+    <string name="stop_on_no_internet">Zatrzymaj, gdy nie ma Internetu</string>
+    <string name="stop_on_internet_loss">Zatrzymaj tunel przy utracie Internetu</string>
+    <string name="ethernet_tunnel">Tunel ethernetowy</string>
+    <string name="set_ethernet_tunnel">Ustaw jako tunel ethernetowy</string>
+    <string name="allow_lan_traffic">Zezwól na ruch LAN</string>
+    <string name="bypass_lan_for_kill_switch">Omiń LAN dla wyłącznika awaryjnego</string>
+    <string name="vpn_channel_description">Kanał powiadomień o stanie VPN</string>
+    <string name="auto_tunnel_channel_name">Kanał powiadomień autotunelu</string>
+    <string name="auto_tunnel_channel_description">Kanał powiadomień o stanie autotunelowania</string>
+    <string name="stop">Zatrzymaj</string>
+    <string name="splt_tunneling">Tunelowanie rozdzielone</string>
+    <string name="tunnel_specific_settings">Ustawienia specyficzne dla tunelu</string>
+    <string name="pre_up">Przed aktywacją</string>
+    <string name="post_up">Po aktywacji</string>
+    <string name="pre_down">Przed dezaktywacją</string>
+    <string name="post_down">Po dezaktywacji</string>
+    <string name="amnezia_kernel_message">Protokół Amnezia niedostępny w trybie jądra</string>
+    <string name="enable_amnezia">Włącz protokół Amnezia</string>
+    <string name="wg_compat_mode">Tryb kompatybilności WG</string>
+    <string name="quick_actions">Szybkie czynności</string>
+    <string name="native_kill_switch">Natywny wyłącznik awaryjny</string>
+    <string name="vpn_kill_switch">Wyłącznik awaryjny VPN</string>
+    <string name="kill_switch_options">Opcje wyłącznika awaryjnego</string>
+    <string name="show_scripts">Pokaż skrypty</string>
 </resources>
