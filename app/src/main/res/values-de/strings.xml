@@ -67,7 +67,7 @@
     <string name="all">alle</string>
     <string name="no_browser_detected">Keinen Browser erkannt</string>
     <string name="open_issue">Issue öffnen</string>
-    <string name="read_logs">Logs lesen</string>
+    <string name="read_logs">Logeinträge lesen</string>
     <string name="auto">(automatisch)</string>
     <string name="incorrect_pin">PIN nicht korrekt</string>
     <string name="pin_created">PIN erfolgreich erstellt</string>
@@ -127,7 +127,7 @@
     <string name="never">nie</string>
     <string name="handshake">Handshake</string>
     <string name="vpn_denied_dialog_title">Genehmigung verweigert</string>
-    <string name="logs">Logs</string>
+    <string name="logs">Logeinträge</string>
     <string name="kernel_not_supported">Kernel nicht unterstützt</string>
     <string name="trusted_wifi_names">Vertrauenswürdige WLAN Namen</string>
     <string name="requires_app_relaunch">Diese Änderung erfordert einen Neustart der App. Möchten Sie fortfahren?</string>
