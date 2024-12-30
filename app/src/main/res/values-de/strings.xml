@@ -5,7 +5,7 @@
     <string name="no_tunnels">Noch keine Tunnel hinzugefügt!</string>
     <string name="tunnels">Tunnel</string>
     <string name="tunnel_mobile_data">Tunnel für mobile Daten</string>
-    <string name="privacy_policy">Siehe Privacy Policy</string>
+    <string name="privacy_policy">Datenschutzbestimmungen anzeigen</string>
     <string name="okay">Ok</string>
     <string name="tunnel_on_ethernet">Tunnel für Ethernet</string>
     <string name="auto_tunneling">Auto-Tunneln</string>
@@ -36,7 +36,7 @@
     <string name="vpn_on">VPN an</string>
     <string name="vpn_off">VPN aus</string>
     <string name="create_import">Von Grund auf neu erstellen</string>
-    <string name="add_peer">Peer hinzufügen</string>
+    <string name="add_peer">Gegenstelle hinzufügen</string>
     <string name="rotate_keys">Schlüssel rotieren</string>
     <string name="private_key">Privater Schlüssel</string>
     <string name="copy_public_key">Öffentlichen Schlüssel kopieren</string>
@@ -115,7 +115,7 @@
     <string name="chat_description">Tritt der Community bei</string>
     <string name="set_custom_ping_cooldown">Ping-Neustart-Cooldown (sek)</string>
     <string name="set_custom_ping_ip">Benutzerdefinierte Ping-IP einstellen</string>
-    <string name="default_ping_ip">(optional, Vorgabe ist peers)</string>
+    <string name="default_ping_ip">(optional, Standardwert: Gegenstelle)</string>
     <string name="set_custom_ping_internal">Pingintervall (sek)</string>
     <string name="always_on_message2">um sicherzustellen, dass Always-on VPN für alle anderen Apps ausgeschaltet ist und versuche es erneut</string>
     <string name="tunnel_required">Feature erfordert mindestens einen Tunnel</string>
@@ -171,7 +171,7 @@
     <string name="auto_tunnel_channel_name">Auto-Tunnel-Benachrichtigungskanal</string>
     <string name="auto_tunnel_channel_description">Ein Kanal für Auto-Tunnel Statusbenachrichtigungen</string>
     <string name="stop">Stopp</string>
-    <string name="splt_tunneling">Gesplitteter Tinnel</string>
+    <string name="splt_tunneling">Tunneling aufteilen</string>
     <string name="tunnel_specific_settings">Tunnelspezifische Einstellungen</string>
     <string name="show_scripts">Skripte anzeigen</string>
     <string name="pre_up">Vor Aktivierung</string>
