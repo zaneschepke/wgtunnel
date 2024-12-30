@@ -5,7 +5,7 @@
     <string name="unsure_how">jeśli nie masz pewności, jak postępować</string>
     <string name="getting_started_guide">przewodnik wprowadzający</string>
     <string name="peer">Peer</string>
-    <string name="background_location_message2">w celu upewnienia się, że uprawnienia te są włączone.</string>
+    <string name="background_location_message2">w celu upewnienia się, że uprawnienia te są włączone</string>
     <string name="rotate_keys">Rotuj klucze</string>
     <string name="tunnel_on_ethernet">Tunel przez sieć ethernetową</string>
     <string name="public_key">Klucz publiczny</string>
