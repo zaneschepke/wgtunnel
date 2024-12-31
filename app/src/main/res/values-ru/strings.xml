@@ -180,4 +180,8 @@
     <string name="stop">стоп</string>
     <string name="splt_tunneling">Раздельное туннелирование</string>
     <string name="tunnel_specific_settings">Специальные настройки туннеля</string>
+    <string name="pre_up">До активации</string>
+    <string name="post_up">После активации</string>
+    <string name="pre_down">До деактивации</string>
+    <string name="post_down">После деактивации</string>
 </resources>
