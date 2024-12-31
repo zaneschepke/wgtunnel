@@ -104,6 +104,15 @@ jobs:
         if: ${{ inputs.build_type == 'debug' }}
         run: ./gradlew :app:assembleFdroidDebug --stacktrace
 
+      # bump versionCode for nightly and prerelease builds
+      - name: Commit and push versionCode changes
+        if: ${{ inputs.build_type == 'nightly' || inputs.build_type == 'prerelease' }}
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add versionCode.txt
+          git commit -m "Automated build update"
+
       - name: Get release apk path
         id: apk-path
         run: echo "path=$(find . -regex '^.*/build/outputs/apk/fdroid/${{ inputs.build_type }}/.*\.apk$' -type f | head -1 | tail -c+2)" >> $GITHUB_OUTPUT

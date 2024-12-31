@@ -114,14 +114,6 @@ jobs:
           version_code=$(grep "VERSION_CODE" buildSrc/src/main/kotlin/Constants.kt | awk '{print $5}' | tr -d '\n')
           echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
 
-      - name: Commit and push versionCode changes
-        if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly'  || inputs.release_type == 'prerelease' }}
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git add versionCode.txt
-          git commit -m "Automated build update"
-
       - name: Push changes
         if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly'  || inputs.release_type == 'prerelease' }}
         uses: ad-m/github-push-action@master
