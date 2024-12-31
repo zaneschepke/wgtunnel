@@ -68,7 +68,7 @@ jobs:
       - check_commits
       - build
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
-    name: Build Signed APK
+    name: publish-github
     runs-on: ubuntu-latest
     env:
       GH_USER: ${{ secrets.GH_USER }}
@@ -77,6 +77,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
 
     steps:
+      - uses: actions/checkout@v4
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
