@@ -86,7 +86,7 @@ class ServiceManager
 		}
 	}
 
-	private fun updateAutoTunnelTile() {
+	fun updateAutoTunnelTile() {
 		if (autoTunnelTile.isCompleted) {
 			autoTunnelTile.getCompleted().updateTileState()
 		} else {
