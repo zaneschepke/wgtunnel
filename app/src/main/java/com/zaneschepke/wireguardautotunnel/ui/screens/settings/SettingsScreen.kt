@@ -115,7 +115,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 		val onAutoTunnelClick = {
 			if (!uiState.generalState.isLocationDisclosureShown) {
 				navController.navigate(Route.LocationDisclosure)
-			} else navController.navigate(Route.AutoTunnel)
+			} else {
+				navController.navigate(Route.AutoTunnel)
+			}
 		}
 		SurfaceSelectionGroupButton(
 			listOf(

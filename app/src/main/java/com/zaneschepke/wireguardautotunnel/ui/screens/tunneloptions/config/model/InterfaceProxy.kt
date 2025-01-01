@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.mode
 import com.wireguard.config.Interface
 import com.zaneschepke.wireguardautotunnel.util.extensions.joinAndTrim
 import com.zaneschepke.wireguardautotunnel.util.extensions.toTrimmedList
+import kotlin.ranges.contains
 
 data class InterfaceProxy(
 	val privateKey: String = "",
@@ -42,6 +43,46 @@ data class InterfaceProxy(
 			preDown.toTrimmedList().forEach { parsePreDown(it) }
 			postDown.toTrimmedList().forEach { parsePostDown(it) }
 		}.build()
+	}
+
+	fun toAmneziaCompatibilityConfig(): InterfaceProxy {
+		return copy(
+			junkPacketCount = "4",
+			junkPacketMinSize = "40",
+			junkPacketMaxSize = "70",
+			initPacketJunkSize = "0",
+			responsePacketJunkSize = "0",
+			initPacketMagicHeader = "1",
+			responsePacketMagicHeader = "2",
+			underloadPacketMagicHeader = "3",
+			transportPacketMagicHeader = "4",
+		)
+	}
+
+	fun resetAmneziaProperties(): InterfaceProxy {
+		return copy(
+			junkPacketCount = "",
+			junkPacketMinSize = "",
+			junkPacketMaxSize = "",
+			initPacketJunkSize = "",
+			responsePacketJunkSize = "",
+			initPacketMagicHeader = "",
+			responsePacketMagicHeader = "",
+			underloadPacketMagicHeader = "",
+			transportPacketMagicHeader = "",
+		)
+	}
+
+	fun isAmneziaCompatibilityModeSet(): Boolean {
+		return junkPacketCount.toIntOrNull() in 3..<5 &&
+			junkPacketMinSize.toIntOrNull() == 40 &&
+			junkPacketMaxSize.toIntOrNull() == 70 &&
+			with(initPacketJunkSize.toIntOrNull()) { this == 0 || this == null } &&
+			with(responsePacketJunkSize.toIntOrNull()) { this == 0 || this == null } &&
+			initPacketMagicHeader.toLongOrNull() == 1L &&
+			responsePacketMagicHeader.toLongOrNull() == 2L &&
+			underloadPacketMagicHeader.toLongOrNull() == 3L &&
+			transportPacketMagicHeader.toLongOrNull() == 4L
 	}
 
 	fun toAmInterface(): org.amnezia.awg.config.Interface {

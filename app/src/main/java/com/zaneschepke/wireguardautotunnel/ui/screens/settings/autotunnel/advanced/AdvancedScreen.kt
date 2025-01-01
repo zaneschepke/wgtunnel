@@ -39,7 +39,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun AdvancedScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
-
 	var isDropDownExpanded by remember {
 		mutableStateOf(false)
 	}
@@ -47,9 +46,9 @@ fun AdvancedScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 	var selected by remember { mutableIntStateOf(appUiState.settings.debounceDelaySeconds) }
 
 	LaunchedEffect(selected) {
-		if(selected == appUiState.settings.debounceDelaySeconds) return@LaunchedEffect
+		if (selected == appUiState.settings.debounceDelaySeconds) return@LaunchedEffect
 		appViewModel.saveSettings(appUiState.settings.copy(debounceDelaySeconds = selected))
-		if(appUiState.settings.isAutoTunnelEnabled) {
+		if (appUiState.settings.isAutoTunnelEnabled) {
 			appViewModel.bounceAutoTunnel()
 		}
 	}
@@ -86,32 +85,36 @@ fun AdvancedScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 						trailing = {
 							Row(
 								horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
-								verticalAlignment = Alignment.CenterVertically) {
+								verticalAlignment = Alignment.CenterVertically,
+							) {
 								Text(text = selected.toString(), style = MaterialTheme.typography.bodyMedium)
 								val icon = Icons.Default.ArrowDropDown
 								Icon(icon, icon.name)
 							}
 							DropdownMenu(
-								modifier = Modifier.height(140.dp.scaledHeight()),
+								modifier = Modifier.height(250.dp.scaledHeight()),
 								scrollState = rememberScrollState(),
 								containerColor = MaterialTheme.colorScheme.surface,
 								expanded = isDropDownExpanded,
 								onDismissRequest = {
 									isDropDownExpanded = false
-								}) {
+								},
+							) {
 								(0..10).forEachIndexed { index, num ->
-									DropdownMenuItem(text = {
-										Text(text = num.toString())
-									},
+									DropdownMenuItem(
+										text = {
+											Text(text = num.toString())
+										},
 										onClick = {
 											isDropDownExpanded = false
 											selected = num
-										})
+										},
+									)
 								}
 							}
 						},
-					)
-				)
+					),
+				),
 			)
 		}
 	}

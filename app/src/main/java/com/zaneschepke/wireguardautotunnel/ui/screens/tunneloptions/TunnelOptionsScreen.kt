@@ -3,12 +3,12 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.CallSplit
-import androidx.compose.material.icons.outlined.Adjust
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Star
@@ -32,27 +32,16 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
-import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
-import com.zaneschepke.wireguardautotunnel.util.extensions.isWgCompatibilityMode
-import com.zaneschepke.wireguardautotunnel.util.extensions.resetAmneziaProperties
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
-import com.zaneschepke.wireguardautotunnel.util.extensions.toAmneziaCompatibilityConfig
 
 @Composable
 fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: Int) {
 	val navController = LocalNavController.current
 	val config = appUiState.tunnels.first { it.id == tunnelId }
-
-	// TODO optimize
-
-	val amConfig = config.toAmConfig()
-
-	val isAmneziaCompatibilityEnabled = amConfig.`interface`.isWgCompatibilityMode()
 
 	var currentText by remember { mutableStateOf("") }
 
@@ -71,6 +60,7 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 			Modifier
 				.fillMaxSize()
 				.padding(it)
+				.imePadding()
 				.verticalScroll(rememberScrollState())
 				.padding(top = 24.dp.scaledHeight())
 				.padding(horizontal = 24.dp.scaledWidth()),
@@ -149,38 +139,6 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 						trailing = {
 							ForwardButton { navController.navigate(Route.SplitTunnel(id = tunnelId)) }
 						},
-					),
-				),
-			)
-			val amneziaClick = {
-				val proxy = InterfaceProxy.from(amConfig.`interface`)
-				val `interface` = if (!isAmneziaCompatibilityEnabled) proxy.toAmneziaCompatibilityConfig() else proxy.resetAmneziaProperties()
-				appViewModel.updateExistingTunnelConfig(config, `interface` = `interface`)
-			}
-			GroupLabel(stringResource(R.string.quick_actions))
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						Icons.Outlined.Adjust,
-						title = {
-							Text(
-								stringResource(R.string.enable_amnezia),
-								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-							)
-						},
-						description = {
-							Text(
-								stringResource(R.string.wg_compat_mode),
-								style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-							)
-						},
-						trailing = {
-							ScaledSwitch(
-								isAmneziaCompatibilityEnabled,
-								onClick = { amneziaClick() },
-							)
-						},
-						onClick = { amneziaClick() },
 					),
 				),
 			)

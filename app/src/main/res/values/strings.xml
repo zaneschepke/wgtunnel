@@ -196,4 +196,10 @@
 	<string name="quick_actions">Quick actions</string>
     <string name="advanced_settings">Advanced settings</string>
 	<string name="debounce_delay">Debounce delay</string>
+	<string name="hide_amnezia_properties">Hide Amnezia properties</string>
+	<string name="hide_scripts">Hide scripts</string>
+	<string name="enable_amnezia_compatibility">Enable Amnezia compatibility</string>
+	<string name="remove_amnezia_compatibility">Remove Amnezia compatibility</string>
+	<string name="exclude_lan">Exclude LAN</string>
+	<string name="include_lan">Include LAN</string>
 </resources>

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SettingsEthernet
 import androidx.compose.material.icons.outlined.SignalCellular4Bar
-import androidx.compose.material.icons.outlined.VpnKeyOff
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -135,6 +135,7 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 				.fillMaxSize()
 				.padding(padding)
 				.verticalScroll(rememberScrollState())
+				.imePadding()
 				.padding(top = 24.dp.scaledHeight())
 				.padding(horizontal = 24.dp.scaledWidth()),
 		) {
@@ -376,7 +377,7 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 							ForwardButton { navController.navigate(Route.AutoTunnelAdvanced) }
 						},
 					),
-				)
+				),
 			)
 		}
 	}
