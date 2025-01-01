@@ -99,7 +99,7 @@
     <string name="add_from_qr">Dodaj z kodu QR</string>
     <string name="qr_scan">Skanuj kod QR</string>
     <string name="tunnel_name">Nazwa tunelu</string>
-    <string name="include">Dołącz</string>
+    <string name="include">Uwzględnij</string>
     <string name="config_changes_saved">Zmiany konfiguracji zostały zapisane.</string>
     <string name="allowed_ips">Dozwolone adresy IP</string>
     <string name="endpoint">Punkt końcowy</string>
@@ -179,10 +179,18 @@
     <string name="post_down">Po dezaktywacji</string>
     <string name="amnezia_kernel_message">Protokół Amnezia niedostępny w trybie jądra</string>
     <string name="enable_amnezia">Włącz protokół Amnezia</string>
-    <string name="wg_compat_mode">Tryb kompatybilności WG</string>
+    <string name="wg_compat_mode">Tryb zgodności WG</string>
     <string name="quick_actions">Szybkie czynności</string>
     <string name="native_kill_switch">Natywny wyłącznik awaryjny</string>
     <string name="vpn_kill_switch">Wyłącznik awaryjny VPN</string>
     <string name="kill_switch_options">Opcje wyłącznika awaryjnego</string>
     <string name="show_scripts">Pokaż skrypty</string>
+    <string name="hide_scripts">Ukryj skrypty</string>
+    <string name="debounce_delay">Opóźnienie odbicia</string>
+    <string name="enable_amnezia_compatibility">Włącz zgodność z protokołem Amnezia</string>
+    <string name="remove_amnezia_compatibility">Usuń zgodność z protokołem Amnezia</string>
+    <string name="exclude_lan">Wyklucz LAN</string>
+    <string name="include_lan">Uwzględnij LAN</string>
+    <string name="advanced_settings">Ustawienia zaawansowane</string>
+    <string name="hide_amnezia_properties">Ukryj właściwości protokołu Amnezia</string>
 </resources>
