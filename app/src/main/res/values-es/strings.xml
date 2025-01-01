@@ -125,4 +125,6 @@
     <string name="set_custom_ping_ip">Establecer ping ip personalizado</string>
     <string name="default_ping_ip">(opcional, por defecto de los pares)</string>
     <string name="set_custom_ping_cooldown">Tiempo de espera de reinicio del Ping (seg)</string>
+    <string name="restart_at_boot">Reiniciar al arrancar</string>
+    <string name="underload_packet_magic_header">Encabezado del paquete baja carga</string>
 </resources>
