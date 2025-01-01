@@ -66,8 +66,8 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.InterfaceActions
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.PeerActions
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceActions
+import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerActions
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize

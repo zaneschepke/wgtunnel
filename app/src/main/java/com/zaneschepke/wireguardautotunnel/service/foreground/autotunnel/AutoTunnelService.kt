@@ -22,6 +22,7 @@ import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.A
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.AutoTunnelState
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.NetworkState
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
+import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
@@ -29,6 +30,7 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.getCurrentWifiName
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import com.zaneschepke.wireguardautotunnel.util.extensions.onNotRunning
 import dagger.hilt.android.AndroidEntryPoint
@@ -240,7 +242,19 @@ class AutoTunnelService : LifecycleService() {
 			combineSettings(),
 			combineNetworkEventsJob(),
 		) { double, networkState ->
-			AutoTunnelState(tunnelService.get().vpnState.value, networkState, double.first, double.second)
+			// quick fix for bug where when first setting up auto tunneling we probably want to query for ssid right away
+			var netState: NetworkState? = null
+			if (networkState.wifiName == Constants.UNREADABLE_SSID && double.first.isTunnelOnWifiEnabled) {
+				if (double.first.isWifiNameByShellEnabled) {
+					netState = networkState.copy(wifiName = rootShell.get().getCurrentWifiName())
+				} else if (networkState.capabilities != null) {
+					netState = networkState.copy(
+						wifiName =
+						WifiService.getNetworkName(networkState.capabilities, this@AutoTunnelService),
+					)
+				}
+			}
+			AutoTunnelState(tunnelService.get().vpnState.value, netState ?: networkState, double.first, double.second)
 		}.collect { state ->
 			Timber.d("Network state: ${state.networkState}")
 			autoTunnelStateFlow.update {
@@ -265,6 +279,7 @@ class AutoTunnelService : LifecycleService() {
 				mobileData.available,
 				false,
 				wifi.name,
+				wifi.capabilities,
 			)
 		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }
 	}

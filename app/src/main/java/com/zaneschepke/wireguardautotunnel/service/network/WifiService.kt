@@ -114,27 +114,32 @@ constructor(
 				if (available || ssid == null || ssid == Constants.UNREADABLE_SSID) {
 					available = false
 					Timber.d("Getting SSID from capabilities")
-					ssid = getNetworkName(it.networkCapabilities)
+					ssid = if (settingsRepository.getSettings().isWifiNameByShellEnabled) {
+						rootShell.get().getCurrentWifiName()
+					} else {
+						getNetworkName(it.networkCapabilities, context)
+					}
 				}
-				emit(Status(true, ssid))
+				emit(Status(true, ssid, it.networkCapabilities))
 			}
-			is NetworkStatus.Unavailable -> emit(Status(false, null))
+			is NetworkStatus.Unavailable -> emit(Status(false, null, null))
 		}
 	}
 
-	private suspend fun getNetworkName(networkCapabilities: NetworkCapabilities): String? {
-		if (settingsRepository.getSettings().isWifiNameByShellEnabled) return rootShell.get().getCurrentWifiName()
-		var ssid = networkCapabilities.getWifiName()
-		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
-			val wifiManager =
-				context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+	companion object {
+		fun getNetworkName(networkCapabilities: NetworkCapabilities, context: Context): String? {
+			var ssid = networkCapabilities.getWifiName()
+			if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
+				val wifiManager =
+					context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-			@Suppress("DEPRECATION")
-			val info = wifiManager.connectionInfo
-			if (info.supplicantState === SupplicantState.COMPLETED) {
-				ssid = info.ssid
+				@Suppress("DEPRECATION")
+				val info = wifiManager.connectionInfo
+				if (info.supplicantState === SupplicantState.COMPLETED) {
+					ssid = info.ssid
+				}
 			}
+			return ssid?.trim('"')
 		}
-		return ssid?.trim('"')
 	}
 }

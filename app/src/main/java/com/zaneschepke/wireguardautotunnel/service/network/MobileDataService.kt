@@ -56,8 +56,8 @@ constructor(
 		emit(NetworkStatus.Unavailable())
 	}.map {
 		when (it) {
-			is NetworkStatus.Available, is NetworkStatus.CapabilitiesChanged -> Status(true, null)
-			is NetworkStatus.Unavailable -> Status(false, null)
+			is NetworkStatus.Available, is NetworkStatus.CapabilitiesChanged -> Status(true, null, null)
+			is NetworkStatus.Unavailable -> Status(false, null, null)
 		}
 	}
 }
