@@ -222,24 +222,16 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.Config> {
 										val args = it.toRoute<Route.Config>()
-										ConfigScreen(
-											appUiState,
-											tunnelId = args.id,
-											appViewModel = viewModel,
-										)
+										val config = appUiState.tunnels.firstOrNull { it.id == args.id }
+										ConfigScreen(config, viewModel)
 									}
 									composable<Route.TunnelOptions> {
 										val args = it.toRoute<Route.TunnelOptions>()
-										OptionsScreen(
-											tunnelId = args.id,
-											appUiState = appUiState,
-											appViewModel = viewModel,
-										)
+										val config = appUiState.tunnels.first { it.id == args.id }
+										OptionsScreen(config, viewModel)
 									}
 									composable<Route.Lock> {
-										PinLockScreen(
-											appViewModel = viewModel,
-										)
+										PinLockScreen(viewModel)
 									}
 									composable<Route.Scanner> {
 										ScannerScreen()
@@ -249,11 +241,13 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.SplitTunnel> {
 										val args = it.toRoute<Route.SplitTunnel>()
-										SplitTunnelScreen(appUiState, args.id, viewModel)
+										val config = appUiState.tunnels.first { it.id == args.id }
+										SplitTunnelScreen(config,viewModel)
 									}
 									composable<Route.TunnelAutoTunnel> {
-										val args = it.toRoute<Route.SplitTunnel>()
-										TunnelAutoTunnelScreen(appUiState, args.id)
+										val args = it.toRoute<Route.TunnelOptions>()
+										val config = appUiState.tunnels.first { it.id == args.id }
+										TunnelAutoTunnelScreen(config, appUiState.settings)
 									}
 								}
 							}

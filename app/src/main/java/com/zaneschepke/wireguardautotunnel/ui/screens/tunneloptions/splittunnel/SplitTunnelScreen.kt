@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.SelectionItemButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
@@ -62,7 +62,7 @@ import java.text.Collator
 import java.util.Locale
 
 @Composable
-fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewModel) {
+fun SplitTunnelScreen(tunnelConfig: TunnelConfig, viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 
@@ -76,8 +76,6 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 		if (popBackStack) navController.popBackStack()
 	}
 
-	val config = appUiState.tunnels.first { it.id == tunnelId }
-
 	val splitTunnelApps by viewModel.splitTunnelApps.collectAsStateWithLifecycle()
 
 	var proxyInterface by remember { mutableStateOf(InterfaceProxy()) }
@@ -87,7 +85,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 	val selectedPackages = remember { mutableStateListOf<String>() }
 
 	LaunchedEffect(Unit) {
-		proxyInterface = InterfaceProxy.from(config.toAmConfig().`interface`)
+		proxyInterface = InterfaceProxy.from(tunnelConfig.toAmConfig().`interface`)
 		val pair = when {
 			proxyInterface.excludedApplications.isNotEmpty() -> Pair(SplitOptions.EXCLUDE, proxyInterface.excludedApplications)
 			proxyInterface.includedApplications.isNotEmpty() -> Pair(SplitOptions.INCLUDE, proxyInterface.includedApplications)
@@ -107,7 +105,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 
 	LaunchedEffect(Unit) {
 		// clean up any split tunnel packages for apps that were uninstalled
-		viewModel.cleanUpUninstalledApps(config, splitTunnelApps.map { it.`package` })
+		viewModel.cleanUpUninstalledApps(tunnelConfig, splitTunnelApps.map { it.`package` })
 	}
 
 	Scaffold(
@@ -127,7 +125,7 @@ fun SplitTunnelScreen(appUiState: AppUiState, tunnelId: Int, viewModel: AppViewM
 						}
 						SplitOptions.ALL -> Unit
 					}
-					viewModel.updateExistingTunnelConfig(config, `interface` = proxyInterface)
+					viewModel.updateExistingTunnelConfig(tunnelConfig, `interface` = proxyInterface)
 				}) {
 					val icon = Icons.Outlined.Save
 					Icon(

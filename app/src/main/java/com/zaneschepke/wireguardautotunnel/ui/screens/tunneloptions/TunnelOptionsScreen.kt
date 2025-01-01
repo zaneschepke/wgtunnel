@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
@@ -39,18 +39,17 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
-fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: Int) {
+fun OptionsScreen(tunnelConfig: TunnelConfig, appViewModel: AppViewModel) {
 	val navController = LocalNavController.current
-	val config = appUiState.tunnels.first { it.id == tunnelId }
 
 	var currentText by remember { mutableStateOf("") }
 
-	LaunchedEffect(config.tunnelNetworks) {
+	LaunchedEffect(tunnelConfig.tunnelNetworks) {
 		currentText = ""
 	}
 	Scaffold(
 		topBar = {
-			TopNavBar(config.name)
+			TopNavBar(tunnelConfig.name)
 		},
 	) {
 		Column(
@@ -83,11 +82,11 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 						},
 						trailing = {
 							ScaledSwitch(
-								config.isPrimaryTunnel,
-								onClick = { appViewModel.onTogglePrimaryTunnel(config) },
+								tunnelConfig.isPrimaryTunnel,
+								onClick = { appViewModel.onTogglePrimaryTunnel(tunnelConfig) },
 							)
 						},
-						onClick = { appViewModel.onTogglePrimaryTunnel(config) },
+						onClick = { appViewModel.onTogglePrimaryTunnel(tunnelConfig) },
 					),
 					SelectionItem(
 						Icons.Outlined.Bolt,
@@ -104,10 +103,10 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 							)
 						},
 						onClick = {
-							navController.navigate(Route.TunnelAutoTunnel(id = tunnelId))
+							navController.navigate(Route.TunnelAutoTunnel(id = tunnelConfig.id))
 						},
 						trailing = {
-							ForwardButton { navController.navigate(Route.TunnelAutoTunnel(id = tunnelId)) }
+							ForwardButton { navController.navigate(Route.TunnelAutoTunnel(id = tunnelConfig.id)) }
 						},
 					),
 					SelectionItem(
@@ -119,10 +118,10 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 							)
 						},
 						onClick = {
-							navController.navigate(Route.Config(id = tunnelId))
+							navController.navigate(Route.Config(id = tunnelConfig.id))
 						},
 						trailing = {
-							ForwardButton { navController.navigate(Route.Config(id = tunnelId)) }
+							ForwardButton { navController.navigate(Route.Config(id = tunnelConfig.id)) }
 						},
 					),
 					SelectionItem(
@@ -134,10 +133,10 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 							)
 						},
 						onClick = {
-							navController.navigate(Route.SplitTunnel(id = tunnelId))
+							navController.navigate(Route.SplitTunnel(id = tunnelConfig.id))
 						},
 						trailing = {
-							ForwardButton { navController.navigate(Route.SplitTunnel(id = tunnelId)) }
+							ForwardButton { navController.navigate(Route.SplitTunnel(id = tunnelConfig.id)) }
 						},
 					),
 				),

@@ -58,6 +58,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
@@ -77,7 +78,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import org.amnezia.awg.crypto.KeyPair
 
 @Composable
-fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: Int) {
+fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 	val context = LocalContext.current
 	val snackbar = SnackbarController.current
 	val clipboardManager: ClipboardManager = LocalClipboardManager.current
@@ -89,8 +90,6 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 	}
 
 	val popBackStack by appViewModel.popBackStack.collectAsStateWithLifecycle(false)
-
-	val tunnelConfig = appUiState.tunnels.firstOrNull { it.id == tunnelId }
 
 	val configPair = Pair(tunnelConfig?.name ?: "", tunnelConfig?.toAmConfig())
 
@@ -261,32 +260,6 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 							}
 						}
 					}
-// 					ConfigurationToggle(
-// 						stringResource(id = R.string.show_amnezia_properties),
-// 						checked = showAmneziaValues,
-// 						onCheckChanged = {
-// 							if (appUiState.settings.isKernelEnabled) {
-// 								snackbar.showMessage(context.getString(R.string.amnezia_kernel_message))
-// 							} else {
-// 								showAmneziaValues = it
-// 							}
-// 						},
-// 					)
-// 					ConfigurationToggle(
-// 						stringResource(id = R.string.show_scripts),
-// 						checked = showScripts,
-// 						onCheckChanged = { checked ->
-// 							if (appUiState.settings.isKernelEnabled) {
-// 								showScripts = checked
-// 							} else {
-// 								scope.launch {
-// 									appViewModel.requestRoot().onSuccess {
-// 										showScripts = checked
-// 									}
-// 								}
-// 							}
-// 						},
-// 					)
 					ConfigurationTextBox(
 						value = tunnelName,
 						onValueChange = { tunnelName = it },
@@ -297,7 +270,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 						Modifier
 							.fillMaxWidth(),
 					)
-					val privateKeyEnabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated
+					val privateKeyEnabled = (tunnelConfig == null) || isAuthenticated
 					OutlinedTextField(
 						textStyle = MaterialTheme.typography.labelLarge,
 						modifier =
