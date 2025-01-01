@@ -80,4 +80,9 @@ data class Settings(
 		defaultValue = "false",
 	)
 	val isLanOnKillSwitchEnabled: Boolean = false,
+	@ColumnInfo(
+		name = "debounce_delay_seconds",
+		defaultValue = "3",
+	)
+	val debounceDelaySeconds: Int = 3,
 )

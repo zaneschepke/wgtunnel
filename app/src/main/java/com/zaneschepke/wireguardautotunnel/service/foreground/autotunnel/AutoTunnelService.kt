@@ -284,7 +284,10 @@ class AutoTunnelService : LifecycleService() {
 	@OptIn(FlowPreview::class)
 	private fun startAutoTunnelJob() = lifecycleScope.launch(ioDispatcher) {
 		Timber.i("Starting auto-tunnel network event watcher")
-		autoTunnelStateFlow.debounce(1000L).collect { watcherState ->
+		val settings = appDataRepository.get().settings.getSettings()
+		val debounce = settings.debounceDelaySeconds * 1000L
+		Timber.d("Starting with debounce delay of: $debounce")
+		autoTunnelStateFlow.debounce(debounce).collect { watcherState ->
 			if (watcherState == defaultState) return@collect
 			Timber.d("New auto tunnel state emitted")
 			when (val event = watcherState.asAutoTunnelEvent()) {

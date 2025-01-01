@@ -9,6 +9,7 @@ import com.wireguard.config.Config
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
@@ -27,6 +28,7 @@ import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -130,6 +132,10 @@ constructor(
 			handleVpnKillSwitchChange(settings.isVpnKillSwitchEnabled)
 			if (settings.isAutoTunnelEnabled) serviceManager.startAutoTunnel(false)
 		}
+	}
+
+	fun saveSettings(settings: Settings) = viewModelScope.launch {
+		appDataRepository.settings.save(settings)
 	}
 
 	fun onPinLockDisabled() = viewModelScope.launch(ioDispatcher) {
@@ -367,6 +373,12 @@ constructor(
 		}.onFailure {
 			Timber.e(it)
 		}
+	}
+
+	fun bounceAutoTunnel() = viewModelScope.launch(ioDispatcher) {
+		serviceManager.stopAutoTunnel()
+		delay(1000L)
+		serviceManager.startAutoTunnel(true)
 	}
 
 	fun onTogglePrimaryTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {

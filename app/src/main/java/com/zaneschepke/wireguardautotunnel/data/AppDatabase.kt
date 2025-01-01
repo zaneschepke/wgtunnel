@@ -11,7 +11,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 
 @Database(
 	entities = [Settings::class, TunnelConfig::class],
-	version = 13,
+	version = 14,
 	autoMigrations =
 	[
 		AutoMigration(from = 1, to = 2),
@@ -48,6 +48,10 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 		AutoMigration(
 			from = 12,
 			to = 13,
+		),
+		AutoMigration(
+			from = 13,
+			to = 14,
 		),
 	],
 	exportSchema = true,

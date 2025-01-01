@@ -194,4 +194,6 @@
     <string name="enable_amnezia">Enable Amnezia</string>
 	<string name="wg_compat_mode">WG compatibility mode</string>
 	<string name="quick_actions">Quick actions</string>
+    <string name="advanced_settings">Advanced settings</string>
+	<string name="debounce_delay">Debounce delay</string>
 </resources>

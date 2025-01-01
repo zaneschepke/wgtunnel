@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
@@ -55,6 +56,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.Appear
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.display.DisplayScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.LanguageScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.AutoTunnelScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.AdvancedScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSwitchScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -137,6 +139,7 @@ class MainActivity : AppCompatActivity() {
 				SnackbarControllerProvider { host ->
 					WireguardAutoTunnelTheme(theme = appUiState.generalState.theme) {
 						Scaffold(
+							modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
 							contentWindowInsets = WindowInsets(0),
 							snackbarHost = {
 								SnackbarHost(host) { snackbarData: SnackbarData ->
@@ -210,6 +213,9 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.Support> {
 										SupportScreen(appUiState, viewModel)
+									}
+									composable<Route.AutoTunnelAdvanced> {
+										AdvancedScreen(appUiState, viewModel)
 									}
 									composable<Route.Logs> {
 										LogsScreen()
