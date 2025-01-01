@@ -184,4 +184,12 @@
     <string name="post_up">После активации</string>
     <string name="pre_down">До деактивации</string>
     <string name="post_down">После деактивации</string>
+    <string name="debounce_delay">Задержка отбоя</string>
+    <string name="remove_amnezia_compatibility">Отключить совместимость с Amnezia</string>
+    <string name="exclude_lan">Исключить локальную сеть</string>
+    <string name="hide_scripts">Скрыть сценарии</string>
+    <string name="hide_amnezia_properties">Скрыть настройки Amnezia</string>
+    <string name="advanced_settings">Дополнительные настройки</string>
+    <string name="enable_amnezia_compatibility">Включить совместимость с Amnezia</string>
+    <string name="include_lan">Включить локальную сеть</string>
 </resources>
