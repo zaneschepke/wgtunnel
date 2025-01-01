@@ -112,6 +112,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 				},
 			),
 	) {
+		val onAutoTunnelClick = {
+			if (!uiState.generalState.isLocationDisclosureShown) {
+				navController.navigate(Route.LocationDisclosure)
+			} else navController.navigate(Route.AutoTunnel)
+		}
 		SurfaceSelectionGroupButton(
 			listOf(
 				SelectionItem(
@@ -124,11 +129,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						)
 					},
 					onClick = {
-						if (!uiState.generalState.isLocationDisclosureShown) return@SelectionItem navController.navigate(Route.LocationDisclosure)
-						navController.navigate(Route.AutoTunnel)
+						onAutoTunnelClick()
 					},
 					trailing = {
-						ForwardButton(Modifier.focusable()) { navController.navigate(Route.AutoTunnel) }
+						ForwardButton(Modifier.focusable()) { onAutoTunnelClick() }
 					},
 				),
 			),
