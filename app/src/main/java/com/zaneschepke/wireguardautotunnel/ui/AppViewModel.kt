@@ -9,6 +9,7 @@ import com.wireguard.config.Config
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
@@ -27,6 +28,7 @@ import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -132,6 +134,10 @@ constructor(
 		}
 	}
 
+	fun saveSettings(settings: Settings) = viewModelScope.launch {
+		appDataRepository.settings.save(settings)
+	}
+
 	fun onPinLockDisabled() = viewModelScope.launch(ioDispatcher) {
 		PinManager.clearPin()
 		appDataRepository.appState.setPinLockEnabled(false)
@@ -202,18 +208,14 @@ constructor(
 
 	private suspend fun handleVpnKillSwitchChange(enabled: Boolean) {
 		withContext(ioDispatcher) {
-			if (enabled) {
-				Timber.d("Starting kill switch")
-				val allowedIps = if (appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled) {
-					TunnelConfig.IPV4_PUBLIC_NETWORKS
-				} else {
-					emptySet()
-				}
-				tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
+			if (!enabled) return@withContext tunnelService.get().setBackendState(BackendState.SERVICE_ACTIVE, emptySet())
+			Timber.d("Starting kill switch")
+			val allowedIps = if (appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled) {
+				TunnelConfig.IPV4_PUBLIC_NETWORKS
 			} else {
-				Timber.d("Sending shutdown of kill switch")
-				tunnelService.get().setBackendState(BackendState.SERVICE_ACTIVE, emptySet())
+				emptySet()
 			}
+			tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
 		}
 	}
 
@@ -297,23 +299,65 @@ constructor(
 		}
 	}
 
-	fun saveConfigChanges(config: TunnelConfig, peers: List<PeerProxy>? = null, `interface`: InterfaceProxy? = null) = viewModelScope.launch(
-		ioDispatcher,
-	) {
+	fun updateExistingTunnelConfig(
+		tunnelConfig: TunnelConfig,
+		tunnelName: String? = null,
+		peers: List<PeerProxy>? = null,
+		`interface`: InterfaceProxy? = null,
+	) = viewModelScope.launch {
 		runCatching {
-			val amConfig = config.toAmConfig()
-			val wgConfig = config.toWgConfig()
-			rebuildConfigsAndSave(config, amConfig, wgConfig, peers, `interface`)
+			val amConfig = tunnelConfig.toAmConfig()
+			val wgConfig = tunnelConfig.toWgConfig()
+			updateTunnelConfig(tunnelConfig, tunnelName, amConfig, wgConfig, peers, `interface`)
 			_popBackStack.emit(true)
 			SnackbarController.showMessage(StringValue.StringResource(R.string.config_changes_saved))
 		}.onFailure {
-			Timber.e(it)
-			SnackbarController.showMessage(
-				it.message?.let { message ->
-					(StringValue.DynamicString(message))
-				} ?: StringValue.StringResource(R.string.unknown_error),
-			)
+			onConfigSaveError(it)
 		}
+	}
+
+	fun saveNewTunnel(tunnelName: String, peers: List<PeerProxy>, `interface`: InterfaceProxy) = viewModelScope.launch {
+		runCatching {
+			val config = buildConfigs(peers, `interface`)
+			appDataRepository.tunnels.save(
+				TunnelConfig(
+					name = tunnelName,
+					wgQuick = config.first.toWgQuickString(true),
+					amQuick = config.second.toAwgQuickString(true),
+				),
+			)
+			_popBackStack.emit(true)
+			SnackbarController.showMessage(StringValue.StringResource(R.string.config_changes_saved))
+		}.onFailure {
+			onConfigSaveError(it)
+		}
+	}
+
+	private fun onConfigSaveError(throwable: Throwable) {
+		Timber.e(throwable)
+		SnackbarController.showMessage(
+			throwable.message?.let { message ->
+				(StringValue.DynamicString(message))
+			} ?: StringValue.StringResource(R.string.unknown_error),
+		)
+	}
+
+	private suspend fun updateTunnelConfig(
+		tunnelConfig: TunnelConfig,
+		tunnelName: String? = null,
+		amConfig: org.amnezia.awg.config.Config,
+		wgConfig: Config,
+		peers: List<PeerProxy>? = null,
+		`interface`: InterfaceProxy? = null,
+	) {
+		val configs = rebuildConfigs(amConfig, wgConfig, peers, `interface`)
+		appDataRepository.tunnels.save(
+			tunnelConfig.copy(
+				name = tunnelName ?: tunnelConfig.name,
+				amQuick = configs.second.toAwgQuickString(true),
+				wgQuick = configs.first.toWgQuickString(true),
+			),
+		)
 	}
 
 	fun cleanUpUninstalledApps(tunnelConfig: TunnelConfig, packages: List<String>) = viewModelScope.launch(ioDispatcher) {
@@ -323,12 +367,18 @@ constructor(
 			val proxy = InterfaceProxy.from(amConfig.`interface`)
 			if (proxy.includedApplications.isEmpty() && proxy.excludedApplications.isEmpty()) return@launch
 			if (proxy.includedApplications.retainAll(packages.toSet()) || proxy.excludedApplications.retainAll(packages.toSet())) {
-				Timber.i("Removing split tunnel package for app that no longer exists on the device")
-				rebuildConfigsAndSave(tunnelConfig, amConfig, wgConfig, `interface` = proxy)
+				updateTunnelConfig(tunnelConfig, amConfig = amConfig, wgConfig = wgConfig, `interface` = proxy)
+				Timber.i("Removed split tunnel package for app that no longer exists on the device")
 			}
 		}.onFailure {
 			Timber.e(it)
 		}
+	}
+
+	fun bounceAutoTunnel() = viewModelScope.launch(ioDispatcher) {
+		serviceManager.stopAutoTunnel()
+		delay(1000L)
+		serviceManager.startAutoTunnel(true)
 	}
 
 	fun onTogglePrimaryTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
@@ -340,24 +390,38 @@ constructor(
 		)
 	}
 
-	private suspend fun rebuildConfigsAndSave(
-		config: TunnelConfig,
+	private suspend fun rebuildConfigs(
 		amConfig: org.amnezia.awg.config.Config,
 		wgConfig: Config,
 		peers: List<PeerProxy>? = null,
 		`interface`: InterfaceProxy? = null,
-	) {
-		appDataRepository.tunnels.save(
-			config.copy(
-				wgQuick = Config.Builder().apply {
+	): Pair<Config, org.amnezia.awg.config.Config> {
+		return withContext(ioDispatcher) {
+			Pair(
+				Config.Builder().apply {
 					addPeers(peers?.map { it.toWgPeer() } ?: wgConfig.peers)
 					setInterface(`interface`?.toWgInterface() ?: wgConfig.`interface`)
-				}.build().toWgQuickString(true),
-				amQuick = org.amnezia.awg.config.Config.Builder().apply {
+				}.build(),
+				org.amnezia.awg.config.Config.Builder().apply {
 					addPeers(peers?.map { it.toAmPeer() } ?: amConfig.peers)
 					setInterface(`interface`?.toAmInterface() ?: amConfig.`interface`)
-				}.build().toAwgQuickString(true),
-			),
-		)
+				}.build(),
+			)
+		}
+	}
+
+	private suspend fun buildConfigs(peers: List<PeerProxy>, `interface`: InterfaceProxy): Pair<Config, org.amnezia.awg.config.Config> {
+		return withContext(ioDispatcher) {
+			Pair(
+				Config.Builder().apply {
+					addPeers(peers.map { it.toWgPeer() })
+					setInterface(`interface`.toWgInterface())
+				}.build(),
+				org.amnezia.awg.config.Config.Builder().apply {
+					addPeers(peers.map { it.toAmPeer() })
+					setInterface(`interface`.toAmInterface())
+				}.build(),
+			)
+		}
 	}
 }

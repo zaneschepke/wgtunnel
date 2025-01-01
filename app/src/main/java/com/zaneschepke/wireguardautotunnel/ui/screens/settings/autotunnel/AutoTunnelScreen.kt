@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Filter1
 import androidx.compose.material.icons.outlined.NetworkPing
 import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SettingsEthernet
 import androidx.compose.material.icons.outlined.SignalCellular4Bar
 import androidx.compose.material.icons.outlined.Wifi
@@ -42,13 +44,16 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.TrustedNetworkTextBox
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WildcardsLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LearnMoreLinkLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
@@ -62,6 +67,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 @Composable
 fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltViewModel()) {
 	val context = LocalContext.current
+	val navController = LocalNavController.current
 
 	val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 	var currentText by remember { mutableStateOf("") }
@@ -129,6 +135,7 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 				.fillMaxSize()
 				.padding(padding)
 				.verticalScroll(rememberScrollState())
+				.imePadding()
 				.padding(top = 24.dp.scaledHeight())
 				.padding(horizontal = 24.dp.scaledWidth()),
 		) {
@@ -349,6 +356,25 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 						},
 						onClick = {
 							viewModel.onToggleStopOnNoInternet()
+						},
+					),
+				),
+			)
+			SurfaceSelectionGroupButton(
+				listOf(
+					SelectionItem(
+						Icons.Outlined.Settings,
+						title = {
+							Text(
+								stringResource(R.string.advanced_settings),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						onClick = {
+							navController.navigate(Route.AutoTunnelAdvanced)
+						},
+						trailing = {
+							ForwardButton { navController.navigate(Route.AutoTunnelAdvanced) }
 						},
 					),
 				),

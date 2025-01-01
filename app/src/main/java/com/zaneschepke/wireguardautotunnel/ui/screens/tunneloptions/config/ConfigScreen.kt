@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +9,9 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +22,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,15 +36,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.ClipboardManager
@@ -53,56 +58,51 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
-import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationToggle
 import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.InterfaceActions
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.PeerActions
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
+import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
-import kotlinx.coroutines.launch
 import org.amnezia.awg.crypto.KeyPair
 
 @Composable
-fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: Int) {
+fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 	val context = LocalContext.current
 	val snackbar = SnackbarController.current
 	val clipboardManager: ClipboardManager = LocalClipboardManager.current
 	val keyboardController = LocalSoftwareKeyboardController.current
 	val navController = LocalNavController.current
-	val scope = rememberCoroutineScope()
+
+	var isInterfaceDropDownExpanded by remember {
+		mutableStateOf(false)
+	}
 
 	val popBackStack by appViewModel.popBackStack.collectAsStateWithLifecycle(false)
 
-	val tunnelConfig by remember {
-		derivedStateOf {
-			appUiState.tunnels.first { it.id == tunnelId }
-		}
-	}
-
-	val configPair by remember {
-		derivedStateOf {
-			Pair(tunnelConfig.name, tunnelConfig.toAmConfig())
-		}
-	}
+	val configPair = Pair(tunnelConfig?.name ?: "", tunnelConfig?.toAmConfig())
 
 	var tunnelName by remember {
 		mutableStateOf(configPair.first)
 	}
 
 	var interfaceState by remember {
-		mutableStateOf(InterfaceProxy.from(configPair.second.`interface`))
+		mutableStateOf(configPair.second?.let { InterfaceProxy.from(it.`interface`) } ?: InterfaceProxy())
 	}
 
 	var showAmneziaValues by remember {
-		mutableStateOf(configPair.second.`interface`.junkPacketCount.isPresent)
+		mutableStateOf(configPair.second?.`interface`?.junkPacketCount?.isPresent == true)
 	}
 
 	var showScripts by remember {
@@ -110,7 +110,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 	}
 
 	val peersState = remember {
-		configPair.second.peers.map { PeerProxy.from(it) }.toMutableStateList()
+		(configPair.second?.peers?.map { PeerProxy.from(it) } ?: listOf(PeerProxy())).toMutableStateList()
 	}
 
 	var showAuthPrompt by remember { mutableStateOf(false) }
@@ -148,13 +148,14 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 		topBar = {
 			TopNavBar(stringResource(R.string.edit_tunnel), trailing = {
 				IconButton(onClick = {
-					appViewModel.saveConfigChanges(
-						tunnelConfig.copy(
-							name = tunnelName,
-						),
-						peers = peersState,
-						`interface` = interfaceState,
-					)
+					tunnelConfig?.let {
+						appViewModel.updateExistingTunnelConfig(
+							it,
+							tunnelName,
+							peersState,
+							interfaceState,
+						)
+					} ?: appViewModel.saveNewTunnel(tunnelName, peersState, interfaceState)
 				}) {
 					val icon = Icons.Outlined.Save
 					Icon(
@@ -172,6 +173,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 			Modifier
 				.fillMaxSize()
 				.padding(padding)
+				.imePadding()
 				.verticalScroll(rememberScrollState())
 				.padding(top = 24.dp.scaledHeight())
 				.padding(horizontal = 24.dp.scaledWidth()),
@@ -187,35 +189,77 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 						.padding(16.dp.scaledWidth())
 						.focusGroup(),
 				) {
-					GroupLabel(
-						stringResource(R.string.interface_),
-					)
-					ConfigurationToggle(
-						stringResource(id = R.string.show_amnezia_properties),
-						checked = showAmneziaValues,
-						onCheckChanged = {
-							if (appUiState.settings.isKernelEnabled) {
-								snackbar.showMessage(context.getString(R.string.amnezia_kernel_message))
-							} else {
-								showAmneziaValues = it
+					Row(
+						horizontalArrangement = Arrangement.SpaceBetween,
+						verticalAlignment = Alignment.CenterVertically,
+						modifier =
+						Modifier.fillMaxWidth(),
+					) {
+						GroupLabel(
+							stringResource(R.string.interface_),
+						)
+						Column {
+							IconButton(
+								modifier = Modifier.size(iconSize),
+								onClick = {
+									isInterfaceDropDownExpanded = true
+								},
+							) {
+								val icon = Icons.Rounded.MoreVert
+								Icon(icon, icon.name)
 							}
-						},
-					)
-					ConfigurationToggle(
-						stringResource(id = R.string.show_scripts),
-						checked = showScripts,
-						onCheckChanged = { checked ->
-							if (appUiState.settings.isKernelEnabled) {
-								showScripts = checked
-							} else {
-								scope.launch {
-									appViewModel.requestRoot().onSuccess {
-										showScripts = checked
-									}
+							DropdownMenu(
+								containerColor = MaterialTheme.colorScheme.surface,
+								expanded = isInterfaceDropDownExpanded,
+								modifier = Modifier.shadow(12.dp).background(MaterialTheme.colorScheme.surface),
+								onDismissRequest = {
+									isInterfaceDropDownExpanded = false
+								},
+							) {
+								val isAmneziaCompatibilitySet = interfaceState.isAmneziaCompatibilityModeSet()
+								InterfaceActions.entries.forEach { action ->
+									DropdownMenuItem(
+										text = {
+											Text(
+												text = when (action) {
+													InterfaceActions.TOGGLE_SHOW_SCRIPTS -> if (showScripts) {
+														stringResource(R.string.hide_scripts)
+													} else {
+														stringResource(R.string.show_scripts)
+													}
+													InterfaceActions.TOGGLE_AMNEZIA_VALUES -> if (showAmneziaValues) {
+														stringResource(R.string.hide_amnezia_properties)
+													} else {
+														stringResource(R.string.show_amnezia_properties)
+													}
+
+													InterfaceActions.SET_AMNEZIA_COMPATIBILITY -> if (isAmneziaCompatibilitySet) {
+														stringResource(R.string.remove_amnezia_compatibility)
+													} else {
+														stringResource(R.string.enable_amnezia_compatibility)
+													}
+												},
+											)
+										},
+										onClick = {
+											isInterfaceDropDownExpanded = false
+											when (action) {
+												InterfaceActions.TOGGLE_AMNEZIA_VALUES -> showAmneziaValues = !showAmneziaValues
+												InterfaceActions.TOGGLE_SHOW_SCRIPTS -> showScripts = !showScripts
+												InterfaceActions.SET_AMNEZIA_COMPATIBILITY -> if (isAmneziaCompatibilitySet) {
+													showAmneziaValues = false
+													interfaceState = interfaceState.resetAmneziaProperties()
+												} else {
+													showAmneziaValues = true
+													interfaceState = interfaceState.toAmneziaCompatibilityConfig()
+												}
+											}
+										},
+									)
 								}
 							}
-						},
-					)
+						}
+					}
 					ConfigurationTextBox(
 						value = tunnelName,
 						onValueChange = { tunnelName = it },
@@ -226,6 +270,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 						Modifier
 							.fillMaxWidth(),
 					)
+					val privateKeyEnabled = (tunnelConfig == null) || isAuthenticated
 					OutlinedTextField(
 						textStyle = MaterialTheme.typography.labelLarge,
 						modifier =
@@ -234,17 +279,17 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 							.clickable { showAuthPrompt = true },
 						value = interfaceState.privateKey,
 						visualTransformation =
-						if ((tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated) {
+						if (privateKeyEnabled) {
 							VisualTransformation.None
 						} else {
 							PasswordVisualTransformation()
 						},
-						enabled = (tunnelId == Constants.MANUAL_TUNNEL_CONFIG_ID) || isAuthenticated,
+						enabled = privateKeyEnabled,
 						onValueChange = { interfaceState = interfaceState.copy(privateKey = it) },
 						trailingIcon = {
 							IconButton(
-								enabled = isAuthenticated,
-								modifier = Modifier.focusRequester(FocusRequester.Default),
+								enabled = privateKeyEnabled,
+								modifier = Modifier.focusRequester(FocusRequester.Default).size(iconSize),
 								onClick = {
 									val keypair = KeyPair()
 									interfaceState = interfaceState.copy(
@@ -256,7 +301,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 								Icon(
 									Icons.Rounded.Refresh,
 									stringResource(R.string.rotate_keys),
-									tint = if (isAuthenticated) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
+									tint = if (privateKeyEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline,
 								)
 							}
 						},
@@ -285,7 +330,7 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 						},
 						trailingIcon = {
 							IconButton(
-								modifier = Modifier.focusRequester(FocusRequester.Default),
+								modifier = Modifier.focusRequester(FocusRequester.Default).size(iconSize),
 								onClick = {
 									clipboardManager.setText(
 										AnnotatedString(interfaceState.publicKey),
@@ -538,13 +583,17 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 				}
 			}
 			peersState.forEachIndexed { index, peer ->
+				var isPeerDropDownExpanded by remember {
+					mutableStateOf(false)
+				}
+				val isLanExcluded = peer.isLanExcluded()
 				Surface(
 					shape = RoundedCornerShape(12.dp),
 					color = MaterialTheme.colorScheme.surface,
 				) {
 					Column(
 						horizontalAlignment = Alignment.Start,
-						verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top),
+						verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top),
 						modifier = Modifier
 							.padding(16.dp.scaledWidth())
 							.focusGroup(),
@@ -558,11 +607,65 @@ fun ConfigScreen(appUiState: AppUiState, appViewModel: AppViewModel, tunnelId: I
 							GroupLabel(
 								stringResource(R.string.peer),
 							)
-							IconButton(onClick = {
-								peersState.removeAt(index)
-							}) {
-								val icon = Icons.Rounded.Delete
-								Icon(icon, icon.name)
+							Row(
+								horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
+								verticalAlignment = Alignment.CenterVertically,
+							) {
+								IconButton(
+									modifier = Modifier.size(iconSize),
+									onClick = {
+										// TODO make a dialog to confirm this
+										peersState.removeAt(index)
+									},
+								) {
+									val icon = Icons.Rounded.Delete
+									Icon(icon, icon.name)
+								}
+								Column {
+									IconButton(
+										modifier = Modifier.size(iconSize),
+										onClick = {
+											isPeerDropDownExpanded = true
+										},
+									) {
+										val icon = Icons.Rounded.MoreVert
+										Icon(icon, icon.name)
+									}
+									DropdownMenu(
+										containerColor = MaterialTheme.colorScheme.surface,
+										expanded = isPeerDropDownExpanded,
+										modifier = Modifier.shadow(12.dp).background(MaterialTheme.colorScheme.surface),
+										onDismissRequest = {
+											isPeerDropDownExpanded = false
+										},
+									) {
+										PeerActions.entries.forEach { action ->
+											DropdownMenuItem(
+												text = {
+													Text(
+														text = when (action) {
+															PeerActions.EXCLUDE_LAN -> if (isLanExcluded) {
+																stringResource(R.string.include_lan)
+															} else {
+																stringResource(R.string.exclude_lan)
+															}
+														},
+													)
+												},
+												onClick = {
+													isPeerDropDownExpanded = false
+													when (action) {
+														PeerActions.EXCLUDE_LAN -> if (isLanExcluded) {
+															peersState[index] = peer.includeLan()
+														} else {
+															peersState[index] = peer.excludeLan()
+														}
+													}
+												},
+											)
+										}
+									}
+								}
 							}
 						}
 

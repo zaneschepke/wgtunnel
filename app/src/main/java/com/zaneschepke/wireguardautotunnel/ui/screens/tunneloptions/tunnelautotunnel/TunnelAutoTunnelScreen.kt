@@ -33,7 +33,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
@@ -48,17 +49,16 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
-fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunnelViewModel: TunnelAutoTunnelViewModel = hiltViewModel()) {
-	val config = appUiState.tunnels.first { it.id == tunnelId }
+fun TunnelAutoTunnelScreen(tunnelConfig: TunnelConfig, settings: Settings, tunnelAutoTunnelViewModel: TunnelAutoTunnelViewModel = hiltViewModel()) {
 
 	var currentText by remember { mutableStateOf("") }
 
-	LaunchedEffect(config.tunnelNetworks) {
+	LaunchedEffect(tunnelConfig.tunnelNetworks) {
 		currentText = ""
 	}
 	Scaffold(
 		topBar = {
-			TopNavBar(config.name)
+			TopNavBar(tunnelConfig.name)
 		},
 	) { padding ->
 		Column(
@@ -92,11 +92,11 @@ fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunn
 								},
 								trailing = {
 									ScaledSwitch(
-										config.isMobileDataTunnel,
-										onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(config) },
+										tunnelConfig.isMobileDataTunnel,
+										onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(tunnelConfig) },
 									)
 								},
-								onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(config) },
+								onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(tunnelConfig) },
 							),
 							SelectionItem(
 								Icons.Outlined.SettingsEthernet,
@@ -114,11 +114,11 @@ fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunn
 								},
 								trailing = {
 									ScaledSwitch(
-										config.isEthernetTunnel,
-										onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(config) },
+										tunnelConfig.isEthernetTunnel,
+										onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(tunnelConfig) },
 									)
 								},
-								onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(config) },
+								onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(tunnelConfig) },
 							),
 							SelectionItem(
 								Icons.Outlined.NetworkPing,
@@ -130,27 +130,27 @@ fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunn
 								},
 								trailing = {
 									ScaledSwitch(
-										checked = config.isPingEnabled,
-										onClick = { tunnelAutoTunnelViewModel.onToggleRestartOnPing(config) },
+										checked = tunnelConfig.isPingEnabled,
+										onClick = { tunnelAutoTunnelViewModel.onToggleRestartOnPing(tunnelConfig) },
 									)
 								},
-								onClick = { tunnelAutoTunnelViewModel.onToggleRestartOnPing(config) },
+								onClick = { tunnelAutoTunnelViewModel.onToggleRestartOnPing(tunnelConfig) },
 							),
 						),
 					)
-					if (config.isPingEnabled || appUiState.settings.isPingEnabled) {
+					if (tunnelConfig.isPingEnabled || settings.isPingEnabled) {
 						add(
 							SelectionItem(
 								title = {},
 								description = {
 									SubmitConfigurationTextBox(
-										config.pingIp,
+										tunnelConfig.pingIp,
 										stringResource(R.string.set_custom_ping_ip),
 										stringResource(R.string.default_ping_ip),
 										isErrorValue = { !it.isNullOrBlank() && !it.isValidIpv4orIpv6Address() },
 										onSubmit = {
 											tunnelAutoTunnelViewModel.saveTunnelChanges(
-												config.copy(pingIp = it.ifBlank { null }),
+												tunnelConfig.copy(pingIp = it.ifBlank { null }),
 											)
 										},
 									)
@@ -158,7 +158,7 @@ fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunn
 										return seconds?.let { value -> if (value.isBlank()) false else value.toLong() >= Long.MAX_VALUE / 1000 } ?: false
 									}
 									SubmitConfigurationTextBox(
-										config.pingInterval?.let { (it / 1000).toString() },
+										tunnelConfig.pingInterval?.let { (it / 1000).toString() },
 										stringResource(R.string.set_custom_ping_internal),
 										"(${stringResource(R.string.optional_default)} ${Constants.PING_INTERVAL / 1000})",
 										keyboardOptions = KeyboardOptions(
@@ -168,12 +168,12 @@ fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunn
 										isErrorValue = ::isSecondsError,
 										onSubmit = {
 											tunnelAutoTunnelViewModel.saveTunnelChanges(
-												config.copy(pingInterval = if (it.isBlank()) null else it.toLong() * 1000),
+												tunnelConfig.copy(pingInterval = if (it.isBlank()) null else it.toLong() * 1000),
 											)
 										},
 									)
 									SubmitConfigurationTextBox(
-										config.pingCooldown?.let { (it / 1000).toString() },
+										tunnelConfig.pingCooldown?.let { (it / 1000).toString() },
 										stringResource(R.string.set_custom_ping_cooldown),
 										"(${stringResource(R.string.optional_default)} ${Constants.PING_COOLDOWN / 1000})",
 										keyboardOptions = KeyboardOptions(
@@ -182,7 +182,7 @@ fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunn
 										isErrorValue = ::isSecondsError,
 										onSubmit = {
 											tunnelAutoTunnelViewModel.saveTunnelChanges(
-												config.copy(pingCooldown = if (it.isBlank()) null else it.toLong() * 1000),
+												tunnelConfig.copy(pingCooldown = if (it.isBlank()) null else it.toLong() * 1000),
 											)
 										},
 									)
@@ -229,13 +229,13 @@ fun TunnelAutoTunnelScreen(appUiState: AppUiState, tunnelId: Int, tunnelAutoTunn
 							},
 							description = {
 								TrustedNetworkTextBox(
-									config.tunnelNetworks,
-									onDelete = { tunnelAutoTunnelViewModel.onDeleteRunSSID(it, config) },
+									tunnelConfig.tunnelNetworks,
+									onDelete = { tunnelAutoTunnelViewModel.onDeleteRunSSID(it, tunnelConfig) },
 									currentText = currentText,
-									onSave = { tunnelAutoTunnelViewModel.onSaveRunSSID(it, config) },
+									onSave = { tunnelAutoTunnelViewModel.onSaveRunSSID(it, tunnelConfig) },
 									onValueChange = { currentText = it },
 									supporting = {
-										if (appUiState.settings.isWildcardsEnabled) {
+										if (settings.isWildcardsEnabled) {
 											WildcardsLabel()
 										}
 									},

@@ -32,6 +32,8 @@ class AppUpdateReceiver : BroadcastReceiver() {
 
 	override fun onReceive(context: Context, intent: Intent) {
 		if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+		serviceManager.updateTunnelTile()
+		serviceManager.updateAutoTunnelTile()
 		applicationScope.launch {
 			val settings = appDataRepository.settings.getSettings()
 			if (settings.isAutoTunnelEnabled) {

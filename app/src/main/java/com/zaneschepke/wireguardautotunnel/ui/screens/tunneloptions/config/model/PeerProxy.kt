@@ -8,7 +8,7 @@ data class PeerProxy(
 	val preSharedKey: String = "",
 	val persistentKeepalive: String = "",
 	val endpoint: String = "",
-	val allowedIps: String = IPV4_WILDCARD.joinAndTrim(),
+	val allowedIps: String = ALL_IPS.joinAndTrim(),
 ) {
 	fun toWgPeer(): Peer {
 		return Peer.Builder().apply {
@@ -27,6 +27,22 @@ data class PeerProxy(
 			parseEndpoint(endpoint)
 			parseAllowedIPs(allowedIps)
 		}.build()
+	}
+
+	fun isLanExcluded(): Boolean {
+		return this.allowedIps.contains(IPV4_PUBLIC_NETWORKS.joinAndTrim())
+	}
+
+	fun includeLan(): PeerProxy {
+		return this.copy(
+			allowedIps = ALL_IPS.joinAndTrim(),
+		)
+	}
+
+	fun excludeLan(): PeerProxy {
+		return this.copy(
+			allowedIps = IPV4_PUBLIC_NETWORKS.joinAndTrim(),
+		)
 	}
 
 	companion object {
@@ -113,6 +129,6 @@ data class PeerProxy(
 				"200.0.0.0/5",
 				"208.0.0.0/4",
 			)
-		val IPV4_WILDCARD = setOf("0.0.0.0/0")
+		val ALL_IPS = setOf("0.0.0.0/0", "::/0")
 	}
 }

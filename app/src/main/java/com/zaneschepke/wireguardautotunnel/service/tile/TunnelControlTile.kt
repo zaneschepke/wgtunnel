@@ -1,9 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.service.tile
 
+import android.content.Intent
 import android.os.Build
+import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
@@ -12,8 +13,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Provider
 
 @AndroidEntryPoint
 class TunnelControlTile : TileService() {
@@ -21,7 +22,7 @@ class TunnelControlTile : TileService() {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var tunnelService: Provider<TunnelService>
+	lateinit var tunnelService: TunnelService
 
 	@Inject
 	@ApplicationScope
@@ -42,17 +43,20 @@ class TunnelControlTile : TileService() {
 
 	override fun onStartListening() {
 		super.onStartListening()
+		Timber.d("Start listening called")
 		serviceManager.tunnelControlTile.complete(this)
 		applicationScope.launch {
-			if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
 			updateTileState()
 		}
 	}
 
 	fun updateTileState() = applicationScope.launch {
-		val lastActive = appDataRepository.getStartTunnelConfig()
-		lastActive?.let {
-			updateTile(it)
+		if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
+		with(tunnelService.vpnState.value) {
+			if (status.isUp() && tunnelConfig != null) return@launch updateTile(tunnelConfig.name, true)
+		}
+		appDataRepository.getStartTunnelConfig()?.let {
+			updateTile(it.name, false)
 		}
 	}
 
@@ -60,14 +64,9 @@ class TunnelControlTile : TileService() {
 		super.onClick()
 		unlockAndRun {
 			applicationScope.launch {
-				val lastActive = appDataRepository.getStartTunnelConfig()
-				lastActive?.let { tunnel ->
-					if (tunnel.isActive) {
-						tunnelService.get().stopTunnel()
-					} else {
-						tunnelService.get().startTunnel(tunnel, true)
-					}
-					updateTileState()
+				if (tunnelService.vpnState.value.status.isUp()) return@launch tunnelService.stopTunnel()
+				appDataRepository.getStartTunnelConfig()?.let {
+					tunnelService.startTunnel(it, true)
 				}
 			}
 		}
@@ -107,13 +106,24 @@ class TunnelControlTile : TileService() {
 		}
 	}
 
-	private fun updateTile(tunnelConfig: TunnelConfig?) {
+	/* This works around an annoying unsolved frameworks bug some people are hitting. */
+	override fun onBind(intent: Intent): IBinder? {
+		var ret: IBinder? = null
+		try {
+			ret = super.onBind(intent)
+		} catch (_: Throwable) {
+			Timber.e("Failed to bind to TunnelControlTile")
+		}
+		return ret
+	}
+
+	private fun updateTile(name: String, active: Boolean) {
 		kotlin.runCatching {
-			tunnelConfig?.let {
-				setTileDescription(it.name)
-				if (it.isActive) return setActive()
-				setInactive()
-			}
+			setTileDescription(name)
+			if (active) return setActive()
+			setInactive()
+		}.onFailure {
+			Timber.e(it)
 		}
 	}
 }

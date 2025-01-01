@@ -1,16 +1,15 @@
 [versions]
 accompanist = "0.36.0"
 activityCompose = "1.9.3"
-amneziawgAndroid = "1.2.3"
+amneziawgAndroid = "1.2.4"
 androidx-junit = "1.2.1"
 appcompat = "1.7.0"
 biometricKtx = "1.2.0-alpha05"
-coreGoogleShortcuts = "1.1.0"
 coreKtx = "1.15.0"
 datastorePreferences = "1.1.1"
 desugar_jdk_libs = "2.1.4"
 espressoCore = "3.6.1"
-hiltAndroid = "2.53"
+hiltAndroid = "2.54"
 hiltNavigationCompose = "1.2.0"
 junit = "4.13.2"
 kotlinx-serialization-json = "1.7.3"
@@ -46,7 +45,6 @@ accompanist-permissions = { module = "com.google.accompanist:accompanist-permiss
 amneziawg-android = { module = "com.zaneschepke:amneziawg-android", version.ref = "amneziawgAndroid" }
 androidx-biometric-ktx = { module = "androidx.biometric:biometric-ktx", version.ref = "biometricKtx" }
 androidx-core = { module = "androidx.core:core", version.ref = "coreKtx" }
-androidx-core-google-shortcuts = { module = "androidx.core:core-google-shortcuts", version.ref = "coreGoogleShortcuts" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle-runtime-compose" }
 androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycle-runtime-compose" }

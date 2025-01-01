@@ -32,6 +32,8 @@ class BootReceiver : BroadcastReceiver() {
 
 	override fun onReceive(context: Context, intent: Intent) {
 		if (Intent.ACTION_BOOT_COMPLETED != intent.action) return
+		serviceManager.updateTunnelTile()
+		serviceManager.updateAutoTunnelTile()
 		applicationScope.launch {
 			with(appDataRepository.settings.getSettings()) {
 				if (isRestoreOnBootEnabled) {

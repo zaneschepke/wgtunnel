@@ -3,12 +3,12 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.CallSplit
-import androidx.compose.material.icons.outlined.Adjust
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Star
@@ -26,42 +26,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
-import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
-import com.zaneschepke.wireguardautotunnel.util.extensions.isWgCompatibilityMode
-import com.zaneschepke.wireguardautotunnel.util.extensions.resetAmneziaProperties
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
-import com.zaneschepke.wireguardautotunnel.util.extensions.toAmneziaCompatibilityConfig
 
 @Composable
-fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: Int) {
+fun OptionsScreen(tunnelConfig: TunnelConfig, appViewModel: AppViewModel) {
 	val navController = LocalNavController.current
-	val config = appUiState.tunnels.first { it.id == tunnelId }
-
-	// TODO optimize
-
-	val amConfig = config.toAmConfig()
-
-	val isAmneziaCompatibilityEnabled = amConfig.`interface`.isWgCompatibilityMode()
 
 	var currentText by remember { mutableStateOf("") }
 
-	LaunchedEffect(config.tunnelNetworks) {
+	LaunchedEffect(tunnelConfig.tunnelNetworks) {
 		currentText = ""
 	}
 	Scaffold(
 		topBar = {
-			TopNavBar(config.name)
+			TopNavBar(tunnelConfig.name)
 		},
 	) {
 		Column(
@@ -71,6 +59,7 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 			Modifier
 				.fillMaxSize()
 				.padding(it)
+				.imePadding()
 				.verticalScroll(rememberScrollState())
 				.padding(top = 24.dp.scaledHeight())
 				.padding(horizontal = 24.dp.scaledWidth()),
@@ -93,11 +82,11 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 						},
 						trailing = {
 							ScaledSwitch(
-								config.isPrimaryTunnel,
-								onClick = { appViewModel.onTogglePrimaryTunnel(config) },
+								tunnelConfig.isPrimaryTunnel,
+								onClick = { appViewModel.onTogglePrimaryTunnel(tunnelConfig) },
 							)
 						},
-						onClick = { appViewModel.onTogglePrimaryTunnel(config) },
+						onClick = { appViewModel.onTogglePrimaryTunnel(tunnelConfig) },
 					),
 					SelectionItem(
 						Icons.Outlined.Bolt,
@@ -114,10 +103,10 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 							)
 						},
 						onClick = {
-							navController.navigate(Route.TunnelAutoTunnel(id = tunnelId))
+							navController.navigate(Route.TunnelAutoTunnel(id = tunnelConfig.id))
 						},
 						trailing = {
-							ForwardButton { navController.navigate(Route.TunnelAutoTunnel(id = tunnelId)) }
+							ForwardButton { navController.navigate(Route.TunnelAutoTunnel(id = tunnelConfig.id)) }
 						},
 					),
 					SelectionItem(
@@ -129,10 +118,10 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 							)
 						},
 						onClick = {
-							navController.navigate(Route.Config(id = tunnelId))
+							navController.navigate(Route.Config(id = tunnelConfig.id))
 						},
 						trailing = {
-							ForwardButton { navController.navigate(Route.Config(id = tunnelId)) }
+							ForwardButton { navController.navigate(Route.Config(id = tunnelConfig.id)) }
 						},
 					),
 					SelectionItem(
@@ -144,43 +133,11 @@ fun OptionsScreen(appViewModel: AppViewModel, appUiState: AppUiState, tunnelId: 
 							)
 						},
 						onClick = {
-							navController.navigate(Route.SplitTunnel(id = tunnelId))
+							navController.navigate(Route.SplitTunnel(id = tunnelConfig.id))
 						},
 						trailing = {
-							ForwardButton { navController.navigate(Route.SplitTunnel(id = tunnelId)) }
+							ForwardButton { navController.navigate(Route.SplitTunnel(id = tunnelConfig.id)) }
 						},
-					),
-				),
-			)
-			val amneziaClick = {
-				val proxy = InterfaceProxy.from(amConfig.`interface`)
-				val `interface` = if (!isAmneziaCompatibilityEnabled) proxy.toAmneziaCompatibilityConfig() else proxy.resetAmneziaProperties()
-				appViewModel.saveConfigChanges(config, `interface` = `interface`)
-			}
-			GroupLabel(stringResource(R.string.quick_actions))
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						Icons.Outlined.Adjust,
-						title = {
-							Text(
-								stringResource(R.string.enable_amnezia),
-								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-							)
-						},
-						description = {
-							Text(
-								stringResource(R.string.wg_compat_mode),
-								style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-							)
-						},
-						trailing = {
-							ScaledSwitch(
-								isAmneziaCompatibilityEnabled,
-								onClick = { amneziaClick() },
-							)
-						},
-						onClick = { amneziaClick() },
 					),
 				),
 			)

@@ -1,5 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.service.tile
 
+import android.content.Intent
+import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
@@ -9,6 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,6 +78,17 @@ class AutoTunnelControlTile : TileService() {
 			qsTile.state = Tile.STATE_INACTIVE
 			qsTile.updateTile()
 		}
+	}
+
+	/* This works around an annoying unsolved frameworks bug some people are hitting. */
+	override fun onBind(intent: Intent): IBinder? {
+		var ret: IBinder? = null
+		try {
+			ret = super.onBind(intent)
+		} catch (_: Throwable) {
+			Timber.e("Failed to bind to TunnelControlTile")
+		}
+		return ret
 	}
 
 	private fun setUnavailable() {

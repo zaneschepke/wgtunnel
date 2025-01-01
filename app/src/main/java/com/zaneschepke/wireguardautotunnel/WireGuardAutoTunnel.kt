@@ -74,7 +74,9 @@ class WireGuardAutoTunnel : Application() {
 				tunnelService.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
 			}
 			appStateRepository.getLocale()?.let {
-				LocaleUtil.changeLocale(it)
+				withContext(mainDispatcher) {
+					LocaleUtil.changeLocale(it)
+				}
 			}
 		}
 	}

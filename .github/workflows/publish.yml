@@ -68,7 +68,7 @@ jobs:
       - check_commits
       - build
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
-    name: Build Signed APK
+    name: publish-github
     runs-on: ubuntu-latest
     env:
       GH_USER: ${{ secrets.GH_USER }}
@@ -77,6 +77,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
 
     steps:
+      - uses: actions/checkout@v4
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
@@ -112,14 +113,6 @@ jobs:
         run: |
           version_code=$(grep "VERSION_CODE" buildSrc/src/main/kotlin/Constants.kt | awk '{print $5}' | tr -d '\n')
           echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
-
-      - name: Commit and push versionCode changes
-        if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly'  || inputs.release_type == 'prerelease' }}
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git add versionCode.txt
-          git commit -m "Automated build update"
 
       - name: Push changes
         if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly'  || inputs.release_type == 'prerelease' }}
@@ -190,7 +183,8 @@ jobs:
           draft: false
           prerelease: ${{ inputs.release_type == 'prerelease' || inputs.release_type == '' || inputs.release_type == 'nightly' }}
           make_latest: ${{ inputs.release_type == 'release' }}
-          files: ${{ github.workspace }}/${{ env.APK_PATH }}
+          files: |
+            ${{ github.workspace }}/temp/*
 
   publish-fdroid:
     runs-on: ubuntu-latest
