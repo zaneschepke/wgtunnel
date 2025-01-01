@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.CallSplit
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.NetworkPing
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,22 +26,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
+import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Address
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+import kotlin.text.isBlank
+import kotlin.text.isNullOrBlank
+import kotlin.text.toLong
 
 @Composable
-fun OptionsScreen(tunnelConfig: TunnelConfig, appViewModel: AppViewModel) {
+fun OptionsScreen(tunnelConfig: TunnelConfig, viewModel: TunnelOptionsViewModel = hiltViewModel()) {
 	val navController = LocalNavController.current
 
 	var currentText by remember { mutableStateOf("") }
@@ -83,10 +93,10 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, appViewModel: AppViewModel) {
 						trailing = {
 							ScaledSwitch(
 								tunnelConfig.isPrimaryTunnel,
-								onClick = { appViewModel.onTogglePrimaryTunnel(tunnelConfig) },
+								onClick = { viewModel.onTogglePrimaryTunnel(tunnelConfig) },
 							)
 						},
-						onClick = { appViewModel.onTogglePrimaryTunnel(tunnelConfig) },
+						onClick = { viewModel.onTogglePrimaryTunnel(tunnelConfig) },
 					),
 					SelectionItem(
 						Icons.Outlined.Bolt,
@@ -140,6 +150,81 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, appViewModel: AppViewModel) {
 						},
 					),
 				),
+			)
+			SurfaceSelectionGroupButton(
+				buildList {
+					add(
+						SelectionItem(
+							Icons.Outlined.NetworkPing,
+							title = {
+								Text(
+									stringResource(R.string.restart_on_ping),
+									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+								)
+							},
+							trailing = {
+								ScaledSwitch(
+									checked = tunnelConfig.isPingEnabled,
+									onClick = { viewModel.onToggleRestartOnPing(tunnelConfig) },
+								)
+							},
+							onClick = { viewModel.onToggleRestartOnPing(tunnelConfig) },
+						),
+					)
+					if (tunnelConfig.isPingEnabled) {
+						add(
+							SelectionItem(
+								title = {},
+								description = {
+									SubmitConfigurationTextBox(
+										tunnelConfig.pingIp,
+										stringResource(R.string.set_custom_ping_ip),
+										stringResource(R.string.default_ping_ip),
+										isErrorValue = { !it.isNullOrBlank() && !it.isValidIpv4orIpv6Address() },
+										onSubmit = {
+											viewModel.saveTunnelChanges(
+												tunnelConfig.copy(pingIp = it.ifBlank { null }),
+											)
+										},
+									)
+									fun isSecondsError(seconds: String?): Boolean {
+										return seconds?.let { value -> if (value.isBlank()) false else value.toLong() >= Long.MAX_VALUE / 1000 }
+											?: false
+									}
+									SubmitConfigurationTextBox(
+										tunnelConfig.pingInterval?.let { (it / 1000).toString() },
+										stringResource(R.string.set_custom_ping_internal),
+										"(${stringResource(R.string.optional_default)} ${Constants.PING_INTERVAL / 1000})",
+										keyboardOptions = KeyboardOptions(
+											keyboardType = KeyboardType.Number,
+											imeAction = ImeAction.Done,
+										),
+										isErrorValue = ::isSecondsError,
+										onSubmit = {
+											viewModel.saveTunnelChanges(
+												tunnelConfig.copy(pingInterval = if (it.isBlank()) null else it.toLong() * 1000),
+											)
+										},
+									)
+									SubmitConfigurationTextBox(
+										tunnelConfig.pingCooldown?.let { (it / 1000).toString() },
+										stringResource(R.string.set_custom_ping_cooldown),
+										"(${stringResource(R.string.optional_default)} ${Constants.PING_COOLDOWN / 1000})",
+										keyboardOptions = KeyboardOptions(
+											keyboardType = KeyboardType.Number,
+										),
+										isErrorValue = ::isSecondsError,
+										onSubmit = {
+											viewModel.saveTunnelChanges(
+												tunnelConfig.copy(pingCooldown = if (it.isBlank()) null else it.toLong() * 1000),
+											)
+										},
+									)
+								},
+							),
+						)
+					}
+				},
 			)
 		}
 	}

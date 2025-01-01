@@ -9,7 +9,6 @@ import androidx.lifecycle.lifecycleScope
 import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
 import com.zaneschepke.wireguardautotunnel.module.Ethernet
@@ -29,29 +28,20 @@ import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotific
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
-import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.getCurrentWifiName
-import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
-import com.zaneschepke.wireguardautotunnel.util.extensions.onNotRunning
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.net.InetAddress
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -100,10 +90,6 @@ class AutoTunnelService : LifecycleService() {
 
 	private var wakeLock: PowerManager.WakeLock? = null
 
-	private val pingTunnelRestartActive = AtomicBoolean(false)
-
-	private var pingJob: Job? = null
-
 	override fun onCreate() {
 		super.onCreate()
 		serviceManager.autoTunnelService.complete(this)
@@ -135,7 +121,6 @@ class AutoTunnelService : LifecycleService() {
 			}
 			startAutoTunnelJob()
 			startAutoTunnelStateJob()
-			startPingStateJob()
 		}.onFailure {
 			Timber.e(it)
 		}
@@ -147,7 +132,6 @@ class AutoTunnelService : LifecycleService() {
 	}
 
 	override fun onDestroy() {
-		cancelAndResetPingJob()
 		serviceManager.autoTunnelService = CompletableDeferred()
 		super.onDestroy()
 	}
@@ -184,59 +168,6 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	private fun startPingJob() = lifecycleScope.launch {
-		watchForPingFailure()
-	}
-
-	private fun startPingStateJob() = lifecycleScope.launch {
-		autoTunnelStateFlow.collect {
-			if (it == defaultState) return@collect
-			if (it.isPingEnabled()) {
-				pingJob.onNotRunning { pingJob = startPingJob() }
-			} else {
-				if (!pingTunnelRestartActive.get()) cancelAndResetPingJob()
-			}
-		}
-	}
-
-	private suspend fun watchForPingFailure() {
-		withContext(ioDispatcher) {
-			Timber.i("Starting ping watcher")
-			runCatching {
-				do {
-					val vpnState = autoTunnelStateFlow.value.vpnState
-					if (vpnState.status.isUp() && !autoTunnelStateFlow.value.isNoConnectivity()) {
-						if (vpnState.tunnelConfig != null) {
-							val config = TunnelConfig.configFromWgQuick(vpnState.tunnelConfig.wgQuick)
-							val results = if (vpnState.tunnelConfig.pingIp != null) {
-								Timber.d("Pinging custom ip : ${vpnState.tunnelConfig.pingIp}")
-								listOf(InetAddress.getByName(vpnState.tunnelConfig.pingIp).isReachable(Constants.PING_TIMEOUT.toInt()))
-							} else {
-								Timber.d("Pinging all peers")
-								config.peers.map { peer ->
-									peer.isReachable()
-								}
-							}
-							Timber.i("Ping results reachable: $results")
-							if (results.contains(false)) {
-								Timber.i("Restarting VPN for ping failure")
-								val cooldown = vpnState.tunnelConfig.pingCooldown
-								pingTunnelRestartActive.set(true)
-								tunnelService.get().bounceTunnel()
-								pingTunnelRestartActive.set(false)
-								delay(cooldown ?: Constants.PING_COOLDOWN)
-								continue
-							}
-						}
-					}
-					delay(vpnState.tunnelConfig?.pingInterval ?: Constants.PING_INTERVAL)
-				} while (true)
-			}.onFailure {
-				Timber.e(it)
-			}
-		}
-	}
-
 	private fun startAutoTunnelStateJob() = lifecycleScope.launch(ioDispatcher) {
 		combine(
 			combineSettings(),
@@ -263,11 +194,6 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	private fun cancelAndResetPingJob() {
-		pingJob?.cancelWithMessage("Ping job canceled")
-		pingJob = null
-	}
-
 	@OptIn(FlowPreview::class)
 	private fun combineNetworkEventsJob(): Flow<NetworkState> {
 		return combine(
@@ -281,7 +207,7 @@ class AutoTunnelService : LifecycleService() {
 				wifi.name,
 				wifi.capabilities,
 			)
-		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }
+		}.distinctUntilChanged()
 	}
 
 	private fun combineSettings(): Flow<Pair<Settings, TunnelConfigs>> {

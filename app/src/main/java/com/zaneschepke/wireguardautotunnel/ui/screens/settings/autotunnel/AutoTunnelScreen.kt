@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Filter1
-import androidx.compose.material.icons.outlined.NetworkPing
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SettingsEthernet
@@ -314,24 +313,6 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 						},
 						onClick = {
 							viewModel.onToggleTunnelOnEthernet()
-						},
-					),
-					SelectionItem(
-						Icons.Outlined.NetworkPing,
-						title = {
-							Text(
-								stringResource(R.string.restart_on_ping),
-								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-							)
-						},
-						trailing = {
-							ScaledSwitch(
-								checked = uiState.settings.isPingEnabled,
-								onClick = { viewModel.onToggleRestartOnPing() },
-							)
-						},
-						onClick = {
-							viewModel.onToggleRestartOnPing()
 						},
 					),
 					SelectionItem(

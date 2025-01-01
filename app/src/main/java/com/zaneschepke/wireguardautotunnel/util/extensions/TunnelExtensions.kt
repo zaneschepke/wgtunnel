@@ -46,11 +46,10 @@ fun Peer.isReachable(): Boolean {
 		} else {
 			Constants.DEFAULT_PING_IP
 		}
-	Timber.i("Checking reachability of peer: $host")
+	Timber.d("Checking reachability of peer: $host")
 	val reachable =
 		InetAddress.getByName(host)
 			.isReachable(Constants.PING_TIMEOUT.toInt())
-	Timber.i("Result: reachable - $reachable")
 	return reachable
 }
 

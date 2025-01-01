@@ -78,15 +78,9 @@ fun <T> CoroutineScope.asChannel(flow: Flow<T>): ReceiveChannel<T> = produce {
 	}
 }
 
-fun Job?.onNotRunning(callback: () -> Unit) {
-	if (this == null || this.isCompleted || this.isCompleted) {
-		callback.invoke()
-	}
-}
-
 fun Job.cancelWithMessage(message: String) {
 	kotlin.runCatching {
-		this.cancel()
+		cancel()
 		Timber.i(message)
 	}
 }

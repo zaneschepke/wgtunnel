@@ -66,7 +66,7 @@ data class TunnelConfig(
 ) {
 
 	fun toAmConfig(): org.amnezia.awg.config.Config {
-		return configFromAmQuick(if (amQuick != "") amQuick else wgQuick)
+		return configFromAmQuick(if (amQuick.isNotBlank()) amQuick else wgQuick)
 	}
 
 	fun toWgConfig(): Config {

@@ -381,15 +381,6 @@ constructor(
 		serviceManager.startAutoTunnel(true)
 	}
 
-	fun onTogglePrimaryTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
-		appDataRepository.tunnels.updatePrimaryTunnel(
-			when (tunnelConfig.isPrimaryTunnel) {
-				true -> null
-				false -> tunnelConfig
-			},
-		)
-	}
-
 	private suspend fun rebuildConfigs(
 		amConfig: org.amnezia.awg.config.Config,
 		wgConfig: Config,

@@ -19,7 +19,9 @@ fun TopNavBar(title: String, trailing: @Composable () -> Unit = {}, showBack: Bo
 		},
 		navigationIcon = {
 			if (showBack) {
-				IconButton(onClick = { navController.popBackStack() }) {
+				IconButton(onClick = {
+					navController.popBackStack()
+				}) {
 					val icon = Icons.AutoMirrored.Outlined.ArrowBack
 					Icon(
 						imageVector = icon,

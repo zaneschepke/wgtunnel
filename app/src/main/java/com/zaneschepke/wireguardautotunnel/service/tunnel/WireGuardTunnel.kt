@@ -17,8 +17,11 @@ import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotific
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.asBackendState
+import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
+import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -33,6 +36,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
+import java.net.InetAddress
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -54,6 +58,7 @@ constructor(
 
 	private var statsJob: Job? = null
 	private var tunnelChangesJob: Job? = null
+	private var pingJob: Job? = null
 
 	@get:Synchronized @set:Synchronized
 	private var isKernelBackend: Boolean? = null
@@ -86,16 +91,9 @@ constructor(
 	private suspend fun setState(tunnelConfig: TunnelConfig, tunnelState: TunnelState): Result<TunnelState> {
 		return runCatching {
 			when (val backend = backend()) {
-				is Backend -> backend.setState(this, tunnelState.toWgState(), TunnelConfig.configFromWgQuick(tunnelConfig.wgQuick)).let { TunnelState.from(it) }
+				is Backend -> backend.setState(this, tunnelState.toWgState(), tunnelConfig.toWgConfig()).let { TunnelState.from(it) }
 				is org.amnezia.awg.backend.Backend -> {
-					val config = if (tunnelConfig.amQuick.isBlank()) {
-						TunnelConfig.configFromAmQuick(
-							tunnelConfig.wgQuick,
-						)
-					} else {
-						TunnelConfig.configFromAmQuick(tunnelConfig.amQuick)
-					}
-					backend.setState(this, tunnelState.toAmState(), config).let {
+					backend.setState(this, tunnelState.toAmState(), tunnelConfig.toAmConfig()).let {
 						TunnelState.from(it)
 					}
 				}
@@ -108,9 +106,11 @@ constructor(
 	}
 
 	private fun isTunnelAlreadyRunning(tunnelConfig: TunnelConfig): Boolean {
-		val isRunning = tunnelConfig.id == _vpnState.value.tunnelConfig?.id && _vpnState.value.status.isUp()
-		if (isRunning) Timber.w("Tunnel already running")
-		return isRunning
+		return with(_vpnState.value) {
+			this.tunnelConfig?.id == tunnelConfig.id && status.isUp().also {
+				if (it) Timber.w("Tunnel already running")
+			}
+		}
 	}
 
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig?, background: Boolean) {
@@ -165,10 +165,12 @@ constructor(
 	}
 
 	override suspend fun bounceTunnel() {
-		_vpnState.value.tunnelConfig?.let {
-			withServiceActive {
-				toggleTunnel(it)
-				toggleTunnel(it)
+		with(_vpnState.value) {
+			if (tunnelConfig != null && status.isUp()) {
+				withServiceActive {
+					toggleTunnel(tunnelConfig)
+					toggleTunnel(tunnelConfig)
+				}
 			}
 		}
 	}
@@ -273,13 +275,15 @@ constructor(
 	}
 
 	override fun cancelActiveTunnelJobs() {
-		statsJob?.cancel()
-		tunnelChangesJob?.cancel()
+		statsJob?.cancelWithMessage("Tunnel stats job cancelled")
+		tunnelChangesJob?.cancelWithMessage("Tunnel changes job cancelled")
+		pingJob?.cancelWithMessage("Ping job cancelled")
 	}
 
 	override fun startActiveTunnelJobs() {
 		statsJob = startTunnelStatisticsJob()
 		tunnelChangesJob = startTunnelConfigChangesJob()
+		if (_vpnState.value.tunnelConfig?.isPingEnabled == true) pingJob = startPingJob()
 	}
 
 	override fun getName(): String {
@@ -304,20 +308,90 @@ constructor(
 		}
 	}
 
+	private fun isQuickConfigChanged(config: TunnelConfig): Boolean {
+		return with(_vpnState.value) {
+			if (tunnelConfig == null) return false
+			config.wgQuick != tunnelConfig.wgQuick ||
+				config.amQuick != tunnelConfig.amQuick
+		}
+	}
+
+	private fun isPingConfigMatching(config: TunnelConfig): Boolean {
+		return with(_vpnState.value.tunnelConfig) {
+			if (this == null) return true
+			config.isPingEnabled == isPingEnabled &&
+				pingIp == config.pingIp &&
+				config.pingCooldown == pingCooldown &&
+				config.pingInterval == pingInterval
+		}
+	}
+
+	private fun handlePingConfigChanges() {
+		with(_vpnState.value.tunnelConfig) {
+			if (this == null) return
+			if (!isPingEnabled && pingJob?.isActive == true) {
+				pingJob?.cancelWithMessage("Ping job cancelled")
+				return
+			}
+			restartPingJob()
+		}
+	}
+
+	private fun restartPingJob() {
+		pingJob?.cancelWithMessage("Ping job cancelled")
+		pingJob = startPingJob()
+	}
+
 	private fun startTunnelConfigChangesJob() = applicationScope.launch(ioDispatcher) {
-		tunnelConfigRepository.getTunnelConfigsFlow().collect {
+		tunnelConfigRepository.getTunnelConfigsFlow().collect { tunnels ->
 			with(_vpnState.value) {
-				if (status.isDown() || tunnelConfig == null) return@collect
-				val vpnConfigFromStorage = it.first { it.id == tunnelConfig.id }
-				val isRestartNeeded = vpnConfigFromStorage.wgQuick != tunnelConfig.wgQuick ||
-					vpnConfigFromStorage.amQuick != tunnelConfig.amQuick
-				updateTunnelConfig(vpnConfigFromStorage)
-				if (isRestartNeeded) {
-					Timber.d("Bouncing tunnel on config change")
-					bounceTunnel()
+				if (tunnelConfig == null) return@collect
+				val storageConfig = tunnels.firstOrNull { it.id == tunnelConfig.id }
+				if (storageConfig == null) return@collect
+				val quickChanged = isQuickConfigChanged(storageConfig)
+				val pingMatching = isPingConfigMatching(storageConfig)
+				updateTunnelConfig(storageConfig)
+				if (quickChanged) bounceTunnel()
+				if (!pingMatching) handlePingConfigChanges()
+			}
+		}
+	}
+
+	private suspend fun pingTunnel(tunnelConfig: TunnelConfig): List<Boolean> {
+		return withContext(ioDispatcher) {
+			val config = tunnelConfig.toWgConfig()
+			if (tunnelConfig.pingIp != null) {
+				Timber.i("Pinging custom ip")
+				listOf(InetAddress.getByName(tunnelConfig.pingIp).isReachable(Constants.PING_TIMEOUT.toInt()))
+			} else {
+				Timber.i("Pinging all peers")
+				config.peers.map { peer ->
+					peer.isReachable()
 				}
 			}
 		}
+	}
+
+	private fun startPingJob() = applicationScope.launch(ioDispatcher) {
+		do {
+			run {
+				with(_vpnState.value) {
+					// TODO ignore when no connectivity
+					if (status.isUp() && tunnelConfig != null) {
+						val reachable = pingTunnel(tunnelConfig)
+						if (reachable.contains(false)) {
+							Timber.i("Ping result: target was not reachable, bouncing the tunnel")
+							bounceTunnel()
+							delay(tunnelConfig.pingCooldown ?: Constants.PING_COOLDOWN)
+							return@run
+						} else {
+							Timber.i("Ping result: all ping targets were reached successfully")
+						}
+					}
+					delay(tunnelConfig?.pingInterval ?: Constants.PING_INTERVAL)
+				}
+			}
+		} while (true)
 	}
 
 	override fun onStateChange(newState: Tunnel.State) {

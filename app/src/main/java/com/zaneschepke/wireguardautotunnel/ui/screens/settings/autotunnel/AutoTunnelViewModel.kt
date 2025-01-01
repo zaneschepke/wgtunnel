@@ -119,16 +119,6 @@ constructor(
 		}
 	}
 
-	fun onToggleRestartOnPing() = viewModelScope.launch {
-		with(settings.value) {
-			appDataRepository.settings.save(
-				copy(
-					isPingEnabled = !isPingEnabled,
-				),
-			)
-		}
-	}
-
 	fun onToggleStopOnNoInternet() = viewModelScope.launch {
 		with(settings.value) {
 			appDataRepository.settings.save(

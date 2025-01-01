@@ -5,6 +5,7 @@ import android.graphics.Color.TRANSPARENT
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -35,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -69,6 +71,7 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -228,7 +231,7 @@ class MainActivity : AppCompatActivity() {
 									composable<Route.TunnelOptions> {
 										val args = it.toRoute<Route.TunnelOptions>()
 										val config = appUiState.tunnels.first { it.id == args.id }
-										OptionsScreen(config, viewModel)
+										OptionsScreen(config)
 									}
 									composable<Route.Lock> {
 										PinLockScreen(viewModel)
@@ -250,16 +253,18 @@ class MainActivity : AppCompatActivity() {
 										TunnelAutoTunnelScreen(config, appUiState.settings)
 									}
 								}
+								BackHandler(enabled = true) {
+									lifecycleScope.launch {
+										if (!navController.popBackStack()) {
+											this@MainActivity.finish()
+										}
+									}
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-	}
-	override fun onDestroy() {
-		super.onDestroy()
-		// save battery by not polling stats while app is closed
-		tunnelService.cancelActiveTunnelJobs()
 	}
 }

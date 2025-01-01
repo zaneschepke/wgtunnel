@@ -61,14 +61,6 @@ constructor(
 		}
 	}
 
-	fun onToggleRestartOnPing(tunnelConfig: TunnelConfig) = viewModelScope.launch {
-		appDataRepository.tunnels.save(
-			tunnelConfig.copy(
-				isPingEnabled = !tunnelConfig.isPingEnabled,
-			),
-		)
-	}
-
 	fun onToggleIsEthernetTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		if (tunnelConfig.isEthernetTunnel) {
 			appDataRepository.tunnels.updateEthernetTunnel(null)
