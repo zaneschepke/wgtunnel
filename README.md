@@ -3,20 +3,6 @@ WG Tunnel
 </h1>
 
 <div align="center">
-  An alternative Android client app for WireGuard and Amnezia VPN
-  <br />
-  <br />
-  <a href="https://github.com/zaneschepke/wgtunnel/issues/new?assignees=zaneschepke&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D+-+Problem+with+app">Report a Bug</a>
-  ·
-  <a href="https://github.com/zaneschepke/wgtunnel/issues/new?assignees=zaneschepke&labels=enhancement&projects=&template=feature_request.md&title=%5BFEATURE%5D+-+New+feature+request">Request a Feature</a>
-  ·
-  <a href="https://github.com/zaneschepke/wgtunnel/discussions">Ask a Question</a>
-
-</div>
-
-<br/>
-
-<div align="center">
 
 An alternative Android client app for [WireGuard®](https://www.wireguard.com/)
 and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/)
