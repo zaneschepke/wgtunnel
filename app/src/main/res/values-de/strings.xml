@@ -78,7 +78,7 @@
     <string name="error_authentication_failed">Authentifizierung fehlgeschlagen</string>
     <string name="export_configs">Konfigurationen exportieren</string>
     <string name="unknown_error">Unbekannter Fehler aufgetreten</string>
-    <string name="email_chooser">Sende eine E-Mail…</string>
+    <string name="email_chooser">Eine E-Mail senden…</string>
     <string name="error_authorization_failed">Autorisierung fehlgeschlagen</string>
     <string name="error_invalid_code">Ungültiger QR Code</string>
     <string name="tunneling_apps">Getunnelte Apps</string>
@@ -184,4 +184,12 @@
     <string name="quick_actions">Schnellaktionen</string>
     <string name="stop_on_internet_loss">Stoppen, wenn die Internetverbindung getrennt wird</string>
     <string name="bypass_lan_for_kill_switch">LAN umgehen für Notschalter</string>
+    <string name="advanced_settings">Erweiterte Einstellungen</string>
+    <string name="debounce_delay">Entprellverzögerung</string>
+    <string name="hide_scripts">Skripte verbergen</string>
+    <string name="enable_amnezia_compatibility">Amnezia Kompatibilität aktivieren</string>
+    <string name="remove_amnezia_compatibility">Amnezia Kompatibilität entfernen</string>
+    <string name="hide_amnezia_properties">Amnezia Eigenschaften verbergen</string>
+    <string name="include_lan">LAN einschließen</string>
+    <string name="exclude_lan">LAN ausschließen</string>
 </resources>
