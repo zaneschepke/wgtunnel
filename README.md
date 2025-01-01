@@ -1,4 +1,4 @@
-<div align="center">
+<h1 align="center">
 WG Tunnel
 </h1>
 
