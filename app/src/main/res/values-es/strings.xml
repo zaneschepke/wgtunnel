@@ -107,7 +107,7 @@
     <string name="getting_started_guide">guía de inicio rápido</string>
     <string name="always_on_message">Se ha denegado el permiso de conexión VPN. Por favor, compruebe el</string>
     <string name="always_on_message2">para asegurarse de que el VPN Siempre encendido esté desactivada para todas las demás aplicaciones e inténtelo de nuevo</string>
-    <string name="response_packet_magic_header">Encabezado mágico del paquete de respuesta</string>
+    <string name="response_packet_magic_header">Encabezado del paquete de respuesta</string>
     <string name="junk_packet_maximum_size">Tamaño máximo del paquete basura</string>
     <string name="init_packet_junk_size">Tamaño basura del paquete de inicialización</string>
     <string name="unsure_how">si no está seguro de cómo continuar</string>
@@ -119,7 +119,7 @@
     <string name="tunnel_required">La función requiere al menos un túnel</string>
     <string name="background_location_message">Permitir todo el tiempo que se requiera permiso de ubicación y/o ubicación precisa para esta función. Consultar</string>
     <string name="response_packet_junk_size">Tamaño basura del paquete de respuesta</string>
-    <string name="init_packet_magic_header">Encabezado mágico del paquete de inicio</string>
+    <string name="init_packet_magic_header">Encabezado del paquete de inicialización</string>
     <string name="background_location_message2">para asegurarse de que estos permisos estén habilitados</string>
     <string name="root_accepted">Shell root permitido</string>
     <string name="set_custom_ping_ip">Establecer ping ip personalizado</string>
