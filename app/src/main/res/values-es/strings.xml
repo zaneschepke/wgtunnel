@@ -103,13 +103,13 @@
     <string name="never">nunca</string>
     <string name="sec">seg</string>
     <string name="set_custom_ping_internal">Intervalo del Ping (seg)</string>
-    <string name="transport_packet_magic_header">Encabezado mágico del paquete de transporte</string>
+    <string name="transport_packet_magic_header">Encabezado del paquete de transporte</string>
     <string name="getting_started_guide">guía de inicio rápido</string>
     <string name="always_on_message">Se ha denegado el permiso de conexión VPN. Por favor, compruebe el</string>
     <string name="always_on_message2">para asegurarse de que el VPN Siempre encendido esté desactivada para todas las demás aplicaciones e inténtelo de nuevo</string>
     <string name="response_packet_magic_header">Encabezado mágico del paquete de respuesta</string>
     <string name="junk_packet_maximum_size">Tamaño máximo del paquete basura</string>
-    <string name="init_packet_junk_size">Tamaño inicial del paquete basura</string>
+    <string name="init_packet_junk_size">Tamaño innecesario del paquete de inicialización</string>
     <string name="unsure_how">si no está seguro de cómo continuar</string>
     <string name="see_the">Ver la</string>
     <string name="error_file_format">Formato de configuración de túnel no válido</string>
