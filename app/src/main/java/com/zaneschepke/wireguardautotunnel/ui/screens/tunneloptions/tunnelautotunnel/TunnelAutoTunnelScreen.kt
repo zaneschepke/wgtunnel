@@ -50,7 +50,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun TunnelAutoTunnelScreen(tunnelConfig: TunnelConfig, settings: Settings, tunnelAutoTunnelViewModel: TunnelAutoTunnelViewModel = hiltViewModel()) {
-
 	var currentText by remember { mutableStateOf("") }
 
 	LaunchedEffect(tunnelConfig.tunnelNetworks) {

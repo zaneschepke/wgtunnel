@@ -108,7 +108,7 @@ constructor(
 	}
 
 	private fun isTunnelAlreadyRunning(tunnelConfig: TunnelConfig): Boolean {
-		val isRunning = tunnelConfig == _vpnState.value.tunnelConfig && _vpnState.value.status.isUp()
+		val isRunning = tunnelConfig.id == _vpnState.value.tunnelConfig?.id && _vpnState.value.status.isUp()
 		if (isRunning) Timber.w("Tunnel already running")
 		return isRunning
 	}
@@ -116,16 +116,12 @@ constructor(
 	override suspend fun startTunnel(tunnelConfig: TunnelConfig?, background: Boolean) {
 		withContext(ioDispatcher) {
 			if (tunnelConfig == null || isTunnelAlreadyRunning(tunnelConfig)) return@withContext
+			onBeforeStart(background)
 			updateTunnelConfig(tunnelConfig) // need to update this here
 			withServiceActive {
-				onBeforeStart(background)
-				tunnelControlMutex.withLock {
-					setState(tunnelConfig, TunnelState.UP).onSuccess {
-						updateTunnelState(it, tunnelConfig)
-						onTunnelStart(tunnelConfig, background)
-					}
-				}.onFailure {
-					Timber.e(it)
+				setState(tunnelConfig, TunnelState.UP).onSuccess {
+					updateTunnelState(it, tunnelConfig)
+					onTunnelStart(tunnelConfig, background)
 				}
 			}
 		}
@@ -136,13 +132,11 @@ constructor(
 			if (_vpnState.value.status.isDown()) return@withContext
 			with(_vpnState.value) {
 				if (tunnelConfig == null) return@withContext
-				tunnelControlMutex.withLock {
-					setState(tunnelConfig, TunnelState.DOWN).onSuccess {
-						onTunnelStop(tunnelConfig)
-						updateTunnelState(it, null)
-					}.onFailure {
-						Timber.e(it)
-					}
+				setState(tunnelConfig, TunnelState.DOWN).onSuccess {
+					onTunnelStop(tunnelConfig)
+					updateTunnelState(it, null)
+				}.onFailure {
+					Timber.e(it)
 				}
 			}
 		}

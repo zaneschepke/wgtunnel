@@ -12,6 +12,7 @@ import android.os.Build
 import com.wireguard.android.util.RootShell
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.getCurrentWifiName
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -110,7 +111,7 @@ constructor(
 				available = true
 			}
 			is NetworkStatus.CapabilitiesChanged -> mutex.withLock {
-				if (available) {
+				if (available || ssid == null || ssid == Constants.UNREADABLE_SSID) {
 					available = false
 					Timber.d("Getting SSID from capabilities")
 					ssid = getNetworkName(it.networkCapabilities)

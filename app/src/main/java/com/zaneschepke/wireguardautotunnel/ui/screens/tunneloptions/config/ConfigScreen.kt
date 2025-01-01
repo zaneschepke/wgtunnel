@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
@@ -72,7 +71,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanc
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
-import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import org.amnezia.awg.crypto.KeyPair

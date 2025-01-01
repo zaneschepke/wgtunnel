@@ -266,7 +266,7 @@ class AutoTunnelService : LifecycleService() {
 				false,
 				wifi.name,
 			)
-		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }.debounce(500L)
+		}.distinctUntilChanged().filterNot { it.isWifiConnected && it.wifiName == null }
 	}
 
 	private fun combineSettings(): Flow<Pair<Settings, TunnelConfigs>> {

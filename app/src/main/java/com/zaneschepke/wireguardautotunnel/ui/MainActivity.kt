@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity() {
 									composable<Route.SplitTunnel> {
 										val args = it.toRoute<Route.SplitTunnel>()
 										val config = appUiState.tunnels.first { it.id == args.id }
-										SplitTunnelScreen(config,viewModel)
+										SplitTunnelScreen(config, viewModel)
 									}
 									composable<Route.TunnelAutoTunnel> {
 										val args = it.toRoute<Route.TunnelOptions>()
