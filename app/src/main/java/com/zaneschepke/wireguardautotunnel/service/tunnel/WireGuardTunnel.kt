@@ -193,6 +193,7 @@ constructor(
 					onTunnelStop(tunnelConfig)
 					updateTunnelState(it, null)
 				}.onFailure {
+					clearJobsAndStats()
 					Timber.e(it)
 				}
 			}
@@ -313,8 +314,7 @@ constructor(
 	override fun cancelActiveTunnelJobs() {
 		statsJob?.cancelWithMessage("Tunnel stats job cancelled")
 		tunnelChangesJob?.cancelWithMessage("Tunnel changes job cancelled")
-		pingJob?.cancelWithMessage("Ping job cancelled")
-		networkJob?.cancelWithMessage("Network job cancelled")
+		cancelPingJobs()
 	}
 
 	override fun startActiveTunnelJobs() {
@@ -326,6 +326,7 @@ constructor(
 	}
 
 	private fun startPingJobs() {
+		cancelPingJobs()
 		pingJob = startPingJob()
 		networkJob = startNetworkJob()
 	}
@@ -373,8 +374,7 @@ constructor(
 		with(_vpnState.value.tunnelConfig) {
 			if (this == null) return
 			if (!isPingEnabled && pingJob?.isActive == true) {
-				pingJob?.cancelWithMessage("Ping job cancelled")
-				networkJob?.cancelWithMessage("Network job cancelled")
+				cancelPingJobs()
 				return
 			}
 			restartPingJob()
@@ -382,9 +382,13 @@ constructor(
 	}
 
 	private fun restartPingJob() {
+		cancelPingJobs()
+		startPingJobs()
+	}
+
+	private fun cancelPingJobs() {
 		pingJob?.cancelWithMessage("Ping job cancelled")
 		networkJob?.cancelWithMessage("Network job cancelled")
-		startPingJobs()
 	}
 
 	private fun startTunnelConfigChangesJob() = applicationScope.launch(ioDispatcher) {
