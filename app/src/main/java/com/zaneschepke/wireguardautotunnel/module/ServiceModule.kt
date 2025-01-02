@@ -7,25 +7,21 @@ import com.zaneschepke.wireguardautotunnel.service.network.WifiService
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ServiceComponent
-import dagger.hilt.android.scopes.ServiceScoped
+import dagger.hilt.components.SingletonComponent
 
 @Module
-@InstallIn(ServiceComponent::class)
+@InstallIn(SingletonComponent::class)
 abstract class ServiceModule {
 
 	@Binds
 	@Wifi
-	@ServiceScoped
 	abstract fun provideWifiService(wifiService: WifiService): NetworkService
 
 	@Binds
 	@MobileData
-	@ServiceScoped
 	abstract fun provideMobileDataService(mobileDataService: MobileDataService): NetworkService
 
 	@Binds
 	@Ethernet
-	@ServiceScoped
 	abstract fun provideEthernetService(ethernetService: EthernetService): NetworkService
 }

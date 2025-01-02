@@ -29,7 +29,7 @@ class ServiceManager
 	val autoTunnelActive = _autoTunnelActive.asStateFlow()
 
 	var autoTunnelService = CompletableDeferred<AutoTunnelService>()
-	var backgroundService = CompletableDeferred<TunnelBackgroundService>()
+	var backgroundService = CompletableDeferred<TunnelForegroundService>()
 	var autoTunnelTile = CompletableDeferred<AutoTunnelControlTile>()
 	var tunnelControlTile = CompletableDeferred<TunnelControlTile>()
 
@@ -59,10 +59,10 @@ class ServiceManager
 		}
 	}
 
-	suspend fun startBackgroundService(tunnelConfig: TunnelConfig?) {
+	suspend fun startBackgroundService(tunnelConfig: TunnelConfig) {
 		if (backgroundService.isCompleted) return
 		kotlin.runCatching {
-			startService(TunnelBackgroundService::class.java, true)
+			startService(TunnelForegroundService::class.java, true)
 			backgroundService.await()
 			backgroundService.getCompleted().start(tunnelConfig)
 		}.onFailure {

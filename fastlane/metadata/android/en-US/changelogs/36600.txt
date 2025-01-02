@@ -1,0 +1,6 @@
+What's new:
+- Ping feature now works independent of auto tunnel
+- Added convenience action for Amnezia compatibility
+- Added convenience action for excluding LAN from tunnel
+- Added debounce delay tuning option for auto tunnel
+- Many bug fixes and improvements

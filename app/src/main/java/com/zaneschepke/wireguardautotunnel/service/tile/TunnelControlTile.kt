@@ -66,7 +66,7 @@ class TunnelControlTile : TileService() {
 			applicationScope.launch {
 				if (tunnelService.vpnState.value.status.isUp()) return@launch tunnelService.stopTunnel()
 				appDataRepository.getStartTunnelConfig()?.let {
-					tunnelService.startTunnel(it, true)
+					tunnelService.startTunnel(it)
 				}
 			}
 		}

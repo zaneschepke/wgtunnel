@@ -5,4 +5,8 @@ data class NetworkState(
 	val isMobileDataConnected: Boolean = false,
 	val isEthernetConnected: Boolean = false,
 	val wifiName: String? = null,
-)
+) {
+	fun hasNoCapabilities(): Boolean {
+		return !isWifiConnected && !isMobileDataConnected && !isEthernetConnected
+	}
+}

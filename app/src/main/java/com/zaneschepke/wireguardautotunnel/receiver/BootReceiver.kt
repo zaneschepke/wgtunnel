@@ -41,7 +41,7 @@ class BootReceiver : BroadcastReceiver() {
 					val tunState = tunnelService.get().vpnState.value.status
 					if (activeTunnels.isNotEmpty() && tunState != TunnelState.UP) {
 						Timber.i("Starting previously active tunnel")
-						tunnelService.get().startTunnel(activeTunnels.first(), true)
+						tunnelService.get().startTunnel(activeTunnels.first())
 					}
 					if (isAutoTunnelEnabled) {
 						Timber.i("Starting watcher service from boot")

@@ -2,33 +2,44 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel
 
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.Tunnel.State
-import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.module.Ethernet
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.Kernel
+import com.zaneschepke.wireguardautotunnel.module.MobileData
+import com.zaneschepke.wireguardautotunnel.module.Wifi
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
+import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.NetworkState
+import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService.Companion.VPN_NOTIFICATION_ID
-import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.asBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -37,6 +48,7 @@ import kotlinx.coroutines.withContext
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
 import java.net.InetAddress
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -51,6 +63,9 @@ constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	private val serviceManager: ServiceManager,
 	private val notificationService: NotificationService,
+	@Wifi private val wifiService: NetworkService,
+	@MobileData private val mobileDataService: NetworkService,
+	@Ethernet private val ethernetService: NetworkService,
 ) : TunnelService {
 
 	private val _vpnState = MutableStateFlow(VpnState())
@@ -59,9 +74,11 @@ constructor(
 	private var statsJob: Job? = null
 	private var tunnelChangesJob: Job? = null
 	private var pingJob: Job? = null
+	private var networkJob: Job? = null
 
 	@get:Synchronized @set:Synchronized
 	private var isKernelBackend: Boolean? = null
+	private val isNetworkAvailable = AtomicBoolean(false)
 
 	private val tunnelControlMutex = Mutex()
 
@@ -86,6 +103,23 @@ constructor(
 			is org.amnezia.awg.backend.Backend -> backend.runningTunnelNames
 			else -> emptySet()
 		}
+	}
+
+	// TODO refactor duplicate
+	@OptIn(FlowPreview::class)
+	private fun combineNetworkEventsJob(): Flow<NetworkState> {
+		return combine(
+			wifiService.status,
+			mobileDataService.status,
+			ethernetService.status,
+		) { wifi, mobileData, ethernet ->
+			NetworkState(
+				wifi.available,
+				mobileData.available,
+				ethernet.available,
+				wifi.name,
+			)
+		}.distinctUntilChanged()
 	}
 
 	private suspend fun setState(tunnelConfig: TunnelConfig, tunnelState: TunnelState): Result<TunnelState> {
@@ -113,17 +147,40 @@ constructor(
 		}
 	}
 
-	override suspend fun startTunnel(tunnelConfig: TunnelConfig?, background: Boolean) {
+	override suspend fun startTunnel(tunnelConfig: TunnelConfig?) {
 		withContext(ioDispatcher) {
 			if (tunnelConfig == null || isTunnelAlreadyRunning(tunnelConfig)) return@withContext
-			onBeforeStart(background)
+			onBeforeStart(tunnelConfig)
 			updateTunnelConfig(tunnelConfig) // need to update this here
+			appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
 			withServiceActive {
 				setState(tunnelConfig, TunnelState.UP).onSuccess {
 					updateTunnelState(it, tunnelConfig)
-					onTunnelStart(tunnelConfig, background)
+					startActiveTunnelJobs()
+				}.onFailure {
+					onTunnelStop(tunnelConfig)
+					// TODO improve this with better statuses and handling
+					showTunnelStartFailed()
 				}
 			}
+		}
+	}
+
+	private fun showTunnelStartFailed() {
+		if (WireGuardAutoTunnel.isForeground()) {
+			SnackbarController.showMessage(StringValue.StringResource(R.string.error_tunnel_start))
+		} else {
+			launchStartFailedNotification()
+		}
+	}
+
+	private fun launchStartFailedNotification() {
+		with(notificationService) {
+			val notification = createNotification(
+				WireGuardNotification.NotificationChannels.VPN,
+				title = context.getString(R.string.error_tunnel_start),
+			)
+			show(VPN_NOTIFICATION_ID, notification)
 		}
 	}
 
@@ -200,31 +257,10 @@ constructor(
 		}
 	}
 
-	private suspend fun onBeforeStart(background: Boolean) {
+	private suspend fun onBeforeStart(tunnelConfig: TunnelConfig) {
 		with(_vpnState.value) {
 			if (status.isUp()) stopTunnel() else clearJobsAndStats()
-			if (isKernelBackend == true || background) serviceManager.startBackgroundService(tunnelConfig)
-		}
-	}
-
-	private suspend fun onTunnelStart(tunnelConfig: TunnelConfig, background: Boolean) {
-		startActiveTunnelJobs()
-		if (_vpnState.value.status.isUp()) {
-			appDataRepository.tunnels.save(tunnelConfig.copy(isActive = true))
-		}
-		if (isKernelBackend == false && !background) launchUserspaceTunnelNotification()
-	}
-
-	private fun launchUserspaceTunnelNotification() {
-		with(notificationService) {
-			val notification = createNotification(
-				WireGuardNotification.NotificationChannels.VPN,
-				title = "${context.getString(R.string.tunnel_running)} - ${_vpnState.value.tunnelConfig?.name}",
-				actions = listOf(
-					notificationService.createNotificationAction(NotificationAction.TUNNEL_OFF),
-				),
-			)
-			show(VPN_NOTIFICATION_ID, notification)
+			serviceManager.startBackgroundService(tunnelConfig)
 		}
 	}
 
@@ -278,14 +314,21 @@ constructor(
 		statsJob?.cancelWithMessage("Tunnel stats job cancelled")
 		tunnelChangesJob?.cancelWithMessage("Tunnel changes job cancelled")
 		pingJob?.cancelWithMessage("Ping job cancelled")
+		networkJob?.cancelWithMessage("Network job cancelled")
 	}
 
 	override fun startActiveTunnelJobs() {
 		statsJob = startTunnelStatisticsJob()
 		tunnelChangesJob = startTunnelConfigChangesJob()
-		if (_vpnState.value.tunnelConfig?.isPingEnabled == true) pingJob = startPingJob()
+		if (_vpnState.value.tunnelConfig?.isPingEnabled == true) {
+			startPingJobs()
+		}
 	}
 
+	private fun startPingJobs() {
+		pingJob = startPingJob()
+		networkJob = startNetworkJob()
+	}
 	override fun getName(): String {
 		return _vpnState.value.tunnelConfig?.name ?: ""
 	}
@@ -331,6 +374,7 @@ constructor(
 			if (this == null) return
 			if (!isPingEnabled && pingJob?.isActive == true) {
 				pingJob?.cancelWithMessage("Ping job cancelled")
+				networkJob?.cancelWithMessage("Network job cancelled")
 				return
 			}
 			restartPingJob()
@@ -339,7 +383,8 @@ constructor(
 
 	private fun restartPingJob() {
 		pingJob?.cancelWithMessage("Ping job cancelled")
-		pingJob = startPingJob()
+		networkJob?.cancelWithMessage("Network job cancelled")
+		startPingJobs()
 	}
 
 	private fun startTunnelConfigChangesJob() = applicationScope.launch(ioDispatcher) {
@@ -376,13 +421,16 @@ constructor(
 		do {
 			run {
 				with(_vpnState.value) {
-					// TODO ignore when no connectivity
-					if (status.isUp() && tunnelConfig != null) {
+					if (status.isUp() && tunnelConfig != null && isNetworkAvailable.get()) {
 						val reachable = pingTunnel(tunnelConfig)
 						if (reachable.contains(false)) {
-							Timber.i("Ping result: target was not reachable, bouncing the tunnel")
-							bounceTunnel()
-							delay(tunnelConfig.pingCooldown ?: Constants.PING_COOLDOWN)
+							if (isNetworkAvailable.get()) {
+								Timber.i("Ping result: target was not reachable, bouncing the tunnel")
+								bounceTunnel()
+								delay(tunnelConfig.pingCooldown ?: Constants.PING_COOLDOWN)
+							} else {
+								Timber.i("Ping result: target was not reachable, but not network available")
+							}
 							return@run
 						} else {
 							Timber.i("Ping result: all ping targets were reached successfully")
@@ -392,6 +440,17 @@ constructor(
 				}
 			}
 		} while (true)
+	}
+
+	private fun startNetworkJob() = applicationScope.launch(ioDispatcher) {
+		combineNetworkEventsJob().collect {
+			Timber.d("New network state: $it")
+			if (!it.isWifiConnected && !it.isEthernetConnected && !it.isMobileDataConnected) {
+				isNetworkAvailable.set(false)
+			} else {
+				isNetworkAvailable.set(true)
+			}
+		}
 	}
 
 	override fun onStateChange(newState: Tunnel.State) {

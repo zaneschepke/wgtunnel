@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
@@ -142,7 +141,6 @@ class MainActivity : AppCompatActivity() {
 				SnackbarControllerProvider { host ->
 					WireguardAutoTunnelTheme(theme = appUiState.generalState.theme) {
 						Scaffold(
-							modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
 							contentWindowInsets = WindowInsets(0),
 							snackbarHost = {
 								SnackbarHost(host) { snackbarData: SnackbarData ->

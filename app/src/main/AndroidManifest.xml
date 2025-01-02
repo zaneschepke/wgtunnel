@@ -164,7 +164,7 @@
             tools:node="merge" />
 
 		<service
-			android:name=".service.foreground.TunnelBackgroundService"
+			android:name=".service.foreground.TunnelForegroundService"
 			android:exported="false"
 			android:persistent="true"
 			android:foregroundServiceType="systemExempted"

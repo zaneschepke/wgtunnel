@@ -10,6 +10,7 @@ import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
+import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.service.tunnel.WireGuardTunnel
@@ -78,6 +79,9 @@ class TunnelModule {
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
 		serviceManager: ServiceManager,
 		notificationService: NotificationService,
+		@Wifi wifiService: NetworkService,
+		@MobileData mobileDataService: NetworkService,
+		@Ethernet ethernetService: NetworkService,
 	): TunnelService {
 		return WireGuardTunnel(
 			amneziaBackend,
@@ -88,6 +92,9 @@ class TunnelModule {
 			ioDispatcher,
 			serviceManager,
 			notificationService,
+			wifiService,
+			mobileDataService,
+			ethernetService,
 		)
 	}
 

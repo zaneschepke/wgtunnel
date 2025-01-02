@@ -45,7 +45,7 @@ class ShortcutsActivity : ComponentActivity() {
 						Timber.d("Shortcut action on name: ${tunnelConfig?.name}")
 						tunnelConfig?.let {
 							when (intent.action) {
-								Action.START.name -> tunnelService.get().startTunnel(it, true)
+								Action.START.name -> tunnelService.get().startTunnel(it)
 								Action.STOP.name -> tunnelService.get().stopTunnel()
 								else -> Unit
 							}

@@ -16,7 +16,7 @@ import kotlinx.coroutines.CompletableDeferred
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TunnelBackgroundService : LifecycleService() {
+class TunnelForegroundService : LifecycleService() {
 
 	@Inject
 	lateinit var notificationService: NotificationService
@@ -39,9 +39,9 @@ class TunnelBackgroundService : LifecycleService() {
 		return super.onStartCommand(intent, flags, startId)
 	}
 
-	fun start(tunnelConfig: TunnelConfig?) {
+	fun start(tunnelConfig: TunnelConfig) {
 		ServiceCompat.startForeground(
-			this,
+			this@TunnelForegroundService,
 			NotificationService.KERNEL_SERVICE_NOTIFICATION_ID,
 			createNotification(tunnelConfig),
 			Constants.SYSTEM_EXEMPT_SERVICE_TYPE_ID,

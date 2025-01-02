@@ -3,6 +3,9 @@ package com.zaneschepke.wireguardautotunnel
 import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
@@ -52,6 +55,7 @@ class WireGuardAutoTunnel : Application() {
 	override fun onCreate() {
 		super.onCreate()
 		instance = this
+		ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver())
 		if (BuildConfig.DEBUG) {
 			Timber.plant(Timber.DebugTree())
 			StrictMode.setThreadPolicy(
@@ -88,7 +92,25 @@ class WireGuardAutoTunnel : Application() {
 		super.onTerminate()
 	}
 
+	class AppLifecycleObserver : DefaultLifecycleObserver {
+
+		override fun onStart(owner: LifecycleOwner) {
+			Timber.d("Application entered foreground")
+			foreground = true
+		}
+		override fun onPause(owner: LifecycleOwner) {
+			Timber.d("Application entered background")
+			foreground = false
+		}
+	}
+
 	companion object {
+		private var foreground = false
+
+		fun isForeground(): Boolean {
+			return foreground
+		}
+
 		lateinit var instance: WireGuardAutoTunnel
 			private set
 	}

@@ -82,7 +82,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 
 	val startAutoTunnel = withVpnPermission<Unit> { viewModel.onToggleAutoTunnel() }
 	val startTunnel = withVpnPermission<TunnelConfig> {
-		viewModel.onTunnelStart(it, uiState.settings.isKernelEnabled)
+		viewModel.onTunnelStart(it)
 	}
 	val autoTunnelToggleBattery = withIgnoreBatteryOpt(uiState.generalState.isBatteryOptimizationDisableShown) {
 		if (!uiState.generalState.isBatteryOptimizationDisableShown) viewModel.setBatteryOptimizeDisableShown()
@@ -129,7 +129,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
 		if (!checked) viewModel.onTunnelStop().also { return }
 		if (uiState.settings.isKernelEnabled) {
-			viewModel.onTunnelStart(tunnel, uiState.settings.isKernelEnabled)
+			viewModel.onTunnelStart(tunnel)
 		} else {
 			startTunnel.invoke(tunnel)
 		}
@@ -226,8 +226,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 			) { tunnel ->
 				val expanded = uiState.generalState.isTunnelStatsExpanded
 				TunnelRowItem(
-					tunnel.id == uiState.vpnState.tunnelConfig?.id &&
-						uiState.vpnState.status.isUp(),
+					tunnel.id == uiState.vpnState.tunnelConfig?.id && (
+						uiState.vpnState.status.isUp() || (uiState.settings.isKernelEnabled && tunnel.isActive)
+						),
 					expanded,
 					selectedTunnel?.id == tunnel.id,
 					tunnel,

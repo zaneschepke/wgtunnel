@@ -67,9 +67,9 @@ constructor(
 		appDataRepository.appState.setTunnelStatsExpanded(expanded)
 	}
 
-	fun onTunnelStart(tunnelConfig: TunnelConfig, background: Boolean) = viewModelScope.launch {
+	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Starting tunnel ${tunnelConfig.name}")
-		tunnelService.get().startTunnel(tunnelConfig, background)
+		tunnelService.get().startTunnel(tunnelConfig)
 	}
 
 	fun onTunnelStop() = viewModelScope.launch {
@@ -84,20 +84,6 @@ constructor(
 			Timber.e(e)
 			NumberUtils.generateRandomTunnelName()
 		}
-	}
-
-	private fun generateQrCodeTunnelName(config: String): String {
-		var defaultName = generateQrCodeDefaultName(config)
-		val lines = config.lines().toMutableList()
-		val linesIterator = lines.iterator()
-		while (linesIterator.hasNext()) {
-			val next = linesIterator.next()
-			if (next.contains(Constants.QR_CODE_NAME_PROPERTY)) {
-				defaultName = next.substringAfter(Constants.QR_CODE_NAME_PROPERTY).trim()
-				break
-			}
-		}
-		return defaultName
 	}
 
 	private suspend fun makeTunnelNameUnique(name: String): String {

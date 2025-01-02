@@ -42,7 +42,7 @@ class AppUpdateReceiver : BroadcastReceiver() {
 			}
 			if (!settings.isAutoTunnelEnabled) {
 				val tunnels = appDataRepository.tunnels.getAll().filter { it.isActive }
-				if (tunnels.isNotEmpty()) tunnelService.get().startTunnel(tunnels.first(), true)
+				if (tunnels.isNotEmpty()) tunnelService.get().startTunnel(tunnels.first())
 			}
 		}
 	}

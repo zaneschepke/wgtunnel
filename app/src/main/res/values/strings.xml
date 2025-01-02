@@ -202,4 +202,5 @@
 	<string name="remove_amnezia_compatibility">Remove Amnezia compatibility</string>
 	<string name="exclude_lan">Exclude LAN</string>
 	<string name="include_lan">Include LAN</string>
+    <string name="error_tunnel_start">Failed to starting tunnel</string>
 </resources>
