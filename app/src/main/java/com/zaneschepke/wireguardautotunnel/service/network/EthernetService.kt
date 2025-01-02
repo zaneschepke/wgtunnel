@@ -20,6 +20,8 @@ constructor(
 	@ApplicationContext context: Context,
 ) : NetworkService {
 
+	override var capabilities: NetworkCapabilities? = null
+
 	private val connectivityManager =
 		context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -32,6 +34,7 @@ constructor(
 				trySend(NetworkStatus.Unavailable())
 			}
 			override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+				capabilities = networkCapabilities
 				trySend(
 					NetworkStatus.CapabilitiesChanged(
 						network,
@@ -57,8 +60,8 @@ constructor(
 		emit(NetworkStatus.Unavailable())
 	}.map {
 		when (it) {
-			is NetworkStatus.Available, is NetworkStatus.CapabilitiesChanged -> Status(true, null, null)
-			is NetworkStatus.Unavailable -> Status(false, null, null)
+			is NetworkStatus.Available, is NetworkStatus.CapabilitiesChanged -> Status(true, null)
+			is NetworkStatus.Unavailable -> Status(false, null)
 		}
 	}
 }

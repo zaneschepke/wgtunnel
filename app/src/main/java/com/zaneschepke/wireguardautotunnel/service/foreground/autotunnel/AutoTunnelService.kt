@@ -173,19 +173,12 @@ class AutoTunnelService : LifecycleService() {
 			combineSettings(),
 			combineNetworkEventsJob(),
 		) { double, networkState ->
-			// quick fix for bug where when first setting up auto tunneling we probably want to query for ssid right away
-			var netState: NetworkState? = null
+			var wifiName: String? = null
 			if (networkState.wifiName == Constants.UNREADABLE_SSID && double.first.isTunnelOnWifiEnabled) {
-				if (double.first.isWifiNameByShellEnabled) {
-					netState = networkState.copy(wifiName = rootShell.get().getCurrentWifiName())
-				} else if (networkState.capabilities != null) {
-					netState = networkState.copy(
-						wifiName =
-						WifiService.getNetworkName(networkState.capabilities, this@AutoTunnelService),
-					)
-				}
+				wifiName = getWifiName(double.first)
 			}
-			AutoTunnelState(tunnelService.get().vpnState.value, netState ?: networkState, double.first, double.second)
+			val netState = wifiName?.let { networkState.copy(wifiName = it) } ?: networkState
+			AutoTunnelState(tunnelService.get().vpnState.value, netState, double.first, double.second)
 		}.collect { state ->
 			Timber.d("Network state: ${state.networkState}")
 			autoTunnelStateFlow.update {
@@ -194,18 +187,28 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
+	private fun getWifiName(setting: Settings): String? {
+		return if (setting.isWifiNameByShellEnabled) {
+			rootShell.get().getCurrentWifiName()
+		} else if (wifiService.capabilities != null) {
+			WifiService.getNetworkName(wifiService.capabilities!!, this@AutoTunnelService)
+		} else {
+			null
+		}
+	}
+
 	@OptIn(FlowPreview::class)
 	private fun combineNetworkEventsJob(): Flow<NetworkState> {
 		return combine(
 			wifiService.status,
 			mobileDataService.status,
-		) { wifi, mobileData ->
+			ethernetService.status,
+		) { wifi, mobileData, ethernet ->
 			NetworkState(
 				wifi.available,
 				mobileData.available,
-				false,
+				ethernet.available,
 				wifi.name,
-				wifi.capabilities,
 			)
 		}.distinctUntilChanged()
 	}

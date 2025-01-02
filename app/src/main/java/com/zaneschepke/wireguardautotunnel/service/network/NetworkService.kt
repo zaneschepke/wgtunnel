@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.map
 
 interface NetworkService {
 	val status: Flow<Status>
+	var capabilities: NetworkCapabilities?
 }
 
 inline fun <Result> Flow<NetworkStatus>.map(

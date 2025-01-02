@@ -34,6 +34,8 @@ constructor(
 	@AppShell private val rootShell: Provider<RootShell>,
 ) : NetworkService {
 
+	override var capabilities: NetworkCapabilities? = null
+
 	val mutex = Mutex()
 
 	private var ssid: String? = null
@@ -80,6 +82,7 @@ constructor(
 						}
 
 						override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+							capabilities = networkCapabilities
 							trySend(
 								NetworkStatus.CapabilitiesChanged(
 									network,
@@ -120,9 +123,9 @@ constructor(
 						getNetworkName(it.networkCapabilities, context)
 					}
 				}
-				emit(Status(true, ssid, it.networkCapabilities))
+				emit(Status(true, ssid))
 			}
-			is NetworkStatus.Unavailable -> emit(Status(false, null, null))
+			is NetworkStatus.Unavailable -> emit(Status(false, null))
 		}
 	}
 
