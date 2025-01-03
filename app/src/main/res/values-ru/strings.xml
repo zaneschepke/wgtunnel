@@ -173,8 +173,8 @@
     <string name="native_kill_switch">Штатное экстренное отключение</string>
     <string name="vpn_kill_switch">Экстренное отключение VPN</string>
     <string name="kill_switch_options">Настройка экстренного отключения</string>
-    <string name="allow_lan_traffic">Разрешать трафик LAN</string>
-    <string name="bypass_lan_for_kill_switch">Обход LAN при экстренном отключении</string>
+    <string name="allow_lan_traffic">Обход LAN</string>
+    <string name="bypass_lan_for_kill_switch">Разрешать трафик LAN при экстренном отключении</string>
     <string name="vpn_channel_description">Канал уведомлений о состоянии VPN</string>
     <string name="auto_tunnel_channel_description">Канал уведомлений о состоянии автотуннеля</string>
     <string name="stop">стоп</string>
@@ -186,10 +186,10 @@
     <string name="post_down">После деактивации</string>
     <string name="debounce_delay">Задержка отбоя</string>
     <string name="remove_amnezia_compatibility">Отключить совместимость с Amnezia</string>
-    <string name="exclude_lan">Исключить локальную сеть</string>
+    <string name="exclude_lan">Исключить LAN</string>
     <string name="hide_scripts">Скрыть сценарии</string>
     <string name="hide_amnezia_properties">Скрыть настройки Amnezia</string>
     <string name="advanced_settings">Дополнительные настройки</string>
     <string name="enable_amnezia_compatibility">Включить совместимость с Amnezia</string>
-    <string name="include_lan">Включить локальную сеть</string>
+    <string name="include_lan">Включить LAN</string>
 </resources>
