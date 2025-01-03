@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="turn_off_tunnel">Cette action nécessite la désactivation du tunnel</string>
+    <string name="turn_off_tunnel">Cette action nécessite la désactivation du tunnel</string>
     <string name="no_tunnels">Aucun tunnel n\'a été ajouté pour le moment !</string>
     <string name="tunnels">Tunnels</string>
     <string name="tunnel_mobile_data">Tunnel sur données mobiles</string>
@@ -38,7 +38,7 @@
     <string name="config_changes_saved">Changements de la configuration sauvegardés.</string>
     <string name="public_key">Clé publique</string>
     <string name="addresses">Adresses</string>
-	<string name="vpn_on">VPN allumé</string>
+    <string name="vpn_on">VPN allumé</string>
     <string name="create_import">Créer à partir de zéro</string>
     <string name="private_key">Clé privée</string>
     <string name="interface_">Interface</string>
@@ -90,7 +90,7 @@
     <string name="vpn_settings">paramètres système des VPN</string>
     <string name="tunnel_required">Cette fonctionnalité nécessite au moins un tunnel</string>
     <string name="app_settings">les réglages de l\'application</string>
-    <string name="background_location_message2">afin de s\'assurer que ces permissions soient actives.</string>
+    <string name="background_location_message2">afin de s\'assurer que ces permissions soient actives</string>
     <string name="root_accepted">Accès au shell root autorisé</string>
     <string name="set_custom_ping_ip">Personnaliser l\'ip à pinguer</string>
     <string name="optional_default">"optionnel, par défaut : "</string>
@@ -160,4 +160,28 @@
     <string name="kernel_not_supported">Noyau non supporté</string>
     <string name="start_auto">Démarrer l\'auto-tunnel</string>
     <string name="requires_app_relaunch">Cette modification nécessite un redémarrage de l\'application. Voulez-vous continuer ?</string>
+    <string name="exclude_lan">Exclure le LAN</string>
+    <string name="tunnel_specific_settings">Réglages spécifiques du tunnel</string>
+    <string name="show_scripts">Voir les scripts</string>
+    <string name="hide_scripts">Cacher les scripts</string>
+    <string name="remove_amnezia_compatibility">Retirer la prise en charge d\'Amnezia</string>
+    <string name="hide_amnezia_properties">Cacher les propriétés d\'Amnezia</string>
+    <string name="advanced_settings">Réglages avancés</string>
+    <string name="stop_on_no_internet">Arrêt en l\'absence d\'internet</string>
+    <string name="stop_on_internet_loss">Couper les tunnels en l\'absence d\'internet</string>
+    <string name="ethernet_tunnel">Tunnel ethernet</string>
+    <string name="set_ethernet_tunnel">Définir comme tunnel ethernet</string>
+    <string name="native_kill_switch">Arrêt d\'urgence natif</string>
+    <string name="vpn_kill_switch">Arrêt d\'urgence VPN</string>
+    <string name="kill_switch_options">Options d\'arrêt d\'urgence</string>
+    <string name="allow_lan_traffic">Autoriser le trafic LAN</string>
+    <string name="bypass_lan_for_kill_switch">Contourner le LAN en cas d\'arêt d\'urgence</string>
+    <string name="stop">arrêter</string>
+    <string name="splt_tunneling">Tunnel partagé</string>
+    <string name="amnezia_kernel_message">Amnezia n\'est pas disponible en mode noyau</string>
+    <string name="enable_amnezia">Activer Amnezia</string>
+    <string name="wg_compat_mode">Mode de compatibilité WG</string>
+    <string name="quick_actions">Actions rapides</string>
+    <string name="enable_amnezia_compatibility">Activer la prise en charge d\'Amnezia</string>
+    <string name="include_lan">Inclure le LAN</string>
 </resources>
