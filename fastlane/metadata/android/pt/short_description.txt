@@ -1,0 +1,1 @@
+Uma alternativa de cliente WireGuard VPN com recursos adicionais
