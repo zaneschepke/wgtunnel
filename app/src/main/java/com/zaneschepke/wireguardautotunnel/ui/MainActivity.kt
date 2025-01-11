@@ -35,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -70,7 +69,6 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -251,11 +249,9 @@ class MainActivity : AppCompatActivity() {
 										TunnelAutoTunnelScreen(config, appUiState.settings)
 									}
 								}
-								BackHandler(enabled = true) {
-									lifecycleScope.launch {
-										if (!navController.popBackStack()) {
-											this@MainActivity.finish()
-										}
+								BackHandler {
+									if (navController.previousBackStackEntry == null || !navController.popBackStack()) {
+										this@MainActivity.finish()
 									}
 								}
 							}
