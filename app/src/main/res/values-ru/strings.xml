@@ -192,4 +192,7 @@
     <string name="advanced_settings">Дополнительные настройки</string>
     <string name="enable_amnezia_compatibility">Включить совместимость с Amnezia</string>
     <string name="include_lan">Включить LAN</string>
+    <string name="auto_tunnel">Автотуннель</string>
+    <string name="tunnel_control">Управление туннелем</string>
+    <string name="error_tunnel_start">Невозможно запустить туннель</string>
 </resources>
