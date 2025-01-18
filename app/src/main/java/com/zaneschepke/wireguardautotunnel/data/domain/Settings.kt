@@ -85,4 +85,8 @@ data class Settings(
 		defaultValue = "3",
 	)
 	val debounceDelaySeconds: Int = 3,
-)
+) {
+	fun debounceDelayMillis(): Long {
+		return debounceDelaySeconds * 1000L
+	}
+}

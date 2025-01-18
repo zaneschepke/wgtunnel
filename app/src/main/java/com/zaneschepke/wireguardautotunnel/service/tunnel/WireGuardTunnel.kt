@@ -2,28 +2,24 @@ package com.zaneschepke.wireguardautotunnel.service.tunnel
 
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.Tunnel.State
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.TunnelConfigRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.module.Ethernet
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.Kernel
-import com.zaneschepke.wireguardautotunnel.module.MobileData
-import com.zaneschepke.wireguardautotunnel.module.Wifi
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.NetworkState
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService.Companion.VPN_NOTIFICATION_ID
+import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.WireGuardStatistics
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.asBackendState
@@ -31,14 +27,11 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.cancelWithMessage
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -63,9 +56,7 @@ constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	private val serviceManager: ServiceManager,
 	private val notificationService: NotificationService,
-	@Wifi private val wifiService: NetworkService,
-	@MobileData private val mobileDataService: NetworkService,
-	@Ethernet private val ethernetService: NetworkService,
+	private val internetConnectivityService: NetworkService,
 ) : TunnelService {
 
 	private val _vpnState = MutableStateFlow(VpnState())
@@ -103,23 +94,6 @@ constructor(
 			is org.amnezia.awg.backend.Backend -> backend.runningTunnelNames
 			else -> emptySet()
 		}
-	}
-
-	// TODO refactor duplicate
-	@OptIn(FlowPreview::class)
-	private fun combineNetworkEventsJob(): Flow<NetworkState> {
-		return combine(
-			wifiService.status,
-			mobileDataService.status,
-			ethernetService.status,
-		) { wifi, mobileData, ethernet ->
-			NetworkState(
-				wifi.available,
-				mobileData.available,
-				ethernet.available,
-				wifi.name,
-			)
-		}.distinctUntilChanged()
 	}
 
 	private suspend fun setState(tunnelConfig: TunnelConfig, tunnelState: TunnelState): Result<TunnelState> {
@@ -447,13 +421,8 @@ constructor(
 	}
 
 	private fun startNetworkJob() = applicationScope.launch(ioDispatcher) {
-		combineNetworkEventsJob().collect {
-			Timber.d("New network state: $it")
-			if (!it.isWifiConnected && !it.isEthernetConnected && !it.isMobileDataConnected) {
-				isNetworkAvailable.set(false)
-			} else {
-				isNetworkAvailable.set(true)
-			}
+		internetConnectivityService.status.distinctUntilChanged().collect {
+			isNetworkAvailable.set(!it.allOffline)
 		}
 	}
 
