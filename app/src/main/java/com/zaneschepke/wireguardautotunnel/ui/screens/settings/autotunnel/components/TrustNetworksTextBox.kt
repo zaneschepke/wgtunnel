@@ -65,11 +65,17 @@ fun TrustedNetworkTextBox(
 			}
 		}
 		CustomTextField(
-			textStyle = MaterialTheme.typography.bodySmall,
+			textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
 			value = currentText,
 			onValueChange = onValueChange,
 			interactionSource = remember { MutableInteractionSource() },
-			label = { Text(stringResource(R.string.add_wifi_name)) },
+			label = {
+				Text(
+					stringResource(R.string.add_wifi_name),
+					color = MaterialTheme.colorScheme.onSurface,
+					style = MaterialTheme.typography.labelMedium,
+				)
+			},
 			containerColor = MaterialTheme.colorScheme.surface,
 			supportingText = supporting,
 			modifier =

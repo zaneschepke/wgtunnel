@@ -47,13 +47,13 @@ fun SubmitConfigurationTextBox(
 
 	CustomTextField(
 		isError = isErrorValue(stateValue),
-		textStyle = MaterialTheme.typography.bodySmall,
+		textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
 		value = stateValue,
 		onValueChange = { stateValue = it },
 		interactionSource = interactionSource,
-		label = { Text(label) },
+		label = { Text(label, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelMedium) },
 		containerColor = MaterialTheme.colorScheme.surface,
-		placeholder = { Text(hint, style = MaterialTheme.typography.bodySmall) },
+		placeholder = { Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline) },
 		modifier =
 		Modifier
 			.padding(

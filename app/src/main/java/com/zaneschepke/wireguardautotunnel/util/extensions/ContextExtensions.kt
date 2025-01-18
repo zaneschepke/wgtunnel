@@ -87,8 +87,8 @@ fun Context.launchNotificationSettings() {
 
 fun Context.launchShareFile(file: Uri) {
 	val shareIntent = Intent().apply {
-		setAction(Intent.ACTION_SEND)
-		setType("*/*")
+		action = Intent.ACTION_SEND
+		type = "*/*"
 		putExtra(Intent.EXTRA_STREAM, file)
 		addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 	}
@@ -146,7 +146,7 @@ fun Context.launchVpnSettings(): Result<Unit> {
 fun Context.launchLocationServicesSettings(): Result<Unit> {
 	return kotlin.runCatching {
 		val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
-			setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+			flags = Intent.FLAG_ACTIVITY_NEW_TASK
 		}
 		startActivity(intent)
 	}
@@ -155,7 +155,7 @@ fun Context.launchLocationServicesSettings(): Result<Unit> {
 fun Context.launchSettings(): Result<Unit> {
 	return kotlin.runCatching {
 		val intent = Intent(Settings.ACTION_SETTINGS).apply {
-			setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+			flags = Intent.FLAG_ACTIVITY_NEW_TASK
 		}
 		startActivity(intent)
 	}
@@ -165,7 +165,7 @@ fun Context.launchAppSettings() {
 	kotlin.runCatching {
 		val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
 			data = Uri.fromParts("package", packageName, null)
-			setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+			flags = Intent.FLAG_ACTIVITY_NEW_TASK
 		}
 		startActivity(intent)
 	}

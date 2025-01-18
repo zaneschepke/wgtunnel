@@ -303,7 +303,13 @@ fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 								)
 							}
 						},
-						label = { Text(stringResource(R.string.private_key)) },
+						label = {
+							Text(
+								stringResource(R.string.private_key),
+								color = MaterialTheme.colorScheme.onSurface,
+								style = MaterialTheme.typography.labelMedium,
+							)
+						},
 						singleLine = true,
 						placeholder = {
 							Text(
@@ -342,7 +348,13 @@ fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 								)
 							}
 						},
-						label = { Text(stringResource(R.string.public_key)) },
+						label = {
+							Text(
+								stringResource(R.string.public_key),
+								color = MaterialTheme.colorScheme.onSurface,
+								style = MaterialTheme.typography.labelMedium,
+							)
+						},
 						singleLine = true,
 						placeholder = {
 							Text(
@@ -677,7 +689,8 @@ fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 							hint = stringResource(R.string.base64_key),
 							modifier = Modifier.fillMaxWidth(),
 						)
-						val presharedKeyEnabled = (tunnelConfig == null) || isAuthenticated || peer.preSharedKey.isBlank()
+						val presharedKeyEnabled = (tunnelConfig == null) || isAuthenticated ||
+							with(configPair.second?.peers[index]?.preSharedKey) { this?.isEmpty == true || this?.isPresent == false }
 						OutlinedTextField(
 							textStyle = MaterialTheme.typography.labelLarge,
 							modifier =
@@ -693,7 +706,13 @@ fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 							},
 							enabled = presharedKeyEnabled,
 							onValueChange = { value -> peersState[index] = peersState[index].copy(preSharedKey = value) },
-							label = { Text(stringResource(R.string.preshared_key)) },
+							label = {
+								Text(
+									stringResource(R.string.preshared_key),
+									color = MaterialTheme.colorScheme.onSurface,
+									style = MaterialTheme.typography.labelMedium,
+								)
+							},
 							singleLine = true,
 							placeholder = {
 								Text(
@@ -720,7 +739,9 @@ fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 									style = MaterialTheme.typography.labelMedium,
 								)
 							},
-							label = { Text(stringResource(R.string.persistent_keepalive), style = MaterialTheme.typography.labelMedium) },
+							label = {
+								Text(stringResource(R.string.persistent_keepalive), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelMedium)
+							},
 							singleLine = true,
 							placeholder = {
 								Text(stringResource(R.string.optional_no_recommend), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.outline)
@@ -746,7 +767,13 @@ fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 							onValueChange = { value ->
 								peersState[index] = peersState[index].copy(allowedIps = value)
 							},
-							label = { Text(stringResource(R.string.allowed_ips)) },
+							label = {
+								Text(
+									stringResource(R.string.allowed_ips),
+									color = MaterialTheme.colorScheme.onSurface,
+									style = MaterialTheme.typography.labelMedium,
+								)
+							},
 							singleLine = true,
 							placeholder = {
 								Text(stringResource(R.string.comma_separated_list), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.outline)
