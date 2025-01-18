@@ -213,7 +213,7 @@ constructor(
 			if (!enabled) return@withContext tunnelService.get().setBackendState(BackendState.SERVICE_ACTIVE, emptySet())
 			Timber.d("Starting kill switch")
 			val allowedIps = if (appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled) {
-				TunnelConfig.IPV4_PUBLIC_NETWORKS
+				TunnelConfig.LAN_BYPASS_ALLOWED_IPS
 			} else {
 				emptySet()
 			}
@@ -227,7 +227,7 @@ constructor(
 				isLanOnKillSwitchEnabled = enabled,
 			),
 		)
-		val allowedIps = if (enabled) TunnelConfig.IPV4_PUBLIC_NETWORKS else emptySet()
+		val allowedIps = if (enabled) TunnelConfig.LAN_BYPASS_ALLOWED_IPS else emptySet()
 		Timber.d("Setting allowedIps $allowedIps")
 		tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
 	}

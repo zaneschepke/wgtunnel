@@ -97,6 +97,9 @@ data class TunnelConfig(
 
 		const val AM_QUICK_DEFAULT = ""
 
+		const val IPV6_ALL_NETWORKS = "::/0"
+		const val IPV4_ALL_NETWORKS = "0.0.0.0/0"
+		val ALL_IPS = setOf(IPV4_ALL_NETWORKS, IPV6_ALL_NETWORKS)
 		val IPV4_PUBLIC_NETWORKS = setOf(
 			"0.0.0.0/5", "8.0.0.0/7", "11.0.0.0/8", "12.0.0.0/6", "16.0.0.0/4", "32.0.0.0/3",
 			"64.0.0.0/2", "128.0.0.0/3", "160.0.0.0/5", "168.0.0.0/6", "172.0.0.0/12",
@@ -105,5 +108,6 @@ data class TunnelConfig(
 			"192.170.0.0/15", "192.172.0.0/14", "192.176.0.0/12", "192.192.0.0/10",
 			"193.0.0.0/8", "194.0.0.0/7", "196.0.0.0/6", "200.0.0.0/5", "208.0.0.0/4",
 		)
+		val LAN_BYPASS_ALLOWED_IPS = setOf(IPV6_ALL_NETWORKS) + IPV4_PUBLIC_NETWORKS
 	}
 }
