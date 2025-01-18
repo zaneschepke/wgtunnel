@@ -191,7 +191,6 @@ dependencies {
 
 	// accompanist
 	implementation(libs.accompanist.permissions)
-	implementation(libs.accompanist.flowlayout)
 	implementation(libs.accompanist.drawablepainter)
 
 	// storage
