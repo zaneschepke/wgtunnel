@@ -677,15 +677,33 @@ fun ConfigScreen(tunnelConfig: TunnelConfig?, appViewModel: AppViewModel) {
 							hint = stringResource(R.string.base64_key),
 							modifier = Modifier.fillMaxWidth(),
 						)
-						ConfigurationTextBox(
+						val presharedKeyEnabled = (tunnelConfig == null) || isAuthenticated || peer.preSharedKey.isBlank()
+						OutlinedTextField(
+							textStyle = MaterialTheme.typography.labelLarge,
+							modifier =
+							Modifier
+								.fillMaxWidth()
+								.clickable { showAuthPrompt = true },
 							value = peer.preSharedKey,
-							onValueChange = { value ->
-								peersState[index] = peersState[index].copy(preSharedKey = value)
+							visualTransformation =
+							if (presharedKeyEnabled) {
+								VisualTransformation.None
+							} else {
+								PasswordVisualTransformation()
 							},
+							enabled = presharedKeyEnabled,
+							onValueChange = { value -> peersState[index] = peersState[index].copy(preSharedKey = value) },
+							label = { Text(stringResource(R.string.preshared_key)) },
+							singleLine = true,
+							placeholder = {
+								Text(
+									stringResource(R.string.optional),
+									style = MaterialTheme.typography.labelLarge,
+									color = MaterialTheme.colorScheme.outline,
+								)
+							},
+							keyboardOptions = keyboardOptions,
 							keyboardActions = keyboardActions,
-							label = stringResource(R.string.preshared_key),
-							hint = stringResource(R.string.optional),
-							modifier = Modifier.fillMaxWidth(),
 						)
 						OutlinedTextField(
 							textStyle = MaterialTheme.typography.labelLarge,
