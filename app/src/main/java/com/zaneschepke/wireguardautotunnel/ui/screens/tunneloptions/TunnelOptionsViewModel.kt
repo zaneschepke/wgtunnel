@@ -14,13 +14,6 @@ class TunnelOptionsViewModel
 constructor(
 	private val appDataRepository: AppDataRepository,
 ) : ViewModel() {
-	fun onToggleRestartOnPing(tunnelConfig: TunnelConfig) = viewModelScope.launch {
-		appDataRepository.tunnels.save(
-			tunnelConfig.copy(
-				isPingEnabled = !tunnelConfig.isPingEnabled,
-			),
-		)
-	}
 
 	fun onTogglePrimaryTunnel(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		appDataRepository.tunnels.updatePrimaryTunnel(
@@ -33,5 +26,17 @@ constructor(
 
 	fun saveTunnelChanges(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		appDataRepository.tunnels.save(tunnelConfig)
+	}
+
+	fun onPingIntervalChange(tunnelConfig: TunnelConfig, interval: String) = viewModelScope.launch {
+		val interval = if (interval.isBlank()) null else interval.toLong() * 1000
+		saveTunnelChanges(
+			tunnelConfig.copy(pingInterval = interval),
+		)
+	}
+
+	fun onPingCoolDownChange(tunnelConfig: TunnelConfig, cooldown: String) = viewModelScope.launch {
+		val cooldown = if (cooldown.isBlank()) null else cooldown.toLong() * 1000
+		saveTunnelChanges(tunnelConfig.copy(pingCooldown = cooldown))
 	}
 }

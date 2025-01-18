@@ -57,6 +57,11 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, viewModel: TunnelOptionsViewModel 
 	LaunchedEffect(tunnelConfig.tunnelNetworks) {
 		currentText = ""
 	}
+
+	val onPingToggle = {
+		viewModel.saveTunnelChanges(tunnelConfig.copy(isPingEnabled = !tunnelConfig.isPingEnabled))
+	}
+
 	Scaffold(
 		topBar = {
 			TopNavBar(tunnelConfig.name)
@@ -165,10 +170,10 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, viewModel: TunnelOptionsViewModel 
 							trailing = {
 								ScaledSwitch(
 									checked = tunnelConfig.isPingEnabled,
-									onClick = { viewModel.onToggleRestartOnPing(tunnelConfig) },
+									onClick = { onPingToggle() },
 								)
 							},
-							onClick = { viewModel.onToggleRestartOnPing(tunnelConfig) },
+							onClick = { onPingToggle() },
 						),
 					)
 					if (tunnelConfig.isPingEnabled) {
@@ -188,8 +193,7 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, viewModel: TunnelOptionsViewModel 
 										},
 									)
 									fun isSecondsError(seconds: String?): Boolean {
-										return seconds?.let { value -> if (value.isBlank()) false else value.toLong() >= Long.MAX_VALUE / 1000 }
-											?: false
+										return seconds?.let { value -> if (value.isBlank()) false else value.toLong() >= Long.MAX_VALUE / 1000 } == true
 									}
 									SubmitConfigurationTextBox(
 										tunnelConfig.pingInterval?.let { (it / 1000).toString() },
@@ -201,9 +205,7 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, viewModel: TunnelOptionsViewModel 
 										),
 										isErrorValue = ::isSecondsError,
 										onSubmit = {
-											viewModel.saveTunnelChanges(
-												tunnelConfig.copy(pingInterval = if (it.isBlank()) null else it.toLong() * 1000),
-											)
+											viewModel.onPingIntervalChange(tunnelConfig, it)
 										},
 									)
 									SubmitConfigurationTextBox(
@@ -214,11 +216,7 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, viewModel: TunnelOptionsViewModel 
 											keyboardType = KeyboardType.Number,
 										),
 										isErrorValue = ::isSecondsError,
-										onSubmit = {
-											viewModel.saveTunnelChanges(
-												tunnelConfig.copy(pingCooldown = if (it.isBlank()) null else it.toLong() * 1000),
-											)
-										},
+										onSubmit = { viewModel.onPingCoolDownChange(tunnelConfig, it) },
 									)
 								},
 							),
