@@ -79,9 +79,7 @@ class TunnelModule {
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
 		serviceManager: ServiceManager,
 		notificationService: NotificationService,
-		@Wifi wifiService: NetworkService,
-		@MobileData mobileDataService: NetworkService,
-		@Ethernet ethernetService: NetworkService,
+		internetConnectivityService: NetworkService,
 	): TunnelService {
 		return WireGuardTunnel(
 			amneziaBackend,
@@ -92,9 +90,7 @@ class TunnelModule {
 			ioDispatcher,
 			serviceManager,
 			notificationService,
-			wifiService,
-			mobileDataService,
-			ethernetService,
+			internetConnectivityService,
 		)
 	}
 
