@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
@@ -50,6 +51,14 @@ data class AutoTunnelState(
 
 	private fun stopOnEthernet(): Boolean {
 		return networkState.isEthernetConnected && !settings.isTunnelOnEthernetEnabled && vpnState.status.isUp()
+	}
+
+	private fun stopKillSwitchOnTrusted(): Boolean {
+		return networkState.isWifiConnected && settings.isVpnKillSwitchEnabled && settings.isDisableKillSwitchOnTrustedEnabled && isCurrentSSIDTrusted() && vpnState.backendState == BackendState.KILL_SWITCH_ACTIVE
+	}
+
+	private fun startKillSwitch(): Boolean {
+		return settings.isVpnKillSwitchEnabled && vpnState.backendState != BackendState.KILL_SWITCH_ACTIVE && (!settings.isDisableKillSwitchOnTrustedEnabled || !isCurrentSSIDTrusted())
 	}
 
 	fun isNoConnectivity(): Boolean {
@@ -113,6 +122,17 @@ data class AutoTunnelState(
 			// no connectivity
 			isNoConnectivity() && settings.isStopOnNoInternetEnabled -> AutoTunnelEvent.Stop
 			else -> AutoTunnelEvent.DoNothing
+		}
+	}
+
+	fun asKillSwitchEvent(): KillSwitchEvent {
+		return when {
+			stopKillSwitchOnTrusted() -> KillSwitchEvent.Stop
+			startKillSwitch() -> {
+				val allowedIps = if (settings.isLanOnKillSwitchEnabled) TunnelConfig.LAN_BYPASS_ALLOWED_IPS else emptySet()
+				KillSwitchEvent.Start(allowedIps)
+			}
+			else -> KillSwitchEvent.DoNothing
 		}
 	}
 

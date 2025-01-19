@@ -198,7 +198,7 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.AutoTunnel> {
 										AutoTunnelScreen(
-											appUiState,
+											appUiState.settings,
 										)
 									}
 									composable<Route.Appearance> {
@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity() {
 										SupportScreen(appUiState, viewModel)
 									}
 									composable<Route.AutoTunnelAdvanced> {
-										AdvancedScreen(appUiState, viewModel)
+										AdvancedScreen(appUiState.settings, viewModel)
 									}
 									composable<Route.Logs> {
 										LogsScreen()

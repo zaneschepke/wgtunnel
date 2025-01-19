@@ -205,4 +205,5 @@
     <string name="error_tunnel_start">Failed to starting tunnel</string>
     <string name="tunnel_control">Tunnel control</string>
 	<string name="auto_tunnel">Auto-tunnel</string>
+    <string name="kill_switch_off">Stop kill switch on trusted</string>
 </resources>

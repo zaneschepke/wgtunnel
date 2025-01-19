@@ -222,6 +222,9 @@ constructor(
 			when (val backend = backend()) {
 				is org.amnezia.awg.backend.Backend -> {
 					backend.setBackendState(backendState.asAmBackendState(), allowedIps)
+					_vpnState.update {
+						it.copy(backendState = backendState)
+					}
 				}
 				is Backend -> {
 					// TODO not yet implemented

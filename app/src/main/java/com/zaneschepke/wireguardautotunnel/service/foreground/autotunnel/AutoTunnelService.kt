@@ -17,6 +17,7 @@ import com.zaneschepke.wireguardautotunnel.module.MainImmediateDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.AutoTunnelEvent
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.AutoTunnelState
+import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.KillSwitchEvent
 import com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model.NetworkState
 import com.zaneschepke.wireguardautotunnel.service.network.InternetConnectivityService
 import com.zaneschepke.wireguardautotunnel.service.network.NetworkService
@@ -24,6 +25,7 @@ import com.zaneschepke.wireguardautotunnel.service.network.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationAction
 import com.zaneschepke.wireguardautotunnel.service.notification.NotificationService
 import com.zaneschepke.wireguardautotunnel.service.notification.WireGuardNotification
+import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
@@ -111,6 +113,7 @@ class AutoTunnelService : LifecycleService() {
 			}
 			startAutoTunnelJob()
 			startAutoTunnelStateJob()
+			startKillSwitchJob()
 		}.onFailure {
 			Timber.e(it)
 		}
@@ -181,7 +184,6 @@ class AutoTunnelService : LifecycleService() {
 		) { double, networkState ->
 			AutoTunnelState(tunnelService.get().vpnState.value, networkState, double.first, double.second)
 		}.collect { state ->
-			Timber.d("Network state: ${state.networkState}")
 			autoTunnelStateFlow.update {
 				it.copy(vpnState = state.vpnState, networkState = state.networkState, settings = state.settings, tunnels = state.tunnels)
 			}
@@ -207,6 +209,23 @@ class AutoTunnelService : LifecycleService() {
 		) { settings, tunnels ->
 			Pair(settings, tunnels)
 		}.distinctUntilChanged()
+	}
+
+	private fun startKillSwitchJob() = lifecycleScope.launch(ioDispatcher) {
+		autoTunnelStateFlow.collect {
+			if (it == defaultState) return@collect
+			when (val event = it.asKillSwitchEvent()) {
+				KillSwitchEvent.DoNothing -> Unit
+				is KillSwitchEvent.Start -> {
+					Timber.d("Starting kill switch")
+					tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, event.allowedIps)
+				}
+				KillSwitchEvent.Stop -> {
+					Timber.d("Stopping kill switch")
+					tunnelService.get().setBackendState(BackendState.SERVICE_ACTIVE, emptySet())
+				}
+			}
+		}
 	}
 
 	@OptIn(FlowPreview::class)

@@ -5,6 +5,7 @@ import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStati
 
 data class VpnState(
 	val status: TunnelState = TunnelState.DOWN,
+	val backendState: BackendState = BackendState.INACTIVE,
 	val tunnelConfig: TunnelConfig? = null,
 	val statistics: TunnelStatistics? = null,
 )

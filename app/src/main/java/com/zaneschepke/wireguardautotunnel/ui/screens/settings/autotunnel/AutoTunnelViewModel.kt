@@ -12,8 +12,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,11 +26,8 @@ constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
-	private val settings = appDataRepository.settings.getSettingsFlow()
-		.stateIn(viewModelScope, SharingStarted.Eagerly, Settings())
-
-	fun onToggleTunnelOnWifi() = viewModelScope.launch {
-		with(settings.value) {
+	fun onToggleTunnelOnWifi(settings: Settings) = viewModelScope.launch {
+		with(settings) {
 			appDataRepository.settings.save(
 				copy(
 					isTunnelOnWifiEnabled = !isTunnelOnWifiEnabled,
@@ -41,8 +36,8 @@ constructor(
 		}
 	}
 
-	fun onToggleTunnelOnMobileData() = viewModelScope.launch {
-		with(settings.value) {
+	fun onToggleTunnelOnMobileData(settings: Settings) = viewModelScope.launch {
+		with(settings) {
 			appDataRepository.settings.save(
 				copy(
 					isTunnelOnMobileDataEnabled = !isTunnelOnMobileDataEnabled,
@@ -51,8 +46,8 @@ constructor(
 		}
 	}
 
-	fun onToggleWildcards() = viewModelScope.launch {
-		with(settings.value) {
+	fun onToggleWildcards(settings: Settings) = viewModelScope.launch {
+		with(settings) {
 			appDataRepository.settings.save(
 				copy(
 					isWildcardsEnabled = !isWildcardsEnabled,
@@ -61,8 +56,8 @@ constructor(
 		}
 	}
 
-	fun onDeleteTrustedSSID(ssid: String) = viewModelScope.launch {
-		with(settings.value) {
+	fun onDeleteTrustedSSID(ssid: String, settings: Settings) = viewModelScope.launch {
+		with(settings) {
 			appDataRepository.settings.save(
 				copy(
 					trustedNetworkSSIDs = (trustedNetworkSSIDs - ssid).toMutableList(),
@@ -71,9 +66,9 @@ constructor(
 		}
 	}
 
-	fun onRootShellWifiToggle() = viewModelScope.launch {
+	fun onRootShellWifiToggle(settings: Settings) = viewModelScope.launch {
 		requestRoot().onSuccess {
-			with(settings.value) {
+			with(settings) {
 				appDataRepository.settings.save(
 					copy(isWifiNameByShellEnabled = !isWifiNameByShellEnabled),
 				)
@@ -92,8 +87,8 @@ constructor(
 		}
 	}
 
-	fun onToggleTunnelOnEthernet() = viewModelScope.launch {
-		with(settings.value) {
+	fun onToggleTunnelOnEthernet(settings: Settings) = viewModelScope.launch {
+		with(settings) {
 			appDataRepository.settings.save(
 				copy(
 					isTunnelOnEthernetEnabled = !isTunnelOnEthernetEnabled,
@@ -102,13 +97,16 @@ constructor(
 		}
 	}
 
-	fun onSaveTrustedSSID(ssid: String) = viewModelScope.launch {
+	fun onSaveTrustedSSID(ssid: String, settings: Settings) = viewModelScope.launch {
 		if (ssid.isEmpty()) return@launch
 		val trimmed = ssid.trim()
-		with(settings.value) {
+		with(settings) {
 			if (!trustedNetworkSSIDs.contains(trimmed)) {
-				this.trustedNetworkSSIDs.add(ssid)
-				appDataRepository.settings.save(this)
+				appDataRepository.settings.save(
+					settings.copy(
+						trustedNetworkSSIDs = (trustedNetworkSSIDs + ssid).toMutableList(),
+					),
+				)
 			} else {
 				SnackbarController.showMessage(
 					StringValue.StringResource(
@@ -119,10 +117,18 @@ constructor(
 		}
 	}
 
-	fun onToggleStopOnNoInternet() = viewModelScope.launch {
-		with(settings.value) {
+	fun onToggleStopOnNoInternet(settings: Settings) = viewModelScope.launch {
+		with(settings) {
 			appDataRepository.settings.save(
 				copy(isStopOnNoInternetEnabled = !isStopOnNoInternetEnabled),
+			)
+		}
+	}
+
+	fun onToggleStopKillSwitchOnTrusted(settings: Settings) = viewModelScope.launch {
+		with(settings) {
+			appDataRepository.settings.save(
+				copy(isDisableKillSwitchOnTrustedEnabled = !isDisableKillSwitchOnTrustedEnabled),
 			)
 		}
 	}

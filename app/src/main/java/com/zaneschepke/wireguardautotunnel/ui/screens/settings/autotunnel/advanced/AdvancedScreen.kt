@@ -18,9 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
@@ -38,19 +36,9 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
-fun AdvancedScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
+fun AdvancedScreen(settings: Settings, appViewModel: AppViewModel) {
 	var isDropDownExpanded by remember {
 		mutableStateOf(false)
-	}
-
-	var selected by remember { mutableIntStateOf(appUiState.settings.debounceDelaySeconds) }
-
-	LaunchedEffect(selected) {
-		if (selected == appUiState.settings.debounceDelaySeconds) return@LaunchedEffect
-		appViewModel.saveSettings(appUiState.settings.copy(debounceDelaySeconds = selected))
-		if (appUiState.settings.isAutoTunnelEnabled) {
-			appViewModel.bounceAutoTunnel()
-		}
 	}
 
 	Scaffold(
@@ -87,7 +75,7 @@ fun AdvancedScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 								horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
 								verticalAlignment = Alignment.CenterVertically,
 							) {
-								Text(text = selected.toString(), style = MaterialTheme.typography.bodyMedium)
+								Text(text = settings.debounceDelaySeconds.toString(), style = MaterialTheme.typography.bodyMedium)
 								val icon = Icons.Default.ArrowDropDown
 								Icon(icon, icon.name)
 							}
@@ -107,7 +95,9 @@ fun AdvancedScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 										},
 										onClick = {
 											isDropDownExpanded = false
-											selected = num
+											appViewModel.saveSettings(
+												settings.copy(debounceDelaySeconds = num),
+											)
 										},
 									)
 								}

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SettingsEthernet
 import androidx.compose.material.icons.outlined.SignalCellular4Bar
+import androidx.compose.material.icons.outlined.VpnKeyOff
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +43,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
@@ -64,7 +65,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltViewModel()) {
+fun AutoTunnelScreen(settings: Settings, viewModel: AutoTunnelViewModel = hiltViewModel()) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 
@@ -103,7 +104,7 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 		}
 	}
 
-	LaunchedEffect(uiState.settings.trustedNetworkSSIDs) {
+	LaunchedEffect(settings.trustedNetworkSSIDs) {
 		currentText = ""
 	}
 
@@ -154,15 +155,15 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 								},
 								trailing = {
 									ScaledSwitch(
-										enabled = !uiState.settings.isAlwaysOnVpnEnabled,
-										checked = uiState.settings.isTunnelOnWifiEnabled,
+										enabled = !settings.isAlwaysOnVpnEnabled,
+										checked = settings.isTunnelOnWifiEnabled,
 										onClick = {
-											viewModel.onToggleTunnelOnWifi()
+											viewModel.onToggleTunnelOnWifi(settings)
 										},
 									)
 								},
 								onClick = {
-									viewModel.onToggleTunnelOnWifi()
+									viewModel.onToggleTunnelOnWifi(settings)
 								},
 							),
 							SelectionItem(
@@ -181,19 +182,19 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 								},
 								trailing = {
 									ScaledSwitch(
-										checked = uiState.settings.isWifiNameByShellEnabled,
+										checked = settings.isWifiNameByShellEnabled,
 										onClick = {
-											viewModel.onRootShellWifiToggle()
+											viewModel.onRootShellWifiToggle(settings)
 										},
 									)
 								},
 								onClick = {
-									viewModel.onRootShellWifiToggle()
+									viewModel.onRootShellWifiToggle(settings)
 								},
 							),
 						),
 					)
-					if (uiState.settings.isTunnelOnWifiEnabled) {
+					if (settings.isTunnelOnWifiEnabled) {
 						addAll(
 							listOf(
 								SelectionItem(
@@ -209,14 +210,14 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 									},
 									trailing = {
 										ScaledSwitch(
-											checked = uiState.settings.isWildcardsEnabled,
+											checked = settings.isWildcardsEnabled,
 											onClick = {
-												viewModel.onToggleWildcards()
+												viewModel.onToggleWildcards(settings)
 											},
 										)
 									},
 									onClick = {
-										viewModel.onToggleWildcards()
+										viewModel.onToggleWildcards(settings)
 									},
 								),
 								SelectionItem(
@@ -255,19 +256,42 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 									},
 									description = {
 										TrustedNetworkTextBox(
-											uiState.settings.trustedNetworkSSIDs,
-											onDelete = viewModel::onDeleteTrustedSSID,
+											settings.trustedNetworkSSIDs,
+											onDelete = { viewModel.onDeleteTrustedSSID(it, settings) },
 											currentText = currentText,
 											onSave = { ssid ->
-												if (uiState.settings.isWifiNameByShellEnabled || isWifiNameReadable()) viewModel.onSaveTrustedSSID(ssid)
+												if (settings.isWifiNameByShellEnabled || isWifiNameReadable()) viewModel.onSaveTrustedSSID(ssid, settings)
 											},
 											onValueChange = { currentText = it },
 											supporting = {
-												if (uiState.settings.isWildcardsEnabled) {
+												if (settings.isWildcardsEnabled) {
 													WildcardsLabel()
 												}
 											},
 										)
+									},
+								),
+								SelectionItem(
+									Icons.Outlined.VpnKeyOff,
+									title = {
+										Text(
+											stringResource(R.string.kill_switch_off),
+											style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+										)
+									},
+									description = {
+									},
+									trailing = {
+										ScaledSwitch(
+											enabled = settings.isVpnKillSwitchEnabled,
+											checked = settings.isDisableKillSwitchOnTrustedEnabled,
+											onClick = {
+												viewModel.onToggleStopKillSwitchOnTrusted(settings)
+											},
+										)
+									},
+									onClick = {
+										viewModel.onToggleStopKillSwitchOnTrusted(settings)
 									},
 								),
 							),
@@ -287,13 +311,13 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 						},
 						trailing = {
 							ScaledSwitch(
-								enabled = !uiState.settings.isAlwaysOnVpnEnabled,
-								checked = uiState.settings.isTunnelOnMobileDataEnabled,
-								onClick = { viewModel.onToggleTunnelOnMobileData() },
+								enabled = !settings.isAlwaysOnVpnEnabled,
+								checked = settings.isTunnelOnMobileDataEnabled,
+								onClick = { viewModel.onToggleTunnelOnMobileData(settings) },
 							)
 						},
 						onClick = {
-							viewModel.onToggleTunnelOnMobileData()
+							viewModel.onToggleTunnelOnMobileData(settings)
 						},
 					),
 					SelectionItem(
@@ -306,13 +330,13 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 						},
 						trailing = {
 							ScaledSwitch(
-								enabled = !uiState.settings.isAlwaysOnVpnEnabled,
-								checked = uiState.settings.isTunnelOnEthernetEnabled,
-								onClick = { viewModel.onToggleTunnelOnEthernet() },
+								enabled = !settings.isAlwaysOnVpnEnabled,
+								checked = settings.isTunnelOnEthernetEnabled,
+								onClick = { viewModel.onToggleTunnelOnEthernet(settings) },
 							)
 						},
 						onClick = {
-							viewModel.onToggleTunnelOnEthernet()
+							viewModel.onToggleTunnelOnEthernet(settings)
 						},
 					),
 					SelectionItem(
@@ -331,12 +355,12 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AutoTunnelViewModel = hiltV
 						},
 						trailing = {
 							ScaledSwitch(
-								checked = uiState.settings.isStopOnNoInternetEnabled,
-								onClick = { viewModel.onToggleStopOnNoInternet() },
+								checked = settings.isStopOnNoInternetEnabled,
+								onClick = { viewModel.onToggleStopOnNoInternet(settings) },
 							)
 						},
 						onClick = {
-							viewModel.onToggleStopOnNoInternet()
+							viewModel.onToggleStopOnNoInternet(settings)
 						},
 					),
 				),

@@ -85,6 +85,11 @@ data class Settings(
 		defaultValue = "3",
 	)
 	val debounceDelaySeconds: Int = 3,
+	@ColumnInfo(
+		name = "is_disable_kill_switch_on_trusted_enabled",
+		defaultValue = "false",
+	)
+	val isDisableKillSwitchOnTrustedEnabled: Boolean = false,
 ) {
 	fun debounceDelayMillis(): Long {
 		return debounceDelaySeconds * 1000L
