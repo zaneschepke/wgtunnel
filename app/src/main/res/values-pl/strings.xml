@@ -193,4 +193,7 @@
     <string name="include_lan">Uwzględnij LAN</string>
     <string name="advanced_settings">Ustawienia zaawansowane</string>
     <string name="hide_amnezia_properties">Ukryj właściwości protokołu Amnezia</string>
+    <string name="error_tunnel_start">Nie udało się uruchomić tunelu</string>
+    <string name="tunnel_control">Kontrola tunelu</string>
+    <string name="auto_tunnel">Autotunel</string>
 </resources>

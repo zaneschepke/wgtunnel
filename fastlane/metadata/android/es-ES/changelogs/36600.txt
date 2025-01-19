@@ -1,0 +1,6 @@
+Novedades:
+- La función Ping ahora funciona independientemente del túnel automático
+- Añadida acción para compatibilidad con Amnezia
+- Añadida acción para excluir LAN del túnel
+- Añadida la opción de ajuste del retardo de rebote para el túnel automático.
+- Numerosas correcciones de errores y mejoras
