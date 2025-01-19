@@ -1,0 +1,6 @@
+Co nowego:
+- Funkcja ping działa teraz niezależnie od autotunelowania
+- Dodano wygodną czynność dla zgodności z protokołem Amnezia
+- Dodano wygodną czynność dla wykluczenia sieci LAN z tunelowania
+- Dodano opcję dostrajania opóźnienia odbicia dla autotunelowania
+- Wiele poprawek błędów i ulepszeń
