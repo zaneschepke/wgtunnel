@@ -192,4 +192,8 @@
     <string name="hide_amnezia_properties">Amnezia Eigenschaften verbergen</string>
     <string name="include_lan">LAN einschließen</string>
     <string name="exclude_lan">LAN ausschließen</string>
+    <string name="tunnel_control">Tunnelsteuerung</string>
+    <string name="kill_switch_off">Notschalter stoppen bei vertrauenswürdigen</string>
+    <string name="error_tunnel_start">Starten des Tunnels fehlgeschlagen</string>
+    <string name="auto_tunnel">Auto-Tunnel</string>
 </resources>
