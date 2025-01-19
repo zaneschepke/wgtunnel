@@ -173,8 +173,15 @@ jobs:
           body: |
             ${{ env.RELEASE_NOTES }}
 
-            SHA256 fingerprint:
-            ```${{ steps.checksum.outputs.checksum }}```
+            SHA-256 fingerprint for the 4096-bit signing certificate:
+            ```sh
+            ${{ steps.checksum.outputs.checksum }}
+            ```
+
+            To verify fingerprint:
+            ```sh
+            apksigner verify --print-certs [path to APK file] | grep SHA-256
+            ```
 
             ### Changelog
             ${{ steps.changelog.outputs.changes }}
