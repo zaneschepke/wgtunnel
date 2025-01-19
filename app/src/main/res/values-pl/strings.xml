@@ -196,5 +196,5 @@
     <string name="error_tunnel_start">Nie udało się uruchomić tunelu</string>
     <string name="tunnel_control">Kontrola tunelu</string>
     <string name="auto_tunnel">Autotunel</string>
-    <string name="kill_switch_off">Zatrzymaj wyłącznik awaryjny na zaufanej</string>
+    <string name="kill_switch_off">Zatrzymaj wyłącznik awaryjny w zaufanej</string>
 </resources>
