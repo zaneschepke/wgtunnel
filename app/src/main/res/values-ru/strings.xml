@@ -195,4 +195,5 @@
     <string name="auto_tunnel">Автотуннель</string>
     <string name="tunnel_control">Управление туннелем</string>
     <string name="error_tunnel_start">Невозможно запустить туннель</string>
+    <string name="kill_switch_off">Без экстренного отключения в доверенных</string>
 </resources>
