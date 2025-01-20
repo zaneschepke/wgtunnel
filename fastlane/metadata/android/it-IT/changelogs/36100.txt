@@ -1,0 +1,7 @@
+Novità:
+- Aggiungi tunnel dagli appunti
+- Aggiunte localizzazioni
+- Corretto bug consumo batteria
+- Corretto bug cancellazione
+- Migliorata sincronizzazione tile tunnel
+- Altre correzioni e migliorie

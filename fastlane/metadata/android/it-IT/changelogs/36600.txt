@@ -1,0 +1,6 @@
+Novità:
+- Il ping ora funziona indipendentemente dall'auto tunnel
+- Aggiunte azioni per compatibilità Amnezia
+- Aggiunte azioni esclusione LAN dal tunnel
+- Aggiunta opzione regolazione tempo di rimbalzo per auto tunnel
+- Molte correzioni a bug e migliore

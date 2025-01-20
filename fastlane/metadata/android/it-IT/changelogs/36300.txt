@@ -1,0 +1,3 @@
+Novità:
+- Corretto bug commutatore modalità kernel
+- Corretto bug crash notifica

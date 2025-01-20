@@ -1,0 +1,6 @@
+Novità:
+- Migliorata stabilità auto tunnel
+- Corretto salvataggio split tunnel e migliore prestazioni
+- Corretto bug modalità kernel
+- Corretto bug tile
+- Vare altre correzioni e migliorie
