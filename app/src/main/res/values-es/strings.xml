@@ -192,4 +192,8 @@
     <string name="wg_compat_mode">Modo compatibilidad de WG</string>
     <string name="quick_actions">Acciones rápidas</string>
     <string name="remove_amnezia_compatibility">Eliminar compatibilidad con Amnezia</string>
+    <string name="error_tunnel_start">Fallo al iniciar el túnel</string>
+    <string name="tunnel_control">Control del túnel</string>
+    <string name="auto_tunnel">Túnel automático</string>
+    <string name="kill_switch_off">Detener interruptor de apagado en confianza</string>
 </resources>
