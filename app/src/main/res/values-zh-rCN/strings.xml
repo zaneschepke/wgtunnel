@@ -65,7 +65,7 @@
     <string name="config_changes_saved">设置已保存。</string>
     <string name="interface_">接口</string>
     <string name="email_subject">WG Tunnel 支持</string>
-    <string name="auto_tunnel_title">自动连接服务</string>
+    <string name="auto_tunnel_title">自动隧道服务</string>
     <string name="delete_tunnel">删除隧道</string>
     <string name="delete_tunnel_message">确定删除这个隧道吗？</string>
     <string name="location_services_missing_message">此应用不会在您的设备上检测任何已开启的定位服务。根据不同的设备，可能会导致无法获得不可信 WiFi 的名称。您想继续吗？</string>
@@ -195,4 +195,5 @@
     <string name="kill_switch_options">开关选项</string>
     <string name="allow_lan_traffic">允许局域网流量</string>
     <string name="vpn_channel_description">VPN 状态通知频道</string>
+    <string name="kill_switch_off">在受信任网络上停止 Kill Switch</string>
 </resources>
