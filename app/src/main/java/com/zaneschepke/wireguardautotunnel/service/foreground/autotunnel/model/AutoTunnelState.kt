@@ -2,8 +2,8 @@ package com.zaneschepke.wireguardautotunnel.service.foreground.autotunnel.model
 
 import com.zaneschepke.wireguardautotunnel.data.domain.Settings
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
-import com.zaneschepke.wireguardautotunnel.service.tunnel.VpnState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.BackendState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.VpnState
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
 
@@ -18,16 +18,16 @@ data class AutoTunnelState(
 		return !networkState.isEthernetConnected && !networkState.isWifiConnected && networkState.isMobileDataConnected
 	}
 
-	private fun isMobileTunnelDataChangeNeeded(): Boolean {
-		val preferredTunnel = preferredMobileDataTunnel()
-		return preferredTunnel != null &&
-			vpnState.status.isUp() && preferredTunnel.id != vpnState.tunnelConfig?.id
-	}
-
-	private fun isEthernetTunnelChangeNeeded(): Boolean {
-		val preferredTunnel = preferredEthernetTunnel()
-		return preferredTunnel != null && vpnState.status.isUp() && preferredTunnel.id != vpnState.tunnelConfig?.id
-	}
+//	private fun isMobileTunnelDataChangeNeeded(): Boolean {
+//		val preferredTunnel = preferredMobileDataTunnel()
+//		return preferredTunnel != null &&
+//			vpnState.state.isUp() && preferredTunnel.id != vpnState.tunnelConfig?.id
+//	}
+//
+//	private fun isEthernetTunnelChangeNeeded(): Boolean {
+//		val preferredTunnel = preferredEthernetTunnel()
+//		return preferredTunnel != null && vpnState.state.isUp() && preferredTunnel.id != vpnState.tunnelConfig?.id
+//	}
 
 	private fun preferredMobileDataTunnel(): TunnelConfig? {
 		return tunnels.firstOrNull { it.isMobileDataTunnel } ?: tunnels.firstOrNull { it.isPrimaryTunnel }
@@ -46,11 +46,11 @@ data class AutoTunnelState(
 	}
 
 	private fun startOnEthernet(): Boolean {
-		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && vpnState.status.isDown()
+		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && vpnState.state.isDown()
 	}
 
 	private fun stopOnEthernet(): Boolean {
-		return networkState.isEthernetConnected && !settings.isTunnelOnEthernetEnabled && vpnState.status.isUp()
+		return networkState.isEthernetConnected && !settings.isTunnelOnEthernetEnabled && vpnState.state.isUp()
 	}
 
 	private fun stopKillSwitchOnTrusted(): Boolean {
@@ -66,64 +66,64 @@ data class AutoTunnelState(
 	}
 
 	private fun stopOnMobileData(): Boolean {
-		return isMobileDataActive() && !settings.isTunnelOnMobileDataEnabled && vpnState.status.isUp()
+		return isMobileDataActive() && !settings.isTunnelOnMobileDataEnabled && vpnState.state.isUp()
 	}
 
 	private fun startOnMobileData(): Boolean {
-		return isMobileDataActive() && settings.isTunnelOnMobileDataEnabled && vpnState.status.isDown()
+		return isMobileDataActive() && settings.isTunnelOnMobileDataEnabled && vpnState.state.isDown()
 	}
 
-	private fun changeOnMobileData(): Boolean {
-		return isMobileDataActive() && settings.isTunnelOnMobileDataEnabled && isMobileTunnelDataChangeNeeded()
-	}
-
-	private fun changeOnEthernet(): Boolean {
-		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && isEthernetTunnelChangeNeeded()
-	}
+//	private fun changeOnMobileData(): Boolean {
+//		return isMobileDataActive() && settings.isTunnelOnMobileDataEnabled && isMobileTunnelDataChangeNeeded()
+//	}
+//
+//	private fun changeOnEthernet(): Boolean {
+//		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && isEthernetTunnelChangeNeeded()
+//	}
 
 	private fun stopOnWifi(): Boolean {
-		return isWifiActive() && !settings.isTunnelOnWifiEnabled && vpnState.status.isUp()
+		return isWifiActive() && !settings.isTunnelOnWifiEnabled && vpnState.state.isUp()
 	}
 
 	private fun stopOnTrustedWifi(): Boolean {
-		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.status.isUp() && isCurrentSSIDTrusted()
+		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.state.isUp() && isCurrentSSIDTrusted()
 	}
 
 	private fun startOnUntrustedWifi(): Boolean {
-		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.status.isDown() && !isCurrentSSIDTrusted()
+		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.state.isDown() && !isCurrentSSIDTrusted()
 	}
 
-	private fun changeOnUntrustedWifi(): Boolean {
-		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.status.isUp() && !isCurrentSSIDTrusted() && !isWifiTunnelPreferred()
-	}
+//	private fun changeOnUntrustedWifi(): Boolean {
+//		return isWifiActive() && settings.isTunnelOnWifiEnabled && vpnState.state.isUp() && !isCurrentSSIDTrusted() && !isWifiTunnelPreferred()
+//	}
 
-	private fun isWifiTunnelPreferred(): Boolean {
-		val preferred = preferredWifiTunnel()
-		val vpnTunnel = vpnState.tunnelConfig
-		return if (preferred != null && vpnTunnel != null) {
-			preferred.id == vpnTunnel.id
-		} else {
-			true
-		}
-	}
+//	private fun isWifiTunnelPreferred(): Boolean {
+//		val preferred = preferredWifiTunnel()
+//		val vpnTunnel = vpnState.tunnelConfig
+//		return if (preferred != null && vpnTunnel != null) {
+//			preferred.id == vpnTunnel.id
+//		} else {
+//			true
+//		}
+//	}
 
-	fun asAutoTunnelEvent(): AutoTunnelEvent {
-		return when {
-			// ethernet scenarios
-			stopOnEthernet() -> AutoTunnelEvent.Stop
-			startOnEthernet() || changeOnEthernet() -> AutoTunnelEvent.Start(preferredEthernetTunnel())
-			// mobile data scenarios
-			stopOnMobileData() -> AutoTunnelEvent.Stop
-			startOnMobileData() || changeOnMobileData() -> AutoTunnelEvent.Start(preferredMobileDataTunnel())
-			// wifi scenarios
-			stopOnWifi() -> AutoTunnelEvent.Stop
-			stopOnTrustedWifi() -> AutoTunnelEvent.Stop
-			startOnUntrustedWifi() || changeOnUntrustedWifi() -> AutoTunnelEvent.Start(preferredWifiTunnel())
-			// no connectivity
-			isNoConnectivity() && settings.isStopOnNoInternetEnabled -> AutoTunnelEvent.Stop
-			else -> AutoTunnelEvent.DoNothing
-		}
-	}
+//	fun asAutoTunnelEvent(): AutoTunnelEvent {
+//		return when {
+//			// ethernet scenarios
+//			stopOnEthernet() -> AutoTunnelEvent.Stop
+//			startOnEthernet() || changeOnEthernet() -> AutoTunnelEvent.Start(preferredEthernetTunnel())
+//			// mobile data scenarios
+//			stopOnMobileData() -> AutoTunnelEvent.Stop
+//			startOnMobileData() || changeOnMobileData() -> AutoTunnelEvent.Start(preferredMobileDataTunnel())
+//			// wifi scenarios
+//			stopOnWifi() -> AutoTunnelEvent.Stop
+//			stopOnTrustedWifi() -> AutoTunnelEvent.Stop
+//			startOnUntrustedWifi() || changeOnUntrustedWifi() -> AutoTunnelEvent.Start(preferredWifiTunnel())
+//			// no connectivity
+//			isNoConnectivity() && settings.isStopOnNoInternetEnabled -> AutoTunnelEvent.Stop
+//			else -> AutoTunnelEvent.DoNothing
+//		}
+//	}
 
 	fun asKillSwitchEvent(): KillSwitchEvent {
 		return when {
@@ -158,8 +158,8 @@ data class AutoTunnelState(
 		}
 	}
 
-	fun isPingEnabled(): Boolean {
-		return settings.isPingEnabled ||
-			(vpnState.status.isUp() && vpnState.tunnelConfig != null && tunnels.first { it.id == vpnState.tunnelConfig.id }.isPingEnabled)
-	}
+//	fun isPingEnabled(): Boolean {
+//		return settings.isPingEnabled ||
+//			(vpnState.state.isUp() && vpnState.tunnelConfig != null && tunnels.first { it.id == vpnState.tunnelConfig.id }.isPingEnabled)
+//	}
 }

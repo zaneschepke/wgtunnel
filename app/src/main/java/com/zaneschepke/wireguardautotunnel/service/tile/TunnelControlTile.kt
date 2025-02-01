@@ -8,7 +8,6 @@ import android.service.quicksettings.TileService
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -20,9 +19,6 @@ import javax.inject.Inject
 class TunnelControlTile : TileService() {
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
-
-	@Inject
-	lateinit var tunnelService: TunnelService
 
 	@Inject
 	@ApplicationScope
@@ -52,24 +48,26 @@ class TunnelControlTile : TileService() {
 
 	fun updateTileState() = applicationScope.launch {
 		if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
-		with(tunnelService.vpnState.value) {
-			if (status.isUp() && tunnelConfig != null) return@launch updateTile(tunnelConfig.name, true)
-		}
-		appDataRepository.getStartTunnelConfig()?.let {
-			updateTile(it.name, false)
-		}
+		// TODO FIX
+// 		with(tunnelService.vpnState.value) {
+// 			if (status.isUp() && tunnelConfig != null) return@launch updateTile(tunnelConfig.name, true)
+// 		}
+// 		appDataRepository.getStartTunnelConfig()?.let {
+// 			updateTile(it.name, false)
+// 		}
 	}
 
 	override fun onClick() {
 		super.onClick()
-		unlockAndRun {
-			applicationScope.launch {
-				if (tunnelService.vpnState.value.status.isUp()) return@launch tunnelService.stopTunnel()
-				appDataRepository.getStartTunnelConfig()?.let {
-					tunnelService.startTunnel(it)
-				}
-			}
-		}
+		// TODO FIX
+// 		unlockAndRun {
+// 			applicationScope.launch {
+// 				if (tunnelService.vpnState.value.status.isUp()) return@launch tunnelService.stopTunnel()
+// 				appDataRepository.getStartTunnelConfig()?.let {
+// 					tunnelService.startTunnel(it)
+// 				}
+// 			}
+// 		}
 	}
 
 	private fun setActive() {

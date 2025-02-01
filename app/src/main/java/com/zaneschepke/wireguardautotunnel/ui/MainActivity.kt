@@ -42,7 +42,7 @@ import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.service.shortcut.ShortcutManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelFactory
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 	lateinit var appStateRepository: AppStateRepository
 
 	@Inject
-	lateinit var tunnelService: TunnelService
+	lateinit var tunnelFactory: TunnelFactory
 
 	@Inject
 	lateinit var shortcutManager: ShortcutManager

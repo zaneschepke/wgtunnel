@@ -12,7 +12,7 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
+import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelFactory
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.FileReadException
@@ -30,14 +30,13 @@ import timber.log.Timber
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
-import javax.inject.Provider
 
 @HiltViewModel
 class MainViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
-	private val tunnelService: Provider<TunnelService>,
+	val tunnelFactory: TunnelFactory,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	private val serviceManager: ServiceManager,
 ) : ViewModel() {
@@ -69,12 +68,14 @@ constructor(
 
 	fun onTunnelStart(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Starting tunnel ${tunnelConfig.name}")
-		tunnelService.get().startTunnel(tunnelConfig)
+		val setting = appDataRepository.settings.getSettings()
+		this@MainViewModel.tunnelFactory.getTunnel(tunnelConfig, setting.isKernelEnabled).startTunnel()
 	}
 
-	fun onTunnelStop() = viewModelScope.launch {
+	fun onTunnelStop(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		Timber.i("Stopping active tunnel")
-		tunnelService.get().stopTunnel()
+		val setting = appDataRepository.settings.getSettings()
+		this@MainViewModel.tunnelFactory.getTunnel(tunnelConfig, setting.isKernelEnabled).stopTunnel()
 	}
 
 	private fun generateQrCodeDefaultName(config: String): String {

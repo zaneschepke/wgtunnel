@@ -38,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
@@ -297,11 +296,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 							ScaledSwitch(
 								uiState.settings.isKernelEnabled,
 								onClick = { appViewModel.onToggleKernelMode() },
-								enabled = !(
-									uiState.settings.isAutoTunnelEnabled ||
-										uiState.settings.isAlwaysOnVpnEnabled ||
-										(uiState.vpnState.status == TunnelState.UP)
-									),
+// 								enabled = !(
+// 									uiState.settings.isAutoTunnelEnabled ||
+// 										uiState.settings.isAlwaysOnVpnEnabled ||
+// 										(uiState.vpnState.status == TunnelState.UP)
+// 									),
 							)
 						},
 						onClick = {

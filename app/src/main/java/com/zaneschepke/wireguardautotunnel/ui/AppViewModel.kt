@@ -15,9 +15,9 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.AppShell
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
-import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.BackendState
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.screens.tunneloptions.config.model.PeerProxy
@@ -28,7 +28,6 @@ import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,7 +52,6 @@ class AppViewModel
 @Inject
 constructor(
 	private val appDataRepository: AppDataRepository,
-	private val tunnelService: Provider<TunnelService>,
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	@AppShell private val rootShell: Provider<RootShell>,
 	private val serviceManager: ServiceManager,
@@ -76,14 +74,12 @@ constructor(
 		combine(
 			appDataRepository.settings.getSettingsFlow(),
 			appDataRepository.tunnels.getTunnelConfigsFlow(),
-			tunnelService.get().vpnState,
 			appDataRepository.appState.generalStateFlow,
 			serviceManager.autoTunnelActive,
-		) { settings, tunnels, tunnelState, generalState, autoTunnel ->
+		) { settings, tunnels, generalState, autoTunnel ->
 			AppUiState(
 				settings,
 				tunnels,
-				tunnelState,
 				generalState,
 				autoTunnel,
 			)
@@ -113,13 +109,13 @@ constructor(
 
 	private suspend fun initTunnel() {
 		withContext(ioDispatcher) {
-			if (tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startActiveTunnelJobs()
-			val activeTunnels = appDataRepository.tunnels.getActive()
-			if (activeTunnels.isNotEmpty() &&
-				tunnelService.get().getState() == TunnelState.DOWN
-			) {
-				tunnelService.get().startTunnel(activeTunnels.first())
-			}
+//			if (tunnelService.get().getState() == TunnelState.UP) tunnelService.get().startActiveTunnelJobs()
+//			val activeTunnels = appDataRepository.tunnels.getActive()
+//			if (activeTunnels.isNotEmpty() &&
+//				tunnelService.get().getState() == TunnelState.DOWN
+//			) {
+////				tunnelService.get().startTunnel(activeTunnels.first())
+//			}
 		}
 	}
 
@@ -209,16 +205,16 @@ constructor(
 	}
 
 	private suspend fun handleVpnKillSwitchChange(enabled: Boolean) {
-		withContext(ioDispatcher) {
-			if (!enabled) return@withContext tunnelService.get().setBackendState(BackendState.SERVICE_ACTIVE, emptySet())
-			Timber.d("Starting kill switch")
-			val allowedIps = if (appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled) {
-				TunnelConfig.LAN_BYPASS_ALLOWED_IPS
-			} else {
-				emptySet()
-			}
-			tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
-		}
+//		withContext(ioDispatcher) {
+//			if (!enabled) return@withContext tunnelService.get().setBackendState(BackendState.SERVICE_ACTIVE, emptySet())
+//			Timber.d("Starting kill switch")
+//			val allowedIps = if (appDataRepository.settings.getSettings().isLanOnKillSwitchEnabled) {
+//				TunnelConfig.LAN_BYPASS_ALLOWED_IPS
+//			} else {
+//				emptySet()
+//			}
+//			tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
+//		}
 	}
 
 	fun onToggleLanOnKillSwitch(enabled: Boolean) = viewModelScope.launch(ioDispatcher) {
@@ -229,7 +225,7 @@ constructor(
 		)
 		val allowedIps = if (enabled) TunnelConfig.LAN_BYPASS_ALLOWED_IPS else emptySet()
 		Timber.d("Setting allowedIps $allowedIps")
-		tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
+//		tunnelService.get().setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
 	}
 
 	fun onToggleShortcutsEnabled() = viewModelScope.launch {
@@ -257,7 +253,7 @@ constructor(
 			if (!isKernelEnabled) {
 				requestRoot().onSuccess {
 					if (!isKernelSupported()) return@onSuccess SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
-					tunnelService.get().setBackendState(BackendState.INACTIVE, emptyList())
+//					tunnelService.get().setBackendState(BackendState.INACTIVE, emptyList())
 					appDataRepository.settings.save(
 						copy(
 							isKernelEnabled = true,
@@ -375,12 +371,6 @@ constructor(
 		}.onFailure {
 			Timber.e(it)
 		}
-	}
-
-	fun bounceAutoTunnel() = viewModelScope.launch(ioDispatcher) {
-		serviceManager.stopAutoTunnel()
-		delay(1000L)
-		serviceManager.startAutoTunnel(true)
 	}
 
 	private suspend fun rebuildConfigs(

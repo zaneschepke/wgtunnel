@@ -17,9 +17,6 @@ import javax.inject.Provider
 class KernelReceiver : BroadcastReceiver() {
 
 	@Inject
-	lateinit var tunnelService: Provider<TunnelService>
-
-	@Inject
 	@ApplicationScope
 	lateinit var applicationScope: CoroutineScope
 
@@ -33,13 +30,13 @@ class KernelReceiver : BroadcastReceiver() {
 		val action = intent.action ?: return
 		applicationScope.launch {
 			if (action == REFRESH_TUNNELS_ACTION) {
-				tunnelService.get().runningTunnelNames().forEach { name ->
-					// TODO can optimize later
-					val tunnel = tunnelConfigRepository.findByTunnelName(name)
-					tunnel?.let {
-						tunnelConfigRepository.save(it.copy(isActive = true))
-					}
-				}
+//				tunnelService.get().runningTunnelNames().forEach { name ->
+//					// TODO can optimize later
+//					val tunnel = tunnelConfigRepository.findByTunnelName(name)
+//					tunnel?.let {
+//						tunnelConfigRepository.save(it.copy(isActive = true))
+//					}
+//				}
 				serviceManager.updateTunnelTile()
 			}
 		}

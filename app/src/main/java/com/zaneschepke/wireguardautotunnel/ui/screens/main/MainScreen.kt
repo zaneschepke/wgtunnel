@@ -36,8 +36,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.VpnState
 import com.zaneschepke.wireguardautotunnel.ui.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.NestedScrollListener
@@ -73,6 +75,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
 	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
 	val isRunningOnTv = remember { context.isRunningOnTv() }
+
+	val tunnelStates by viewModel.tunnelFactory.tunnelStates.collectAsStateWithLifecycle(emptyMap())
 
 	val collator = Collator.getInstance(Locale.getDefault())
 
@@ -127,7 +131,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	}
 
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
-		if (!checked) viewModel.onTunnelStop().also { return }
+		if (!checked) viewModel.onTunnelStop(tunnel).also { return }
 		if (uiState.settings.isKernelEnabled) {
 			viewModel.onTunnelStart(tunnel)
 		} else {
@@ -226,13 +230,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 			) { tunnel ->
 				val expanded = uiState.generalState.isTunnelStatsExpanded
 				TunnelRowItem(
-					tunnel.id == uiState.vpnState.tunnelConfig?.id && (
-						uiState.vpnState.status.isUp() || (uiState.settings.isKernelEnabled && tunnel.isActive)
-						),
+					tunnel.isActive,
 					expanded,
 					selectedTunnel?.id == tunnel.id,
 					tunnel,
-					vpnState = uiState.vpnState,
+					vpnState = tunnelStates[tunnel.id] ?: VpnState(),
 					{ selectedTunnel = tunnel },
 					{ viewModel.onExpandedChanged(!expanded) },
 					onDelete = { showDeleteTunnelAlertDialog = true },

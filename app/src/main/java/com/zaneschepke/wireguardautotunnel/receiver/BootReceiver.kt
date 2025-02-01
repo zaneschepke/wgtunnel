@@ -7,7 +7,7 @@ import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.service.foreground.ServiceManager
 import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -19,9 +19,6 @@ import javax.inject.Provider
 class BootReceiver : BroadcastReceiver() {
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
-
-	@Inject
-	lateinit var tunnelService: Provider<TunnelService>
 
 	@Inject
 	@ApplicationScope
@@ -38,11 +35,11 @@ class BootReceiver : BroadcastReceiver() {
 			with(appDataRepository.settings.getSettings()) {
 				if (isRestoreOnBootEnabled) {
 					val activeTunnels = appDataRepository.tunnels.getActive()
-					val tunState = tunnelService.get().vpnState.value.status
-					if (activeTunnels.isNotEmpty() && tunState != TunnelState.UP) {
-						Timber.i("Starting previously active tunnel")
-						tunnelService.get().startTunnel(activeTunnels.first())
-					}
+//					val tunState = tunnelService.get().vpnState.value.status
+//					if (activeTunnels.isNotEmpty() && tunState != TunnelState.UP) {
+//						Timber.i("Starting previously active tunnel")
+//						tunnelService.get().startTunnel(activeTunnels.first())
+//					}
 					if (isAutoTunnelEnabled) {
 						Timber.i("Starting watcher service from boot")
 						serviceManager.startAutoTunnel(true)

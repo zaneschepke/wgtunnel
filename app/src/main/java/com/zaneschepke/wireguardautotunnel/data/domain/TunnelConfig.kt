@@ -63,6 +63,11 @@ data class TunnelConfig(
 		defaultValue = "false",
 	)
 	var isEthernetTunnel: Boolean = false,
+	@ColumnInfo(
+		name = "is_ipv4_preferred",
+		defaultValue = "true",
+	)
+	var isIpv4Preferred: Boolean = true,
 ) {
 
 	fun toAmConfig(): org.amnezia.awg.config.Config {

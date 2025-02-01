@@ -24,6 +24,14 @@ constructor(
 		)
 	}
 
+	fun onToggleIpv4(tunnelConfig: TunnelConfig) = viewModelScope.launch {
+		appDataRepository.tunnels.save(
+			tunnelConfig.copy(
+				isIpv4Preferred = !tunnelConfig.isIpv4Preferred
+			)
+		)
+	}
+
 	fun saveTunnelChanges(tunnelConfig: TunnelConfig) = viewModelScope.launch {
 		appDataRepository.tunnels.save(tunnelConfig)
 	}

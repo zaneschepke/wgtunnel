@@ -15,9 +15,6 @@ import javax.inject.Provider
 class AlwaysOnVpnService : LifecycleService() {
 
 	@Inject
-	lateinit var tunnelService: Provider<TunnelService>
-
-	@Inject
 	lateinit var appDataRepository: AppDataRepository
 
 	override fun onBind(intent: Intent): IBinder? {
@@ -34,7 +31,7 @@ class AlwaysOnVpnService : LifecycleService() {
 				if (settings.isAlwaysOnVpnEnabled) {
 					val tunnel = appDataRepository.getPrimaryOrFirstTunnel()
 					tunnel?.let {
-						tunnelService.get().startTunnel(it)
+//						tunnelService.get().startTunnel(it)
 					}
 				} else {
 					Timber.w("Always-on VPN is not enabled in app settings")

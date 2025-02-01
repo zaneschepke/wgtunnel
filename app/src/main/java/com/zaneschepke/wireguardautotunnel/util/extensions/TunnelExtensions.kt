@@ -3,14 +3,18 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 import androidx.compose.ui.graphics.Color
 import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
-import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
-import com.zaneschepke.wireguardautotunnel.service.tunnel.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.BackendState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState.DOWN
+import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState.UP
 import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import org.amnezia.awg.backend.Backend
+import org.amnezia.awg.backend.Tunnel
 import org.amnezia.awg.config.Config
 import timber.log.Timber
 import java.net.InetAddress
@@ -37,12 +41,12 @@ fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
 	}
 }
 
-fun Peer.isReachable(): Boolean {
+fun Peer.isReachable(preferIpv4 : Boolean): Boolean {
 	val host =
 		if (this.endpoint.isPresent &&
-			this.endpoint.get().resolved.isPresent
+			this.endpoint.get().getResolved(preferIpv4).isPresent
 		) {
-			this.endpoint.get().resolved.get().host
+			this.endpoint.get().getResolved(preferIpv4).get().host
 		} else {
 			Constants.DEFAULT_PING_IP
 		}
@@ -93,4 +97,18 @@ fun Backend.BackendState.asBackendState(): BackendState {
 
 fun BackendState.asAmBackendState(): Backend.BackendState {
 	return Backend.BackendState.valueOf(this.name)
+}
+
+fun Tunnel.State.asTunnelState(): TunnelState {
+	return when (this) {
+		Tunnel.State.DOWN -> DOWN
+		Tunnel.State.UP -> UP
+	}
+}
+
+fun com.wireguard.android.backend.Tunnel.State.asTunnelState(): TunnelState {
+	return when (this) {
+		com.wireguard.android.backend.Tunnel.State.DOWN -> DOWN
+		com.wireguard.android.backend.Tunnel.State.UP -> UP
+	}
 }

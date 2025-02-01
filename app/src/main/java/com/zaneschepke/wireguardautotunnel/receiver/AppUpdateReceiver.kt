@@ -25,9 +25,6 @@ class AppUpdateReceiver : BroadcastReceiver() {
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
-	lateinit var tunnelService: Provider<TunnelService>
-
-	@Inject
 	lateinit var serviceManager: ServiceManager
 
 	override fun onReceive(context: Context, intent: Intent) {
@@ -42,7 +39,7 @@ class AppUpdateReceiver : BroadcastReceiver() {
 			}
 			if (!settings.isAutoTunnelEnabled) {
 				val tunnels = appDataRepository.tunnels.getAll().filter { it.isActive }
-				if (tunnels.isNotEmpty()) tunnelService.get().startTunnel(tunnels.first())
+//				if (tunnels.isNotEmpty()) tunnelService.get().startTunnel(tunnels.first())
 			}
 		}
 	}

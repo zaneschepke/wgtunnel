@@ -12,8 +12,6 @@ import com.zaneschepke.wireguardautotunnel.data.repository.SettingsRepository
 import com.zaneschepke.wireguardautotunnel.module.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.module.MainDispatcher
-import com.zaneschepke.wireguardautotunnel.service.tunnel.BackendState
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelService
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.ReleaseTree
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
@@ -40,9 +38,6 @@ class WireGuardAutoTunnel : Application() {
 
 	@Inject
 	lateinit var settingsRepository: SettingsRepository
-
-	@Inject
-	lateinit var tunnelService: TunnelService
 
 	@Inject
 	@IoDispatcher
@@ -75,7 +70,7 @@ class WireGuardAutoTunnel : Application() {
 				if (appStateRepository.isLocalLogsEnabled() && !isRunningOnTv()) logReader.initialize()
 			}
 			if (!settingsRepository.getSettings().isKernelEnabled) {
-				tunnelService.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
+				// tunnelProvider.get().setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
 			}
 			appStateRepository.getLocale()?.let {
 				withContext(mainDispatcher) {
@@ -87,7 +82,7 @@ class WireGuardAutoTunnel : Application() {
 
 	override fun onTerminate() {
 		applicationScope.launch {
-			tunnelService.setBackendState(BackendState.INACTIVE, emptyList())
+			// tunnelProvider.get().setBackendState(BackendState.INACTIVE, emptyList())
 		}
 		super.onTerminate()
 	}

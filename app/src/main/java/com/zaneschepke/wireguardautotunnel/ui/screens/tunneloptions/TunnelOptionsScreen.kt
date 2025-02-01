@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.CallSplit
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NetworkPing
 import androidx.compose.material.icons.outlined.Star
@@ -138,6 +139,28 @@ fun OptionsScreen(tunnelConfig: TunnelConfig, viewModel: TunnelOptionsViewModel 
 						trailing = {
 							ForwardButton { navController.navigate(Route.Config(id = tunnelConfig.id)) }
 						},
+					),
+					SelectionItem(
+						Icons.Outlined.Dns,
+						title = {
+							Text(
+								stringResource(R.string.server_ipv4),
+								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+							)
+						},
+						description = {
+							Text(
+								stringResource(R.string.prefer_ipv4),
+								style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+							)
+						},
+						trailing = {
+							ScaledSwitch(
+								tunnelConfig.isIpv4Preferred,
+								onClick = { viewModel.onToggleIpv4(tunnelConfig) },
+							)
+						},
+						onClick = { viewModel.onToggleIpv4(tunnelConfig) },
 					),
 					SelectionItem(
 						Icons.AutoMirrored.Outlined.CallSplit,
