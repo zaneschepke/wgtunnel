@@ -25,8 +25,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.VpnState
+import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.ExpandingRowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
@@ -40,15 +40,15 @@ fun TunnelRowItem(
 	isActive: Boolean,
 	expanded: Boolean,
 	isSelected: Boolean,
-	tunnel: TunnelConfig,
-	vpnState: VpnState,
+	tunnel: TunnelConf,
+	tunnelState: TunnelState,
 	onHold: () -> Unit,
 	onClick: () -> Unit,
 	onCopy: () -> Unit,
 	onDelete: () -> Unit,
 	onSwitchClick: (checked: Boolean) -> Unit,
 ) {
-	val leadingIconColor = if (!isActive) Color.Gray else vpnState.statistics.asColor()
+	val leadingIconColor = if (!isActive) Color.Gray else tunnelState.statistics.asColor()
 	val context = LocalContext.current
 	val snackbar = SnackbarController.current
 	val navController = LocalNavController.current
@@ -69,7 +69,7 @@ fun TunnelRowItem(
 				modifier = Modifier.size(16.dp),
 			)
 		},
-		text = tunnel.name,
+		text = tunnel.tunName,
 		onHold = {
 			haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 			onHold()
@@ -85,7 +85,7 @@ fun TunnelRowItem(
 			}
 		},
 		isExpanded = expanded && isActive,
-		expanded = { if (isActive && expanded) TunnelStatisticsRow(vpnState.statistics, tunnel) },
+		expanded = { if (isActive && expanded) TunnelStatisticsRow(tunnelState.statistics, tunnel) },
 		trailing = {
 			if (
 				isSelected &&

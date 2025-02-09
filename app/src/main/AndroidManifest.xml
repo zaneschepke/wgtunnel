@@ -66,7 +66,7 @@
         android:theme="@style/Theme.App.Start"
         tools:targetApi="tiramisu">
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
 			android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.WireguardAutoTunnel"
@@ -87,7 +87,7 @@
             tools:replace="screenOrientation" />
 
         <activity
-            android:name=".service.shortcut.ShortcutsActivity"
+            android:name=".core.shortcut.ShortcutsActivity"
             android:enabled="true"
             android:exported="true"
 			android:noHistory="true"
@@ -107,7 +107,7 @@
 		</provider>
 
         <service
-            android:name=".service.tile.TunnelControlTile"
+            android:name=".core.service.tile.TunnelControlTile"
             android:exported="true"
             android:icon="@drawable/ic_launcher"
             android:label="@string/tunnel_control"
@@ -124,7 +124,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".service.tile.AutoTunnelControlTile"
+            android:name=".core.service.tile.AutoTunnelControlTile"
             android:exported="true"
             android:icon="@drawable/ic_launcher"
             android:label="@string/auto_tunnel"
@@ -140,23 +140,8 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
-		<service
-			android:name=".service.tunnel.AlwaysOnVpnService"
-			android:enabled="true"
-			android:exported="false"
-			android:foregroundServiceType="systemExempted"
-			android:permission="android.permission.BIND_VPN_SERVICE"
-			android:persistent="true"
-			tools:node="merge">
-			<intent-filter>
-				<action android:name="android.net.VpnService" />
-			</intent-filter>
-			<meta-data
-				android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
-				android:value="true" />
-		</service>
         <service
-            android:name=".service.foreground.autotunnel.AutoTunnelService"
+            android:name=".core.service.autotunnel.AutoTunnelService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="systemExempted"
@@ -165,7 +150,7 @@
             tools:node="merge" />
 
 		<service
-			android:name=".service.foreground.TunnelForegroundService"
+			android:name=".core.service.TunnelForegroundService"
 			android:exported="false"
 			android:persistent="true"
 			android:foregroundServiceType="systemExempted"
@@ -176,7 +161,7 @@
 		</service>
 
         <receiver
-            android:name=".receiver.BootReceiver"
+            android:name=".core.broadcast.BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -189,14 +174,14 @@
             </intent-filter>
         </receiver>
 		<receiver
-			android:name=".receiver.AppUpdateReceiver"
+			android:name=".core.broadcast.AppUpdateReceiver"
 			android:exported="false">
 			<intent-filter>
 				<action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
 			</intent-filter>
 		</receiver>
 		<receiver
-			android:name=".receiver.KernelReceiver"
+			android:name=".core.broadcast.KernelReceiver"
 			android:exported="false"
 			android:permission="${applicationId}.permission.CONTROL_TUNNELS">
 			<intent-filter>
@@ -204,7 +189,7 @@
 			</intent-filter>
 		</receiver>
 		<receiver
-			android:name=".receiver.NotificationActionReceiver"
+			android:name=".core.broadcast.NotificationActionReceiver"
 			android:exported="false"
 			android:permission="${applicationId}.permission.CONTROL_TUNNELS">
 		</receiver>

@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.location.LocationManagerCompat
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.service.tile.AutoTunnelControlTile
-import com.zaneschepke.wireguardautotunnel.service.tile.TunnelControlTile
+import com.zaneschepke.wireguardautotunnel.core.service.tile.AutoTunnelControlTile
+import com.zaneschepke.wireguardautotunnel.core.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.util.Constants
 
 private const val BASELINE_HEIGHT = 2201

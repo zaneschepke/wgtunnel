@@ -1,30 +1,31 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
-import com.zaneschepke.wireguardautotunnel.data.SettingsDao
-import com.zaneschepke.wireguardautotunnel.data.domain.Settings
-import com.zaneschepke.wireguardautotunnel.module.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.data.dao.SettingsDao
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
+import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class RoomSettingsRepository(private val settingsDoa: SettingsDao, @IoDispatcher private val ioDispatcher: CoroutineDispatcher) : SettingsRepository {
-	override suspend fun save(settings: Settings) {
+class RoomSettingsRepository(
+	private val settingsDoa: SettingsDao,
+	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+) : AppSettingRepository {
+
+	override suspend fun save(appSettings: AppSettings) {
 		withContext(ioDispatcher) {
-			settingsDoa.save(settings)
+			settingsDoa.save(Settings.from(appSettings))
 		}
 	}
 
-	override fun getSettingsFlow(): Flow<Settings> {
-		return settingsDoa.getSettingsFlow()
-	}
+	override val flow = settingsDoa.getSettingsFlow().flowOn(ioDispatcher).map { it.toAppSettings() }
 
-	override suspend fun getSettings(): Settings {
+	override suspend fun get(): AppSettings {
 		return withContext(ioDispatcher) {
-			settingsDoa.getAll().firstOrNull() ?: Settings()
+			(settingsDoa.getAll().firstOrNull() ?: Settings()).toAppSettings()
 		}
-	}
-
-	override suspend fun getAll(): List<Settings> {
-		return withContext(ioDispatcher) { settingsDoa.getAll() }
 	}
 }

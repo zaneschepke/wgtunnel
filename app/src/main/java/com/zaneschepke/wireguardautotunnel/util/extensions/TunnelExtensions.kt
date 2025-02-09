@@ -3,12 +3,12 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 import androidx.compose.ui.graphics.Color
 import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.BackendState
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.HandshakeStatus
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState.DOWN
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.TunnelState.UP
-import com.zaneschepke.wireguardautotunnel.service.tunnel.statistics.TunnelStatistics
+import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
+import com.zaneschepke.wireguardautotunnel.domain.enums.HandshakeStatus
+import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
+import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus.DOWN
+import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus.UP
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -41,7 +41,7 @@ fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
 	}
 }
 
-fun Peer.isReachable(preferIpv4 : Boolean): Boolean {
+fun Peer.isReachable(preferIpv4: Boolean): Boolean {
 	val host =
 		if (this.endpoint.isPresent &&
 			this.endpoint.get().getResolved(preferIpv4).isPresent
@@ -99,14 +99,14 @@ fun BackendState.asAmBackendState(): Backend.BackendState {
 	return Backend.BackendState.valueOf(this.name)
 }
 
-fun Tunnel.State.asTunnelState(): TunnelState {
+fun Tunnel.State.asTunnelState(): TunnelStatus {
 	return when (this) {
 		Tunnel.State.DOWN -> DOWN
 		Tunnel.State.UP -> UP
 	}
 }
 
-fun com.wireguard.android.backend.Tunnel.State.asTunnelState(): TunnelState {
+fun com.wireguard.android.backend.Tunnel.State.asTunnelState(): TunnelStatus {
 	return when (this) {
 		com.wireguard.android.backend.Tunnel.State.DOWN -> DOWN
 		com.wireguard.android.backend.Tunnel.State.UP -> UP

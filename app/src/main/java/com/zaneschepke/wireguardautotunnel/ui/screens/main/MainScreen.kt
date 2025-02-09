@@ -38,9 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.service.tunnel.model.VpnState
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
+import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.NestedScrollListener
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
@@ -59,6 +59,7 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
+import com.zaneschepke.wireguardautotunnel.viewmodel.MainViewModel
 import java.text.Collator
 import java.util.Locale
 
@@ -73,24 +74,24 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	var showBottomSheet by remember { mutableStateOf(false) }
 	var isFabVisible by rememberSaveable { mutableStateOf(true) }
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
-	var selectedTunnel by remember { mutableStateOf<TunnelConfig?>(null) }
+	var selectedTunnel by remember { mutableStateOf<TunnelConf?>(null) }
 	val isRunningOnTv = remember { context.isRunningOnTv() }
 
-	val tunnelStates by viewModel.tunnelFactory.tunnelStates.collectAsStateWithLifecycle(emptyMap())
+	val activeTunnels by viewModel.activeTunnels.collectAsStateWithLifecycle(emptyList())
 
 	val collator = Collator.getInstance(Locale.getDefault())
 
 	val sortedTunnels = remember(uiState.tunnels) {
-		uiState.tunnels.sortedWith(compareBy(collator) { it.name })
+		uiState.tunnels.sortedWith(compareBy(collator) { it.tunName })
 	}
 
 	val startAutoTunnel = withVpnPermission<Unit> { viewModel.onToggleAutoTunnel() }
-	val startTunnel = withVpnPermission<TunnelConfig> {
+	val startTunnel = withVpnPermission<TunnelConf> {
 		viewModel.onTunnelStart(it)
 	}
 	val autoTunnelToggleBattery = withIgnoreBatteryOpt(uiState.generalState.isBatteryOptimizationDisableShown) {
 		if (!uiState.generalState.isBatteryOptimizationDisableShown) viewModel.setBatteryOptimizeDisableShown()
-		if (uiState.settings.isKernelEnabled) {
+		if (uiState.appSettings.isKernelEnabled) {
 			viewModel.onToggleAutoTunnel()
 		} else {
 			startAutoTunnel.invoke(Unit)
@@ -130,9 +131,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 		)
 	}
 
-	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConfig) {
-		if (!checked) viewModel.onTunnelStop(tunnel).also { return }
-		if (uiState.settings.isKernelEnabled) {
+	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConf) {
+		if (!checked) {
+			viewModel.onTunnelStop(tunnel)
+			return
+		}
+		if (uiState.appSettings.isKernelEnabled) {
 			viewModel.onTunnelStart(tunnel)
 		} else {
 			startTunnel.invoke(tunnel)
@@ -229,12 +233,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
 				val expanded = uiState.generalState.isTunnelStatsExpanded
+				val tunnelState = activeTunnels.firstOrNull { it.id == tunnel.id }?.state?.collectAsStateWithLifecycle()
 				TunnelRowItem(
 					tunnel.isActive,
 					expanded,
 					selectedTunnel?.id == tunnel.id,
 					tunnel,
-					vpnState = tunnelStates[tunnel.id] ?: VpnState(),
+					tunnelState = tunnelState?.value ?: TunnelState(),
 					{ selectedTunnel = tunnel },
 					{ viewModel.onExpandedChanged(!expanded) },
 					onDelete = { showDeleteTunnelAlertDialog = true },

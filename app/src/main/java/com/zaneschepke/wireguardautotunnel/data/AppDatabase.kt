@@ -6,8 +6,10 @@ import androidx.room.DeleteColumn
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
-import com.zaneschepke.wireguardautotunnel.data.domain.Settings
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.dao.SettingsDao
+import com.zaneschepke.wireguardautotunnel.data.dao.TunnelConfigDao
+import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 
 @Database(
 	entities = [Settings::class, TunnelConfig::class],
