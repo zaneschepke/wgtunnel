@@ -75,7 +75,7 @@
     <string name="dynamic">動態</string>
     <string name="never">從不</string>
     <string name="automatic">自動</string>
-    <string name="add_wifi_name">新增 WiFi SSID</string>
+    <string name="add_wifi_name">新增WiFi SSID</string>
     <string name="allow_lan_traffic">允許 LAN 流量</string>
     <string name="configuration_change">組態變更</string>
     <string name="stop_on_no_internet">沒有連上網路時停用</string>
