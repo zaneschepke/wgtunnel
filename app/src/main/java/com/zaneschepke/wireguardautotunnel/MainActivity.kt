@@ -14,7 +14,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -85,7 +84,6 @@ class MainActivity : AppCompatActivity() {
 	@Inject
 	lateinit var shortcutManager: ShortcutManager
 
-	@OptIn(ExperimentalLayoutApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		enableEdgeToEdge(
 			statusBarStyle = SystemBarStyle.Companion.auto(Color.TRANSPARENT, Color.TRANSPARENT),

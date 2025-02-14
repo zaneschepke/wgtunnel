@@ -5,6 +5,7 @@ import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.wireguard.android.util.ToolsInstaller
 import com.zaneschepke.wireguardautotunnel.core.network.NetworkMonitor
+import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.KernelTunnel
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
@@ -64,9 +65,10 @@ class TunnelModule {
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
 		networkMonitor: NetworkMonitor,
+		notificationManager: NotificationManager,
 		backend: com.wireguard.android.backend.Backend,
 	): TunnelProvider {
-		return KernelTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, backend, networkMonitor)
+		return KernelTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend, networkMonitor)
 	}
 
 	@Provides
@@ -77,10 +79,11 @@ class TunnelModule {
 		@ApplicationScope applicationScope: CoroutineScope,
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
+		notificationManager: NotificationManager,
 		networkMonitor: NetworkMonitor,
 		backend: Backend,
 	): TunnelProvider {
-		return UserspaceTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, backend, networkMonitor)
+		return UserspaceTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend, networkMonitor)
 	}
 
 	@Provides

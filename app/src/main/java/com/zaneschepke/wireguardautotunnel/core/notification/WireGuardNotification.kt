@@ -17,6 +17,7 @@ import com.zaneschepke.wireguardautotunnel.core.broadcast.NotificationActionRece
 import com.zaneschepke.wireguardautotunnel.MainActivity
 import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager.Companion.EXTRA_ID
 import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -64,6 +65,28 @@ constructor(
 			setShowWhen(showTimestamp)
 			setSmallIcon(R.drawable.ic_launcher)
 		}.build()
+	}
+
+	override fun createNotification(
+		channel: NotificationChannels,
+		title: StringValue,
+		actions: Collection<NotificationCompat.Action>,
+		description: StringValue,
+		showTimestamp: Boolean,
+		importance: Int,
+		onGoing: Boolean,
+		onlyAlertOnce: Boolean,
+	): Notification {
+		return createNotification(
+			channel,
+			title.asString(context),
+			actions,
+			description.asString(context),
+			showTimestamp,
+			importance,
+			onGoing,
+			onlyAlertOnce,
+		)
 	}
 
 	override fun createNotificationAction(notificationAction: NotificationAction, extraId: Int?): NotificationCompat.Action {

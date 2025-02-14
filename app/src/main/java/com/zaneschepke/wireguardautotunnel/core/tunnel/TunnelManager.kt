@@ -72,7 +72,7 @@ class TunnelManager @Inject constructor(
 	}
 
 	override suspend fun runningTunnelNames(): Set<String> {
-		return appSettings.filterNotNull().first().let {
+		appSettings.filterNotNull().first().let {
 			if (it.isKernelEnabled) return kernelTunnel.runningTunnelNames()
 			return userspaceTunnel.runningTunnelNames()
 		}

@@ -1,8 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
 import androidx.compose.ui.graphics.Color
+import com.wireguard.android.backend.BackendException
 import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
+import com.zaneschepke.wireguardautotunnel.domain.enums.BackendError
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
@@ -103,6 +105,22 @@ fun Tunnel.State.asTunnelState(): TunnelStatus {
 	return when (this) {
 		Tunnel.State.DOWN -> DOWN
 		Tunnel.State.UP -> UP
+	}
+}
+
+fun BackendException.toBackendError(): BackendError {
+	return when (this.reason) {
+		BackendException.Reason.VPN_NOT_AUTHORIZED -> BackendError.Unauthorized
+		BackendException.Reason.DNS_RESOLUTION_FAILURE -> BackendError.DNS
+		else -> BackendError.Unauthorized
+	}
+}
+
+fun org.amnezia.awg.backend.BackendException.toBackendError(): BackendError {
+	return when (this.reason) {
+		org.amnezia.awg.backend.BackendException.Reason.VPN_NOT_AUTHORIZED -> BackendError.Unauthorized
+		org.amnezia.awg.backend.BackendException.Reason.DNS_RESOLUTION_FAILURE -> BackendError.DNS
+		else -> BackendError.Unauthorized
 	}
 }
 

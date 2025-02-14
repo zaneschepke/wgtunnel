@@ -161,7 +161,7 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	suspend fun buildNetworkState(connectivityState: ConnectivityState): NetworkState {
+	private suspend fun buildNetworkState(connectivityState: ConnectivityState): NetworkState {
 		return with(autoTunnelStateFlow.value.networkState) {
 			val wifiName = when {
 				connectivityState.wifiAvailable &&
@@ -171,7 +171,12 @@ class AutoTunnelService : LifecycleService() {
 				!connectivityState.wifiAvailable -> null
 				else -> wifiName
 			}
-			copy(connectivityState.wifiAvailable, connectivityState.cellularAvailable, connectivityState.ethernetAvailable, wifiName)
+			copy(
+				isWifiConnected = connectivityState.wifiAvailable,
+				isMobileDataConnected = connectivityState.cellularAvailable,
+				isEthernetConnected = isEthernetConnected,
+				wifiName = wifiName,
+			)
 		}
 	}
 
@@ -240,7 +245,7 @@ class AutoTunnelService : LifecycleService() {
 				is AutoTunnelEvent.Start -> (event.tunnelConf ?: appDataRepository.get().getPrimaryOrFirstTunnel())?.let {
 					tunnelManager.startTunnel(it)
 				}
-				// TODO fix to stop individual tunnels
+				// TODO improve this to target specific tunnels to better support multi-tunnel
 				is AutoTunnelEvent.Stop -> tunnelManager.stopTunnel()
 				AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: no condition met")
 			}
