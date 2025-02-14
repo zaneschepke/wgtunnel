@@ -1,7 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
-import com.zaneschepke.wireguardautotunnel.data.datastore.DataStoreManager
-import com.zaneschepke.wireguardautotunnel.data.domain.GeneralState
+import com.zaneschepke.wireguardautotunnel.data.DataStoreManager
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
+import com.zaneschepke.wireguardautotunnel.data.model.GeneralState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -77,7 +78,7 @@ class DataStoreAppStateRepository(
 		return dataStoreManager.getFromStore(DataStoreManager.locale)
 	}
 
-	override val generalStateFlow: Flow<GeneralState> =
+	override val flow: Flow<GeneralState> =
 		dataStoreManager.preferencesFlow.map { prefs ->
 			prefs?.let { pref ->
 				try {

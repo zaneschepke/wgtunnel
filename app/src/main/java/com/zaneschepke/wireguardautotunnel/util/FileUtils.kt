@@ -1,8 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.util
 
 import android.content.Context
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.BufferedOutputStream
@@ -16,10 +16,10 @@ class FileUtils(
 	private val ioDispatcher: CoroutineDispatcher,
 ) {
 
-	suspend fun createWgFiles(tunnels: TunnelConfigs): List<File> {
+	suspend fun createWgFiles(tunnels: List<TunnelConf>): List<File> {
 		return withContext(ioDispatcher) {
 			tunnels.map { config ->
-				val file = File(context.cacheDir, "${config.name}-wg.conf")
+				val file = File(context.cacheDir, "${config.tunName}-wg.conf")
 				file.outputStream().use {
 					it.write(config.wgQuick.toByteArray())
 				}
@@ -28,10 +28,10 @@ class FileUtils(
 		}
 	}
 
-	suspend fun createAmFiles(tunnels: TunnelConfigs): List<File> {
+	suspend fun createAmFiles(tunnels: List<TunnelConf>): List<File> {
 		return withContext(ioDispatcher) {
 			tunnels.filter { it.amQuick != TunnelConfig.AM_QUICK_DEFAULT }.map { config ->
-				val file = File(context.cacheDir, "${config.name}-am.conf")
+				val file = File(context.cacheDir, "${config.tunName}-am.conf")
 				file.outputStream().use {
 					it.write(config.amQuick.toByteArray())
 				}

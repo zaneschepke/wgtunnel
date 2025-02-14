@@ -6,12 +6,14 @@ import androidx.room.DeleteColumn
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
-import com.zaneschepke.wireguardautotunnel.data.domain.Settings
-import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.dao.SettingsDao
+import com.zaneschepke.wireguardautotunnel.data.dao.TunnelConfigDao
+import com.zaneschepke.wireguardautotunnel.data.model.Settings
+import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 
 @Database(
 	entities = [Settings::class, TunnelConfig::class],
-	version = 15,
+	version = 16,
 	autoMigrations =
 	[
 		AutoMigration(from = 1, to = 2),
@@ -56,6 +58,10 @@ import com.zaneschepke.wireguardautotunnel.data.domain.TunnelConfig
 		AutoMigration(
 			from = 14,
 			to = 15,
+		),
+		AutoMigration(
+			from = 15,
+			to = 16,
 		),
 	],
 	exportSchema = true,

@@ -38,9 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.service.tunnel.TunnelState
-import com.zaneschepke.wireguardautotunnel.ui.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.AppViewModel
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
@@ -54,6 +53,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.launchNotificationSet
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
+import com.zaneschepke.wireguardautotunnel.viewmodel.SettingsViewModel
 import xyz.teamgravity.pin_lock_compose.PinManager
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -146,7 +146,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						Icons.Filled.AppShortcut,
 						{
 							ScaledSwitch(
-								uiState.settings.isShortcutsEnabled,
+								uiState.appSettings.isShortcutsEnabled,
 								onClick = { appViewModel.onToggleShortcutsEnabled() },
 							)
 						},
@@ -167,14 +167,14 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								ScaledSwitch(
 									enabled = !(
 										(
-											uiState.settings.isTunnelOnWifiEnabled ||
-												uiState.settings.isTunnelOnEthernetEnabled ||
-												uiState.settings.isTunnelOnMobileDataEnabled
+											uiState.appSettings.isTunnelOnWifiEnabled ||
+												uiState.appSettings.isTunnelOnEthernetEnabled ||
+												uiState.appSettings.isTunnelOnMobileDataEnabled
 											) &&
-											uiState.settings.isAutoTunnelEnabled
+											uiState.appSettings.isAutoTunnelEnabled
 										),
 									onClick = { appViewModel.onToggleAlwaysOnVPN() },
-									checked = uiState.settings.isAlwaysOnVpnEnabled,
+									checked = uiState.appSettings.isAlwaysOnVpnEnabled,
 								)
 							},
 							title = {
@@ -210,7 +210,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						Icons.Outlined.Restore,
 						{
 							ScaledSwitch(
-								uiState.settings.isRestoreOnBootEnabled,
+								uiState.appSettings.isRestoreOnBootEnabled,
 								onClick = { appViewModel.onToggleRestartAtBoot() },
 							)
 						},
@@ -295,13 +295,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						},
 						trailing = {
 							ScaledSwitch(
-								uiState.settings.isKernelEnabled,
+								uiState.appSettings.isKernelEnabled,
 								onClick = { appViewModel.onToggleKernelMode() },
-								enabled = !(
-									uiState.settings.isAutoTunnelEnabled ||
-										uiState.settings.isAlwaysOnVpnEnabled ||
-										(uiState.vpnState.status == TunnelState.UP)
-									),
+// 								enabled = !(
+// 									uiState.settings.isAutoTunnelEnabled ||
+// 										uiState.settings.isAlwaysOnVpnEnabled ||
+// 										(uiState.vpnState.status == TunnelState.UP)
+// 									),
 							)
 						},
 						onClick = {
