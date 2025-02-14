@@ -129,7 +129,7 @@
     <string name="handshake">рукопожатие</string>
     <string name="logs">Журналы</string>
     <string name="light">Светлая</string>
-    <string name="automatic">Автоматически</string>
+    <string name="automatic">Автоматическая</string>
     <string name="dynamic">Динамическая</string>
     <string name="language">Язык</string>
     <string name="trusted_wifi_names">Доверенные сети Wi-Fi</string>
