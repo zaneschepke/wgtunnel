@@ -196,4 +196,11 @@
     <string name="tunnel_control">Control del túnel</string>
     <string name="auto_tunnel">Túnel automático</string>
     <string name="kill_switch_off">Detener interruptor de apagado en confianza</string>
+    <string name="server_ipv4">Resolución de host IPv4</string>
+    <string name="prefer_ipv4">Preferir conexión IPv4</string>
+    <string name="dns_error">No se ha podido resolver el DNS del punto final.</string>
+    <string name="start_failed_config">Fallo al iniciar túnel con error de configuración.</string>
+    <string name="unauthorized">Fallo al iniciar túnel, no autorizado.</string>
+    <string name="tunne_start_failed_title">Fallo del túnel</string>
+    <string name="multiple">Múltiple</string>
 </resources>
