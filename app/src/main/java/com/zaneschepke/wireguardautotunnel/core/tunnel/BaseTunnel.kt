@@ -68,6 +68,7 @@ open class BaseTunnel(
 					tunnelJobs[tun]?.cancelWithMessage("Canceling tunnel jobs for tunnel: ${tun.name}")
 					tunnelJobs.remove(tun)
 				}
+				serviceManager.updateTunnelTile()
 			}
 		}
 	}

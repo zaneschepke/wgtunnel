@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
@@ -53,7 +54,7 @@ class TunnelControlTile : TileService() {
 	fun updateTileState() = applicationScope.launch {
 		if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
 		with(tunnelManager.activeTunnels().value) {
-			if (isNotEmpty()) return@launch updateTile(if (size == 1) first().tunName else "Multiple", true)
+			if (isNotEmpty()) return@launch updateTile(if (size == 1) first().tunName else getString(R.string.multiple), true)
 		}
 		appDataRepository.getStartTunnelConfig()?.let {
 			updateTile(it.tunName, false)

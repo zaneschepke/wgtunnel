@@ -35,7 +35,7 @@ data class TunnelConf(
 	val state = MutableStateFlow(TunnelState())
 
 	fun toAmConfig(): org.amnezia.awg.config.Config {
-		return configFromAmQuick(if (amQuick.isNotBlank()) amQuick else wgQuick)
+		return configFromAmQuick(amQuick.ifBlank { wgQuick })
 	}
 
 	fun toWgConfig(): Config {
@@ -110,10 +110,10 @@ data class TunnelConf(
 			return TunnelConf(tunName = name, wgQuick = wgQuick, amQuick = amQuick)
 		}
 
-		const val IPV6_ALL_NETWORKS = "::/0"
-		const val IPV4_ALL_NETWORKS = "0.0.0.0/0"
+		private const val IPV6_ALL_NETWORKS = "::/0"
+		private const val IPV4_ALL_NETWORKS = "0.0.0.0/0"
 		val ALL_IPS = listOf(IPV4_ALL_NETWORKS, IPV6_ALL_NETWORKS)
-		val IPV4_PUBLIC_NETWORKS = listOf(
+		private val IPV4_PUBLIC_NETWORKS = listOf(
 			"0.0.0.0/5", "8.0.0.0/7", "11.0.0.0/8", "12.0.0.0/6", "16.0.0.0/4", "32.0.0.0/3",
 			"64.0.0.0/2", "128.0.0.0/3", "160.0.0.0/5", "168.0.0.0/6", "172.0.0.0/12",
 			"172.32.0.0/11", "172.64.0.0/10", "172.128.0.0/9", "173.0.0.0/8", "174.0.0.0/7",

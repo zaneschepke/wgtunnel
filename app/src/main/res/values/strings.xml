@@ -212,4 +212,5 @@
 	<string name="start_failed_config">Failed to start tunnel with config error.</string>
 	<string name="unauthorized">Failed to start tunnel, unauthorized.</string>
 	<string name="tunne_start_failed_title">Tunnel failure</string>
+	<string name="multiple">Multiple</string>
 </resources>
