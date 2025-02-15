@@ -196,4 +196,11 @@
     <string name="allow_lan_traffic">允许局域网流量</string>
     <string name="vpn_channel_description">VPN 状态通知频道</string>
     <string name="kill_switch_off">在受信任网络上停止 Kill Switch</string>
+    <string name="prefer_ipv4">首选 IPv4 连接</string>
+    <string name="dns_error">解析端点 DNS 失败。</string>
+    <string name="unauthorized">身份验证未通过，启动流量隧道失败。</string>
+    <string name="tunne_start_failed_title">隧道失败</string>
+    <string name="multiple">多个</string>
+    <string name="server_ipv4">IPv4 主机名解析</string>
+    <string name="start_failed_config">配置文件错误，启动流量隧道失败。</string>
 </resources>
