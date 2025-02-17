@@ -196,4 +196,11 @@
     <string name="vpn_channel_description">Канал сповіщень про стан VPN</string>
     <string name="enable_amnezia_compatibility">Включити сумісність із Amnezia</string>
     <string name="kill_switch_off">Без екстреного вимкнення у довірених</string>
+    <string name="server_ipv4">Отримання імені вузла IPv4</string>
+    <string name="prefer_ipv4">Віддавати перевагу з\'єднанню IPv4</string>
+    <string name="dns_error">Не отримати кінцеву точку DNS.</string>
+    <string name="start_failed_config">Неможливо запустити тунель із помилкою конфігурації.</string>
+    <string name="unauthorized">Неможливо запустити тунель без авторизації.</string>
+    <string name="tunne_start_failed_title">Помилка тунелю</string>
+    <string name="multiple">Декілька</string>
 </resources>
