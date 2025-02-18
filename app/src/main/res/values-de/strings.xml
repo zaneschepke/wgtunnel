@@ -162,7 +162,7 @@
     <string name="monitoring_state_changes">Überwache Statusänderungen</string>
     <string name="stop_on_no_internet">Stoppen wenn keine Internetverbindung besteht</string>
     <string name="ethernet_tunnel">Ethernet Tunnel</string>
-    <string name="set_ethernet_tunnel">Als Ethernet Tunnel setzten</string>
+    <string name="set_ethernet_tunnel">Als Ethernet Tunnel setzen</string>
     <string name="native_kill_switch">Nativer Notschalter</string>
     <string name="vpn_kill_switch">VPN Notschalter</string>
     <string name="kill_switch_options">Notschalteroptionen</string>
