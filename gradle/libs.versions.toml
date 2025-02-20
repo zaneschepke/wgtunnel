@@ -1,5 +1,5 @@
 [versions]
-accompanist = "0.37.0"
+accompanist = "0.37.1"
 activityCompose = "1.10.0"
 amneziawgAndroid = "1.2.6"
 androidx-junit = "1.2.1"
