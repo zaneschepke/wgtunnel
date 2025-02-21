@@ -3,7 +3,7 @@
     <string name="turn_off_tunnel">Действие требует отключения туннеля</string>
     <string name="mtu">MTU</string>
     <string name="tunnel_name">Имя туннеля</string>
-    <string name="public_key">Публичный ключ</string>
+    <string name="public_key">Открытый ключ</string>
     <string name="name">Имя</string>
     <string name="peer">Пир</string>
     <string name="privacy_policy">Посмотреть политику конфиденциальности</string>
