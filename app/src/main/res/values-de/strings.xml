@@ -196,4 +196,13 @@
     <string name="kill_switch_off">Notschalter stoppen bei vertrauenswürdigen</string>
     <string name="error_tunnel_start">Start des Tunnels fehlgeschlagen</string>
     <string name="auto_tunnel">Auto-Tunnel</string>
+    <string name="export_amnezia">Als Amnezia exportieren</string>
+    <string name="export_wireguard">Als WireGuard exportieren</string>
+    <string name="server_ipv4">IPv4 Hostnamensauflösung</string>
+    <string name="prefer_ipv4">IPv4 Verbindung bevorzugen</string>
+    <string name="dns_error">Fehler bei Endpunkt DNS Auflösung.</string>
+    <string name="start_failed_config">Starten des Tunnels wegen Konfigfehler fehlgeschlagen.</string>
+    <string name="unauthorized">Starten des Tunnels fehlgeschlagen, unberechtigt.</string>
+    <string name="tunne_start_failed_title">Tunnelfehler</string>
+    <string name="multiple">Mehrere</string>
 </resources>
