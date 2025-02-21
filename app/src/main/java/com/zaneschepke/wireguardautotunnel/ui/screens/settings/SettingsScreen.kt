@@ -5,8 +5,9 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -15,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ViewQuilt
 import androidx.compose.material.icons.filled.AppShortcut
+import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.FolderZip
@@ -23,7 +25,11 @@ import androidx.compose.material.icons.outlined.Pin
 import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.VpnKeyOff
 import androidx.compose.material.icons.outlined.VpnLock
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
@@ -56,7 +63,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
 import com.zaneschepke.wireguardautotunnel.viewmodel.SettingsViewModel
 import xyz.teamgravity.pin_lock_compose.PinManager
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel: AppViewModel, uiState: AppUiState) {
 	val context = LocalContext.current
@@ -68,11 +75,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 	val interactionSource = remember { MutableInteractionSource() }
 	var showAuthPrompt by remember { mutableStateOf(false) }
 
+	var showExportSheet by remember { mutableStateOf(false) }
+
 	if (showAuthPrompt) {
 		AuthorizationPrompt(
 			onSuccess = {
 				showAuthPrompt = false
-				viewModel.exportAllConfigs(context)
+				showExportSheet = true
 			},
 			onError = { _ ->
 				showAuthPrompt = false
@@ -87,6 +96,52 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 				)
 			},
 		)
+	}
+
+	if (showExportSheet) {
+		ModalBottomSheet(onDismissRequest = { showExportSheet = false }) {
+			Row(
+				modifier =
+				Modifier
+					.fillMaxWidth()
+					.clickable {
+						showExportSheet = false
+						viewModel.exportAllConfigs(context, ConfigType.AMNEZIA)
+					}
+					.padding(10.dp),
+			) {
+				Icon(
+					Icons.Filled.FolderZip,
+					contentDescription = stringResource(id = R.string.export_amnezia),
+					modifier = Modifier.padding(10.dp),
+				)
+				Text(
+					stringResource(id = R.string.export_amnezia),
+					modifier = Modifier.padding(10.dp),
+				)
+			}
+			HorizontalDivider()
+			Row(
+				modifier =
+				Modifier
+					.fillMaxWidth()
+					.clickable {
+						showExportSheet = false
+						viewModel.exportAllConfigs(context, ConfigType.WG)
+					}
+					.padding(10.dp),
+			) {
+				Icon(
+					Icons.Filled.FolderZip,
+					contentDescription = stringResource(id = R.string.export_wireguard),
+					modifier = Modifier.padding(10.dp),
+				)
+				Text(
+					stringResource(id = R.string.export_wireguard),
+					modifier = Modifier.padding(10.dp),
+				)
+			}
+		}
 	}
 
 	Column(
