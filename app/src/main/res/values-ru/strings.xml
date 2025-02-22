@@ -203,4 +203,6 @@
     <string name="tunne_start_failed_title">Ошибка туннеля</string>
     <string name="server_ipv4">Получение имени узла IPv4</string>
     <string name="multiple">Несколько</string>
+    <string name="export_amnezia">Экспортировать как Amnezia</string>
+    <string name="export_wireguard">Экспортировать как WireGuard</string>
 </resources>
