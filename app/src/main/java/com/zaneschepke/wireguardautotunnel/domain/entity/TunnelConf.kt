@@ -62,9 +62,9 @@ data class TunnelConf(
 		}
 	}
 
-	fun isQuickConfigChanged(updatedConf: TunnelConf): Boolean {
-		return updatedConf.wgQuick != wgQuick ||
-			updatedConf.amQuick != amQuick
+	fun isQuickConfigMatching(updatedConf: TunnelConf): Boolean {
+		return updatedConf.wgQuick == wgQuick ||
+			updatedConf.amQuick == amQuick
 	}
 
 	fun isPingConfigMatching(updatedConf: TunnelConf): Boolean {

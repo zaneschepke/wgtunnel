@@ -200,7 +200,7 @@ open class BaseTunnel(
 	private suspend fun startTunnelConfigChangeJob(tunnel: TunnelConf) = coroutineScope {
 		appDataRepository.tunnels.flow.collect { storageTuns ->
 			storageTuns.firstOrNull { it.id == tunnel.id }?.let { storageTun ->
-				if (tunnel.isQuickConfigChanged(storageTun) || tunnel.isPingConfigMatching(storageTun)) {
+				if (!tunnel.isQuickConfigMatching(storageTun) || !tunnel.isPingConfigMatching(storageTun)) {
 					bounceTunnel(tunnel)
 				}
 			}
