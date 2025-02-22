@@ -100,9 +100,10 @@ class AutoTunnelService : LifecycleService() {
 	}
 
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+		super.onStartCommand(intent, flags, startId)
 		Timber.d("onStartCommand executed with startId: $startId")
 		serviceManager.autoTunnelService.complete(this)
-		return super.onStartCommand(intent, flags, startId)
+		return START_NOT_STICKY
 	}
 
 	fun start() {

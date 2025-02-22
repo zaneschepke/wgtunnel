@@ -35,8 +35,9 @@ class TunnelForegroundService : LifecycleService() {
 	}
 
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+		super.onStartCommand(intent, flags, startId)
 		serviceManager.backgroundService.complete(this)
-		return super.onStartCommand(intent, flags, startId)
+		return START_NOT_STICKY
 	}
 
 	fun start(tunnelConf: TunnelConf) {
