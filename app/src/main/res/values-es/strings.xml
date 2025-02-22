@@ -203,4 +203,6 @@
     <string name="unauthorized">Fallo al iniciar túnel, no autorizado.</string>
     <string name="tunne_start_failed_title">Fallo del túnel</string>
     <string name="multiple">Múltiple</string>
+    <string name="export_amnezia">Exportar cómo Amnezia</string>
+    <string name="export_wireguard">Exportar cómo WireGuard</string>
 </resources>
