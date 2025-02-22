@@ -203,4 +203,6 @@
     <string name="multiple">多个</string>
     <string name="server_ipv4">IPv4 主机名解析</string>
     <string name="start_failed_config">配置文件错误，启动流量隧道失败。</string>
+    <string name="export_amnezia">导出为 Amnezia</string>
+    <string name="export_wireguard">导出为 WireGuard</string>
 </resources>
