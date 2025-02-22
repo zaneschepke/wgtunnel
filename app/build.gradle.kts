@@ -172,8 +172,7 @@ dependencies {
 	debugImplementation(libs.androidx.compose.ui.tooling)
 	debugImplementation(libs.androidx.compose.manifest)
 
-	// get tunnel lib from github packages or mavenLocal
-// 	implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
+	// tunnel
 	implementation(libs.tunnel)
 	implementation(libs.amneziawg.android)
 	coreLibraryDesugaring(libs.desugar.jdk.libs)
@@ -188,6 +187,7 @@ dependencies {
 	// hilt
 	implementation(libs.hilt.android)
 	ksp(libs.hilt.android.compiler)
+	ksp(libs.androidx.hilt.compiler)
 
 	// accompanist
 	implementation(libs.accompanist.permissions)
@@ -221,6 +221,10 @@ dependencies {
 
 	// splash
 	implementation(libs.androidx.core.splashscreen)
+
+	// worker
+	implementation(libs.androidx.work.runtime)
+	implementation(libs.androidx.hilt.work)
 }
 
 fun determineVersionName(): String {

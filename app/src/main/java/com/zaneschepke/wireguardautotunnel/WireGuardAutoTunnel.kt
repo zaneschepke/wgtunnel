@@ -3,9 +3,11 @@ package com.zaneschepke.wireguardautotunnel
 import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.work.Configuration
 import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
@@ -26,7 +28,15 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
-class WireGuardAutoTunnel : Application() {
+class WireGuardAutoTunnel : Application(), Configuration.Provider {
+
+	@Inject
+	lateinit var workerFactory: HiltWorkerFactory
+
+	override val workManagerConfiguration: Configuration
+		get() = Configuration.Builder()
+			.setWorkerFactory(workerFactory)
+			.build()
 
 	@Inject
 	@ApplicationScope

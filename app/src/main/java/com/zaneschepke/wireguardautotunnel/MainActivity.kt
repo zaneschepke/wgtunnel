@@ -40,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.core.shortcut.ShortcutManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
+import com.zaneschepke.wireguardautotunnel.core.worker.ServiceWorker
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
@@ -133,6 +134,8 @@ class MainActivity : AppCompatActivity() {
 					shortcutManager.addShortcuts()
 				}
 			}
+
+			ServiceWorker.start(this)
 
 			CompositionLocalProvider(LocalNavController provides navController) {
 				SnackbarControllerProvider { host ->

@@ -35,7 +35,7 @@ class BootReceiver : BroadcastReceiver() {
 			with(appDataRepository.settings.get()) {
 				if (isRestoreOnBootEnabled) {
 					// If auto tunnel is enabled, just start it and let auto tunnel start appropriate tun
-					if (isAutoTunnelEnabled) return@launch serviceManager.startAutoTunnel(true)
+					if (isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) return@launch serviceManager.startAutoTunnel(true)
 					tunnelManager.restorePreviousState()
 				}
 			}
