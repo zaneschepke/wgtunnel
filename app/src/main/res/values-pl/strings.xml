@@ -204,4 +204,6 @@
     <string name="start_failed_config">Nie udało się uruchomić tunelu z powodu błędu konfiguracji.</string>
     <string name="tunne_start_failed_title">Awaria tunelu</string>
     <string name="dns_error">Nie udało się rozpoznać punktu końcowego DNS.</string>
+    <string name="export_amnezia">Eksportuj jako Amnezia</string>
+    <string name="export_wireguard">Eksportuj jako WireGuard</string>
 </resources>
