@@ -45,3 +45,6 @@
 # Suppress warnings about missing classes if not all features are used
 -dontwarn java.lang.management.**
 -dontwarn sun.nio.ch.**
+
+-keep class com.google.api.client.http.** { *; }
+-dontwarn com.google.api.client.http.**
