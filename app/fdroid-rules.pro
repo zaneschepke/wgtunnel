@@ -16,13 +16,7 @@
 -keep class org.xbill.DNS.config.** { *; }
 -dontwarn org.xbill.DNS.config.**
 
-# Preserve Lookup and related classes, which might use reflection
--keep class org.xbill.DNS.Lookup { *; }
--keep class org.xbill.DNS.Message { *; }
--keep class org.xbill.DNS.Record { *; }
-
-# Keep resource files (e.g., for default resolver configurations)
--keepresource org/xbill/DNS/*.properties
+-keep class org.xbill.DNS.** { *; }
 
 # Prevent optimization issues with native or reflection-based calls
 -dontoptimize
