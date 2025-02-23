@@ -67,7 +67,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.support.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -121,20 +120,14 @@ class MainActivity : AppCompatActivity() {
 				viewModel.getEmitSplitTunnelApps(this@MainActivity)
 			}
 
-			LaunchedEffect(appUiState.autoTunnelActive) {
-				requestAutoTunnelTileServiceUpdate()
-			}
-
 			with(appUiState.appSettings) {
-				LaunchedEffect(isAutoTunnelEnabled) {
-					this@MainActivity.requestAutoTunnelTileServiceUpdate()
-				}
 				LaunchedEffect(isShortcutsEnabled) {
 					if (!isShortcutsEnabled) return@LaunchedEffect shortcutManager.removeShortcuts()
 					shortcutManager.addShortcuts()
 				}
 			}
 
+			// TODO could improve this to cancel when no tuns or autotun on
 			ServiceWorker.start(this)
 
 			CompositionLocalProvider(LocalNavController provides navController) {
@@ -221,14 +214,14 @@ class MainActivity : AppCompatActivity() {
 									composable<Route.Logs> {
 										LogsScreen()
 									}
-									composable<Route.Config> {
-										val args = it.toRoute<Route.Config>()
+									composable<Route.Config> { backStack ->
+										val args = backStack.toRoute<Route.Config>()
 										val config =
 											appUiState.tunnels.firstOrNull { it.id == args.id }
 										ConfigScreen(config, viewModel)
 									}
-									composable<Route.TunnelOptions> {
-										val args = it.toRoute<Route.TunnelOptions>()
+									composable<Route.TunnelOptions> { backStack ->
+										val args = backStack.toRoute<Route.TunnelOptions>()
 										val config = appUiState.tunnels.first { it.id == args.id }
 										OptionsScreen(config)
 									}
@@ -241,13 +234,13 @@ class MainActivity : AppCompatActivity() {
 									composable<Route.KillSwitch> {
 										KillSwitchScreen(appUiState, viewModel)
 									}
-									composable<Route.SplitTunnel> {
-										val args = it.toRoute<Route.SplitTunnel>()
+									composable<Route.SplitTunnel> { backStack ->
+										val args = backStack.toRoute<Route.SplitTunnel>()
 										val config = appUiState.tunnels.first { it.id == args.id }
 										SplitTunnelScreen(config, viewModel)
 									}
-									composable<Route.TunnelAutoTunnel> {
-										val args = it.toRoute<Route.TunnelOptions>()
+									composable<Route.TunnelAutoTunnel> { backStack ->
+										val args = backStack.toRoute<Route.TunnelOptions>()
 										val config = appUiState.tunnels.first { it.id == args.id }
 										TunnelAutoTunnelScreen(config, appUiState.appSettings)
 									}

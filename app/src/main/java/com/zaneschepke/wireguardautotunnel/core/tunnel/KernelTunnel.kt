@@ -33,10 +33,10 @@ class KernelTunnel @Inject constructor(
 
 	override suspend fun startTunnel(tunnelConf: TunnelConf) {
 		withContext(ioDispatcher) {
-			super.startTunnel(tunnelConf)
+			if (tunnels.value.any { it.id == tunnelConf.id }) return@withContext Timber.w("Tunnel already running")
 			runCatching {
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
-				addToActiveTunnels(tunnelConf)
+				super.startTunnel(tunnelConf)
 			}.onFailure {
 				onTunnelStop(tunnelConf)
 				if (it is BackendException) {
@@ -66,8 +66,8 @@ class KernelTunnel @Inject constructor(
 		}
 	}
 
-	override suspend fun toggleTunnel(tunnelConf: TunnelConf, status: TunnelStatus) {
-		when (status) {
+	override suspend fun toggleTunnel(tunnelConf: TunnelConf, state: TunnelStatus) {
+		when (state) {
 			TunnelStatus.UP -> backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
 			TunnelStatus.DOWN -> backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toWgConfig())
 		}

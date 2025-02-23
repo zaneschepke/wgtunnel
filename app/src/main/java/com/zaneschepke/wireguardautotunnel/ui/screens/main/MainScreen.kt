@@ -77,7 +77,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	var selectedTunnel by remember { mutableStateOf<TunnelConf?>(null) }
 	val isRunningOnTv = remember { context.isRunningOnTv() }
 
-	val activeTunnels by viewModel.activeTunnels.collectAsStateWithLifecycle(emptyList())
+	val activeTunnels by viewModel.tunnelManager.activeTunnels.collectAsStateWithLifecycle(emptyMap())
 
 	val collator = Collator.getInstance(Locale.getDefault())
 
@@ -89,6 +89,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	val startTunnel = withVpnPermission<TunnelConf> {
 		viewModel.onTunnelStart(it)
 	}
+
 	val autoTunnelToggleBattery = withIgnoreBatteryOpt(uiState.generalState.isBatteryOptimizationDisableShown) {
 		if (!uiState.generalState.isBatteryOptimizationDisableShown) viewModel.setBatteryOptimizeDisableShown()
 		if (uiState.appSettings.isKernelEnabled) {
@@ -132,15 +133,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	}
 
 	fun onTunnelToggle(checked: Boolean, tunnel: TunnelConf) {
-		if (!checked) {
-			viewModel.onTunnelStop(tunnel)
-			return
-		}
-		if (uiState.appSettings.isKernelEnabled) {
-			viewModel.onTunnelStart(tunnel)
-		} else {
-			startTunnel.invoke(tunnel)
-		}
+		if (!checked) return viewModel.onTunnelStop(tunnel).let { }
+		if (uiState.appSettings.isKernelEnabled) viewModel.onTunnelStart(tunnel) else startTunnel(tunnel)
 	}
 
 	Scaffold(
@@ -233,13 +227,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
 				val expanded = uiState.generalState.isTunnelStatsExpanded
-				val tunnelState = activeTunnels.firstOrNull { it.id == tunnel.id }?.state?.collectAsStateWithLifecycle()
+				val tunnelState = activeTunnels.getOrDefault(tunnel.id, TunnelState())
 				TunnelRowItem(
-					tunnel.isActive,
+					tunnelState.state.isUp(),
 					expanded,
 					selectedTunnel?.id == tunnel.id,
 					tunnel,
-					tunnelState = tunnelState?.value ?: TunnelState(),
+					tunnelState = tunnelState,
 					{ selectedTunnel = tunnel },
 					{ viewModel.onExpandedChanged(!expanded) },
 					onDelete = { showDeleteTunnelAlertDialog = true },

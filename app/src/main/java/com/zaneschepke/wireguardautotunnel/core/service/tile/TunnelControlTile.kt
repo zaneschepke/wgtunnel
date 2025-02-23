@@ -52,9 +52,14 @@ class TunnelControlTile : TileService() {
 	}
 
 	fun updateTileState() = applicationScope.launch {
-		if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
-		with(tunnelManager.activeTunnels().value) {
-			if (isNotEmpty()) return@launch updateTile(if (size == 1) first().tunName else getString(R.string.multiple), true)
+		val tunnels = appDataRepository.tunnels.getAll()
+		if (tunnels.isEmpty()) return@launch setUnavailable()
+		with(tunnelManager.activeTunnels.value) {
+			if (isNotEmpty()) if (size == 1) {
+				tunnels.firstOrNull { it.id == keys.first() }?.let { return@launch updateTile(it.tunName, true) }
+			} else {
+				return@launch updateTile(getString(R.string.multiple), true)
+			}
 		}
 		appDataRepository.getStartTunnelConfig()?.let {
 			updateTile(it.tunName, false)
@@ -65,7 +70,7 @@ class TunnelControlTile : TileService() {
 		super.onClick()
 		unlockAndRun {
 			applicationScope.launch {
-				if (tunnelManager.activeTunnels().value.isNotEmpty()) return@launch tunnelManager.stopTunnel()
+				if (tunnelManager.activeTunnels.value.isNotEmpty()) return@launch tunnelManager.stopTunnel()
 				appDataRepository.getStartTunnelConfig()?.let {
 					tunnelManager.startTunnel(it)
 				}

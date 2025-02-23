@@ -7,7 +7,7 @@ import com.zaneschepke.wireguardautotunnel.domain.events.AutoTunnelEvent
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
 
 data class AutoTunnelState(
-	val activeTunnels: List<TunnelConf> = emptyList(),
+	val activeTunnels: Map<Int, TunnelState> = emptyMap(),
 	val networkState: NetworkState = NetworkState(),
 	val settings: AppSettings = AppSettings(),
 	val tunnels: List<TunnelConf> = emptyList(),
@@ -20,12 +20,12 @@ data class AutoTunnelState(
 	private fun isMobileTunnelDataChangeNeeded(): Boolean {
 		val preferredTunnel = preferredMobileDataTunnel()
 		return preferredTunnel != null &&
-			activeTunnels.isNotEmpty() && !activeTunnels.any { it.id == preferredTunnel.id }
+			activeTunnels.isNotEmpty() && !activeTunnels.any { it.key == preferredTunnel.id }
 	}
 
 	private fun isEthernetTunnelChangeNeeded(): Boolean {
 		val preferredTunnel = preferredEthernetTunnel()
-		return preferredTunnel != null && activeTunnels.isNotEmpty() && !activeTunnels.any { it.id == preferredTunnel.id }
+		return preferredTunnel != null && activeTunnels.isNotEmpty() && !activeTunnels.any { it.key == preferredTunnel.id }
 	}
 
 	private fun preferredMobileDataTunnel(): TunnelConf? {
@@ -62,7 +62,7 @@ data class AutoTunnelState(
 		return settings.isVpnKillSwitchEnabled && (!settings.isDisableKillSwitchOnTrustedEnabled || !isCurrentSSIDTrusted())
 	}
 
-	fun isNoConnectivity(): Boolean {
+	private fun isNoConnectivity(): Boolean {
 		return !networkState.isEthernetConnected && !networkState.isWifiConnected && !networkState.isMobileDataConnected
 	}
 
@@ -100,7 +100,7 @@ data class AutoTunnelState(
 
 	private fun isWifiTunnelPreferred(): Boolean {
 		val preferred = preferredWifiTunnel()
-		return activeTunnels.any { it.id == preferred?.id }
+		return activeTunnels.any { it.key == preferred?.id }
 	}
 
 	fun asAutoTunnelEvent(): AutoTunnelEvent {

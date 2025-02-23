@@ -14,6 +14,7 @@ import com.zaneschepke.wireguardautotunnel.domain.enums.BackendError
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -45,6 +46,8 @@ open class BaseTunnel(
 
 	internal val tunnels = MutableStateFlow<List<TunnelConf>>(emptyList())
 
+	private val _activeTunnels = MutableStateFlow<Map<Int, TunnelState>>(emptyMap())
+
 	private val tunnelJobs = mutableMapOf<TunnelConf, Job>()
 
 	private val isNetworkAvailable = AtomicBoolean(false)
@@ -67,8 +70,9 @@ open class BaseTunnel(
 				removedItems.forEach { tun ->
 					tunnelJobs[tun]?.cancelWithMessage("Canceling tunnel jobs for tunnel: ${tun.name}")
 					tunnelJobs.remove(tun)
+					_activeTunnels.update { it - tun.id }
+					serviceManager.updateTunnelTile()
 				}
-				serviceManager.updateTunnelTile()
 			}
 		}
 	}
@@ -82,6 +86,9 @@ open class BaseTunnel(
 		}
 		launch {
 			startTunnelConfigChangeJob(tunnel)
+		}
+		launch {
+			startStateJob(tunnel)
 		}
 	}
 
@@ -99,14 +106,13 @@ open class BaseTunnel(
 		return emptySet()
 	}
 
-	override suspend fun activeTunnels(): StateFlow<List<TunnelConf>> {
-		return tunnels.asStateFlow()
-	}
+	override val activeTunnels: StateFlow<Map<Int, TunnelState>>
+		get() = _activeTunnels.asStateFlow()
 
 	override suspend fun startTunnel(tunnelConf: TunnelConf) {
-		if (tunnels.value.any { it.id == tunnelConf.id }) return Timber.w("Tunnel already running")
 		serviceManager.startBackgroundService(tunnelConf)
 		appDataRepository.tunnels.save(tunnelConf.copy(isActive = true))
+		addToActiveTunnels(tunnelConf)
 	}
 
 	override suspend fun stopTunnel(tunnelConf: TunnelConf?) {
@@ -131,7 +137,7 @@ open class BaseTunnel(
 		}
 	}
 
-	internal fun addToActiveTunnels(conf: TunnelConf) {
+	private fun addToActiveTunnels(conf: TunnelConf) {
 		tunnels.update {
 			it.toMutableList().apply {
 				add(conf)
@@ -153,13 +159,22 @@ open class BaseTunnel(
 		}
 	}
 
+	private suspend fun startStateJob(tunnel: TunnelConf) {
+		tunnel.state.collect { state ->
+			_activeTunnels.update {
+				it + (tunnel.id to state)
+			}
+			serviceManager.updateTunnelTile()
+		}
+	}
+
 	private suspend fun startPingJob(tunnel: TunnelConf) = coroutineScope {
 		while (isActive) {
 			if (isNetworkAvailable.get() && tunnel.isActive) {
 				val pingResult = tunnel.pingTunnel(ioDispatcher)
 				handlePingResult(tunnel, pingResult)
 			}
-			delay(CHECK_INTERVAL)
+			delay(tunnel.pingInterval ?: Constants.PING_INTERVAL)
 		}
 	}
 

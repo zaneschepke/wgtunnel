@@ -34,10 +34,13 @@ class UserspaceTunnel @Inject constructor(
 
 	override suspend fun startTunnel(tunnelConf: TunnelConf) {
 		withContext(ioDispatcher) {
-			super.startTunnel(tunnelConf)
+			if (tunnels.value.any { it.id == tunnelConf.id }) return@withContext Timber.w("Tunnel already running")
+			if (tunnels.value.isNotEmpty()) {
+				stopAllTunnels()
+			}
 			runCatching {
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toAmConfig())
-				addToActiveTunnels(tunnelConf)
+				super.startTunnel(tunnelConf)
 			}.onFailure {
 				onTunnelStop(tunnelConf)
 				if (it is BackendException) {

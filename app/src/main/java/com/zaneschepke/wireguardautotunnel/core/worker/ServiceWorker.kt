@@ -53,7 +53,7 @@ class ServiceWorker @AssistedInject constructor(
 		Timber.i("Service worker started")
 		with(appDataRepository.settings.get()) {
 			if (isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) return@with serviceManager.startAutoTunnel(true)
-			if (tunnelManager.activeTunnels().value.isEmpty()) tunnelManager.restorePreviousState()
+			if (tunnelManager.activeTunnels.value.isEmpty()) tunnelManager.restorePreviousState()
 		}
 		Result.success()
 	}

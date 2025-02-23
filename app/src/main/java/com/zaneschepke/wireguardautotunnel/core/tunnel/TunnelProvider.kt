@@ -2,11 +2,12 @@ package com.zaneschepke.wireguardautotunnel.core.tunnel
 
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import kotlinx.coroutines.flow.StateFlow
 
 interface TunnelProvider {
 
-	suspend fun activeTunnels(): StateFlow<List<TunnelConf>>
+	val activeTunnels: StateFlow<Map<Int, TunnelState>>
 
 	suspend fun startTunnel(tunnelConf: TunnelConf)
 

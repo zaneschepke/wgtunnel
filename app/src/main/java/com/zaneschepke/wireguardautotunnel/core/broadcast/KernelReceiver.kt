@@ -32,8 +32,8 @@ class KernelReceiver : BroadcastReceiver() {
 		val action = intent.action ?: return
 		applicationScope.launch {
 			if (action == REFRESH_TUNNELS_ACTION) {
-				tunnelManager.runningTunnelNames().forEach {
-					val tunnel = tunnelRepository.findByTunnelName(it)
+				tunnelManager.runningTunnelNames().forEach { name ->
+					val tunnel = tunnelRepository.findByTunnelName(name)
 					tunnel?.let {
 						tunnelRepository.save(it.copy(isActive = true))
 					}

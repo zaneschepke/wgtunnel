@@ -187,7 +187,7 @@ class AutoTunnelService : LifecycleService() {
 				buildNetworkState(it)
 			}.distinctUntilChanged(),
 		) { double, networkState ->
-			AutoTunnelState(tunnelManager.activeTunnels().value, networkState, double.first, double.second)
+			AutoTunnelState(tunnelManager.activeTunnels.value, networkState, double.first, double.second)
 		}.collect { state ->
 			autoTunnelStateFlow.update {
 				it.copy(activeTunnels = state.activeTunnels, networkState = state.networkState, settings = state.settings, tunnels = state.tunnels)

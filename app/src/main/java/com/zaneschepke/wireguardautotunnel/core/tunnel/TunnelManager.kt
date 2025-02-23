@@ -11,10 +11,12 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.util.extensions.withData
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
@@ -34,14 +36,21 @@ class TunnelManager @Inject constructor(
 		initialValue = null,
 	)
 
-	override suspend fun activeTunnels(): StateFlow<List<TunnelConf>> {
-		return withContext(ioDispatcher) {
-			appSettings.filterNotNull().first().let {
-				if (it.isKernelEnabled) return@withContext kernelTunnel.activeTunnels()
-				userspaceTunnel.activeTunnels()
+	@OptIn(ExperimentalCoroutinesApi::class)
+	override val activeTunnels = appSettings
+		.filterNotNull()
+		.flatMapLatest { settings ->
+			if (settings.isKernelEnabled) {
+				kernelTunnel.activeTunnels
+			} else {
+				userspaceTunnel.activeTunnels
 			}
 		}
-	}
+		.stateIn(
+			scope = applicationScope,
+			started = SharingStarted.Eagerly,
+			initialValue = emptyMap(),
+		)
 
 	override suspend fun startTunnel(tunnelConf: TunnelConf) {
 		appSettings.withData {
@@ -84,14 +93,14 @@ class TunnelManager @Inject constructor(
 				if (isRestoreOnBootEnabled) {
 					val previouslyActiveTuns = appDataRepository.tunnels.getActive()
 					// handle kernel mode
-					val tunsToStart = previouslyActiveTuns.filterNot { tun -> activeTunnels().value.any { tun.id == it.id } }
+					val tunsToStart = previouslyActiveTuns.filterNot { tun -> activeTunnels.value.any { tun.id == it.key } }
 					if (isKernelEnabled) {
 						return@withContext tunsToStart.forEach {
 							startTunnel(it)
 						}
 					}
 					// handle userspace
-					if (activeTunnels().value.isEmpty()) tunsToStart.firstOrNull()?.let { startTunnel(it) }
+					if (activeTunnels.value.isEmpty()) tunsToStart.firstOrNull()?.let { startTunnel(it) }
 				}
 			}
 		}

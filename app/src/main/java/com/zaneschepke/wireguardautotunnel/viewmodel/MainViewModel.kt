@@ -24,8 +24,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import com.zaneschepke.wireguardautotunnel.util.extensions.withData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.amnezia.awg.config.Config
@@ -43,15 +41,6 @@ constructor(
 	private val serviceManager: ServiceManager,
 	appDataRepository: AppDataRepository,
 ) : BaseViewModel(appDataRepository) {
-
-	private val _activeTunnels = MutableStateFlow<List<TunnelConf>>(emptyList())
-	val activeTunnels = _activeTunnels.asStateFlow()
-
-	init {
-		viewModelScope.launch {
-			tunnelManager.activeTunnels().collect(_activeTunnels::emit)
-		}
-	}
 
 	fun onDelete(tunnel: TunnelConf) = viewModelScope.launch {
 		appSettings.withData { settings ->

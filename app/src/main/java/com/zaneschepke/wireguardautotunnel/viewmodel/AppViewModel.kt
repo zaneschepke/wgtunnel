@@ -109,8 +109,8 @@ constructor(
 	}
 
 	private suspend fun initTunnels() {
-		tunnels.withData {
-			it.filter { it.isActive }.forEach {
+		tunnels.withData { tunnels ->
+			tunnels.filter { it.isActive }.forEach {
 				tunnelManager.startTunnel(it)
 			}
 		}
