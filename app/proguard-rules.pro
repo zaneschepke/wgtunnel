@@ -48,3 +48,7 @@
 
 -keep class com.google.api.client.http.** { *; }
 -dontwarn com.google.api.client.http.**
+
+# Keep Joda-Time classes used by Tink
+-keep class org.joda.time.** { *; }
+-dontwarn org.joda.time.**
