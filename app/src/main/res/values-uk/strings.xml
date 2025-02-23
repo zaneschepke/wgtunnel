@@ -203,4 +203,6 @@
     <string name="unauthorized">Неможливо запустити тунель без авторизації.</string>
     <string name="tunne_start_failed_title">Помилка тунелю</string>
     <string name="multiple">Декілька</string>
+    <string name="export_amnezia">Експортувати як Amnezia</string>
+    <string name="export_wireguard">Експортувати як WireGuard</string>
 </resources>
