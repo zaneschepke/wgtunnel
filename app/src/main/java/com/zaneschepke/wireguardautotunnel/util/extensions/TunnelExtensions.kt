@@ -46,9 +46,9 @@ fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
 fun Peer.isReachable(preferIpv4: Boolean): Boolean {
 	val host =
 		if (this.endpoint.isPresent &&
-			this.endpoint.get().getResolved(preferIpv4).isPresent
+			this.endpoint.get().resolved.isPresent
 		) {
-			this.endpoint.get().getResolved(preferIpv4).get().host
+			this.endpoint.get().resolved.get().host
 		} else {
 			Constants.DEFAULT_PING_IP
 		}
