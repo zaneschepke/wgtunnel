@@ -1,0 +1,6 @@
+Novità:
+- aggiornamenti UI
+- Migliorie navigazione AndroidTV
+- Bug consumo batteria risolto
+- Correzione impostazioni opzionali caratteri jolly
+- Altre migliorie

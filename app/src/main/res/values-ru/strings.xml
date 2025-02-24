@@ -3,7 +3,7 @@
     <string name="turn_off_tunnel">Действие требует отключения туннеля</string>
     <string name="mtu">MTU</string>
     <string name="tunnel_name">Имя туннеля</string>
-    <string name="public_key">Публичный ключ</string>
+    <string name="public_key">Открытый ключ</string>
     <string name="name">Имя</string>
     <string name="peer">Пир</string>
     <string name="privacy_policy">Посмотреть политику конфиденциальности</string>
@@ -129,7 +129,7 @@
     <string name="handshake">рукопожатие</string>
     <string name="logs">Журналы</string>
     <string name="light">Светлая</string>
-    <string name="automatic">Автоматически</string>
+    <string name="automatic">Автоматическая</string>
     <string name="dynamic">Динамическая</string>
     <string name="language">Язык</string>
     <string name="trusted_wifi_names">Доверенные сети Wi-Fi</string>
@@ -192,4 +192,17 @@
     <string name="advanced_settings">Дополнительные настройки</string>
     <string name="enable_amnezia_compatibility">Включить совместимость с Amnezia</string>
     <string name="include_lan">Включить LAN</string>
+    <string name="auto_tunnel">Автотуннель</string>
+    <string name="tunnel_control">Управление туннелем</string>
+    <string name="error_tunnel_start">Невозможно запустить туннель</string>
+    <string name="kill_switch_off">Без экстренного отключения в доверенных</string>
+    <string name="prefer_ipv4">Предпочитать соединение IPv4</string>
+    <string name="dns_error">Не получить конечную точку DNS.</string>
+    <string name="start_failed_config">Невозможно запустить туннель с ошибкой конфигурации.</string>
+    <string name="unauthorized">Невозможно запустить туннель без авторизации.</string>
+    <string name="tunne_start_failed_title">Ошибка туннеля</string>
+    <string name="server_ipv4">Получение имени узла IPv4</string>
+    <string name="multiple">Несколько</string>
+    <string name="export_amnezia">Экспортировать как Amnezia</string>
+    <string name="export_wireguard">Экспортировать как WireGuard</string>
 </resources>
