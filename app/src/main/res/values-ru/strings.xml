@@ -126,7 +126,7 @@
     <string name="show_amnezia_properties">Показать настройки Amnezia</string>
     <string name="never">никогда</string>
     <string name="sec">сек.</string>
-    <string name="handshake">рукопожатие</string>
+    <string name="handshake">соединение</string>
     <string name="logs">Журналы</string>
     <string name="light">Светлая</string>
     <string name="automatic">Автоматическая</string>
