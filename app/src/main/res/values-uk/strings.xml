@@ -117,7 +117,7 @@
     <string name="set_custom_ping_cooldown">Час очікування перезапуску пінгу (сек.)</string>
     <string name="show_amnezia_properties">Показати налаштування Amnezia</string>
     <string name="sec">сек.</string>
-    <string name="handshake">рукостискання</string>
+    <string name="handshake">з\'єднання</string>
     <string name="notifications">Сповіщення</string>
     <string name="light">Світла</string>
     <string name="dark">Темна</string>
