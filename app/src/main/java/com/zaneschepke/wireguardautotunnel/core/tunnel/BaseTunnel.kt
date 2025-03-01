@@ -92,6 +92,22 @@ open class BaseTunnel(
 		}
 	}
 
+	override fun startTunnel(tunnelConf: TunnelConf) {
+		applicationScope.launch(ioDispatcher) {
+			serviceManager.startBackgroundService(tunnelConf)
+			appDataRepository.tunnels.save(tunnelConf.copy(isActive = true))
+			addToActiveTunnels(tunnelConf)
+		}
+	}
+
+	override fun stopTunnel(tunnelConf: TunnelConf?) {
+		// Default empty implementation; subclasses override
+	}
+
+	override fun toggleTunnel(tunnelConf: TunnelConf, state: TunnelStatus) {
+		// Default empty implementation; subclasses override
+	}
+
 	override suspend fun bounceTunnel(tunnelConf: TunnelConf) {
 		if (tunnels.value.any { it.id == tunnelConf.id }) {
 			toggleTunnel(tunnelConf, TunnelStatus.DOWN)
@@ -100,30 +116,19 @@ open class BaseTunnel(
 	}
 
 	override suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
+		// Default empty implementation
 	}
 
 	override suspend fun runningTunnelNames(): Set<String> {
 		return emptySet()
 	}
 
-	override val activeTunnels: StateFlow<Map<Int, TunnelState>>
-		get() = _activeTunnels.asStateFlow()
-
-	override suspend fun startTunnel(tunnelConf: TunnelConf) {
-		serviceManager.startBackgroundService(tunnelConf)
-		appDataRepository.tunnels.save(tunnelConf.copy(isActive = true))
-		addToActiveTunnels(tunnelConf)
-	}
-
-	override suspend fun stopTunnel(tunnelConf: TunnelConf?) {
-	}
-
-	open suspend fun toggleTunnel(tunnelConf: TunnelConf, state: TunnelStatus) {
-	}
-
-	open suspend fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
+	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
 		throw NotImplementedError("Get statistics not implemented in base class")
 	}
+
+	override val activeTunnels: StateFlow<Map<Int, TunnelState>>
+		get() = _activeTunnels.asStateFlow()
 
 	internal suspend fun onTunnelStop(tunnelConf: TunnelConf) {
 		appDataRepository.tunnels.save(tunnelConf.copy(isActive = false))
@@ -131,7 +136,7 @@ open class BaseTunnel(
 		if (tunnels.value.isEmpty()) serviceManager.stopBackgroundService()
 	}
 
-	internal suspend fun stopAllTunnels() {
+	internal fun stopAllTunnels() {
 		tunnels.value.forEach {
 			stopTunnel(it)
 		}

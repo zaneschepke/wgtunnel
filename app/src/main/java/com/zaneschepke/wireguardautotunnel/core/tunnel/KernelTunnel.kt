@@ -17,7 +17,7 @@ import com.zaneschepke.wireguardautotunnel.domain.state.WireGuardStatistics
 import com.zaneschepke.wireguardautotunnel.util.extensions.toBackendError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -31,9 +31,9 @@ class KernelTunnel @Inject constructor(
 	networkMonitor: NetworkMonitor,
 ) : BaseTunnel(ioDispatcher, applicationScope, networkMonitor, appDataRepository, serviceManager, notificationManager) {
 
-	override suspend fun startTunnel(tunnelConf: TunnelConf) {
-		withContext(ioDispatcher) {
-			if (tunnels.value.any { it.id == tunnelConf.id }) return@withContext Timber.w("Tunnel already running")
+	override fun startTunnel(tunnelConf: TunnelConf) {
+		applicationScope.launch(ioDispatcher) {
+			if (tunnels.value.any { it.id == tunnelConf.id }) return@launch Timber.w("Tunnel already running")
 			runCatching {
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
 				super.startTunnel(tunnelConf)
@@ -48,15 +48,14 @@ class KernelTunnel @Inject constructor(
 		}
 	}
 
-	override suspend fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
+	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
 		return WireGuardStatistics(backend.getStatistics(tunnelConf))
 	}
 
-	override suspend fun stopTunnel(tunnelConf: TunnelConf?) {
-		withContext(ioDispatcher) {
-			val tunnel = tunnels.value.firstOrNull { it.id == tunnelConf?.id }
+	override fun stopTunnel(tunnelConf: TunnelConf?) {
+		applicationScope.launch(ioDispatcher) {
 			runCatching {
-				tunnel?.let {
+				tunnels.value.firstOrNull { it.id == tunnelConf?.id }?.let {
 					backend.setState(it, Tunnel.State.DOWN, it.toWgConfig())
 					onTunnelStop(it)
 				} ?: stopAllTunnels()
@@ -66,10 +65,16 @@ class KernelTunnel @Inject constructor(
 		}
 	}
 
-	override suspend fun toggleTunnel(tunnelConf: TunnelConf, state: TunnelStatus) {
-		when (state) {
-			TunnelStatus.UP -> backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
-			TunnelStatus.DOWN -> backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toWgConfig())
+	override fun toggleTunnel(tunnelConf: TunnelConf, status: TunnelStatus) {
+		applicationScope.launch(ioDispatcher) {
+			runCatching {
+				when (status) {
+					TunnelStatus.UP -> backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
+					TunnelStatus.DOWN -> backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toWgConfig())
+				}
+			}.onFailure {
+				Timber.e(it)
+			}
 		}
 	}
 

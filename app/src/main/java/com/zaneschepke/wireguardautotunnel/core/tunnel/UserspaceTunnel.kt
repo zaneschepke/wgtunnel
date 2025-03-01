@@ -16,7 +16,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.toBackendError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
@@ -30,11 +30,11 @@ class UserspaceTunnel @Inject constructor(
 	notificationManager: NotificationManager,
 	private val backend: Backend,
 	networkMonitor: NetworkMonitor,
-) : TunnelProvider, BaseTunnel(ioDispatcher, applicationScope, networkMonitor, appDataRepository, serviceManager, notificationManager) {
+) : BaseTunnel(ioDispatcher, applicationScope, networkMonitor, appDataRepository, serviceManager, notificationManager) {
 
-	override suspend fun startTunnel(tunnelConf: TunnelConf) {
-		withContext(ioDispatcher) {
-			if (tunnels.value.any { it.id == tunnelConf.id }) return@withContext Timber.w("Tunnel already running")
+	override fun startTunnel(tunnelConf: TunnelConf) {
+		applicationScope.launch(ioDispatcher) {
+			if (tunnels.value.any { it.id == tunnelConf.id }) return@launch Timber.w("Tunnel already running")
 			if (tunnels.value.isNotEmpty()) {
 				stopAllTunnels()
 			}
@@ -52,19 +52,21 @@ class UserspaceTunnel @Inject constructor(
 		}
 	}
 
-	override suspend fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
-		return AmneziaStatistics(backend.getStatistics(tunnelConf))
-	}
-
-	override suspend fun toggleTunnel(tunnelConf: TunnelConf, status: TunnelStatus) {
-		when (status) {
-			TunnelStatus.UP -> backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toAmConfig())
-			TunnelStatus.DOWN -> backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toAmConfig())
+	override fun toggleTunnel(tunnelConf: TunnelConf, status: TunnelStatus) {
+		applicationScope.launch(ioDispatcher) {
+			runCatching {
+				when (status) {
+					TunnelStatus.UP -> backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toAmConfig())
+					TunnelStatus.DOWN -> backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toAmConfig())
+				}
+			}.onFailure {
+				Timber.e(it)
+			}
 		}
 	}
 
-	override suspend fun stopTunnel(tunnelConf: TunnelConf?) {
-		withContext(ioDispatcher) {
+	override fun stopTunnel(tunnelConf: TunnelConf?) {
+		applicationScope.launch(ioDispatcher) {
 			runCatching {
 				tunnels.value.firstOrNull { it.id == tunnelConf?.id }?.let {
 					backend.setState(it, Tunnel.State.DOWN, it.toAmConfig())
@@ -76,11 +78,22 @@ class UserspaceTunnel @Inject constructor(
 		}
 	}
 
+	override suspend fun bounceTunnel(tunnelConf: TunnelConf) {
+		if (tunnels.value.any { it.id == tunnelConf.id }) {
+			toggleTunnel(tunnelConf, TunnelStatus.DOWN)
+			toggleTunnel(tunnelConf, TunnelStatus.UP)
+		}
+	}
+
 	override suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
 		backend.setBackendState(backendState.asAmBackendState(), allowedIps)
 	}
 
 	override suspend fun runningTunnelNames(): Set<String> {
 		return backend.runningTunnelNames
+	}
+
+	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
+		return AmneziaStatistics(backend.getStatistics(tunnelConf))
 	}
 }
