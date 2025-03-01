@@ -31,11 +31,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
@@ -103,9 +101,8 @@ constructor(
 
 	private suspend fun appReadyCheck() {
 		val tunnelCount = appDataRepository.tunnels.count()
-		uiState.takeWhile { it.tunnels.size != tunnelCount }.onCompletion {
-			_isAppReady.emit(true)
-		}.collect()
+		uiState.first { it.tunnels.count() == tunnelCount }
+		_isAppReady.emit(true)
 	}
 
 	private suspend fun initTunnels() {

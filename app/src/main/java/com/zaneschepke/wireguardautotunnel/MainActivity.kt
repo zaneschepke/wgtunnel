@@ -222,8 +222,9 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.TunnelOptions> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()
-										val config = appUiState.tunnels.first { it.id == args.id }
-										OptionsScreen(config)
+										appUiState.tunnels.firstOrNull { it.id == args.id }?.let { config ->
+											OptionsScreen(config)
+										}
 									}
 									composable<Route.Lock> {
 										PinLockScreen(viewModel)
@@ -236,13 +237,15 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.SplitTunnel> { backStack ->
 										val args = backStack.toRoute<Route.SplitTunnel>()
-										val config = appUiState.tunnels.first { it.id == args.id }
-										SplitTunnelScreen(config, viewModel)
+										appUiState.tunnels.firstOrNull { it.id == args.id }?.let {
+											SplitTunnelScreen(it, viewModel)
+										}
 									}
 									composable<Route.TunnelAutoTunnel> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()
-										val config = appUiState.tunnels.first { it.id == args.id }
-										TunnelAutoTunnelScreen(config, appUiState.appSettings)
+										appUiState.tunnels.firstOrNull { it.id == args.id }?.let {
+											TunnelAutoTunnelScreen(it, appUiState.appSettings)
+										}
 									}
 								}
 								BackHandler {
