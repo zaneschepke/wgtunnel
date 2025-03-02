@@ -35,7 +35,11 @@ class RestartReceiver : BroadcastReceiver() {
 	lateinit var ioDispatcher: CoroutineDispatcher
 
 	override fun onReceive(context: Context, intent: Intent) {
-		if (intent.action != Intent.ACTION_BOOT_COMPLETED && intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+		val action = intent.action ?: return
+		if (action != Intent.ACTION_BOOT_COMPLETED &&
+			action != Intent.ACTION_MY_PACKAGE_REPLACED &&
+			action != "com.htc.intent.action.QUICKBOOT_POWERON") return
+
 		Timber.d("RestartReceiver triggered with action: ${intent.action}")
 		applicationScope.launch(ioDispatcher) {
 			serviceManager.updateTunnelTile()
