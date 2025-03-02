@@ -1,8 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.core.tunnel
 
+import com.zaneschepke.networkmonitor.NetworkMonitor
+import com.zaneschepke.networkmonitor.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
-import com.zaneschepke.wireguardautotunnel.core.network.NetworkMonitor
 import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
 import com.zaneschepke.wireguardautotunnel.core.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
@@ -28,7 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -159,9 +160,10 @@ open class BaseTunnel(
 	}
 
 	private suspend fun startNetworkJob() = coroutineScope {
-		networkMonitor.status.distinctUntilChanged().collect {
-			isNetworkAvailable.set(!it.allOffline)
-		}
+		networkMonitor.getNetworkStatusFlow(includeWifiSsid = false, useRootShell = false)
+			.flowOn(ioDispatcher).collect {
+				isNetworkAvailable.set(it !is NetworkStatus.Disconnected)
+			}
 	}
 
 	private suspend fun startStateJob(tunnel: TunnelConf) {

@@ -3,7 +3,7 @@ package com.zaneschepke.wireguardautotunnel.core.tunnel
 import com.wireguard.android.backend.Backend
 import com.wireguard.android.backend.BackendException
 import com.wireguard.android.backend.Tunnel
-import com.zaneschepke.wireguardautotunnel.core.network.NetworkMonitor
+import com.zaneschepke.networkmonitor.NetworkMonitor
 import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope

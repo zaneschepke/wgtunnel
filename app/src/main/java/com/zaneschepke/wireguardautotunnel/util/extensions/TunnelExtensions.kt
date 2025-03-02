@@ -2,7 +2,6 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 
 import androidx.compose.ui.graphics.Color
 import com.wireguard.android.backend.BackendException
-import com.wireguard.android.util.RootShell
 import com.wireguard.config.Peer
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendError
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
@@ -85,12 +84,6 @@ fun Config.toWgQuickString(): String {
 		}
 	}
 	return lines.joinToString(System.lineSeparator())
-}
-
-fun RootShell.getCurrentWifiName(): String? {
-	val response = mutableListOf<String>()
-	this.run(response, "dumpsys wifi | grep 'Supplicant state: COMPLETED' | grep -o 'SSID: [^,]*' | cut -d ' ' -f2- | tr -d '\"'")
-	return response.firstOrNull()
 }
 
 fun Backend.BackendState.asBackendState(): BackendState {

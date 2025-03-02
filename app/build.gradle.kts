@@ -144,8 +144,8 @@ android {
 }
 
 dependencies {
-
 	implementation(project(":logcatter"))
+	implementation(project(":networkmonitor"))
 
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

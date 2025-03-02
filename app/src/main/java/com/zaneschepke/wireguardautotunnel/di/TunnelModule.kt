@@ -4,7 +4,8 @@ import android.content.Context
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.wireguard.android.util.ToolsInstaller
-import com.zaneschepke.wireguardautotunnel.core.network.NetworkMonitor
+import com.zaneschepke.networkmonitor.AndroidNetworkMonitor
+import com.zaneschepke.networkmonitor.NetworkMonitor
 import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.KernelTunnel
@@ -96,6 +97,12 @@ class TunnelModule {
 		@ApplicationScope applicationScope: CoroutineScope,
 	): TunnelManager {
 		return TunnelManager(kernelTunnel, userspaceTunnel, appDataRepository, applicationScope, ioDispatcher)
+	}
+
+	@Provides
+	@Singleton
+	fun provideNetworkMonitor(@ApplicationContext context: Context): NetworkMonitor {
+		return AndroidNetworkMonitor(context)
 	}
 
 	@Singleton

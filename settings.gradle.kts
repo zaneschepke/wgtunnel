@@ -34,3 +34,4 @@ rootProject.name = "WG Tunnel"
 
 include(":app")
 include(":logcatter")
+include(":networkmonitor")
