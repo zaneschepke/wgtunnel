@@ -54,12 +54,12 @@ class ServiceManager @Inject constructor(
 		applicationScope.launch(ioDispatcher) {
 			val settings = appDataRepository.settings.get()
 			appDataRepository.settings.save(settings.copy(isAutoTunnelEnabled = true))
-			if (autoTunnelService.isCompleted && autoTunnelService.isActive) {
+			if (autoTunnelService.isCompleted) {
 				_autoTunnelActive.update { true }
 				return@launch
 			}
 			runCatching {
-				autoTunnelService = CompletableDeferred() // Reset
+				autoTunnelService = CompletableDeferred()
 				startService(AutoTunnelService::class.java, background)
 				val service = withTimeoutOrNull(SERVICE_START_TIMEOUT) { autoTunnelService.await() }
 					?: throw IllegalStateException("AutoTunnelService start timed out")
@@ -75,7 +75,7 @@ class ServiceManager @Inject constructor(
 
 	fun startBackgroundService(tunnelConf: TunnelConf) {
 		applicationScope.launch(ioDispatcher) {
-			if (backgroundService.isCompleted && backgroundService.isActive) return@launch
+			if (backgroundService.isCompleted) return@launch
 			runCatching {
 				backgroundService = CompletableDeferred()
 				startService(TunnelForegroundService::class.java, true)
@@ -90,7 +90,7 @@ class ServiceManager @Inject constructor(
 
 	fun stopBackgroundService() {
 		applicationScope.launch(ioDispatcher) {
-			if (!backgroundService.isCompleted || !backgroundService.isActive) return@launch
+			if (!backgroundService.isCompleted) return@launch
 			runCatching {
 				val service = backgroundService.await()
 				service.stop()
@@ -141,7 +141,7 @@ class ServiceManager @Inject constructor(
 		applicationScope.launch(ioDispatcher) {
 			val settings = appDataRepository.settings.get()
 			appDataRepository.settings.save(settings.copy(isAutoTunnelEnabled = false))
-			if (!autoTunnelService.isCompleted || !autoTunnelService.isActive) return@launch
+			if (!autoTunnelService.isCompleted) return@launch
 			runCatching {
 				val service = autoTunnelService.await()
 				service.stop()
