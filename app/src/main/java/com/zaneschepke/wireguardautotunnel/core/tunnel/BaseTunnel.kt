@@ -177,16 +177,18 @@ open class BaseTunnel(
 
 	private suspend fun startPingJob(tunnel: TunnelConf) = coroutineScope {
 		while (isActive) {
-			if (isNetworkAvailable.get() && tunnel.isActive) {
-				val pingResult = tunnel.pingTunnel(ioDispatcher)
-				handlePingResult(tunnel, pingResult)
+			runCatching {
+				if (isNetworkAvailable.get() && tunnel.isActive) {
+					val pingSuccess = tunnel.isTunnelPingable(ioDispatcher)
+					handlePingResult(tunnel, pingSuccess)
+				}
+				delay(tunnel.pingInterval ?: Constants.PING_INTERVAL)
 			}
-			delay(tunnel.pingInterval ?: Constants.PING_INTERVAL)
 		}
 	}
 
-	private suspend fun handlePingResult(tunnel: TunnelConf, pingResult: List<Boolean>) {
-		if (pingResult.contains(false)) {
+	private suspend fun handlePingResult(tunnel: TunnelConf, pingSuccess: Boolean) {
+		if (!pingSuccess) {
 			if (isNetworkAvailable.get()) {
 				Timber.i("Ping result: target was not reachable, bouncing the tunnel")
 				bounceTunnel(tunnel)
@@ -231,11 +233,13 @@ open class BaseTunnel(
 
 	private suspend fun startTunnelStatisticsJob(tunnel: TunnelConf) = coroutineScope {
 		while (isActive) {
-			val stats = getStatistics(tunnel)
-			tunnel.state.update {
-				it.copy(statistics = stats)
+			runCatching {
+				val stats = getStatistics(tunnel)
+				tunnel.state.update {
+					it.copy(statistics = stats)
+				}
+				delay(CHECK_INTERVAL)
 			}
-			delay(CHECK_INTERVAL)
 		}
 	}
 }

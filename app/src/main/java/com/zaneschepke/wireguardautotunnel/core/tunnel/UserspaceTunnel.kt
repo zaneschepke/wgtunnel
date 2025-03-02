@@ -34,14 +34,19 @@ class UserspaceTunnel @Inject constructor(
 
 	override fun startTunnel(tunnelConf: TunnelConf) {
 		applicationScope.launch(ioDispatcher) {
+			Timber.d("Starting tunnel ${tunnelConf.id} userspace")
 			if (tunnels.value.any { it.id == tunnelConf.id }) return@launch Timber.w("Tunnel already running")
 			if (tunnels.value.isNotEmpty()) {
+				Timber.d("Stopping all tunnels")
 				stopAllTunnels()
 			}
 			runCatching {
+				Timber.d("Setting backend state UP")
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toAmConfig())
+				Timber.d("Calling super.startTunnel")
 				super.startTunnel(tunnelConf)
 			}.onFailure {
+				Timber.e(it, "Failed to start tunnel ${tunnelConf.id} userspace")
 				onTunnelStop(tunnelConf)
 				if (it is BackendException) {
 					handleBackendThrowable(it.toBackendError())

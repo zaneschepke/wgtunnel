@@ -74,18 +74,17 @@ data class TunnelConf(
 			updatedConf.pingInterval == pingInterval
 	}
 
-	suspend fun pingTunnel(context: CoroutineContext): List<Boolean> {
+	suspend fun isTunnelPingable(context: CoroutineContext): Boolean {
 		return withContext(context) {
 			val config = toWgConfig()
 			if (pingIp != null) {
-				Timber.i("Pinging custom ip")
-				listOf(InetAddress.getByName(pingIp).isReachable(Constants.PING_TIMEOUT.toInt()))
-			} else {
-				Timber.i("Pinging all peers")
-				config.peers.map { peer ->
-					peer.isReachable(isIpv4Preferred)
-				}
+				return@withContext InetAddress.getByName(pingIp)
+					.isReachable(Constants.PING_TIMEOUT.toInt())
 			}
+			Timber.i("Pinging all peers")
+			config.peers.map { peer ->
+				peer.isReachable(isIpv4Preferred)
+			}.all { true }
 		}
 	}
 

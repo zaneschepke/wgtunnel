@@ -32,12 +32,16 @@ class KernelTunnel @Inject constructor(
 ) : BaseTunnel(ioDispatcher, applicationScope, networkMonitor, appDataRepository, serviceManager, notificationManager) {
 
 	override fun startTunnel(tunnelConf: TunnelConf) {
+		Timber.d("Starting tunnel ${tunnelConf.id} kernel")
 		applicationScope.launch(ioDispatcher) {
 			if (tunnels.value.any { it.id == tunnelConf.id }) return@launch Timber.w("Tunnel already running")
 			runCatching {
+				Timber.d("Setting backend state UP")
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
+				Timber.d("Calling super.startTunnel")
 				super.startTunnel(tunnelConf)
 			}.onFailure {
+				Timber.e(it, "Failed to start tunnel ${tunnelConf.id} kernel")
 				onTunnelStop(tunnelConf)
 				if (it is BackendException) {
 					handleBackendThrowable(it.toBackendError())
@@ -75,6 +79,13 @@ class KernelTunnel @Inject constructor(
 			}.onFailure {
 				Timber.e(it)
 			}
+		}
+	}
+
+	override suspend fun bounceTunnel(tunnelConf: TunnelConf) {
+		if (tunnels.value.any { it.id == tunnelConf.id }) {
+			toggleTunnel(tunnelConf, TunnelStatus.DOWN)
+			toggleTunnel(tunnelConf, TunnelStatus.UP)
 		}
 	}
 
