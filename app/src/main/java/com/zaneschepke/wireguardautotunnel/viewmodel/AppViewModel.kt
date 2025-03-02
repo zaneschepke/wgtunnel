@@ -73,11 +73,13 @@ constructor(
 			appDataRepository.settings.flow,
 			appDataRepository.tunnels.flow,
 			appDataRepository.appState.flow,
+			tunnelManager.activeTunnels,
 			serviceManager.autoTunnelActive,
-		) { settings, tunnels, generalState, autoTunnel ->
+		) { settings, tunnels, generalState, activeTunnels, autoTunnel ->
 			AppUiState(
 				settings,
 				tunnels,
+				activeTunnels,
 				generalState,
 				autoTunnel,
 			)

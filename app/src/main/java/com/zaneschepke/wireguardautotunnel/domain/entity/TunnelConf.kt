@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.domain.entity
 
-import android.os.Parcelable
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
@@ -29,7 +28,7 @@ data class TunnelConf(
 	val isEthernetTunnel: Boolean = false,
 	val isIpv4Preferred: Boolean = false,
 	@Transient
-	private var stateChangeCallback: ((Any) -> Unit)? = null
+	private var stateChangeCallback: ((Any) -> Unit)? = null,
 ) : Tunnel, com.wireguard.android.backend.Tunnel {
 
 	fun setStateChangeCallback(callback: (Any) -> Unit) {

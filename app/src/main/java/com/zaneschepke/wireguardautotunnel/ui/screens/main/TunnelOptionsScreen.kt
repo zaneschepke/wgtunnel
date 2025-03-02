@@ -41,6 +41,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationT
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Address
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
@@ -51,7 +52,7 @@ import kotlin.text.isNullOrBlank
 import kotlin.text.toLong
 
 @Composable
-fun OptionsScreen(tunnelConf: TunnelConf, viewModel: TunnelOptionsViewModel = hiltViewModel()) {
+fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: TunnelOptionsViewModel = hiltViewModel()) {
 	val navController = LocalNavController.current
 
 	var currentText by remember { mutableStateOf("") }
@@ -194,6 +195,7 @@ fun OptionsScreen(tunnelConf: TunnelConf, viewModel: TunnelOptionsViewModel = hi
 							trailing = {
 								ScaledSwitch(
 									checked = tunnelConf.isPingEnabled,
+									enabled = !appUiState.activeTunnels.containsKey(tunnelConf.id),
 									onClick = { onPingToggle() },
 								)
 							},

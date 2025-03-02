@@ -352,11 +352,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 							ScaledSwitch(
 								uiState.appSettings.isKernelEnabled,
 								onClick = { appViewModel.onToggleKernelMode() },
-// 								enabled = !(
-// 									uiState.settings.isAutoTunnelEnabled ||
-// 										uiState.settings.isAlwaysOnVpnEnabled ||
-// 										(uiState.vpnState.status == TunnelState.UP)
-// 									),
+								enabled = !(
+									uiState.appSettings.isAutoTunnelEnabled ||
+										uiState.appSettings.isAlwaysOnVpnEnabled ||
+										uiState.activeTunnels.isNotEmpty()
+									),
 							)
 						},
 						onClick = {

@@ -38,7 +38,10 @@ class RestartReceiver : BroadcastReceiver() {
 		val action = intent.action ?: return
 		if (action != Intent.ACTION_BOOT_COMPLETED &&
 			action != Intent.ACTION_MY_PACKAGE_REPLACED &&
-			action != "com.htc.intent.action.QUICKBOOT_POWERON") return
+			action != "com.htc.intent.action.QUICKBOOT_POWERON"
+		) {
+			return
+		}
 
 		Timber.d("RestartReceiver triggered with action: ${intent.action}")
 		applicationScope.launch(ioDispatcher) {

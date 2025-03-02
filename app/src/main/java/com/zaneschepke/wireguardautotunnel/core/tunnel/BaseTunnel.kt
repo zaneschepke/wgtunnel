@@ -83,7 +83,7 @@ open class BaseTunnel(
 
 	private fun startTunnelJobs(tunnel: TunnelConf) = applicationScope.launch(ioDispatcher) {
 		launch { startTunnelStatisticsJob(tunnel) }
-		if(tunnel.isPingEnabled) launch { startPingJob(tunnel) }
+		if (tunnel.isPingEnabled) launch { startPingJob(tunnel) }
 	}
 
 	private fun updateTunnelState(tunnelId: Int, newState: TunnelStatus) {
@@ -96,7 +96,6 @@ open class BaseTunnel(
 			newMap
 		}
 	}
-
 
 	internal fun beforeStartTunnel(tunnelConf: TunnelConf) {
 		tunnelConf.setStateChangeCallback { state ->
@@ -111,7 +110,6 @@ open class BaseTunnel(
 		}
 	}
 
-
 	override fun startTunnel(tunnelConf: TunnelConf) {
 		applicationScope.launch(ioDispatcher) {
 			serviceManager.startBackgroundService(tunnelConf)
@@ -123,7 +121,6 @@ open class BaseTunnel(
 	override fun stopTunnel(tunnelConf: TunnelConf?) {
 		// Default empty implementation; subclasses override
 	}
-
 
 	override suspend fun bounceTunnel(tunnelConf: TunnelConf) {
 		stopTunnel(tunnelConf)
@@ -232,9 +229,8 @@ open class BaseTunnel(
 			storageTuns.forEach { storageTun ->
 				val currentTun = tunnels.value.firstOrNull { it.id == storageTun.id }
 				if (currentTun != null) {
-					if (!currentTun.isQuickConfigMatching(storageTun) ||
-						currentTun.isPingEnabled != storageTun.isPingEnabled) {
-						Timber.d("Tunnel config changed for ID ${storageTun}, bouncing tunnel")
+					if (!currentTun.isQuickConfigMatching(storageTun)) {
+						Timber.d("Tunnel config changed for ID $storageTun, bouncing tunnel")
 						bounceTunnel(storageTun)
 					}
 				}
