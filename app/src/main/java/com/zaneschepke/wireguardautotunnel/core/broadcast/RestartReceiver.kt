@@ -7,13 +7,16 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
+import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class BootReceiver : BroadcastReceiver() {
+class RestartReceiver : BroadcastReceiver() {
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
 
@@ -27,17 +30,27 @@ class BootReceiver : BroadcastReceiver() {
 	@Inject
 	lateinit var tunnelManager: TunnelManager
 
+	@Inject
+	@IoDispatcher
+	lateinit var ioDispatcher: CoroutineDispatcher
+
 	override fun onReceive(context: Context, intent: Intent) {
-		if (Intent.ACTION_BOOT_COMPLETED != intent.action) return
-		serviceManager.updateTunnelTile()
-		serviceManager.updateAutoTunnelTile()
-		applicationScope.launch {
-			with(appDataRepository.settings.get()) {
-				if (isRestoreOnBootEnabled) {
-					// If auto tunnel is enabled, just start it and let auto tunnel start appropriate tun
-					if (isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) return@launch serviceManager.startAutoTunnel(true)
+		if (intent.action != Intent.ACTION_BOOT_COMPLETED && intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+		Timber.d("RestartReceiver triggered with action: ${intent.action}")
+		applicationScope.launch(ioDispatcher) {
+			serviceManager.updateTunnelTile()
+			serviceManager.updateAutoTunnelTile()
+			val settings = appDataRepository.settings.get()
+			if (settings.isRestoreOnBootEnabled) {
+				if (settings.isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) {
+					Timber.d("Starting auto-tunnel on boot/update")
+					serviceManager.startAutoTunnel(true)
+				} else {
+					Timber.d("Restoring previous tunnel state")
 					tunnelManager.restorePreviousState()
 				}
+			} else {
+				Timber.d("Restore on boot disabled, skipping")
 			}
 		}
 	}
