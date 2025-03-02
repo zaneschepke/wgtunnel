@@ -10,7 +10,6 @@ import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
-import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.domain.state.WireGuardStatistics
@@ -37,6 +36,7 @@ class KernelTunnel @Inject constructor(
 			if (tunnels.value.any { it.id == tunnelConf.id }) return@launch Timber.w("Tunnel already running")
 			runCatching {
 				Timber.d("Setting backend state UP")
+				super.beforeStartTunnel(tunnelConf)
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
 				Timber.d("Calling super.startTunnel")
 				super.startTunnel(tunnelConf)
@@ -66,26 +66,6 @@ class KernelTunnel @Inject constructor(
 			}.onFailure {
 				Timber.e(it)
 			}
-		}
-	}
-
-	override fun toggleTunnel(tunnelConf: TunnelConf, status: TunnelStatus) {
-		applicationScope.launch(ioDispatcher) {
-			runCatching {
-				when (status) {
-					TunnelStatus.UP -> backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
-					TunnelStatus.DOWN -> backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toWgConfig())
-				}
-			}.onFailure {
-				Timber.e(it)
-			}
-		}
-	}
-
-	override suspend fun bounceTunnel(tunnelConf: TunnelConf) {
-		if (tunnels.value.any { it.id == tunnelConf.id }) {
-			toggleTunnel(tunnelConf, TunnelStatus.DOWN)
-			toggleTunnel(tunnelConf, TunnelStatus.UP)
 		}
 	}
 

@@ -14,7 +14,6 @@ interface TunnelProvider {
 
 	fun startTunnel(tunnelConf: TunnelConf)
 	fun stopTunnel(tunnelConf: TunnelConf? = null)
-	fun toggleTunnel(tunnelConf: TunnelConf, state: TunnelStatus)
 	suspend fun bounceTunnel(tunnelConf: TunnelConf)
 	suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>)
 	suspend fun runningTunnelNames(): Set<String>

@@ -11,6 +11,7 @@ import androidx.work.Configuration
 import com.wireguard.android.backend.GoBackend
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
+import com.zaneschepke.wireguardautotunnel.core.worker.ServiceWorker
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.di.MainDispatcher
@@ -90,6 +91,8 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
 				}
 			}
 		}
+
+		ServiceWorker.start(this)
 
 		applicationScope.launch {
 			withContext(mainDispatcher) {

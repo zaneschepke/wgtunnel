@@ -127,9 +127,6 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 
-			// TODO could improve this to cancel when no tuns or autotun on
-			ServiceWorker.start(this)
-
 			CompositionLocalProvider(LocalNavController provides navController) {
 				SnackbarControllerProvider { host ->
 					WireguardAutoTunnelTheme(theme = appUiState.generalState.theme) {
