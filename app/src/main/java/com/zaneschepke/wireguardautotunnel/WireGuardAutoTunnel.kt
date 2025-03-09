@@ -96,7 +96,7 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
 
 		applicationScope.launch {
 			withContext(mainDispatcher) {
-				if (appDataRepository.appState.isLocalLogsEnabled() && !isRunningOnTv()) logReader.initialize()
+				if (appDataRepository.appState.isLocalLogsEnabled() && !isRunningOnTv()) logReader.start()
 			}
 			if (!appDataRepository.settings.get().isKernelEnabled) {
 				tunnelManager.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())

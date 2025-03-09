@@ -145,15 +145,10 @@ constructor(
 		with(uiState.value.generalState) {
 			val toggledOn = !isLocalLogsEnabled
 			appDataRepository.appState.setLocalLogsEnabled(toggledOn)
-			if (!toggledOn) onLoggerStop()
-			_configurationChange.update {
-				true
+			if (!toggledOn) {
+				logReader.stop()
 			}
 		}
-	}
-
-	private suspend fun onLoggerStop() {
-		logReader.deleteAndClearLogs()
 	}
 
 	fun onToggleAlwaysOnVPN() = viewModelScope.launch {

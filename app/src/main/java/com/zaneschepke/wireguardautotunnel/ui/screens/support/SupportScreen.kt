@@ -18,8 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +34,6 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.label.VersionLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
@@ -51,20 +48,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 fun SupportScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
-
-	var showDialog by remember { mutableStateOf(false) }
-
-	if (showDialog) {
-		InfoDialog(onAttest = {
-			showDialog = false
-			appViewModel.onToggleLocalLogging()
-		}, onDismiss = {
-			showDialog = false
-		}, title = {
-			Text(stringResource(R.string.configuration_change))
-		}, body = { Text(stringResource(R.string.requires_app_relaunch)) }, confirmText = { Text(stringResource(R.string.yes)) })
-	}
-
 	Column(
 		horizontalAlignment = Alignment.Start,
 		verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
@@ -115,12 +98,12 @@ fun SupportScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 								ScaledSwitch(
 									appUiState.generalState.isLocalLogsEnabled,
 									onClick = {
-										showDialog = true
+										appViewModel.onToggleLocalLogging()
 									},
 								)
 							},
 							onClick = {
-								showDialog = true
+								appViewModel.onToggleLocalLogging()
 							},
 						),
 					)
