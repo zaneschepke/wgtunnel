@@ -196,12 +196,12 @@
     <string name="tunnel_control">Управление туннелем</string>
     <string name="error_tunnel_start">Невозможно запустить туннель</string>
     <string name="kill_switch_off">Без экстренного отключения в доверенных</string>
-    <string name="prefer_ipv4">Предпочитать IPv4 соединение</string>
+    <string name="prefer_ipv4">Предпочитать соединение IPv4</string>
     <string name="dns_error">Не получить конечную точку DNS.</string>
     <string name="start_failed_config">Невозможно запустить туннель с ошибкой конфигурации.</string>
     <string name="unauthorized">Невозможно запустить туннель без авторизации.</string>
     <string name="tunne_start_failed_title">Ошибка туннеля</string>
-    <string name="server_ipv4">Разрешать IPv4 имена хостов</string>
+    <string name="server_ipv4">Получение имени узла IPv4</string>
     <string name="multiple">Несколько</string>
     <string name="export_amnezia">Экспортировать как Amnezia</string>
     <string name="export_wireguard">Экспортировать как WireGuard</string>
