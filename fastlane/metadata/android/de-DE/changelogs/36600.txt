@@ -1,0 +1,6 @@
+Was ist neu?
+- Die Ping-Funktion funktioniert jetzt unabhängig vom automatischen Tunnel
+- Komfortaktion für Amnezia-Kompatibilität hinzugefügt
+- Komfortaktion zum Ausschließen von LAN aus dem Tunnel hinzugefügt
+- Option zur Einstellung der Entprellungszeit für Autotunnel hinzugefügt
+- Viele Fehlerkorrekturen und Verbesserungen

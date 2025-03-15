@@ -162,7 +162,7 @@
     <string name="monitoring_state_changes">Überwache Statusänderungen</string>
     <string name="stop_on_no_internet">Stoppen wenn keine Internetverbindung besteht</string>
     <string name="ethernet_tunnel">Ethernet Tunnel</string>
-    <string name="set_ethernet_tunnel">Als Ethernet Tunnel setzten</string>
+    <string name="set_ethernet_tunnel">Als Ethernet Tunnel setzen</string>
     <string name="native_kill_switch">Nativer Notschalter</string>
     <string name="vpn_kill_switch">VPN Notschalter</string>
     <string name="kill_switch_options">Notschalteroptionen</string>
@@ -192,4 +192,17 @@
     <string name="hide_amnezia_properties">Amnezia Eigenschaften verbergen</string>
     <string name="include_lan">LAN einschließen</string>
     <string name="exclude_lan">LAN ausschließen</string>
+    <string name="tunnel_control">Tunnelsteuerung</string>
+    <string name="kill_switch_off">Notschalter stoppen bei vertrauenswürdigen</string>
+    <string name="error_tunnel_start">Start des Tunnels fehlgeschlagen</string>
+    <string name="auto_tunnel">Auto-Tunnel</string>
+    <string name="export_amnezia">Als Amnezia exportieren</string>
+    <string name="export_wireguard">Als WireGuard exportieren</string>
+    <string name="server_ipv4">IPv4 Hostnamensauflösung</string>
+    <string name="prefer_ipv4">IPv4 Verbindung bevorzugen</string>
+    <string name="dns_error">Fehler bei Endpunkt DNS Auflösung.</string>
+    <string name="start_failed_config">Starten des Tunnels wegen Konfigfehler fehlgeschlagen.</string>
+    <string name="unauthorized">Starten des Tunnels fehlgeschlagen, unberechtigt.</string>
+    <string name="tunne_start_failed_title">Tunnelfehler</string>
+    <string name="multiple">Mehrere</string>
 </resources>

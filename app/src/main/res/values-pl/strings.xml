@@ -3,7 +3,7 @@
     <string name="tunnels">Tunele</string>
     <string name="app_name">WG Tunnel</string>
     <string name="unsure_how">jeśli nie masz pewności, jak postępować</string>
-    <string name="getting_started_guide">przewodnik wprowadzający</string>
+    <string name="getting_started_guide">przewodnik wprowadzający,</string>
     <string name="peer">Peer</string>
     <string name="background_location_message2">w celu upewnienia się, że uprawnienia te są włączone</string>
     <string name="rotate_keys">Rotuj klucze</string>
@@ -196,4 +196,14 @@
     <string name="error_tunnel_start">Nie udało się uruchomić tunelu</string>
     <string name="tunnel_control">Kontrola tunelu</string>
     <string name="auto_tunnel">Autotunel</string>
+    <string name="kill_switch_off">Zatrzymaj wyłącznik awaryjny w zaufanej</string>
+    <string name="server_ipv4">Rozpoznawanie nazw hostów IPv6</string>
+    <string name="prefer_ipv4">Preferuj połączenie IPv4</string>
+    <string name="unauthorized">Nie udało się uruchomić tunelu, brak autoryzacji.</string>
+    <string name="multiple">Wiele</string>
+    <string name="start_failed_config">Nie udało się uruchomić tunelu z powodu błędu konfiguracji.</string>
+    <string name="tunne_start_failed_title">Awaria tunelu</string>
+    <string name="dns_error">Nie udało się rozpoznać punktu końcowego DNS.</string>
+    <string name="export_amnezia">Eksportuj jako Amnezia</string>
+    <string name="export_wireguard">Eksportuj jako WireGuard</string>
 </resources>
