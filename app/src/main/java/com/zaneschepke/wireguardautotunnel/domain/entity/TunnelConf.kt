@@ -26,7 +26,7 @@ data class TunnelConf(
 	val pingCooldown: Long? = null,
 	val pingIp: String? = null,
 	val isEthernetTunnel: Boolean = false,
-	val isIpv4Preferred: Boolean = false,
+	val isIpv4Preferred: Boolean = true,
 	@Transient
 	private var stateChangeCallback: ((Any) -> Unit)? = null,
 ) : Tunnel, com.wireguard.android.backend.Tunnel {
