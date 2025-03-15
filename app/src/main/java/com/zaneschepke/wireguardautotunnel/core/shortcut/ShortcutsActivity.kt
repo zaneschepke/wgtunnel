@@ -6,6 +6,7 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.service.autotunnel.AutoTunnelService
+import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +21,9 @@ class ShortcutsActivity : ComponentActivity() {
 
 	@Inject
 	lateinit var serviceManager: ServiceManager
+
+	@Inject
+	lateinit var tunnelManager: TunnelManager
 
 	@Inject
 	@ApplicationScope
@@ -39,13 +43,13 @@ class ShortcutsActivity : ComponentActivity() {
 								.firstOrNull { it.tunName == tunnelName }
 						} ?: appDataRepository.getStartTunnelConfig()
 						Timber.d("Shortcut action on name: ${tunnelConfig?.tunName}")
-// 						tunnelConfig?.let {
-// 							when (intent.action) {
-// 								Action.START.name -> tunnelService.get().startTunnel(it)
-// 								Action.STOP.name -> tunnelService.get().stopTunnel()
-// 								else -> Unit
-// 							}
-// 						}
+ 						tunnelConfig?.let {
+ 							when (intent.action) {
+ 								Action.START.name -> tunnelManager.startTunnel(it)
+ 								Action.STOP.name -> tunnelManager.stopTunnel()
+ 								else -> Unit
+ 							}
+ 						}
 					}
 					AutoTunnelService::class.java.simpleName, LEGACY_AUTO_TUNNEL_SERVICE_NAME -> {
 						when (intent.action) {
