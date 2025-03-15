@@ -690,7 +690,7 @@ fun ConfigScreen(tunnelConf: TunnelConf?, appViewModel: AppViewModel) {
 							modifier = Modifier.fillMaxWidth(),
 						)
 						val presharedKeyEnabled = (tunnelConf == null) || isAuthenticated ||
-							with(configPair.second?.peers[index]?.preSharedKey) { this?.isEmpty == true || this?.isPresent == false }
+							with(configPair.second?.peers?.getOrNull(index)?.preSharedKey) { this?.isEmpty == true || this?.isPresent == false }
 						OutlinedTextField(
 							textStyle = MaterialTheme.typography.labelLarge,
 							modifier =

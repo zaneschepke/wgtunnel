@@ -43,13 +43,13 @@ class ShortcutsActivity : ComponentActivity() {
 								.firstOrNull { it.tunName == tunnelName }
 						} ?: appDataRepository.getStartTunnelConfig()
 						Timber.d("Shortcut action on name: ${tunnelConfig?.tunName}")
- 						tunnelConfig?.let {
- 							when (intent.action) {
- 								Action.START.name -> tunnelManager.startTunnel(it)
- 								Action.STOP.name -> tunnelManager.stopTunnel()
- 								else -> Unit
- 							}
- 						}
+						tunnelConfig?.let {
+							when (intent.action) {
+								Action.START.name -> tunnelManager.startTunnel(it)
+								Action.STOP.name -> tunnelManager.stopTunnel()
+								else -> Unit
+							}
+						}
 					}
 					AutoTunnelService::class.java.simpleName, LEGACY_AUTO_TUNNEL_SERVICE_NAME -> {
 						when (intent.action) {
