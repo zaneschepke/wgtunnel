@@ -27,12 +27,16 @@
 -dontwarn java.lang.management.**
 -dontwarn sun.nio.ch.**
 
--keep class com.google.api.client.http.** { *; }
--dontwarn com.google.api.client.http.**
-
-# Keep Joda-Time classes used by Tink
--keep class org.joda.time.** { *; }
--dontwarn org.joda.time.**
-
--keep class org.slf4j.** { *; }
--dontwarn org.slf4j.**
+-dontwarn com.google.api.client.http.GenericUrl
+-dontwarn com.google.api.client.http.HttpHeaders
+-dontwarn com.google.api.client.http.HttpRequest
+-dontwarn com.google.api.client.http.HttpRequestFactory
+-dontwarn com.google.api.client.http.HttpResponse
+-dontwarn com.google.api.client.http.HttpTransport
+-dontwarn com.google.api.client.http.javanet.NetHttpTransport$Builder
+-dontwarn com.google.api.client.http.javanet.NetHttpTransport
+-dontwarn javax.lang.model.element.Modifier
+-dontwarn org.joda.time.Instant
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+-dontwarn org.slf4j.impl.StaticMDCBinder
+-dontwarn org.slf4j.impl.StaticMarkerBinder

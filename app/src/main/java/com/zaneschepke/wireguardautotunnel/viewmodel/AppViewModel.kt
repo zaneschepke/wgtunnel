@@ -31,11 +31,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
@@ -75,11 +73,13 @@ constructor(
 			appDataRepository.settings.flow,
 			appDataRepository.tunnels.flow,
 			appDataRepository.appState.flow,
+			tunnelManager.activeTunnels,
 			serviceManager.autoTunnelActive,
-		) { settings, tunnels, generalState, autoTunnel ->
+		) { settings, tunnels, generalState, activeTunnels, autoTunnel ->
 			AppUiState(
 				settings,
 				tunnels,
+				activeTunnels,
 				generalState,
 				autoTunnel,
 			)
@@ -103,9 +103,8 @@ constructor(
 
 	private suspend fun appReadyCheck() {
 		val tunnelCount = appDataRepository.tunnels.count()
-		uiState.takeWhile { it.tunnels.size != tunnelCount }.onCompletion {
-			_isAppReady.emit(true)
-		}.collect()
+		uiState.first { it.tunnels.count() == tunnelCount }
+		_isAppReady.emit(true)
 	}
 
 	private suspend fun initTunnels() {
@@ -146,15 +145,10 @@ constructor(
 		with(uiState.value.generalState) {
 			val toggledOn = !isLocalLogsEnabled
 			appDataRepository.appState.setLocalLogsEnabled(toggledOn)
-			if (!toggledOn) onLoggerStop()
-			_configurationChange.update {
-				true
+			if (!toggledOn) {
+				logReader.stop()
 			}
 		}
-	}
-
-	private suspend fun onLoggerStop() {
-		logReader.deleteAndClearLogs()
 	}
 
 	fun onToggleAlwaysOnVPN() = viewModelScope.launch {

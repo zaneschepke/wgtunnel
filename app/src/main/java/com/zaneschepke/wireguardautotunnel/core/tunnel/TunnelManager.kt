@@ -4,22 +4,20 @@ import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.di.Kernel
 import com.zaneschepke.wireguardautotunnel.di.Userspace
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.util.extensions.withData
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class TunnelManager @Inject constructor(
@@ -30,14 +28,20 @@ class TunnelManager @Inject constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : TunnelProvider {
 
-	val appSettings: StateFlow<AppSettings?> = appDataRepository.settings.flow.stateIn(
-		scope = applicationScope.plus(ioDispatcher),
-		started = SharingStarted.Eagerly,
-		initialValue = null,
-	)
+	@OptIn(ExperimentalCoroutinesApi::class)
+	private val tunnelProviderFlow = appDataRepository.settings.flow
+		.filterNotNull()
+		.flatMapLatest { settings ->
+			MutableStateFlow(if (settings.isKernelEnabled) kernelTunnel else userspaceTunnel)
+		}
+		.stateIn(
+			scope = applicationScope.plus(ioDispatcher),
+			started = SharingStarted.Eagerly,
+			initialValue = userspaceTunnel,
+		)
 
 	@OptIn(ExperimentalCoroutinesApi::class)
-	override val activeTunnels = appSettings
+	override val activeTunnels = appDataRepository.settings.flow
 		.filterNotNull()
 		.flatMapLatest { settings ->
 			if (settings.isKernelEnabled) {
@@ -47,61 +51,46 @@ class TunnelManager @Inject constructor(
 			}
 		}
 		.stateIn(
-			scope = applicationScope,
+			scope = applicationScope.plus(ioDispatcher),
 			started = SharingStarted.Eagerly,
 			initialValue = emptyMap(),
 		)
 
-	override suspend fun startTunnel(tunnelConf: TunnelConf) {
-		appSettings.withData {
-			if (it.isKernelEnabled) return@withData kernelTunnel.startTunnel(tunnelConf)
-			userspaceTunnel.startTunnel(tunnelConf)
-		}
+	override fun startTunnel(tunnelConf: TunnelConf) {
+		tunnelProviderFlow.value.startTunnel(tunnelConf)
 	}
 
-	override suspend fun stopTunnel(tunnelConf: TunnelConf?) {
-		appSettings.withData {
-			if (it.isKernelEnabled) return@withData kernelTunnel.stopTunnel(tunnelConf)
-			userspaceTunnel.stopTunnel(tunnelConf)
-		}
+	override fun stopTunnel(tunnelConf: TunnelConf?) {
+		tunnelProviderFlow.value.stopTunnel(tunnelConf)
 	}
 
 	override suspend fun bounceTunnel(tunnelConf: TunnelConf) {
-		appSettings.withData {
-			if (it.isKernelEnabled) return@withData kernelTunnel.stopTunnel(tunnelConf)
-			userspaceTunnel.stopTunnel(tunnelConf)
-		}
+		tunnelProviderFlow.value.bounceTunnel(tunnelConf)
 	}
 
 	override suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
-		appSettings.withData {
-			if (it.isKernelEnabled) return@withData kernelTunnel.setBackendState(backendState, allowedIps)
-			userspaceTunnel.setBackendState(backendState, allowedIps)
-		}
+		tunnelProviderFlow.value.setBackendState(backendState, allowedIps)
 	}
 
 	override suspend fun runningTunnelNames(): Set<String> {
-		appSettings.filterNotNull().first().let {
-			if (it.isKernelEnabled) return kernelTunnel.runningTunnelNames()
-			return userspaceTunnel.runningTunnelNames()
-		}
+		return tunnelProviderFlow.value.runningTunnelNames()
 	}
 
-	suspend fun restorePreviousState() {
-		withContext(ioDispatcher) {
-			with(appDataRepository.settings.get()) {
-				if (isRestoreOnBootEnabled) {
-					val previouslyActiveTuns = appDataRepository.tunnels.getActive()
-					// handle kernel mode
-					val tunsToStart = previouslyActiveTuns.filterNot { tun -> activeTunnels.value.any { tun.id == it.key } }
-					if (isKernelEnabled) {
-						return@withContext tunsToStart.forEach {
-							startTunnel(it)
-						}
-					}
-					// handle userspace
-					if (activeTunnels.value.isEmpty()) tunsToStart.firstOrNull()?.let { startTunnel(it) }
+	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
+		return tunnelProviderFlow.value.getStatistics(tunnelConf)
+	}
+
+	fun restorePreviousState() = applicationScope.launch(ioDispatcher) {
+		val settings = appDataRepository.settings.get()
+		if (settings.isRestoreOnBootEnabled) {
+			val previouslyActiveTuns = appDataRepository.tunnels.getActive()
+			val tunsToStart = previouslyActiveTuns.filterNot { tun -> activeTunnels.value.any { tun.id == it.key } }
+			if (settings.isKernelEnabled) {
+				return@launch tunsToStart.forEach {
+					startTunnel(it)
 				}
+			} else {
+				tunsToStart.firstOrNull()?.let { startTunnel(it) }
 			}
 		}
 	}

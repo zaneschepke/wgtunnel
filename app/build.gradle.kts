@@ -75,8 +75,8 @@ android {
 
 		release {
 			isDebuggable = false
-			isMinifyEnabled = false
-			isShrinkResources = false
+			isMinifyEnabled = true
+			isShrinkResources = true
 			proguardFiles(
 				getDefaultProguardFile("proguard-android-optimize.txt"),
 				"proguard-rules.pro",
@@ -144,8 +144,8 @@ android {
 }
 
 dependencies {
-
 	implementation(project(":logcatter"))
+	implementation(project(":networkmonitor"))
 
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)

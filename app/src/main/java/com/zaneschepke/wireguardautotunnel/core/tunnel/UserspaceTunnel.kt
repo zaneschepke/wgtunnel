@@ -1,14 +1,13 @@
 package com.zaneschepke.wireguardautotunnel.core.tunnel
 
 import com.wireguard.android.backend.BackendException
-import com.zaneschepke.wireguardautotunnel.core.network.NetworkMonitor
+import com.zaneschepke.networkmonitor.NetworkMonitor
 import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
-import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.AmneziaStatistics
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
@@ -16,7 +15,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.toBackendError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
@@ -30,18 +29,24 @@ class UserspaceTunnel @Inject constructor(
 	notificationManager: NotificationManager,
 	private val backend: Backend,
 	networkMonitor: NetworkMonitor,
-) : TunnelProvider, BaseTunnel(ioDispatcher, applicationScope, networkMonitor, appDataRepository, serviceManager, notificationManager) {
+) : BaseTunnel(ioDispatcher, applicationScope, networkMonitor, appDataRepository, serviceManager, notificationManager) {
 
-	override suspend fun startTunnel(tunnelConf: TunnelConf) {
-		withContext(ioDispatcher) {
-			if (tunnels.value.any { it.id == tunnelConf.id }) return@withContext Timber.w("Tunnel already running")
+	override fun startTunnel(tunnelConf: TunnelConf) {
+		applicationScope.launch(ioDispatcher) {
+			Timber.d("Starting tunnel ${tunnelConf.id} userspace")
+			if (tunnels.value.any { it.id == tunnelConf.id }) return@launch Timber.w("Tunnel already running")
 			if (tunnels.value.isNotEmpty()) {
+				Timber.d("Stopping all tunnels")
 				stopAllTunnels()
 			}
 			runCatching {
+				Timber.d("Setting backend state UP")
+				super.beforeStartTunnel(tunnelConf)
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toAmConfig())
+				Timber.d("Calling super.startTunnel")
 				super.startTunnel(tunnelConf)
 			}.onFailure {
+				Timber.e(it, "Failed to start tunnel ${tunnelConf.id} userspace")
 				onTunnelStop(tunnelConf)
 				if (it is BackendException) {
 					handleBackendThrowable(it.toBackendError())
@@ -52,19 +57,8 @@ class UserspaceTunnel @Inject constructor(
 		}
 	}
 
-	override suspend fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
-		return AmneziaStatistics(backend.getStatistics(tunnelConf))
-	}
-
-	override suspend fun toggleTunnel(tunnelConf: TunnelConf, status: TunnelStatus) {
-		when (status) {
-			TunnelStatus.UP -> backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toAmConfig())
-			TunnelStatus.DOWN -> backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toAmConfig())
-		}
-	}
-
-	override suspend fun stopTunnel(tunnelConf: TunnelConf?) {
-		withContext(ioDispatcher) {
+	override fun stopTunnel(tunnelConf: TunnelConf?) {
+		applicationScope.launch(ioDispatcher) {
 			runCatching {
 				tunnels.value.firstOrNull { it.id == tunnelConf?.id }?.let {
 					backend.setState(it, Tunnel.State.DOWN, it.toAmConfig())
@@ -82,5 +76,9 @@ class UserspaceTunnel @Inject constructor(
 
 	override suspend fun runningTunnelNames(): Set<String> {
 		return backend.runningTunnelNames
+	}
+
+	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
+		return AmneziaStatistics(backend.getStatistics(tunnelConf))
 	}
 }

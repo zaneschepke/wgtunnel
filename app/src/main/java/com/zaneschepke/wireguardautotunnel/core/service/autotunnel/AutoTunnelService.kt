@@ -1,44 +1,42 @@
 package com.zaneschepke.wireguardautotunnel.core.service.autotunnel
 
 import android.content.Intent
-import android.net.NetworkCapabilities
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.wireguard.android.util.RootShell
+import com.zaneschepke.networkmonitor.NetworkMonitor
+import com.zaneschepke.networkmonitor.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.di.AppShell
-import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.di.MainImmediateDispatcher
-import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
-import com.zaneschepke.wireguardautotunnel.domain.state.AutoTunnelState
-import com.zaneschepke.wireguardautotunnel.domain.state.NetworkState
-import com.zaneschepke.wireguardautotunnel.core.network.InternetConnectivityMonitor
-import com.zaneschepke.wireguardautotunnel.core.network.NetworkMonitor
-import com.zaneschepke.wireguardautotunnel.domain.state.ConnectivityState
-import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
 import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
 import com.zaneschepke.wireguardautotunnel.core.notification.WireGuardNotification
+import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
+import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.di.MainImmediateDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
+import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
 import com.zaneschepke.wireguardautotunnel.domain.events.AutoTunnelEvent
 import com.zaneschepke.wireguardautotunnel.domain.events.KillSwitchEvent
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.domain.state.AutoTunnelState
+import com.zaneschepke.wireguardautotunnel.domain.state.NetworkState
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.Tunnels
-import com.zaneschepke.wireguardautotunnel.util.extensions.getCurrentWifiName
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,10 +46,6 @@ import javax.inject.Provider
 
 @AndroidEntryPoint
 class AutoTunnelService : LifecycleService() {
-
-	@Inject
-	@AppShell
-	lateinit var rootShell: Provider<RootShell>
 
 	@Inject
 	lateinit var networkMonitor: NetworkMonitor
@@ -161,46 +155,51 @@ class AutoTunnelService : LifecycleService() {
 		}
 	}
 
-	private suspend fun buildNetworkState(connectivityState: ConnectivityState): NetworkState {
+	private fun buildNetworkState(networkStatus: NetworkStatus): NetworkState {
 		return with(autoTunnelStateFlow.value.networkState) {
-			val wifiName = when {
-				connectivityState.wifiAvailable &&
-					(wifiName == null || wifiName == Constants.UNREADABLE_SSID || networkMonitor.didWifiChangeSinceLastCapabilitiesQuery) -> {
-					networkMonitor.getWifiCapabilities()?.let { getWifiName(it) } ?: wifiName
+			val wifiName = when (networkStatus) {
+				is NetworkStatus.Connected -> {
+					networkStatus.wifiSsid
 				}
-				!connectivityState.wifiAvailable -> null
-				else -> wifiName
+				else -> null
 			}
 			copy(
-				isWifiConnected = connectivityState.wifiAvailable,
-				isMobileDataConnected = connectivityState.cellularAvailable,
-				isEthernetConnected = isEthernetConnected,
+				isWifiConnected = networkStatus.wifiConnected,
+				isMobileDataConnected = networkStatus.cellularConnected,
+				isEthernetConnected = networkStatus.ethernetConnected,
 				wifiName = wifiName,
 			)
 		}
 	}
 
+	@OptIn(ExperimentalCoroutinesApi::class)
 	private fun startAutoTunnelStateJob() = lifecycleScope.launch(ioDispatcher) {
 		combine(
 			combineSettings(),
-			networkMonitor.status.map {
-				buildNetworkState(it)
-			}.distinctUntilChanged(),
+			appDataRepository.get().settings.flow
+				.distinctUntilChanged { old, new -> old.isKernelEnabled == new.isKernelEnabled } // Only emit when isKernelEnabled changes
+				.flatMapLatest { settings ->
+					networkMonitor.getNetworkStatusFlow(true, settings.isKernelEnabled)
+						.flowOn(ioDispatcher)
+						.map { buildNetworkState(it) }
+				}
+				.distinctUntilChanged(),
 		) { double, networkState ->
-			AutoTunnelState(tunnelManager.activeTunnels.value, networkState, double.first, double.second)
+			AutoTunnelState(
+				tunnelManager.activeTunnels.value,
+				networkState,
+				double.first,
+				double.second,
+			)
 		}.collect { state ->
 			autoTunnelStateFlow.update {
-				it.copy(activeTunnels = state.activeTunnels, networkState = state.networkState, settings = state.settings, tunnels = state.tunnels)
+				it.copy(
+					activeTunnels = state.activeTunnels,
+					networkState = state.networkState,
+					settings = state.settings,
+					tunnels = state.tunnels,
+				)
 			}
-		}
-	}
-
-	private suspend fun getWifiName(wifiCapabilities: NetworkCapabilities): String? {
-		val setting = appDataRepository.get().settings.get()
-		return if (setting.isWifiNameByShellEnabled) {
-			rootShell.get().getCurrentWifiName()
-		} else {
-			InternetConnectivityMonitor.getNetworkName(wifiCapabilities, this@AutoTunnelService)
 		}
 	}
 
@@ -240,7 +239,7 @@ class AutoTunnelService : LifecycleService() {
 		Timber.d("Starting with debounce delay of: ${settings.debounceDelaySeconds} seconds")
 		autoTunnelStateFlow.debounce(settings.debounceDelayMillis()).collect { watcherState ->
 			if (watcherState == defaultState) return@collect
-			Timber.d("New auto tunnel state emitted")
+			Timber.d("New auto tunnel state emitted ${watcherState.networkState}")
 			when (val event = watcherState.asAutoTunnelEvent()) {
 				is AutoTunnelEvent.Start -> (event.tunnelConf ?: appDataRepository.get().getPrimaryOrFirstTunnel())?.let {
 					tunnelManager.startTunnel(it)

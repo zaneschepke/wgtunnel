@@ -40,7 +40,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.core.shortcut.ShortcutManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
-import com.zaneschepke.wireguardautotunnel.core.worker.ServiceWorker
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
@@ -126,9 +125,6 @@ class MainActivity : AppCompatActivity() {
 					shortcutManager.addShortcuts()
 				}
 			}
-
-			// TODO could improve this to cancel when no tuns or autotun on
-			ServiceWorker.start(this)
 
 			CompositionLocalProvider(LocalNavController provides navController) {
 				SnackbarControllerProvider { host ->
@@ -222,8 +218,9 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.TunnelOptions> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()
-										val config = appUiState.tunnels.first { it.id == args.id }
-										OptionsScreen(config)
+										appUiState.tunnels.firstOrNull { it.id == args.id }?.let { config ->
+											OptionsScreen(config, appUiState)
+										}
 									}
 									composable<Route.Lock> {
 										PinLockScreen(viewModel)
@@ -236,13 +233,15 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.SplitTunnel> { backStack ->
 										val args = backStack.toRoute<Route.SplitTunnel>()
-										val config = appUiState.tunnels.first { it.id == args.id }
-										SplitTunnelScreen(config, viewModel)
+										appUiState.tunnels.firstOrNull { it.id == args.id }?.let {
+											SplitTunnelScreen(it, viewModel)
+										}
 									}
 									composable<Route.TunnelAutoTunnel> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()
-										val config = appUiState.tunnels.first { it.id == args.id }
-										TunnelAutoTunnelScreen(config, appUiState.appSettings)
+										appUiState.tunnels.firstOrNull { it.id == args.id }?.let {
+											TunnelAutoTunnelScreen(it, appUiState.appSettings)
+										}
 									}
 								}
 								BackHandler {

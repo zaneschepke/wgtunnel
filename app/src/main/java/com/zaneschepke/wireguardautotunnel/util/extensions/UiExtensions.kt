@@ -8,12 +8,6 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.isCurrentRoute
 
-fun NavController.navigateAndForget(route: Route) {
-	navigate(route) {
-		popUpTo(0)
-	}
-}
-
 fun NavController.goFromRoot(route: Route) {
 	if (currentBackStackEntry?.isCurrentRoute(route::class) == true) return
 	this.navigate(route) {
