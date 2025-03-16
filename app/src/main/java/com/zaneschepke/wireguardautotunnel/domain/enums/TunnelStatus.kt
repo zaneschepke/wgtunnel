@@ -4,7 +4,7 @@ enum class TunnelStatus {
 	UP,
 	DOWN,
 	STARTING,
-	STOPPING
+	STOPPING,
 	;
 
 	fun isDown(): Boolean {

@@ -93,7 +93,7 @@ class UserspaceTunnel @Inject constructor(
 					Timber.i(
 						"Stopping tunnel ${originalTunnel.id} userspace",
 					)
-//					updateTunnelState(tunnelConf.id, TunnelStatus.STOPPING)
+// 					updateTunnelState(tunnelConf.id, TunnelStatus.STOPPING)
 					backend.setState(originalTunnel, org.amnezia.awg.backend.Tunnel.State.DOWN, originalTunnel.toAmConfig())
 					super.stopTunnel(originalTunnel)
 					startedTunnels.remove(originalTunnel.id)
@@ -106,7 +106,7 @@ class UserspaceTunnel @Inject constructor(
 				} else {
 					Timber.w("Tunnel not found in startedTunnels, stopping all tunnels")
 					startedTunnels.forEach { (_, config) ->
-//						updateTunnelState(config.id, TunnelStatus.STOPPING)
+// 						updateTunnelState(config.id, TunnelStatus.STOPPING)
 						val state = backend.setState(config, org.amnezia.awg.backend.Tunnel.State.DOWN, config.toAmConfig())
 						super.stopTunnel(tunnelConf)
 						if (state == org.amnezia.awg.backend.Tunnel.State.DOWN) {

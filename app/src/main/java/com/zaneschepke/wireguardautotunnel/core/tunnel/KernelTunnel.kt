@@ -86,7 +86,7 @@ class KernelTunnel @Inject constructor(
 					Timber.i(
 						"Stopping tunnel ${originalTunnel.id} kernel",
 					)
-//					updateTunnelState(tunnelConf.id, TunnelStatus.STOPPING)
+// 					updateTunnelState(tunnelConf.id, TunnelStatus.STOPPING)
 					backend.setState(originalTunnel, Tunnel.State.DOWN, originalTunnel.toWgConfig())
 					super.stopTunnel(originalTunnel)
 					startedTunnels.remove(originalTunnel.id)
@@ -99,7 +99,7 @@ class KernelTunnel @Inject constructor(
 				} else {
 					Timber.w("Tunnel not found in startedTunnels, stopping all tunnels")
 					startedTunnels.forEach { (_, config) ->
-//						updateTunnelState(config.id, TunnelStatus.STOPPING)
+// 						updateTunnelState(config.id, TunnelStatus.STOPPING)
 						val state = backend.setState(config, Tunnel.State.DOWN, config.toWgConfig())
 						super.stopTunnel(tunnelConf)
 						if (state == Tunnel.State.DOWN) {
