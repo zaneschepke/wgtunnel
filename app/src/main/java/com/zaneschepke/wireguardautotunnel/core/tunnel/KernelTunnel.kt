@@ -15,7 +15,6 @@ import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.domain.state.WireGuardStatistics
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
@@ -35,7 +34,7 @@ class KernelTunnel @Inject constructor(
 	private val startedTunnels = ConcurrentHashMap<Int, TunnelConf>()
 
 	override fun startTunnel(tunnelConf: TunnelConf) {
-		Timber.i("Starting tunnel ${tunnelConf.id} userspace")
+		Timber.i("Starting tunnel ${tunnelConf.id} kernel")
 		applicationScope.launch(ioDispatcher) {
 			runCatching {
 				updateTunnelState(tunnelConf.id, TunnelStatus.STARTING)
@@ -45,7 +44,7 @@ class KernelTunnel @Inject constructor(
 				Timber.d("Callback set for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
 
 				super.startTunnel(tunnelConf)
-				Timber.d("Calling backend.setState UP for tunnel ${tunnelConf.id} with (identity: ${System.identityHashCode(tunnelConf)})")
+				Timber.d("Calling backend.setState UP for tunnel ${tunnelConf.id}")
 				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
 				startedTunnels[tunnelConf.id] = tunnelConf
 
@@ -61,7 +60,7 @@ class KernelTunnel @Inject constructor(
 				tunnelJobs[tunnelConf.id] = mutableListOf(startTunnelJobs(tunnelConf))
 				Timber.d("Started stats jobs for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
 			}.onFailure { exception ->
-				Timber.e(exception, "Failed to start tunnel ${tunnelConf.id} userspace")
+				Timber.e(exception, "Failed to start tunnel ${tunnelConf.id} kernel")
 				stopTunnel(tunnelConf)
 				handleBackendThrowable(exception)
 			}.onSuccess {
@@ -73,7 +72,7 @@ class KernelTunnel @Inject constructor(
 	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics? {
 		return try {
 			WireGuardStatistics(backend.getStatistics(tunnelConf))
-		} catch (e : Exception) {
+		} catch (e: Exception) {
 			Timber.e(e)
 			null
 		}
@@ -84,7 +83,10 @@ class KernelTunnel @Inject constructor(
 			runCatching {
 				val originalTunnel = tunnelConf?.let { startedTunnels.getOrDefault(it.id, null) }
 				if (originalTunnel != null) {
-					Timber.i("Stopping tunnel ${originalTunnel.id} userspace with original TunnelConf: $originalTunnel (identity: ${System.identityHashCode(originalTunnel)})")
+					Timber.i(
+						"Stopping tunnel ${originalTunnel.id} kernel",
+					)
+//					updateTunnelState(tunnelConf.id, TunnelStatus.STOPPING)
 					backend.setState(originalTunnel, Tunnel.State.DOWN, originalTunnel.toWgConfig())
 					super.stopTunnel(originalTunnel)
 					startedTunnels.remove(originalTunnel.id)
@@ -97,6 +99,7 @@ class KernelTunnel @Inject constructor(
 				} else {
 					Timber.w("Tunnel not found in startedTunnels, stopping all tunnels")
 					startedTunnels.forEach { (_, config) ->
+//						updateTunnelState(config.id, TunnelStatus.STOPPING)
 						val state = backend.setState(config, Tunnel.State.DOWN, config.toWgConfig())
 						super.stopTunnel(tunnelConf)
 						if (state == Tunnel.State.DOWN) {

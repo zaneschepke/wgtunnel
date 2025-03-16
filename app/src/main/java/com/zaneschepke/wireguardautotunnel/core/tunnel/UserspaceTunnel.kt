@@ -46,7 +46,7 @@ class UserspaceTunnel @Inject constructor(
 				Timber.d("Callback set for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
 
 				super.startTunnel(tunnelConf)
-				Timber.d("Calling backend.setState UP for tunnel ${tunnelConf.id} with (identity: ${System.identityHashCode(tunnelConf)})")
+				Timber.d("Calling backend.setState UP for tunnel ${tunnelConf.id}")
 				backend.setState(tunnelConf, org.amnezia.awg.backend.Tunnel.State.UP, tunnelConf.toAmConfig())
 				startedTunnels[tunnelConf.id] = tunnelConf
 
@@ -90,7 +90,10 @@ class UserspaceTunnel @Inject constructor(
 			runCatching {
 				val originalTunnel = tunnelConf?.let { startedTunnels.getOrDefault(it.id, null) }
 				if (originalTunnel != null) {
-					Timber.i("Stopping tunnel ${originalTunnel.id} userspace with original TunnelConf: $originalTunnel (identity: ${System.identityHashCode(originalTunnel)})")
+					Timber.i(
+						"Stopping tunnel ${originalTunnel.id} userspace",
+					)
+//					updateTunnelState(tunnelConf.id, TunnelStatus.STOPPING)
 					backend.setState(originalTunnel, org.amnezia.awg.backend.Tunnel.State.DOWN, originalTunnel.toAmConfig())
 					super.stopTunnel(originalTunnel)
 					startedTunnels.remove(originalTunnel.id)
@@ -103,6 +106,7 @@ class UserspaceTunnel @Inject constructor(
 				} else {
 					Timber.w("Tunnel not found in startedTunnels, stopping all tunnels")
 					startedTunnels.forEach { (_, config) ->
+//						updateTunnelState(config.id, TunnelStatus.STOPPING)
 						val state = backend.setState(config, org.amnezia.awg.backend.Tunnel.State.DOWN, config.toAmConfig())
 						super.stopTunnel(tunnelConf)
 						if (state == org.amnezia.awg.backend.Tunnel.State.DOWN) {

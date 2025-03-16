@@ -88,7 +88,7 @@ class ServiceManager @Inject constructor(
 		}
 	}
 
-	fun updateTunnelForegroundServiceNotification(tunnelConf : TunnelConf) {
+	fun updateTunnelForegroundServiceNotification(tunnelConf: TunnelConf) {
 		applicationScope.launch(ioDispatcher) {
 			if (!backgroundService.isCompleted) return@launch
 			runCatching {
@@ -99,7 +99,6 @@ class ServiceManager @Inject constructor(
 			}
 		}
 	}
-
 
 	fun stopTunnelForegroundService() {
 		applicationScope.launch(ioDispatcher) {

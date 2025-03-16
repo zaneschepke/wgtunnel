@@ -129,7 +129,7 @@ abstract class BaseTunnel(
 	}
 
 	protected fun handleBackendThrowable(throwable: Throwable) {
-		val backendError = when(throwable) {
+		val backendError = when (throwable) {
 			is BackendException -> throwable.toBackendError()
 			is org.amnezia.awg.backend.BackendException -> throwable.toBackendError()
 			else -> BackendError.Unknown
@@ -166,7 +166,7 @@ abstract class BaseTunnel(
 					} else {
 						val updated = existing.copy(
 							state = newState,
-							statistics = stats ?: existing.statistics
+							statistics = stats ?: existing.statistics,
 						)
 						current + (tunnelId to updated)
 					}

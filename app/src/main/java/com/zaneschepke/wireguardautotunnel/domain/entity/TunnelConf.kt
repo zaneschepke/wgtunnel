@@ -58,12 +58,12 @@ data class TunnelConf(
 		pingCooldown: Long? = this.pingCooldown,
 		pingIp: String? = this.pingIp,
 		isEthernetTunnel: Boolean = this.isEthernetTunnel,
-		isIpv4Preferred: Boolean = this.isIpv4Preferred
+		isIpv4Preferred: Boolean = this.isIpv4Preferred,
 	): TunnelConf {
 		return TunnelConf(
 			id, tunName, wgQuick, tunnelNetworks, isMobileDataTunnel, isPrimaryTunnel,
 			amQuick, isActive, isPingEnabled, pingInterval, pingCooldown, pingIp,
-			isEthernetTunnel, isIpv4Preferred
+			isEthernetTunnel, isIpv4Preferred,
 		).apply {
 			stateChangeCallback = this@TunnelConf.stateChangeCallback
 		}
@@ -82,32 +82,31 @@ data class TunnelConf(
 	override fun isIpv4ResolutionPreferred(): Boolean = isIpv4Preferred
 
 	override fun onStateChange(newState: org.amnezia.awg.backend.Tunnel.State) {
-		Timber.d("onStateChange called for tunnel ${id}: $tunName with state $newState")
+		Timber.d("onStateChange called for tunnel $id: $tunName with state $newState")
 		runBlocking {
 			callbackMutex.withLock {
 				if (stateChangeCallback != null) {
-					Timber.d("Invoking stateChangeCallback for tunnel ${id}: $tunName with state $newState")
+					Timber.d("Invoking stateChangeCallback for tunnel $id: $tunName with state $newState")
 					stateChangeCallback?.invoke(newState)
 				} else {
-					Timber.w("No stateChangeCallback set for tunnel ${id}: $tunName")
+					Timber.w("No stateChangeCallback set for tunnel $id: $tunName")
 				}
 			}
 		}
 	}
 
 	override fun onStateChange(newState: Tunnel.State) {
-		Timber.d("onStateChange called for tunnel ${id}: $tunName with state $newState")
+		Timber.d("onStateChange called for tunnel $id: $tunName with state $newState")
 		runBlocking {
 			callbackMutex.withLock {
 				if (stateChangeCallback != null) {
-					Timber.d("Invoking stateChangeCallback for tunnel ${id}: $tunName with state $newState")
+					Timber.d("Invoking stateChangeCallback for tunnel $id: $tunName with state $newState")
 					stateChangeCallback?.invoke(newState)
 				} else {
-					Timber.w("No stateChangeCallback set for tunnel ${id}: $tunName")
+					Timber.w("No stateChangeCallback set for tunnel $id: $tunName")
 				}
 			}
 		}
-
 	}
 
 	fun isQuickConfigMatching(updatedConf: TunnelConf): Boolean {
