@@ -98,4 +98,9 @@
     <string name="allowed_ips">允許的 IP</string>
     <string name="junk_packet_minimum_size">最小無效封包</string>
     <string name="error_no_file_explorer">未安裝任何檔案管理器</string>
+    <string name="unsure_how">如果您不確定如何進行</string>
+    <string name="see_the">請參閱</string>
+    <string name="read_logs">查看日誌</string>
+    <string name="local_logging">本地日誌記錄</string>
+    <string name="enable_local_logging">啟用本地日誌記錄</string>
 </resources>
