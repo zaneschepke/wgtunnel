@@ -73,7 +73,7 @@ class ServiceManager @Inject constructor(
 		}
 	}
 
-	fun startBackgroundService(tunnelConf: TunnelConf) {
+	fun startTunnelForegroundService(tunnelConf: TunnelConf) {
 		applicationScope.launch(ioDispatcher) {
 			if (backgroundService.isCompleted) return@launch
 			runCatching {
@@ -88,7 +88,19 @@ class ServiceManager @Inject constructor(
 		}
 	}
 
-	fun stopBackgroundService() {
+	fun updateTunnelForegroundServiceNotification(tunnelConf: TunnelConf) {
+		applicationScope.launch(ioDispatcher) {
+			if (!backgroundService.isCompleted) return@launch
+			runCatching {
+				val service = backgroundService.await()
+				service.start(tunnelConf)
+			}.onFailure {
+				Timber.e(it)
+			}
+		}
+	}
+
+	fun stopTunnelForegroundService() {
 		applicationScope.launch(ioDispatcher) {
 			if (!backgroundService.isCompleted) return@launch
 			runCatching {

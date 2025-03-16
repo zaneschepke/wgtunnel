@@ -76,7 +76,7 @@ class TunnelManager @Inject constructor(
 		return tunnelProviderFlow.value.runningTunnelNames()
 	}
 
-	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
+	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics? {
 		return tunnelProviderFlow.value.getStatistics(tunnelConf)
 	}
 
