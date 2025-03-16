@@ -4,4 +4,5 @@ sealed class BackendError() {
 	data object DNS : BackendError()
 	data object Unauthorized : BackendError()
 	data object Config : BackendError()
+	data object Unknown : BackendError()
 }

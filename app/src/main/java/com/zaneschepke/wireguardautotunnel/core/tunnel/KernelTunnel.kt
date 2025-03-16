@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.core.tunnel
 
 import com.wireguard.android.backend.Backend
-import com.wireguard.android.backend.BackendException
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.networkmonitor.NetworkMonitor
 import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
@@ -10,14 +9,17 @@ import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
+import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.domain.state.WireGuardStatistics
-import com.zaneschepke.wireguardautotunnel.util.extensions.toBackendError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 class KernelTunnel @Inject constructor(
@@ -30,41 +32,85 @@ class KernelTunnel @Inject constructor(
 	networkMonitor: NetworkMonitor,
 ) : BaseTunnel(ioDispatcher, applicationScope, networkMonitor, appDataRepository, serviceManager, notificationManager) {
 
+	private val startedTunnels = ConcurrentHashMap<Int, TunnelConf>()
+
 	override fun startTunnel(tunnelConf: TunnelConf) {
-		Timber.d("Starting tunnel ${tunnelConf.id} kernel")
+		Timber.i("Starting tunnel ${tunnelConf.id} userspace")
 		applicationScope.launch(ioDispatcher) {
-			if (tunnels.value.any { it.id == tunnelConf.id }) return@launch Timber.w("Tunnel already running")
 			runCatching {
-				Timber.d("Setting backend state UP")
-				super.beforeStartTunnel(tunnelConf)
-				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
-				Timber.d("Calling super.startTunnel")
+
+				updateTunnelState(tunnelConf.id, TunnelStatus.STARTING)
+				Timber.d("Set STARTING state for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
+
+				runBlocking { configureTunnel(tunnelConf) }
+				Timber.d("Callback set for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
+
 				super.startTunnel(tunnelConf)
-			}.onFailure {
-				Timber.e(it, "Failed to start tunnel ${tunnelConf.id} kernel")
-				onTunnelStop(tunnelConf)
-				if (it is BackendException) {
-					handleBackendThrowable(it.toBackendError())
+				Timber.d("Calling backend.setState UP for tunnel ${tunnelConf.id} with (identity: ${System.identityHashCode(tunnelConf)})")
+				backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toWgConfig())
+				startedTunnels[tunnelConf.id] = tunnelConf
+
+				val backendState = backend.getState(tunnelConf)
+				if (backendState == Tunnel.State.UP) {
+					updateTunnelState(tunnelConf.id, TunnelStatus.UP)
+					Timber.d("Confirmed UP state for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
 				} else {
-					Timber.e(it)
+					Timber.w("Tunnel ${tunnelConf.id} not UP after setState, state: $backendState")
 				}
+
+				// Start stats jobs only after UP is confirmed
+				tunnelJobs[tunnelConf.id] = mutableListOf(startTunnelJobs(tunnelConf))
+				Timber.d("Started stats jobs for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
+			}.onFailure { exception ->
+				Timber.e(exception, "Failed to start tunnel ${tunnelConf.id} userspace")
+				stopTunnel(tunnelConf)
+				handleBackendThrowable(exception)
+			}.onSuccess {
+				Timber.i("Tunnel ${tunnelConf.id} started successfully")
 			}
 		}
 	}
 
-	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics {
-		return WireGuardStatistics(backend.getStatistics(tunnelConf))
+	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics? {
+		return try {
+			WireGuardStatistics(backend.getStatistics(tunnelConf))
+		} catch (e : Exception) {
+			Timber.e(e)
+			null
+		}
 	}
 
 	override fun stopTunnel(tunnelConf: TunnelConf?) {
-		applicationScope.launch(ioDispatcher) {
-			runCatching {
-				tunnels.value.firstOrNull { it.id == tunnelConf?.id }?.let {
-					backend.setState(it, Tunnel.State.DOWN, it.toWgConfig())
-					onTunnelStop(it)
-				} ?: stopAllTunnels()
-			}.onFailure {
-				Timber.e(it)
+		tunnelConf?.let {
+			applicationScope.launch(ioDispatcher) {
+				runCatching {
+					val originalTunnel = startedTunnels[tunnelConf.id]
+					if (originalTunnel != null) {
+						Timber.i("Stopping tunnel ${originalTunnel.id} userspace with original TunnelConf: $originalTunnel (identity: ${System.identityHashCode(originalTunnel)})")
+						backend.setState(originalTunnel, Tunnel.State.DOWN, originalTunnel.toWgConfig())
+						super.stopTunnel(originalTunnel)
+						startedTunnels.remove(originalTunnel.id)
+						tunnelJobs[originalTunnel.id]?.forEach { it.cancel() }
+						tunnelJobs.remove(originalTunnel.id)
+						if (backend.getState(originalTunnel) == Tunnel.State.DOWN) {
+							updateTunnelState(originalTunnel.id, TunnelStatus.DOWN)
+							Timber.d("Confirmed DOWN state for tunnel ${originalTunnel.id}")
+						}
+					} else {
+						Timber.w("Original tunnel ${tunnelConf.id} not found in startedTunnels, attempting stop with provided instance: $tunnelConf (identity: ${System.identityHashCode(tunnelConf)})")
+						backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toWgConfig())
+						super.stopTunnel(tunnelConf)
+						if (backend.getState(tunnelConf) == Tunnel.State.DOWN) {
+							startedTunnels.remove(tunnelConf.id)
+							tunnelJobs[tunnelConf.id]?.forEach { it.cancel() }
+							tunnelJobs.remove(tunnelConf.id)
+							updateTunnelState(tunnelConf.id, TunnelStatus.DOWN)
+							Timber.d("Confirmed DOWN state for tunnel ${tunnelConf.id} after fallback")
+						}
+					}
+				}.onFailure { e ->
+					Timber.e(e, "Failed to stop tunnel ${tunnelConf.id}")
+				}
 			}
 		}
 	}

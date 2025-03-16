@@ -1,16 +1,19 @@
 package com.zaneschepke.wireguardautotunnel.domain.entity
 
+import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.Transient
-import org.amnezia.awg.backend.Tunnel
-import timber.log.Timber
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.InputStream
 import java.net.InetAddress
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.nio.charset.StandardCharsets
 
 data class TunnelConf(
 	val id: Int = 0,
@@ -29,10 +32,41 @@ data class TunnelConf(
 	val isIpv4Preferred: Boolean = true,
 	@Transient
 	private var stateChangeCallback: ((Any) -> Unit)? = null,
-) : Tunnel, com.wireguard.android.backend.Tunnel {
+) : Tunnel, org.amnezia.awg.backend.Tunnel {
 
-	fun setStateChangeCallback(callback: (Any) -> Unit) {
-		stateChangeCallback = callback
+	// Mutex to protect stateChangeCallback access
+	private val callbackMutex = Mutex()
+
+	suspend fun setStateChangeCallback(callback: (Any) -> Unit) {
+		callbackMutex.withLock {
+			stateChangeCallback = callback
+		}
+	}
+
+	// Ensure callback is copied over
+	fun copyWithCallback(
+		id: Int = this.id,
+		tunName: String = this.tunName,
+		wgQuick: String = this.wgQuick,
+		tunnelNetworks: List<String> = this.tunnelNetworks,
+		isMobileDataTunnel: Boolean = this.isMobileDataTunnel,
+		isPrimaryTunnel: Boolean = this.isPrimaryTunnel,
+		amQuick: String = this.amQuick,
+		isActive: Boolean = this.isActive,
+		isPingEnabled: Boolean = this.isPingEnabled,
+		pingInterval: Long? = this.pingInterval,
+		pingCooldown: Long? = this.pingCooldown,
+		pingIp: String? = this.pingIp,
+		isEthernetTunnel: Boolean = this.isEthernetTunnel,
+		isIpv4Preferred: Boolean = this.isIpv4Preferred
+	): TunnelConf {
+		return TunnelConf(
+			id, tunName, wgQuick, tunnelNetworks, isMobileDataTunnel, isPrimaryTunnel,
+			amQuick, isActive, isPingEnabled, pingInterval, pingCooldown, pingIp,
+			isEthernetTunnel, isIpv4Preferred
+		).apply {
+			stateChangeCallback = this@TunnelConf.stateChangeCallback
+		}
 	}
 
 	fun toAmConfig(): org.amnezia.awg.config.Config {
@@ -43,25 +77,41 @@ data class TunnelConf(
 		return configFromWgQuick(wgQuick)
 	}
 
-	override fun getName(): String {
-		return tunName
-	}
+	override fun getName(): String = tunName
 
-	override fun isIpv4ResolutionPreferred(): Boolean {
-		return isIpv4Preferred
-	}
+	override fun isIpv4ResolutionPreferred(): Boolean = isIpv4Preferred
 
-	override fun onStateChange(newState: com.wireguard.android.backend.Tunnel.State) {
-		stateChangeCallback?.invoke(newState)
+	override fun onStateChange(newState: org.amnezia.awg.backend.Tunnel.State) {
+		Timber.d("onStateChange called for tunnel ${id}: $tunName with state $newState")
+		runBlocking {
+			callbackMutex.withLock {
+				if (stateChangeCallback != null) {
+					Timber.d("Invoking stateChangeCallback for tunnel ${id}: $tunName with state $newState")
+					stateChangeCallback?.invoke(newState)
+				} else {
+					Timber.w("No stateChangeCallback set for tunnel ${id}: $tunName")
+				}
+			}
+		}
 	}
 
 	override fun onStateChange(newState: Tunnel.State) {
-		stateChangeCallback?.invoke(newState)
+		Timber.d("onStateChange called for tunnel ${id}: $tunName with state $newState")
+		runBlocking {
+			callbackMutex.withLock {
+				if (stateChangeCallback != null) {
+					Timber.d("Invoking stateChangeCallback for tunnel ${id}: $tunName with state $newState")
+					stateChangeCallback?.invoke(newState)
+				} else {
+					Timber.w("No stateChangeCallback set for tunnel ${id}: $tunName")
+				}
+			}
+		}
+
 	}
 
 	fun isQuickConfigMatching(updatedConf: TunnelConf): Boolean {
-		return updatedConf.wgQuick == wgQuick ||
-			updatedConf.amQuick == amQuick
+		return updatedConf.wgQuick == wgQuick || updatedConf.amQuick == amQuick
 	}
 
 	fun isPingConfigMatching(updatedConf: TunnelConf): Boolean {
@@ -78,7 +128,6 @@ data class TunnelConf(
 				return@withContext InetAddress.getByName(pingIp)
 					.isReachable(Constants.PING_TIMEOUT.toInt())
 			}
-			Timber.i("Pinging all peers")
 			config.peers.map { peer ->
 				peer.isReachable(isIpv4Preferred)
 			}.all { true }
@@ -88,14 +137,14 @@ data class TunnelConf(
 	companion object {
 		fun configFromWgQuick(wgQuick: String): Config {
 			val inputStream: InputStream = wgQuick.byteInputStream()
-			return inputStream.bufferedReader(Charsets.UTF_8).use {
+			return inputStream.bufferedReader(StandardCharsets.UTF_8).use {
 				Config.parse(it)
 			}
 		}
 
 		fun configFromAmQuick(amQuick: String): org.amnezia.awg.config.Config {
 			val inputStream: InputStream = amQuick.byteInputStream()
-			return inputStream.bufferedReader(Charsets.UTF_8).use {
+			return inputStream.bufferedReader(StandardCharsets.UTF_8).use {
 				org.amnezia.awg.config.Config.parse(it)
 			}
 		}

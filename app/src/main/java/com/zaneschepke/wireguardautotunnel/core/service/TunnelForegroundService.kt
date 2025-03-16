@@ -49,12 +49,12 @@ class TunnelForegroundService : LifecycleService() {
 	}
 
 	fun stop() {
-		stopForeground(STOP_FOREGROUND_REMOVE)
 		stopSelf()
 	}
 
 	override fun onDestroy() {
 		serviceManager.backgroundService = CompletableDeferred()
+		ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
 		super.onDestroy()
 	}
 
