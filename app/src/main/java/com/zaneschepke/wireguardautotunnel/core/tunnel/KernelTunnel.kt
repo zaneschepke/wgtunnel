@@ -38,7 +38,6 @@ class KernelTunnel @Inject constructor(
 		Timber.i("Starting tunnel ${tunnelConf.id} userspace")
 		applicationScope.launch(ioDispatcher) {
 			runCatching {
-
 				updateTunnelState(tunnelConf.id, TunnelStatus.STARTING)
 				Timber.d("Set STARTING state for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
 
@@ -81,36 +80,36 @@ class KernelTunnel @Inject constructor(
 	}
 
 	override fun stopTunnel(tunnelConf: TunnelConf?) {
-		tunnelConf?.let {
-			applicationScope.launch(ioDispatcher) {
-				runCatching {
-					val originalTunnel = startedTunnels[tunnelConf.id]
-					if (originalTunnel != null) {
-						Timber.i("Stopping tunnel ${originalTunnel.id} userspace with original TunnelConf: $originalTunnel (identity: ${System.identityHashCode(originalTunnel)})")
-						backend.setState(originalTunnel, Tunnel.State.DOWN, originalTunnel.toWgConfig())
-						super.stopTunnel(originalTunnel)
-						startedTunnels.remove(originalTunnel.id)
-						tunnelJobs[originalTunnel.id]?.forEach { it.cancel() }
-						tunnelJobs.remove(originalTunnel.id)
-						if (backend.getState(originalTunnel) == Tunnel.State.DOWN) {
-							updateTunnelState(originalTunnel.id, TunnelStatus.DOWN)
-							Timber.d("Confirmed DOWN state for tunnel ${originalTunnel.id}")
-						}
-					} else {
-						Timber.w("Original tunnel ${tunnelConf.id} not found in startedTunnels, attempting stop with provided instance: $tunnelConf (identity: ${System.identityHashCode(tunnelConf)})")
-						backend.setState(tunnelConf, Tunnel.State.DOWN, tunnelConf.toWgConfig())
+		applicationScope.launch(ioDispatcher) {
+			runCatching {
+				val originalTunnel = tunnelConf?.let { startedTunnels.getOrDefault(it.id, null) }
+				if (originalTunnel != null) {
+					Timber.i("Stopping tunnel ${originalTunnel.id} userspace with original TunnelConf: $originalTunnel (identity: ${System.identityHashCode(originalTunnel)})")
+					backend.setState(originalTunnel, Tunnel.State.DOWN, originalTunnel.toWgConfig())
+					super.stopTunnel(originalTunnel)
+					startedTunnels.remove(originalTunnel.id)
+					tunnelJobs[originalTunnel.id]?.forEach { it.cancel() }
+					tunnelJobs.remove(originalTunnel.id)
+					if (backend.getState(originalTunnel) == Tunnel.State.DOWN) {
+						updateTunnelState(originalTunnel.id, TunnelStatus.DOWN)
+						Timber.d("Confirmed DOWN state for tunnel ${originalTunnel.id}")
+					}
+				} else {
+					Timber.w("Tunnel not found in startedTunnels, stopping all tunnels")
+					startedTunnels.forEach { (_, config) ->
+						val state = backend.setState(config, Tunnel.State.DOWN, config.toWgConfig())
 						super.stopTunnel(tunnelConf)
-						if (backend.getState(tunnelConf) == Tunnel.State.DOWN) {
-							startedTunnels.remove(tunnelConf.id)
-							tunnelJobs[tunnelConf.id]?.forEach { it.cancel() }
-							tunnelJobs.remove(tunnelConf.id)
-							updateTunnelState(tunnelConf.id, TunnelStatus.DOWN)
-							Timber.d("Confirmed DOWN state for tunnel ${tunnelConf.id} after fallback")
+						if (state == Tunnel.State.DOWN) {
+							startedTunnels.remove(config.id)
+							tunnelJobs[config.id]?.forEach { it.cancel() }
+							tunnelJobs.remove(config.id)
+							updateTunnelState(config.id, TunnelStatus.DOWN)
+							Timber.d("Confirmed DOWN state for tunnel ${config.id} after fallback")
 						}
 					}
-				}.onFailure { e ->
-					Timber.e(e, "Failed to stop tunnel ${tunnelConf.id}")
 				}
+			}.onFailure { e ->
+				Timber.e(e, "Failed to stop tunnel ${tunnelConf?.id}")
 			}
 		}
 	}

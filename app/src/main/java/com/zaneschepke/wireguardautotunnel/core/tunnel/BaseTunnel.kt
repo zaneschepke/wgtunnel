@@ -168,7 +168,6 @@ abstract class BaseTunnel(
 							state = newState,
 							statistics = stats ?: existing.statistics
 						)
-						Timber.d("Updated tunnel state for $tunnelId: $updated at ${System.currentTimeMillis()}")
 						current + (tunnelId to updated)
 					}
 				}

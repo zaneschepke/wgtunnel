@@ -38,19 +38,7 @@ class UserspaceTunnel @Inject constructor(
 		Timber.i("Starting tunnel ${tunnelConf.id} userspace")
 		applicationScope.launch(ioDispatcher) {
 			runCatching {
-				// Stop any other running tunnels first
-				val runningTunnels = activeTunnels.value.filter { (id, state) ->
-					id != tunnelConf.id && state.state == TunnelStatus.UP
-				}
-				runningTunnels.forEach { (id, _) ->
-					val runningTunnel = startedTunnels[id]
-					if (runningTunnel != null) {
-						Timber.i("Stopping running tunnel ${runningTunnel.id} before starting ${tunnelConf.id}")
-						stopTunnel(runningTunnel)
-						delay(300)
-					}
-				}
-
+				stopActiveTunnels(tunnelConf)
 				updateTunnelState(tunnelConf.id, TunnelStatus.STARTING)
 				Timber.d("Set STARTING state for tunnel ${tunnelConf.id} at ${System.currentTimeMillis()}")
 
@@ -83,37 +71,51 @@ class UserspaceTunnel @Inject constructor(
 		}
 	}
 
+	private suspend fun stopActiveTunnels(tunnelConf: TunnelConf) {
+		val runningTunnels = activeTunnels.value.filter { (id, state) ->
+			id != tunnelConf.id && state.state == TunnelStatus.UP
+		}
+		runningTunnels.forEach { (id, _) ->
+			val runningTunnel = startedTunnels[id]
+			if (runningTunnel != null) {
+				Timber.i("Stopping running tunnel ${runningTunnel.id} before starting ${tunnelConf.id}")
+				stopTunnel(runningTunnel)
+				delay(300)
+			}
+		}
+	}
+
 	override fun stopTunnel(tunnelConf: TunnelConf?) {
-		tunnelConf?.let {
-			applicationScope.launch(ioDispatcher) {
-				runCatching {
-					val originalTunnel = startedTunnels[tunnelConf.id]
-					if (originalTunnel != null) {
-						Timber.i("Stopping tunnel ${originalTunnel.id} userspace with original TunnelConf: $originalTunnel (identity: ${System.identityHashCode(originalTunnel)})")
-						backend.setState(originalTunnel, org.amnezia.awg.backend.Tunnel.State.DOWN, originalTunnel.toAmConfig())
-						super.stopTunnel(originalTunnel)
-						startedTunnels.remove(originalTunnel.id)
-						tunnelJobs[originalTunnel.id]?.forEach { it.cancel() }
-						tunnelJobs.remove(originalTunnel.id)
-						if (backend.getState(originalTunnel) == org.amnezia.awg.backend.Tunnel.State.DOWN) {
-							updateTunnelState(originalTunnel.id, TunnelStatus.DOWN)
-							Timber.d("Confirmed DOWN state for tunnel ${originalTunnel.id}")
-						}
-					} else {
-						Timber.w("Original tunnel ${tunnelConf.id} not found in startedTunnels, attempting stop with provided instance: $tunnelConf (identity: ${System.identityHashCode(tunnelConf)})")
-						backend.setState(tunnelConf, org.amnezia.awg.backend.Tunnel.State.DOWN, tunnelConf.toAmConfig())
+		applicationScope.launch(ioDispatcher) {
+			runCatching {
+				val originalTunnel = tunnelConf?.let { startedTunnels.getOrDefault(it.id, null) }
+				if (originalTunnel != null) {
+					Timber.i("Stopping tunnel ${originalTunnel.id} userspace with original TunnelConf: $originalTunnel (identity: ${System.identityHashCode(originalTunnel)})")
+					backend.setState(originalTunnel, org.amnezia.awg.backend.Tunnel.State.DOWN, originalTunnel.toAmConfig())
+					super.stopTunnel(originalTunnel)
+					startedTunnels.remove(originalTunnel.id)
+					tunnelJobs[originalTunnel.id]?.forEach { it.cancel() }
+					tunnelJobs.remove(originalTunnel.id)
+					if (backend.getState(originalTunnel) == org.amnezia.awg.backend.Tunnel.State.DOWN) {
+						updateTunnelState(originalTunnel.id, TunnelStatus.DOWN)
+						Timber.d("Confirmed DOWN state for tunnel ${originalTunnel.id}")
+					}
+				} else {
+					Timber.w("Tunnel not found in startedTunnels, stopping all tunnels")
+					startedTunnels.forEach { (_, config) ->
+						val state = backend.setState(config, org.amnezia.awg.backend.Tunnel.State.DOWN, config.toAmConfig())
 						super.stopTunnel(tunnelConf)
-						if (backend.getState(tunnelConf) == org.amnezia.awg.backend.Tunnel.State.DOWN) {
-							startedTunnels.remove(tunnelConf.id)
-							tunnelJobs[tunnelConf.id]?.forEach { it.cancel() }
-							tunnelJobs.remove(tunnelConf.id)
-							updateTunnelState(tunnelConf.id, TunnelStatus.DOWN)
-							Timber.d("Confirmed DOWN state for tunnel ${tunnelConf.id} after fallback")
+						if (state == org.amnezia.awg.backend.Tunnel.State.DOWN) {
+							startedTunnels.remove(config.id)
+							tunnelJobs[config.id]?.forEach { it.cancel() }
+							tunnelJobs.remove(config.id)
+							updateTunnelState(config.id, TunnelStatus.DOWN)
+							Timber.d("Confirmed DOWN state for tunnel ${config.id} after fallback")
 						}
 					}
-				}.onFailure { e ->
-					Timber.e(e, "Failed to stop tunnel ${tunnelConf.id}")
 				}
+			}.onFailure { e ->
+				Timber.e(e, "Failed to stop tunnel ${tunnelConf?.id}")
 			}
 		}
 	}
