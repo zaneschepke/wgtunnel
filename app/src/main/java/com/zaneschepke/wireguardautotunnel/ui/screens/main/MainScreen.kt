@@ -55,6 +55,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.GettingSta
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ScrollDismissFab
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImportSheet
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelRowItem
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.UrlImportDialog
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
@@ -75,6 +76,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 	var isFabVisible by rememberSaveable { mutableStateOf(true) }
 	var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
 	var selectedTunnel by remember { mutableStateOf<TunnelConf?>(null) }
+	var showUrlImportDialog by remember { mutableStateOf(false) }
 	val isRunningOnTv = remember { context.isRunningOnTv() }
 
 	val activeTunnels by viewModel.tunnelManager.activeTunnels.collectAsStateWithLifecycle(emptyMap())
@@ -197,7 +199,19 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 					Route.Config(Constants.MANUAL_TUNNEL_CONFIG_ID),
 				)
 			},
+			onUrlClick = { showUrlImportDialog = true }
 		)
+
+		if (showUrlImportDialog) {
+			UrlImportDialog(
+				onDismiss = { showUrlImportDialog = false },
+				onConfirm = { url ->
+					viewModel.onUrlImport(url)
+					showUrlImportDialog = false
+				}
+			)
+		}
+
 		LazyColumn(
 			horizontalAlignment = Alignment.Start,
 			verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top),
