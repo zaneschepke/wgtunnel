@@ -4,8 +4,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import com.zaneschepke.wireguardautotunnel.core.service.autotunnel.AutoTunnelService
-import com.zaneschepke.wireguardautotunnel.core.service.tile.AutoTunnelControlTile
-import com.zaneschepke.wireguardautotunnel.core.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
@@ -20,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
@@ -36,8 +33,6 @@ class ServiceManager @Inject constructor(
 
 	var autoTunnelService = CompletableDeferred<AutoTunnelService>()
 	var backgroundService = CompletableDeferred<TunnelForegroundService>()
-	var autoTunnelTile = CompletableDeferred<AutoTunnelControlTile>()
-	var tunnelControlTile = CompletableDeferred<TunnelControlTile>()
 
 	private fun <T : Service> startService(cls: Class<T>, background: Boolean) {
 		runCatching {
@@ -65,12 +60,12 @@ class ServiceManager @Inject constructor(
 					?: throw IllegalStateException("AutoTunnelService start timed out")
 				service.start()
 				_autoTunnelActive.update { true }
-				updateAutoTunnelTile()
 			}.onFailure {
 				Timber.e(it)
 				_autoTunnelActive.update { false }
 			}
 		}
+		updateAutoTunnelTile()
 	}
 
 	fun startTunnelForegroundService(tunnelConf: TunnelConf) {
@@ -119,34 +114,12 @@ class ServiceManager @Inject constructor(
 		}
 	}
 
-	suspend fun updateAutoTunnelTile() {
-		withContext(ioDispatcher) {
-			runCatching {
-				val service = withTimeoutOrNull(SERVICE_START_TIMEOUT) { autoTunnelTile.await() }
-					?: run {
-						context.requestAutoTunnelTileServiceUpdate()
-						return@withContext
-					}
-				service.updateTileState()
-			}.onFailure {
-				Timber.e(it)
-			}
-		}
+	fun updateAutoTunnelTile() {
+		context.requestAutoTunnelTileServiceUpdate()
 	}
 
-	suspend fun updateTunnelTile() {
-		withContext(ioDispatcher) {
-			runCatching {
-				val service = withTimeoutOrNull(SERVICE_START_TIMEOUT) { tunnelControlTile.await() }
-					?: run {
-						context.requestTunnelTileServiceStateUpdate()
-						return@withContext
-					}
-				service.updateTileState()
-			}.onFailure {
-				Timber.e(it)
-			}
-		}
+	fun updateTunnelTile() {
+		context.requestTunnelTileServiceStateUpdate()
 	}
 
 	fun stopAutoTunnel() {
