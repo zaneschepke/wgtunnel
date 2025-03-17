@@ -103,4 +103,5 @@
     <string name="read_logs">查看日誌</string>
     <string name="local_logging">本地日誌記錄</string>
     <string name="enable_local_logging">啟用本地日誌記錄</string>
+    <string name="email_description">寄封電子郵件給作者</string>
 </resources>
