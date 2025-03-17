@@ -56,7 +56,7 @@ class TunnelControlTile : TileService() {
 		if (tunnels.isEmpty()) return@launch setUnavailable()
 		with(tunnelManager.activeTunnels.value) {
 			if (isNotEmpty()) if (size == 1) {
-				tunnels.firstOrNull { it.id == keys.first() }?.let { return@launch updateTile(it.tunName, true) }
+				tunnels.firstOrNull { it.id == keys.first().id }?.let { return@launch updateTile(it.tunName, true) }
 			} else {
 				return@launch updateTile(getString(R.string.multiple), true)
 			}

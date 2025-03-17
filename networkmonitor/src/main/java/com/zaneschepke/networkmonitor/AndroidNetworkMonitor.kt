@@ -30,7 +30,8 @@ class AndroidNetworkMonitor(
 	data class TransportState(val connected: Boolean = false)
 
 	private val wifiFlow: Flow<WifiState> = callbackFlow {
-		var currentSsid: String? = null
+
+		var currentSsid: String?
 
 		@Suppress("DEPRECATION")
 		fun getWifiSsid(): String? {
@@ -47,13 +48,8 @@ class AndroidNetworkMonitor(
 		val callback = object : ConnectivityManager.NetworkCallback() {
 			override fun onAvailable(network: Network) {
 				Timber.d("Wi-Fi onAvailable: network=$network")
-				val capabilities = connectivityManager.getNetworkCapabilities(network)
-				val connected = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
-				if (connected) {
-					val ssid = getWifiSsid()
-					currentSsid = ssid
-					trySend(WifiState(connected = true, ssid = ssid))
-				}
+				currentSsid = getWifiSsid()
+				trySend(WifiState(connected = true, ssid = currentSsid))
 			}
 
 			override fun onLost(network: Network) {
@@ -63,12 +59,7 @@ class AndroidNetworkMonitor(
 			}
 
 			override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-				val connected = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-				val ssid = if (connected) getWifiSsid() else null
-				if (ssid != currentSsid) {
-					currentSsid = ssid
-					trySend(WifiState(connected = connected, ssid = ssid))
-				}
+				Timber.d("Wi-Fi onCapabilitiesChanged: network=$network, networkCapabilities=$networkCapabilities")
 			}
 		}
 

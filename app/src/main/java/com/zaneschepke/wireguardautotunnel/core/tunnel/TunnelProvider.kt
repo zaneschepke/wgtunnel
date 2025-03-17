@@ -13,5 +13,5 @@ interface TunnelProvider {
 	suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>)
 	suspend fun runningTunnelNames(): Set<String>
 	fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics?
-	val activeTunnels: StateFlow<Map<Int, TunnelState>>
+	val activeTunnels: StateFlow<Map<TunnelConf, TunnelState>>
 }

@@ -84,7 +84,7 @@ class TunnelManager @Inject constructor(
 		val settings = appDataRepository.settings.get()
 		if (settings.isRestoreOnBootEnabled) {
 			val previouslyActiveTuns = appDataRepository.tunnels.getActive()
-			val tunsToStart = previouslyActiveTuns.filterNot { tun -> activeTunnels.value.any { tun.id == it.key } }
+			val tunsToStart = previouslyActiveTuns.filterNot { tun -> activeTunnels.value.any { tun.id == it.key.id } }
 			if (settings.isKernelEnabled) {
 				return@launch tunsToStart.forEach {
 					startTunnel(it)

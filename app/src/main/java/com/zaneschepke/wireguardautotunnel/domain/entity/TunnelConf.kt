@@ -34,7 +34,6 @@ data class TunnelConf(
 	private var stateChangeCallback: ((Any) -> Unit)? = null,
 ) : Tunnel, org.amnezia.awg.backend.Tunnel {
 
-	// Mutex to protect stateChangeCallback access
 	private val callbackMutex = Mutex()
 
 	suspend fun setStateChangeCallback(callback: (Any) -> Unit) {
@@ -43,7 +42,6 @@ data class TunnelConf(
 		}
 	}
 
-	// Ensure callback is copied over
 	fun copyWithCallback(
 		id: Int = this.id,
 		tunName: String = this.tunName,

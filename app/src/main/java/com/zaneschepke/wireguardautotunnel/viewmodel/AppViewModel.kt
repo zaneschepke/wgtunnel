@@ -147,6 +147,8 @@ constructor(
 			appDataRepository.appState.setLocalLogsEnabled(toggledOn)
 			if (!toggledOn) {
 				logReader.stop()
+			} else {
+				logReader.start()
 			}
 		}
 	}
@@ -275,13 +277,13 @@ constructor(
 		}
 	}
 
-	suspend fun requestRoot(): Result<Unit> {
+	private suspend fun requestRoot(): Result<Unit> {
 		return withContext(ioDispatcher) {
 			runCatching {
 				rootShell.get().start()
-				SnackbarController.Companion.showMessage(StringValue.StringResource(R.string.root_accepted))
+				SnackbarController.showMessage(StringValue.StringResource(R.string.root_accepted))
 			}.onFailure {
-				SnackbarController.Companion.showMessage(StringValue.StringResource(R.string.error_root_denied))
+				SnackbarController.showMessage(StringValue.StringResource(R.string.error_root_denied))
 			}
 		}
 	}
@@ -351,7 +353,7 @@ constructor(
 		runCatching {
 			val amConfig = tunnelConfig.toAmConfig()
 			val wgConfig = tunnelConfig.toWgConfig()
-			val proxy = InterfaceProxy.Companion.from(amConfig.`interface`)
+			val proxy = InterfaceProxy.from(amConfig.`interface`)
 			if (proxy.includedApplications.isEmpty() && proxy.excludedApplications.isEmpty()) return@launch
 			if (proxy.includedApplications.retainAll(packages.toSet()) || proxy.excludedApplications.retainAll(packages.toSet())) {
 				updateTunnelConfig(tunnelConfig, amConfig = amConfig, wgConfig = wgConfig, `interface` = proxy)

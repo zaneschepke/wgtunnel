@@ -1,5 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.domain.state
 
+import com.zaneschepke.wireguardautotunnel.core.tunnel.allDown
+import com.zaneschepke.wireguardautotunnel.core.tunnel.hasActive
+import com.zaneschepke.wireguardautotunnel.core.tunnel.isUp
 import com.zaneschepke.wireguardautotunnel.domain.events.KillSwitchEvent
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
@@ -7,7 +10,7 @@ import com.zaneschepke.wireguardautotunnel.domain.events.AutoTunnelEvent
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
 
 data class AutoTunnelState(
-	val activeTunnels: Map<Int, TunnelState> = emptyMap(),
+	val activeTunnels: Map<TunnelConf, TunnelState> = emptyMap(),
 	val networkState: NetworkState = NetworkState(),
 	val settings: AppSettings = AppSettings(),
 	val tunnels: List<TunnelConf> = emptyList(),
@@ -20,12 +23,12 @@ data class AutoTunnelState(
 	private fun isMobileTunnelDataChangeNeeded(): Boolean {
 		val preferredTunnel = preferredMobileDataTunnel()
 		return preferredTunnel != null &&
-			activeTunnels.isNotEmpty() && !activeTunnels.any { it.key == preferredTunnel.id }
+			activeTunnels.isNotEmpty() && !activeTunnels.isUp(preferredTunnel)
 	}
 
 	private fun isEthernetTunnelChangeNeeded(): Boolean {
 		val preferredTunnel = preferredEthernetTunnel()
-		return preferredTunnel != null && activeTunnels.isNotEmpty() && !activeTunnels.any { it.key == preferredTunnel.id }
+		return preferredTunnel != null && activeTunnels.isNotEmpty() && !activeTunnels.isUp(preferredTunnel)
 	}
 
 	private fun preferredMobileDataTunnel(): TunnelConf? {
@@ -45,11 +48,11 @@ data class AutoTunnelState(
 	}
 
 	private fun startOnEthernet(): Boolean {
-		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && activeTunnels.isEmpty()
+		return networkState.isEthernetConnected && settings.isTunnelOnEthernetEnabled && activeTunnels.allDown()
 	}
 
 	private fun stopOnEthernet(): Boolean {
-		return networkState.isEthernetConnected && !settings.isTunnelOnEthernetEnabled && activeTunnels.isNotEmpty()
+		return networkState.isEthernetConnected && !settings.isTunnelOnEthernetEnabled && activeTunnels.hasActive()
 	}
 
 	// TODO test removed kill switch state check
@@ -67,11 +70,11 @@ data class AutoTunnelState(
 	}
 
 	private fun stopOnMobileData(): Boolean {
-		return isMobileDataActive() && !settings.isTunnelOnMobileDataEnabled && activeTunnels.isNotEmpty()
+		return isMobileDataActive() && !settings.isTunnelOnMobileDataEnabled && activeTunnels.hasActive()
 	}
 
 	private fun startOnMobileData(): Boolean {
-		return isMobileDataActive() && settings.isTunnelOnMobileDataEnabled && activeTunnels.isEmpty()
+		return isMobileDataActive() && settings.isTunnelOnMobileDataEnabled && activeTunnels.allDown()
 	}
 
 	private fun changeOnMobileData(): Boolean {
@@ -83,24 +86,24 @@ data class AutoTunnelState(
 	}
 
 	private fun stopOnWifi(): Boolean {
-		return isWifiActive() && !settings.isTunnelOnWifiEnabled && activeTunnels.isNotEmpty()
+		return isWifiActive() && !settings.isTunnelOnWifiEnabled && activeTunnels.hasActive()
 	}
 
 	private fun stopOnTrustedWifi(): Boolean {
-		return isWifiActive() && settings.isTunnelOnWifiEnabled && activeTunnels.isNotEmpty() && isCurrentSSIDTrusted()
+		return isWifiActive() && settings.isTunnelOnWifiEnabled && activeTunnels.hasActive() && isCurrentSSIDTrusted()
 	}
 
 	private fun startOnUntrustedWifi(): Boolean {
-		return isWifiActive() && settings.isTunnelOnWifiEnabled && activeTunnels.isEmpty() && !isCurrentSSIDTrusted()
+		return isWifiActive() && settings.isTunnelOnWifiEnabled && activeTunnels.allDown() && !isCurrentSSIDTrusted()
 	}
 
 	private fun changeOnUntrustedWifi(): Boolean {
-		return isWifiActive() && settings.isTunnelOnWifiEnabled && activeTunnels.isNotEmpty() && !isCurrentSSIDTrusted() && !isWifiTunnelPreferred()
+		return isWifiActive() && settings.isTunnelOnWifiEnabled && activeTunnels.hasActive() && !isCurrentSSIDTrusted() && !isWifiTunnelPreferred()
 	}
 
 	private fun isWifiTunnelPreferred(): Boolean {
 		val preferred = preferredWifiTunnel()
-		return activeTunnels.any { it.key == preferred?.id }
+		return preferred?.let { activeTunnels.isUp(it) } ?: true
 	}
 
 	fun asAutoTunnelEvent(): AutoTunnelEvent {

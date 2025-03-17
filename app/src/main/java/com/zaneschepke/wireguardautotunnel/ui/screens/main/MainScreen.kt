@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.core.tunnel.getValueById
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
@@ -227,7 +228,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				key = { tunnel -> tunnel.id },
 			) { tunnel ->
 				val expanded = uiState.generalState.isTunnelStatsExpanded
-				val tunnelState = activeTunnels.getOrDefault(tunnel.id, TunnelState())
+				val tunnelState = activeTunnels.getValueById(tunnel.id) ?: TunnelState()
 				TunnelRowItem(
 					tunnelState.state.isUp(),
 					expanded,
