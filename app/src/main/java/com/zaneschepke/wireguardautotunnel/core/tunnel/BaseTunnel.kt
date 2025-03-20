@@ -228,7 +228,7 @@ abstract class BaseTunnel(
 	}
 
 	private suspend fun monitorNetworkStatus() {
-		networkMonitor.getNetworkStatusFlow(includeWifiSsid = false, useRootShell = false)
+		networkMonitor.networkStatusFlow
 			.flowOn(ioDispatcher)
 			.collectLatest { status ->
 				val isAvailable = status !is NetworkStatus.Disconnected

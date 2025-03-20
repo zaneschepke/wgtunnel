@@ -56,9 +56,6 @@ class ServiceManager @Inject constructor(
 			runCatching {
 				autoTunnelService = CompletableDeferred()
 				startService(AutoTunnelService::class.java, background)
-				val service = withTimeoutOrNull(SERVICE_START_TIMEOUT) { autoTunnelService.await() }
-					?: throw IllegalStateException("AutoTunnelService start timed out")
-				service.start()
 				_autoTunnelActive.update { true }
 			}.onFailure {
 				Timber.e(it)

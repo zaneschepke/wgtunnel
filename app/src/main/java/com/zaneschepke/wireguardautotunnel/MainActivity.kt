@@ -1,6 +1,8 @@
 package com.zaneschepke.wireguardautotunnel
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -32,12 +34,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.zaneschepke.networkmonitor.NetworkMonitor
 import com.zaneschepke.wireguardautotunnel.core.shortcut.ShortcutManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
@@ -68,6 +72,7 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -82,6 +87,11 @@ class MainActivity : AppCompatActivity() {
 
 	@Inject
 	lateinit var shortcutManager: ShortcutManager
+
+	@Inject
+	lateinit var networkMonitor: NetworkMonitor
+
+	private var lastLocationPermissionState: Boolean? = null
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		enableEdgeToEdge(
@@ -254,6 +264,24 @@ class MainActivity : AppCompatActivity() {
 					}
 				}
 			}
+		}
+	}
+	override fun onResume() {
+		super.onResume()
+		checkPermissionAndNotify()
+	}
+
+	private fun checkPermissionAndNotify() {
+		val hasLocation = ContextCompat.checkSelfPermission(
+			this,
+			Manifest.permission.ACCESS_FINE_LOCATION,
+		) == PackageManager.PERMISSION_GRANTED
+		if (lastLocationPermissionState != hasLocation) {
+			Timber.d("Location permission changed to: $hasLocation")
+			if (hasLocation) {
+				networkMonitor.sendLocationPermissionsGrantedBroadcast()
+			}
+			lastLocationPermissionState = hasLocation
 		}
 	}
 }
