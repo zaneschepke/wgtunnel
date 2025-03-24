@@ -103,5 +103,11 @@
     <string name="read_logs">查看日誌</string>
     <string name="local_logging">本地日誌記錄</string>
     <string name="enable_local_logging">啟用本地日誌記錄</string>
-    <string name="email_description">寄封電子郵件給作者</string>
+    <string name="email_description">給作者寄電子郵件</string>
+    <string name="always_on_vpn_support">允許永久連線的 VPN</string>
+    <string name="hint_search_packages">搜尋軟體套件</string>
+    <string name="vpn_on">VPN 已開啟</string>
+    <string name="vpn_off">VPN 已關閉</string>
+    <string name="error_root_denied">無法取得 root 權限</string>
+    <string name="root_accepted">已取得 root 權限</string>
 </resources>
