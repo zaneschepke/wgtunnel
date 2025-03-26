@@ -163,4 +163,17 @@
     <string name="peer">Peer</string>
     <string name="prefer_ipv4">Preferovat IPv4 připojení</string>
     <string name="kill_switch_off">Vypnout kill switch na důvěryhodných</string>
+    <string name="vpn_settings">Systémové nastavení VPN</string>
+    <string name="never">nikdy</string>
+    <string name="sec">s</string>
+    <string name="handshake">handshake</string>
+    <string name="start_auto">Spustit auto-tunel</string>
+    <string name="stop_auto">Zastavit auto-tunel</string>
+    <string name="local_logging">Místní protokolování</string>
+    <string name="requires_app_relaunch">Tato změna vyžaduje opětovné spuštění aplikace. Chcete pokračovat?</string>
+    <string name="wg_compat_mode">Režim kompatibility WG</string>
+    <string name="error_tunnel_start">Nezdařilo se spustit tunel</string>
+    <string name="learn_more">Zjistit více</string>
+    <string name="tunnel_required">Funkce vyžaduje alespoň jeden tunel</string>
+    <string name="stop">zastavit</string>
 </resources>
