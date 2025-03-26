@@ -176,4 +176,6 @@
     <string name="learn_more">Zjistit více</string>
     <string name="tunnel_required">Funkce vyžaduje alespoň jeden tunel</string>
     <string name="stop">zastavit</string>
+    <string name="server_ipv4">Překlad názvu hostitele IPv4</string>
+    <string name="start_failed_config">Tunel se nepodařilo spustit kvůli chybě konfigurace.</string>
 </resources>
