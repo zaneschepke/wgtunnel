@@ -29,6 +29,7 @@ import kotlinx.coroutines.withContext
 import org.amnezia.awg.config.Config
 import timber.log.Timber
 import java.io.InputStream
+import java.net.URL
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
@@ -239,6 +240,30 @@ constructor(
 			saveTunnel(tunnelConf)
 		}.onFailure {
 			SnackbarController.Companion.showMessage(StringValue.StringResource(R.string.error_file_format))
+		}
+	}
+
+	fun onUrlImport(urlString: String) = viewModelScope.launch(ioDispatcher) {
+		runCatching {
+			val url = URL(urlString)
+			val fileName = urlString.substringAfterLast("/")
+			if (!fileName.endsWith(Constants.CONF_FILE_EXTENSION)) {
+				throw InvalidFileExtensionException
+			}
+			
+			url.openStream().use { stream ->
+				saveTunnelConfigFromStream(stream, fileName)
+			}
+		}.onFailure {
+			Timber.Forest.e(it)
+			when (it) {
+				is InvalidFileExtensionException -> {
+					SnackbarController.Companion.showMessage(StringValue.StringResource(R.string.error_file_extension))
+				}
+				else -> {
+					SnackbarController.Companion.showMessage(StringValue.StringResource(R.string.error_download_failed))
+				}
+			}
 		}
 	}
 }

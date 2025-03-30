@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ContentPasteGo
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ fun TunnelImportSheet(
 	onQrClick: () -> Unit,
 	onManualImportClick: () -> Unit,
 	onClipboardClick: () -> Unit,
+	onUrlClick: () -> Unit,
 ) {
 	val sheetState = rememberModalBottomSheetState()
 
@@ -108,6 +110,27 @@ fun TunnelImportSheet(
 						modifier = Modifier.padding(10.dp),
 					)
 				}
+			}
+			HorizontalDivider()
+			Row(
+				modifier =
+				Modifier
+					.fillMaxWidth()
+					.clickable {
+						onDismiss()
+						onUrlClick()
+					}
+					.padding(10.dp),
+			) {
+				Icon(
+					Icons.Filled.Link,
+					contentDescription = stringResource(id = R.string.add_from_url),
+					modifier = Modifier.padding(10.dp),
+				)
+				Text(
+					stringResource(id = R.string.add_from_url),
+					modifier = Modifier.padding(10.dp),
+				)
 			}
 			HorizontalDivider()
 			Row(
