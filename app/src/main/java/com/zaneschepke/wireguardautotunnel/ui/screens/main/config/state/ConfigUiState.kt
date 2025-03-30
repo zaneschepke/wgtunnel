@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.main.config.state
 import com.zaneschepke.wireguardautotunnel.ui.state.ConfigProxy
 import com.zaneschepke.wireguardautotunnel.ui.state.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.state.PeerProxy
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 
 data class ConfigUiState(
 	val tunnelName: String = "",
@@ -11,4 +12,5 @@ data class ConfigUiState(
 	val showScripts: Boolean = false,
 	val isAuthenticated: Boolean = true,
 	val showAuthPrompt: Boolean = false,
+	val message: StringValue? = null,
 )

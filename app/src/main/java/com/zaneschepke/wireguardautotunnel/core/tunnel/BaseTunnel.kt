@@ -39,14 +39,22 @@ abstract class BaseTunnel(
 	private val notificationManager: NotificationManager,
 ) : TunnelProvider {
 
-	protected val activeTuns = MutableStateFlow<Map<TunnelConf, TunnelState>>(emptyMap())
+	private val activeTuns = MutableStateFlow<Map<TunnelConf, TunnelState>>(emptyMap())
 	override val activeTunnels = activeTuns.asStateFlow()
 
 	private val isBounce = AtomicBoolean(false)
 
-	protected val mutex = Mutex()
+	private val mutex = Mutex()
 
-	protected fun handleBackendThrowable(throwable: Throwable) {
+	abstract suspend fun startBackend(tunnel: TunnelConf)
+
+	abstract fun stopBackend(tunnel: TunnelConf)
+
+	private fun findActiveTunnel(id: Int): TunnelConf? = activeTuns.value.keys.find { it.id == id }
+
+	private fun isTunnelActive(id: Int) = (activeTuns.value.any { it.key.id == id })
+
+	private fun handleBackendThrowable(throwable: Throwable) {
 		val backendError = when (throwable) {
 			is BackendException -> throwable.toBackendError()
 			is org.amnezia.awg.backend.BackendException -> throwable.toBackendError()
@@ -106,7 +114,7 @@ abstract class BaseTunnel(
 		}
 	}
 
-	protected fun configureTunnel(tunnelConf: TunnelConf) {
+	private fun configureTunnelCallbacks(tunnelConf: TunnelConf) {
 		Timber.d("Configuring TunnelConf instance: ${tunnelConf.hashCode()}")
 
 		tunnelConf.setStateChangeCallback { state ->
@@ -121,33 +129,66 @@ abstract class BaseTunnel(
 			val stats = getStatistics(tunnelConf)
 			updateTunnelState(tunnelConf, null, stats)
 		}
-		tunnelConf.setBounceTunnelCallback {
-			bounceTunnel(tunnelConf)
-		}
+		tunnelConf.setBounceTunnelCallback(::bounceTunnel)
 	}
 
 	override fun startTunnel(tunnelConf: TunnelConf) {
-		applicationScope.launch {
-			val tunnelCopy = tunnelConf.copyWithCallback(isActive = true)
-			if (!isBounce.get()) serviceManager.startTunnelForegroundService(tunnelCopy)
-			appDataRepository.tunnels.save(tunnelCopy)
+		applicationScope.launch(ioDispatcher) {
+			runCatching {
+				if (isTunnelActive(tunnelConf.id)) return@launch
+				startTunnelInner(tunnelConf)
+			}.onFailure { exception ->
+				Timber.e(exception, "Failed to start tunnel ${tunnelConf.id} userspace")
+				stopTunnel(tunnelConf)
+				handleBackendThrowable(exception)
+			}.onSuccess {
+				Timber.i("Tunnel ${tunnelConf.id} started successfully")
+			}
 		}
 	}
 
+	private suspend fun startTunnelInner(tunnelConf: TunnelConf) {
+		mutex.withLock {
+			configureTunnelCallbacks(tunnelConf)
+			startBackend(tunnelConf)
+			saveTunnelActiveState(tunnelConf, true)
+			if (!isBounce.get()) serviceManager.startTunnelForegroundService(tunnelConf)
+		}
+	}
+
+	private suspend fun saveTunnelActiveState(tunnelConf: TunnelConf, active: Boolean) {
+		val tunnelCopy = tunnelConf.copyWithCallback(isActive = active)
+		appDataRepository.tunnels.save(tunnelCopy)
+	}
+
 	override fun stopTunnel(tunnelConf: TunnelConf?) {
-		if (tunnelConf == null) return
 		applicationScope.launch(ioDispatcher) {
-			mutex.withLock {
-				removeActiveTunnel(tunnelConf)
-				val lockedConf = tunnelConf.copyWithCallback(isActive = false)
-				appDataRepository.tunnels.save(lockedConf)
-				if (activeTuns.value.isEmpty() && !isBounce.get()) return@launch serviceManager.stopTunnelForegroundService()
-				val nextActive = activeTuns.value.keys.firstOrNull()
-				if (nextActive != null) {
-					Timber.d("Next active tunnel: ${nextActive.id}")
-					serviceManager.updateTunnelForegroundServiceNotification(nextActive)
-				}
+			runCatching {
+				if (tunnelConf == null) return@launch stopActiveTunnels()
+				stopTunnelInner(tunnelConf)
+			}.onFailure { e ->
+				Timber.e(e, "Failed to stop tunnel ${tunnelConf?.id}")
 			}
+		}
+	}
+
+	private suspend fun stopTunnelInner(tunnelConf: TunnelConf) {
+		mutex.withLock {
+			val tunnel = findActiveTunnel(tunnelConf.id) ?: return
+			stopBackend(tunnel)
+			removeActiveTunnel(tunnel)
+			// use latest tunnel
+			saveTunnelActiveState(tunnelConf, false)
+			handleServiceChangesOnStop()
+		}
+	}
+
+	private fun handleServiceChangesOnStop() {
+		if (activeTuns.value.isEmpty() && !isBounce.get()) return serviceManager.stopTunnelForegroundService()
+		val nextActive = activeTuns.value.keys.firstOrNull()
+		if (nextActive != null) {
+			Timber.d("Next active tunnel: ${nextActive.id}")
+			serviceManager.updateTunnelForegroundServiceNotification(nextActive)
 		}
 	}
 
@@ -159,6 +200,7 @@ abstract class BaseTunnel(
 
 	override fun bounceTunnel(tunnelConf: TunnelConf) {
 		applicationScope.launch(ioDispatcher) {
+			Timber.i("Bounce tunnel ${tunnelConf.name}")
 			isBounce.set(true)
 			stopTunnel(tunnelConf)
 			delay(300)

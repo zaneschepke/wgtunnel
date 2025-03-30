@@ -12,8 +12,6 @@ import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.backend.Tunnel
 import timber.log.Timber
@@ -28,46 +26,14 @@ class UserspaceTunnel @Inject constructor(
 	private val backend: Backend,
 ) : BaseTunnel(ioDispatcher, applicationScope, appDataRepository, serviceManager, notificationManager) {
 
-	override fun startTunnel(tunnelConf: TunnelConf) {
-		Timber.i("Starting tunnel ${tunnelConf.id} userspace")
-		applicationScope.launch(ioDispatcher) {
-			runCatching {
-				// tunnel already active
-				if (activeTuns.value.any { it.key.id == tunnelConf.id }) return@launch
-
-				// stop any active tunnels that aren't this one, userspace only
-				stopActiveTunnels()
-
-				mutex.withLock {
-					// configure state callback and add to tunnels
-					configureTunnel(tunnelConf)
-					backend.setState(tunnelConf, Tunnel.State.UP, tunnelConf.toAmConfig())
-					super.startTunnel(tunnelConf)
-				}
-			}.onFailure { exception ->
-				Timber.e(exception, "Failed to start tunnel ${tunnelConf.id} userspace")
-				stopTunnel(tunnelConf)
-				handleBackendThrowable(exception)
-			}.onSuccess {
-				Timber.i("Tunnel ${tunnelConf.id} started successfully")
-			}
-		}
+	override suspend fun startBackend(tunnel: TunnelConf) {
+		stopActiveTunnels()
+		backend.setState(tunnel, Tunnel.State.UP, tunnel.toAmConfig())
 	}
 
-	override fun stopTunnel(tunnelConf: TunnelConf?) {
-		applicationScope.launch(ioDispatcher) {
-			runCatching {
-				mutex.withLock {
-					val originalTunnel = activeTuns.value.keys.find { it.id == tunnelConf?.id }
-					if (originalTunnel == null) return@launch stopActiveTunnels()
-					Timber.i("Stopping tunnel ${originalTunnel.id} userspace")
-					backend.setState(originalTunnel, Tunnel.State.DOWN, originalTunnel.toAmConfig())
-					super.stopTunnel(originalTunnel)
-				}
-			}.onFailure { e ->
-				Timber.e(e, "Failed to stop tunnel ${tunnelConf?.id}")
-			}
-		}
+	override fun stopBackend(tunnel: TunnelConf) {
+		Timber.i("Stopping tunnel ${tunnel.id} userspace")
+		backend.setState(tunnel, Tunnel.State.DOWN, tunnel.toAmConfig())
 	}
 
 	override suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {

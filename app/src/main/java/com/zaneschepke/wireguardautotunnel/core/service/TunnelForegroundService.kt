@@ -22,7 +22,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -85,13 +88,22 @@ class TunnelForegroundService : LifecycleService() {
 	}
 
 	private fun startTunnelConfChangesJob(tunnelConf: TunnelConf) = lifecycleScope.launch(ioDispatcher) {
-		tunnelRepo.flow.flowOn(ioDispatcher).collectLatest { storedTunnels ->
-			val storedTunnel = storedTunnels.firstOrNull { it.id == tunnelConf.id }
-			if (storedTunnel != null && tunnelConf.isTunnelConfigChanged(storedTunnel)) {
-				Timber.d("Config changed for ${storedTunnel.name}, bouncing")
-				tunnelConf.bounceTunnel(storedTunnel)
+		tunnelRepo.flow
+			.flowOn(ioDispatcher)
+			.map { storedTunnels ->
+				storedTunnels.firstOrNull { it.id == tunnelConf.id }
 			}
-		}
+			.filterNotNull()
+			// only emit when one of these 3 values change
+			.distinctUntilChanged { old, new ->
+				old.tunName == new.tunName && old.wgQuick == new.wgQuick && old.amQuick == new.amQuick
+			}
+			.collect { storedTunnel ->
+				if (tunnelConf.isTunnelConfigChanged(storedTunnel)) {
+					Timber.d("Config changed for ${storedTunnel.tunName}, bouncing")
+					tunnelConf.bounceTunnel(storedTunnel)
+				}
+			}
 	}
 
 	private fun startNetworkMonitorJob() = lifecycleScope.launch(ioDispatcher) {
@@ -112,6 +124,7 @@ class TunnelForegroundService : LifecycleService() {
 	}
 
 	private fun startPingJob(tunnel: TunnelConf) = lifecycleScope.launch(ioDispatcher) {
+		delay(PING_START_DELAY)
 		while (isActive) {
 			val shouldBounce = shouldBounceTunnel(tunnel)
 			val delayMs = if (shouldBounce) {
@@ -158,5 +171,6 @@ class TunnelForegroundService : LifecycleService() {
 
 	companion object {
 		const val STATS_DELAY = 1_000L
+		const val PING_START_DELAY = 30_000L
 	}
 }

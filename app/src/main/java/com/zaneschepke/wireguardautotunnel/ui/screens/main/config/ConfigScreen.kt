@@ -16,10 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,11 +39,19 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 fun ConfigScreen(tunnelConf: TunnelConf?, viewModel: ConfigViewModel = hiltViewModel()) {
 	val context = LocalContext.current
 	val snackbar = SnackbarController.current
+	val keyboardController = LocalSoftwareKeyboardController.current
 
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
 	LaunchedEffect(tunnelConf) {
 		viewModel.initFromTunnel(tunnelConf)
+	}
+
+	LaunchedEffect(uiState.message) {
+		uiState.message?.let { message ->
+			snackbar.showMessage(message.asString(context))
+			viewModel.setMessage(null)
+		}
 	}
 
 	if (uiState.showAuthPrompt) {
@@ -72,7 +80,10 @@ fun ConfigScreen(tunnelConf: TunnelConf?, viewModel: ConfigViewModel = hiltViewM
 			TopNavBar(
 				title = stringResource(R.string.edit_tunnel),
 				trailing = {
-					IconButton(onClick = { viewModel.save(tunnelConf) }) {
+					IconButton(onClick = {
+						keyboardController?.hide()
+						viewModel.save(tunnelConf)
+					}) {
 						Icon(Icons.Outlined.Save, contentDescription = stringResource(R.string.save))
 					}
 				},

@@ -3,15 +3,16 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.main.config
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
-import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.state.ConfigUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.ConfigProxy
 import com.zaneschepke.wireguardautotunnel.ui.state.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.state.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ConfigViewModel @Inject constructor(
 	private val tunnelRepository: TunnelRepository,
+	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
 	private val _uiState = MutableStateFlow(ConfigUiState())
@@ -123,24 +125,37 @@ class ConfigViewModel @Inject constructor(
 		updatePeer(index, updated)
 	}
 
-	fun save(tunnelConf: TunnelConf?) = viewModelScope.launch {
-		runCatching {
-			val (wg, am) = _uiState.value.configProxy.buildConfigs()
-			val name = _uiState.value.tunnelName
-			val saveConfig = tunnelConf?.copyWithCallback(
-				tunName = tunnelConf.name,
-				amQuick = am.toAwgQuickString(true),
-				wgQuick = wg.toWgQuickString(true),
-			)
-				?: TunnelConf(tunName = name, amQuick = am.toAwgQuickString(true), wgQuick = wg.toWgQuickString(true))
-			tunnelRepository.save(saveConfig)
-		}.onFailure {
-			SnackbarController.showMessage(
-				it.message?.let { message ->
-					(StringValue.DynamicString(message))
-				} ?: StringValue.StringResource(R.string.unknown_error),
-			)
+	fun setMessage(message: StringValue?) {
+		_uiState.update {
+			it.copy(message = message)
 		}
+	}
+
+	// TODO improve error messaging
+	fun save(tunnelConf: TunnelConf?) = viewModelScope.launch(ioDispatcher) {
+		val message = try {
+			val saveConfig = buildTunnelConfFromState(tunnelConf)
+			tunnelRepository.save(saveConfig)
+			StringValue.StringResource(R.string.config_changes_saved)
+		} catch (e: Exception) {
+			e.message?.let { message ->
+				(StringValue.DynamicString(message))
+			} ?: StringValue.StringResource(R.string.unknown_error)
+		}
+		setMessage(message)
+	}
+
+	private fun buildTunnelConfFromState(tunnelConf: TunnelConf?): TunnelConf {
+		val (wg, am) = _uiState.value.configProxy.buildConfigs()
+		val name = _uiState.value.tunnelName
+		return tunnelConf?.copyWithCallback(
+			tunName = name,
+			amQuick = am.toAwgQuickString(true),
+			wgQuick = wg.toWgQuickString(true),
+		) ?: TunnelConf(
+			tunName = name, amQuick = am.toAwgQuickString(true),
+			wgQuick = wg.toWgQuickString(true),
+		)
 	}
 
 	fun onAuthenticated() {
