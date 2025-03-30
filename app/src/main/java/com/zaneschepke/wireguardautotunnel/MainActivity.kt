@@ -56,7 +56,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.PinLockScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ScannerScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.SplitTunnelScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.SplitTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.TunnelAutoTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.AdvancedScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.AppearanceScreen
@@ -123,10 +123,6 @@ class MainActivity : AppCompatActivity() {
 						exitProcess(0)
 					}
 				}
-			}
-
-			LaunchedEffect(Unit) {
-				viewModel.getEmitSplitTunnelApps(this@MainActivity)
 			}
 
 			with(appUiState.appSettings) {
@@ -241,11 +237,8 @@ class MainActivity : AppCompatActivity() {
 									composable<Route.KillSwitch> {
 										KillSwitchScreen(appUiState, viewModel)
 									}
-									composable<Route.SplitTunnel> { backStack ->
-										val args = backStack.toRoute<Route.SplitTunnel>()
-										appUiState.tunnels.firstOrNull { it.id == args.id }?.let {
-											SplitTunnelScreen(it, viewModel)
-										}
+									composable<Route.SplitTunnel> {
+										SplitTunnelScreen()
 									}
 									composable<Route.TunnelAutoTunnel> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()

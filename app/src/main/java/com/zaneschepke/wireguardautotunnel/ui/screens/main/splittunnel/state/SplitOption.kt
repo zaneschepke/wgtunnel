@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.enums
+package com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 
-enum class SplitOptions {
+enum class SplitOption {
 	INCLUDE,
 	ALL,
 	EXCLUDE,

@@ -215,4 +215,7 @@
 	<string name="multiple">Multiple</string>
     <string name="export_amnezia">Export as Amnezia</string>
 	<string name="export_wireguard">Export as WireGuard</string>
+    <string name="save">Save</string>
+	<string name="search">Search</string>
+	<string name="select">Select</string>
 </resources>

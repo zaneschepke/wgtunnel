@@ -1,6 +1,5 @@
 package com.zaneschepke.wireguardautotunnel.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
@@ -18,11 +17,9 @@ import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.InterfaceProxy
 import com.zaneschepke.wireguardautotunnel.ui.state.PeerProxy
-import com.zaneschepke.wireguardautotunnel.ui.state.SplitTunnelApp
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.StringValue
-import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import com.zaneschepke.wireguardautotunnel.util.extensions.withData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -64,9 +61,6 @@ constructor(
 
 	private val _configurationChange = MutableStateFlow(false)
 	val configurationChange = _configurationChange.asStateFlow()
-
-	private val _splitTunnelApps = MutableStateFlow<List<SplitTunnelApp>>(emptyList())
-	val splitTunnelApps = _splitTunnelApps.asStateFlow()
 
 	val uiState =
 		combine(
@@ -238,7 +232,7 @@ constructor(
 			if (!isKernelEnabled) {
 				requestRoot().onSuccess {
 					if (!isKernelSupported()) {
-						return@onSuccess SnackbarController.Companion.showMessage(
+						return@onSuccess SnackbarController.showMessage(
 							StringValue.StringResource(R.string.kernel_not_supported),
 						)
 					}
@@ -259,21 +253,6 @@ constructor(
 	private suspend fun isKernelSupported(): Boolean {
 		return withContext(ioDispatcher) {
 			WgQuickBackend.hasKernelSupport()
-		}
-	}
-
-	suspend fun getEmitSplitTunnelApps(context: Context) {
-		withContext(ioDispatcher) {
-			val apps = context.getAllInternetCapablePackages().filter { it.applicationInfo != null }
-				.map { pack ->
-					SplitTunnelApp(
-						context.packageManager.getApplicationIcon(pack.applicationInfo!!),
-						context.packageManager.getApplicationLabel(pack.applicationInfo!!)
-							.toString(),
-						pack.packageName,
-					)
-				}
-			_splitTunnelApps.emit(apps)
 		}
 	}
 
@@ -306,25 +285,25 @@ constructor(
 	}
 
 	fun saveNewTunnel(tunnelName: String, peers: List<PeerProxy>, `interface`: InterfaceProxy) = viewModelScope.launch {
-		runCatching {
-			val config = buildConfigs(peers, `interface`)
-			appDataRepository.tunnels.save(
-				TunnelConf(
-					tunName = tunnelName,
-					wgQuick = config.first.toWgQuickString(true),
-					amQuick = config.second.toAwgQuickString(true),
-				),
-			)
-			_popBackStack.emit(true)
-			SnackbarController.Companion.showMessage(StringValue.StringResource(R.string.config_changes_saved))
-		}.onFailure {
-			onConfigSaveError(it)
-		}
+// 		runCatching {
+// 			val config = buildConfigs(peers, `interface`)
+// 			appDataRepository.tunnels.save(
+// 				TunnelConf(
+// 					tunName = tunnelName,
+// 					wgQuick = config.first.toWgQuickString(true),
+// 					amQuick = config.second.toAwgQuickString(true),
+// 				),
+// 			)
+// 			_popBackStack.emit(true)
+// 			SnackbarController.showMessage(StringValue.StringResource(R.string.config_changes_saved))
+// 		}.onFailure {
+// 			onConfigSaveError(it)
+// 		}
 	}
 
 	private fun onConfigSaveError(throwable: Throwable) {
 		Timber.Forest.e(throwable)
-		SnackbarController.Companion.showMessage(
+		SnackbarController.showMessage(
 			throwable.message?.let { message ->
 				(StringValue.DynamicString(message))
 			} ?: StringValue.StringResource(R.string.unknown_error),
@@ -339,63 +318,13 @@ constructor(
 		peers: List<PeerProxy>? = null,
 		`interface`: InterfaceProxy? = null,
 	) {
-		val configs = rebuildConfigs(amConfig, wgConfig, peers, `interface`)
-		appDataRepository.tunnels.save(
-			tunnelConf.copy(
-				tunName = tunnelName ?: tunnelConf.tunName,
-				amQuick = configs.second.toAwgQuickString(true),
-				wgQuick = configs.first.toWgQuickString(true),
-			),
-		)
-	}
-
-	fun cleanUpUninstalledApps(tunnelConfig: TunnelConf, packages: List<String>) = viewModelScope.launch(ioDispatcher) {
-		runCatching {
-			val amConfig = tunnelConfig.toAmConfig()
-			val wgConfig = tunnelConfig.toWgConfig()
-			val proxy = InterfaceProxy.from(amConfig.`interface`)
-			if (proxy.includedApplications.isEmpty() && proxy.excludedApplications.isEmpty()) return@launch
-			if (proxy.includedApplications.retainAll(packages.toSet()) || proxy.excludedApplications.retainAll(packages.toSet())) {
-				updateTunnelConfig(tunnelConfig, amConfig = amConfig, wgConfig = wgConfig, `interface` = proxy)
-				Timber.Forest.i("Removed split tunnel package for app that no longer exists on the device")
-			}
-		}.onFailure {
-			Timber.Forest.e(it)
-		}
-	}
-
-	private suspend fun rebuildConfigs(
-		amConfig: Config,
-		wgConfig: com.wireguard.config.Config,
-		peers: List<PeerProxy>? = null,
-		`interface`: InterfaceProxy? = null,
-	): Pair<com.wireguard.config.Config, Config> {
-		return withContext(ioDispatcher) {
-			Pair(
-				com.wireguard.config.Config.Builder().apply {
-					addPeers(peers?.map { it.toWgPeer() } ?: wgConfig.peers)
-					setInterface(`interface`?.toWgInterface() ?: wgConfig.`interface`)
-				}.build(),
-				Config.Builder().apply {
-					addPeers(peers?.map { it.toAmPeer() } ?: amConfig.peers)
-					setInterface(`interface`?.toAmInterface() ?: amConfig.`interface`)
-				}.build(),
-			)
-		}
-	}
-
-	private suspend fun buildConfigs(peers: List<PeerProxy>, `interface`: InterfaceProxy): Pair<com.wireguard.config.Config, Config> {
-		return withContext(ioDispatcher) {
-			Pair(
-				com.wireguard.config.Config.Builder().apply {
-					addPeers(peers.map { it.toWgPeer() })
-					setInterface(`interface`.toWgInterface())
-				}.build(),
-				Config.Builder().apply {
-					addPeers(peers.map { it.toAmPeer() })
-					setInterface(`interface`.toAmInterface())
-				}.build(),
-			)
-		}
+// 		val configs = rebuildConfigs(amConfig, wgConfig, peers, `interface`)
+// 		appDataRepository.tunnels.save(
+// 			tunnelConf.copy(
+// 				tunName = tunnelName ?: tunnelConf.tunName,
+// 				amQuick = configs.second.toAwgQuickString(true),
+// 				wgQuick = configs.first.toWgQuickString(true),
+// 			),
+// 		)
 	}
 }
