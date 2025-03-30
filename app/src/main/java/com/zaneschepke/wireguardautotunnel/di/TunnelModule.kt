@@ -13,6 +13,7 @@ import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelProvider
 import com.zaneschepke.wireguardautotunnel.core.tunnel.UserspaceTunnel
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,6 +21,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.backend.GoBackend
 import org.amnezia.awg.backend.RootTunnelActionHandler
@@ -65,11 +67,10 @@ class TunnelModule {
 		@ApplicationScope applicationScope: CoroutineScope,
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
-		networkMonitor: NetworkMonitor,
 		notificationManager: NotificationManager,
 		backend: com.wireguard.android.backend.Backend,
 	): TunnelProvider {
-		return KernelTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend, networkMonitor)
+		return KernelTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend)
 	}
 
 	@Provides
@@ -81,10 +82,9 @@ class TunnelModule {
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
 		notificationManager: NotificationManager,
-		networkMonitor: NetworkMonitor,
 		backend: Backend,
 	): TunnelProvider {
-		return UserspaceTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend, networkMonitor)
+		return UserspaceTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend)
 	}
 
 	@Provides
@@ -101,8 +101,8 @@ class TunnelModule {
 
 	@Provides
 	@Singleton
-	fun provideNetworkMonitor(@ApplicationContext context: Context): NetworkMonitor {
-		return AndroidNetworkMonitor(context)
+	fun provideNetworkMonitor(@ApplicationContext context: Context, settingsRepository: AppSettingRepository): NetworkMonitor {
+		return AndroidNetworkMonitor(context) { runBlocking { settingsRepository.get().isWifiNameByShellEnabled } }
 	}
 
 	@Singleton

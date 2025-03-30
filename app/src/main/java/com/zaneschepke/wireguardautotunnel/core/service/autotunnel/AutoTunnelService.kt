@@ -94,9 +94,11 @@ class AutoTunnelService : LifecycleService() {
 	}
 
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+		super.onStartCommand(intent, flags, startId)
 		Timber.d("onStartCommand executed with startId: $startId")
 		serviceManager.autoTunnelService.complete(this)
-		return super.onStartCommand(intent, flags, startId)
+		start()
+		return START_STICKY
 	}
 
 	fun start() {
@@ -178,8 +180,8 @@ class AutoTunnelService : LifecycleService() {
 			combineSettings(),
 			appDataRepository.get().settings.flow
 				.distinctUntilChanged { old, new -> old.isKernelEnabled == new.isKernelEnabled } // Only emit when isKernelEnabled changes
-				.flatMapLatest { settings ->
-					networkMonitor.getNetworkStatusFlow(true, settings.isKernelEnabled)
+				.flatMapLatest {
+					networkMonitor.networkStatusFlow
 						.flowOn(ioDispatcher)
 						.map { buildNetworkState(it) }
 				}

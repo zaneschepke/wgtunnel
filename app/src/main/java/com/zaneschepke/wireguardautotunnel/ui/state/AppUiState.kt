@@ -8,7 +8,7 @@ import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 data class AppUiState(
 	val appSettings: AppSettings = AppSettings(),
 	val tunnels: List<TunnelConf> = emptyList(),
-	val activeTunnels: Map<Int, TunnelState> = emptyMap(),
+	val activeTunnels: Map<TunnelConf, TunnelState> = emptyMap(),
 	val generalState: GeneralState = GeneralState(),
 	val autoTunnelActive: Boolean = false,
 )

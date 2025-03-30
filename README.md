@@ -30,7 +30,7 @@ and [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/)
 <div align="center">
 
 [<img  src="https://img.shields.io/badge/Telegram-26A5E4.svg?style=for-the-badge&logo=Telegram&logoColor=white">](https://t.me/wgtunnel)
-[<img src="https://img.shields.io/badge/Matrix-000000.svg?style=for-the-badge&logo=Matrix&logoColor=white">](https://matrix.to/#/#wg-tunnel:matrix.zaneschepke.com)
+[<img src="https://img.shields.io/badge/Matrix-000000.svg?style=for-the-badge&logo=Matrix&logoColor=white">](https://matrix.to/#/#wg-tunnel-space:matrix.org)
 </div>
 
 <details open="open">

@@ -5,26 +5,23 @@ import android.os.Build
 import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
-import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TunnelControlTile : TileService() {
+class TunnelControlTile : TileService(), LifecycleOwner {
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
-
-	@Inject
-	@ApplicationScope
-	lateinit var applicationScope: CoroutineScope
 
 	@Inject
 	lateinit var serviceManager: ServiceManager
@@ -32,31 +29,39 @@ class TunnelControlTile : TileService() {
 	@Inject
 	lateinit var tunnelManager: TunnelManager
 
+	private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
+
+	private var isCollecting = false
+
 	override fun onCreate() {
 		super.onCreate()
-		serviceManager.tunnelControlTile.complete(this)
+		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 	}
 
 	override fun onDestroy() {
 		super.onDestroy()
-		serviceManager.tunnelControlTile = CompletableDeferred()
+		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	}
 
 	override fun onStartListening() {
 		super.onStartListening()
-		Timber.d("Start listening called")
-		serviceManager.tunnelControlTile.complete(this)
-		applicationScope.launch {
-			updateTileState()
+		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+		Timber.d("Start listening called for tunnel tile")
+		if (isCollecting) return
+		isCollecting = true
+		lifecycleScope.launch {
+			tunnelManager.activeTunnels.collect {
+				updateTileState()
+			}
 		}
 	}
 
-	fun updateTileState() = applicationScope.launch {
+	private fun updateTileState() = lifecycleScope.launch {
 		val tunnels = appDataRepository.tunnels.getAll()
 		if (tunnels.isEmpty()) return@launch setUnavailable()
 		with(tunnelManager.activeTunnels.value) {
 			if (isNotEmpty()) if (size == 1) {
-				tunnels.firstOrNull { it.id == keys.first() }?.let { return@launch updateTile(it.tunName, true) }
+				tunnels.firstOrNull { it.id == keys.first().id }?.let { return@launch updateTile(it.tunName, true) }
 			} else {
 				return@launch updateTile(getString(R.string.multiple), true)
 			}
@@ -69,7 +74,7 @@ class TunnelControlTile : TileService() {
 	override fun onClick() {
 		super.onClick()
 		unlockAndRun {
-			applicationScope.launch {
+			lifecycleScope.launch {
 				if (tunnelManager.activeTunnels.value.isNotEmpty()) return@launch tunnelManager.stopTunnel()
 				appDataRepository.getStartTunnelConfig()?.let {
 					tunnelManager.startTunnel(it)
@@ -132,4 +137,6 @@ class TunnelControlTile : TileService() {
 			Timber.e(it)
 		}
 	}
+	override val lifecycle: Lifecycle
+		get() = lifecycleRegistry
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.core.tunnel.isUp
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
@@ -195,7 +196,7 @@ fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: Tun
 							trailing = {
 								ScaledSwitch(
 									checked = tunnelConf.isPingEnabled,
-									enabled = !appUiState.activeTunnels.containsKey(tunnelConf.id),
+									enabled = !appUiState.activeTunnels.isUp(tunnelConf),
 									onClick = { onPingToggle() },
 								)
 							},

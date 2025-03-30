@@ -219,4 +219,7 @@
     <string name="enter_config_url">Enter config URL</string>
     <string name="error_download_failed">Failed to download config</string>
     <string name="error_invalid_url">Invalid URL</string>
+    <string name="save">Save</string>
+	<string name="search">Search</string>
+	<string name="select">Select</string>
 </resources>

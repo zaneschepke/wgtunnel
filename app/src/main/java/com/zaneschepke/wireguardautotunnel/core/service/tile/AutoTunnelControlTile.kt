@@ -4,57 +4,61 @@ import android.content.Intent
 import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AutoTunnelControlTile : TileService() {
+class AutoTunnelControlTile : TileService(), LifecycleOwner {
 	@Inject
 	lateinit var appDataRepository: AppDataRepository
 
 	@Inject
 	lateinit var serviceManager: ServiceManager
 
-	@Inject
-	@ApplicationScope
-	lateinit var applicationScope: CoroutineScope
+	private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
 
 	override fun onCreate() {
 		super.onCreate()
-		serviceManager.autoTunnelTile.complete(this)
+		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 	}
 
 	override fun onDestroy() {
 		super.onDestroy()
-		serviceManager.autoTunnelTile = CompletableDeferred()
+		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 	}
 
 	override fun onStartListening() {
 		super.onStartListening()
-		serviceManager.autoTunnelTile.complete(this)
-		applicationScope.launch {
-			if (appDataRepository.tunnels.getAll().isEmpty()) return@launch setUnavailable()
-			updateTileState()
+		Timber.d("Start listening called for auto tunnel tile")
+		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+		lifecycleScope.launch {
+			serviceManager.autoTunnelActive.collect {
+				if (it) setActive() else setInactive()
+			}
 		}
-	}
-
-	fun updateTileState() {
-		serviceManager.autoTunnelActive.value.let {
-			if (it) setActive() else setInactive()
+		lifecycleScope.launch {
+			appDataRepository.tunnels.flow.collect {
+				if (it.isEmpty()) {
+					setUnavailable()
+				} else {
+					if (qsTile.state == Tile.STATE_ACTIVE) setInactive()
+				}
+			}
 		}
 	}
 
 	override fun onClick() {
 		super.onClick()
 		unlockAndRun {
-			applicationScope.launch {
+			lifecycleScope.launch {
 				if (serviceManager.autoTunnelActive.value) {
 					serviceManager.stopAutoTunnel()
 					setInactive()
@@ -97,4 +101,7 @@ class AutoTunnelControlTile : TileService() {
 			qsTile.updateTile()
 		}
 	}
+
+	override val lifecycle: Lifecycle
+		get() = lifecycleRegistry
 }

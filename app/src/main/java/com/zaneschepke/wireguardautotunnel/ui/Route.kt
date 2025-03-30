@@ -52,7 +52,11 @@ sealed class Route {
 	@Serializable
 	data class SplitTunnel(
 		val id: Int,
-	) : Route()
+	) : Route() {
+		companion object {
+			const val KEY_ID = "id"
+		}
+	}
 
 	@Serializable
 	data class TunnelAutoTunnel(
