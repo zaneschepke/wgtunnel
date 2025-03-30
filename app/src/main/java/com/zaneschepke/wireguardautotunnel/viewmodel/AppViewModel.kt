@@ -21,10 +21,8 @@ import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.withData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -49,9 +47,6 @@ constructor(
 	private val serviceManager: ServiceManager,
 	private val logReader: LogReader,
 ) : BaseViewModel(appDataRepository) {
-
-	private val _popBackStack = MutableSharedFlow<Boolean>()
-	val popBackStack = _popBackStack.asSharedFlow()
 
 	private val _isAppReady = MutableStateFlow(false)
 	val isAppReady = _isAppReady.asStateFlow()
@@ -263,13 +258,4 @@ constructor(
 			}
 		}
 	}
-
-// 	private fun onConfigSaveError(throwable: Throwable) {
-// 		Timber.Forest.e(throwable)
-// 		SnackbarController.showMessage(
-// 			throwable.message?.let { message ->
-// 				(StringValue.DynamicString(message))
-// 			} ?: StringValue.StringResource(R.string.unknown_error),
-// 		)
-// 	}
 }
