@@ -15,8 +15,6 @@ import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.state.InterfaceProxy
-import com.zaneschepke.wireguardautotunnel.ui.state.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.StringValue
@@ -35,7 +33,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
-import org.amnezia.awg.config.Config
 import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
 import javax.inject.Inject
@@ -267,64 +264,12 @@ constructor(
 		}
 	}
 
-	fun updateExistingTunnelConfig(
-		tunnelConfig: TunnelConf,
-		tunnelName: String? = null,
-		peers: List<PeerProxy>? = null,
-		`interface`: InterfaceProxy? = null,
-	) = viewModelScope.launch {
-		runCatching {
-			val amConfig = tunnelConfig.toAmConfig()
-			val wgConfig = tunnelConfig.toWgConfig()
-			updateTunnelConfig(tunnelConfig, tunnelName, amConfig, wgConfig, peers, `interface`)
-			_popBackStack.emit(true)
-			SnackbarController.Companion.showMessage(StringValue.StringResource(R.string.config_changes_saved))
-		}.onFailure {
-			onConfigSaveError(it)
-		}
-	}
-
-	fun saveNewTunnel(tunnelName: String, peers: List<PeerProxy>, `interface`: InterfaceProxy) = viewModelScope.launch {
-// 		runCatching {
-// 			val config = buildConfigs(peers, `interface`)
-// 			appDataRepository.tunnels.save(
-// 				TunnelConf(
-// 					tunName = tunnelName,
-// 					wgQuick = config.first.toWgQuickString(true),
-// 					amQuick = config.second.toAwgQuickString(true),
-// 				),
-// 			)
-// 			_popBackStack.emit(true)
-// 			SnackbarController.showMessage(StringValue.StringResource(R.string.config_changes_saved))
-// 		}.onFailure {
-// 			onConfigSaveError(it)
-// 		}
-	}
-
-	private fun onConfigSaveError(throwable: Throwable) {
-		Timber.Forest.e(throwable)
-		SnackbarController.showMessage(
-			throwable.message?.let { message ->
-				(StringValue.DynamicString(message))
-			} ?: StringValue.StringResource(R.string.unknown_error),
-		)
-	}
-
-	private suspend fun updateTunnelConfig(
-		tunnelConf: TunnelConf,
-		tunnelName: String? = null,
-		amConfig: Config,
-		wgConfig: com.wireguard.config.Config,
-		peers: List<PeerProxy>? = null,
-		`interface`: InterfaceProxy? = null,
-	) {
-// 		val configs = rebuildConfigs(amConfig, wgConfig, peers, `interface`)
-// 		appDataRepository.tunnels.save(
-// 			tunnelConf.copy(
-// 				tunName = tunnelName ?: tunnelConf.tunName,
-// 				amQuick = configs.second.toAwgQuickString(true),
-// 				wgQuick = configs.first.toWgQuickString(true),
-// 			),
+// 	private fun onConfigSaveError(throwable: Throwable) {
+// 		Timber.Forest.e(throwable)
+// 		SnackbarController.showMessage(
+// 			throwable.message?.let { message ->
+// 				(StringValue.DynamicString(message))
+// 			} ?: StringValue.StringResource(R.string.unknown_error),
 // 		)
-	}
+// 	}
 }

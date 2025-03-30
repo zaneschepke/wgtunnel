@@ -7,6 +7,11 @@ data class ConfigProxy(
 	val `interface`: InterfaceProxy,
 ) {
 
+	fun hasScripts(): Boolean {
+		return `interface`.preUp.isNotBlank() || `interface`.preDown.isNotBlank() ||
+			`interface`.postUp.isNotBlank() || `interface`.postDown.isNotBlank()
+	}
+
 	fun buildConfigs(): Pair<com.wireguard.config.Config, Config> {
 		return Pair(
 			com.wireguard.config.Config.Builder().apply {

@@ -51,7 +51,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.ConfigScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.PinLockScreen
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
 										val args = backStack.toRoute<Route.Config>()
 										val config =
 											appUiState.tunnels.firstOrNull { it.id == args.id }
-										ConfigScreen(config, viewModel)
+										ConfigScreen(config)
 									}
 									composable<Route.TunnelOptions> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()

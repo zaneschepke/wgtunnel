@@ -1,0 +1,157 @@
+package com.zaneschepke.wireguardautotunnel.ui.screens.main.config
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.state.ConfigUiState
+import com.zaneschepke.wireguardautotunnel.ui.state.ConfigProxy
+import com.zaneschepke.wireguardautotunnel.ui.state.InterfaceProxy
+import com.zaneschepke.wireguardautotunnel.ui.state.PeerProxy
+import com.zaneschepke.wireguardautotunnel.util.StringValue
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class ConfigViewModel @Inject constructor(
+	private val tunnelRepository: TunnelRepository,
+) : ViewModel() {
+
+	private val _uiState = MutableStateFlow(ConfigUiState())
+	val uiState: StateFlow<ConfigUiState> = _uiState.asStateFlow()
+
+	fun initFromTunnel(tunnelConf: TunnelConf?) {
+		if (tunnelConf == null) return
+		_uiState.update {
+			val proxy = ConfigProxy.from(tunnelConf.toAmConfig())
+			it.copy(
+				tunnelName = tunnelConf.name,
+				configProxy = proxy,
+				showScripts = proxy.hasScripts(),
+				showAmneziaValues = proxy.`interface`.junkPacketCount.isNotBlank(),
+				isAuthenticated = false,
+			)
+		}
+	}
+
+	fun updateTunnelName(name: String) {
+		_uiState.update {
+			it.copy(tunnelName = name)
+		}
+	}
+
+	fun updateInterface(newInterface: InterfaceProxy) {
+		_uiState.update {
+			it.copy(
+				configProxy = it.configProxy.copy(
+					`interface` = newInterface,
+				),
+			)
+		}
+	}
+
+	fun toggleAmneziaValues() {
+		_uiState.update {
+			it.copy(showAmneziaValues = !it.showAmneziaValues)
+		}
+	}
+
+	fun toggleScripts() {
+		_uiState.update {
+			it.copy(showScripts = !it.showScripts)
+		}
+	}
+
+	fun toggleAmneziaCompatibility() {
+		val (show, `interface`) = with(_uiState.value.configProxy) {
+			if (`interface`.isAmneziaCompatibilityModeSet()) {
+				Pair(false, `interface`.resetAmneziaProperties())
+			} else {
+				Pair(true, `interface`.toAmneziaCompatibilityConfig())
+			}
+		}
+		_uiState.update {
+			it.copy(
+				showScripts = show,
+				configProxy = it.configProxy.copy(
+					`interface` = `interface`,
+				),
+			)
+		}
+	}
+
+	fun addPeer() {
+		_uiState.update { currentState ->
+			currentState.copy(
+				configProxy = currentState.configProxy.copy(
+					peers = currentState.configProxy.peers + PeerProxy(),
+				),
+			)
+		}
+	}
+
+	fun removePeer(index: Int) {
+		_uiState.update { currentState ->
+			currentState.copy(
+				configProxy = currentState.configProxy.copy(
+					peers = currentState.configProxy.peers.toMutableList().apply { removeAt(index) },
+				),
+			)
+		}
+	}
+
+	fun updatePeer(index: Int, peer: PeerProxy) {
+		_uiState.update { currentState ->
+			currentState.copy(
+				configProxy = currentState.configProxy.copy(
+					peers = currentState.configProxy.peers.toMutableList().apply { set(index, peer) },
+				),
+			)
+		}
+	}
+
+	fun toggleLanExclusion(index: Int) {
+		val peer = _uiState.value.configProxy.peers[index]
+		val updated = if (peer.isLanExcluded()) peer.includeLan() else peer.excludeLan()
+		updatePeer(index, updated)
+	}
+
+	fun save(tunnelConf: TunnelConf?) = viewModelScope.launch {
+		runCatching {
+			val (wg, am) = _uiState.value.configProxy.buildConfigs()
+			val name = _uiState.value.tunnelName
+			val saveConfig = tunnelConf?.copyWithCallback(
+				tunName = tunnelConf.name,
+				amQuick = am.toAwgQuickString(true),
+				wgQuick = wg.toWgQuickString(true),
+			)
+				?: TunnelConf(tunName = name, amQuick = am.toAwgQuickString(true), wgQuick = wg.toWgQuickString(true))
+			tunnelRepository.save(saveConfig)
+		}.onFailure {
+			SnackbarController.showMessage(
+				it.message?.let { message ->
+					(StringValue.DynamicString(message))
+				} ?: StringValue.StringResource(R.string.unknown_error),
+			)
+		}
+	}
+
+	fun onAuthenticated() {
+		_uiState.update {
+			it.copy(isAuthenticated = true)
+		}
+	}
+
+	fun toggleShowAuthPrompt() {
+		_uiState.update {
+			it.copy(showAuthPrompt = !it.showAuthPrompt)
+		}
+	}
+}
