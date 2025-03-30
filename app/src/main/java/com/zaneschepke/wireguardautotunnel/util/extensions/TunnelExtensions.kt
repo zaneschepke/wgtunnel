@@ -42,15 +42,12 @@ fun TunnelStatistics.PeerStats.handshakeStatus(): HandshakeStatus {
 	}
 }
 
-fun Peer.isReachable(preferIpv4: Boolean): Boolean {
-	val host =
-		if (this.endpoint.isPresent &&
-			this.endpoint.get().resolved.isPresent
-		) {
-			this.endpoint.get().resolved.get().host
-		} else {
-			Constants.DEFAULT_PING_IP
-		}
+fun Peer.isReachable(): Boolean {
+	val host = if (this.endpoint.isPresent) {
+		this.endpoint.get().host
+	} else {
+		Constants.DEFAULT_PING_IP
+	}
 	Timber.d("Checking reachability of peer: $host")
 	val reachable =
 		InetAddress.getByName(host)

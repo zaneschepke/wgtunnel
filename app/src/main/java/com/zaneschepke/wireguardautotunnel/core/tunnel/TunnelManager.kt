@@ -64,7 +64,7 @@ class TunnelManager @Inject constructor(
 		tunnelProviderFlow.value.stopTunnel(tunnelConf)
 	}
 
-	override suspend fun bounceTunnel(tunnelConf: TunnelConf) {
+	override fun bounceTunnel(tunnelConf: TunnelConf) {
 		tunnelProviderFlow.value.bounceTunnel(tunnelConf)
 	}
 

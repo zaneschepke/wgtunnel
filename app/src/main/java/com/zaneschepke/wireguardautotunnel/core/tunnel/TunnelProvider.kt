@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface TunnelProvider {
 	fun startTunnel(tunnelConf: TunnelConf)
 	fun stopTunnel(tunnelConf: TunnelConf? = null)
-	suspend fun bounceTunnel(tunnelConf: TunnelConf)
+	fun bounceTunnel(tunnelConf: TunnelConf)
 	suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>)
 	suspend fun runningTunnelNames(): Set<String>
 	fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics?

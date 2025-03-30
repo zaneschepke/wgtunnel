@@ -67,11 +67,10 @@ class TunnelModule {
 		@ApplicationScope applicationScope: CoroutineScope,
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
-		networkMonitor: NetworkMonitor,
 		notificationManager: NotificationManager,
 		backend: com.wireguard.android.backend.Backend,
 	): TunnelProvider {
-		return KernelTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend, networkMonitor)
+		return KernelTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend)
 	}
 
 	@Provides
@@ -83,10 +82,9 @@ class TunnelModule {
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
 		notificationManager: NotificationManager,
-		networkMonitor: NetworkMonitor,
 		backend: Backend,
 	): TunnelProvider {
-		return UserspaceTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend, networkMonitor)
+		return UserspaceTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, notificationManager, backend)
 	}
 
 	@Provides

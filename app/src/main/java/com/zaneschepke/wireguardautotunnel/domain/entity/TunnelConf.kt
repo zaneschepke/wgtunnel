@@ -5,15 +5,12 @@ import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import java.io.InputStream
-import java.net.InetAddress
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.InputStream
+import java.net.InetAddress
 import java.nio.charset.StandardCharsets
+import kotlin.coroutines.CoroutineContext
 
 data class TunnelConf(
 	val id: Int = 0,
@@ -32,14 +29,22 @@ data class TunnelConf(
 	val isIpv4Preferred: Boolean = true,
 	@Transient
 	private var stateChangeCallback: ((Any) -> Unit)? = null,
+	@Transient
+	private var tunnelStatsCallback: (() -> Unit)? = null,
+	@Transient
+	private var bounceTunnelCallback: ((TunnelConf) -> Unit)? = null,
 ) : Tunnel, org.amnezia.awg.backend.Tunnel {
 
-	private val callbackMutex = Mutex()
+	fun setStateChangeCallback(callback: (Any) -> Unit) {
+		stateChangeCallback = callback
+	}
 
-	suspend fun setStateChangeCallback(callback: (Any) -> Unit) {
-		callbackMutex.withLock {
-			stateChangeCallback = callback
-		}
+	fun setTunnelStatsCallback(callback: (() -> Unit)) {
+		tunnelStatsCallback = callback
+	}
+
+	fun setBounceTunnelCallback(callback: (TunnelConf) -> Unit) {
+		bounceTunnelCallback = callback
 	}
 
 	fun copyWithCallback(
@@ -64,7 +69,17 @@ data class TunnelConf(
 			isEthernetTunnel, isIpv4Preferred,
 		).apply {
 			stateChangeCallback = this@TunnelConf.stateChangeCallback
+			tunnelStatsCallback = this@TunnelConf.tunnelStatsCallback
+			bounceTunnelCallback = this@TunnelConf.bounceTunnelCallback
 		}
+	}
+
+	fun onUpdateStatistics() {
+		tunnelStatsCallback?.invoke()
+	}
+
+	fun bounceTunnel(tunnelConf: TunnelConf) {
+		bounceTunnelCallback?.invoke(tunnelConf)
 	}
 
 	fun toAmConfig(): org.amnezia.awg.config.Config {
@@ -80,42 +95,15 @@ data class TunnelConf(
 	override fun isIpv4ResolutionPreferred(): Boolean = isIpv4Preferred
 
 	override fun onStateChange(newState: org.amnezia.awg.backend.Tunnel.State) {
-		Timber.d("onStateChange called for tunnel $id: $tunName with state $newState")
-		runBlocking {
-			callbackMutex.withLock {
-				if (stateChangeCallback != null) {
-					Timber.d("Invoking stateChangeCallback for tunnel $id: $tunName with state $newState")
-					stateChangeCallback?.invoke(newState)
-				} else {
-					Timber.w("No stateChangeCallback set for tunnel $id: $tunName")
-				}
-			}
-		}
+		stateChangeCallback?.invoke(newState)
 	}
 
 	override fun onStateChange(newState: Tunnel.State) {
-		Timber.d("onStateChange called for tunnel $id: $tunName with state $newState")
-		runBlocking {
-			callbackMutex.withLock {
-				if (stateChangeCallback != null) {
-					Timber.d("Invoking stateChangeCallback for tunnel $id: $tunName with state $newState")
-					stateChangeCallback?.invoke(newState)
-				} else {
-					Timber.w("No stateChangeCallback set for tunnel $id: $tunName")
-				}
-			}
-		}
+		stateChangeCallback?.invoke(newState)
 	}
 
-	fun isQuickConfigMatching(updatedConf: TunnelConf): Boolean {
-		return updatedConf.wgQuick == wgQuick || updatedConf.amQuick == amQuick
-	}
-
-	fun isPingConfigMatching(updatedConf: TunnelConf): Boolean {
-		return updatedConf.isPingEnabled == isPingEnabled &&
-			pingIp == updatedConf.pingIp &&
-			updatedConf.pingCooldown == pingCooldown &&
-			updatedConf.pingInterval == pingInterval
+	fun isTunnelConfigChanged(updatedConf: TunnelConf): Boolean {
+		return updatedConf.wgQuick != wgQuick || updatedConf.amQuick != amQuick || updatedConf.name != name
 	}
 
 	suspend fun isTunnelPingable(context: CoroutineContext): Boolean {
@@ -123,11 +111,15 @@ data class TunnelConf(
 			val config = toWgConfig()
 			if (pingIp != null) {
 				return@withContext InetAddress.getByName(pingIp)
-					.isReachable(Constants.PING_TIMEOUT.toInt())
+					.isReachable(Constants.PING_TIMEOUT.toInt()).also {
+						Timber.i("Ping reachable $pingIp: $it")
+					}
 			}
 			config.peers.map { peer ->
-				peer.isReachable(isIpv4Preferred)
-			}.all { true }
+				peer.isReachable()
+			}.all { true }.also {
+				Timber.i("Ping of all peers reachable: $it")
+			}
 		}
 	}
 
