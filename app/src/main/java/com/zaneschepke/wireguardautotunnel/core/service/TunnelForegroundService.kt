@@ -172,5 +172,10 @@ class TunnelForegroundService : LifecycleService() {
 	companion object {
 		const val STATS_DELAY = 1_000L
 		const val PING_START_DELAY = 30_000L
+		// ipv6 disabled or block on network
+//		const val userspaceStartFailed = "Failed to send handshake initiation: write udp [::]"
+//		const val ipv6Fails = "Failed to send data packets: write udp [::]"
+//		const val ipv4Fails = "Failed to send data packets: write udp 0.0.0.0:51820"
+
 	}
 }
