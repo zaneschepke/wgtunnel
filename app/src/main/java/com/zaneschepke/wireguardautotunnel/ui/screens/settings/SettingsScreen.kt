@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.FolderZip
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Pin
 import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.VpnKeyOff
@@ -56,7 +55,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-import com.zaneschepke.wireguardautotunnel.util.extensions.launchNotificationSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
@@ -291,16 +289,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 					},
 					trailing = {
 						ForwardButton { navController.navigate(Route.Appearance) }
-					},
-				),
-				SelectionItem(
-					Icons.Outlined.Notifications,
-					title = { Text(stringResource(R.string.notifications), style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface)) },
-					onClick = {
-						context.launchNotificationSettings()
-					},
-					trailing = {
-						ForwardButton { context.launchNotificationSettings() }
 					},
 				),
 				SelectionItem(

@@ -6,13 +6,12 @@ object Constants {
 
 	const val MANUAL_TUNNEL_CONFIG_ID = 0
 	const val BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT = 10 * 60 * 1_000L // 10 minutes
-	const val WATCHER_COLLECTION_DELAY = 3_000L
 
 	const val CONF_FILE_EXTENSION = ".conf"
 	const val ZIP_FILE_EXTENSION = ".zip"
 	const val URI_CONTENT_SCHEME = "content"
-	const val TEXT_MIME_TYPE = "text/plain"
-	const val ZIP_FILE_MIME_TYPE = "application/zip"
+	private const val TEXT_MIME_TYPE = "text/plain"
+	private const val ZIP_FILE_MIME_TYPE = "application/zip"
 	const val ALLOWED_TV_FILE_TYPES = "${TEXT_MIME_TYPE}|${ZIP_FILE_MIME_TYPE}"
 	const val ALL_FILE_TYPES = "*/*"
 	const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
@@ -29,8 +28,8 @@ object Constants {
 	const val PING_INTERVAL = 60_000L
 	const val PING_COOLDOWN = PING_INTERVAL * 60 // one hour
 
-	const val UNREADABLE_SSID = "<unknown ssid>"
-
 	val amProperties = listOf("Jc", "Jmin", "Jmax", "S1", "S2", "H1", "H2", "H3", "H4")
 	const val QR_CODE_NAME_PROPERTY = "# Name ="
+
+	const val FDROID_FLAVOR = "fdroid"
 }

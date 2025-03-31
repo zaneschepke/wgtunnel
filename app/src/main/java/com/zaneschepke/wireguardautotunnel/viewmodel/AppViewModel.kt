@@ -3,7 +3,6 @@ package com.zaneschepke.wireguardautotunnel.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
-import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
@@ -45,7 +44,6 @@ constructor(
 	@AppShell private val rootShell: Provider<RootShell>,
 	private val tunnelManager: TunnelManager,
 	private val serviceManager: ServiceManager,
-	private val logReader: LogReader,
 ) : BaseViewModel(appDataRepository) {
 
 	private val _isAppReady = MutableStateFlow(false)
@@ -125,18 +123,6 @@ constructor(
 
 	fun setLocationDisclosureShown() = viewModelScope.launch {
 		appDataRepository.appState.setLocationDisclosureShown(true)
-	}
-
-	fun onToggleLocalLogging() = viewModelScope.launch(ioDispatcher) {
-		with(uiState.value.generalState) {
-			val toggledOn = !isLocalLogsEnabled
-			appDataRepository.appState.setLocalLogsEnabled(toggledOn)
-			if (!toggledOn) {
-				logReader.stop()
-			} else {
-				logReader.start()
-			}
-		}
 	}
 
 	fun onToggleAlwaysOnVPN() = viewModelScope.launch {

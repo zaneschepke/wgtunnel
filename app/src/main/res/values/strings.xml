@@ -222,4 +222,7 @@
     <string name="save">Save</string>
 	<string name="search">Search</string>
 	<string name="select">Select</string>
+    <string name="join_telegram">Join Telegram community</string>
+	<string name="join_matrix">Join Matrix community</string>
+	<string name="matrix_url">https://matrix.to/#/#wg-tunnel-space:matrix.org</string>
 </resources>

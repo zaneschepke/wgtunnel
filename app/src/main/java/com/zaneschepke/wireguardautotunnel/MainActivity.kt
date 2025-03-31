@@ -66,7 +66,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.LanguageScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.AutoTunnelScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.support.LogsScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.Constants
@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
 										DisplayScreen(appUiState)
 									}
 									composable<Route.Support> {
-										SupportScreen(appUiState, viewModel)
+										SupportScreen(appUiState)
 									}
 									composable<Route.AutoTunnelAdvanced> {
 										AdvancedScreen(appUiState.appSettings, viewModel)
