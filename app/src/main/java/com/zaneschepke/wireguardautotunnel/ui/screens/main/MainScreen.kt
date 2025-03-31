@@ -200,7 +200,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 					Route.Config(Constants.MANUAL_TUNNEL_CONFIG_ID),
 				)
 			},
-			onUrlClick = { showUrlImportDialog = true }
+			onUrlClick = { showUrlImportDialog = true },
 		)
 
 		if (showUrlImportDialog) {
@@ -209,7 +209,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel(), uiState: AppUiState) 
 				onConfirm = { url ->
 					viewModel.onUrlImport(url)
 					showUrlImportDialog = false
-				}
+				},
 			)
 		}
 
