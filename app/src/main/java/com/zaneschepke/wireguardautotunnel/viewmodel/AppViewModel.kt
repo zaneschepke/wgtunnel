@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
+import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
@@ -18,6 +19,7 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.withData
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +46,7 @@ constructor(
 	@AppShell private val rootShell: Provider<RootShell>,
 	private val tunnelManager: TunnelManager,
 	private val serviceManager: ServiceManager,
+	private val logReader: LogReader,
 ) : BaseViewModel(appDataRepository) {
 
 	private val _isAppReady = MutableStateFlow(false)
@@ -82,6 +85,16 @@ constructor(
 				initTunnels()
 			}
 			appReadyCheck()
+		}
+	}
+
+	fun handleEvent(event: AppEvent) = viewModelScope.launch {
+		when (event) {
+			AppEvent.ToggleLocalLogging -> {
+				val enabled = uiState.value.generalState.isLocalLogsEnabled
+				appDataRepository.appState.setLocalLogsEnabled(!enabled)
+				if (!enabled) logReader.start() else logReader.stop()
+			}
 		}
 	}
 

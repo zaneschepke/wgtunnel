@@ -24,9 +24,13 @@ import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun SupportScreen(appUiState: AppUiState, viewModel: SupportViewModel = hiltViewModel()) {
+fun SupportScreen(appUiState: AppUiState) {
+	val viewModel: AppViewModel = hiltViewModel()
+
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val isTv = context.isRunningOnTv()
@@ -41,7 +45,13 @@ fun SupportScreen(appUiState: AppUiState, viewModel: SupportViewModel = hiltView
 		verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
 	) {
 		GroupLabel(stringResource(R.string.thank_you))
-		GeneralSupportOptions(context, appUiState, viewModel, navController, isTv)
+		GeneralSupportOptions(
+			context,
+			appUiState,
+			{ viewModel.handleEvent(AppEvent.ToggleLocalLogging) },
+			navController,
+			isTv,
+		)
 		ContactSupportOptions(context)
 		VersionLabel()
 	}

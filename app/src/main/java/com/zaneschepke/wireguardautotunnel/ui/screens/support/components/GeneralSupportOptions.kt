@@ -13,7 +13,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionIte
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItemLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
-import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportViewModel
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 
@@ -21,7 +20,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 fun GeneralSupportOptions(
 	context: android.content.Context,
 	appUiState: AppUiState,
-	viewModel: SupportViewModel,
+	onToggleLocalLogging: () -> Unit,
 	navController: androidx.navigation.NavController,
 	isTv: Boolean,
 ) {
@@ -44,10 +43,10 @@ fun GeneralSupportOptions(
 						trailing = {
 							ScaledSwitch(
 								checked = appUiState.generalState.isLocalLogsEnabled,
-								onClick = { viewModel.onToggleLocalLogging() },
+								onClick = { onToggleLocalLogging() },
 							)
 						},
-						onClick = { viewModel.onToggleLocalLogging() },
+						onClick = { onToggleLocalLogging() },
 					),
 				)
 				if (appUiState.generalState.isLocalLogsEnabled) {
