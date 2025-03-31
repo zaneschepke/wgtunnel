@@ -27,7 +27,7 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.util.extensions.goFromRoot
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight

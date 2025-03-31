@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.components
+package com.zaneschepke.wireguardautotunnel.ui.common.button
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.size

@@ -89,11 +89,14 @@ constructor(
 	}
 
 	fun handleEvent(event: AppEvent) = viewModelScope.launch {
-		when (event) {
-			AppEvent.ToggleLocalLogging -> {
-				val enabled = uiState.value.generalState.isLocalLogsEnabled
-				appDataRepository.appState.setLocalLogsEnabled(!enabled)
-				if (!enabled) logReader.start() else logReader.stop()
+		with(uiState.value) {
+			when (event) {
+				AppEvent.ToggleLocalLogging -> {
+					val enabled = generalState.isLocalLogsEnabled
+					appDataRepository.appState.setLocalLogsEnabled(!enabled)
+					if (!enabled) logReader.start() else logReader.stop()
+				}
+				is AppEvent.SetDebounceDelay -> saveAppSettings(appSettings.copy(debounceDelaySeconds = event.delay))
 			}
 		}
 	}

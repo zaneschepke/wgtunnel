@@ -225,4 +225,5 @@
     <string name="join_telegram">Join Telegram community</string>
 	<string name="join_matrix">Join Matrix community</string>
 	<string name="matrix_url">https://matrix.to/#/#wg-tunnel-space:matrix.org</string>
+    <string name="dropdown">Dropdown</string>
 </resources>

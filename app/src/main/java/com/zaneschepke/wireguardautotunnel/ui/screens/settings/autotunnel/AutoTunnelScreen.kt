@@ -53,7 +53,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.TrustedNetworkTextBox
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WildcardsLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LearnMoreLinkLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize

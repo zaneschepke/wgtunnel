@@ -58,7 +58,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.PinLockScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ScannerScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.SplitTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.TunnelAutoTunnelScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.AdvancedScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.AdvancedScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.AppearanceScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.DisplayScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.KillSwitchScreen
@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity() {
 										SupportScreen(appUiState)
 									}
 									composable<Route.AutoTunnelAdvanced> {
-										AdvancedScreen(appUiState.appSettings, viewModel)
+										AdvancedScreen(appUiState)
 									}
 									composable<Route.Logs> {
 										LogsScreen()

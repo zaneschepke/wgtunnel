@@ -41,7 +41,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelec
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ForwardButton
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Address
