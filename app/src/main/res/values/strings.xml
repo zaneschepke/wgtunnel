@@ -226,4 +226,5 @@
 	<string name="join_matrix">Join Matrix community</string>
 	<string name="matrix_url">https://matrix.to/#/#wg-tunnel-space:matrix.org</string>
     <string name="dropdown">Dropdown</string>
+	<string name="add_tunnel">Add tunnel</string>
 </resources>

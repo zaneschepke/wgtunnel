@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
@@ -40,10 +39,11 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.compon
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
-import com.zaneschepke.wireguardautotunnel.viewmodel.TunnelAutoTunnelViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun TunnelAutoTunnelScreen(tunnelConf: TunnelConf, appSettings: AppSettings, tunnelAutoTunnelViewModel: TunnelAutoTunnelViewModel = hiltViewModel()) {
+fun TunnelAutoTunnelScreen(tunnelConf: TunnelConf, appSettings: AppSettings, viewModel: AppViewModel) {
 	var currentText by remember { mutableStateOf("") }
 
 	LaunchedEffect(tunnelConf.tunnelNetworks) {
@@ -86,10 +86,10 @@ fun TunnelAutoTunnelScreen(tunnelConf: TunnelConf, appSettings: AppSettings, tun
 								trailing = {
 									ScaledSwitch(
 										tunnelConf.isMobileDataTunnel,
-										onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(tunnelConf) },
+										onClick = { viewModel.handleEvent(AppEvent.ToggleMobileDataTunnel(tunnelConf)) },
 									)
 								},
-								onClick = { tunnelAutoTunnelViewModel.onToggleIsMobileDataTunnel(tunnelConf) },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleMobileDataTunnel(tunnelConf)) },
 							),
 							SelectionItem(
 								Icons.Outlined.SettingsEthernet,
@@ -108,10 +108,10 @@ fun TunnelAutoTunnelScreen(tunnelConf: TunnelConf, appSettings: AppSettings, tun
 								trailing = {
 									ScaledSwitch(
 										tunnelConf.isEthernetTunnel,
-										onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(tunnelConf) },
+										onClick = { viewModel.handleEvent(AppEvent.ToggleEthernetTunnel(tunnelConf)) },
 									)
 								},
-								onClick = { tunnelAutoTunnelViewModel.onToggleIsEthernetTunnel(tunnelConf) },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleEthernetTunnel(tunnelConf)) },
 							),
 						),
 					)
@@ -155,9 +155,9 @@ fun TunnelAutoTunnelScreen(tunnelConf: TunnelConf, appSettings: AppSettings, tun
 							description = {
 								TrustedNetworkTextBox(
 									tunnelConf.tunnelNetworks,
-									onDelete = { tunnelAutoTunnelViewModel.onDeleteRunSSID(it, tunnelConf) },
+									onDelete = { viewModel.handleEvent(AppEvent.DeleteTunnelRunSSID(it, tunnelConf)) },
 									currentText = currentText,
-									onSave = { tunnelAutoTunnelViewModel.onSaveRunSSID(it, tunnelConf) },
+									onSave = { viewModel.handleEvent(AppEvent.AddTunnelRunSSID(it, tunnelConf)) },
 									onValueChange = { currentText = it },
 									supporting = {
 										if (appSettings.isWildcardsEnabled) {

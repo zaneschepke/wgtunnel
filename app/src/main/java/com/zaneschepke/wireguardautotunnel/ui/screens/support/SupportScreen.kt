@@ -13,13 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
-import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.VersionLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.ContactSupportOptions
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.GeneralSupportOptions
+import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.VersionLabel
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
@@ -28,9 +27,7 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun SupportScreen(appUiState: AppUiState) {
-	val viewModel: AppViewModel = hiltViewModel()
-
+fun SupportScreen(appUiState: AppUiState, viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val isTv = context.isRunningOnTv()

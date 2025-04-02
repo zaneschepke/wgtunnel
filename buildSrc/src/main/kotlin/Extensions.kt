@@ -1,6 +1,6 @@
 import org.gradle.api.Project
 import java.io.File
-import java.util.Properties
+import java.util.*
 
 fun Project.getCurrentFlavor(): String {
     val taskRequestsStr = gradle.startParameter.taskRequests.toString()

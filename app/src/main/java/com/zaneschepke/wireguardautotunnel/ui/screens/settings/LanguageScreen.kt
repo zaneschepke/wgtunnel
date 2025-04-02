@@ -14,19 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.common.SelectedLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.SelectionItemButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import java.text.Collator
-import java.util.Locale
+import java.util.*
 
 @Composable
-fun LanguageScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
+fun LanguageScreen(appUiState: AppUiState, viewModel: AppViewModel) {
 	val collator = Collator.getInstance(Locale.getDefault())
 
 	val locales = LocaleUtil.supportedLocales.map {
@@ -57,7 +58,7 @@ fun LanguageScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 					SelectionItemButton(
 						buttonText = stringResource(R.string.automatic),
 						onClick = {
-							appViewModel.onLocaleChange(LocaleUtil.OPTION_PHONE_LANGUAGE)
+							viewModel.handleEvent(AppEvent.SetLocale(LocaleUtil.OPTION_PHONE_LANGUAGE))
 						},
 						trailing = {
 							with(appUiState.generalState.locale) {
@@ -80,7 +81,7 @@ fun LanguageScreen(appUiState: AppUiState, appViewModel: AppViewModel) {
 							""
 						},
 					onClick = {
-						appViewModel.onLocaleChange(locale.toLanguageTag())
+						viewModel.handleEvent(AppEvent.SetLocale(locale.toLanguageTag()))
 					},
 					trailing = {
 						if (locale.toLanguageTag() == appUiState.generalState.locale) {

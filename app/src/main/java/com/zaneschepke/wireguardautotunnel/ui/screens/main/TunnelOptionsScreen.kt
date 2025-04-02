@@ -30,40 +30,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.core.tunnel.isUp
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.config.SubmitConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
-import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.isValidIpv4orIpv6Address
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
-import com.zaneschepke.wireguardautotunnel.viewmodel.TunnelOptionsViewModel
-import kotlin.text.isBlank
-import kotlin.text.isNullOrBlank
-import kotlin.text.toLong
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: TunnelOptionsViewModel = hiltViewModel()) {
+fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: AppViewModel) {
 	val navController = LocalNavController.current
 
 	var currentText by remember { mutableStateOf("") }
 
 	LaunchedEffect(tunnelConf.tunnelNetworks) {
 		currentText = ""
-	}
-
-	val onPingToggle = {
-		viewModel.saveTunnel(tunnelConf.copy(isPingEnabled = !tunnelConf.isPingEnabled))
 	}
 
 	Scaffold(
@@ -102,10 +95,10 @@ fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: Tun
 						trailing = {
 							ScaledSwitch(
 								tunnelConf.isPrimaryTunnel,
-								onClick = { viewModel.onTogglePrimaryTunnel(tunnelConf) },
+								onClick = { viewModel.handleEvent(AppEvent.TogglePrimaryTunnel(tunnelConf)) },
 							)
 						},
-						onClick = { viewModel.onTogglePrimaryTunnel(tunnelConf) },
+						onClick = { viewModel.handleEvent(AppEvent.TogglePrimaryTunnel(tunnelConf)) },
 					),
 					SelectionItem(
 						Icons.Outlined.Bolt,
@@ -160,10 +153,10 @@ fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: Tun
 						trailing = {
 							ScaledSwitch(
 								tunnelConf.isIpv4Preferred,
-								onClick = { viewModel.onToggleIpv4(tunnelConf) },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleIpv4Preferred(tunnelConf)) },
 							)
 						},
-						onClick = { viewModel.onToggleIpv4(tunnelConf) },
+						onClick = { viewModel.handleEvent(AppEvent.ToggleIpv4Preferred(tunnelConf)) },
 					),
 					SelectionItem(
 						Icons.AutoMirrored.Outlined.CallSplit,
@@ -197,10 +190,10 @@ fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: Tun
 								ScaledSwitch(
 									checked = tunnelConf.isPingEnabled,
 									enabled = !appUiState.activeTunnels.isUp(tunnelConf),
-									onClick = { onPingToggle() },
+									onClick = { viewModel.handleEvent(AppEvent.TogglePingTunnelEnabled(tunnelConf)) },
 								)
 							},
-							onClick = { onPingToggle() },
+							onClick = { viewModel.handleEvent(AppEvent.TogglePingTunnelEnabled(tunnelConf)) },
 						),
 					)
 					if (tunnelConf.isPingEnabled) {
@@ -212,11 +205,9 @@ fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: Tun
 										tunnelConf.pingIp,
 										stringResource(R.string.set_custom_ping_ip),
 										stringResource(R.string.default_ping_ip),
-										isErrorValue = { !it.isNullOrBlank() && !it.isValidIpv4orIpv6Address() },
-										onSubmit = {
-											viewModel.saveTunnel(
-												tunnelConf.copy(pingIp = it.ifBlank { null }),
-											)
+										isErrorValue = { error -> !error.isNullOrBlank() && !error.isValidIpv4orIpv6Address() },
+										onSubmit = { ip ->
+											viewModel.handleEvent(AppEvent.SetTunnelPingIp(tunnelConf, ip))
 										},
 									)
 									fun isSecondsError(seconds: String?): Boolean {
@@ -231,8 +222,8 @@ fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: Tun
 											imeAction = ImeAction.Done,
 										),
 										isErrorValue = ::isSecondsError,
-										onSubmit = {
-											viewModel.onPingIntervalChange(tunnelConf, it)
+										onSubmit = { interval ->
+											viewModel.handleEvent(AppEvent.SetTunnelPingInterval(tunnelConf, interval))
 										},
 									)
 									SubmitConfigurationTextBox(
@@ -243,7 +234,7 @@ fun OptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: Tun
 											keyboardType = KeyboardType.Number,
 										),
 										isErrorValue = ::isSecondsError,
-										onSubmit = { viewModel.onPingCoolDownChange(tunnelConf, it) },
+										onSubmit = { cooldown -> viewModel.handleEvent(AppEvent.SetTunnelPingCooldown(tunnelConf, cooldown)) },
 									)
 								},
 							),

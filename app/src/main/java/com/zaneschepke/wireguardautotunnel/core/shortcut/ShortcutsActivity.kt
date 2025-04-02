@@ -2,12 +2,12 @@ package com.zaneschepke.wireguardautotunnel.core.shortcut
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.service.autotunnel.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelProvider
+import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -53,7 +53,7 @@ class ShortcutsActivity : ComponentActivity() {
 					}
 					AutoTunnelService::class.java.simpleName, LEGACY_AUTO_TUNNEL_SERVICE_NAME -> {
 						when (intent.action) {
-							Action.START.name -> serviceManager.startAutoTunnel(true)
+							Action.START.name -> serviceManager.startAutoTunnel()
 							Action.STOP.name -> serviceManager.stopAutoTunnel()
 						}
 					}

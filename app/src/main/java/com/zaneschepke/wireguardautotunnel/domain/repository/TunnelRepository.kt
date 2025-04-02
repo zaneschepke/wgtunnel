@@ -11,6 +11,8 @@ interface TunnelRepository {
 
 	suspend fun save(tunnelConf: TunnelConf)
 
+	suspend fun saveAll(tunnelConfList: List<TunnelConf>)
+
 	suspend fun updatePrimaryTunnel(tunnelConf: TunnelConf?)
 
 	suspend fun updateMobileDataTunnel(tunnelConf: TunnelConf?)

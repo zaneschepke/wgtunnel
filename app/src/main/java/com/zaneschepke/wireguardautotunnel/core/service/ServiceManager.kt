@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.core.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.core.service.autotunnel.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
@@ -45,7 +46,7 @@ class ServiceManager @Inject constructor(
 		}.onFailure { Timber.e(it) }
 	}
 
-	fun startAutoTunnel(background: Boolean) {
+	fun startAutoTunnel() {
 		applicationScope.launch(ioDispatcher) {
 			val settings = appDataRepository.settings.get()
 			appDataRepository.settings.save(settings.copy(isAutoTunnelEnabled = true))
@@ -55,7 +56,7 @@ class ServiceManager @Inject constructor(
 			}
 			runCatching {
 				autoTunnelService = CompletableDeferred()
-				startService(AutoTunnelService::class.java, background)
+				startService(AutoTunnelService::class.java, !WireGuardAutoTunnel.isForeground())
 				_autoTunnelActive.update { true }
 			}.onFailure {
 				Timber.e(it)
@@ -70,7 +71,7 @@ class ServiceManager @Inject constructor(
 			if (backgroundService.isCompleted) return@launch
 			runCatching {
 				backgroundService = CompletableDeferred()
-				startService(TunnelForegroundService::class.java, true)
+				startService(TunnelForegroundService::class.java, !WireGuardAutoTunnel.isForeground())
 				val service = withTimeoutOrNull(SERVICE_START_TIMEOUT) { backgroundService.await() }
 					?: throw IllegalStateException("Background service start timed out")
 				service.start(tunnelConf)
@@ -105,9 +106,9 @@ class ServiceManager @Inject constructor(
 		}
 	}
 
-	fun toggleAutoTunnel(background: Boolean) {
+	fun toggleAutoTunnel() {
 		applicationScope.launch(ioDispatcher) {
-			if (_autoTunnelActive.value) stopAutoTunnel() else startAutoTunnel(background)
+			if (_autoTunnelActive.value) stopAutoTunnel() else startAutoTunnel()
 		}
 	}
 

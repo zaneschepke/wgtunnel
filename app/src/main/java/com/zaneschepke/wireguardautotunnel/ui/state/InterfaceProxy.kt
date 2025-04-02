@@ -3,7 +3,6 @@ package com.zaneschepke.wireguardautotunnel.ui.state
 import com.wireguard.config.Interface
 import com.zaneschepke.wireguardautotunnel.util.extensions.joinAndTrim
 import com.zaneschepke.wireguardautotunnel.util.extensions.toTrimmedList
-import kotlin.ranges.contains
 
 data class InterfaceProxy(
 	val privateKey: String = "",

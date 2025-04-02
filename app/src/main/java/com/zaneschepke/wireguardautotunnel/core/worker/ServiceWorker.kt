@@ -52,7 +52,7 @@ class ServiceWorker @AssistedInject constructor(
 	override suspend fun doWork(): Result = withContext(ioDispatcher) {
 		Timber.i("Service worker started")
 		with(appDataRepository.settings.get()) {
-			if (isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) return@with serviceManager.startAutoTunnel(true)
+			if (isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) return@with serviceManager.startAutoTunnel()
 			if (tunnelManager.activeTunnels.value.isEmpty()) tunnelManager.restorePreviousState()
 		}
 		Result.success()

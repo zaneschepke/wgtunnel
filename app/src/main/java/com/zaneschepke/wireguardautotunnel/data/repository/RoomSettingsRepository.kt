@@ -1,10 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.dao.SettingsDao
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
 import com.zaneschepke.wireguardautotunnel.data.model.Settings
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map

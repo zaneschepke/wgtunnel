@@ -12,9 +12,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,7 +39,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zaneschepke.networkmonitor.NetworkMonitor
-import com.zaneschepke.wireguardautotunnel.core.shortcut.ShortcutManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
@@ -50,15 +46,15 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
+import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarControllerProvider
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.OptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.PinLockScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.ScannerScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.SplitTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.TunnelAutoTunnelScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.AdvancedScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.SplitTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.AppearanceScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.DisplayScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.KillSwitchScreen
@@ -66,11 +62,12 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.LanguageScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.AutoTunnelScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.AdvancedScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
-import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import javax.inject.Inject
@@ -84,9 +81,6 @@ class MainActivity : AppCompatActivity() {
 
 	@Inject
 	lateinit var tunnelManager: TunnelManager
-
-	@Inject
-	lateinit var shortcutManager: ShortcutManager
 
 	@Inject
 	lateinit var networkMonitor: NetworkMonitor
@@ -107,28 +101,41 @@ class MainActivity : AppCompatActivity() {
 
 		installSplashScreen().apply {
 			setKeepOnScreenCondition {
-				!viewModel.isAppReady.value
+				!viewModel.appState.value.isAppReady
 			}
 		}
 
 		setContent {
 			val appUiState by viewModel.uiState.collectAsStateWithLifecycle()
-			val configurationChange by viewModel.configurationChange.collectAsStateWithLifecycle()
-			val navController = rememberNavController()
+			val appState by viewModel.appState.collectAsStateWithLifecycle()
 
-			LaunchedEffect(configurationChange) {
-				if (configurationChange) {
-					Intent(this@MainActivity, MainActivity::class.java).also {
-						startActivity(it)
-						exitProcess(0)
-					}
-				}
+			if (!appState.isAppReady) {
+				Box(modifier = Modifier.fillMaxSize())
+				return@setContent
 			}
 
-			with(appUiState.appSettings) {
-				LaunchedEffect(isShortcutsEnabled) {
-					if (!isShortcutsEnabled) return@LaunchedEffect shortcutManager.removeShortcuts()
-					shortcutManager.addShortcuts()
+			val navController = rememberNavController()
+			val snackbarController = SnackbarController.current
+
+			with(appState) {
+				LaunchedEffect(isConfigChanged) {
+					if (isConfigChanged) {
+						Intent(this@MainActivity, MainActivity::class.java).also {
+							startActivity(it)
+							exitProcess(0)
+						}
+					}
+				}
+				LaunchedEffect(errorMessage) {
+					errorMessage?.let {
+						snackbarController.showMessage(it.asString(this@MainActivity))
+					}
+				}
+				LaunchedEffect(popBackStack) {
+					if (popBackStack) {
+						navController.popBackStack()
+						viewModel.handleEvent(AppEvent.BackStackPopped)
+					}
 				}
 			}
 
@@ -175,28 +182,19 @@ class MainActivity : AppCompatActivity() {
 							Box(modifier = Modifier.Companion.fillMaxSize().padding(padding)) {
 								NavHost(
 									navController,
-									enterTransition = { fadeIn(tween(Constants.TRANSITION_ANIMATION_TIME)) },
-									exitTransition = { fadeOut(tween(Constants.TRANSITION_ANIMATION_TIME)) },
 									startDestination = (if (appUiState.generalState.isPinLockEnabled) Route.Lock else Route.Main),
 								) {
 									composable<Route.Main> {
-										MainScreen(
-											uiState = appUiState,
-										)
+										MainScreen(appUiState, viewModel)
 									}
 									composable<Route.Settings> {
-										SettingsScreen(
-											appViewModel = viewModel,
-											uiState = appUiState,
-										)
+										SettingsScreen(appUiState, viewModel)
 									}
 									composable<Route.LocationDisclosure> {
-										LocationDisclosureScreen(viewModel, appUiState)
+										LocationDisclosureScreen(appUiState, viewModel)
 									}
 									composable<Route.AutoTunnel> {
-										AutoTunnelScreen(
-											appUiState.appSettings,
-										)
+										AutoTunnelScreen(appUiState.appSettings, viewModel)
 									}
 									composable<Route.Appearance> {
 										AppearanceScreen()
@@ -205,10 +203,10 @@ class MainActivity : AppCompatActivity() {
 										LanguageScreen(appUiState, viewModel)
 									}
 									composable<Route.Display> {
-										DisplayScreen(appUiState)
+										DisplayScreen(appUiState, viewModel)
 									}
 									composable<Route.Support> {
-										SupportScreen(appUiState)
+										SupportScreen(appUiState, viewModel)
 									}
 									composable<Route.AutoTunnelAdvanced> {
 										AdvancedScreen(appUiState)
@@ -218,21 +216,20 @@ class MainActivity : AppCompatActivity() {
 									}
 									composable<Route.Config> { backStack ->
 										val args = backStack.toRoute<Route.Config>()
-										val config =
-											appUiState.tunnels.firstOrNull { it.id == args.id }
+										val config = appUiState.tunnels.firstOrNull { it.id == args.id }
 										ConfigScreen(config)
 									}
 									composable<Route.TunnelOptions> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()
 										appUiState.tunnels.firstOrNull { it.id == args.id }?.let { config ->
-											OptionsScreen(config, appUiState)
+											OptionsScreen(config, appUiState, viewModel)
 										}
 									}
 									composable<Route.Lock> {
 										PinLockScreen(viewModel)
 									}
 									composable<Route.Scanner> {
-										ScannerScreen()
+										ScannerScreen(viewModel)
 									}
 									composable<Route.KillSwitch> {
 										KillSwitchScreen(appUiState, viewModel)
@@ -243,7 +240,7 @@ class MainActivity : AppCompatActivity() {
 									composable<Route.TunnelAutoTunnel> { backStack ->
 										val args = backStack.toRoute<Route.TunnelOptions>()
 										appUiState.tunnels.firstOrNull { it.id == args.id }?.let {
-											TunnelAutoTunnelScreen(it, appUiState.appSettings)
+											TunnelAutoTunnelScreen(it, appUiState.appSettings, viewModel)
 										}
 									}
 								}

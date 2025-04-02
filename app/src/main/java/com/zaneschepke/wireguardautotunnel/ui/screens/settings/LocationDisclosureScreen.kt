@@ -21,20 +21,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.goFromRoot
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun LocationDisclosureScreen(appViewModel: AppViewModel, appUiState: AppUiState) {
+fun LocationDisclosureScreen(appUiState: AppUiState, viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 
@@ -77,13 +78,13 @@ fun LocationDisclosureScreen(appViewModel: AppViewModel, appUiState: AppUiState)
 					},
 					onClick = {
 						context.launchAppSettings().also {
-							appViewModel.setLocationDisclosureShown()
+							viewModel.handleEvent(AppEvent.SetLocationDisclosureShown)
 						}
 					},
 					trailing = {
 						ForwardButton {
 							context.launchAppSettings().also {
-								appViewModel.setLocationDisclosureShown()
+								viewModel.handleEvent(AppEvent.SetLocationDisclosureShown)
 							}
 						}
 					},
@@ -94,9 +95,9 @@ fun LocationDisclosureScreen(appViewModel: AppViewModel, appUiState: AppUiState)
 			listOf(
 				SelectionItem(
 					title = { Text(stringResource(R.string.skip), style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface)) },
-					onClick = { appViewModel.setLocationDisclosureShown() },
+					onClick = { viewModel.handleEvent(AppEvent.SetLocationDisclosureShown) },
 					trailing = {
-						ForwardButton { appViewModel.setLocationDisclosureShown() }
+						ForwardButton { viewModel.handleEvent(AppEvent.SetLocationDisclosureShown) }
 					},
 				),
 			),

@@ -4,7 +4,6 @@ import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,13 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
@@ -53,7 +52,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.TrustedNetworkTextBox
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WildcardsLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
-import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LearnMoreLinkLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
@@ -62,11 +60,12 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
-import com.zaneschepke.wireguardautotunnel.viewmodel.AutoTunnelViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = hiltViewModel()) {
+fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 
@@ -159,12 +158,12 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 										enabled = !appSettings.isAlwaysOnVpnEnabled,
 										checked = appSettings.isTunnelOnWifiEnabled,
 										onClick = {
-											viewModel.onToggleTunnelOnWifi()
+											viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi)
 										},
 									)
 								},
 								onClick = {
-									viewModel.onToggleTunnelOnWifi()
+									viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi)
 								},
 							),
 							SelectionItem(
@@ -185,12 +184,12 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 									ScaledSwitch(
 										checked = appSettings.isWifiNameByShellEnabled,
 										onClick = {
-											viewModel.onRootShellWifiToggle()
+											viewModel.handleEvent(AppEvent.ToggleRootShellWifi)
 										},
 									)
 								},
 								onClick = {
-									viewModel.onRootShellWifiToggle()
+									viewModel.handleEvent(AppEvent.ToggleRootShellWifi)
 								},
 							),
 						),
@@ -213,12 +212,12 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 										ScaledSwitch(
 											checked = appSettings.isWildcardsEnabled,
 											onClick = {
-												viewModel.onToggleWildcards()
+												viewModel.handleEvent(AppEvent.ToggleAutoTunnelWildcards)
 											},
 										)
 									},
 									onClick = {
-										viewModel.onToggleWildcards()
+										viewModel.handleEvent(AppEvent.ToggleAutoTunnelWildcards)
 									},
 								),
 								SelectionItem(
@@ -258,10 +257,10 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 									description = {
 										TrustedNetworkTextBox(
 											appSettings.trustedNetworkSSIDs,
-											onDelete = { viewModel.onDeleteTrustedSSID(it) },
+											onDelete = { viewModel.handleEvent(AppEvent.DeleteTrustedSSID(it)) },
 											currentText = currentText,
 											onSave = { ssid ->
-												if (appSettings.isWifiNameByShellEnabled || isWifiNameReadable()) viewModel.onSaveTrustedSSID(ssid)
+												if (appSettings.isWifiNameByShellEnabled || isWifiNameReadable()) viewModel.handleEvent(AppEvent.SaveTrustedSSID(ssid))
 											},
 											onValueChange = { currentText = it },
 											supporting = {
@@ -287,12 +286,12 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 											enabled = appSettings.isVpnKillSwitchEnabled,
 											checked = appSettings.isDisableKillSwitchOnTrustedEnabled,
 											onClick = {
-												viewModel.onToggleStopKillSwitchOnTrusted()
+												viewModel.handleEvent(AppEvent.ToggleStopKillSwitchOnTrusted)
 											},
 										)
 									},
 									onClick = {
-										viewModel.onToggleStopKillSwitchOnTrusted()
+										viewModel.handleEvent(AppEvent.ToggleStopKillSwitchOnTrusted)
 									},
 								),
 							),
@@ -314,11 +313,11 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 							ScaledSwitch(
 								enabled = !appSettings.isAlwaysOnVpnEnabled,
 								checked = appSettings.isTunnelOnMobileDataEnabled,
-								onClick = { viewModel.onToggleTunnelOnMobileData() },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
 							)
 						},
 						onClick = {
-							viewModel.onToggleTunnelOnMobileData()
+							viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular)
 						},
 					),
 					SelectionItem(
@@ -333,11 +332,11 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 							ScaledSwitch(
 								enabled = !appSettings.isAlwaysOnVpnEnabled,
 								checked = appSettings.isTunnelOnEthernetEnabled,
-								onClick = { viewModel.onToggleTunnelOnEthernet() },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
 							)
 						},
 						onClick = {
-							viewModel.onToggleTunnelOnEthernet()
+							viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet)
 						},
 					),
 					SelectionItem(
@@ -357,11 +356,11 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AutoTunnelViewModel = 
 						trailing = {
 							ScaledSwitch(
 								checked = appSettings.isStopOnNoInternetEnabled,
-								onClick = { viewModel.onToggleStopOnNoInternet() },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet) },
 							)
 						},
 						onClick = {
-							viewModel.onToggleStopOnNoInternet()
+							viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet)
 						},
 					),
 				),

@@ -11,4 +11,6 @@ data class AppUiState(
 	val activeTunnels: Map<TunnelConf, TunnelState> = emptyMap(),
 	val generalState: GeneralState = GeneralState(),
 	val autoTunnelActive: Boolean = false,
+	val appConfigurationChange: Boolean = false,
+	val isAppLoaded: Boolean = false,
 )
