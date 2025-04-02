@@ -21,6 +21,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.core.service.tile.AutoTunnelControlTile
 import com.zaneschepke.wireguardautotunnel.core.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import java.io.InputStream
 
 private const val BASELINE_HEIGHT = 2201
 private const val BASELINE_WIDTH = 1080
@@ -141,6 +142,10 @@ fun Context.launchVpnSettings(): Result<Unit> {
 		}
 		startActivity(intent)
 	}
+}
+
+fun Context.getInputStreamFromUri(uri: Uri): InputStream? {
+	return this.applicationContext.contentResolver.openInputStream(uri)
 }
 
 fun Context.launchLocationServicesSettings(): Result<Unit> {

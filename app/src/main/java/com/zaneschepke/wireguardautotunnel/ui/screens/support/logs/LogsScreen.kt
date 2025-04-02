@@ -30,24 +30,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zaneschepke.logcatter.model.LogMessage
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
-import com.zaneschepke.wireguardautotunnel.viewmodel.LogsViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
-	val logs = viewModel.logs
+fun LogsScreen() {
+	val appViewModel = hiltViewModel<AppViewModel>()
 
-	val context = LocalContext.current
+	val logs by appViewModel.logs.collectAsStateWithLifecycle()
+
 	val clipboardManager: ClipboardManager = LocalClipboardManager.current
 
 	val lazyColumnListState = rememberLazyListState()
@@ -91,7 +93,7 @@ fun LogsScreen(viewModel: LogsViewModel = hiltViewModel()) {
 		floatingActionButton = {
 			FloatingActionButton(
 				onClick = {
-					viewModel.shareLogs(context)
+					appViewModel.handleEvent(AppEvent.ExportLogs)
 				},
 				shape = RoundedCornerShape(16.dp),
 				containerColor = MaterialTheme.colorScheme.primary,

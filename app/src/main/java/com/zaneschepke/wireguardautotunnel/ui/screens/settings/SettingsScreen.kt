@@ -41,29 +41,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
-import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.prompt.AuthorizationPrompt
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
-import com.zaneschepke.wireguardautotunnel.viewmodel.SettingsViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import xyz.teamgravity.pin_lock_compose.PinManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel: AppViewModel, uiState: AppUiState) {
+fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val focusManager = LocalFocusManager.current
@@ -104,7 +103,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 					.fillMaxWidth()
 					.clickable {
 						showExportSheet = false
-						viewModel.exportAllConfigs(context, ConfigType.AMNEZIA)
+						viewModel.handleEvent(AppEvent.ExportTunnels(ConfigType.AMNEZIA))
 					}
 					.padding(10.dp),
 			) {
@@ -125,7 +124,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 					.fillMaxWidth()
 					.clickable {
 						showExportSheet = false
-						viewModel.exportAllConfigs(context, ConfigType.WG)
+						viewModel.handleEvent(AppEvent.ExportTunnels(ConfigType.WG))
 					}
 					.padding(10.dp),
 			) {
@@ -200,7 +199,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						{
 							ScaledSwitch(
 								uiState.appSettings.isShortcutsEnabled,
-								onClick = { appViewModel.onToggleShortcutsEnabled() },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleAppShortcuts) },
 							)
 						},
 						title = {
@@ -209,7 +208,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 							)
 						},
-						onClick = { appViewModel.onToggleShortcutsEnabled() },
+						onClick = { viewModel.handleEvent(AppEvent.ToggleAppShortcuts) },
 					),
 				)
 				if (!isRunningOnTv) {
@@ -226,7 +225,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 											) &&
 											uiState.appSettings.isAutoTunnelEnabled
 										),
-									onClick = { appViewModel.onToggleAlwaysOnVPN() },
+									onClick = { viewModel.handleEvent(AppEvent.ToggleAlwaysOn) },
 									checked = uiState.appSettings.isAlwaysOnVpnEnabled,
 								)
 							},
@@ -236,7 +235,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 									style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 								)
 							},
-							onClick = { appViewModel.onToggleAlwaysOnVPN() },
+							onClick = { viewModel.handleEvent(AppEvent.ToggleAlwaysOn) },
 						),
 					)
 				}
@@ -264,7 +263,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						{
 							ScaledSwitch(
 								uiState.appSettings.isRestoreOnBootEnabled,
-								onClick = { appViewModel.onToggleRestartAtBoot() },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleRestartAtBoot) },
 							)
 						},
 						title = {
@@ -273,11 +272,20 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 							)
 						},
-						onClick = { appViewModel.onToggleRestartAtBoot() },
+						onClick = { viewModel.handleEvent(AppEvent.ToggleRestartAtBoot) },
 					),
 				)
 			},
 		)
+
+		fun onPinLockToggle() {
+			if (uiState.generalState.isPinLockEnabled) {
+				viewModel.handleEvent(AppEvent.TogglePinLock)
+			} else {
+				PinManager.initialize(context)
+				navController.navigate(Route.Lock)
+			}
+		}
 
 		SurfaceSelectionGroupButton(
 			listOf(
@@ -303,22 +311,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						ScaledSwitch(
 							uiState.generalState.isPinLockEnabled,
 							onClick = {
-								if (uiState.generalState.isPinLockEnabled) {
-									appViewModel.onPinLockDisabled()
-								} else {
-									PinManager.initialize(context)
-									navController.navigate(Route.Lock)
-								}
+								onPinLockToggle()
 							},
 						)
 					},
 					onClick = {
-						if (uiState.generalState.isPinLockEnabled) {
-							appViewModel.onPinLockDisabled()
-						} else {
-							PinManager.initialize(context)
-							navController.navigate(Route.Lock)
-						}
+						onPinLockToggle()
 					},
 				),
 			),
@@ -339,7 +337,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 						trailing = {
 							ScaledSwitch(
 								uiState.appSettings.isKernelEnabled,
-								onClick = { appViewModel.onToggleKernelMode() },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleKernelMode) },
 								enabled = !(
 									uiState.appSettings.isAutoTunnelEnabled ||
 										uiState.appSettings.isAlwaysOnVpnEnabled ||
@@ -348,7 +346,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), appViewModel:
 							)
 						},
 						onClick = {
-							appViewModel.onToggleKernelMode()
+							viewModel.handleEvent(AppEvent.ToggleKernelMode)
 						},
 					),
 				),

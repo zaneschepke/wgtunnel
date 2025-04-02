@@ -1,10 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
-import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
+import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
 import javax.inject.Inject
 
 class AppDataRoomRepository

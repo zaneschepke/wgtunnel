@@ -1,9 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -13,7 +13,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.selects.whileSelect
 import timber.log.Timber
@@ -81,13 +80,6 @@ fun <T> CoroutineScope.asChannel(flow: Flow<T>): ReceiveChannel<T> = produce {
 	}
 }
 
-fun Job.cancelWithMessage(message: String) {
-	kotlin.runCatching {
-		cancel()
-		Timber.i(message)
-	}
-}
-
-suspend fun <T> StateFlow<T?>.withData(callback: suspend (T) -> Unit) {
-	return this.filterNotNull().first().let { callback(it) }
+suspend fun <R> StateFlow<AppUiState>.withFirstState(block: suspend (AppUiState) -> R): R {
+	return block(first { it.isAppLoaded })
 }

@@ -6,16 +6,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import xyz.teamgravity.pin_lock_compose.PinLock
 
 @Composable
-fun PinLockScreen(appViewModel: AppViewModel) {
+fun PinLockScreen(viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val snackbar = SnackbarController.current
@@ -57,7 +58,7 @@ fun PinLockScreen(appViewModel: AppViewModel) {
 			snackbar.showMessage(
 				StringValue.StringResource(R.string.pin_created).asString(context),
 			)
-			appViewModel.onPinLockEnabled()
+			viewModel.handleEvent(AppEvent.TogglePinLock)
 		},
 	)
 }

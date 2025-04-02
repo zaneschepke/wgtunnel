@@ -136,6 +136,7 @@ abstract class BaseTunnel(
 		applicationScope.launch(ioDispatcher) {
 			runCatching {
 				if (isTunnelActive(tunnelConf.id)) return@launch
+				saveTunnelActiveState(tunnelConf, true)
 				startTunnelInner(tunnelConf)
 			}.onFailure { exception ->
 				Timber.e(exception, "Failed to start tunnel ${tunnelConf.id} userspace")
@@ -151,7 +152,6 @@ abstract class BaseTunnel(
 		mutex.withLock {
 			configureTunnelCallbacks(tunnelConf)
 			startBackend(tunnelConf)
-			saveTunnelActiveState(tunnelConf, true)
 			if (!isBounce.get()) serviceManager.startTunnelForegroundService(tunnelConf)
 		}
 	}
@@ -175,10 +175,10 @@ abstract class BaseTunnel(
 	private suspend fun stopTunnelInner(tunnelConf: TunnelConf) {
 		mutex.withLock {
 			val tunnel = findActiveTunnel(tunnelConf.id) ?: return
+			saveTunnelActiveState(tunnelConf, false)
 			stopBackend(tunnel)
 			removeActiveTunnel(tunnel)
 			// use latest tunnel
-			saveTunnelActiveState(tunnelConf, false)
 			handleServiceChangesOnStop()
 		}
 	}

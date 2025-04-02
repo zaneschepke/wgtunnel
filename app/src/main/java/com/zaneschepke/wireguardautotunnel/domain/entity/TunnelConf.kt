@@ -3,6 +3,9 @@ package com.zaneschepke.wireguardautotunnel.domain.entity
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.defaultName
+import com.zaneschepke.wireguardautotunnel.util.extensions.extractNameAndNumber
+import com.zaneschepke.wireguardautotunnel.util.extensions.hasNumberInParentheses
 import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
 import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import kotlinx.coroutines.withContext
@@ -106,6 +109,21 @@ data class TunnelConf(
 		return updatedConf.wgQuick != wgQuick || updatedConf.amQuick != amQuick || updatedConf.name != name
 	}
 
+	fun generateUniqueName(tunnelNames: List<String>): String {
+		var tunnelName = this.tunName
+		var num = 1
+		while (tunnelNames.any { it == tunnelName }) {
+			tunnelName = if (!tunnelName.hasNumberInParentheses()) {
+				"$name($num)"
+			} else {
+				val pair = tunnelName.extractNameAndNumber()
+				"${pair?.first}($num)"
+			}
+			num++
+		}
+		return tunnelName
+	}
+
 	suspend fun isTunnelPingable(context: CoroutineContext): Boolean {
 		return withContext(context) {
 			val config = toWgConfig()
@@ -138,10 +156,10 @@ data class TunnelConf(
 			}
 		}
 
-		fun tunnelConfigFromAmConfig(config: org.amnezia.awg.config.Config, name: String): TunnelConf {
+		fun tunnelConfigFromAmConfig(config: org.amnezia.awg.config.Config, name: String? = null): TunnelConf {
 			val amQuick = config.toAwgQuickString(true)
 			val wgQuick = config.toWgQuickString()
-			return TunnelConf(tunName = name, wgQuick = wgQuick, amQuick = amQuick)
+			return TunnelConf(tunName = name ?: config.defaultName(), wgQuick = wgQuick, amQuick = amQuick)
 		}
 
 		private const val IPV6_ALL_NETWORKS = "::/0"

@@ -83,6 +83,15 @@ fun Config.toWgQuickString(): String {
 	return lines.joinToString(System.lineSeparator())
 }
 
+fun Config.defaultName(): String {
+	return try {
+		this.peers[0].endpoint.get().host
+	} catch (e: Exception) {
+		Timber.Forest.e(e)
+		NumberUtils.generateRandomTunnelName()
+	}
+}
+
 fun Backend.BackendState.asBackendState(): BackendState {
 	return BackendState.valueOf(this.name)
 }

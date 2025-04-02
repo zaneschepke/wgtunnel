@@ -8,8 +8,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -63,7 +63,7 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 					serviceManager.stopAutoTunnel()
 					setInactive()
 				} else {
-					serviceManager.startAutoTunnel(true)
+					serviceManager.startAutoTunnel()
 					setActive()
 				}
 			}

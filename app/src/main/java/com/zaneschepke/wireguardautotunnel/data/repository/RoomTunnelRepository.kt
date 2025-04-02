@@ -1,10 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.dao.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
 import com.zaneschepke.wireguardautotunnel.util.extensions.Tunnels
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flowOn
@@ -27,6 +27,12 @@ class RoomTunnelRepository(
 	override suspend fun save(tunnelConf: TunnelConf) {
 		withContext(ioDispatcher) {
 			tunnelConfigDao.save(TunnelConfig.from(tunnelConf))
+		}
+	}
+
+	override suspend fun saveAll(tunnelConfs: List<TunnelConf>) {
+		withContext(ioDispatcher) {
+			tunnelConfigDao.saveAll(tunnelConfs.map(TunnelConfig::from))
 		}
 	}
 

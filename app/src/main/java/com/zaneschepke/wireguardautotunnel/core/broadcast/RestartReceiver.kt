@@ -3,11 +3,11 @@ package com.zaneschepke.wireguardautotunnel.core.broadcast
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
+import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
+import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -51,7 +51,7 @@ class RestartReceiver : BroadcastReceiver() {
 			if (settings.isRestoreOnBootEnabled) {
 				if (settings.isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) {
 					Timber.d("Starting auto-tunnel on boot/update")
-					serviceManager.startAutoTunnel(true)
+					serviceManager.startAutoTunnel()
 				} else {
 					Timber.d("Restoring previous tunnel state")
 					tunnelManager.restorePreviousState()

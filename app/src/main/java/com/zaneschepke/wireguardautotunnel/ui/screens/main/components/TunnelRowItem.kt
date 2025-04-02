@@ -46,25 +46,28 @@ fun TunnelRowItem(
 	onClick: () -> Unit,
 	onCopy: () -> Unit,
 	onDelete: () -> Unit,
-	onSwitchClick: (checked: Boolean) -> Unit,
+	onSwitchClick: (Boolean) -> Unit,
 ) {
-	val leadingIconColor = if (!isActive) Color.Gray else tunnelState.statistics.asColor()
 	val context = LocalContext.current
-	val snackbar = SnackbarController.current
 	val navController = LocalNavController.current
 	val haptic = LocalHapticFeedback.current
+	val snackbar = SnackbarController.current
 	val itemFocusRequester = remember { FocusRequester() }
+	val isTv = context.isRunningOnTv()
+
+	val leadingIconColor = if (!isActive) Color.Gray else tunnelState.statistics.asColor()
+	val leadingIcon = when {
+		tunnel.isPrimaryTunnel -> Icons.Rounded.Star
+		tunnel.isMobileDataTunnel -> Icons.Rounded.Smartphone
+		tunnel.isEthernetTunnel -> Icons.Rounded.SettingsEthernet
+		else -> Icons.Rounded.Circle
+	}
+
 	ExpandingRowListItem(
 		leading = {
-			val icon = when {
-				tunnel.isPrimaryTunnel -> Icons.Rounded.Star
-				tunnel.isMobileDataTunnel -> Icons.Rounded.Smartphone
-				tunnel.isEthernetTunnel -> Icons.Rounded.SettingsEthernet
-				else -> Icons.Rounded.Circle
-			}
 			Icon(
-				icon,
-				icon.name,
+				leadingIcon,
+				leadingIcon.name,
 				tint = leadingIconColor,
 				modifier = Modifier.size(16.dp),
 			)
@@ -75,10 +78,8 @@ fun TunnelRowItem(
 			onHold()
 		},
 		onClick = {
-			if (!context.isRunningOnTv()) {
-				if (isActive) {
-					onClick()
-				}
+			if (!isTv) {
+				if (isActive) onClick()
 			} else {
 				onHold()
 				itemFocusRequester.requestFocus()
@@ -87,108 +88,56 @@ fun TunnelRowItem(
 		isExpanded = expanded && isActive,
 		expanded = { if (isActive && expanded) TunnelStatisticsRow(tunnelState.statistics, tunnel) },
 		trailing = {
-			if (
-				isSelected &&
-				!context.isRunningOnTv()
-			) {
+			if (isSelected && !isTv) {
 				Row {
-					IconButton(
-						onClick = {
-							navController.navigate(
-								Route.TunnelOptions(tunnel.id),
-							)
-						},
-					) {
-						val icon = Icons.Rounded.Settings
-						Icon(
-							icon,
-							icon.name,
-						)
+					IconButton(onClick = { navController.navigate(Route.TunnelOptions(tunnel.id)) }) {
+						Icon(Icons.Rounded.Settings, "Settings")
 					}
-					IconButton(
-						modifier = Modifier.focusable(),
-						onClick = { onCopy() },
-					) {
-						val icon = Icons.Rounded.CopyAll
-						Icon(icon, icon.name)
+					IconButton(modifier = Modifier.focusable(), onClick = onCopy) {
+						Icon(Icons.Rounded.CopyAll, "Copy")
 					}
-					IconButton(
-						enabled = !isActive,
-						modifier = Modifier.focusable(),
-						onClick = { onDelete() },
-					) {
-						val icon = Icons.Rounded.Delete
-						Icon(icon, icon.name)
+					IconButton(modifier = Modifier.focusable(), enabled = !isActive, onClick = onDelete) {
+						Icon(Icons.Rounded.Delete, "Delete")
 					}
 				}
-			} else {
-				if (context.isRunningOnTv()) {
-					Row {
-						IconButton(
-							onClick = {
-								onHold()
-								navController.navigate(
-									Route.TunnelOptions(tunnel.id),
-								)
-							},
-						) {
-							val icon = Icons.Rounded.Settings
-							Icon(
-								icon,
-								icon.name,
-							)
-						}
-						IconButton(
-							onClick = {
-								if (isActive) {
-									onClick()
-								} else {
-									snackbar.showMessage(
-										context.getString(R.string.turn_on_tunnel),
-									)
-								}
-							},
-						) {
-							val icon = Icons.Rounded.Info
-							Icon(icon, icon.name)
-						}
-						IconButton(
-							onClick = { onCopy() },
-						) {
-							val icon = Icons.Rounded.CopyAll
-							Icon(icon, icon.name)
-						}
-						IconButton(
-							onClick = {
-								if (isActive) {
-									snackbar.showMessage(
-										context.getString(R.string.turn_off_tunnel),
-									)
-								} else {
-									onHold()
-									onDelete()
-								}
-							},
-						) {
-							val icon = Icons.Rounded.Delete
-							Icon(
-								icon,
-								icon.name,
-							)
-						}
-						ScaledSwitch(
-							modifier = Modifier.focusRequester(itemFocusRequester),
-							checked = isActive,
-							onClick = onSwitchClick,
-						)
+			} else if (isTv) {
+				Row {
+					IconButton(onClick = {
+						onHold()
+						navController.navigate(Route.TunnelOptions(tunnel.id))
+					}) {
+						Icon(Icons.Rounded.Settings, "Settings")
 					}
-				} else {
+					IconButton(onClick = {
+						if (isActive) onClick() else snackbar.showMessage(context.getString(R.string.turn_on_tunnel))
+					}) {
+						Icon(Icons.Rounded.Info, "Info")
+					}
+					IconButton(onClick = onCopy) {
+						Icon(Icons.Rounded.CopyAll, "Copy")
+					}
+					IconButton(onClick = {
+						if (isActive) {
+							snackbar.showMessage(context.getString(R.string.turn_off_tunnel))
+						} else {
+							onHold()
+							onDelete()
+						}
+					}) {
+						Icon(Icons.Rounded.Delete, "Delete")
+					}
 					ScaledSwitch(
 						modifier = Modifier.focusRequester(itemFocusRequester),
 						checked = isActive,
 						onClick = onSwitchClick,
 					)
 				}
+			} else {
+				ScaledSwitch(
+					modifier = Modifier.focusRequester(itemFocusRequester),
+					checked = isActive,
+					onClick = onSwitchClick,
+				)
 			}
 		},
 	)

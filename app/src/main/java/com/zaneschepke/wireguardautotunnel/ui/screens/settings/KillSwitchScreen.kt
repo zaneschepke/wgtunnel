@@ -18,44 +18,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
 import com.zaneschepke.wireguardautotunnel.ui.common.permission.vpn.withVpnPermission
-import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
-import com.zaneschepke.wireguardautotunnel.util.StringValue
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchVpnSettings
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
+fun KillSwitchScreen(uiState: AppUiState, viewModel: AppViewModel) {
 	val context = LocalContext.current
-
-	val toggleVpnSwitch = withVpnPermission<Boolean> { appViewModel.onToggleVpnKillSwitch(it) }
-
-	fun toggleVpnKillSwitch() {
-		with(uiState.appSettings) {
-			// TODO improve this error message
-			if (isKernelEnabled) return SnackbarController.showMessage(StringValue.StringResource(R.string.kernel_not_supported))
-			if (isVpnKillSwitchEnabled) {
-				appViewModel.onToggleVpnKillSwitch(false)
-			} else {
-				toggleVpnSwitch.invoke(true)
-			}
-		}
-	}
-
-	fun toggleLanOnKillSwitch() {
-		with(uiState.appSettings) {
-			appViewModel.onToggleLanOnKillSwitch(!isLanOnKillSwitchEnabled)
-		}
-	}
+	val toggleVpnSwitch = withVpnPermission<Boolean> { viewModel.handleEvent(AppEvent.ToggleVpnKillSwitch) }
 
 	Scaffold(
 		topBar = {
@@ -102,13 +82,13 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 								)
 							},
 							onClick = {
-								toggleVpnKillSwitch()
+								toggleVpnSwitch.invoke(true)
 							},
 							trailing = {
 								ScaledSwitch(
 									uiState.appSettings.isVpnKillSwitchEnabled,
 									onClick = {
-										toggleVpnKillSwitch()
+										toggleVpnSwitch.invoke(true)
 									},
 								)
 							},
@@ -124,7 +104,7 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
 									)
 								},
-								onClick = { toggleLanOnKillSwitch() },
+								onClick = { viewModel.handleEvent(AppEvent.ToggleLanOnKillSwitch) },
 								description = {
 									Text(
 										stringResource(R.string.bypass_lan_for_kill_switch),
@@ -135,7 +115,7 @@ fun KillSwitchScreen(uiState: AppUiState, appViewModel: AppViewModel) {
 									ScaledSwitch(
 										uiState.appSettings.isLanOnKillSwitchEnabled,
 										onClick = {
-											toggleLanOnKillSwitch()
+											viewModel.handleEvent(AppEvent.ToggleLanOnKillSwitch)
 										},
 									)
 								},
