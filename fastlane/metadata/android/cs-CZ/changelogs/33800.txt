@@ -1,0 +1,4 @@
+Co je nového:
+- Oprava chyby v uživatelském rozhraní pro úpravy konfigurace
+- Přidání oznámení AOVPN při prvním spuštění systému GrapheneOS
+- Bump verze

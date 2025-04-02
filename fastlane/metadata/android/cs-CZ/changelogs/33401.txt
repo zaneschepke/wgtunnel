@@ -1,0 +1,2 @@
+Co je nového:
+- Toto je testovací verze CI

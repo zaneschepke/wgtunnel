@@ -1,0 +1,2 @@
+Co je nového:
+- Oprava chyby v uživatelském rozhraní tunelu

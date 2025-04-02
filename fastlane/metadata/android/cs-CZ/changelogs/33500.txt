@@ -1,0 +1,5 @@
+Co je nového:
+- Automatické spuštění Always-On VPN v režim jádra při restartu
+- Podpora pro adaptivní motivy ikon
+- Oprava ikon oznámení, ikony dlaždic
+- Oprava ikon AndroidTV

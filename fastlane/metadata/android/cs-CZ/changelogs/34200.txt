@@ -1,0 +1,5 @@
+Co je nového:
+- Oprava regrese při vypínání tunelu
+- Přidání obfuskace protokolů
+- Přidáno skrývání FAB při skrolování
+- Přidána turecká lokalizace
