@@ -52,7 +52,6 @@ fun TunnelList(
 		modifier = modifier
 			.pointerInput(Unit) {
 				if (appUiState.tunnels.isEmpty()) return@pointerInput
-				detectTapGestures(onTap = { onTunnelSelected(null!!) })
 			}
 			.overscroll(ScrollableDefaults.overscrollEffect())
 			.nestedScroll(nestedScrollConnection),
