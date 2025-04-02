@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main.config
 
+import android.view.WindowManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 
 import androidx.compose.runtime.getValue
@@ -24,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zaneschepke.wireguardautotunnel.MainActivity
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
@@ -42,6 +45,19 @@ fun ConfigScreen(tunnelConf: TunnelConf?, viewModel: ConfigViewModel = hiltViewM
 	val keyboardController = LocalSoftwareKeyboardController.current
 
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+	val activity = context as? MainActivity
+
+	// Secure screen due to sensitive information
+	DisposableEffect(Unit) {
+		activity?.window?.setFlags(
+			WindowManager.LayoutParams.FLAG_SECURE,
+			WindowManager.LayoutParams.FLAG_SECURE,
+		)
+		onDispose {
+			activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+		}
+	}
 
 	LaunchedEffect(tunnelConf) {
 		viewModel.initFromTunnel(tunnelConf)
