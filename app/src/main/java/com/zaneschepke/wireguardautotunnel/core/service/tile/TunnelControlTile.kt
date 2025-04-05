@@ -10,9 +10,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
+import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -57,15 +60,54 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 	}
 
 	private fun updateTileState() = lifecycleScope.launch {
-		val tunnels = appDataRepository.tunnels.getAll()
-		if (tunnels.isEmpty()) return@launch setUnavailable()
-		with(tunnelManager.activeTunnels.value) {
-			val starting = this.filter { it.value.status.isUpOrStarting() }
-			if (starting.size == 1) return@launch updateTile(starting.keys.first().tunName, true)
-			if (starting.size > 1) return@launch updateTile(getString(R.string.multiple), true)
+		try {
+			val tunnels = appDataRepository.tunnels.getAll()
+			if (tunnels.isEmpty()) {
+				setUnavailable()
+				return@launch
+			}
+
+			val activeTunnels = tunnelManager.activeTunnels.value
+				.filter { it.value.status.isUpOrStarting() }
+
+			when {
+				activeTunnels.isNotEmpty() -> {
+					val activeIds = activeTunnels.map { it.key.id }
+					// TODO improvements would be needed to make this work well with toggling multiple tunnels
+					// this would be better managed elsewhere
+					WireGuardAutoTunnel.setLastActiveTunnels(activeIds)
+					updateTileForActiveTunnels(activeTunnels)
+				}
+				else -> updateTileForLastActiveTunnels()
+			}
+		} catch (e: Exception) {
+			setUnavailable()
 		}
-		appDataRepository.getStartTunnelConfig()?.let {
-			updateTile(it.tunName, false)
+	}
+
+	private fun updateTileForActiveTunnels(activeTunnels: Map<TunnelConf, TunnelState>) {
+		val tileName = when (activeTunnels.size) {
+			1 -> activeTunnels.keys.first().tunName
+			else -> getString(R.string.multiple)
+		}
+		updateTile(tileName, true)
+	}
+
+	private suspend fun updateTileForLastActiveTunnels() {
+		val lastActiveIds = WireGuardAutoTunnel.getLastActiveTunnels()
+		when {
+			lastActiveIds.isEmpty() -> {
+				appDataRepository.getStartTunnelConfig()?.let { config ->
+					updateTile(config.tunName, false)
+				} ?: setUnavailable()
+			}
+			lastActiveIds.size > 1 -> updateTile(getString(R.string.multiple), false)
+			else -> {
+				val tunnelId = lastActiveIds.first()
+				appDataRepository.tunnels.getById(tunnelId)?.let { tunnel ->
+					updateTile(tunnel.tunName, false)
+				} ?: setUnavailable()
+			}
 		}
 	}
 
@@ -74,8 +116,13 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 		unlockAndRun {
 			lifecycleScope.launch {
 				if (tunnelManager.activeTunnels.value.isNotEmpty()) return@launch tunnelManager.stopTunnel()
-				appDataRepository.getStartTunnelConfig()?.let {
-					tunnelManager.startTunnel(it)
+				val lastActive = WireGuardAutoTunnel.getLastActiveTunnels()
+				if (lastActive.isEmpty()) {
+					appDataRepository.getStartTunnelConfig()?.let(tunnelManager::startTunnel)
+				} else {
+					lastActive.forEach { id ->
+						appDataRepository.tunnels.getById(id)?.let(tunnelManager::startTunnel)
+					}
 				}
 			}
 		}

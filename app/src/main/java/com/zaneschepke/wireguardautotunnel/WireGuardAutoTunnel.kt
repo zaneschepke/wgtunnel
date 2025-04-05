@@ -134,6 +134,19 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
 			return foreground
 		}
 
+		@Volatile
+		private var lastActiveTunnels: List<Int> = emptyList()
+
+		@Synchronized
+		fun getLastActiveTunnels(): List<Int> {
+			return lastActiveTunnels
+		}
+
+		@Synchronized
+		fun setLastActiveTunnels(newTunnels: List<Int>) {
+			lastActiveTunnels = newTunnels
+		}
+
 		lateinit var instance: WireGuardAutoTunnel
 			private set
 	}
