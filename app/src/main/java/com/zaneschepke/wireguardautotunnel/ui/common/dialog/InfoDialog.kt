@@ -1,19 +1,15 @@
 package com.zaneschepke.wireguardautotunnel.ui.common.dialog
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.zaneschepke.wireguardautotunnel.R
-import timber.log.Timber
 
 @Composable
 fun InfoDialog(
@@ -23,19 +19,12 @@ fun InfoDialog(
 	body: @Composable () -> Unit,
 	confirmText: @Composable () -> Unit,
 ) {
-	val isSystemInDarkTheme = isSystemInDarkTheme()
-	val color = MaterialTheme.colorScheme.surface
-
-	LaunchedEffect(Unit) {
-		Timber.d("Dialog Surface Color: ${color.toArgb()}")
-		Timber.d("Dark mode: $isSystemInDarkTheme")
-	}
 	MaterialTheme(
-		colorScheme = MaterialTheme.colorScheme.copy(), // Clone the current theme to avoid overrides
+		colorScheme = MaterialTheme.colorScheme.copy(),
 	) {
 		Surface(
-			color = MaterialTheme.colorScheme.surface, // Use the theme's surface color
-			tonalElevation = 0.dp, // Disable elevation tinting to keep color consistent
+			color = MaterialTheme.colorScheme.surface,
+			tonalElevation = 0.dp,
 		) {
 			AlertDialog(
 				onDismissRequest = { onDismiss() },
