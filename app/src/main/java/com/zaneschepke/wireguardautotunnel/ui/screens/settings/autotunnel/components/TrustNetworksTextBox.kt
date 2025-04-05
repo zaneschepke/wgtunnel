@@ -29,8 +29,6 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -43,7 +41,7 @@ fun TrustedNetworkTextBox(
 	supporting: @Composable () -> Unit,
 ) {
 	val context = LocalContext.current
-	Column(verticalArrangement = Arrangement.spacedBy(10.dp.scaledHeight())) {
+	Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
 		FlowRow(
 			modifier =
 			Modifier.fillMaxWidth(),
@@ -83,7 +81,7 @@ fun TrustedNetworkTextBox(
 				.padding(
 					top = 5.dp,
 					bottom = 10.dp,
-				).fillMaxWidth().padding(end = 16.dp.scaledWidth()),
+				).fillMaxWidth().padding(end = 16.dp),
 			singleLine = true,
 			keyboardOptions =
 			KeyboardOptions(

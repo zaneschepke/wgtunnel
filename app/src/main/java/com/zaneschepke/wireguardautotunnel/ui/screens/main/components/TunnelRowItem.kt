@@ -1,7 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main.components
 
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Circle
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
@@ -31,9 +33,11 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.ExpandingRowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.asColor
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun TunnelRowItem(
@@ -42,16 +46,16 @@ fun TunnelRowItem(
 	isSelected: Boolean,
 	tunnel: TunnelConf,
 	tunnelState: TunnelState,
-	onHold: () -> Unit,
+	onSetSelectedTunnel: (TunnelConf?) -> Unit,
 	onClick: () -> Unit,
 	onCopy: () -> Unit,
 	onDelete: () -> Unit,
 	onSwitchClick: (Boolean) -> Unit,
+	viewModel: AppViewModel,
 ) {
 	val context = LocalContext.current
 	val navController = LocalNavController.current
 	val haptic = LocalHapticFeedback.current
-	val snackbar = SnackbarController.current
 	val itemFocusRequester = remember { FocusRequester() }
 	val isTv = context.isRunningOnTv()
 
@@ -75,13 +79,13 @@ fun TunnelRowItem(
 		text = tunnel.tunName,
 		onHold = {
 			haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-			onHold()
+			onSetSelectedTunnel(tunnel)
 		},
 		onClick = {
 			if (!isTv) {
 				if (isActive) onClick()
 			} else {
-				onHold()
+				onSetSelectedTunnel(tunnel)
 				itemFocusRequester.requestFocus()
 			}
 		},
@@ -89,45 +93,116 @@ fun TunnelRowItem(
 		expanded = { if (isActive && expanded) TunnelStatisticsRow(tunnelState.statistics, tunnel) },
 		trailing = {
 			if (isSelected && !isTv) {
-				Row {
-					IconButton(onClick = { navController.navigate(Route.TunnelOptions(tunnel.id)) }) {
-						Icon(Icons.Rounded.Settings, "Settings")
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.SpaceEvenly,
+				) {
+					IconButton(
+						modifier = Modifier.weight(1f),
+						onClick = {
+							onSetSelectedTunnel(null)
+							navController.navigate(Route.TunnelOptions(tunnel.id))
+						},
+					) {
+						Icon(
+							Icons.Rounded.Settings,
+							stringResource(id = R.string.settings),
+							modifier = Modifier.size(24.dp),
+						)
 					}
-					IconButton(modifier = Modifier.focusable(), onClick = onCopy) {
-						Icon(Icons.Rounded.CopyAll, "Copy")
+					IconButton(
+						modifier = Modifier.weight(1f),
+						onClick = {
+							onCopy()
+							onSetSelectedTunnel(null)
+						},
+					) {
+						Icon(
+							Icons.Rounded.CopyAll,
+							stringResource(R.string.copy),
+							modifier = Modifier.size(24.dp),
+						)
 					}
-					IconButton(modifier = Modifier.focusable(), enabled = !isActive, onClick = onDelete) {
-						Icon(Icons.Rounded.Delete, "Delete")
+					IconButton(
+						modifier = Modifier.weight(1f),
+						enabled = !isActive,
+						onClick = { onDelete() },
+					) {
+						Icon(
+							Icons.Rounded.Delete,
+							stringResource(R.string.delete_tunnel),
+							modifier = Modifier.size(24.dp),
+						)
 					}
 				}
 			} else if (isTv) {
-				Row {
-					IconButton(onClick = {
-						onHold()
-						navController.navigate(Route.TunnelOptions(tunnel.id))
-					}) {
-						Icon(Icons.Rounded.Settings, "Settings")
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.SpaceEvenly,
+				) {
+					IconButton(
+						modifier = Modifier.weight(1f),
+						onClick = {
+							navController.navigate(Route.TunnelOptions(tunnel.id))
+							onSetSelectedTunnel(null)
+						},
+					) {
+						Icon(
+							Icons.Rounded.Settings,
+							stringResource(id = R.string.settings),
+							modifier = Modifier.size(24.dp),
+						)
 					}
-					IconButton(onClick = {
-						if (isActive) onClick() else snackbar.showMessage(context.getString(R.string.turn_on_tunnel))
-					}) {
-						Icon(Icons.Rounded.Info, "Info")
+					IconButton(
+						modifier = Modifier.weight(1f),
+						onClick = {
+							if (isActive) {
+								onClick()
+							} else {
+								viewModel.handleEvent(
+									AppEvent.ShowMessage(StringValue.StringResource(R.string.turn_on_tunnel)),
+								)
+							}
+						},
+					) {
+						Icon(
+							Icons.Rounded.Info,
+							stringResource(R.string.info),
+							modifier = Modifier.size(24.dp),
+						)
 					}
-					IconButton(onClick = onCopy) {
-						Icon(Icons.Rounded.CopyAll, "Copy")
+					IconButton(
+						modifier = Modifier.weight(1f),
+						onClick = onCopy,
+					) {
+						Icon(
+							Icons.Rounded.CopyAll,
+							stringResource(R.string.copy),
+							modifier = Modifier.size(24.dp),
+						)
 					}
-					IconButton(onClick = {
-						if (isActive) {
-							snackbar.showMessage(context.getString(R.string.turn_off_tunnel))
-						} else {
-							onHold()
-							onDelete()
-						}
-					}) {
-						Icon(Icons.Rounded.Delete, "Delete")
+					IconButton(
+						modifier = Modifier.weight(1f),
+						onClick = {
+							if (isActive) {
+								viewModel.handleEvent(
+									AppEvent.ShowMessage(StringValue.StringResource(R.string.turn_off_tunnel)),
+								)
+							} else {
+								onDelete()
+							}
+						},
+					) {
+						Icon(
+							Icons.Rounded.Delete,
+							stringResource(R.string.delete_tunnel),
+							modifier = Modifier.size(24.dp),
+						)
 					}
 					ScaledSwitch(
-						modifier = Modifier.focusRequester(itemFocusRequester),
+						modifier = Modifier
+							.focusRequester(itemFocusRequester)
+							.weight(1f),
 						checked = isActive,
 						onClick = onSwitchClick,
 					)

@@ -23,7 +23,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
 import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigViewModel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.state.ConfigUiState
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun InterfaceSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
@@ -34,8 +33,8 @@ fun InterfaceSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
 		color = MaterialTheme.colorScheme.surface,
 	) {
 		Column(
-			verticalArrangement = Arrangement.spacedBy(5.dp),
-			modifier = Modifier.padding(16.dp.scaledWidth()).focusGroup(),
+			verticalArrangement = Arrangement.spacedBy(6.dp),
+			modifier = Modifier.padding(16.dp).focusGroup(),
 		) {
 			Row(
 				horizontalArrangement = Arrangement.SpaceBetween,

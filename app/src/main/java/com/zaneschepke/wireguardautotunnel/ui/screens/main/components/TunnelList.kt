@@ -2,7 +2,6 @@ package com.zaneschepke.wireguardautotunnel.ui.screens.main.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.ScrollableDefaults
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -22,6 +19,7 @@ import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
+import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import java.text.Collator
 import java.util.*
 
@@ -31,14 +29,13 @@ fun TunnelList(
 	appUiState: AppUiState,
 	activeTunnels: Map<TunnelConf, TunnelState>,
 	selectedTunnel: TunnelConf?,
-	onTunnelSelected: (TunnelConf) -> Unit,
+	onSetSelectedTunnel: (TunnelConf?) -> Unit,
 	onDeleteTunnel: (TunnelConf) -> Unit,
-	onToggleAutoTunnel: () -> Unit,
 	onToggleTunnel: (TunnelConf, Boolean) -> Unit,
 	onExpandStats: () -> Unit,
 	onCopyTunnel: (TunnelConf) -> Unit,
-	nestedScrollConnection: NestedScrollConnection,
 	modifier: Modifier = Modifier,
+	viewModel: AppViewModel,
 ) {
 	val context = LocalContext.current
 	val collator = Collator.getInstance(Locale.getDefault())
@@ -52,9 +49,7 @@ fun TunnelList(
 		modifier = modifier
 			.pointerInput(Unit) {
 				if (appUiState.tunnels.isEmpty()) return@pointerInput
-			}
-			.overscroll(ScrollableDefaults.overscrollEffect())
-			.nestedScroll(nestedScrollConnection),
+			}.overscroll(ScrollableDefaults.overscrollEffect()),
 		state = rememberLazyListState(0, appUiState.tunnels.count()),
 		userScrollEnabled = true,
 		reverseLayout = false,
@@ -64,24 +59,21 @@ fun TunnelList(
 			item {
 				GettingStartedLabel(onClick = { context.openWebUrl(it) })
 			}
-		} else {
-			item {
-				AutoTunnelRowItem(appUiState, onToggleAutoTunnel)
-			}
 		}
 		items(sortedTunnels, key = { it.id }) { tunnel ->
 			val tunnelState = activeTunnels.getValueById(tunnel.id) ?: TunnelState()
 			TunnelRowItem(
-				isActive = tunnel.isActive,
+				isActive = tunnelState.status.isUpOrStarting(),
 				expanded = appUiState.generalState.isTunnelStatsExpanded,
 				isSelected = selectedTunnel?.id == tunnel.id,
 				tunnel = tunnel,
 				tunnelState = tunnelState,
-				onHold = { onTunnelSelected(tunnel) },
+				onSetSelectedTunnel = { onSetSelectedTunnel(it) },
 				onClick = onExpandStats,
 				onCopy = { onCopyTunnel(tunnel) },
 				onDelete = { onDeleteTunnel(tunnel) },
 				onSwitchClick = { checked -> onToggleTunnel(tunnel, checked) },
+				viewModel = viewModel,
 			)
 		}
 	}

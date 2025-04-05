@@ -18,7 +18,6 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.zaneschepke.wireguardautotunnel.ui.common.button.SelectionItemButton
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.TunnelApp
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun AppListItem(appInfo: TunnelApp, isSelected: Boolean, onToggle: () -> Unit) {
@@ -37,7 +36,7 @@ fun AppListItem(appInfo: TunnelApp, isSelected: Boolean, onToggle: () -> Unit) {
 				painter = rememberDrawablePainter(icon),
 				contentDescription = appInfo.name,
 				modifier = Modifier
-					.padding(horizontal = 24.dp.scaledWidth())
+					.padding(horizontal = 24.dp)
 					.size(iconSize),
 			)
 		},

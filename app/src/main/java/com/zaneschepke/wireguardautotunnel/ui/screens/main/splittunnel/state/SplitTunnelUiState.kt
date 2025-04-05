@@ -8,4 +8,5 @@ data class SplitTunnelUiState(
 	val tunneledApps: SplitTunnelApps = emptyList(),
 	val splitOption: SplitOption = SplitOption.ALL,
 	val searchQuery: String = "",
+	val success: Boolean? = null,
 )

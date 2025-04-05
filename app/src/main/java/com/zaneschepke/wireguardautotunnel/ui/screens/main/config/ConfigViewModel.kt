@@ -81,7 +81,7 @@ class ConfigViewModel @Inject constructor(
 		}
 		_uiState.update {
 			it.copy(
-				showScripts = show,
+				showAmneziaValues = show,
 				configProxy = it.configProxy.copy(
 					`interface` = `interface`,
 				),

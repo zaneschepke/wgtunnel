@@ -22,24 +22,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.common.animation.ShimmerEffect
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun SplitTunnelSkeleton() {
 	val shimmerBrush = ShimmerEffect()
 
 	Column(
-		verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.CenterVertically),
+		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
 		horizontalAlignment = Alignment.CenterHorizontally,
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(top = 24.dp.scaledHeight()),
+			.padding(top = 24.dp),
 	) {
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 24.dp.scaledWidth())
+				.padding(horizontal = 24.dp)
 				.height(45.dp),
 			horizontalArrangement = Arrangement.spacedBy(8.dp),
 		) {
@@ -57,7 +55,7 @@ fun SplitTunnelSkeleton() {
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 24.dp.scaledWidth())
+				.padding(horizontal = 24.dp)
 				.height(45.dp),
 			horizontalArrangement = Arrangement.spacedBy(8.dp),
 		) {
@@ -80,7 +78,7 @@ fun SplitTunnelSkeleton() {
 				Row(
 					modifier = Modifier
 						.fillMaxWidth()
-						.padding(horizontal = 24.dp.scaledWidth(), vertical = 8.dp),
+						.padding(horizontal = 24.dp, vertical = 8.dp),
 					verticalAlignment = Alignment.CenterVertically,
 				) {
 					Box(

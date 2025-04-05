@@ -20,11 +20,11 @@ import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
-import com.zaneschepke.wireguardautotunnel.ui.state.AppState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
+import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.FileReadException
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.InvalidFileExtensionException
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
@@ -38,9 +38,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,6 +46,7 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.amnezia.awg.config.BadConfigException
 import org.amnezia.awg.config.Config
 import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
@@ -73,14 +72,16 @@ constructor(
 
 	private val tunnelMutex = Mutex()
 	private val settingsMutex = Mutex()
-	private val loggerMutex = Mutex()
 	private val tunControlMutex = Mutex()
 
-	private val _appState = MutableStateFlow(AppState())
-	val appState = _appState.asStateFlow()
+	private val _screenCallback = MutableStateFlow<(() -> Unit)?>(null)
+
+	private val _appViewState = MutableStateFlow(AppViewState())
+	val appViewState = _appViewState.asStateFlow()
 
 	private val _logs = MutableStateFlow<List<LogMessage>>(emptyList())
 	val logs: StateFlow<List<LogMessage>> = _logs.asStateFlow()
+	private val maxLogSize = 10_000
 
 	val uiState =
 		combine(
@@ -106,107 +107,131 @@ constructor(
 
 	init {
 		viewModelScope.launch(ioDispatcher) {
-			uiState.withFirstState { realState ->
-				Timber.d("Real state: $realState")
-				initPin(realState.generalState.isPinLockEnabled)
-				handleKillSwitchChange(realState.appSettings)
-				initServicesFromSavedState(realState)
-				_appState.update { it.copy(isAppReady = true) }
+			uiState.withFirstState { state ->
+				initPin(state.generalState.isPinLockEnabled)
+				handleKillSwitchChange(state.appSettings)
+				initServicesFromSavedState(state)
+				if (state.generalState.isLocalLogsEnabled) startCollectingLogs()
 			}
-			uiState.filter { it.generalState.isLocalLogsEnabled }.first()
-			collectLogs()
 		}
 	}
 
 	fun handleEvent(event: AppEvent) = viewModelScope.launch(ioDispatcher) {
 		uiState.withFirstState { state ->
-			Timber.d("handleEvent: $event")
 			when (event) {
-				AppEvent.ToggleLocalLogging -> onToggleLocalLogging(state.generalState.isLocalLogsEnabled)
-				is AppEvent.SetDebounceDelay -> onSetDebounceDelay(state.appSettings, event.delay)
-				is AppEvent.CopyTunnel -> onCopyTunnel(event.tunnel, state.tunnels)
-				is AppEvent.DeleteTunnel -> onDeleteTunnel(event.tunnel, state)
-				is AppEvent.ImportTunnelFromClipboard -> onClipboardImport(event.text, state.tunnels)
-				is AppEvent.ImportTunnelFromFile -> onImportTunnelFromFile(event.data, state.tunnels)
-				is AppEvent.ImportTunnelFromUrl -> onImportTunnelFromUrl(event.url, state.tunnels)
-				is AppEvent.ImportTunnelFromQrCode -> onImportTunnelFromQr(event.qrCode, state.tunnels)
+				AppEvent.ToggleLocalLogging -> handleToggleLocalLogging(state.generalState.isLocalLogsEnabled)
+				is AppEvent.SetDebounceDelay -> handleSetDebounceDelay(state.appSettings, event.delay)
+				is AppEvent.CopyTunnel -> handleCopyTunnel(event.tunnel, state.tunnels)
+				is AppEvent.DeleteTunnel -> handleDeleteTunnel(event.tunnel, state)
+				is AppEvent.ImportTunnelFromClipboard -> handleClipboardImport(event.text, state.tunnels)
+				is AppEvent.ImportTunnelFromFile -> handleImportTunnelFromFile(event.data, state.tunnels)
+				is AppEvent.ImportTunnelFromUrl -> handleImportTunnelFromUrl(event.url, state.tunnels)
+				is AppEvent.ImportTunnelFromQrCode -> handleImportTunnelFromQr(event.qrCode, state.tunnels)
 				AppEvent.SetBatteryOptimizeDisableShown -> setBatteryOptimizeDisableShown()
-				is AppEvent.StartTunnel -> onStartTunnel(event.tunnel)
-				is AppEvent.StopTunnel -> onStopTunnel(event.tunnel)
-				AppEvent.ToggleAutoTunnel -> onToggleAutoTunnel()
-				AppEvent.ToggleTunnelStatsExpanded -> onToggleExpandTunnelStats(state.generalState.isTunnelStatsExpanded)
-				AppEvent.ToggleAlwaysOn -> onToggleAlwaysOnVPN(state.appSettings)
-				AppEvent.TogglePinLock -> onPinLockToggled(state.generalState.isPinLockEnabled)
+				is AppEvent.StartTunnel -> handleStartTunnel(event.tunnel, state.appSettings)
+				is AppEvent.StopTunnel -> handleStopTunnel(event.tunnel)
+				AppEvent.ToggleAutoTunnel -> handleToggleAutoTunnel(state)
+				AppEvent.ToggleTunnelStatsExpanded -> handleToggleExpandTunnelStats(state.generalState.isTunnelStatsExpanded)
+				AppEvent.ToggleAlwaysOn -> handleToggleAlwaysOnVPN(state.appSettings)
+				AppEvent.TogglePinLock -> handlePinLockToggled(state.generalState.isPinLockEnabled)
 				AppEvent.SetLocationDisclosureShown -> setLocationDisclosureShown()
-				is AppEvent.SetLocale -> onLocaleChange(event.localeTag)
-				AppEvent.ToggleRestartAtBoot -> onToggleRestartAtBoot(state.appSettings)
-				AppEvent.ToggleVpnKillSwitch -> onToggleVpnKillSwitch(state.appSettings)
-				AppEvent.ToggleLanOnKillSwitch -> onToggleLanOnKillSwitch(state.appSettings)
-				AppEvent.ToggleAppShortcuts -> onToggleAppShortcuts(state.appSettings)
-				AppEvent.ToggleKernelMode -> onToggleKernelMode(state.appSettings)
-				is AppEvent.SetTheme -> onThemeChange(event.theme)
-				is AppEvent.ToggleIpv4Preferred -> onToggleIpv4(event.tunnel)
-				is AppEvent.TogglePrimaryTunnel -> onTogglePrimaryTunnel(event.tunnel)
-				is AppEvent.SetTunnelPingCooldown -> onPingCoolDownChange(event.tunnel, event.pingCooldown)
-				is AppEvent.SetTunnelPingInterval -> onPingIntervalChange(event.tunnel, event.pingInterval)
-				is AppEvent.AddTunnelRunSSID -> onAddTunnelRunSSID(event.ssid, event.tunnel, state.tunnels)
-				is AppEvent.DeleteTunnelRunSSID -> onRemoveTunnelRunSSID(event.ssid, event.tunnel)
-				is AppEvent.ToggleEthernetTunnel -> onToggleEthernetTunnel(event.tunnel)
-				is AppEvent.ToggleMobileDataTunnel -> onToggleMobileDataTunnel(event.tunnel)
-				AppEvent.ToggleAutoTunnelOnCellular -> onToggleAutoTunnelOnCellular(state.appSettings)
-				AppEvent.ToggleAutoTunnelOnWifi -> onToggleAutoTunnelOnWifi(state.appSettings)
-				is AppEvent.DeleteTrustedSSID -> onDeleteTrustedSSID(event.ssid, state.appSettings)
-				AppEvent.ToggleAutoTunnelWildcards -> onToggleAutoTunnelWildcards(state.appSettings)
-				AppEvent.ToggleRootShellWifi -> onToggleRootShellWifi(state.appSettings)
-				is AppEvent.SaveTrustedSSID -> onSaveTrustedSSID(event.ssid, state.appSettings)
-				AppEvent.ToggleAutoTunnelOnEthernet -> onToggleTunnelOnEthernet(state.appSettings)
-				AppEvent.ToggleStopKillSwitchOnTrusted -> onToggleStopKillSwitchOnTrusted(state.appSettings)
-				AppEvent.ToggleStopTunnelOnNoInternet -> onToggleStopOnNoInternet(state.appSettings)
-				is AppEvent.ExportTunnels -> onExportTunnels(event.configType, state.tunnels)
-				AppEvent.ExportLogs -> onExportLogs()
-				AppEvent.ErrorShown -> onErrorShown()
-				AppEvent.BackStackPopped -> _appState.update { it.copy(popBackStack = false) }
-				is AppEvent.TogglePingTunnelEnabled -> onTogglePingTunnel(event.tunnel)
-				is AppEvent.SetTunnelPingIp -> onTunnelPingIpChange(event.tunnelConf, event.ip)
+				is AppEvent.SetLocale -> handleLocaleChange(event.localeTag)
+				AppEvent.ToggleRestartAtBoot -> handleToggleRestartAtBoot(state.appSettings)
+				AppEvent.ToggleVpnKillSwitch -> handleToggleVpnKillSwitch(state.appSettings)
+				AppEvent.ToggleLanOnKillSwitch -> handleToggleLanOnKillSwitch(state.appSettings)
+				AppEvent.ToggleAppShortcuts -> handleToggleAppShortcuts(state.appSettings)
+				AppEvent.ToggleKernelMode -> handleToggleKernelMode(state.appSettings)
+				is AppEvent.SetTheme -> handleThemeChange(event.theme)
+				is AppEvent.ToggleIpv4Preferred -> handleToggleIpv4(event.tunnel)
+				is AppEvent.TogglePrimaryTunnel -> handleTogglePrimaryTunnel(event.tunnel)
+				is AppEvent.SetTunnelPingCooldown -> handlePingCoolDownChange(event.tunnel, event.pingCooldown)
+				is AppEvent.SetTunnelPingInterval -> handlePingIntervalChange(event.tunnel, event.pingInterval)
+				is AppEvent.AddTunnelRunSSID -> handleAddTunnelRunSSID(event.ssid, event.tunnel, state.tunnels)
+				is AppEvent.DeleteTunnelRunSSID -> handleRemoveTunnelRunSSID(event.ssid, event.tunnel)
+				is AppEvent.ToggleEthernetTunnel -> handleToggleEthernetTunnel(event.tunnel)
+				is AppEvent.ToggleMobileDataTunnel -> handleToggleMobileDataTunnel(event.tunnel)
+				AppEvent.ToggleAutoTunnelOnCellular -> handleToggleAutoTunnelOnCellular(state.appSettings)
+				AppEvent.ToggleAutoTunnelOnWifi -> handleToggleAutoTunnelOnWifi(state.appSettings)
+				is AppEvent.DeleteTrustedSSID -> handleDeleteTrustedSSID(event.ssid, state.appSettings)
+				AppEvent.ToggleAutoTunnelWildcards -> handleToggleAutoTunnelWildcards(state.appSettings)
+				AppEvent.ToggleRootShellWifi -> handleToggleRootShellWifi(state.appSettings)
+				is AppEvent.SaveTrustedSSID -> handleSaveTrustedSSID(event.ssid, state.appSettings)
+				AppEvent.ToggleAutoTunnelOnEthernet -> handleToggleTunnelOnEthernet(state.appSettings)
+				AppEvent.ToggleStopKillSwitchOnTrusted -> handleToggleStopKillSwitchOnTrusted(state.appSettings)
+				AppEvent.ToggleStopTunnelOnNoInternet -> handleToggleStopOnNoInternet(state.appSettings)
+				is AppEvent.ExportTunnels -> handleExportTunnels(event.configType, state.tunnels)
+				AppEvent.ExportLogs -> handleExportLogs()
+				AppEvent.MessageShown -> handleErrorShown()
+				is AppEvent.TogglePingTunnelEnabled -> handleTogglePingTunnel(event.tunnel)
+				is AppEvent.SetTunnelPingIp -> handleTunnelPingIpChange(event.tunnelConf, event.ip)
+				AppEvent.ToggleBottomSheet -> handleToggleBottomSheet()
+				AppEvent.DeleteLogs -> handleDeleteLogs()
+				is AppEvent.SetScreenAction -> _screenCallback.update { event.callback }
+				AppEvent.InvokeScreenAction -> _screenCallback.value?.invoke()
+				is AppEvent.SetSelectedTunnel -> _appViewState.update { it.copy(selectedTunnel = event.tunnel) }
+				AppEvent.VpnPermissionRequested -> requestVpnPermission(false)
+				is AppEvent.AppReadyCheck -> handleAppReadyCheck(event.tunnels)
+				is AppEvent.ShowMessage -> handleShowMessage(event.message)
+				is AppEvent.PopBackStack -> _appViewState.update { it.copy(popBackStack = event.pop) }
+				is AppEvent.ClearTunnelError -> tunnelManager.clearError(event.tunnel)
 			}
 		}
 	}
 
-	private fun collectLogs() {
-		viewModelScope.launch(ioDispatcher) {
+	private fun startCollectingLogs() {
+		viewModelScope.launch {
 			logReader.bufferedLogs
-				.runningFold(emptyList<LogMessage>()) { accumulator, log ->
-					val updated = accumulator + log
-					if (updated.size > Constants.LOG_BUFFER_SIZE) updated.takeLast(Constants.LOG_BUFFER_SIZE.toInt()) else updated
+				.flowOn(ioDispatcher)
+				.collect { logMessage ->
+					_logs.update { currentList ->
+						val newList = currentList.toMutableList()
+						if (newList.size >= maxLogSize) {
+							newList.removeAt(0)
+						}
+						newList.add(logMessage)
+						newList
+					}
 				}
-				.collect { _logs.value = it }
 		}
 	}
 
-	private suspend fun onTunnelPingIpChange(tunnelConf: TunnelConf, ip: String) = saveTunnel(
+	private suspend fun handleAppReadyCheck(tunnels: List<TunnelConf>) {
+		if (tunnels.size == appDataRepository.tunnels.count()) {
+			_appViewState.update { it.copy(isAppReady = true) }
+		}
+	}
+
+	private fun handleToggleBottomSheet() = _appViewState.update {
+		it.copy(showBottomSheet = !it.showBottomSheet)
+	}
+
+	private suspend fun handleTunnelPingIpChange(tunnelConf: TunnelConf, ip: String) = saveTunnel(
 		tunnelConf.copy(pingIp = ip),
 	)
 
-	private suspend fun onTogglePingTunnel(tunnel: TunnelConf) = saveTunnel(
+	private suspend fun handleTogglePingTunnel(tunnel: TunnelConf) = saveTunnel(
 		tunnel.copy(isPingEnabled = !tunnel.isPingEnabled),
 	)
 
-	private suspend fun onToggleLocalLogging(currentlyEnabled: Boolean) {
-		loggerMutex.withLock {
-			val newEnabled = !currentlyEnabled
-			appDataRepository.appState.setLocalLogsEnabled(newEnabled)
-			withContext(mainDispatcher) {
-				if (newEnabled) logReader.start() else logReader.stop()
+	private suspend fun handleToggleLocalLogging(currentlyEnabled: Boolean) {
+		val enable = !currentlyEnabled
+		appDataRepository.appState.setLocalLogsEnabled(enable)
+		withContext(mainDispatcher) {
+			if (enable) {
+				logReader.start()
+				startCollectingLogs()
+			} else {
+				logReader.stop()
+				_logs.update { emptyList() }
 			}
-			if (!newEnabled) _logs.value = emptyList()
 		}
 	}
 
-	private suspend fun onSetDebounceDelay(appSettings: AppSettings, delay: Int) = saveSettings(
+	private suspend fun handleSetDebounceDelay(appSettings: AppSettings, delay: Int) = saveSettings(
 		appSettings.copy(debounceDelaySeconds = delay),
 	)
 
-	private suspend fun onCopyTunnel(tunnel: TunnelConf, existingTunnels: List<TunnelConf>) = saveTunnel(
+	private suspend fun handleCopyTunnel(tunnel: TunnelConf, existingTunnels: List<TunnelConf>) = saveTunnel(
 		TunnelConf(
 			tunName = tunnel.generateUniqueName(existingTunnels.map { it.tunName }),
 			wgQuick = tunnel.wgQuick,
@@ -214,48 +239,65 @@ constructor(
 		),
 	)
 
-	private suspend fun onDeleteTunnel(tunnel: TunnelConf, state: AppUiState) {
+	private suspend fun handleDeleteTunnel(tunnel: TunnelConf, state: AppUiState) {
 		if (state.tunnels.size == 1 || tunnel.isPrimaryTunnel) {
 			serviceManager.stopAutoTunnel()
 		}
 		appDataRepository.tunnels.delete(tunnel)
 	}
 
-	private suspend fun onStartTunnel(tunnel: TunnelConf) {
+	private fun requestVpnPermission(request: Boolean) = _appViewState.update {
+		it.copy(requestVpnPermission = request)
+	}
+
+	private fun requestBatteryPermission(request: Boolean) = _appViewState.update {
+		it.copy(requestBatteryPermission = request)
+	}
+
+	private suspend fun handleStartTunnel(tunnel: TunnelConf, appSettings: AppSettings) {
 		tunControlMutex.withLock {
+			if (!tunnelManager.hasVpnPermission() && !appSettings.isKernelEnabled) return@withLock requestVpnPermission(true)
 			tunnelManager.startTunnel(tunnel)
 		}
 	}
 
-	private suspend fun onStopTunnel(tunnel: TunnelConf) {
+	private suspend fun handleStopTunnel(tunnel: TunnelConf) {
 		tunControlMutex.withLock {
 			tunnelManager.stopTunnel(tunnel)
 		}
 	}
 
-	private suspend fun onToggleAutoTunnel() {
+	private suspend fun handleToggleAutoTunnel(state: AppUiState) {
 		tunControlMutex.withLock {
+			if (!state.appSettings.isAutoTunnelEnabled && !tunnelManager.hasVpnPermission() &&
+				!state.appSettings.isKernelEnabled
+			) {
+				return@withLock requestVpnPermission(
+					true,
+				)
+			}
+			if (!state.generalState.isBatteryOptimizationDisableShown) return@withLock requestBatteryPermission(true)
 			serviceManager.toggleAutoTunnel()
 		}
 	}
 
-	private suspend fun onToggleExpandTunnelStats(currentlyEnabled: Boolean) {
+	private suspend fun handleToggleExpandTunnelStats(currentlyEnabled: Boolean) {
 		appDataRepository.appState.setTunnelStatsExpanded(!currentlyEnabled)
 	}
 
-	private fun onErrorShown() {
-		_appState.update { it.copy(errorMessage = null) }
+	private fun handleErrorShown() {
+		_appViewState.update { it.copy(errorMessage = null) }
 	}
 
-	private fun onError(message: StringValue) {
-		_appState.update { it.copy(errorMessage = message) }
+	private fun handleShowMessage(message: StringValue) {
+		_appViewState.update { it.copy(errorMessage = message) }
 	}
 
 	private fun popBackStack() {
-		_appState.update { it.copy(popBackStack = true) }
+		_appViewState.update { it.copy(popBackStack = true) }
 	}
 
-	private suspend fun onImportTunnelFromFile(uri: Uri, tunnels: List<TunnelConf>) {
+	private suspend fun handleImportTunnelFromFile(uri: Uri, tunnels: List<TunnelConf>) {
 		runCatching {
 			val tunnelConfigs = fileUtils.buildTunnelsFromUri(uri)
 			val existingNames = tunnels.map { it.tunName }.toMutableList()
@@ -266,23 +308,27 @@ constructor(
 			}
 			appDataRepository.tunnels.saveAll(uniqueTunnelConfigs)
 		}.onFailure {
-			// TODO handle exceptions, show message to UI
+			when (it) {
+				is FileReadException, is BadConfigException -> handleShowMessage(StringValue.StringResource(R.string.error_file_format))
+				is InvalidFileExtensionException -> handleShowMessage(StringValue.StringResource(R.string.error_file_extension))
+				else -> handleShowMessage(StringValue.StringResource(R.string.unknown_error))
+			}
 			Timber.e(it)
 		}
 	}
 
-	private suspend fun onClipboardImport(config: String, tunnels: List<TunnelConf>) {
+	private suspend fun handleClipboardImport(config: String, tunnels: List<TunnelConf>) {
 		runCatching {
 			val amConfig = TunnelConf.configFromAmQuick(config)
 			val tunnelConf = TunnelConf.tunnelConfigFromAmConfig(amConfig)
 			saveTunnel(tunnelConf.copy(tunName = tunnelConf.generateUniqueName(tunnels.map { it.tunName })))
 		}.onFailure {
 			Timber.e(it)
-			onError(StringValue.StringResource(R.string.error_file_format))
+			handleShowMessage(StringValue.StringResource(R.string.error_file_format))
 		}
 	}
 
-	private suspend fun onImportTunnelFromUrl(urlString: String, tunnels: List<TunnelConf>) {
+	private suspend fun handleImportTunnelFromUrl(urlString: String, tunnels: List<TunnelConf>) {
 		runCatching {
 			val url = URL(urlString)
 			val fileName = urlString.substringAfterLast("/")
@@ -300,16 +346,17 @@ constructor(
 				is InvalidFileExtensionException -> StringValue.StringResource(R.string.error_file_extension)
 				else -> StringValue.StringResource(R.string.error_download_failed)
 			}
-			onError(message)
+			handleShowMessage(message)
 		}
 	}
 
-	private suspend fun onImportTunnelFromQr(result: String, existingTunnels: List<TunnelConf>) {
-		onClipboardImport(result, existingTunnels)
+	private suspend fun handleImportTunnelFromQr(result: String, existingTunnels: List<TunnelConf>) {
+		handleClipboardImport(result, existingTunnels)
 		popBackStack()
 	}
 
 	private suspend fun setBatteryOptimizeDisableShown() {
+		requestBatteryPermission(false)
 		appDataRepository.appState.setBatteryOptimizationDisableShown(true)
 	}
 
@@ -326,7 +373,7 @@ constructor(
 		if (enabled) PinManager.initialize(WireGuardAutoTunnel.instance)
 	}
 
-	private suspend fun onPinLockToggled(currentlyEnabled: Boolean) {
+	private suspend fun handlePinLockToggled(currentlyEnabled: Boolean) {
 		if (currentlyEnabled) PinManager.clearPin()
 		appDataRepository.appState.setPinLockEnabled(!currentlyEnabled)
 	}
@@ -335,26 +382,27 @@ constructor(
 		appDataRepository.appState.setLocationDisclosureShown(true)
 	}
 
-	private suspend fun onToggleAlwaysOnVPN(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleAlwaysOnVPN(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(
 			isAlwaysOnVpnEnabled = !appSettings.isAlwaysOnVpnEnabled,
 		),
 	)
 
-	private suspend fun onLocaleChange(localeTag: String) {
+	private suspend fun handleLocaleChange(localeTag: String) {
 		appDataRepository.appState.setLocale(localeTag)
 		LocaleUtil.changeLocale(localeTag)
-		_appState.update { it.copy(isConfigChanged = true) }
+		_appViewState.update { it.copy(isConfigChanged = true) }
 	}
 
-	private suspend fun onToggleRestartAtBoot(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleRestartAtBoot(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(
 			isRestoreOnBootEnabled = !appSettings.isRestoreOnBootEnabled,
 		),
 	)
 
-	private suspend fun onToggleVpnKillSwitch(appSettings: AppSettings) {
+	private suspend fun handleToggleVpnKillSwitch(appSettings: AppSettings) {
 		val enabled = !appSettings.isVpnKillSwitchEnabled
+		if (enabled && !tunnelManager.hasVpnPermission()) return requestVpnPermission(true)
 		val updatedSettings = appSettings.copy(
 			isVpnKillSwitchEnabled = enabled,
 			isLanOnKillSwitchEnabled = if (enabled) appSettings.isLanOnKillSwitchEnabled else false,
@@ -363,7 +411,7 @@ constructor(
 		handleKillSwitchChange(updatedSettings)
 	}
 
-	private suspend fun onToggleLanOnKillSwitch(appSettings: AppSettings) {
+	private suspend fun handleToggleLanOnKillSwitch(appSettings: AppSettings) {
 		val updatedSettings = appSettings.copy(
 			isLanOnKillSwitchEnabled = !appSettings.isLanOnKillSwitchEnabled,
 		)
@@ -371,14 +419,14 @@ constructor(
 		handleKillSwitchChange(appSettings)
 	}
 
-	private suspend fun handleKillSwitchChange(appSettings: AppSettings) {
+	private fun handleKillSwitchChange(appSettings: AppSettings) {
 		if (!appSettings.isVpnKillSwitchEnabled) return tunnelManager.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
 		Timber.d("Starting kill switch")
 		val allowedIps = if (appSettings.isLanOnKillSwitchEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()
 		tunnelManager.setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
 	}
 
-	private suspend fun onToggleAppShortcuts(appSettings: AppSettings) {
+	private suspend fun handleToggleAppShortcuts(appSettings: AppSettings) {
 		val enabled = !appSettings.isShortcutsEnabled
 		if (enabled) shortcutManager.addShortcuts() else shortcutManager.removeShortcuts()
 		saveSettings(
@@ -388,7 +436,7 @@ constructor(
 		)
 	}
 
-	private suspend fun onTogglePrimaryTunnel(tunnelConf: TunnelConf) {
+	private suspend fun handleTogglePrimaryTunnel(tunnelConf: TunnelConf) {
 		tunnelMutex.withLock {
 			appDataRepository.tunnels.updatePrimaryTunnel(
 				when (tunnelConf.isPrimaryTunnel) {
@@ -399,45 +447,52 @@ constructor(
 		}
 	}
 
-	private suspend fun onToggleIpv4(tunnelConf: TunnelConf) = saveTunnel(
+	private suspend fun handleToggleIpv4(tunnelConf: TunnelConf) = saveTunnel(
 		tunnelConf.copy(
 			isIpv4Preferred = !tunnelConf.isIpv4Preferred,
 		),
 	)
 
-	private suspend fun onPingIntervalChange(tunnelConf: TunnelConf, interval: String) = saveTunnel(
+	private suspend fun handlePingIntervalChange(tunnelConf: TunnelConf, interval: String) = saveTunnel(
 		tunnelConf.copy(pingInterval = if (interval.isBlank()) null else interval.toLong() * 1000),
 	)
 
-	private suspend fun onPingCoolDownChange(tunnelConf: TunnelConf, cooldown: String) = saveTunnel(
+	private suspend fun handlePingCoolDownChange(tunnelConf: TunnelConf, cooldown: String) = saveTunnel(
 		tunnelConf.copy(pingCooldown = if (cooldown.isBlank()) null else cooldown.toLong() * 1000),
 	)
 
-	private suspend fun onThemeChange(theme: Theme) {
+	private suspend fun handleThemeChange(theme: Theme) {
 		appDataRepository.appState.setTheme(theme)
 	}
 
-	private suspend fun onToggleKernelMode(appSettings: AppSettings) {
+	private suspend fun handleToggleKernelMode(appSettings: AppSettings) {
 		val enabled = !appSettings.isKernelEnabled
 		if (enabled && !isKernelSupported()) {
-			onError(StringValue.StringResource(R.string.kernel_not_supported))
+			handleShowMessage(StringValue.StringResource(R.string.kernel_not_supported))
 			return
 		}
 		if (enabled && !requestRoot()) return
+		// disable kill switch feature in kernel mode
 		tunnelManager.setBackendState(BackendState.INACTIVE, emptyList())
-		saveSettings(appSettings.copy(isKernelEnabled = enabled))
+		saveSettings(
+			appSettings.copy(
+				isKernelEnabled = enabled,
+				isVpnKillSwitchEnabled = false,
+				isLanOnKillSwitchEnabled = false,
+			),
+		)
 	}
 
-	private suspend fun onRemoveTunnelRunSSID(ssid: String, tunnelConfig: TunnelConf) = saveTunnel(
+	private suspend fun handleRemoveTunnelRunSSID(ssid: String, tunnelConfig: TunnelConf) = saveTunnel(
 		tunnelConfig.copy(
 			tunnelNetworks = (tunnelConfig.tunnelNetworks - ssid).toMutableList(),
 		),
 	)
 
-	private suspend fun onAddTunnelRunSSID(ssid: String, tunnelConf: TunnelConf, existingTunnels: List<TunnelConf>) {
+	private suspend fun handleAddTunnelRunSSID(ssid: String, tunnelConf: TunnelConf, existingTunnels: List<TunnelConf>) {
 		if (ssid.isBlank()) return
 		val trimmed = ssid.trim()
-		if (existingTunnels.any { it.tunnelNetworks.contains(trimmed) }) return onError(StringValue.StringResource(R.string.error_ssid_exists))
+		if (existingTunnels.any { it.tunnelNetworks.contains(trimmed) }) return handleShowMessage(StringValue.StringResource(R.string.error_ssid_exists))
 		saveTunnel(
 			tunnelConf.copy(
 				tunnelNetworks = (tunnelConf.tunnelNetworks + ssid).toMutableList(),
@@ -445,45 +500,45 @@ constructor(
 		)
 	}
 
-	private suspend fun onToggleMobileDataTunnel(tunnelConf: TunnelConf) {
+	private suspend fun handleToggleMobileDataTunnel(tunnelConf: TunnelConf) {
 		tunnelMutex.withLock {
 			if (tunnelConf.isMobileDataTunnel) return appDataRepository.tunnels.updateMobileDataTunnel(null)
 			appDataRepository.tunnels.updateMobileDataTunnel(tunnelConf)
 		}
 	}
 
-	private suspend fun onToggleEthernetTunnel(tunnelConf: TunnelConf) {
+	private suspend fun handleToggleEthernetTunnel(tunnelConf: TunnelConf) {
 		tunnelMutex.withLock {
 			if (tunnelConf.isEthernetTunnel) return appDataRepository.tunnels.updateEthernetTunnel(null)
 			appDataRepository.tunnels.updateEthernetTunnel(tunnelConf)
 		}
 	}
 
-	private suspend fun onToggleAutoTunnelOnWifi(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleAutoTunnelOnWifi(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(
 			isTunnelOnWifiEnabled = !appSettings.isTunnelOnWifiEnabled,
 		),
 	)
 
-	private suspend fun onToggleAutoTunnelOnCellular(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleAutoTunnelOnCellular(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(
 			isTunnelOnMobileDataEnabled = !appSettings.isTunnelOnMobileDataEnabled,
 		),
 	)
 
-	private suspend fun onToggleAutoTunnelWildcards(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleAutoTunnelWildcards(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(
 			isWildcardsEnabled = !appSettings.isWildcardsEnabled,
 		),
 	)
 
-	private suspend fun onDeleteTrustedSSID(ssid: String, appSettings: AppSettings) = saveSettings(
+	private suspend fun handleDeleteTrustedSSID(ssid: String, appSettings: AppSettings) = saveSettings(
 		appSettings.copy(
 			trustedNetworkSSIDs = (appSettings.trustedNetworkSSIDs - ssid).toMutableList(),
 		),
 	)
 
-	private suspend fun onToggleRootShellWifi(appSettings: AppSettings) {
+	private suspend fun handleToggleRootShellWifi(appSettings: AppSettings) {
 		if (requestRoot()) {
 			saveSettings(
 				appSettings.copy(isWifiNameByShellEnabled = !appSettings.isWifiNameByShellEnabled),
@@ -491,14 +546,14 @@ constructor(
 		}
 	}
 
-	private suspend fun onToggleTunnelOnEthernet(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleTunnelOnEthernet(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(isTunnelOnEthernetEnabled = !appSettings.isTunnelOnEthernetEnabled),
 	)
 
-	private suspend fun onSaveTrustedSSID(ssid: String, appSettings: AppSettings) {
+	private suspend fun handleSaveTrustedSSID(ssid: String, appSettings: AppSettings) {
 		if (ssid.isEmpty()) return
 		val trimmed = ssid.trim()
-		if (appSettings.trustedNetworkSSIDs.contains(trimmed)) return onError(StringValue.StringResource(R.string.error_ssid_exists))
+		if (appSettings.trustedNetworkSSIDs.contains(trimmed)) return handleShowMessage(StringValue.StringResource(R.string.error_ssid_exists))
 		saveSettings(
 			appSettings.copy(
 				trustedNetworkSSIDs = (appSettings.trustedNetworkSSIDs + ssid).toMutableList(),
@@ -506,11 +561,11 @@ constructor(
 		)
 	}
 
-	private suspend fun onToggleStopOnNoInternet(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleStopOnNoInternet(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(isStopOnNoInternetEnabled = !appSettings.isStopOnNoInternetEnabled),
 	)
 
-	private suspend fun onToggleStopKillSwitchOnTrusted(appSettings: AppSettings) = saveSettings(
+	private suspend fun handleToggleStopKillSwitchOnTrusted(appSettings: AppSettings) = saveSettings(
 		appSettings.copy(isDisableKillSwitchOnTrustedEnabled = !appSettings.isDisableKillSwitchOnTrustedEnabled),
 	)
 
@@ -532,7 +587,7 @@ constructor(
 		}
 	}
 
-	private suspend fun onExportTunnels(configType: ConfigType, tunnels: List<TunnelConf>) {
+	private suspend fun handleExportTunnels(configType: ConfigType, tunnels: List<TunnelConf>) {
 		runCatching {
 			val (files, shareFileName) = when (configType) {
 				ConfigType.AMNEZIA -> {
@@ -546,19 +601,26 @@ constructor(
 			fileUtils.zipAll(shareFile, files)
 			fileUtils.shareFile(shareFile)
 		}.onFailure {
-			// TODO handle error
 			Timber.e(it)
+			handleShowMessage(StringValue.StringResource(R.string.export_failed))
 		}
 	}
 
-	private suspend fun onExportLogs() {
+	private suspend fun handleExportLogs() {
 		runCatching {
 			val file = fileUtils.createNewShareFile("${Constants.BASE_LOG_FILE_NAME}-${Instant.now().epochSecond}.zip")
 			logReader.zipLogFiles(file.absolutePath)
 			fileUtils.shareFile(file)
 		}.onFailure {
-			// TODO handle error
 			Timber.e(it)
+			handleShowMessage(StringValue.StringResource(R.string.export_failed))
+		}
+	}
+
+	private suspend fun handleDeleteLogs() {
+		withContext(mainDispatcher) {
+			logReader.deleteAndClearLogs()
+			_logs.update { emptyList() }
 		}
 	}
 
@@ -566,10 +628,10 @@ constructor(
 		return withContext(ioDispatcher) {
 			try {
 				rootShell.get().start()
-				SnackbarController.showMessage(StringValue.StringResource(R.string.root_accepted))
+				handleShowMessage(StringValue.StringResource(R.string.root_accepted))
 				true
 			} catch (e: Exception) {
-				SnackbarController.showMessage(StringValue.StringResource(R.string.error_root_denied))
+				handleShowMessage(StringValue.StringResource(R.string.error_root_denied))
 				false
 			}
 		}

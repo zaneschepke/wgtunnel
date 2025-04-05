@@ -19,10 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun SelectionItemButton(
@@ -31,20 +30,21 @@ fun SelectionItemButton(
 	trailing: (@Composable () -> Unit)? = null,
 	onClick: () -> Unit,
 	ripple: Boolean = true,
+	modifier: Modifier = Modifier,
 ) {
 	Card(
 		modifier =
-		Modifier
+		modifier
 			.clip(RoundedCornerShape(8.dp))
 			.clickable(
 				indication = if (ripple) ripple() else null,
 				interactionSource = remember { MutableInteractionSource() },
 				onClick = { onClick() },
 			)
-			.height(56.dp.scaledHeight()),
+			.height(56.dp),
 		colors =
 		CardDefaults.cardColors(
-			containerColor = MaterialTheme.colorScheme.background,
+			containerColor = Color.Transparent,
 		),
 	) {
 		Row(
@@ -52,7 +52,7 @@ fun SelectionItemButton(
 			horizontalArrangement = Arrangement.Start,
 			modifier = Modifier
 				.fillMaxSize()
-				.padding(end = 10.dp.scaledWidth()),
+				.padding(end = 10.dp),
 		) {
 			leading?.let {
 				it()
