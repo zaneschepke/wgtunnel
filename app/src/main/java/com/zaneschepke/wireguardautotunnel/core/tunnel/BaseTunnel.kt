@@ -46,32 +46,6 @@ abstract class BaseTunnel(
 
 	abstract fun stopBackend(tunnel: TunnelConf)
 
-// 	private fun handleBackendThrowable(throwable: Throwable) {
-// 		val backendError = when (throwable) {
-// 			is BackendException -> throwable.toBackendError()
-// 			is org.amnezia.awg.backend.BackendException -> throwable.toBackendError()
-// 			else -> BackendError.Unknown
-// 		}
-// 		val message = when (backendError) {
-// 			BackendError.Config -> StringValue.StringResource(R.string.start_failed_config)
-// 			BackendError.DNS -> StringValue.StringResource(R.string.dns_error)
-// 			BackendError.Unauthorized -> StringValue.StringResource(R.string.unauthorized)
-// 			BackendError.Unknown -> StringValue.StringResource(R.string.unknown_error)
-// 		}
-// 		if (WireGuardAutoTunnel.isForeground()) {
-// 			SnackbarController.showMessage(message)
-// 		} else {
-// 			notificationManager.show(
-// 				NotificationManager.VPN_NOTIFICATION_ID,
-// 				notificationManager.createNotification(
-// 					WireGuardNotification.NotificationChannels.VPN,
-// 					title = StringValue.StringResource(R.string.tunne_start_failed_title),
-// 					description = message,
-// 				),
-// 			)
-// 		}
-// 	}
-
 	override fun clearError(tunnelConf: TunnelConf) {
 		applicationScope.launch {
 			updateTunnelStatus(tunnelConf, TunnelStatus.Down)
@@ -95,7 +69,7 @@ abstract class BaseTunnel(
 					Timber.d("Skipping redundant state update for ${tunnelConf.id}: $newState")
 					current
 				} else {
-					Timber.d("Updating tunnel ${tunnelConf.id} in activeTunnels as state is $state")
+					Timber.d("Updating tunnel ${tunnelConf.id} in activeTunnels as state is $newState, with stats")
 					val updated = existingState.copy(
 						status = newState,
 						statistics = stats ?: existingState.statistics,
@@ -106,7 +80,7 @@ abstract class BaseTunnel(
 		}
 	}
 
-	protected suspend fun stopActiveTunnels() {
+	private suspend fun stopActiveTunnels() {
 		activeTunnels.value.forEach { (config, state) ->
 			if (state.status.isUpOrStarting()) {
 				stopTunnel(config)
@@ -135,8 +109,11 @@ abstract class BaseTunnel(
 
 	override fun startTunnel(tunnelConf: TunnelConf) {
 		if (activeTuns.exists(tunnelConf.id) || tunThreads.containsKey(tunnelConf.id)) return
+		// use thread to interrupt java backend if stuck (like in dns resolution)
 		tunThreads += tunnelConf.id to thread {
 			runBlocking {
+				// stop active tunnels if we are userspace
+				if (this@BaseTunnel is UserspaceTunnel) stopActiveTunnels()
 				try {
 					Timber.d("Starting tunnel ${tunnelConf.id}...")
 					startTunnelInner(tunnelConf)
@@ -172,7 +149,9 @@ abstract class BaseTunnel(
 		applicationScope.launch(ioDispatcher) {
 			if (tunnelConf == null) return@launch stopActiveTunnels()
 			try {
-				if (activeTuns.isStarting(tunnelConf.id)) return@launch handleStartingTunnelStop(tunnelConf)
+				val stuckStarting = activeTuns.isStarting(tunnelConf.id)
+				handleTunnelThreadCleanup(tunnelConf)
+				if (stuckStarting) return@launch
 				updateTunnelStatus(tunnelConf, TunnelStatus.Stopping(reason))
 				stopTunnelInner(tunnelConf)
 			} catch (e: BackendError) {
@@ -201,12 +180,22 @@ abstract class BaseTunnel(
 		}
 	}
 
-	private suspend fun handleStartingTunnelStop(tunnel: TunnelConf) {
-		Timber.i("Stopping tunnel stuck in starting state ${tunnel.name}")
-		tunThreads[tunnel.id]?.interrupt().also {
-			updateTunnelStatus(tunnel, TunnelStatus.Down)
-			tunThreads -= tunnel.id
+	private suspend fun handleTunnelThreadCleanup(tunnel: TunnelConf) {
+		Timber.d("Cleaning up thread for ${tunnel.name}")
+		try {
+			tunThreads[tunnel.id]?.let {
+				if (it.state != Thread.State.TERMINATED) {
+					it.interrupt()
+					updateTunnelStatus(tunnel, TunnelStatus.Down)
+				} else {
+					Timber.d("Thread already terminated")
+				}
+			}
+		} catch (e: Exception) {
+			Timber.e(e, "Failed to stop tunnel thread for ${tunnel.name}")
 		}
+		Timber.d("Removing thread for ${tunnel.name}")
+		tunThreads -= tunnel.id
 	}
 
 	private fun removeActiveTunnel(tunnelConf: TunnelConf) {
@@ -215,7 +204,6 @@ abstract class BaseTunnel(
 		}
 	}
 
-	// TODO this should support vpn killswitch
 	override fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
 		applicationScope.launch(ioDispatcher) {
 			Timber.i("Bounce tunnel ${tunnelConf.name}")

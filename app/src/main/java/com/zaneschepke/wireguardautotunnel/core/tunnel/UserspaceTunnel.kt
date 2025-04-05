@@ -32,10 +32,9 @@ class UserspaceTunnel @Inject constructor(
 	private var previousBackendState: Pair<BackendState, Boolean>? = null
 
 	override suspend fun startBackend(tunnel: TunnelConf) {
-		stopActiveTunnels()
 		try {
 			updateTunnelStatus(tunnel, TunnelStatus.Starting)
-			// stop vpn kill switch if if we need to resolve DNS for peer endpoints
+			// stop vpn kill switch if we need to resolve DNS for peer endpoints
 			// endpoint resolved by DNS
 			val amConfig = tunnel.toAmConfig()
 			if (amConfig.peers.any { it.endpoint.getOrNull()?.toString()?.isUrl() == true } &&
