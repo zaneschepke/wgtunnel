@@ -23,8 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @androidx.compose.runtime.Composable
 fun IconSurfaceButton(title: String, onClick: () -> Unit, selected: Boolean, leadingIcon: ImageVector? = null, description: String? = null) {
@@ -53,22 +51,22 @@ fun IconSurfaceButton(title: String, onClick: () -> Unit, selected: Boolean, lea
 			Column(
 				modifier =
 				Modifier
-					.padding(horizontal = 8.dp.scaledWidth(), vertical = 10.dp.scaledHeight())
-					.padding(end = 16.dp.scaledWidth()).padding(start = 8.dp.scaledWidth())
+					.padding(horizontal = 8.dp, vertical = 10.dp)
+					.padding(end = 16.dp).padding(start = 8.dp)
 					.fillMaxSize(),
 				verticalArrangement = Arrangement.Center,
 				horizontalAlignment = Alignment.Start,
 			) {
 				Row(
 					verticalAlignment = Alignment.Companion.CenterVertically,
-					horizontalArrangement = Arrangement.spacedBy(16.dp.scaledWidth()),
+					horizontalArrangement = Arrangement.spacedBy(16.dp),
 				) {
 					Row(
 						horizontalArrangement = Arrangement.spacedBy(
-							16.dp.scaledWidth(),
+							16.dp,
 						),
 						verticalAlignment = Alignment.Companion.CenterVertically,
-						modifier = Modifier.padding(vertical = if (description == null) 10.dp.scaledHeight() else 0.dp),
+						modifier = Modifier.padding(vertical = if (description == null) 10.dp else 0.dp),
 					) {
 						leadingIcon?.let {
 							Icon(

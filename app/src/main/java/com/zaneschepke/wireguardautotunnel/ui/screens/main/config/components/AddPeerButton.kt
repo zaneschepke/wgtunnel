@@ -19,7 +19,7 @@ fun AddPeerButton(viewModel: ConfigViewModel) {
 	Row(
 		horizontalArrangement = Arrangement.Center,
 		verticalAlignment = Alignment.CenterVertically,
-		modifier = Modifier.fillMaxWidth().padding(bottom = 140.dp),
+		modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
 	) {
 		TextButton(onClick = { viewModel.addPeer() }) {
 			Text(stringResource(R.string.add_peer))

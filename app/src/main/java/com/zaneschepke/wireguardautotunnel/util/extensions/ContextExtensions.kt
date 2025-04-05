@@ -89,11 +89,14 @@ fun Context.launchNotificationSettings() {
 fun Context.launchShareFile(file: Uri) {
 	val shareIntent = Intent().apply {
 		action = Intent.ACTION_SEND
-		type = "*/*"
+		type = Constants.ALL_FILE_TYPES
 		putExtra(Intent.EXTRA_STREAM, file)
 		addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 	}
-	this.startActivity(Intent.createChooser(shareIntent, ""))
+	val chooserIntent = Intent.createChooser(shareIntent, "").apply {
+		addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+	}
+	this.startActivity(chooserIntent)
 }
 
 fun Context.isLocationServicesEnabled(): Boolean {

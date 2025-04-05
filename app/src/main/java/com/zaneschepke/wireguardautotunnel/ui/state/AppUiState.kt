@@ -13,4 +13,5 @@ data class AppUiState(
 	val autoTunnelActive: Boolean = false,
 	val appConfigurationChange: Boolean = false,
 	val isAppLoaded: Boolean = false,
+	val selectedTunnel: TunnelConf? = null,
 )

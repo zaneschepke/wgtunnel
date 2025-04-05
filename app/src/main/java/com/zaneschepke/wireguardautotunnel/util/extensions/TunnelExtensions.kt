@@ -7,8 +7,6 @@ import com.zaneschepke.wireguardautotunnel.domain.enums.BackendError
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.HandshakeStatus
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
-import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus.DOWN
-import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus.UP
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.Straw
@@ -102,8 +100,8 @@ fun BackendState.asAmBackendState(): Backend.BackendState {
 
 fun Tunnel.State.asTunnelState(): TunnelStatus {
 	return when (this) {
-		Tunnel.State.DOWN -> DOWN
-		Tunnel.State.UP -> UP
+		Tunnel.State.DOWN -> TunnelStatus.Down
+		Tunnel.State.UP -> TunnelStatus.Up
 	}
 }
 
@@ -111,7 +109,12 @@ fun BackendException.toBackendError(): BackendError {
 	return when (this.reason) {
 		BackendException.Reason.VPN_NOT_AUTHORIZED -> BackendError.Unauthorized
 		BackendException.Reason.DNS_RESOLUTION_FAILURE -> BackendError.DNS
-		else -> BackendError.Unauthorized
+		BackendException.Reason.UNKNOWN_KERNEL_MODULE_NAME -> BackendError.KernelModuleName
+		BackendException.Reason.WG_QUICK_CONFIG_ERROR_CODE -> BackendError.Config
+		BackendException.Reason.TUNNEL_MISSING_CONFIG -> BackendError.Config
+		BackendException.Reason.UNABLE_TO_START_VPN -> BackendError.NotAuthorized
+		BackendException.Reason.TUN_CREATION_ERROR -> BackendError.NotAuthorized
+		BackendException.Reason.GO_ACTIVATION_ERROR_CODE -> BackendError.Unknown
 	}
 }
 
@@ -119,13 +122,19 @@ fun org.amnezia.awg.backend.BackendException.toBackendError(): BackendError {
 	return when (this.reason) {
 		org.amnezia.awg.backend.BackendException.Reason.VPN_NOT_AUTHORIZED -> BackendError.Unauthorized
 		org.amnezia.awg.backend.BackendException.Reason.DNS_RESOLUTION_FAILURE -> BackendError.DNS
-		else -> BackendError.Unauthorized
+		org.amnezia.awg.backend.BackendException.Reason.UNKNOWN_KERNEL_MODULE_NAME -> BackendError.KernelModuleName
+		org.amnezia.awg.backend.BackendException.Reason.AWG_QUICK_CONFIG_ERROR_CODE -> BackendError.Config
+		org.amnezia.awg.backend.BackendException.Reason.TUNNEL_MISSING_CONFIG -> BackendError.Config
+		org.amnezia.awg.backend.BackendException.Reason.UNABLE_TO_START_VPN -> BackendError.NotAuthorized
+		org.amnezia.awg.backend.BackendException.Reason.TUN_CREATION_ERROR -> BackendError.NotAuthorized
+		org.amnezia.awg.backend.BackendException.Reason.GO_ACTIVATION_ERROR_CODE -> BackendError.Unknown
+		org.amnezia.awg.backend.BackendException.Reason.SERVICE_NOT_RUNNING -> BackendError.ServiceNotRunning
 	}
 }
 
 fun com.wireguard.android.backend.Tunnel.State.asTunnelState(): TunnelStatus {
 	return when (this) {
-		com.wireguard.android.backend.Tunnel.State.DOWN -> DOWN
-		com.wireguard.android.backend.Tunnel.State.UP -> UP
+		com.wireguard.android.backend.Tunnel.State.DOWN -> TunnelStatus.Down
+		com.wireguard.android.backend.Tunnel.State.UP -> TunnelStatus.Up
 	}
 }

@@ -45,7 +45,7 @@ fun InterfaceFields(
 	OutlinedTextField(
 		value = interfaceState.privateKey,
 		onValueChange = { onInterfaceChange(interfaceState.copy(privateKey = it)) },
-		label = { Text(stringResource(R.string.private_key)) },
+		label = { Text(stringResource(R.string.private_key), style = MaterialTheme.typography.bodyMedium) },
 		modifier = Modifier.fillMaxWidth().clickable {
 			if (!isAuthenticated) showAuthPrompt()
 		},
@@ -75,7 +75,7 @@ fun InterfaceFields(
 	OutlinedTextField(
 		value = interfaceState.publicKey,
 		onValueChange = { onInterfaceChange(interfaceState.copy(publicKey = it)) },
-		label = { Text(stringResource(R.string.public_key)) },
+		label = { Text(stringResource(R.string.public_key), style = MaterialTheme.typography.bodyMedium) },
 		enabled = false,
 		modifier = Modifier.fillMaxWidth(),
 		singleLine = true,
@@ -105,7 +105,7 @@ fun InterfaceFields(
 	)
 	Row(
 		modifier = Modifier.fillMaxWidth(),
-		horizontalArrangement = Arrangement.spacedBy(5.dp),
+		horizontalArrangement = Arrangement.spacedBy(6.dp),
 	) {
 		ConfigurationTextBox(
 			value = interfaceState.dnsServers,

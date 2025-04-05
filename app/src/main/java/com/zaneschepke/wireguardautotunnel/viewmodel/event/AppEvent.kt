@@ -4,8 +4,11 @@ import android.net.Uri
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
+import com.zaneschepke.wireguardautotunnel.util.StringValue
 
 sealed class AppEvent {
+	data class SetScreenAction(val callback: () -> Unit) : AppEvent()
+	data object InvokeScreenAction : AppEvent()
 	data object ToggleLocalLogging : AppEvent()
 	data object ToggleRestartAtBoot : AppEvent()
 	data object ToggleVpnKillSwitch : AppEvent()
@@ -50,6 +53,13 @@ sealed class AppEvent {
 	data class SaveTrustedSSID(val ssid: String) : AppEvent()
 	data class ExportTunnels(val configType: ConfigType) : AppEvent()
 	data object ExportLogs : AppEvent()
-	data object ErrorShown : AppEvent()
-	data object BackStackPopped : AppEvent()
+	data object DeleteLogs : AppEvent()
+	data object MessageShown : AppEvent()
+	data class ShowMessage(val message: StringValue) : AppEvent()
+	data class ClearTunnelError(val tunnel: TunnelConf) : AppEvent()
+	data class PopBackStack(val pop: Boolean) : AppEvent()
+	data object ToggleBottomSheet : AppEvent()
+	data class SetSelectedTunnel(val tunnel: TunnelConf?) : AppEvent()
+	data object VpnPermissionRequested : AppEvent()
+	data class AppReadyCheck(val tunnels: List<TunnelConf>) : AppEvent()
 }

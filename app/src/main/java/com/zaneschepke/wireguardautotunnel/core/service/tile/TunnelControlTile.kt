@@ -60,11 +60,9 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 		val tunnels = appDataRepository.tunnels.getAll()
 		if (tunnels.isEmpty()) return@launch setUnavailable()
 		with(tunnelManager.activeTunnels.value) {
-			if (isNotEmpty()) if (size == 1) {
-				tunnels.firstOrNull { it.id == keys.first().id }?.let { return@launch updateTile(it.tunName, true) }
-			} else {
-				return@launch updateTile(getString(R.string.multiple), true)
-			}
+			val starting = this.filter { it.value.status.isUpOrStarting() }
+			if (starting.size == 1) return@launch updateTile(starting.keys.first().tunName, true)
+			if (starting.size > 1) return@launch updateTile(getString(R.string.multiple), true)
 		}
 		appDataRepository.getStartTunnelConfig()?.let {
 			updateTile(it.tunName, false)

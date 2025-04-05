@@ -34,7 +34,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigViewModel
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.state.ConfigUiState
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun PeersSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
@@ -46,8 +45,8 @@ fun PeersSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
 			color = MaterialTheme.colorScheme.surface,
 		) {
 			Column(
-				verticalArrangement = Arrangement.spacedBy(10.dp),
-				modifier = Modifier.padding(16.dp.scaledWidth()).focusGroup(),
+				verticalArrangement = Arrangement.spacedBy(6.dp),
+				modifier = Modifier.padding(16.dp).focusGroup(),
 			) {
 				Row(
 					horizontalArrangement = Arrangement.SpaceBetween,
@@ -63,14 +62,14 @@ fun PeersSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
 							modifier = Modifier.size(iconSize),
 							onClick = { viewModel.removePeer(index) },
 						) {
-							Icon(Icons.Rounded.Delete, contentDescription = "Delete")
+							Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete))
 						}
 						Column {
 							IconButton(
 								modifier = Modifier.size(iconSize),
 								onClick = { isDropDownExpanded = true },
 							) {
-								Icon(Icons.Rounded.MoreVert, contentDescription = "More")
+								Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.quick_actions))
 							}
 							DropdownMenu(
 								expanded = isDropDownExpanded,

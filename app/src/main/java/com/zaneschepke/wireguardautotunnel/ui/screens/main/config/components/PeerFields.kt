@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,8 +38,8 @@ fun PeerFields(peer: PeerProxy, onPeerChange: (PeerProxy) -> Unit, showAuthPromp
 		value = peer.preSharedKey,
 		enabled = isAuthenticated,
 		onValueChange = { onPeerChange(peer.copy(preSharedKey = it)) },
-		label = { Text(stringResource(R.string.preshared_key)) },
-		placeholder = { Text(stringResource(R.string.optional)) },
+		label = { Text(stringResource(R.string.preshared_key), style = MaterialTheme.typography.bodyMedium) },
+		placeholder = { Text(stringResource(R.string.optional), style = MaterialTheme.typography.bodyMedium) },
 		modifier = Modifier.fillMaxWidth().clickable { if (!isAuthenticated) showAuthPrompt() },
 		keyboardOptions = keyboardOptions,
 		keyboardActions = keyboardActions,
@@ -47,9 +48,9 @@ fun PeerFields(peer: PeerProxy, onPeerChange: (PeerProxy) -> Unit, showAuthPromp
 	OutlinedTextField(
 		value = peer.persistentKeepalive,
 		onValueChange = { onPeerChange(peer.copy(persistentKeepalive = it)) },
-		label = { Text(stringResource(R.string.persistent_keepalive)) },
-		placeholder = { Text(stringResource(R.string.optional_no_recommend)) },
-		trailingIcon = { Text(stringResource(R.string.seconds), modifier = Modifier.padding(end = 10.dp)) },
+		label = { Text(stringResource(R.string.persistent_keepalive), style = MaterialTheme.typography.bodyMedium) },
+		placeholder = { Text(stringResource(R.string.optional), style = MaterialTheme.typography.bodyMedium) },
+		trailingIcon = { Text(stringResource(R.string.seconds), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = 10.dp)) },
 		modifier = Modifier.fillMaxWidth(),
 		keyboardOptions = keyboardOptions,
 		keyboardActions = keyboardActions,
@@ -64,8 +65,8 @@ fun PeerFields(peer: PeerProxy, onPeerChange: (PeerProxy) -> Unit, showAuthPromp
 	OutlinedTextField(
 		value = peer.allowedIps,
 		onValueChange = { onPeerChange(peer.copy(allowedIps = it)) },
-		label = { Text(stringResource(R.string.allowed_ips)) },
-		placeholder = { Text(stringResource(R.string.comma_separated_list)) },
+		label = { Text(stringResource(R.string.allowed_ips), style = MaterialTheme.typography.bodyMedium) },
+		placeholder = { Text(stringResource(R.string.comma_separated_list), style = MaterialTheme.typography.bodyMedium) },
 		modifier = Modifier.fillMaxWidth(),
 		keyboardOptions = keyboardOptions,
 		keyboardActions = keyboardActions,

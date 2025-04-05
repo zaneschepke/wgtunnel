@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 
 @Composable
 fun <T> DropdownSelector(
@@ -41,7 +40,7 @@ fun <T> DropdownSelector(
 		Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown))
 	}
 	DropdownMenu(
-		modifier = modifier.height(250.dp.scaledHeight()),
+		modifier = modifier.height(250.dp),
 		scrollState = rememberScrollState(),
 		containerColor = MaterialTheme.colorScheme.surface,
 		expanded = isExpanded,

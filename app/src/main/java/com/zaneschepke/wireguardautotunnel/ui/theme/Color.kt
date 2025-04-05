@@ -6,10 +6,12 @@ val OffWhite = Color(0xFFF2F2F4)
 val CoolGray = Color(0xFF8D9D9F)
 val LightGrey = Color(0xFFECEDEF)
 val Aqua = Color(0xFF76BEBD)
-val SilverTree = Color(0xFF6DB58B)
 val Plantation = Color(0xFF264A49)
 val Shark = Color(0xFF21272A)
 val BalticSea = Color(0xFF1C1B1F)
+
+// Status colors
+val SilverTree = Color(0xFF6DB58B)
 val Brick = Color(0xFFCE4257)
 val Straw = Color(0xFFD4C483)
 

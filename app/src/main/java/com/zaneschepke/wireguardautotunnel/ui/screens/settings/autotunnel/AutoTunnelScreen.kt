@@ -4,28 +4,10 @@ import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AirplanemodeActive
-import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.Filter1
-import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.SettingsEthernet
-import androidx.compose.material.icons.outlined.SignalCellular4Bar
-import androidx.compose.material.icons.outlined.VpnKeyOff
-import androidx.compose.material.icons.outlined.Wifi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,40 +17,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
-import com.zaneschepke.wireguardautotunnel.ui.Route
-import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
-import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
-import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.TopNavBar
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.TrustedNetworkTextBox
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WildcardsLabel
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.AdvancedSettingsItem
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.NetworkTunnelingItems
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WifiTunnelingItems
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LearnMoreLinkLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
-import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
+import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isLocationServicesEnabled
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
+
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
-import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AppViewModel) {
+fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
 	val context = LocalContext.current
-	val navController = LocalNavController.current
-
 	val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 	var currentText by remember { mutableStateOf("") }
 	var isBackgroundLocationGranted by remember { mutableStateOf(true) }
@@ -81,8 +49,7 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AppViewModel) {
 
 	fun isWifiNameReadable(): Boolean {
 		return when {
-			!isBackgroundLocationGranted ||
-				!fineLocationState.status.isGranted -> {
+			!isBackgroundLocationGranted || !fineLocationState.status.isGranted -> {
 				showLocationDialog = true
 				false
 			}
@@ -104,16 +71,14 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AppViewModel) {
 		}
 	}
 
-	LaunchedEffect(appSettings.trustedNetworkSSIDs) {
+	LaunchedEffect(uiState.appSettings.trustedNetworkSSIDs) {
 		currentText = ""
 	}
 
 	LocationServicesDialog(
 		showLocationServicesAlertDialog,
 		onDismiss = { showLocationServicesAlertDialog = false },
-		onAttest = {
-			showLocationServicesAlertDialog = false
-		},
+		onAttest = { showLocationServicesAlertDialog = false },
 	)
 
 	BackgroundLocationDialog(
@@ -122,268 +87,23 @@ fun AutoTunnelScreen(appSettings: AppSettings, viewModel: AppViewModel) {
 		onAttest = { showLocationDialog = false },
 	)
 
-	Scaffold(
-		topBar = {
-			TopNavBar(stringResource(R.string.auto_tunneling))
-		},
-	) { padding ->
-		Column(
-			horizontalAlignment = Alignment.Start,
-			verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.Top),
-			modifier =
-			Modifier
-				.fillMaxSize()
-				.padding(padding)
-				.verticalScroll(rememberScrollState())
-				.imePadding()
-				.padding(top = 24.dp.scaledHeight())
-				.padding(horizontal = 24.dp.scaledWidth()),
-		) {
-			SurfaceSelectionGroupButton(
-				buildList {
-					addAll(
-						listOf(
-							SelectionItem(
-								Icons.Outlined.Wifi,
-								title = {
-									Text(
-										stringResource(R.string.tunnel_on_wifi),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								description = {
-								},
-								trailing = {
-									ScaledSwitch(
-										enabled = !appSettings.isAlwaysOnVpnEnabled,
-										checked = appSettings.isTunnelOnWifiEnabled,
-										onClick = {
-											viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi)
-										},
-									)
-								},
-								onClick = {
-									viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi)
-								},
-							),
-							SelectionItem(
-								Icons.Outlined.Code,
-								title = {
-									Text(
-										stringResource(R.string.wifi_name_via_shell),
-										style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-									)
-								},
-								description = {
-									Text(
-										stringResource(R.string.use_root_shell_for_wifi),
-										style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-									)
-								},
-								trailing = {
-									ScaledSwitch(
-										checked = appSettings.isWifiNameByShellEnabled,
-										onClick = {
-											viewModel.handleEvent(AppEvent.ToggleRootShellWifi)
-										},
-									)
-								},
-								onClick = {
-									viewModel.handleEvent(AppEvent.ToggleRootShellWifi)
-								},
-							),
-						),
-					)
-					if (appSettings.isTunnelOnWifiEnabled) {
-						addAll(
-							listOf(
-								SelectionItem(
-									Icons.Outlined.Filter1,
-									title = {
-										Text(
-											stringResource(R.string.use_wildcards),
-											style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-										)
-									},
-									description = {
-										LearnMoreLinkLabel({ context.openWebUrl(it) }, stringResource(id = R.string.docs_wildcards))
-									},
-									trailing = {
-										ScaledSwitch(
-											checked = appSettings.isWildcardsEnabled,
-											onClick = {
-												viewModel.handleEvent(AppEvent.ToggleAutoTunnelWildcards)
-											},
-										)
-									},
-									onClick = {
-										viewModel.handleEvent(AppEvent.ToggleAutoTunnelWildcards)
-									},
-								),
-								SelectionItem(
-									title = {
-										Row(
-											verticalAlignment = Alignment.CenterVertically,
-											modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp.scaledHeight()),
-										) {
-											Row(
-												verticalAlignment = Alignment.CenterVertically,
-												modifier = Modifier
-													.weight(4f, false)
-													.fillMaxWidth(),
-											) {
-												val icon = Icons.Outlined.Security
-												Icon(
-													icon,
-													icon.name,
-													modifier = Modifier.size(iconSize),
-												)
-												Column(
-													horizontalAlignment = Alignment.Start,
-													verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
-													modifier = Modifier
-														.fillMaxWidth()
-														.padding(start = 16.dp.scaledWidth())
-														.padding(vertical = 6.dp.scaledHeight()),
-												) {
-													Text(
-														stringResource(R.string.trusted_wifi_names),
-														style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-													)
-												}
-											}
-										}
-									},
-									description = {
-										TrustedNetworkTextBox(
-											appSettings.trustedNetworkSSIDs,
-											onDelete = { viewModel.handleEvent(AppEvent.DeleteTrustedSSID(it)) },
-											currentText = currentText,
-											onSave = { ssid ->
-												if (appSettings.isWifiNameByShellEnabled || isWifiNameReadable()) viewModel.handleEvent(AppEvent.SaveTrustedSSID(ssid))
-											},
-											onValueChange = { currentText = it },
-											supporting = {
-												if (appSettings.isWildcardsEnabled) {
-													WildcardsLabel()
-												}
-											},
-										)
-									},
-								),
-								SelectionItem(
-									Icons.Outlined.VpnKeyOff,
-									title = {
-										Text(
-											stringResource(R.string.kill_switch_off),
-											style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-										)
-									},
-									description = {
-									},
-									trailing = {
-										ScaledSwitch(
-											enabled = appSettings.isVpnKillSwitchEnabled,
-											checked = appSettings.isDisableKillSwitchOnTrustedEnabled,
-											onClick = {
-												viewModel.handleEvent(AppEvent.ToggleStopKillSwitchOnTrusted)
-											},
-										)
-									},
-									onClick = {
-										viewModel.handleEvent(AppEvent.ToggleStopKillSwitchOnTrusted)
-									},
-								),
-							),
-						)
-					}
-				},
-			)
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						Icons.Outlined.SignalCellular4Bar,
-						title = {
-							Text(
-								stringResource(R.string.tunnel_mobile_data),
-								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-							)
-						},
-						trailing = {
-							ScaledSwitch(
-								enabled = !appSettings.isAlwaysOnVpnEnabled,
-								checked = appSettings.isTunnelOnMobileDataEnabled,
-								onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
-							)
-						},
-						onClick = {
-							viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular)
-						},
-					),
-					SelectionItem(
-						Icons.Outlined.SettingsEthernet,
-						title = {
-							Text(
-								stringResource(R.string.tunnel_on_ethernet),
-								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-							)
-						},
-						trailing = {
-							ScaledSwitch(
-								enabled = !appSettings.isAlwaysOnVpnEnabled,
-								checked = appSettings.isTunnelOnEthernetEnabled,
-								onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
-							)
-						},
-						onClick = {
-							viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet)
-						},
-					),
-					SelectionItem(
-						Icons.Outlined.AirplanemodeActive,
-						title = {
-							Text(
-								stringResource(R.string.stop_on_no_internet),
-								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-							)
-						},
-						description = {
-							Text(
-								stringResource(R.string.stop_on_internet_loss),
-								style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-							)
-						},
-						trailing = {
-							ScaledSwitch(
-								checked = appSettings.isStopOnNoInternetEnabled,
-								onClick = { viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet) },
-							)
-						},
-						onClick = {
-							viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet)
-						},
-					),
-				),
-			)
-			SurfaceSelectionGroupButton(
-				listOf(
-					SelectionItem(
-						Icons.Outlined.Settings,
-						title = {
-							Text(
-								stringResource(R.string.advanced_settings),
-								style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-							)
-						},
-						onClick = {
-							navController.navigate(Route.AutoTunnelAdvanced)
-						},
-						trailing = {
-							ForwardButton { navController.navigate(Route.AutoTunnelAdvanced) }
-						},
-					),
-				),
-			)
-		}
+	Column(
+		horizontalAlignment = Alignment.Start,
+		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+		modifier = Modifier
+			.fillMaxSize()
+			.verticalScroll(rememberScrollState())
+			.padding(vertical = 24.dp)
+			.padding(horizontal = 24.dp),
+	) {
+		SurfaceSelectionGroupButton(
+			items = WifiTunnelingItems(uiState, viewModel, currentText, { currentText = it }, { isWifiNameReadable() }),
+		)
+		SurfaceSelectionGroupButton(
+			items = NetworkTunnelingItems(uiState, viewModel),
+		)
+		SurfaceSelectionGroupButton(
+			items = listOf(AdvancedSettingsItem()),
+		)
 	}
 }

@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.SplitOption
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.SplitTunnelUiState
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
 
 @Composable
 fun SplitTunnelContent(
@@ -20,11 +19,11 @@ fun SplitTunnelContent(
 	onQueryChange: (String) -> Unit,
 ) {
 	Column(
-		verticalArrangement = Arrangement.spacedBy(24.dp.scaledHeight(), Alignment.CenterVertically),
+		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
 		horizontalAlignment = Alignment.CenterHorizontally,
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(top = 24.dp.scaledHeight()),
+			.padding(top = 24.dp),
 	) {
 		SplitOptionSelector(
 			selectedOption = uiState.splitOption,

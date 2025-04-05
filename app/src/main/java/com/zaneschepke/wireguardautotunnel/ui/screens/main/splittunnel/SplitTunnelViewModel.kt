@@ -4,17 +4,14 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
-import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.SnackbarController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.SplitOption
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.SplitTunnelUiState
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.TunnelApp
 import com.zaneschepke.wireguardautotunnel.ui.state.ConfigProxy
 import com.zaneschepke.wireguardautotunnel.ui.state.InterfaceProxy
-import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.util.extensions.getAllInternetCapablePackages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -154,7 +151,7 @@ class SplitTunnelViewModel @Inject constructor(
 			}
 		}
 		saveProxyConfig(configProxy, tunnel)
-		SnackbarController.showMessage(StringValue.StringResource(R.string.config_changes_saved))
+		_uiState.update { it.copy(success = true) }
 	}
 
 	private suspend fun saveProxyConfig(proxy: ConfigProxy, tunnel: TunnelConf) {

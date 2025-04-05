@@ -6,6 +6,7 @@ import com.zaneschepke.wireguardautotunnel.di.Kernel
 import com.zaneschepke.wireguardautotunnel.di.Userspace
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
+import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import kotlinx.coroutines.CoroutineDispatcher
@@ -56,19 +57,27 @@ class TunnelManager @Inject constructor(
 			initialValue = emptyMap(),
 		)
 
+	override fun hasVpnPermission(): Boolean {
+		return userspaceTunnel.hasVpnPermission()
+	}
+
+	override fun clearError(tunnelConf: TunnelConf) {
+		tunnelProviderFlow.value.clearError(tunnelConf)
+	}
+
 	override fun startTunnel(tunnelConf: TunnelConf) {
 		tunnelProviderFlow.value.startTunnel(tunnelConf)
 	}
 
-	override fun stopTunnel(tunnelConf: TunnelConf?) {
+	override fun stopTunnel(tunnelConf: TunnelConf?, reason: TunnelStatus.StopReason) {
 		tunnelProviderFlow.value.stopTunnel(tunnelConf)
 	}
 
-	override fun bounceTunnel(tunnelConf: TunnelConf) {
+	override fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
 		tunnelProviderFlow.value.bounceTunnel(tunnelConf)
 	}
 
-	override suspend fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
+	override fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
 		tunnelProviderFlow.value.setBackendState(backendState, allowedIps)
 	}
 

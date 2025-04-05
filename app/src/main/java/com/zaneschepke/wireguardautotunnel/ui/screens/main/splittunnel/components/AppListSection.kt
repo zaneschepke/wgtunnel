@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.TunnelApp
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun AppListSection(apps: List<Pair<TunnelApp, Boolean>>, onAppSelectionToggle: (String) -> Unit, onQueryChange: (String) -> Unit, query: String) {
@@ -48,11 +47,11 @@ fun AppListSection(apps: List<Pair<TunnelApp, Boolean>>, onAppSelectionToggle: (
 			leading = {
 				Icon(Icons.Outlined.Search, stringResource(R.string.search))
 			},
-			containerColor = MaterialTheme.colorScheme.background,
+			containerColor = MaterialTheme.colorScheme.surface,
 			modifier = Modifier
 				.fillMaxWidth()
 				.height(inputHeight)
-				.padding(horizontal = 24.dp.scaledWidth()),
+				.padding(horizontal = 24.dp),
 			singleLine = true,
 			keyboardOptions = KeyboardOptions(
 				capitalization = KeyboardCapitalization.None,

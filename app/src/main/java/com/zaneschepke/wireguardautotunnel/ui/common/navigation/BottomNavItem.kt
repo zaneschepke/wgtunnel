@@ -7,4 +7,6 @@ data class BottomNavItem(
 	val name: String,
 	val route: Route,
 	val icon: ImageVector,
+	val onClick: () -> Unit,
+	val active: Boolean = false,
 )
