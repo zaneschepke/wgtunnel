@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PauseCircle

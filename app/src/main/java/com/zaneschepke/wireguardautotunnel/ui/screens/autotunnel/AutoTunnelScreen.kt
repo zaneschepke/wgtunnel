@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel
+package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel
 
 import android.Manifest
 import android.os.Build
@@ -22,9 +22,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.AdvancedSettingsItem
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.NetworkTunnelingItems
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components.WifiTunnelingItems
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.AdvancedSettingsItem
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.NetworkTunnelingItems
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.WifiTunnelingItems
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.BackgroundLocationDialog
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState

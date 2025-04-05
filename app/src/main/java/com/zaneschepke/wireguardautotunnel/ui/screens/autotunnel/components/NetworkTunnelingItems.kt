@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AirplanemodeActive
@@ -7,7 +7,9 @@ import androidx.compose.material.icons.outlined.SignalCellular4Bar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
@@ -33,6 +35,15 @@ fun NetworkTunnelingItems(uiState: AppUiState, viewModel: AppViewModel): List<Se
 					onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
 				)
 			},
+			description = {
+				val cellularActive = remember(uiState.networkStatus) { uiState.networkStatus?.cellularConnected ?: false }
+				Text(
+					text = if (cellularActive) stringResource(R.string.active) else stringResource(R.string.inactive),
+					style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline),
+					maxLines = 1,
+					overflow = TextOverflow.Ellipsis,
+				)
+			},
 			onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
 		),
 		SelectionItem(
@@ -48,6 +59,15 @@ fun NetworkTunnelingItems(uiState: AppUiState, viewModel: AppViewModel): List<Se
 					enabled = !uiState.appSettings.isAlwaysOnVpnEnabled,
 					checked = uiState.appSettings.isTunnelOnEthernetEnabled,
 					onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
+				)
+			},
+			description = {
+				val ethernetActive = remember(uiState.networkStatus) { uiState.networkStatus?.ethernetConnected ?: false }
+				Text(
+					text = if (ethernetActive) stringResource(R.string.active) else stringResource(R.string.inactive),
+					style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline),
+					maxLines = 1,
+					overflow = TextOverflow.Ellipsis,
 				)
 			},
 			onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },

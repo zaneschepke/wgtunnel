@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,11 +16,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.networkmonitor.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
@@ -41,6 +46,7 @@ fun WifiTunnelingItems(
 	isWifiNameReadable: () -> Boolean,
 ): List<SelectionItem> {
 	val context = LocalContext.current
+
 	val baseItems = listOf(
 		SelectionItem(
 			leadingIcon = Icons.Outlined.Wifi,
@@ -55,6 +61,21 @@ fun WifiTunnelingItems(
 					enabled = !uiState.appSettings.isAlwaysOnVpnEnabled,
 					checked = uiState.appSettings.isTunnelOnWifiEnabled,
 					onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi) },
+				)
+			},
+			description = {
+				val wifiName by remember(uiState.networkStatus) {
+					derivedStateOf {
+						(uiState.networkStatus as? NetworkStatus.Connected)
+							?.takeIf { it.wifiConnected }
+							?.wifiSsid
+					}
+				}
+				Text(
+					text = wifiName?.let { stringResource(R.string.wifi_name_template, it) } ?: stringResource(R.string.inactive),
+					style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline),
+					maxLines = 1,
+					overflow = TextOverflow.Ellipsis,
 				)
 			},
 			onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi) },

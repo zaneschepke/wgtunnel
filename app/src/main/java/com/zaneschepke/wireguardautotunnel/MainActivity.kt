@@ -80,8 +80,8 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.SettingsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.AppearanceScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.display.DisplayScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.LanguageScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.AutoTunnelScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.AdvancedScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.AutoTunnelScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.AdvancedScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSwitchScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -174,11 +174,13 @@ class MainActivity : AppCompatActivity() {
 						}
 					}
 				}
-				LaunchedEffect(errorMessage, appUiState.activeTunnels) {
+				LaunchedEffect(errorMessage) {
 					errorMessage?.let {
 						snackbar.showSnackbar(it.asString(this@MainActivity))
 						viewModel.handleEvent(AppEvent.MessageShown)
 					}
+				}
+				LaunchedEffect(appUiState.activeTunnels) {
 					appUiState.activeTunnels
 						.mapNotNull { (tunnelConf, tunnelState) ->
 							(tunnelState.status as? TunnelStatus.Error)?.let { error ->
@@ -264,7 +266,7 @@ class MainActivity : AppCompatActivity() {
 												val route = if (appUiState.generalState.isLocationDisclosureShown) Route.AutoTunnel else Route.LocationDisclosure
 												navController.goFromRoot(route)
 											},
-											active = appUiState.autoTunnelActive,
+											active = appUiState.isAutoTunnelActive,
 										),
 										BottomNavItem(
 											name = stringResource(R.string.settings),

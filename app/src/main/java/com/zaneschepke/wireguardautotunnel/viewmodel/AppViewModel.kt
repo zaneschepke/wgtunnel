@@ -7,11 +7,14 @@ import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.logcatter.model.LogMessage
+import com.zaneschepke.networkmonitor.NetworkMonitor
+import com.zaneschepke.networkmonitor.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.shortcut.ShortcutManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
+import com.zaneschepke.wireguardautotunnel.data.model.GeneralState
 import com.zaneschepke.wireguardautotunnel.di.AppShell
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.di.MainDispatcher
@@ -20,6 +23,7 @@ import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
@@ -37,10 +41,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
@@ -68,6 +72,7 @@ constructor(
 	private val logReader: LogReader,
 	private val fileUtils: FileUtils,
 	private val shortcutManager: ShortcutManager,
+	private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
 	private val tunnelMutex = Mutex()
@@ -90,14 +95,23 @@ constructor(
 			appDataRepository.appState.flow,
 			tunnelManager.activeTunnels,
 			serviceManager.autoTunnelActive,
-		) { settings, tunnels, generalState, activeTunnels, autoTunnel ->
+			networkMonitor.networkStatusFlow,
+		) { array ->
+			val settings = array[0] as AppSettings
+			val tunnels = array[1] as List<TunnelConf>
+			val generalState = array[2] as GeneralState
+			val activeTunnels = array[3] as Map<TunnelConf, TunnelState>
+			val autoTunnel = array[4] as Boolean
+			val network = array[5] as NetworkStatus
+
 			AppUiState(
-				settings,
-				tunnels,
-				activeTunnels,
-				generalState,
-				autoTunnel,
+				appSettings = settings,
+				tunnels = tunnels,
+				activeTunnels = activeTunnels,
+				generalState = generalState,
+				isAutoTunnelActive = autoTunnel,
 				isAppLoaded = true,
+				networkStatus = network,
 			)
 		}.stateIn(
 			viewModelScope + ioDispatcher,

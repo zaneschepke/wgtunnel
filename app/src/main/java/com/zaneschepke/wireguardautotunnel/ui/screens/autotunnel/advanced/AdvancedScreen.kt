@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced
+package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.autotunnel.advanced.components.DebounceDelaySelector
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.components.DebounceDelaySelector
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel

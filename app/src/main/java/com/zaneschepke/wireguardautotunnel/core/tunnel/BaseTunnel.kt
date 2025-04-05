@@ -102,7 +102,9 @@ abstract class BaseTunnel(
 		}
 		tunnelConf.setTunnelStatsCallback {
 			val stats = getStatistics(tunnelConf)
-			applicationScope.launch { updateTunnelStatus(tunnelConf, null, stats) }
+			applicationScope.launch {
+				updateTunnelStatus(tunnelConf, null, stats)
+			}
 		}
 		tunnelConf.setBounceTunnelCallback(::bounceTunnel)
 	}
