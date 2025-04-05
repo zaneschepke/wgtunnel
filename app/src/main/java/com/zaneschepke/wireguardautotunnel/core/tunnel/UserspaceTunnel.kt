@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.backend.BackendException
 import org.amnezia.awg.backend.Tunnel
+import org.amnezia.awg.config.Config
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.jvm.optionals.getOrNull
@@ -34,16 +35,8 @@ class UserspaceTunnel @Inject constructor(
 	override suspend fun startBackend(tunnel: TunnelConf) {
 		try {
 			updateTunnelStatus(tunnel, TunnelStatus.Starting)
-			// stop vpn kill switch if we need to resolve DNS for peer endpoints
-			// endpoint resolved by DNS
 			val amConfig = tunnel.toAmConfig()
-			if (amConfig.peers.any { it.endpoint.getOrNull()?.toString()?.isUrl() == true } &&
-				backend.backendState.asBackendState() == BackendState.KILL_SWITCH_ACTIVE
-			) {
-				val bypassLan = appDataRepository.settings.get().isLanOnKillSwitchEnabled
-				previousBackendState = Pair(BackendState.KILL_SWITCH_ACTIVE, bypassLan)
-				setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
-			}
+			handleVpnKillSwitchWithDomainEndpoints(amConfig)
 			backend.setState(tunnel, Tunnel.State.UP, amConfig)
 		} catch (e: BackendException) {
 			Timber.e(e, "Failed to start up backend for tunnel ${tunnel.name}")
@@ -59,20 +52,41 @@ class UserspaceTunnel @Inject constructor(
 			Timber.e(e, "Failed to stop tunnel ${tunnel.id}")
 			throw e.toBackendError()
 		}
+		handlePreviouslyEnabledVpnKillSwitch()
+	}
+
+	// stop vpn kill switch if we need to resolve DNS for peer endpoints
+	private suspend fun handleVpnKillSwitchWithDomainEndpoints(config: Config) {
+		if (config.peers.any { it.endpoint.getOrNull()?.toString()?.isUrl() == true } &&
+			backend.backendState.asBackendState() == BackendState.KILL_SWITCH_ACTIVE
+		) {
+			val bypassLan = appDataRepository.settings.get().isLanOnKillSwitchEnabled
+			previousBackendState = Pair(BackendState.KILL_SWITCH_ACTIVE, bypassLan)
+			setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
+		}
+	}
+
+	// restore vpn kill switch if needed
+	private fun handlePreviouslyEnabledVpnKillSwitch() {
+		previousBackendState?.let { (state, lanEnabled) ->
+			Timber.d("Restoring kill switch configuration")
+			val lan = if (lanEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()
+			backend.setBackendState(state.asAmBackendState(), lan)
+			previousBackendState = null
+		}
 	}
 
 	override fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
 		Timber.d("Setting backend state: $backendState with allowedIps: $allowedIps")
 		try {
 			backend.setBackendState(backendState.asAmBackendState(), allowedIps)
-			previousBackendState?.let { (state, lanEnabled) ->
-				Timber.d("Restoring kill switch configuration")
-				val lan = if (lanEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()
-				backend.setBackendState(state.asAmBackendState(), lan)
-			}
 		} catch (e: BackendException) {
 			throw e.toBackendError()
 		}
+	}
+
+	override fun getBackendState(): BackendState {
+		return backend.backendState.asBackendState()
 	}
 
 	override suspend fun runningTunnelNames(): Set<String> {

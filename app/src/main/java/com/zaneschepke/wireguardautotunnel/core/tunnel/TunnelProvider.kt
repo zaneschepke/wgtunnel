@@ -12,6 +12,7 @@ interface TunnelProvider {
 	fun stopTunnel(tunnelConf: TunnelConf? = null, reason: TunnelStatus.StopReason = TunnelStatus.StopReason.USER)
 	fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason = TunnelStatus.StopReason.USER)
 	fun setBackendState(backendState: BackendState, allowedIps: Collection<String>)
+	fun getBackendState(): BackendState
 	suspend fun runningTunnelNames(): Set<String>
 	fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics?
 	val activeTunnels: StateFlow<Map<TunnelConf, TunnelState>>

@@ -57,6 +57,10 @@ class KernelTunnel @Inject constructor(
 		Timber.w("Not yet implemented for kernel")
 	}
 
+	override fun getBackendState(): BackendState {
+		return BackendState.INACTIVE
+	}
+
 	override suspend fun runningTunnelNames(): Set<String> {
 		return backend.runningTunnelNames
 	}

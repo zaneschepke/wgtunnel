@@ -16,6 +16,7 @@ import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.di.MainImmediateDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
+import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
 import com.zaneschepke.wireguardautotunnel.domain.events.AutoTunnelEvent
@@ -30,6 +31,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -76,6 +78,8 @@ class AutoTunnelService : LifecycleService() {
 
 	private var wakeLock: PowerManager.WakeLock? = null
 
+	private var killSwitchJob: Job? = null
+
 	override fun onCreate() {
 		super.onCreate()
 		serviceManager.autoTunnelService.complete(this)
@@ -109,7 +113,7 @@ class AutoTunnelService : LifecycleService() {
 			}
 			startAutoTunnelJob()
 			startAutoTunnelStateJob()
-			startKillSwitchJob()
+			killSwitchJob = startKillSwitchJob()
 		}.onFailure {
 			Timber.e(it)
 		}
@@ -122,7 +126,18 @@ class AutoTunnelService : LifecycleService() {
 
 	override fun onDestroy() {
 		serviceManager.autoTunnelService = CompletableDeferred()
+		restoreVpnKillSwitch()
 		super.onDestroy()
+	}
+
+	private fun restoreVpnKillSwitch() {
+		with(autoTunnelStateFlow.value) {
+			if (settings.isVpnKillSwitchEnabled && tunnelManager.getBackendState() != BackendState.KILL_SWITCH_ACTIVE) {
+				killSwitchJob?.cancel()
+				val allowedIps = if (settings.isLanOnKillSwitchEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()
+				tunnelManager.setBackendState(BackendState.KILL_SWITCH_ACTIVE, allowedIps)
+			}
+		}
 	}
 
 	private fun launchWatcherNotification(description: String = getString(R.string.monitoring_state_changes)) {

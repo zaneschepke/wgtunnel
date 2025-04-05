@@ -81,6 +81,10 @@ class TunnelManager @Inject constructor(
 		tunnelProviderFlow.value.setBackendState(backendState, allowedIps)
 	}
 
+	override fun getBackendState(): BackendState {
+		return tunnelProviderFlow.value.getBackendState()
+	}
+
 	override suspend fun runningTunnelNames(): Set<String> {
 		return tunnelProviderFlow.value.runningTunnelNames()
 	}
