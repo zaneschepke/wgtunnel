@@ -24,7 +24,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun SubmitConfigurationTextBox(
@@ -59,7 +58,7 @@ fun SubmitConfigurationTextBox(
 			.padding(
 				top = 5.dp,
 				bottom = 10.dp,
-			).fillMaxWidth().padding(end = 16.dp.scaledWidth()),
+			).fillMaxWidth().padding(end = 16.dp),
 		singleLine = true,
 		keyboardOptions = keyboardOptions,
 		keyboardActions = KeyboardActions(

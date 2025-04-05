@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.core.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.net.VpnService
 import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.core.service.autotunnel.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
@@ -44,6 +45,10 @@ class ServiceManager @Inject constructor(
 				context.startService(intent)
 			}
 		}.onFailure { Timber.e(it) }
+	}
+
+	fun hasVpnPermission(): Boolean {
+		return VpnService.prepare(context) == null
 	}
 
 	fun startAutoTunnel() {

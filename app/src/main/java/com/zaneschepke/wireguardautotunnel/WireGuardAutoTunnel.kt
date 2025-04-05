@@ -19,7 +19,6 @@ import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
 import com.zaneschepke.wireguardautotunnel.util.ReleaseTree
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -87,7 +86,7 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
 						tunnelManager.startTunnel(it)
 					}
 				} else {
-					Timber.Forest.w("Always-on VPN is not enabled in app settings")
+					Timber.w("Always-on VPN is not enabled in app settings")
 				}
 			}
 		}
@@ -95,9 +94,6 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
 		ServiceWorker.start(this)
 
 		applicationScope.launch {
-			withContext(mainDispatcher) {
-				if (appDataRepository.appState.isLocalLogsEnabled() && !isRunningOnTv()) logReader.start()
-			}
 			if (!appDataRepository.settings.get().isKernelEnabled) {
 				tunnelManager.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
 			}
@@ -105,6 +101,9 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
 				withContext(mainDispatcher) {
 					LocaleUtil.changeLocale(it)
 				}
+			}
+			appDataRepository.appState.isLocalLogsEnabled().let { enabled ->
+				if (enabled) logReader.start()
 			}
 		}
 	}

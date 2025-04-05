@@ -21,8 +21,6 @@ object Constants {
 
 	const val SUBSCRIPTION_TIMEOUT = 5_000L
 
-	const val TRANSITION_ANIMATION_TIME = 200
-
 	const val DEFAULT_PING_IP = "1.1.1.1"
 	const val PING_TIMEOUT = 5_000L
 	const val PING_INTERVAL = 60_000L
@@ -32,4 +30,5 @@ object Constants {
 	const val QR_CODE_NAME_PROPERTY = "# Name ="
 
 	const val FDROID_FLAVOR = "fdroid"
+	const val RELEASE = "release"
 }

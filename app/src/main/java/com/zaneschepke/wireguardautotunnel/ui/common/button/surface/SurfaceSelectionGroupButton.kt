@@ -19,8 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledHeight
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 
 @Composable
 fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
@@ -38,12 +36,12 @@ fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
 			) {
 				Row(
 					verticalAlignment = Alignment.CenterVertically,
-					modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp.scaledHeight()),
+					modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
 				) {
 					Row(
 						verticalAlignment = Alignment.CenterVertically,
 						modifier = Modifier
-							.padding(start = 16.dp.scaledWidth())
+							.padding(start = 16.dp)
 							.weight(4f, false)
 							.fillMaxWidth(),
 					) {
@@ -60,8 +58,8 @@ fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
 							verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
 							modifier = Modifier
 								.fillMaxWidth()
-								.padding(start = if (item.leadingIcon != null) 16.dp.scaledWidth() else 0.dp)
-								.padding(vertical = if (item.description == null) 16.dp.scaledHeight() else 6.dp.scaledHeight()),
+								.padding(start = if (item.leadingIcon != null) 16.dp else 0.dp)
+								.padding(vertical = if (item.description == null) 16.dp else 6.dp),
 						) {
 							item.title()
 							item.description?.let {
@@ -73,7 +71,7 @@ fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
 						Box(
 							contentAlignment = Alignment.CenterEnd,
 							modifier = Modifier
-								.padding(end = 24.dp.scaledWidth(), start = 16.dp.scaledWidth())
+								.padding(end = 24.dp, start = 16.dp)
 								.weight(1f),
 						) {
 							it()

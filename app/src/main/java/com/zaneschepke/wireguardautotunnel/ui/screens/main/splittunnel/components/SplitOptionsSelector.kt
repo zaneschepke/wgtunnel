@@ -21,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.SplitOption
-import com.zaneschepke.wireguardautotunnel.util.extensions.scaledWidth
 import java.util.*
 
 @Composable
@@ -31,9 +30,9 @@ fun SplitOptionSelector(selectedOption: SplitOption, onOptionChange: (SplitOptio
 
 	MultiChoiceSegmentedButtonRow(
 		modifier = Modifier
-			.background(color = MaterialTheme.colorScheme.background)
+			.background(color = MaterialTheme.colorScheme.surface)
 			.fillMaxWidth()
-			.padding(horizontal = 24.dp.scaledWidth())
+			.padding(horizontal = 24.dp)
 			.height(inputHeight),
 	) {
 		SplitOption.entries.forEachIndexed { index, entry ->
@@ -62,7 +61,7 @@ fun SplitOptionSelector(selectedOption: SplitOption, onOptionChange: (SplitOptio
 				},
 				colors = SegmentedButtonDefaults.colors().copy(
 					activeContainerColor = MaterialTheme.colorScheme.surface,
-					inactiveContainerColor = MaterialTheme.colorScheme.background,
+					inactiveContainerColor = MaterialTheme.colorScheme.surface,
 				),
 				onCheckedChange = { onOptionChange(entry) },
 				checked = active,

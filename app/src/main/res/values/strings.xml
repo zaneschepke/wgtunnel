@@ -227,4 +227,23 @@
 	<string name="matrix_url">https://matrix.to/#/#wg-tunnel-space:matrix.org</string>
     <string name="dropdown">Dropdown</string>
 	<string name="add_tunnel">Add tunnel</string>
+    <string name="export_logs">Export stored logs</string>
+	<string name="delete_logs">Delete and clear logs</string>
+	<string name="copy">Copy</string>
+	<string name="info">Info</string>
+	<string name="export_tunnels_amnezia">Export tunnels as Amnezia</string>
+	<string name="export_tunnels_wireguard">Export tunnels as WireGuard</string>
+	<string name="delete">Delete</string>
+    <string name="camera_permission_required">Camera permission required</string>
+	<string name="export_failed">Export failed</string>
+	<string name="tunnel_error_template">Tunnel failed with: %1$s</string>
+	<string name="wifi_name_template">Active: %1$s</string>
+	<string name="config_error">config error</string>
+	<string name="dns_resolve_error">dns resolution error</string>
+	<string name="invalid_config_error">invalid_config_error</string>
+	<string name="kernel_name_error">kernel module name error</string>
+	<string name="auth_error">not authorized error</string>
+	<string name="service_running_error">service not running error</string>
+    <string name="inactive">Inactive</string>
+	<string name="active">Active</string>
 </resources>

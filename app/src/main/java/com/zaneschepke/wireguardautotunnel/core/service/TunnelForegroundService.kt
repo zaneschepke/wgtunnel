@@ -169,6 +169,7 @@ class TunnelForegroundService : LifecycleService() {
 		)
 	}
 
+	// TODO add notification handling and optional log reading for restart on handshake failures
 	companion object {
 		const val STATS_DELAY = 1_000L
 		const val PING_START_DELAY = 30_000L

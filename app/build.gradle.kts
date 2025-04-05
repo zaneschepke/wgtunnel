@@ -86,7 +86,6 @@ android {
 		}
 		debug {
 			applicationIdSuffix = ".debug"
-			versionNameSuffix = "-debug"
 			resValue("string", "app_name", "WG Tunnel - Debug")
 			isDebuggable = true
 			resValue("string", "provider", "\"${Constants.APP_NAME}.provider.debug\"")
@@ -95,7 +94,6 @@ android {
 		create(Constants.PRERELEASE) {
 			initWith(buildTypes.getByName(Constants.RELEASE))
 			applicationIdSuffix = ".prerelease"
-			versionNameSuffix = "-pre"
 			resValue("string", "app_name", "WG Tunnel - Pre")
 			resValue("string", "provider", "\"${Constants.APP_NAME}.provider.pre\"")
 		}
@@ -103,7 +101,6 @@ android {
 		create(Constants.NIGHTLY) {
 			initWith(buildTypes.getByName(Constants.RELEASE))
 			applicationIdSuffix = ".nightly"
-			versionNameSuffix = "-nightly"
 			resValue("string", "app_name", "WG Tunnel - Nightly")
 			resValue("string", "provider", "\"${Constants.APP_NAME}.provider.nightly\"")
 		}
@@ -160,6 +157,7 @@ dependencies {
 	implementation(libs.androidx.material3)
 	implementation(libs.androidx.appcompat)
 	implementation(libs.material)
+	implementation(libs.androidx.storage)
 
 	// test
 	testImplementation(libs.junit)
@@ -204,13 +202,12 @@ dependencies {
 	implementation(libs.androidx.lifecycle.runtime.ktx)
 	implementation(libs.androidx.lifecycle.process)
 
-	// icons
-	implementation(libs.material.icons.extended)
 	// serialization
 	implementation(libs.kotlinx.serialization.json)
 
-	// barcode scanning
+	// ui
 	implementation(libs.zxing.android.embedded)
+	implementation(libs.material.icons.extended)
 
 	// bio
 	implementation(libs.androidx.biometric.ktx)
