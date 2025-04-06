@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.common.SelectedLabel
+import com.zaneschepke.wireguardautotunnel.ui.common.label.SelectedLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.SelectionItemButton
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil

@@ -32,22 +32,28 @@ data class TunnelConf(
 	val isIpv4Preferred: Boolean = true,
 	@Transient
 	private var stateChangeCallback: ((Any) -> Unit)? = null,
-	@Transient
-	private var tunnelStatsCallback: (() -> Unit)? = null,
-	@Transient
-	private var bounceTunnelCallback: ((TunnelConf) -> Unit)? = null,
 ) : Tunnel, org.amnezia.awg.backend.Tunnel {
 
 	fun setStateChangeCallback(callback: (Any) -> Unit) {
 		stateChangeCallback = callback
 	}
 
-	fun setTunnelStatsCallback(callback: (() -> Unit)) {
-		tunnelStatsCallback = callback
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (other !is TunnelConf) return false
+		return id == other.id && tunName == other.tunName && wgQuick == other.wgQuick && amQuick == other.amQuick &&
+			isPrimaryTunnel == other.isPrimaryTunnel && isMobileDataTunnel == other.isMobileDataTunnel &&
+			isEthernetTunnel == other.isEthernetTunnel && isPingEnabled == other.isPingEnabled && pingIp == other.pingIp &&
+			pingCooldown == other.pingCooldown && pingInterval == other.pingInterval && tunnelNetworks == other.tunnelNetworks &&
+			isIpv4Preferred == other.isIpv4Preferred
 	}
 
-	fun setBounceTunnelCallback(callback: (TunnelConf) -> Unit) {
-		bounceTunnelCallback = callback
+	override fun hashCode(): Int {
+		var result = id
+		result = 31 * result + tunName.hashCode()
+		result = 31 * result + wgQuick.hashCode()
+		result = 31 * result + amQuick.hashCode()
+		return result
 	}
 
 	fun copyWithCallback(
@@ -72,18 +78,18 @@ data class TunnelConf(
 			isEthernetTunnel, isIpv4Preferred,
 		).apply {
 			stateChangeCallback = this@TunnelConf.stateChangeCallback
-			tunnelStatsCallback = this@TunnelConf.tunnelStatsCallback
-			bounceTunnelCallback = this@TunnelConf.bounceTunnelCallback
+// 			tunnelStatsCallback = this@TunnelConf.tunnelStatsCallback
+// 			bounceTunnelCallback = this@TunnelConf.bounceTunnelCallback
 		}
 	}
 
-	fun onUpdateStatistics() {
-		tunnelStatsCallback?.invoke()
-	}
-
-	fun bounceTunnel(tunnelConf: TunnelConf) {
-		bounceTunnelCallback?.invoke(tunnelConf)
-	}
+// 	fun onUpdateStatistics() {
+// 		tunnelStatsCallback?.invoke()
+// 	}
+//
+// 	fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
+// 		bounceTunnelCallback?.invoke(tunnelConf, reason)
+// 	}
 
 	fun toAmConfig(): org.amnezia.awg.config.Config {
 		return configFromAmQuick(amQuick.ifBlank { wgQuick })

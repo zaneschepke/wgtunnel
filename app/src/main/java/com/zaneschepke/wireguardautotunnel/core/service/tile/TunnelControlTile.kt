@@ -118,10 +118,14 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 				if (tunnelManager.activeTunnels.value.isNotEmpty()) return@launch tunnelManager.stopTunnel()
 				val lastActive = WireGuardAutoTunnel.getLastActiveTunnels()
 				if (lastActive.isEmpty()) {
-					appDataRepository.getStartTunnelConfig()?.let(tunnelManager::startTunnel)
+					appDataRepository.getStartTunnelConfig()?.let {
+						tunnelManager.startTunnel(it)
+					}
 				} else {
 					lastActive.forEach { id ->
-						appDataRepository.tunnels.getById(id)?.let(tunnelManager::startTunnel)
+						appDataRepository.tunnels.getById(id)?.let {
+							tunnelManager.startTunnel(it)
+						}
 					}
 				}
 			}

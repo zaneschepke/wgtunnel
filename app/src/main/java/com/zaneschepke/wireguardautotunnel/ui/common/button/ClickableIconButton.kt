@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.common
+package com.zaneschepke.wireguardautotunnel.ui.common.button
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer

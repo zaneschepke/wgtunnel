@@ -39,7 +39,6 @@ interface NotificationManager {
 	fun show(notificationId: Int, notification: Notification)
 
 	companion object {
-		const val KERNEL_SERVICE_NOTIFICATION_ID = 123
 		const val AUTO_TUNNEL_NOTIFICATION_ID = 122
 		const val VPN_NOTIFICATION_ID = 100
 		const val EXTRA_ID = "id"

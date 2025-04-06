@@ -54,7 +54,7 @@ fun TunnelOptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewMode
 		)
 		SurfaceSelectionGroupButton(
 			items = buildList {
-				add(PingRestartItem(tunnelConf, appUiState, viewModel))
+				add(PingRestartItem(tunnelConf, viewModel))
 				if (tunnelConf.isPingEnabled) {
 					add(PingConfigItem(tunnelConf, viewModel))
 				}

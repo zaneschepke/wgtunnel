@@ -8,14 +8,15 @@ import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import kotlinx.coroutines.flow.StateFlow
 
 interface TunnelProvider {
-	fun startTunnel(tunnelConf: TunnelConf)
-	fun stopTunnel(tunnelConf: TunnelConf? = null, reason: TunnelStatus.StopReason = TunnelStatus.StopReason.USER)
-	fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason = TunnelStatus.StopReason.USER)
+	suspend fun startTunnel(tunnelConf: TunnelConf)
+	suspend fun stopTunnel(tunnelConf: TunnelConf? = null, reason: TunnelStatus.StopReason = TunnelStatus.StopReason.USER)
+	suspend fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason = TunnelStatus.StopReason.USER)
 	fun setBackendState(backendState: BackendState, allowedIps: Collection<String>)
 	fun getBackendState(): BackendState
 	suspend fun runningTunnelNames(): Set<String>
 	fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics?
 	val activeTunnels: StateFlow<Map<TunnelConf, TunnelState>>
 	fun hasVpnPermission(): Boolean
-	fun clearError(tunnelConf: TunnelConf)
+	suspend fun clearError(tunnelConf: TunnelConf)
+	suspend fun updateTunnelStatistics(tunnel: TunnelConf)
 }

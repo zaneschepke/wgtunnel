@@ -26,7 +26,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.common.ClickableIconButton
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 

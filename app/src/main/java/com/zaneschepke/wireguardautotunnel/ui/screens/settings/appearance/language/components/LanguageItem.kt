@@ -1,7 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.components
 
 import androidx.compose.runtime.Composable
-import com.zaneschepke.wireguardautotunnel.ui.common.SelectedLabel
+import com.zaneschepke.wireguardautotunnel.ui.common.label.SelectedLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.SelectionItemButton
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel

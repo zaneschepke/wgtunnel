@@ -2,23 +2,20 @@ package com.zaneschepke.wireguardautotunnel.util.extensions
 
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.channels.ticker
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.selects.whileSelect
 import timber.log.Timber
 import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Chunks based on a time or size threshold.
@@ -52,25 +49,8 @@ fun <T> ReceiveChannel<T>.chunked(scope: CoroutineScope, size: Int, time: Durati
 	}
 }
 
-@OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
-fun <T> Flow<T>.chunked(size: Int, time: Duration) = channelFlow {
-	coroutineScope {
-		val channel = asChannel(this@chunked).chunked(this, size, time)
-		try {
-			while (!channel.isClosedForReceive) {
-				send(channel.receive())
-			}
-		} catch (e: ClosedReceiveChannelException) {
-			// Channel was closed by the flow completing, nothing to do
-			Timber.w(e)
-		} catch (e: CancellationException) {
-			channel.cancel(e)
-			throw e
-		} catch (e: Exception) {
-			channel.cancel(CancellationException("Closing channel due to flow exception", e))
-			throw e
-		}
-	}
+fun <K, V> Flow<Map<K, V>>.distinctByKeys(): Flow<Map<K, V>> {
+	return distinctUntilChanged { old, new -> old.keys == new.keys }
 }
 
 @ExperimentalCoroutinesApi

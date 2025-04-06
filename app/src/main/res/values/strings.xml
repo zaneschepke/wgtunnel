@@ -247,4 +247,10 @@
     <string name="inactive">Inactive</string>
 	<string name="active">Active</string>
 	<string name="status">Status</string>
+    <string name="bio_auth_title">Biometric Authentication</string>
+	<string name="bio_subtitle">Log in using your biometric credential</string>
+	<string name="bio_not_supported">Biometrics not supported</string>
+	<string name="bio_not_created">Biometrics not created</string>
+	<string name="bio_update_required">Biometric security update required</string>
+	<string name="tunnel_starting">Tunnel starting</string>
 </resources>

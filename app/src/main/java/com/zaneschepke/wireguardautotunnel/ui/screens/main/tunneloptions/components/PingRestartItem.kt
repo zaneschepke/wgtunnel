@@ -7,16 +7,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.core.tunnel.isUp
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
-import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun PingRestartItem(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: AppViewModel): SelectionItem {
+fun PingRestartItem(tunnelConf: TunnelConf, viewModel: AppViewModel): SelectionItem {
 	return SelectionItem(
 		leadingIcon = Icons.Outlined.NetworkPing,
 		title = {
@@ -28,7 +26,6 @@ fun PingRestartItem(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: A
 		trailing = {
 			ScaledSwitch(
 				checked = tunnelConf.isPingEnabled,
-				enabled = !appUiState.activeTunnels.isUp(tunnelConf),
 				onClick = { viewModel.handleEvent(AppEvent.TogglePingTunnelEnabled(tunnelConf)) },
 			)
 		},

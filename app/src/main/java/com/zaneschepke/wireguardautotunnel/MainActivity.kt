@@ -358,9 +358,7 @@ class MainActivity : AppCompatActivity() {
 							}
 							BackHandler {
 								if (navController.currentDestination?.route != Route.Main::class.qualifiedName) {
-									if (!navController.popBackStack(Route.Main, false)) {
-										navController.goFromRoot(Route.Main)
-									}
+									navController.popBackStack()
 								} else {
 									this@MainActivity.finish()
 								}

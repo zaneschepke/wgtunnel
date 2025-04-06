@@ -61,19 +61,23 @@ class TunnelManager @Inject constructor(
 		return userspaceTunnel.hasVpnPermission()
 	}
 
-	override fun clearError(tunnelConf: TunnelConf) {
+	override suspend fun clearError(tunnelConf: TunnelConf) {
 		tunnelProviderFlow.value.clearError(tunnelConf)
 	}
 
-	override fun startTunnel(tunnelConf: TunnelConf) {
+	override suspend fun updateTunnelStatistics(tunnel: TunnelConf) {
+		tunnelProviderFlow.value.updateTunnelStatistics(tunnel)
+	}
+
+	override suspend fun startTunnel(tunnelConf: TunnelConf) {
 		tunnelProviderFlow.value.startTunnel(tunnelConf)
 	}
 
-	override fun stopTunnel(tunnelConf: TunnelConf?, reason: TunnelStatus.StopReason) {
+	override suspend fun stopTunnel(tunnelConf: TunnelConf?, reason: TunnelStatus.StopReason) {
 		tunnelProviderFlow.value.stopTunnel(tunnelConf)
 	}
 
-	override fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
+	override suspend fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
 		tunnelProviderFlow.value.bounceTunnel(tunnelConf)
 	}
 

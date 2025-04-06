@@ -14,7 +14,6 @@ import com.zaneschepke.wireguardautotunnel.core.notification.WireGuardNotificati
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.di.MainImmediateDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
@@ -66,10 +65,6 @@ class AutoTunnelService : LifecycleService() {
 	lateinit var serviceManager: ServiceManager
 
 	@Inject
-	@MainImmediateDispatcher
-	lateinit var mainImmediateDispatcher: CoroutineDispatcher
-
-	@Inject
 	lateinit var tunnelManager: TunnelManager
 
 	private val defaultState = AutoTunnelState()
@@ -83,13 +78,7 @@ class AutoTunnelService : LifecycleService() {
 	override fun onCreate() {
 		super.onCreate()
 		serviceManager.autoTunnelService.complete(this)
-		lifecycleScope.launch(mainImmediateDispatcher) {
-			runCatching {
-				launchWatcherNotification()
-			}.onFailure {
-				Timber.e(it)
-			}
-		}
+		launchWatcherNotification()
 	}
 
 	override fun onBind(intent: Intent): IBinder? {
@@ -107,10 +96,8 @@ class AutoTunnelService : LifecycleService() {
 
 	fun start() {
 		kotlin.runCatching {
-			lifecycleScope.launch(mainImmediateDispatcher) {
-				launchWatcherNotification()
-				initWakeLock()
-			}
+			launchWatcherNotification()
+			initWakeLock()
 			startAutoTunnelJob()
 			startAutoTunnelStateJob()
 			killSwitchJob = startKillSwitchJob()

@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.common
+package com.zaneschepke.wireguardautotunnel.ui.common.label
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

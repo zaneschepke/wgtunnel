@@ -25,7 +25,7 @@ import kotlin.jvm.optionals.getOrNull
 class UserspaceTunnel @Inject constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	@ApplicationScope private val applicationScope: CoroutineScope,
-	serviceManager: ServiceManager,
+	val serviceManager: ServiceManager,
 	val appDataRepository: AppDataRepository,
 	private val backend: Backend,
 ) : BaseTunnel(ioDispatcher, applicationScope, appDataRepository, serviceManager) {
@@ -68,12 +68,15 @@ class UserspaceTunnel @Inject constructor(
 
 	// restore vpn kill switch if needed
 	private fun handlePreviouslyEnabledVpnKillSwitch() {
-		previousBackendState?.let { (state, lanEnabled) ->
-			Timber.d("Restoring kill switch configuration")
-			val lan = if (lanEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()
-			backend.setBackendState(state.asAmBackendState(), lan)
-			previousBackendState = null
+		// let auto tunnel handle this if it is active
+		if (!serviceManager.autoTunnelActive.value) {
+			previousBackendState?.let { (state, lanEnabled) ->
+				Timber.d("Restoring kill switch configuration")
+				val lan = if (lanEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()
+				backend.setBackendState(state.asAmBackendState(), lan)
+			}
 		}
+		previousBackendState = null
 	}
 
 	override fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
