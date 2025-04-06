@@ -13,4 +13,5 @@ data class ConfigUiState(
 	val isAuthenticated: Boolean = true,
 	val showAuthPrompt: Boolean = false,
 	val message: StringValue? = null,
+	val success: Boolean? = null,
 )

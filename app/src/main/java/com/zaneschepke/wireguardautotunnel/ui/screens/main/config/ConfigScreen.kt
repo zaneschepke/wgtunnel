@@ -50,6 +50,7 @@ fun ConfigScreen(tunnelConf: TunnelConf?, appViewModel: AppViewModel, viewModel:
 	}
 
 	LaunchedEffect(Unit) {
+		// set callback for navbar to invoke save
 		appViewModel.handleEvent(
 			AppEvent.SetScreenAction {
 				keyboardController?.hide()
@@ -60,6 +61,13 @@ fun ConfigScreen(tunnelConf: TunnelConf?, appViewModel: AppViewModel, viewModel:
 
 	LaunchedEffect(tunnelConf) {
 		viewModel.initFromTunnel(tunnelConf)
+	}
+
+	LaunchedEffect(uiState.success) {
+		if (uiState.success == true) {
+			appViewModel.handleEvent(AppEvent.ShowMessage(StringValue.StringResource(R.string.config_changes_saved)))
+			appViewModel.handleEvent(AppEvent.PopBackStack(true))
+		}
 	}
 
 	LaunchedEffect(uiState.message) {

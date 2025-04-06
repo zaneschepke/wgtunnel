@@ -9,9 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.components.SplitTunnelContent
-import com.zaneschepke.wireguardautotunnel.util.StringValue
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
@@ -21,13 +19,6 @@ fun SplitTunnelScreen(appViewModel: AppViewModel, viewModel: SplitTunnelViewMode
 
 	LaunchedEffect(Unit) {
 		appViewModel.handleEvent(AppEvent.SetScreenAction { viewModel.saveChanges() })
-	}
-
-	LaunchedEffect(uiState.success) {
-		if (uiState.success == true) {
-			appViewModel.handleEvent(AppEvent.ShowMessage(StringValue.StringResource(R.string.config_changes_saved)))
-			appViewModel.handleEvent(AppEvent.PopBackStack(true))
-		}
 	}
 
 	Crossfade(

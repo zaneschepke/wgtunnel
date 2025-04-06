@@ -136,13 +136,14 @@ class ConfigViewModel @Inject constructor(
 		val message = try {
 			val saveConfig = buildTunnelConfFromState(tunnelConf)
 			tunnelRepository.save(saveConfig)
-			StringValue.StringResource(R.string.config_changes_saved)
+			_uiState.update { it.copy(success = true) }
 		} catch (e: Exception) {
-			e.message?.let { message ->
-				(StringValue.DynamicString(message))
-			} ?: StringValue.StringResource(R.string.unknown_error)
+			setMessage(
+				e.message?.let { message ->
+					(StringValue.DynamicString(message))
+				} ?: StringValue.StringResource(R.string.unknown_error),
+			)
 		}
-		setMessage(message)
 	}
 
 	private fun buildTunnelConfFromState(tunnelConf: TunnelConf?): TunnelConf {
