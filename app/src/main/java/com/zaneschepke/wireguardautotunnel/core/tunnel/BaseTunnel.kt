@@ -69,7 +69,6 @@ abstract class BaseTunnel(
 					Timber.d("Skipping redundant state update for ${tunnelConf.id}: $newState")
 					current
 				} else {
-					Timber.d("Updating tunnel ${tunnelConf.id} in activeTunnels as state is $newState, with stats")
 					val updated = existingState.copy(
 						status = newState,
 						statistics = stats ?: existingState.statistics,

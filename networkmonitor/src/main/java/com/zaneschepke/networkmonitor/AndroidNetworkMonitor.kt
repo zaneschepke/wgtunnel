@@ -131,10 +131,6 @@ class AndroidNetworkMonitor(
 				wifiConnected = false
 				trySend(WifiState(connected = false, ssid = null))
 			}
-
-			override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-				Timber.d("Wi-Fi onCapabilitiesChanged: network=$network, networkCapabilities=$networkCapabilities")
-			}
 		}
 
 		val request = NetworkRequest.Builder()

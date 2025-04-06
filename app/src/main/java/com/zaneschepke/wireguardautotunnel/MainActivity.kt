@@ -357,7 +357,11 @@ class MainActivity : AppCompatActivity() {
 								}
 							}
 							BackHandler {
-								if (navController.previousBackStackEntry == null || !navController.popBackStack()) {
+								if (navController.currentDestination?.route != Route.Main::class.qualifiedName) {
+									if (!navController.popBackStack(Route.Main, false)) {
+										navController.goFromRoot(Route.Main)
+									}
+								} else {
 									this@MainActivity.finish()
 								}
 							}

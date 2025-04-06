@@ -246,4 +246,5 @@
 	<string name="service_running_error">service not running error</string>
     <string name="inactive">Inactive</string>
 	<string name="active">Active</string>
+	<string name="status">Status</string>
 </resources>

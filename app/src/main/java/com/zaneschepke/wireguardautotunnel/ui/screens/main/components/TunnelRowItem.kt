@@ -60,20 +60,21 @@ fun TunnelRowItem(
 	val isTv = context.isRunningOnTv()
 
 	val leadingIconColor = if (!isActive) Color.Gray else tunnelState.statistics.asColor()
-	val leadingIcon = when {
-		tunnel.isPrimaryTunnel -> Icons.Rounded.Star
-		tunnel.isMobileDataTunnel -> Icons.Rounded.Smartphone
-		tunnel.isEthernetTunnel -> Icons.Rounded.SettingsEthernet
-		else -> Icons.Rounded.Circle
+
+	val (leadingIcon, size) = when {
+		tunnel.isPrimaryTunnel -> Pair(Icons.Rounded.Star, 16.dp)
+		tunnel.isMobileDataTunnel -> Pair(Icons.Rounded.Smartphone, 16.dp)
+		tunnel.isEthernetTunnel -> Pair(Icons.Rounded.SettingsEthernet, 16.dp)
+		else -> Pair(Icons.Rounded.Circle, 14.dp)
 	}
 
 	ExpandingRowListItem(
 		leading = {
 			Icon(
 				leadingIcon,
-				leadingIcon.name,
+				stringResource(R.string.status),
 				tint = leadingIconColor,
-				modifier = Modifier.size(16.dp),
+				modifier = Modifier.size(size),
 			)
 		},
 		text = tunnel.tunName,
