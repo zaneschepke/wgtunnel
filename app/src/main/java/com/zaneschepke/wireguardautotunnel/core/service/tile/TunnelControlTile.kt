@@ -59,12 +59,12 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 		}
 	}
 
-	private fun updateTileState() = lifecycleScope.launch {
+	private suspend fun updateTileState() {
 		try {
 			val tunnels = appDataRepository.tunnels.getAll()
 			if (tunnels.isEmpty()) {
 				setUnavailable()
-				return@launch
+				return
 			}
 
 			val activeTunnels = tunnelManager.activeTunnels.value

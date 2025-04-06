@@ -107,9 +107,10 @@ class TunnelModule {
 	fun provideServiceManager(
 		@ApplicationContext context: Context,
 		@IoDispatcher ioDispatcher: CoroutineDispatcher,
+		@MainDispatcher mainCoroutineDispatcher: CoroutineDispatcher,
 		@ApplicationScope applicationScope: CoroutineScope,
 		appDataRepository: AppDataRepository,
 	): ServiceManager {
-		return ServiceManager(context, ioDispatcher, applicationScope, appDataRepository)
+		return ServiceManager(context, ioDispatcher, applicationScope, mainCoroutineDispatcher, appDataRepository)
 	}
 }

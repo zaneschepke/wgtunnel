@@ -37,19 +37,18 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
 
 	override fun onStartListening() {
 		super.onStartListening()
-		Timber.d("Start listening called for auto tunnel tile")
 		lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+		Timber.d("Start listening called for auto tunnel tile")
 		lifecycleScope.launch {
 			serviceManager.autoTunnelActive.collect {
-				if (it) setActive() else setInactive()
+				if (it) return@collect setActive()
+				setInactive()
 			}
 		}
 		lifecycleScope.launch {
 			appDataRepository.tunnels.flow.collect {
 				if (it.isEmpty()) {
 					setUnavailable()
-				} else {
-					if (qsTile.state == Tile.STATE_ACTIVE) setInactive()
 				}
 			}
 		}
