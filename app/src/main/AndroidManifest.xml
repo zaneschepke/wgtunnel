@@ -20,6 +20,8 @@
 
 	<permission
 		android:name="${applicationId}.permission.CONTROL_TUNNELS"
+		android:label="@string/app_permission_title"
+		android:description="@string/app_permission_description"
 		android:icon="@mipmap/ic_launcher"
 		android:protectionLevel="dangerous" />
 
@@ -45,6 +47,7 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
+			<category android:name="android.intent.category.LAUNCHER" />
         </intent>
     </queries>
     <application
@@ -84,7 +87,7 @@
         <activity
             android:name=".core.shortcut.ShortcutsActivity"
             android:enabled="true"
-            android:exported="true"
+            android:exported="false"
 			android:noHistory="true"
 			android:excludeFromRecents="true"
 			android:finishOnTaskLaunch="true"
@@ -180,6 +183,17 @@
 			android:permission="${applicationId}.permission.CONTROL_TUNNELS">
 			<intent-filter>
 				<action android:name="com.wireguard.android.action.REFRESH_TUNNEL_STATES" />
+			</intent-filter>
+		</receiver>
+		<receiver
+			android:name=".core.broadcast.BridgeReceiver"
+			android:exported="true"
+			android:permission="${applicationId}.permission.CONTROL_TUNNELS">
+			<intent-filter>
+				<action android:name="${applicationId}.START_TUNNEL" />
+				<action android:name="${applicationId}.STOP_TUNNEL" />
+				<action android:name="${applicationId}.START_AUTO_TUNNEL" />
+				<action android:name="${applicationId}.STOP_AUTO_TUNNEL" />
 			</intent-filter>
 		</receiver>
 		<receiver

@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">WG Tunnel</string>
+	<string name="app_permission_title">WG Tunnel Control Bridge</string>
+	<string name="app_permission_description">Control tunnels and auto-tunnel features.</string>
     <string name="vpn_channel_id" translatable="false">VPN Channel</string>
     <string name="vpn_channel_name">VPN Notification Channel</string>
 	<string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
