@@ -11,7 +11,6 @@ import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.extensions.asTunnelState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -77,19 +76,20 @@ abstract class BaseTunnel(
 		activeTunnels.value.forEach { (config, state) ->
 			if (state.status.isUpOrStarting()) {
 				stopTunnel(config)
-				delay(300)
 			}
 		}
 	}
 
 	private fun configureTunnelCallbacks(tunnelConf: TunnelConf) {
 		Timber.d("Configuring TunnelConf instance: ${tunnelConf.hashCode()}")
-
 		tunnelConf.setStateChangeCallback { state ->
-			Timber.d("State change callback triggered for tunnel ${tunnelConf.id}: ${tunnelConf.tunName} with state $state at ${System.currentTimeMillis()}")
-			when (state) {
-				is Tunnel.State -> applicationScope.launch { updateTunnelStatus(tunnelConf, state.asTunnelState()) }
-				is org.amnezia.awg.backend.Tunnel.State -> applicationScope.launch { updateTunnelStatus(tunnelConf, state.asTunnelState()) }
+			applicationScope.launch {
+				Timber.d("State change callback triggered for tunnel ${tunnelConf.id}: ${tunnelConf.tunName} with state $state at ${System.currentTimeMillis()}")
+				when (state) {
+					is Tunnel.State -> updateTunnelStatus(tunnelConf, state.asTunnelState())
+					is org.amnezia.awg.backend.Tunnel.State -> updateTunnelStatus(tunnelConf, state.asTunnelState())
+				}
+				handleServiceChangesOnStop()
 			}
 			serviceManager.updateTunnelTile()
 		}
@@ -157,7 +157,6 @@ abstract class BaseTunnel(
 		stopBackend(tunnel)
 		saveTunnelActiveState(tunnelConf, false)
 		removeActiveTunnel(tunnel)
-		handleServiceChangesOnStop()
 	}
 
 	private suspend fun handleServiceChangesOnStop() {
