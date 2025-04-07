@@ -3,7 +3,6 @@ package com.zaneschepke.wireguardautotunnel.core.tunnel
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendError
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
@@ -11,7 +10,6 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.extensions.asTunnelState
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
 abstract class BaseTunnel(
-	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	@ApplicationScope private val applicationScope: CoroutineScope,
 	private val appDataRepository: AppDataRepository,
 	private val serviceManager: ServiceManager,
@@ -60,6 +57,7 @@ abstract class BaseTunnel(
 				val newState = state ?: existingState.status
 				if (newState == TunnelStatus.Down) {
 					Timber.d("Removing tunnel ${tunnelConf.id} from activeTunnels as state is DOWN")
+					cleanUpTunThread(tunnelConf)
 					current - originalConf
 				} else if (existingState.status == newState && stats == null) {
 					Timber.d("Skipping redundant state update for ${tunnelConf.id}: $newState")
@@ -144,9 +142,7 @@ abstract class BaseTunnel(
 		if (tunnelConf == null) return stopActiveTunnels()
 		tunMutex.withLock {
 			try {
-				val stuckStarting = activeTuns.isStarting(tunnelConf.id)
-				handleTunnelThreadCleanup(tunnelConf)
-				if (stuckStarting) return Timber.d("Stuck in starting, so just shutting down tunnel thread")
+				if (activeTuns.isStarting(tunnelConf.id)) return handleStuckStartingTunnelShutdown(tunnelConf)
 				updateTunnelStatus(tunnelConf, TunnelStatus.Stopping(reason))
 				stopTunnelInner(tunnelConf)
 			} catch (e: BackendError) {
@@ -168,8 +164,8 @@ abstract class BaseTunnel(
 		if (activeTuns.value.isEmpty() && !isBouncing.get()) return serviceManager.stopTunnelForegroundService()
 	}
 
-	private suspend fun handleTunnelThreadCleanup(tunnel: TunnelConf) {
-		Timber.d("Cleaning up thread for ${tunnel.name}")
+	private suspend fun handleStuckStartingTunnelShutdown(tunnel: TunnelConf) {
+		Timber.d("Stuck in starting state so shutting down tunnel thread for tunnel ${tunnel.name}")
 		try {
 			tunThreads[tunnel.id]?.let {
 				if (it.state != Thread.State.TERMINATED) {
@@ -182,6 +178,10 @@ abstract class BaseTunnel(
 		} catch (e: Exception) {
 			Timber.e(e, "Failed to stop tunnel thread for ${tunnel.name}")
 		}
+		cleanUpTunThread(tunnel)
+	}
+
+	private fun cleanUpTunThread(tunnel: TunnelConf) {
 		Timber.d("Removing thread for ${tunnel.name}")
 		tunThreads -= tunnel.id
 	}

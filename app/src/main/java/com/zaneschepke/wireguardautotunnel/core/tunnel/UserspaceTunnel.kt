@@ -2,7 +2,6 @@ package com.zaneschepke.wireguardautotunnel.core.tunnel
 
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
-import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
@@ -12,7 +11,6 @@ import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.extensions.asAmBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.asBackendState
 import com.zaneschepke.wireguardautotunnel.util.extensions.toBackendError
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import org.amnezia.awg.backend.Backend
 import org.amnezia.awg.backend.BackendException
@@ -23,12 +21,11 @@ import javax.inject.Inject
 import kotlin.jvm.optionals.getOrNull
 
 class UserspaceTunnel @Inject constructor(
-	@IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 	@ApplicationScope private val applicationScope: CoroutineScope,
 	val serviceManager: ServiceManager,
 	val appDataRepository: AppDataRepository,
 	private val backend: Backend,
-) : BaseTunnel(ioDispatcher, applicationScope, appDataRepository, serviceManager) {
+) : BaseTunnel(applicationScope, appDataRepository, serviceManager) {
 
 	private var previousBackendState: Pair<BackendState, Boolean>? = null
 

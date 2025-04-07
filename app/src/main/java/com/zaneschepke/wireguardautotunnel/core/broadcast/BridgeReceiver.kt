@@ -32,7 +32,8 @@ class BridgeReceiver : BroadcastReceiver() {
 		START_TUNNEL("START_TUNNEL"),
 		STOP_TUNNEL("STOP_TUNNEL"),
 		START_AUTO_TUNNEL("START_AUTO_TUNNEL"),
-		STOP_AUTO_TUNNEL("STOP_AUTO_TUNNEL");
+		STOP_AUTO_TUNNEL("STOP_AUTO_TUNNEL"),
+		;
 
 		fun getFullAction(context: Context): String {
 			return context.packageName + "." + suffix
@@ -54,7 +55,7 @@ class BridgeReceiver : BroadcastReceiver() {
 		val action = intent.action ?: return
 		val appAction = Action.fromAction(context, action) ?: return
 		applicationScope.launch {
-			when(appAction) {
+			when (appAction) {
 				Action.START_TUNNEL -> {
 					val tunnelName = intent.getStringExtra(EXTRA) ?: return@launch startDefaultTunnel()
 					val tunnel = appDataRepository.tunnels.findByTunnelName(tunnelName) ?: return@launch startDefaultTunnel()

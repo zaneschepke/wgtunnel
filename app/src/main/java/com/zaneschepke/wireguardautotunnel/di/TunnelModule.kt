@@ -62,26 +62,24 @@ class TunnelModule {
 	@Singleton
 	@Kernel
 	fun provideKernelProvider(
-		@IoDispatcher ioDispatcher: CoroutineDispatcher,
 		@ApplicationScope applicationScope: CoroutineScope,
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
 		backend: com.wireguard.android.backend.Backend,
 	): TunnelProvider {
-		return KernelTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, backend)
+		return KernelTunnel(applicationScope, serviceManager, appDataRepository, backend)
 	}
 
 	@Provides
 	@Singleton
 	@Userspace
 	fun provideUserspaceProvider(
-		@IoDispatcher ioDispatcher: CoroutineDispatcher,
 		@ApplicationScope applicationScope: CoroutineScope,
 		serviceManager: ServiceManager,
 		appDataRepository: AppDataRepository,
 		backend: Backend,
 	): TunnelProvider {
-		return UserspaceTunnel(ioDispatcher, applicationScope, serviceManager, appDataRepository, backend)
+		return UserspaceTunnel(applicationScope, serviceManager, appDataRepository, backend)
 	}
 
 	@Provides
