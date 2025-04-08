@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,8 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.networkmonitor.NetworkStatus
@@ -46,6 +49,7 @@ fun WifiTunnelingItems(
 	isWifiNameReadable: () -> Boolean,
 ): List<SelectionItem> {
 	val context = LocalContext.current
+	val clipboard = LocalClipboardManager.current
 
 	val baseItems = listOf(
 		SelectionItem(
@@ -76,6 +80,9 @@ fun WifiTunnelingItems(
 					style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline),
 					maxLines = 1,
 					overflow = TextOverflow.Ellipsis,
+					modifier = Modifier.clickable {
+						wifiName?.let { clipboard.setText(AnnotatedString(it)) }
+					},
 				)
 			},
 			onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi) },
