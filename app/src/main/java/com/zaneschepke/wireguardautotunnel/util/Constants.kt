@@ -1,8 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.util
 
 object Constants {
+
+	const val BASE_PACKAGE = "com.zaneschepke.wireguardautotunnel"
+
 	const val BASE_LOG_FILE_NAME = "wg_tunnel_logs"
-	const val LOG_BUFFER_SIZE = 10_000L
 
 	const val MANUAL_TUNNEL_CONFIG_ID = 0
 	const val BATTERY_SAVER_WATCHER_WAKE_LOCK_TIMEOUT = 10 * 60 * 1_000L // 10 minutes

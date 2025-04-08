@@ -240,6 +240,7 @@
 	<string name="export_failed">Export failed</string>
 	<string name="tunnel_error_template">Tunnel failed with: %1$s</string>
 	<string name="wifi_name_template">Active: %1$s</string>
+	<string name="remote_key_template">Key: %1$s</string>
 	<string name="config_error">config error</string>
 	<string name="dns_resolve_error">dns resolution error</string>
 	<string name="invalid_config_error">invalid_config_error</string>
@@ -255,4 +256,5 @@
 	<string name="bio_not_created">Biometrics not created</string>
 	<string name="bio_update_required">Biometric security update required</string>
 	<string name="tunnel_starting">Tunnel starting</string>
+	<string name="enable_remote_app_control">Enable remote app control</string>
 </resources>

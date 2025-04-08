@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.DataStoreManager
 import com.zaneschepke.wireguardautotunnel.data.model.GeneralState
+import com.zaneschepke.wireguardautotunnel.domain.entity.AppState
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
@@ -78,7 +79,23 @@ class DataStoreAppStateRepository(
 		return dataStoreManager.getFromStore(DataStoreManager.locale)
 	}
 
-	override val flow: Flow<GeneralState> =
+	override suspend fun setIsRemoteControlEnabled(enabled: Boolean) {
+		dataStoreManager.saveToDataStore(DataStoreManager.isRemoteControlEnabled, enabled)
+	}
+
+	override suspend fun isRemoteControlEnabled(): Boolean {
+		return dataStoreManager.getFromStore(DataStoreManager.isRemoteControlEnabled) ?: GeneralState.IS_REMOTE_CONTROL_ENABLED
+	}
+
+	override suspend fun setRemoteKey(key: String) {
+		dataStoreManager.saveToDataStore(DataStoreManager.remoteKey, key)
+	}
+
+	override suspend fun getRemoteKey(): String? {
+		return dataStoreManager.getFromStore(DataStoreManager.remoteKey)
+	}
+
+	override val flow: Flow<AppState> =
 		dataStoreManager.preferencesFlow.map { prefs ->
 			prefs?.let { pref ->
 				try {
@@ -94,6 +111,8 @@ class DataStoreAppStateRepository(
 							?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
 						isTunnelStatsExpanded = pref[DataStoreManager.tunnelStatsExpanded] ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
 						isLocalLogsEnabled = pref[DataStoreManager.isLocalLogsEnabled] ?: GeneralState.IS_LOGS_ENABLED_DEFAULT,
+						isRemoteControlEnabled = pref[DataStoreManager.isRemoteControlEnabled] ?: GeneralState.IS_REMOTE_CONTROL_ENABLED,
+						remoteKey = pref[DataStoreManager.remoteKey],
 						locale = pref[DataStoreManager.locale],
 						theme = getTheme(),
 					)
@@ -102,5 +121,5 @@ class DataStoreAppStateRepository(
 					GeneralState()
 				}
 			} ?: GeneralState()
-		}
+		}.map { it.toAppState() }
 }

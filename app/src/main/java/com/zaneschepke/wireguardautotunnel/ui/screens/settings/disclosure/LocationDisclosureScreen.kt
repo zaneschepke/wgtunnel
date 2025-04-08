@@ -25,7 +25,7 @@ fun LocationDisclosureScreen(appUiState: AppUiState, viewModel: AppViewModel) {
 	val navController = LocalNavController.current
 
 	LaunchedEffect(Unit, appUiState) {
-		if (appUiState.generalState.isLocationDisclosureShown) navController.goFromRoot(Route.AutoTunnel)
+		if (appUiState.appState.isLocationDisclosureShown) navController.goFromRoot(Route.AutoTunnel)
 	}
 
 	Column(

@@ -41,7 +41,6 @@ fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
 					Row(
 						verticalAlignment = Alignment.CenterVertically,
 						modifier = Modifier
-							.padding(start = 16.dp)
 							.weight(4f, false)
 							.fillMaxWidth(),
 					) {
@@ -71,7 +70,7 @@ fun SurfaceSelectionGroupButton(items: List<SelectionItem>) {
 						Box(
 							contentAlignment = Alignment.CenterEnd,
 							modifier = Modifier
-								.padding(end = 24.dp, start = 16.dp)
+								.padding(start = 16.dp)
 								.weight(1f),
 						) {
 							it()

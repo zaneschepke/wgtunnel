@@ -33,22 +33,22 @@ fun DisplayScreen(appUiState: AppUiState, viewModel: AppViewModel) {
 			onClick = {
 				viewModel.handleEvent(AppEvent.SetTheme(Theme.AUTOMATIC))
 			},
-			selected = appUiState.generalState.theme == Theme.AUTOMATIC,
+			selected = appUiState.appState.theme == Theme.AUTOMATIC,
 		)
 		IconSurfaceButton(
 			title = stringResource(R.string.light),
 			onClick = { viewModel.handleEvent(AppEvent.SetTheme(Theme.LIGHT)) },
-			selected = appUiState.generalState.theme == Theme.LIGHT,
+			selected = appUiState.appState.theme == Theme.LIGHT,
 		)
 		IconSurfaceButton(
 			title = stringResource(R.string.dark),
 			onClick = { viewModel.handleEvent(AppEvent.SetTheme(Theme.DARK)) },
-			selected = appUiState.generalState.theme == Theme.DARK,
+			selected = appUiState.appState.theme == Theme.DARK,
 		)
 		IconSurfaceButton(
 			title = stringResource(R.string.dynamic),
 			onClick = { viewModel.handleEvent(AppEvent.SetTheme(Theme.DYNAMIC)) },
-			selected = appUiState.generalState.theme == Theme.DYNAMIC,
+			selected = appUiState.appState.theme == Theme.DYNAMIC,
 		)
 	}
 }

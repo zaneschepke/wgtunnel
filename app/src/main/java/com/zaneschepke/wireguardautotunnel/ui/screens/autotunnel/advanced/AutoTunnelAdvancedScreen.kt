@@ -10,16 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.components.DebounceDelaySelector
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
-fun AdvancedScreen(appUiState: AppUiState) {
-	val appViewModel: AppViewModel = hiltViewModel()
-
+fun AutoTunnelAdvancedScreen(appUiState: AppUiState, viewModel: AppViewModel) {
 	Column(
 		horizontalAlignment = Alignment.Start,
 		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
@@ -31,7 +28,7 @@ fun AdvancedScreen(appUiState: AppUiState) {
 	) {
 		DebounceDelaySelector(
 			currentDelay = appUiState.appSettings.debounceDelaySeconds,
-			onEvent = appViewModel::handleEvent,
+			onEvent = viewModel::handleEvent,
 		)
 	}
 }

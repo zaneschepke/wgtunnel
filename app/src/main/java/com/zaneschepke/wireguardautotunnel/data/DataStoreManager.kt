@@ -30,6 +30,8 @@ class DataStoreManager(
 		val isLocalLogsEnabled = booleanPreferencesKey("LOCAL_LOGS_ENABLED")
 		val locale = stringPreferencesKey("LOCALE")
 		val theme = stringPreferencesKey("THEME")
+		val isRemoteControlEnabled = booleanPreferencesKey("IS_REMOTE_CONTROL_ENABLED")
+		val remoteKey = stringPreferencesKey("REMOTE_KEY")
 	}
 
 	// preferences

@@ -14,11 +14,11 @@ import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.shortcut.ShortcutManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
-import com.zaneschepke.wireguardautotunnel.data.model.GeneralState
 import com.zaneschepke.wireguardautotunnel.di.AppShell
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.di.MainDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
+import com.zaneschepke.wireguardautotunnel.domain.entity.AppState
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
@@ -56,6 +56,7 @@ import timber.log.Timber
 import xyz.teamgravity.pin_lock_compose.PinManager
 import java.net.URL
 import java.time.Instant
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -99,7 +100,7 @@ constructor(
 		) { array ->
 			val settings = array[0] as AppSettings
 			val tunnels = array[1] as List<TunnelConf>
-			val generalState = array[2] as GeneralState
+			val generalState = array[2] as AppState
 			val activeTunnels = array[3] as Map<TunnelConf, TunnelState>
 			val autoTunnel = array[4] as Boolean
 			val network = array[5] as NetworkStatus
@@ -108,7 +109,7 @@ constructor(
 				appSettings = settings,
 				tunnels = tunnels,
 				activeTunnels = activeTunnels,
-				generalState = generalState,
+				appState = generalState,
 				isAutoTunnelActive = autoTunnel,
 				isAppLoaded = true,
 				networkStatus = network,
@@ -122,10 +123,10 @@ constructor(
 	init {
 		viewModelScope.launch(ioDispatcher) {
 			uiState.withFirstState { state ->
-				initPin(state.generalState.isPinLockEnabled)
+				initPin(state.appState.isPinLockEnabled)
 				handleKillSwitchChange(state.appSettings)
 				initServicesFromSavedState(state)
-				if (state.generalState.isLocalLogsEnabled) startCollectingLogs()
+				if (state.appState.isLocalLogsEnabled) startCollectingLogs()
 			}
 		}
 	}
@@ -133,7 +134,7 @@ constructor(
 	fun handleEvent(event: AppEvent) = viewModelScope.launch(ioDispatcher) {
 		uiState.withFirstState { state ->
 			when (event) {
-				AppEvent.ToggleLocalLogging -> handleToggleLocalLogging(state.generalState.isLocalLogsEnabled)
+				AppEvent.ToggleLocalLogging -> handleToggleLocalLogging(state.appState.isLocalLogsEnabled)
 				is AppEvent.SetDebounceDelay -> handleSetDebounceDelay(state.appSettings, event.delay)
 				is AppEvent.CopyTunnel -> handleCopyTunnel(event.tunnel, state.tunnels)
 				is AppEvent.DeleteTunnel -> handleDeleteTunnel(event.tunnel, state)
@@ -145,9 +146,9 @@ constructor(
 				is AppEvent.StartTunnel -> handleStartTunnel(event.tunnel, state.appSettings)
 				is AppEvent.StopTunnel -> handleStopTunnel(event.tunnel)
 				AppEvent.ToggleAutoTunnel -> handleToggleAutoTunnel(state)
-				AppEvent.ToggleTunnelStatsExpanded -> handleToggleExpandTunnelStats(state.generalState.isTunnelStatsExpanded)
+				AppEvent.ToggleTunnelStatsExpanded -> handleToggleExpandTunnelStats(state.appState.isTunnelStatsExpanded)
 				AppEvent.ToggleAlwaysOn -> handleToggleAlwaysOnVPN(state.appSettings)
-				AppEvent.TogglePinLock -> handlePinLockToggled(state.generalState.isPinLockEnabled)
+				AppEvent.TogglePinLock -> handlePinLockToggled(state.appState.isPinLockEnabled)
 				AppEvent.SetLocationDisclosureShown -> setLocationDisclosureShown()
 				is AppEvent.SetLocale -> handleLocaleChange(event.localeTag)
 				AppEvent.ToggleRestartAtBoot -> handleToggleRestartAtBoot(state.appSettings)
@@ -188,8 +189,15 @@ constructor(
 				is AppEvent.ShowMessage -> handleShowMessage(event.message)
 				is AppEvent.PopBackStack -> _appViewState.update { it.copy(popBackStack = event.pop) }
 				is AppEvent.ClearTunnelError -> tunnelManager.clearError(event.tunnel)
+				AppEvent.ToggleRemoteControl -> handleToggleRemoteControl(state.appState)
 			}
 		}
+	}
+
+	private suspend fun handleToggleRemoteControl(appState: AppState) {
+		val enabled = !appState.isRemoteControlEnabled
+		if (enabled) appDataRepository.appState.setRemoteKey(UUID.randomUUID().toString())
+		appDataRepository.appState.setIsRemoteControlEnabled(enabled)
 	}
 
 	private fun startCollectingLogs() {
@@ -290,7 +298,7 @@ constructor(
 					true,
 				)
 			}
-			if (!state.generalState.isBatteryOptimizationDisableShown) return@withLock requestBatteryPermission(true)
+			if (!state.appState.isBatteryOptimizationDisableShown) return@withLock requestBatteryPermission(true)
 			serviceManager.toggleAutoTunnel()
 		}
 	}

@@ -23,7 +23,7 @@ fun AutomaticLanguageItem(appUiState: AppUiState, viewModel: AppViewModel) {
 				viewModel.handleEvent(AppEvent.SetLocale(LocaleUtil.OPTION_PHONE_LANGUAGE))
 			},
 			trailing = {
-				with(appUiState.generalState.locale) {
+				with(appUiState.appState.locale) {
 					if (this == LocaleUtil.OPTION_PHONE_LANGUAGE || this == null) {
 						SelectedLabel()
 					}

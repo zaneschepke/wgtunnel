@@ -8,6 +8,8 @@ data class AppState(
 	val isPinLockEnabled: Boolean,
 	val isTunnelStatsExpanded: Boolean,
 	val isLocalLogsEnabled: Boolean,
+	val isRemoteControlEnabled: Boolean,
+	val remoteKey: String?,
 	val locale: String?,
 	val theme: Theme,
 )

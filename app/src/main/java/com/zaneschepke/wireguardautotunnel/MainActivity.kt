@@ -81,7 +81,8 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.Appear
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.display.DisplayScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.LanguageScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.AutoTunnelScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.AdvancedScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.AutoTunnelAdvancedScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.advanced.SettingsAdvancedScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSwitchScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -220,7 +221,7 @@ class MainActivity : AppCompatActivity() {
 			}
 
 			CompositionLocalProvider(LocalNavController provides navController) {
-				WireguardAutoTunnelTheme(theme = appUiState.generalState.theme) {
+				WireguardAutoTunnelTheme(theme = appUiState.appState.theme) {
 					VpnDeniedDialog(showVpnPermissionDialog, onDismiss = { showVpnPermissionDialog = false })
 
 					Scaffold(
@@ -263,7 +264,7 @@ class MainActivity : AppCompatActivity() {
 											route = Route.AutoTunnel,
 											icon = Icons.Rounded.Bolt,
 											onClick = {
-												val route = if (appUiState.generalState.isLocationDisclosureShown) Route.AutoTunnel else Route.LocationDisclosure
+												val route = if (appUiState.appState.isLocationDisclosureShown) Route.AutoTunnel else Route.LocationDisclosure
 												navController.goFromRoot(route)
 											},
 											active = appUiState.isAutoTunnelActive,
@@ -294,13 +295,16 @@ class MainActivity : AppCompatActivity() {
 						) {
 							NavHost(
 								navController,
-								startDestination = (if (appUiState.generalState.isPinLockEnabled) Route.Lock else Route.Main),
+								startDestination = (if (appUiState.appState.isPinLockEnabled) Route.Lock else Route.Main),
 							) {
 								composable<Route.Main> {
 									MainScreen(appUiState, appViewState, viewModel)
 								}
 								composable<Route.Settings> {
 									SettingsScreen(appUiState, appViewState, viewModel)
+								}
+								composable<Route.SettingsAdvanced> {
+									SettingsAdvancedScreen(appUiState, viewModel)
 								}
 								composable<Route.LocationDisclosure> {
 									LocationDisclosureScreen(appUiState, viewModel)
@@ -321,7 +325,7 @@ class MainActivity : AppCompatActivity() {
 									SupportScreen()
 								}
 								composable<Route.AutoTunnelAdvanced> {
-									AdvancedScreen(appUiState)
+									AutoTunnelAdvancedScreen(appUiState, viewModel)
 								}
 								composable<Route.Logs> {
 									LogsScreen(appViewState, viewModel)

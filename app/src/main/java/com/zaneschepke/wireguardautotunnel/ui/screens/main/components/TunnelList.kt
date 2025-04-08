@@ -64,7 +64,7 @@ fun TunnelList(
 			val tunnelState = activeTunnels.getValueById(tunnel.id) ?: TunnelState()
 			TunnelRowItem(
 				isActive = tunnelState.status.isUpOrStarting(),
-				expanded = appUiState.generalState.isTunnelStatsExpanded,
+				expanded = appUiState.appState.isTunnelStatsExpanded,
 				isSelected = selectedTunnel?.id == tunnel.id,
 				tunnel = tunnel,
 				tunnelState = tunnelState,

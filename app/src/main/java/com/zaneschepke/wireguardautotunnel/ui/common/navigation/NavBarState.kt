@@ -79,7 +79,7 @@ fun currentNavBackStackEntryAsNavBarState(
 					route = Route.AutoTunnel,
 				)
 			}
-			backStackEntry.isCurrentRoute(Route.AutoTunnelAdvanced::class) -> {
+			backStackEntry.isCurrentRoute(Route.AutoTunnelAdvanced::class) || backStackEntry.isCurrentRoute(Route.SettingsAdvanced::class) -> {
 				NavBarState(
 					showTop = true, showBottom = true,
 					{ Text(stringResource(R.string.advanced_settings)) },

@@ -7,14 +7,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 
 @Composable
-fun AdvancedSettingsItem(): SelectionItem {
-	val navController = LocalNavController.current
+fun AdvancedSettingsItem(onClick: () -> Unit): SelectionItem {
 	return SelectionItem(
 		leadingIcon = Icons.Outlined.Settings,
 		title = {
@@ -24,8 +21,8 @@ fun AdvancedSettingsItem(): SelectionItem {
 			)
 		},
 		trailing = {
-			ForwardButton { navController.navigate(Route.AutoTunnelAdvanced) }
+			ForwardButton { onClick() }
 		},
-		onClick = { navController.navigate(Route.AutoTunnelAdvanced) },
+		onClick = { onClick() },
 	)
 }

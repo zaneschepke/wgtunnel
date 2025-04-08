@@ -62,4 +62,5 @@ sealed class AppEvent {
 	data class SetSelectedTunnel(val tunnel: TunnelConf?) : AppEvent()
 	data object VpnPermissionRequested : AppEvent()
 	data class AppReadyCheck(val tunnels: List<TunnelConf>) : AppEvent()
+	data object ToggleRemoteControl : AppEvent()
 }

@@ -21,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.AdvancedSettingsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.NetworkTunnelingItems
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.WifiTunnelingItems
@@ -37,6 +39,7 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 @Composable
 fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
 	val context = LocalContext.current
+	val navController = LocalNavController.current
 	val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 	var currentText by remember { mutableStateOf("") }
 	var isBackgroundLocationGranted by remember { mutableStateOf(true) }
@@ -103,7 +106,7 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
 			items = NetworkTunnelingItems(uiState, viewModel),
 		)
 		SurfaceSelectionGroupButton(
-			items = listOf(AdvancedSettingsItem()),
+			items = listOf(AdvancedSettingsItem(onClick = { navController.navigate(Route.AutoTunnelAdvanced) })),
 		)
 	}
 }

@@ -30,9 +30,9 @@ class RoomTunnelRepository(
 		}
 	}
 
-	override suspend fun saveAll(tunnelConfs: List<TunnelConf>) {
+	override suspend fun saveAll(tunnelConfList: List<TunnelConf>) {
 		withContext(ioDispatcher) {
-			tunnelConfigDao.saveAll(tunnelConfs.map(TunnelConfig::from))
+			tunnelConfigDao.saveAll(tunnelConfList.map(TunnelConfig::from))
 		}
 	}
 

@@ -19,7 +19,7 @@ fun LocalLoggingItem(uiState: AppUiState, viewModel: AppViewModel): SelectionIte
 		description = { SelectionItemLabel(R.string.enable_local_logging, isDescription = true) },
 		trailing = {
 			ScaledSwitch(
-				checked = uiState.generalState.isLocalLogsEnabled,
+				checked = uiState.appState.isLocalLogsEnabled,
 				onClick = { viewModel.handleEvent(AppEvent.ToggleLocalLogging) },
 			)
 		},

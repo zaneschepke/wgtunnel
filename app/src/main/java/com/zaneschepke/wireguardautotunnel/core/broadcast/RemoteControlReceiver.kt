@@ -7,13 +7,15 @@ import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class BridgeReceiver : BroadcastReceiver() {
+class RemoteControlReceiver : BroadcastReceiver() {
 
 	@Inject
 	@ApplicationScope
@@ -35,14 +37,14 @@ class BridgeReceiver : BroadcastReceiver() {
 		STOP_AUTO_TUNNEL("STOP_AUTO_TUNNEL"),
 		;
 
-		fun getFullAction(context: Context): String {
-			return context.packageName + "." + suffix
+		fun getFullAction(): String {
+			return "${Constants.BASE_PACKAGE}.$suffix"
 		}
 
 		companion object {
-			fun fromAction(context: Context, action: String): Action? {
+			fun fromAction(action: String): Action? {
 				for (a in entries) {
-					if (a.getFullAction(context) == action) {
+					if (a.getFullAction() == action) {
 						return a
 					}
 				}
@@ -52,17 +54,21 @@ class BridgeReceiver : BroadcastReceiver() {
 	}
 
 	override fun onReceive(context: Context, intent: Intent) {
+		Timber.i("onReceive")
 		val action = intent.action ?: return
-		val appAction = Action.fromAction(context, action) ?: return
+		val appAction = Action.fromAction(action) ?: return Timber.w("Unknown action $action")
 		applicationScope.launch {
+			if (!appDataRepository.appState.isRemoteControlEnabled()) return@launch Timber.w("Remote control disabled")
+			val key = appDataRepository.appState.getRemoteKey() ?: return@launch Timber.w("Remote control key missing")
+			if (key != intent.getStringExtra(EXTRA_KEY)?.trim()) return@launch Timber.w("Invalid remote control key")
 			when (appAction) {
 				Action.START_TUNNEL -> {
-					val tunnelName = intent.getStringExtra(EXTRA) ?: return@launch startDefaultTunnel()
+					val tunnelName = intent.getStringExtra(EXTRA_TUN_NAME) ?: return@launch startDefaultTunnel()
 					val tunnel = appDataRepository.tunnels.findByTunnelName(tunnelName) ?: return@launch startDefaultTunnel()
 					tunnelManager.startTunnel(tunnel)
 				}
 				Action.STOP_TUNNEL -> {
-					val tunnelName = intent.getStringExtra(EXTRA) ?: return@launch tunnelManager.stopTunnel()
+					val tunnelName = intent.getStringExtra(EXTRA_TUN_NAME) ?: return@launch tunnelManager.stopTunnel()
 					val tunnel = appDataRepository.tunnels.findByTunnelName(tunnelName) ?: return@launch tunnelManager.stopTunnel()
 					tunnelManager.stopTunnel(tunnel)
 				}
@@ -79,6 +85,7 @@ class BridgeReceiver : BroadcastReceiver() {
 	}
 
 	companion object {
-		const val EXTRA = "name"
+		const val EXTRA_TUN_NAME = "tunnelName"
+		const val EXTRA_KEY = "key"
 	}
 }

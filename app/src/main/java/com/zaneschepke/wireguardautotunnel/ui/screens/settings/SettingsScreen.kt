@@ -15,7 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.AdvancedSettingsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AlwaysOnVpnItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AppShortcutsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AppearanceItem
@@ -36,6 +39,7 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: AppViewModel) {
 	val context = LocalContext.current
 	val focusManager = LocalFocusManager.current
+	val navController = LocalNavController.current
 	val isRunningOnTv = remember { context.isRunningOnTv() }
 	val interactionSource = remember { MutableInteractionSource() }
 
@@ -76,7 +80,7 @@ fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: A
 			items = buildList {
 				add(AppearanceItem())
 				add(LocalLoggingItem(uiState, viewModel))
-				if (uiState.generalState.isLocalLogsEnabled) add(ReadLogsItem())
+				if (uiState.appState.isLocalLogsEnabled) add(ReadLogsItem())
 				add(PinLockItem(uiState, viewModel))
 			},
 		)
@@ -85,5 +89,8 @@ fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: A
 				items = listOf(KernelModeItem(uiState, viewModel)),
 			)
 		}
+		SurfaceSelectionGroupButton(
+			items = listOf(AdvancedSettingsItem(onClick = { navController.navigate(Route.SettingsAdvanced) })),
+		)
 	}
 }

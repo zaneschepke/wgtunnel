@@ -24,7 +24,7 @@ fun LanguageItem(locale: Locale, appUiState: AppUiState, viewModel: AppViewModel
 			viewModel.handleEvent(AppEvent.SetLocale(locale.toLanguageTag()))
 		},
 		trailing = {
-			if (locale.toLanguageTag() == appUiState.generalState.locale) {
+			if (locale.toLanguageTag() == appUiState.appState.locale) {
 				SelectedLabel()
 			}
 		},

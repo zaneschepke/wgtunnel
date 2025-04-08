@@ -164,16 +164,17 @@
 				<action android:name="android.net.VpnService" />
 			</intent-filter>
 		</service>
-
         <receiver
             android:name=".core.broadcast.RestartReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false"
+			android:directBootAware="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+				<action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
 				<action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
@@ -185,15 +186,18 @@
 				<action android:name="com.wireguard.android.action.REFRESH_TUNNEL_STATES" />
 			</intent-filter>
 		</receiver>
+		<!--custom security solution for easier user integration-->
 		<receiver
-			android:name=".core.broadcast.BridgeReceiver"
-			android:exported="true"
-			android:permission="${applicationId}.permission.CONTROL_TUNNELS">
+			android:name=".core.broadcast.RemoteControlReceiver"
+			android:enabled="true"
+			android:exported="true" tools:ignore="ExportedReceiver">
 			<intent-filter>
-				<action android:name="${applicationId}.START_TUNNEL" />
-				<action android:name="${applicationId}.STOP_TUNNEL" />
-				<action android:name="${applicationId}.START_AUTO_TUNNEL" />
-				<action android:name="${applicationId}.STOP_AUTO_TUNNEL" />
+				<action android:name="com.zaneschepke.wireguardautotunnel.START_TUNNEL" />
+				<action android:name="com.zaneschepke.wireguardautotunnel.STOP_TUNNEL" />
+				<action android:name="com.zaneschepke.wireguardautotunnel.START_AUTO_TUNNEL" />
+				<action android:name="com.zaneschepke.wireguardautotunnel.STOP_AUTO_TUNNEL" />
+				<action android:name="com.zaneschepke.wireguardautotunnel.START_KILL_SWITCH" />
+				<action android:name="com.zaneschepke.wireguardautotunnel.STOP_KILL_SWITCH" />
 			</intent-filter>
 		</receiver>
 		<receiver

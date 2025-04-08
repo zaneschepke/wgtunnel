@@ -23,7 +23,7 @@ fun PinLockItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
 	val context = LocalContext.current
 
 	fun onPinLockToggle() {
-		if (uiState.generalState.isPinLockEnabled) {
+		if (uiState.appState.isPinLockEnabled) {
 			viewModel.handleEvent(AppEvent.TogglePinLock)
 		} else {
 			PinManager.initialize(context)
@@ -41,7 +41,7 @@ fun PinLockItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
 		},
 		trailing = {
 			ScaledSwitch(
-				checked = uiState.generalState.isPinLockEnabled,
+				checked = uiState.appState.isPinLockEnabled,
 				onClick = { onPinLockToggle() },
 			)
 		},
