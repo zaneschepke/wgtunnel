@@ -1,0 +1,5 @@
+Co nowego:
+- Naprawa regresji autotunelowania
+- Ulepszenia kafelka synchronizacji 
+- Optymalizacja zapytań o nazwy Wi-Fi
+- Ulepszone sprawdzanie uprawnień monitorowania sieci
