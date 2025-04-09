@@ -1,8 +1,9 @@
 name: on-publish
 
 on:
-  repository_dispatch:
-    types: [ publish-release ]
+  release:
+    types: [ published ]
+
 
 jobs:
   on-publish:
