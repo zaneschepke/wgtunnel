@@ -147,13 +147,11 @@
     <string name="donate">Fürs Projekt spenden</string>
     <string name="local_logging">Lokales Logging</string>
     <string name="enable_local_logging">Lokales Logging aktivieren</string>
-    <string name="configuration_change">Konfigurationsänderung</string>
     <string name="add_from_clipboard">Aus Zwischenablage einfügen</string>
     <string name="kill_switch">Kill Switch</string>
     <string name="automatic">Automatisch</string>
     <string name="language">Sprache</string>
     <string name="display_theme">Anzeigetheme</string>
-    <string name="on_demand_rules">Regeln für Tunnel bei Bedarf</string>
     <string name="launch_app_settings">App Einstellungen aufrufen</string>
     <string name="primary_tunnel">Primärer Tunnel</string>
     <string name="mobile_tunnel">Mobiler Daten-Tunnel</string>
@@ -200,9 +198,6 @@
     <string name="export_wireguard">Als WireGuard exportieren</string>
     <string name="server_ipv4">IPv4 Hostnamensauflösung</string>
     <string name="prefer_ipv4">IPv4 Verbindung bevorzugen</string>
-    <string name="dns_error">Fehler bei Endpunkt DNS Auflösung.</string>
     <string name="start_failed_config">Starten des Tunnels wegen Konfigfehler fehlgeschlagen.</string>
-    <string name="unauthorized">Starten des Tunnels fehlgeschlagen, unberechtigt.</string>
-    <string name="tunne_start_failed_title">Tunnelfehler</string>
     <string name="multiple">Mehrere</string>
 </resources>

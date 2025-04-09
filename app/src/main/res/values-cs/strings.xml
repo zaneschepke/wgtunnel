@@ -15,7 +15,6 @@
     <string name="endpoint">Koncový bod</string>
     <string name="always_on_vpn_support">Povolit trvalé připojení VPN</string>
     <string name="location_services_not_detected">Služby polohy nebyly detekovány</string>
-    <string name="hint_search_packages">Hledat balíčky</string>
     <string name="vpn_on">VPN zapnuto</string>
     <string name="vpn_off">VPN vypnuto</string>
     <string name="create_import">Vytvořit od základu</string>
@@ -23,14 +22,12 @@
     <string name="comma_separated_list">seznam oddělený čárkami</string>
     <string name="random">(náhodné)</string>
     <string name="optional">(volitelné)</string>
-    <string name="optional_no_recommend">(volitelné, nedoporučeno)</string>
     <string name="preshared_key">Předsdílený klíč</string>
     <string name="seconds">vteřin(y)</string>
     <string name="cancel">Zrušit</string>
     <string name="error_authentication_failed">Autentizace selhala</string>
     <string name="error_authorization_failed">Nepovedlo se autorizovat</string>
     <string name="enabled_app_shortcuts">Zapnout zkratky</string>
-    <string name="export_configs">Exportovat konfigurace</string>
     <string name="unknown_error">Došlo k neznámé chybě</string>
     <string name="tunnel_on_wifi">Tunelovat na nedůvěryhodné Wi-Fi</string>
     <string name="email_subject">WG Tunnel podpora</string>
@@ -39,7 +36,6 @@
     <string name="error_ssid_exists">SSID již existuje</string>
     <string name="error_root_denied">Oprávnění root zamítnuto</string>
     <string name="error_no_file_explorer">Není nainstalován žádný průzkumník souborů</string>
-    <string name="error_invalid_code">Neplatný QR kód</string>
     <string name="auto_tunnel_title">Služba automatického tunelování</string>
     <string name="open_issue">Otevřít případ</string>
     <string name="incorrect_pin">PIN je nesprávný</string>
@@ -81,7 +77,6 @@
     <string name="delete_tunnel">Smazat tunel</string>
     <string name="delete_tunnel_message">Jste si jisti, že chcete smazat tento tunel?</string>
     <string name="yes">Ano</string>
-    <string name="tunneling_apps">Tunelování aplikací</string>
     <string name="all">vše</string>
     <string name="no_email_detected">Žádná emailová aplikace nebyla nalezena</string>
     <string name="no_browser_detected">Žádný prohlížeč nebyl nalezen</string>
@@ -134,8 +129,6 @@
     <string name="vpn_channel_description">Kanál pro oznámení o stavu VPN</string>
     <string name="bypass_lan_for_kill_switch">Obejít LAN pro kill switch</string>
     <string name="hide_scripts">Skrýt skripty</string>
-    <string name="enable_amnezia">Zapnout Amnezia</string>
-    <string name="amnezia_kernel_message">Amnezia není dostupná v kernel režimu</string>
     <string name="quick_actions">Rychlé akce</string>
     <string name="hide_amnezia_properties">Skrýt Amnezia vlastnosti</string>
     <string name="enable_amnezia_compatibility">Zapnout Amnezia kompatibilitu</string>
@@ -149,15 +142,12 @@
     <string name="trusted_wifi_names">Důvěryhodné názvy wifi</string>
     <string name="advanced_settings">Rozšířené nastavení</string>
     <string name="include_lan">Zahrnout LAN</string>
-    <string name="export_amnezia">Exportovat jako Amnezia</string>
-    <string name="export_wireguard">Exportovat jako WireGuard</string>
     <string name="add_wifi_name">Přidat název wifi</string>
     <string name="vpn_channel_name">Kanál pro oznámení VPN</string>
     <string name="tunnel_specific_settings">Specifické nastavení tunelu</string>
     <string name="show_scripts">Zobrazit skripty</string>
     <string name="splt_tunneling">Dělené tunelování</string>
     <string name="auto_tunnel_channel_description">Kanál pro oznámení o stavu auto-tunelu</string>
-    <string name="chat_description">Připojit se ke komunitě</string>
     <string name="transport_packet_magic_header">Transport packet magic header</string>
     <string name="underload_packet_magic_header">Underload packet magic header</string>
     <string name="peer">Peer</string>
@@ -170,12 +160,7 @@
     <string name="start_auto">Spustit auto-tunel</string>
     <string name="stop_auto">Zastavit auto-tunel</string>
     <string name="local_logging">Místní protokolování</string>
-    <string name="requires_app_relaunch">Tato změna vyžaduje opětovné spuštění aplikace. Chcete pokračovat?</string>
-    <string name="wg_compat_mode">Režim kompatibility WG</string>
-    <string name="error_tunnel_start">Nezdařilo se spustit tunel</string>
     <string name="learn_more">Zjistit více</string>
-    <string name="tunnel_required">Funkce vyžaduje alespoň jeden tunel</string>
     <string name="stop">zastavit</string>
     <string name="server_ipv4">Překlad názvu hostitele IPv4</string>
-    <string name="start_failed_config">Tunel se nepodařilo spustit kvůli chybě konfigurace.</string>
 </resources>
