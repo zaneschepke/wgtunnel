@@ -2,7 +2,7 @@ name: on-publish
 
 on:
   release:
-    types: [ published ]
+    types: [ released ]
 
 
 jobs:
@@ -18,4 +18,19 @@ jobs:
             ${{ github.event.release.body }}
             https://github.com/zaneschepke/wgtunnel/releases/tag/${{ github.event.release.tag_name }}'
           curl -s -X POST 'https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage' \
-          -d "chat_id=${{ secrets.TELEGRAM_TO }}&text=${msg_text}&message_thread_id=${{ secrets.TELEGRAM_TOPIC }}"
+          -d "chat_id=${{ secrets.TELEGRAM_TO }}&text=${msg_text}&message_thread_id=${{ vars.TELEGRAM_RELEASE_TOPIC }}"
+
+      - name: Send Matrix Message
+        run: |
+          msg_text='${{ github.actor }} published a new release:
+            Release: ${{ github.event.release.tag_name }}
+            ${{ github.event.release.body }}
+            https://github.com/zaneschepke/wgtunnel/releases/tag/${{ github.event.release.tag_name }}'
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.MATRIX_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "msgtype": "m.text",
+              "body": "'"$msg_text"'"
+            }' \
+            "https://matrix.yourserver.com/_matrix/client/v3/rooms/${{ vars.MATRIX_RELEASE_TOPIC }}/send/m.room.message/$(date +%s)"
