@@ -360,13 +360,6 @@ class MainActivity : AppCompatActivity() {
 									}
 								}
 							}
-							BackHandler {
-								if (navController.currentDestination?.route != Route.Main::class.qualifiedName) {
-									navController.popBackStack()
-								} else {
-									this@MainActivity.finish()
-								}
-							}
 						}
 					}
 				}
