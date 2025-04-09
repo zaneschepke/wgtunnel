@@ -1,5 +1,0 @@
-Novità:
-- Risolta regressione fermata tunnel
-- Aggiunta offuscazione log
-- Aggiunto nascondi FAB allo scorrimento
-- Aggiunta localizzazione turca

@@ -1,2 +1,0 @@
-Qué hay de nuevo:
-- Esta es una versión de prueba de CI

@@ -1,5 +1,0 @@
-Quoi de neuf :
-- Correction de la régression lors de l'arrêt du tunnel
-- Ajout de l’offuscation des logs
-- Ajout de l'option de masquage du bouton d'action flottant lors du défilement
-- Ajout de la localisation turque

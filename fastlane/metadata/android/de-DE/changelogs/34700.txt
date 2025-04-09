@@ -1,6 +1,0 @@
-Was ist Neu:
-- Abstürze behoben
-- Leistung der Kacheln verbessert
-- Reaktivieren von PIN-Sperren
-- "Beim Hochfahren starten" zur Einstellung gemacht
-- verschiedene Leistungsanpassungen und Bugs behoben

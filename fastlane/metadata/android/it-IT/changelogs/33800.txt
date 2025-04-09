@@ -1,4 +1,0 @@
-Novità:
-- Risolto problema modifica configurazione
-- Aggiunta notifica GrapheneOS al primo lancio AOVPN
-- Aggiornate versioni

@@ -1,5 +1,0 @@
-Novedades:
-- Interruptor de apagado VPN añadido con exclusión LAN
-- Velocidad y fiabilidad mejoradas del túnel automático
-- Sincronización de mosaicos mejorada
-- Varias correcciones de errores y mejoras

@@ -1,6 +1,0 @@
-Was ist neu?
-- VPN-Notschalter mit LAN-Bypass hinzugefügt
-- Verbesserte automatische Tunnelgeschwindigkeit und Zuverlässigkeit
-
-- Verbesserte Kachelsynchronisation
-- Verschiedene Fehlerbehebungen und Verbesserungen

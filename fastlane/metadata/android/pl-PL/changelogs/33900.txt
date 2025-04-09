@@ -1,5 +1,0 @@
-Co nowego:
-- Dodano ekran dzienników
-- Dodano blokadę aplikacji lokalnej
-- Dodano ponowne uruchomienie VPN w przypadku nieudanego pingowania
-- Różne poprawki błędów

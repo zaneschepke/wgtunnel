@@ -1,8 +1,0 @@
-Ulepszenia:
-- Refaktoryzacja zarządzania stanem
-- Poprawa nawigacji AndroidTV
-- Poprawa wydajności automatycznego tunelowania
-- Poprawa nawigacji
-- Funkcja pauzy automatycznego tunelowania
-- Naprawiono autotunelowanie uruchamiania pierwszego planu
-- Wiele poprawek błędów

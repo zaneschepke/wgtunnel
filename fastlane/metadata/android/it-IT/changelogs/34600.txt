@@ -1,4 +1,0 @@
-Novità:
-- Corretti problemi auto tunneling
-- Corretto problema backup android
-- Aggiornate versioni

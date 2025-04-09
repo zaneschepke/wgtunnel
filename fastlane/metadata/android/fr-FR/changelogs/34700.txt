@@ -1,6 +1,0 @@
-Quoi de neuf :
-- Correction des problèmes de crash
-- Amélioration des performances de la barre de réglages rapides
-- Réactivation du verrouillage par code PIN
-- La fonctionnalité du redémarrage au démarrage devient une option
-- Diverses améliorations des performances et corrections de bugs

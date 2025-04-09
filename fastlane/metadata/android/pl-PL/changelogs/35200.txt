@@ -1,6 +1,0 @@
-Co nowego:
-- Dodano obsługę symboli wieloznacznych dla nazw sieci Wi-Fi
-- Edycja na żywo ustawień tunelu/autotunelowania podczas aktywności
-- Naprawiono powolność danych mobilnych
-- Różne poprawki błędów i ulepszenia
-- Optymalizacje interfejsu użytkownika

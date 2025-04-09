@@ -1,7 +1,0 @@
-Améliorations :
-- Ajout d'une confirmation lors de la suppression d'un tunnel
-- Ajout de la permission d'usage de la batterie en arrière plan 
-Corrections  :
-- Bug de gel lors de la désactivation du tunnel
-- Bug du champ « À » dans l'email
-- Édition de la configuration avec champ DNS vide

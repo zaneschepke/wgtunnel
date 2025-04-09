@@ -1,7 +1,0 @@
-Peningkatan:
-- Menambahkan konfirmasi hapus tunnel
-- Menambahkan izin latar belakang baterai
-Perbaikan:
-- Tunnel menonaktifkan bug beku
-- Email ke bug lapangan
-- Konfigurasi edit DNS kosong

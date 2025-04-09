@@ -1,3 +1,0 @@
-Co nowego:
-- Dodano protokołu Amnezia obok protokołu WireGuard
-- Naprawiono błąd skrótów aplikacji

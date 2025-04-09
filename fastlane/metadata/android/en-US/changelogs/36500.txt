@@ -1,6 +1,0 @@
-What's new:
-- Auto tunnel reliability improvements
-- Split tunnel save fix and performance improvements
-- Kernel mode bug fix
-- Tile bug fix
-- Various other fixes and improvements

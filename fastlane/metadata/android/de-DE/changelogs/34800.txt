@@ -1,5 +1,0 @@
-Was ist neu:
-- Verbesserungen der Tunnelsteuerung in der AndroidTV Benutzeroberfläche
-- Fehler beim Sperren im Portrait-Modus behoben
-- Fehler welcher eine Umgehung der PIN-Sperre ermöglichte behoben
-- Fehler in der Auot-Tunnel Kachel behoben

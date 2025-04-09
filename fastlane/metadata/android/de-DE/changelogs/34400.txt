@@ -1,5 +1,0 @@
-Was ist neu:
-- Verbesserung der Benennung von Tunnel-Importen
-- Fehler des Anfangszustand beim Auto-Tunneln behoben
-- Verbesserte Fehlerhandhabung
-- Fehler beim Import von Amnezia zip behoben

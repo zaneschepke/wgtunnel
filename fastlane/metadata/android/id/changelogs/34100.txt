@@ -1,5 +1,0 @@
-Apa yang baru:
-- Peningkatan keandalan tunnel otomatis
-- Sinkronisasi kartu yang ditingkatkan
-- Menambahkan aset AndroidTV
-- Menambahkan sidik jari apk

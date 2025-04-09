@@ -1,5 +1,0 @@
-Peningkatan:
-- Menambahkan dukungan untuk tunnel otomatis hanya data seluler
-- Meningkatkan UI layar dukungan
-- Perbarui tautan sumber daya
-- Berbagai perbaikan bug lainnya

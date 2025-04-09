@@ -1,6 +1,0 @@
-Apa yang baru:
-- Menambahkan dukungan wildcard untuk nama wifi
-- Pengeditan langsung pengaturan tunnel/tunnel otomatis saat aktif
-- Memperbaiki kelambatan data seluler
-- Berbagai perbaikan dan peningkatan bug
-- Pengoptimalan UI

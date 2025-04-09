@@ -1,5 +1,0 @@
-Co nowego:
-- Poprawki dla tuneli, które nie uruchamiają się w tle
-- Dodano obsługę ponownego uruchamiania usług po aktualizacji
-- Poprawki szybkości animacji interfejsu użytkownika
-- Inne optymalizacje

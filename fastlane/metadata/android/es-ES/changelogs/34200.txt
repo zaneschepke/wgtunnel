@@ -1,5 +1,0 @@
-Novedades:
-- Corrección de la regresión del túnel de parada
-- Añadir ofuscación de registros
-- Añadir ocultar FAB en scroll
-- Añadir localización turca

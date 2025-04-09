@@ -1,7 +1,0 @@
-What's new:
-- கூட்டு tunnel இருந்து clipboard
-- கூட்டு localizations
-- Fix மின்கலம் drain bug
-- Fix நீக்கு bug
-- Improve tunnel tile sync
-- மற்றொன்று fixes and improvements

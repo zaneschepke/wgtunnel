@@ -1,2 +1,0 @@
-Novità:
-- Risolti problemi UI visualizzazione tunnel

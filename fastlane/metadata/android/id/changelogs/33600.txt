@@ -1,5 +1,0 @@
-Apa yang baru:
-- Meningkatkan alur peluncuran pertama
-- Beralih ke garpu lib wireguard
-- Minta izin VPN pada awal VPN pertama
-- Versi bump

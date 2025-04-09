@@ -1,2 +1,0 @@
-Apa yang baru:
-- Ini adalah versi pengujian CI

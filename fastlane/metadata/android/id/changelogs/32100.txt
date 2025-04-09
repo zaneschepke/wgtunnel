@@ -1,3 +1,0 @@
-Peningkatan:
-- Perbaikan < Android 9 bug perizinian
-- Optimisasi lainnya

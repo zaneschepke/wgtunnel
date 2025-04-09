@@ -1,2 +1,0 @@
-Novedades:
-- Corrección de errores en la interfaz de usuario de Tunnel

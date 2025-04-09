@@ -1,6 +1,0 @@
-Novità:
-- Aggiunto supporto a caratteri jolly per nomi wifi
-- Modifica live delle impostazioni del tunnel/auto-tunnel mentre attivo
-- Risolta lentezza su dati mobili
-- Varie risoluzioni di problemi e migliorie
-- Ottimizzazioni UI

@@ -1,3 +1,0 @@
-Vylepšení:
-- Oprava < Chyba v oprávnění Android 9
-- Další optimalizace

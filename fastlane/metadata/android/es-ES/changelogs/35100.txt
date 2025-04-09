@@ -1,5 +1,0 @@
-Lo nuevo:
-- Inicio de túneles en segundo plano corregido
-- Podibilidad de reiniciar los servicios tras una actualización
-- Mojorada la velocidad de las animaciones del UI
-- Otras mejoras

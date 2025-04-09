@@ -1,3 +1,0 @@
-Apa yang baru:
-- Tambahkan Amnezia secara berdampingan dengan WireGuard
-- Perbaiki bug pintasan aplikasi

@@ -1,5 +1,0 @@
-Quoi de neuf :
-- Corrections des problèmes de lancement des tunnels en arrière-plan
-- Prise en charge du redémarrage des services après une mise à jour
-- Améliorations de la vitesse des animations de l'interface utilisateur
-- Autres optimisations

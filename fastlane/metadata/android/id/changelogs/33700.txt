@@ -1,2 +1,0 @@
-Apa yang baru:
-- Perbaikan bug UI tampilan tunnel

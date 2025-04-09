@@ -1,3 +1,0 @@
-Quoi de neuf :
-- Ajout d'Amnezia en parallèle avec WireGuard
-- Correction du bug sur les raccourcis d'application

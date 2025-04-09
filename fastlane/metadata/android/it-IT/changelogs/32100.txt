@@ -1,3 +1,0 @@
-Migliorie:
-- Correzione bug permessi in < Android 9
-- Altre ottimizzazioni

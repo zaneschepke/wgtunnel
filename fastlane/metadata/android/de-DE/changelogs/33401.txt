@@ -1,2 +1,0 @@
-Was ist neu:
-- Dies ist eine CI Test version

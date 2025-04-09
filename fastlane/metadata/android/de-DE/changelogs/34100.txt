@@ -1,5 +1,0 @@
-Was ist neu:
-- Verbesserung der Auto-Tunnel Zuverlässigkeit
-- Verbesserung der Kachelsynchronisierung
-- AndroidTV Asset hinzugefügt
-- APK Fingerabdruck hinzugefügt

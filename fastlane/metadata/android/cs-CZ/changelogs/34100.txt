@@ -1,5 +1,0 @@
-Co je nového:
-- Vylepšená spolehlivost automatického tunelu
-- Vylepšená synchronizace dlaždic
-- Přidány AndroidTV assets
-- Přidán apk fingerprint

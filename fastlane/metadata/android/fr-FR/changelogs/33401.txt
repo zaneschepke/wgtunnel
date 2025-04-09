@@ -1,2 +1,0 @@
-Quoi de neuf :
-- Il s'agit d'une version de test pour l'intégration continue (CI)

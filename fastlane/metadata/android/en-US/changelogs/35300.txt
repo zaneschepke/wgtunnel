@@ -1,6 +1,0 @@
-What's new:
-- Rooted devices now get wifi name without location
-- Logs screen scroll and sharing improvements
-- Tunnel import bug fixes for AndroidTV 14
-- Tunnel statistics UI enhancements
-- Other bug fixes and improvements

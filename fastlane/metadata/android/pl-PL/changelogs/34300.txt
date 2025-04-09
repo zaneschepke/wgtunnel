@@ -1,6 +1,0 @@
-Co nowego:
-- Oficjalne wsparcie dla protokołu AmneziaWG
-- Importowanie i eksportowanie konfiguracji protokołu Amnezia
-- Autotunel umożliwiający przełączanie tylko raz przy każdej zmianie sieci
-- Obsługa dodatkowych języków
-- Inne poprawki błędów i ulepszenia

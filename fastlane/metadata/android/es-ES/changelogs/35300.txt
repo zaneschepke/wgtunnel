@@ -1,6 +1,0 @@
-Novedades:
-- Los dispositivos rooteados ahora obtienen el nombre wifi sin ubicación
-- Mejoras en la pantalla de desplazamiento y compartición de registros
-- Corrección de errores en la importación de túneles para AndroidTV 14
-- Mejoras en la interfaz de usuario de las estadísticas de túneles
-- Otras correcciones de errores y mejoras

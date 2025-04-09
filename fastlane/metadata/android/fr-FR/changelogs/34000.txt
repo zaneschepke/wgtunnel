@@ -1,5 +1,0 @@
-Quoi de neuf :
-- Tunnel automatique vers des tunnels spécifiques selon le nom du réseau Wi-Fi
-- Contrôle du tunnel automatique depuis les raccourcis de la barre de réglages rapides et les raccourcis
-- Démarrage automatique du tunnel manuel s'il était actif avant le redémarrage
-- Divers correctifs de bugs et amélioration des performances

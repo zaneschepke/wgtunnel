@@ -1,3 +1,0 @@
-Co je nového:
-- Přidána Amnezia side-to-side s WireGuard
-- Oprava chyby zkratek aplikací

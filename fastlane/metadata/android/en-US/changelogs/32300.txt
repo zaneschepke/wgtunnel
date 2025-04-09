@@ -1,5 +1,0 @@
-Enhancements:
-- Add support for mobile data only auto-tunneling
-- Improve support screen UI
-- Update resource links
-- Various other bug fixes

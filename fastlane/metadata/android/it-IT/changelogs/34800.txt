@@ -1,5 +1,0 @@
-Novità:
-- Correzioni per interfaccia controllo tunnel AndroidTV
-- Correzioni problema blocco verticale
-- Correzioni problema aggiramento blocco pin
-- Correzioni problema tile auto tunnel

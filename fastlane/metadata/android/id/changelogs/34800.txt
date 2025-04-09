@@ -1,5 +1,0 @@
-Apa yang baru:
-- Perbaikan untuk kontrol tunnel UI AndroidTV
-- Perbaikan bug kunci potret
-- Perbaikan bug bypass kunci pin
-- Perbaikan bug ubin tunnel otomatis

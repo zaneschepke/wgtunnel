@@ -1,6 +1,0 @@
-Co nowego:
-- Naprawiono problemy z awariami
-- Poprawiono wydajność kafelków
-- Ponownie włączono blokadę PIN
-- Ustawiono opcję ponownego uruchomienia przy rozruchu
-- Różne poprawki wydajności i błędów

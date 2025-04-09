@@ -1,5 +1,0 @@
-Was ist neu:
-- Verbesserung des ersten Starts
-- Wechsel zu Wireguard Bibliotheks Fork
-- Abfrage der VPN Berechtigung beim ersten VPN Start
-- Version angehoben

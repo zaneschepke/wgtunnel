@@ -1,5 +1,0 @@
-Verbesserungen:
-- Unterstützung für Auto-Tunneln nur bei Verwendung von Mobilen Daten
-- Verbesserungen der Support Oberfläche
-- Aktualisierung der Ressourcenlinks
-- Verschiedene andere Fehlerbehebungen

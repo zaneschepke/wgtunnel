@@ -1,5 +1,0 @@
-Quoi de neuf :
-- Corrections de l'interface utilisateur de contrôle du tunnel sur AndroidTV
-- Correction du bug de verrouillage en mode portrait
-- Correction du bug de contournement du verrouillage PIN
-- Correction du bug de la barre de réglages rapides lors de l'auto-tunnel

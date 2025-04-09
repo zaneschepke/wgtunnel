@@ -1,5 +1,0 @@
-Verbeteringen:
-- Ondersteuning van auto-tunneling alleen bij mobiele data;
-- Verbeterde opmaak van het ondersteuningsscherm;
-- Ge-updatete  links
-- Diverse andere bugfixes

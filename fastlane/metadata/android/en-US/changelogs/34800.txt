@@ -1,5 +1,0 @@
-What's new:
-- Fixes for AndroidTV UI tunnel control
-- Fixes portrait lock bug
-- Fixes pin lock bypass bug
-- Fixes auto tunnel tile bug

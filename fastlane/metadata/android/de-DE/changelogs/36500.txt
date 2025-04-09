@@ -1,6 +1,0 @@
-Was ist neu?
-- Verbesserungen der Zuverlässigkeit des automatischen Tunnels
-- Behebung von Problemen beim Speichern von geteilten Tunneln und Leistungsverbesserungen
-- Kernel-Modus-Fehler behoben
-- Kachel-Fehler behoben
-- Verschiedene andere Korrekturen und Verbesserungen

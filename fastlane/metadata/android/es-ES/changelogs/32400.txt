@@ -1,5 +1,0 @@
-Mejoras:
-- Añadida compatiblidad básica de Kernel WireGuard
-- Flujo de divulgación de ubicación mejorada
-- Corregido el fallo ede los persmisos del túnel automático
-- Correcciones y mejoras varias

@@ -1,7 +1,0 @@
-Améliorations :
-- Re-factorisation de la gestion d'état
-- Amélioration de la navigation sur AndroidTV
-- Optimisation de l'efficacité de l'auto-tunnel
-- Navigation améliorée
-- Fonction de pause pour l'auto-tunnel
-- Nombreux bugs résolus

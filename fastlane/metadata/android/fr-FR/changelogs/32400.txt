@@ -1,5 +1,0 @@
-Améliorations :
-- Ajout de la prise en charge simple pour le noyau WireGuard
-- Amélioration du flux de divulgation de l'emplacement
-- Correction des permissions du tunnel automatique
-- Diverses autres corrections de bugs sur l'interface utilisateur

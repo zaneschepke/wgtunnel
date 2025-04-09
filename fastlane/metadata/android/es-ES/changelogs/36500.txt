@@ -1,6 +1,0 @@
-Novedades:
-- Mejoras en la fiabilidad del túnel automático
-- Corrección de guardado de túnel dividido y mejoras de rendimiento
-- Corrección de errores en modo kernel
-- Corrección de errores en mosaicos
-- Otras correcciones y mejoras

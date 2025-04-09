@@ -1,5 +1,0 @@
-Was ist neu:
-- Log anzeige hinzugefügt
-- Lokale App Sperre hinzugefügt
-- Funktion für Neustart des Tunnels nach Fehlerhaftem Ping
-- Verschiedene Fehlerbehebungen

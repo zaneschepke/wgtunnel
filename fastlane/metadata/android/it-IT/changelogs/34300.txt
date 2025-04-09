@@ -1,6 +1,0 @@
-Novità:
-- Supporto ufficiale per AmneziaWG
-- Import/export per configurazioni Amenzia
-- Commutazione Auto-tunnel una volta sola al cambio rete
-- Supporto a lingue addizionali
-- Altri problemi risolti e migliorie
