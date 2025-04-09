@@ -4,7 +4,7 @@
     <string name="turn_off_tunnel">Actie vereist uitgeschakelde tunnel</string>
     <string name="tunnel_mobile_data">Tunnel bij mobiele data</string>
     <string name="app_name">WG Tunnel</string>
-	<string name="vpn_channel_name">VPN Notificatiekanaal</string>
+    <string name="vpn_channel_name">VPN Notificatiekanaal</string>
     <string name="tunnels">Tunnels</string>
     <string name="privacy_policy">Bekijk privacybeleid</string>
     <string name="tunnel_on_ethernet">Tunnel bij ethernet</string>
@@ -108,7 +108,7 @@
     <string name="always_on_message2">om zeker te zijn dat Altijd-aan VPN is uitgeschakeld voor alle andere apps, en probeer dan opnieuw</string>
     <string name="default_ping_ip">(optioneel, standaard op peers)</string>
     <string name="set_custom_ping_cooldown">Ping herstart afkoelperiode (sec)</string>
-    <string name="background_location_message2">om te controleren of toegang is verleend.</string>
+    <string name="background_location_message2">om te controleren of toegang is verleend</string>
     <string name="show_amnezia_properties">Amnezia instellingen weergeven</string>
     <string name="never">nooit</string>
     <string name="sec">sec</string>
@@ -128,4 +128,12 @@
     <string name="location_services_missing_message">De app kan geen ingeschakelde locatieservices op je apparaat vinden. Afhankelijk van het type apparaat kan dit leiden tot een niet functionerende herkenning van het verbonden WiFi netwerk. De niet-vertrouwde WiFi functionaliteit werkt daardoor mogelijk niet. Toch doorgaan?</string>
     <string name="background_location_message">Permanente achtergrondtoegang tot exacte locatie is vereist voor deze functie. Bekijk aub de</string>
     <string name="transport_packet_magic_header">Transport packet magic header</string>
+    <string name="kill_switch">Kill-switch</string>
+    <string name="appearance">Uiterlijk</string>
+    <string name="light">Licht</string>
+    <string name="dynamic">Dynamisch</string>
+    <string name="dark">Donker</string>
+    <string name="language">Taal</string>
+    <string name="automatic">Automatisch</string>
+    <string name="notifications">Meldingen</string>
 </resources>

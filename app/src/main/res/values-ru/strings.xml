@@ -201,7 +201,7 @@
     <string name="start_failed_config">Невозможно запустить туннель с ошибкой конфигурации.</string>
     <string name="unauthorized">Невозможно запустить туннель без авторизации.</string>
     <string name="tunne_start_failed_title">Ошибка туннеля</string>
-    <string name="server_ipv4">Получение имени узла IPv4</string>
+    <string name="server_ipv4">Получать имя узла IPv4</string>
     <string name="multiple">Несколько</string>
     <string name="export_amnezia">Экспортировать как Amnezia</string>
     <string name="export_wireguard">Экспортировать как WireGuard</string>

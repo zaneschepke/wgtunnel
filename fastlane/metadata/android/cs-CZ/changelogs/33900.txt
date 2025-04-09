@@ -1,0 +1,5 @@
+Co je nového:
+- Přidat obrazovku protokolů
+- Přidání místního zámku aplikace
+- Přidání restartu vpn při neúspěšném pingu
+- Opravy různých chyb
