@@ -47,7 +47,6 @@
     <string name="email_description">Lähetä minulle sähköpostia</string>
     <string name="error_ssid_exists">SSID on jo luettelossa</string>
     <string name="error_no_file_explorer">Tiedostonhallintasovellusta ei ole asennettuna</string>
-    <string name="error_invalid_code">Virheellinen QR-koodi</string>
     <string name="location_services_missing_message">Sovellus ei tunnista laitteessasi käytössä olevia sijaintipalveluja. Laitteesta riippuen tämä voi aiheuttaa sen, että epäluotettava wlan-ominaisuus ei pysty lukemaan wlan-nimeä. Haluatko kuitenkin jatkaa?</string>
     <string name="auto_tunnel_title">Automaattinen tunnelointipalvelu</string>
     <string name="delete_tunnel">Poista tunneli</string>
@@ -70,16 +69,11 @@
     <string name="vpn_denied_dialog_title">Ei käyttöoikeutta</string>
     <string name="vpn_settings">VPN järjestelmäasetukset</string>
     <string name="always_on_message">VPN-yhteyden käyttöoikeus on evätty. Tarkista</string>
-    <string name="chat_description">Liity yhteisöön</string>
-    <string name="tunnel_required">Ominaisuus vaatii vähintään yhden tunnelin</string>
     <string name="prominent_background_location_message">Tämä toiminto vaatii taustapaikannusoikeuden, jotta Wi-Fi SSID:n seuranta on mahdollista myös sovelluksen ollessa suljettuna. Lisätietoja löydät Tuki-näkymään linkatusta tietosuojakäytännöstä.</string>
     <string name="optional_default">"valinnainen, oletus: "</string>
     <string name="donate">Lahjoita projektille</string>
-    <string name="requires_app_relaunch">Muutos edellyttää sovelluksen uudelleenkäynnistämistä. Haluatko jatkaa?</string>
     <string name="add_from_clipboard">Lisää leikepöydältä</string>
     <string name="ethernet_tunnel">Ethernet-tunneli</string>
-    <string name="enable_amnezia">Ota Amnezia käyttöön</string>
-    <string name="wg_compat_mode">WG-yhteensopivuustila</string>
     <string name="quick_actions">Pikatoiminnot</string>
     <string name="advanced_settings">Lisäasetukset</string>
     <string name="hide_scripts">Piilota skriptit</string>
@@ -88,7 +82,6 @@
     <string name="error_file_extension">Tiedosto ei ole .conf tai .zip-tiedosto</string>
     <string name="tunnel_mobile_data">Tunneloi mobiilidatalla</string>
     <string name="mtu">MTU</string>
-    <string name="optional_no_recommend">(valinnainen, ei suositeltu)</string>
     <string name="preshared_key">Esijaettu avain</string>
     <string name="all">kaikki</string>
     <string name="never">ei koskaan</string>
@@ -96,7 +89,6 @@
     <string name="set_ethernet_tunnel">Aseta ethernet-tunneliksi</string>
     <string name="seconds">sekuntia</string>
     <string name="cancel">Peruuta</string>
-    <string name="export_configs">Vie asetukset</string>
     <string name="no_browser_detected">Selainta ei tunnistettu</string>
     <string name="handshake">kädenpuristus</string>
     <string name="light">Vaalea</string>

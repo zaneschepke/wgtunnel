@@ -32,7 +32,6 @@
     <string name="name">Name</string>
     <string name="always_on_vpn_support">Always-On VPN erlauben</string>
     <string name="location_services_not_detected">Standortdienste nicht erkannt</string>
-    <string name="hint_search_packages">Pakete suchen</string>
     <string name="vpn_on">VPN an</string>
     <string name="vpn_off">VPN aus</string>
     <string name="create_import">Von Grund auf neu erstellen</string>
@@ -49,7 +48,6 @@
     <string name="listen_port">Eingehender Port</string>
     <string name="random">(zufällig)</string>
     <string name="optional">(optional)</string>
-    <string name="optional_no_recommend">(Optional, nicht empfohlen)</string>
     <string name="seconds">Sekunden</string>
     <string name="cancel">Abbrechen</string>
     <string name="preshared_key">Geteilter Schlüssel</string>
@@ -76,12 +74,9 @@
     <string name="settings">Einstellungen</string>
     <string name="support">Unterstützung</string>
     <string name="error_authentication_failed">Authentifizierung fehlgeschlagen</string>
-    <string name="export_configs">Konfigurationen exportieren</string>
     <string name="unknown_error">Unbekannter Fehler aufgetreten</string>
     <string name="email_chooser">Eine E-Mail senden…</string>
     <string name="error_authorization_failed">Autorisierung fehlgeschlagen</string>
-    <string name="error_invalid_code">Ungültiger QR Code</string>
-    <string name="tunneling_apps">Getunnelte Apps</string>
     <string name="no_email_detected">Keine E-Mail-App erkannt</string>
     <string name="create_pin">PIN erstellen</string>
     <string name="use_tunnel_on_wifi_name">Tunnel für WLAN-Namen verwenden</string>
@@ -112,13 +107,11 @@
     <string name="background_location_message">Für diese Funktion ist die Erlaubnis, den Standort jederzeit zu bestimmen, und/oder ein genauer Standort erforderlich. Bitte prüfe die</string>
     <string name="vpn_settings">VPN-Systemeinstellungen</string>
     <string name="always_on_message">Die Genehmigung für eine VPN-Verbindung wurde verweigert. Bitte überprüfe die</string>
-    <string name="chat_description">Tritt der Community bei</string>
     <string name="set_custom_ping_cooldown">Ping-Neustart-Cooldown (sek)</string>
     <string name="set_custom_ping_ip">Benutzerdefinierte Ping-IP einstellen</string>
     <string name="default_ping_ip">(optional, Standardwert: Gegenstelle)</string>
     <string name="set_custom_ping_internal">Pingintervall (sek)</string>
     <string name="always_on_message2">um sicherzustellen, dass Always-on VPN für alle anderen Apps ausgeschaltet ist und versuche es erneut</string>
-    <string name="tunnel_required">Feature erfordert mindestens einen Tunnel</string>
     <string name="sec">Sek</string>
     <string name="app_settings">App-Einstellungen</string>
     <string name="background_location_message2">um sicherzustellen, dass diese Berechtigungen aktiviert sind</string>
@@ -130,7 +123,6 @@
     <string name="logs">Logeinträge</string>
     <string name="kernel_not_supported">Kernel nicht unterstützt</string>
     <string name="trusted_wifi_names">Vertrauenswürdige WLAN Namen</string>
-    <string name="requires_app_relaunch">Diese Änderung erfordert einen Neustart der App. Möchten Sie fortfahren?</string>
     <string name="use_root_shell_for_wifi">Root-Shell verwenden, um WLAN-Namen zu ermitteln</string>
     <string name="light">Hell</string>
     <string name="add_wifi_name">WLAN Namen hinzufügen</string>
@@ -176,9 +168,6 @@
     <string name="post_up">Nach Aktivierung</string>
     <string name="pre_down">Vor Deaktivierung</string>
     <string name="post_down">Nach Deaktivierung</string>
-    <string name="amnezia_kernel_message">Amnezia nicht verfügbar im Kernel-Modus</string>
-    <string name="enable_amnezia">Amnezia aktivieren</string>
-    <string name="wg_compat_mode">Wireguard Kompatibilitätsmodus</string>
     <string name="quick_actions">Schnellaktionen</string>
     <string name="stop_on_internet_loss">Stoppen, wenn die Internetverbindung getrennt wird</string>
     <string name="bypass_lan_for_kill_switch">LAN umgehen für Notschalter</string>
@@ -192,12 +181,8 @@
     <string name="exclude_lan">LAN ausschließen</string>
     <string name="tunnel_control">Tunnelsteuerung</string>
     <string name="kill_switch_off">Notschalter stoppen bei vertrauenswürdigen</string>
-    <string name="error_tunnel_start">Start des Tunnels fehlgeschlagen</string>
     <string name="auto_tunnel">Auto-Tunnel</string>
-    <string name="export_amnezia">Als Amnezia exportieren</string>
-    <string name="export_wireguard">Als WireGuard exportieren</string>
     <string name="server_ipv4">IPv4 Hostnamensauflösung</string>
     <string name="prefer_ipv4">IPv4 Verbindung bevorzugen</string>
-    <string name="start_failed_config">Starten des Tunnels wegen Konfigfehler fehlgeschlagen.</string>
     <string name="multiple">Mehrere</string>
 </resources>

@@ -10,12 +10,9 @@
     <string name="rotate_keys">Revezar chaves</string>
     <string name="private_key">Chave privada</string>
     <string name="base64_key">Chave base64</string>
-    <string name="optional_no_recommend">(opcional, não recomendado)</string>
     <string name="preshared_key">Chave pré-partilhada</string>
     <string name="seconds">segundos</string>
-    <string name="export_configs">Exportar configurações</string>
     <string name="error_no_file_explorer">Nenhum explorador de ficheiros instalado</string>
-    <string name="error_invalid_code">Código QR inválido</string>
     <string name="auto_tunnel_title">Serviço de Auto-túnel</string>
     <string name="all">todos</string>
     <string name="enter_pin">Digite o seu pin</string>
@@ -52,7 +49,6 @@
     <string name="allowed_ips">IPs Permitidos</string>
     <string name="peer">Par</string>
     <string name="location_services_not_detected">Serviço de localização não foi detetado</string>
-    <string name="hint_search_packages">Procurar pacotes</string>
     <string name="auto_tunneling">Auto-túnel</string>
     <string name="vpn_on">VPN ligada</string>
     <string name="vpn_off">VPN desligada</string>
@@ -83,7 +79,6 @@
     <string name="error_root_denied">Shell Root negado</string>
     <string name="location_services_missing_message">A aplicação não detetou o serviço de localização ativado no seu dispositivo. Dependendo do dispositivo, isto pode causar que a função de Wi-Fi não confiável falhe em ler o nome do Wi-Fi. Quer continuar mesmo assim?</string>
     <string name="open_issue">Abrir um problema</string>
-    <string name="tunneling_apps">Aplicações com túnel</string>
     <string name="no_email_detected">Nenhuma aplicação de email detetado</string>
     <string name="no_browser_detected">Nenhum navegador detetado</string>
     <string name="incorrect_pin">O Pin está errado</string>
@@ -107,8 +102,6 @@
     <string name="vpn_denied_dialog_title">Permissão negada</string>
     <string name="vpn_settings">Configurações do sistema VPN</string>
     <string name="always_on_message">A permissão de conexão VPN foi negada. Por favor, verifique</string>
-    <string name="chat_description">Junte-se à comunidade</string>
-    <string name="tunnel_required">Característica requer pelo menos um túnel</string>
     <string name="app_settings">configurações da app</string>
     <string name="background_location_message2">para garantir que essas permissões estejam ativadas.</string>
     <string name="root_accepted">Shell root aceito</string>
@@ -130,12 +123,10 @@
     <string name="language">Idioma</string>
     <string name="add_wifi_name">Adicionar nome Wi-Fi</string>
     <string name="display_theme">Tema</string>
-    <string name="on_demand_rules">Regras de tunelamento sob demanda</string>
     <string name="dark">Escuro</string>
     <string name="dynamic">Dinâmico</string>
     <string name="skip">Pular</string>
     <string name="mobile_tunnel">Túnel com dados móveis</string>
-    <string name="requires_app_relaunch">Para aplicar as mudanças é necessário reiniciar o aplicativo. Deseja prosseguir ?</string>
     <string name="add_from_clipboard">Adicionar da área de transferência</string>
     <string name="restart_at_boot">Ativar na inicialização</string>
     <string name="appearance">Aparência</string>
@@ -153,7 +144,6 @@
     <string name="donate">Contribua com esse projeto</string>
     <string name="local_logging">Registro local</string>
     <string name="enable_local_logging">Ativar registro local</string>
-    <string name="configuration_change">Configuração alterada</string>
     <string name="stop_on_no_internet">Interromper quando não há internet</string>
     <string name="stop_on_internet_loss">Interrompa o túnel quando a internet não estiver disponível</string>
     <string name="ethernet_tunnel">Túnel ethernet</string>
@@ -167,9 +157,6 @@
     <string name="stop">pausar</string>
     <string name="tunnel_specific_settings">Configurações específicas no túnel</string>
     <string name="show_scripts">Mostrar scripts</string>
-    <string name="amnezia_kernel_message">Amnezia indisponível no kernel</string>
-    <string name="enable_amnezia">Ativar Amnezia</string>
-    <string name="wg_compat_mode">Modo de compatibilidade WG</string>
     <string name="quick_actions">Ações rápidas</string>
     <string name="kernel_not_supported">Kernel não suportado</string>
     <string name="advanced_settings">Configurações avançadas</string>
