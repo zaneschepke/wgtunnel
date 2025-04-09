@@ -18,30 +18,26 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DynamicTopAppBar(navBarState: NavBarState, modifier: Modifier = Modifier) {
-	TopAppBar(
-		modifier = modifier,
-		colors = TopAppBarDefaults.topAppBarColors().copy(Color.Transparent),
-		title = {
-			AnimatedVisibility(
-				visible = navBarState.showTop,
-				enter = slideInVertically() + fadeIn(),
-				exit = slideOutVertically() + fadeOut(),
-			) {
-				Box(modifier = Modifier.padding(start = 10.dp)) {
-					navBarState.topTitle?.invoke()
-				}
-			}
-		},
-		actions = {
-			AnimatedVisibility(
-				visible = navBarState.showTop,
-				enter = slideInVertically() + fadeIn(),
-				exit = slideOutVertically() + fadeOut(),
-			) {
-				Box(modifier = Modifier.padding(end = 10.dp)) {
-					navBarState.topTrailing?.invoke()
-				}
-			}
-		},
-	)
+    TopAppBar(
+        modifier = modifier,
+        colors = TopAppBarDefaults.topAppBarColors().copy(Color.Transparent),
+        title = {
+            AnimatedVisibility(
+                visible = navBarState.showTop,
+                enter = slideInVertically() + fadeIn(),
+                exit = slideOutVertically() + fadeOut(),
+            ) {
+                Box(modifier = Modifier.padding(start = 10.dp)) { navBarState.topTitle?.invoke() }
+            }
+        },
+        actions = {
+            AnimatedVisibility(
+                visible = navBarState.showTop,
+                enter = slideInVertically() + fadeIn(),
+                exit = slideOutVertically() + fadeOut(),
+            ) {
+                Box(modifier = Modifier.padding(end = 10.dp)) { navBarState.topTrailing?.invoke() }
+            }
+        },
+    )
 }

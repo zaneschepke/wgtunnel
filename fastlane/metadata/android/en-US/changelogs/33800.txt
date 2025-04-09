@@ -1,4 +1,0 @@
-What's new:
-- Config edit UI bug fix
-- Add GrapheneOS first launch AOVPN notification
-- Bump versions

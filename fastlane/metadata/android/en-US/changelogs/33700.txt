@@ -1,2 +1,0 @@
-What's new:
-- Tunnel display UI bug fix

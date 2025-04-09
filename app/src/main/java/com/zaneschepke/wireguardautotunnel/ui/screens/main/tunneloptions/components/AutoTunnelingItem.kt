@@ -15,24 +15,25 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 
 @Composable
 fun AutoTunnelingItem(tunnelConf: TunnelConf): SelectionItem {
-	val navController = LocalNavController.current
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Bolt,
-		title = {
-			Text(
-				text = stringResource(R.string.auto_tunneling),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		description = {
-			Text(
-				text = stringResource(R.string.tunnel_specific_settings),
-				style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-			)
-		},
-		trailing = {
-			ForwardButton { navController.navigate(Route.TunnelAutoTunnel(id = tunnelConf.id)) }
-		},
-		onClick = { navController.navigate(Route.TunnelAutoTunnel(id = tunnelConf.id)) },
-	)
+    val navController = LocalNavController.current
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Bolt,
+        title = {
+            Text(
+                text = stringResource(R.string.auto_tunneling),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        description = {
+            Text(
+                text = stringResource(R.string.tunnel_specific_settings),
+                style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+            )
+        },
+        trailing = {
+            ForwardButton { navController.navigate(Route.TunnelAutoTunnel(id = tunnelConf.id)) }
+        },
+        onClick = { navController.navigate(Route.TunnelAutoTunnel(id = tunnelConf.id)) },
+    )
 }

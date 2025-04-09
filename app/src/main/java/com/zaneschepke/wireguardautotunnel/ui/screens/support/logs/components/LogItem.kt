@@ -21,37 +21,24 @@ import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
 
 @Composable
 fun LogItem(log: LogMessage) {
-	val clipboardManager = LocalClipboardManager.current
-	val fontSize = 10.sp
+    val clipboardManager = LocalClipboardManager.current
+    val fontSize = 10.sp
 
-	Row(
-		horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
-		verticalAlignment = Alignment.Top,
-		modifier = Modifier
-			.fillMaxSize()
-			.clickable(
-				interactionSource = remember { MutableInteractionSource() },
-				indication = null,
-				onClick = {
-					clipboardManager.setText(AnnotatedString(log.toString()))
-				},
-			),
-	) {
-		Text(
-			text = log.tag,
-			modifier = Modifier.fillMaxSize(0.3f),
-			fontSize = fontSize,
-		)
-		LogTypeLabel(color = Color(log.level.color())) {
-			Text(
-				text = log.level.signifier,
-				textAlign = TextAlign.Center,
-				fontSize = fontSize,
-			)
-		}
-		Text(
-			text = "${log.message} - ${log.time}",
-			fontSize = fontSize,
-		)
-	}
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
+        verticalAlignment = Alignment.Top,
+        modifier =
+            Modifier.fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { clipboardManager.setText(AnnotatedString(log.toString())) },
+                ),
+    ) {
+        Text(text = log.tag, modifier = Modifier.fillMaxSize(0.3f), fontSize = fontSize)
+        LogTypeLabel(color = Color(log.level.color())) {
+            Text(text = log.level.signifier, textAlign = TextAlign.Center, fontSize = fontSize)
+        }
+        Text(text = "${log.message} - ${log.time}", fontSize = fontSize)
+    }
 }

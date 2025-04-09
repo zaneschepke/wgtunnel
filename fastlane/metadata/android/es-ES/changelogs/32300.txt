@@ -1,5 +1,0 @@
-Mejoras:
-- Compatibilidad de túnel-automático cuando solo para datos móviles
-- UI de la pantalla de ayuda mojorada
-- Enlaces de recursos mejorados
-- Otras correcciones

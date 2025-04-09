@@ -1,6 +1,0 @@
-Quoi de neuf :
-- Les appareils rootés récupèrent désormais le nom du Wi-Fi sans la localisation
-- Améliorations du défilement et du partage de l'écran des journaux
-- Corrections de bugs d'importation de tunnel pour AndroidTV 14
-- Améliorations de l'interface utilisateur des statistiques de tunnel
-- Autres corrections de bugs et améliorations

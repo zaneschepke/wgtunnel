@@ -1,7 +1,0 @@
-Enhancements:
-- Added delete tunnel confirmation
-- Added battery background permission
-Fixes:
-- Tunnel disable frozen bug
-- Email to field bug
-- Config edit empty DNS

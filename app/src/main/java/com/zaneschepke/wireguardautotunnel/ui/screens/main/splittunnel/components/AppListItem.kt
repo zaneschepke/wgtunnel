@@ -21,38 +21,34 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 
 @Composable
 fun AppListItem(appInfo: TunnelApp, isSelected: Boolean, onToggle: () -> Unit) {
-	val context = LocalContext.current
-	val icon = remember(appInfo.`package`) {
-		try {
-			context.packageManager.getApplicationIcon(appInfo.`package`)
-		} catch (e: PackageManager.NameNotFoundException) {
-			null
-		}
-	}
+    val context = LocalContext.current
+    val icon =
+        remember(appInfo.`package`) {
+            try {
+                context.packageManager.getApplicationIcon(appInfo.`package`)
+            } catch (e: PackageManager.NameNotFoundException) {
+                null
+            }
+        }
 
-	SelectionItemButton(
-		leading = {
-			Image(
-				painter = rememberDrawablePainter(icon),
-				contentDescription = appInfo.name,
-				modifier = Modifier
-					.padding(horizontal = 24.dp)
-					.size(iconSize),
-			)
-		},
-		buttonText = appInfo.name,
-		onClick = onToggle,
-		trailing = {
-			Row(
-				modifier = Modifier.fillMaxWidth(),
-				horizontalArrangement = Arrangement.End,
-				verticalAlignment = Alignment.CenterVertically,
-			) {
-				Checkbox(
-					checked = isSelected,
-					onCheckedChange = { onToggle() },
-				)
-			}
-		},
-	)
+    SelectionItemButton(
+        leading = {
+            Image(
+                painter = rememberDrawablePainter(icon),
+                contentDescription = appInfo.name,
+                modifier = Modifier.padding(horizontal = 24.dp).size(iconSize),
+            )
+        },
+        buttonText = appInfo.name,
+        onClick = onToggle,
+        trailing = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(checked = isSelected, onCheckedChange = { onToggle() })
+            }
+        },
+    )
 }

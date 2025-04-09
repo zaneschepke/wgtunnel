@@ -1,6 +1,0 @@
-Novedades:
-- Soporte oficial para AmneziaWG
-- Importación/exportación de configuraciones de Amnezia
-- El túnel automático se activará solo una vez por cambio de red
-- Soporte para idiomas adicionales
-- Otras correcciones de errores y mejoras

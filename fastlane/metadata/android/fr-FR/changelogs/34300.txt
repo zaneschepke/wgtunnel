@@ -1,6 +1,0 @@
-Quoi de neuf :
-- Prise en charge officielle d'AmneziaWG
-- Import/export de configurations Amnezia
-- Tunnel automatique activé une seule fois par changement de réseau
-- Prise en charge de langues supplémentaires
-- Autres corrections de bugs et améliorations

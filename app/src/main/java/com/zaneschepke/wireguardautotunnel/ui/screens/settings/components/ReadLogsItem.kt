@@ -12,11 +12,11 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 
 @Composable
 fun ReadLogsItem(): SelectionItem {
-	val navController = LocalNavController.current
-	return SelectionItem(
-		leadingIcon = Icons.Filled.ViewTimeline,
-		title = { SelectionItemLabel(R.string.read_logs) },
-		trailing = { ForwardButton { navController.navigate(Route.Logs) } },
-		onClick = { navController.navigate(Route.Logs) },
-	)
+    val navController = LocalNavController.current
+    return SelectionItem(
+        leadingIcon = Icons.Filled.ViewTimeline,
+        title = { SelectionItemLabel(R.string.read_logs) },
+        trailing = { ForwardButton { navController.navigate(Route.Logs) } },
+        onClick = { navController.navigate(Route.Logs) },
+    )
 }

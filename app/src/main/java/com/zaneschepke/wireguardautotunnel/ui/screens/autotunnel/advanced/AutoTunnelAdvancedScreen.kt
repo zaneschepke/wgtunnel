@@ -12,23 +12,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.components.DebounceDelaySelector
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
 fun AutoTunnelAdvancedScreen(appUiState: AppUiState, viewModel: AppViewModel) {
-	Column(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-		modifier = Modifier
-			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
-			.padding(top = 24.dp)
-			.padding(horizontal = 24.dp),
-	) {
-		DebounceDelaySelector(
-			currentDelay = appUiState.appSettings.debounceDelaySeconds,
-			onEvent = viewModel::handleEvent,
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        modifier =
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 24.dp)
+                .padding(horizontal = 24.dp),
+    ) {
+        DebounceDelaySelector(
+            currentDelay = appUiState.appSettings.debounceDelaySeconds,
+            onEvent = viewModel::handleEvent,
+        )
+    }
 }

@@ -1,4 +1,0 @@
-Was ist neu:
-- Bug beim auto-tunneling behoben
-- Bug bei Backups auf Android behoben
-- Version angehoben

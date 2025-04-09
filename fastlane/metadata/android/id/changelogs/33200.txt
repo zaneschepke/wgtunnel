@@ -1,8 +1,0 @@
-Peningkatan:
-- Refaktor manajemen status
-- Tingkatkan navigasi AndroidTV
-- Meningkatkan efisiensi tunnel otomatis
-- Meningkatkan navigasi
-- Fitur jeda tunnel otomatis
-- Perbaiki tunnel otomatis mulai latar depan
-- Banyak perbaikan bug

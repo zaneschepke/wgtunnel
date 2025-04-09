@@ -1,6 +1,0 @@
-Was ist neu?
-- Gerootete Geräte erhalten jetzt den WiFi-Namen ohne Standort
-- Verbesserungen beim Scrollen und Teilen von Protokollen
-- Fehlerbehebungen beim Tunnelimport für AndroidTV 14
-- Verbesserungen der Tunnel-Statistik UI
-- Andere Fehlerbehebungen und Verbesserungen

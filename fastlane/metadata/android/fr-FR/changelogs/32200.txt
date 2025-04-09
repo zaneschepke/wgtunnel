@@ -1,5 +1,0 @@
-Améliorations :
-- Ajout des statistiques des tunnels sur l'écran principal
-- Amélioration des paramètres de navigation AndroidTV
-- Suppression des vibrations de notification
-- Diverses autres corrections de bug

@@ -1,5 +1,0 @@
-What's new:
-- Additional language support
-- Auto-tunneling mobile data bug fix
-- AndroidTV floating action button fix
-- Other optimizations and enhancements

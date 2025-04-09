@@ -1,6 +1,0 @@
-What's new:
-- Auto-start on reboot for Always-On VPN kernel mode
-- Support for adaptive theme icons
-- Fix notification icons, tile icon
-- Fix AndroidTV icons
-

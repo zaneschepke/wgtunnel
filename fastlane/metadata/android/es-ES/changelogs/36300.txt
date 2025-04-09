@@ -1,3 +1,0 @@
-Novedades:
-- Error de conmutación del modo kernel corregido
-- Se ha corregido un error de bloqueo de notificación

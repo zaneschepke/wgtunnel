@@ -1,4 +1,0 @@
-Co nowego:
-- Naprawiono błędy automatycznego tunelowania
-- Naprawiono błąd kopii zapasowej Androida
-- Podniesienie wersji

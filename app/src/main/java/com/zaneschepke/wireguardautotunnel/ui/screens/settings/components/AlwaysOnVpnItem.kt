@@ -15,28 +15,26 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun AlwaysOnVpnItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.VpnLock,
-		trailing = {
-			ScaledSwitch(
-				enabled = !(
-					(
-						uiState.appSettings.isTunnelOnWifiEnabled ||
-							uiState.appSettings.isTunnelOnEthernetEnabled ||
-							uiState.appSettings.isTunnelOnMobileDataEnabled
-						) &&
-						uiState.appSettings.isAutoTunnelEnabled
-					),
-				checked = uiState.appSettings.isAlwaysOnVpnEnabled,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleAlwaysOn) },
-			)
-		},
-		title = {
-			Text(
-				text = stringResource(R.string.always_on_vpn_support),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleAlwaysOn) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.VpnLock,
+        trailing = {
+            ScaledSwitch(
+                enabled =
+                    !((uiState.appSettings.isTunnelOnWifiEnabled ||
+                        uiState.appSettings.isTunnelOnEthernetEnabled ||
+                        uiState.appSettings.isTunnelOnMobileDataEnabled) &&
+                        uiState.appSettings.isAutoTunnelEnabled),
+                checked = uiState.appSettings.isAlwaysOnVpnEnabled,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleAlwaysOn) },
+            )
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.always_on_vpn_support),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleAlwaysOn) },
+    )
 }

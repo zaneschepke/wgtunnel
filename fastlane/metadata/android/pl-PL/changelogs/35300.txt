@@ -1,6 +1,0 @@
-Co nowego:
-- Zrootowane urządzenia otrzymują teraz nazwę Wi-Fi bez lokalizacji
-- Ulepszenia przewijania ekranu dzienników i udostępniania
-- Poprawki błędów importu tunelu dla AndroidTV 14
-- Ulepszenia interfejsu użytkownika statystyk tunelu
-- Inne poprawki błędów i ulepszenia

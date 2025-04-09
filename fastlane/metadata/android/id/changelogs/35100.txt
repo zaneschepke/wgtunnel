@@ -1,5 +1,0 @@
-Apa yang baru:
-- Perbaikan untuk tunnel yang tidak diluncurkan dari latar belakang
-- Menambahkan dukungan untuk layanan restart setelah pembaruan
-- Peningkatan kecepatan animasi UI
-- Pengoptimalan lainnya

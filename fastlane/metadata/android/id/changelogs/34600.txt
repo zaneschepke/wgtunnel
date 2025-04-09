@@ -1,4 +1,0 @@
-Apa yang baru:
-- Memperbaiki bug tunnel otomatis
-- Memperbaiki bug pencadangan android
-- Versi bump

@@ -32,80 +32,84 @@ import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 
 @Composable
-fun BottomBarTabs(tabs: List<BottomNavItem>, selectedTabIndex: Int, isChildRoute: Boolean, onTabSelected: (BottomNavItem) -> Unit) {
-	val context = LocalContext.current
-	val isRunningOnTv = remember { context.isRunningOnTv() }
+fun BottomBarTabs(
+    tabs: List<BottomNavItem>,
+    selectedTabIndex: Int,
+    isChildRoute: Boolean,
+    onTabSelected: (BottomNavItem) -> Unit,
+) {
+    val context = LocalContext.current
+    val isRunningOnTv = remember { context.isRunningOnTv() }
 
-	Row(
-		modifier = Modifier
-			.fillMaxWidth()
-			.height(64.dp)
-			.padding(horizontal = 8.dp)
-			.padding(top = 12.dp),
-		horizontalArrangement = Arrangement.SpaceEvenly,
-		verticalAlignment = Alignment.CenterVertically,
-	) {
-		tabs.forEachIndexed { index, tab ->
-			Column(
-				modifier = Modifier
-					.weight(1f)
-					.fillMaxHeight()
-					.background(Color.Transparent)
-					.then(
-						if (isRunningOnTv) {
-							Modifier.clickable {
-								if (index == selectedTabIndex && !isChildRoute) return@clickable
-								tab.onClick.invoke()
-								onTabSelected(tab)
-							}
-						} else {
-							Modifier
-						},
-					)
-					.pointerInput(Unit) {
-						detectTapGestures {
-							if (index == selectedTabIndex && !isChildRoute) return@detectTapGestures
-							tab.onClick.invoke()
-							onTabSelected(tab)
-						}
-					},
-				horizontalAlignment = Alignment.CenterHorizontally,
-				verticalArrangement = Arrangement.Center,
-			) {
-				val animatedColor by animateColorAsState(
-					targetValue = MaterialTheme.colorScheme.primary,
-					animationSpec = spring(stiffness = Spring.StiffnessLow),
-					label = "animatedColor",
-				)
-				val color = if (selectedTabIndex == index) animatedColor else MaterialTheme.colorScheme.onSurface
+    Row(
+        modifier =
+            Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 8.dp).padding(top = 12.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        tabs.forEachIndexed { index, tab ->
+            Column(
+                modifier =
+                    Modifier.weight(1f)
+                        .fillMaxHeight()
+                        .background(Color.Transparent)
+                        .then(
+                            if (isRunningOnTv) {
+                                Modifier.clickable {
+                                    if (index == selectedTabIndex && !isChildRoute) return@clickable
+                                    tab.onClick.invoke()
+                                    onTabSelected(tab)
+                                }
+                            } else {
+                                Modifier
+                            }
+                        )
+                        .pointerInput(Unit) {
+                            detectTapGestures {
+                                if (index == selectedTabIndex && !isChildRoute)
+                                    return@detectTapGestures
+                                tab.onClick.invoke()
+                                onTabSelected(tab)
+                            }
+                        },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                val animatedColor by
+                    animateColorAsState(
+                        targetValue = MaterialTheme.colorScheme.primary,
+                        animationSpec = spring(stiffness = Spring.StiffnessLow),
+                        label = "animatedColor",
+                    )
+                val color =
+                    if (selectedTabIndex == index) animatedColor
+                    else MaterialTheme.colorScheme.onSurface
 
-				if (tab.active) {
-					BadgedBox(
-						badge = {
-							Badge(
-								modifier = Modifier
-									.offset(x = 8.dp, y = ((-8).dp))
-									.size(6.dp),
-								containerColor = SilverTree,
-							)
-						},
-					) {
-						Icon(
-							imageVector = tab.icon,
-							contentDescription = tab.name,
-							tint = color,
-							modifier = Modifier.size(24.dp),
-						)
-					}
-				} else {
-					Icon(
-						imageVector = tab.icon,
-						contentDescription = tab.name,
-						tint = color,
-						modifier = Modifier.size(24.dp),
-					)
-				}
-			}
-		}
-	}
+                if (tab.active) {
+                    BadgedBox(
+                        badge = {
+                            Badge(
+                                modifier = Modifier.offset(x = 8.dp, y = ((-8).dp)).size(6.dp),
+                                containerColor = SilverTree,
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = tab.name,
+                            tint = color,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                } else {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = tab.name,
+                        tint = color,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+        }
+    }
 }

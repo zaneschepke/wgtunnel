@@ -16,20 +16,18 @@ import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun LocationDisclosureHeader() {
-	val icon = Icons.Rounded.PermScanWifi
-	Icon(
-		imageVector = icon,
-		contentDescription = icon.name,
-		modifier = Modifier
-			.padding(30.dp)
-			.size(128.dp),
-	)
-	Text(
-		text = stringResource(R.string.prominent_background_location_title),
-		style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-	)
-	Text(
-		text = stringResource(R.string.prominent_background_location_message),
-		style = MaterialTheme.typography.bodyLarge,
-	)
+    val icon = Icons.Rounded.PermScanWifi
+    Icon(
+        imageVector = icon,
+        contentDescription = icon.name,
+        modifier = Modifier.padding(30.dp).size(128.dp),
+    )
+    Text(
+        text = stringResource(R.string.prominent_background_location_title),
+        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+    )
+    Text(
+        text = stringResource(R.string.prominent_background_location_message),
+        style = MaterialTheme.typography.bodyLarge,
+    )
 }

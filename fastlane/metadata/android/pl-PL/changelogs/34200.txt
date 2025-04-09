@@ -1,5 +1,0 @@
-Co nowego:
-- Naprawiono regresję zatrzymania tunelu 
-- Dodano zaciemnianie dzienników
-- Dodano ukrywanie FAB podczas przewijania
-- Dodano lokalizację turecką

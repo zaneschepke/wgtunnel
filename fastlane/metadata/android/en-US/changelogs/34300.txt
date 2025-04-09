@@ -1,6 +1,0 @@
-What's new:
-- Official support for AmneziaWG
-- Import/export for Amnezia configs
-- Auto-tunnel to only toggle once per network change
-- Additional languages support
-- Other bug fixes and improvements

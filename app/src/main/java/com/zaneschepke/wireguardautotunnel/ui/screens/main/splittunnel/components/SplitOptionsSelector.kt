@@ -25,54 +25,61 @@ import java.util.*
 
 @Composable
 fun SplitOptionSelector(selectedOption: SplitOption, onOptionChange: (SplitOption) -> Unit) {
-	val context = LocalContext.current
-	val inputHeight = 45.dp
+    val context = LocalContext.current
+    val inputHeight = 45.dp
 
-	MultiChoiceSegmentedButtonRow(
-		modifier = Modifier
-			.background(color = MaterialTheme.colorScheme.surface)
-			.fillMaxWidth()
-			.padding(horizontal = 24.dp)
-			.height(inputHeight),
-	) {
-		SplitOption.entries.forEachIndexed { index, entry ->
-			val active = selectedOption == entry
-			SegmentedButton(
-				shape = SegmentedButtonDefaults.itemShape(
-					index = index,
-					count = SplitOption.entries.size,
-					baseShape = RoundedCornerShape(8.dp),
-				),
-				icon = {
-					SegmentedButtonDefaults.Icon(active = active, activeContent = {
-						Icon(
-							imageVector = Icons.Outlined.Check,
-							contentDescription = stringResource(R.string.select),
-							tint = MaterialTheme.colorScheme.primary,
-							modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
-						)
-					}) {
-						Icon(
-							imageVector = entry.icon(),
-							contentDescription = entry.icon().name,
-							modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
-						)
-					}
-				},
-				colors = SegmentedButtonDefaults.colors().copy(
-					activeContainerColor = MaterialTheme.colorScheme.surface,
-					inactiveContainerColor = MaterialTheme.colorScheme.surface,
-				),
-				onCheckedChange = { onOptionChange(entry) },
-				checked = active,
-			) {
-				Text(
-					entry.text().asString(context)
-						.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
-					color = MaterialTheme.colorScheme.onBackground,
-					style = MaterialTheme.typography.labelMedium,
-				)
-			}
-		}
-	}
+    MultiChoiceSegmentedButtonRow(
+        modifier =
+            Modifier.background(color = MaterialTheme.colorScheme.surface)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .height(inputHeight)
+    ) {
+        SplitOption.entries.forEachIndexed { index, entry ->
+            val active = selectedOption == entry
+            SegmentedButton(
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = SplitOption.entries.size,
+                        baseShape = RoundedCornerShape(8.dp),
+                    ),
+                icon = {
+                    SegmentedButtonDefaults.Icon(
+                        active = active,
+                        activeContent = {
+                            Icon(
+                                imageVector = Icons.Outlined.Check,
+                                contentDescription = stringResource(R.string.select),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
+                            )
+                        },
+                    ) {
+                        Icon(
+                            imageVector = entry.icon(),
+                            contentDescription = entry.icon().name,
+                            modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
+                        )
+                    }
+                },
+                colors =
+                    SegmentedButtonDefaults.colors()
+                        .copy(
+                            activeContainerColor = MaterialTheme.colorScheme.surface,
+                            inactiveContainerColor = MaterialTheme.colorScheme.surface,
+                        ),
+                onCheckedChange = { onOptionChange(entry) },
+                checked = active,
+            ) {
+                Text(
+                    entry.text().asString(context).replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                    },
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
+    }
 }

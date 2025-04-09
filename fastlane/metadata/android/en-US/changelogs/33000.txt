@@ -1,8 +1,0 @@
-Enhancements:
-- Refactor state management
-- Improve AndroidTV navigation
-- Improve auto-tunneling efficiency
-- Improve navigation
-- Auto-tunneling pause feature
-- Many bugfixes
-

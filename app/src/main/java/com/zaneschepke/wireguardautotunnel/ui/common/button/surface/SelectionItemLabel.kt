@@ -7,14 +7,17 @@ import androidx.compose.ui.res.stringResource
 
 @Composable
 fun SelectionItemLabel(
-	textResId: Int,
-	style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium,
-	isDescription: Boolean = false,
+    textResId: Int,
+    style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium,
+    isDescription: Boolean = false,
 ) {
-	Text(
-		text = stringResource(textResId),
-		style = style.copy(
-			color = if (isDescription) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-		),
-	)
+    Text(
+        text = stringResource(textResId),
+        style =
+            style.copy(
+                color =
+                    if (isDescription) MaterialTheme.colorScheme.outline
+                    else MaterialTheme.colorScheme.onSurface
+            ),
+    )
 }

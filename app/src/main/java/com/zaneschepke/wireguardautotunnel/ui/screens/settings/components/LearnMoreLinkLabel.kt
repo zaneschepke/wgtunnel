@@ -13,32 +13,26 @@ import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun LearnMoreLinkLabel(onClick: (url: String) -> Unit, url: String) {
-	// TODO update link when docs are fully updated
-	val gettingStarted =
-		buildAnnotatedString {
-			pushStringAnnotation(
-				tag = "details",
-				annotation = url,
-			)
-			withStyle(
-				style = SpanStyle(color = MaterialTheme.colorScheme.primary),
-			) {
-				append(stringResource(id = R.string.learn_more))
-			}
-			pop()
-		}
-	ClickableText(
-		text = gettingStarted,
-		style =
-		MaterialTheme.typography.bodySmall.copy(
-			color = MaterialTheme.colorScheme.onSurfaceVariant,
-			textAlign = TextAlign.Start,
-			fontStyle = FontStyle.Italic,
-		),
-	) {
-		gettingStarted.getStringAnnotations(tag = "details", it, it)
-			.firstOrNull()?.let { annotation ->
-				onClick(annotation.item)
-			}
-	}
+    // TODO update link when docs are fully updated
+    val gettingStarted = buildAnnotatedString {
+        pushStringAnnotation(tag = "details", annotation = url)
+        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+            append(stringResource(id = R.string.learn_more))
+        }
+        pop()
+    }
+    ClickableText(
+        text = gettingStarted,
+        style =
+            MaterialTheme.typography.bodySmall.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Start,
+                fontStyle = FontStyle.Italic,
+            ),
+    ) {
+        gettingStarted.getStringAnnotations(tag = "details", it, it).firstOrNull()?.let { annotation
+            ->
+            onClick(annotation.item)
+        }
+    }
 }

@@ -1,5 +1,0 @@
-Co nowego:
-- Automatyczne uruchamianie po ponownym uruchomieniu w trybie jądra stałego VPN
-- Obsługa ikon adaptacyjnych motywów
-- Naprawiono ikony powiadomień, ikonę kafelka
-- Naprawiono ikony AndroidTV

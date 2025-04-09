@@ -1,3 +1,0 @@
-Peningkatan:
-- Memperbaiki konfigurasi buat yang tidak disimpan
-- Versi yang dibenturkan

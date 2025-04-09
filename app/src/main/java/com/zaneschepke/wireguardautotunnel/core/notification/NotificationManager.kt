@@ -9,38 +9,42 @@ import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 
 interface NotificationManager {
-	val context: Context
-	fun createNotification(
-		channel: NotificationChannels,
-		title: String = "",
-		actions: Collection<NotificationCompat.Action> = emptyList(),
-		description: String = "",
-		showTimestamp: Boolean = false,
-		importance: Int = NotificationManager.IMPORTANCE_HIGH,
-		onGoing: Boolean = true,
-		onlyAlertOnce: Boolean = true,
-	): Notification
+    val context: Context
 
-	fun createNotification(
-		channel: NotificationChannels,
-		title: StringValue,
-		actions: Collection<NotificationCompat.Action> = emptyList(),
-		description: StringValue,
-		showTimestamp: Boolean = false,
-		importance: Int = NotificationManager.IMPORTANCE_HIGH,
-		onGoing: Boolean = true,
-		onlyAlertOnce: Boolean = true,
-	): Notification
+    fun createNotification(
+        channel: NotificationChannels,
+        title: String = "",
+        actions: Collection<NotificationCompat.Action> = emptyList(),
+        description: String = "",
+        showTimestamp: Boolean = false,
+        importance: Int = NotificationManager.IMPORTANCE_HIGH,
+        onGoing: Boolean = true,
+        onlyAlertOnce: Boolean = true,
+    ): Notification
 
-	fun createNotificationAction(notificationAction: NotificationAction, extraId: Int? = null): NotificationCompat.Action
+    fun createNotification(
+        channel: NotificationChannels,
+        title: StringValue,
+        actions: Collection<NotificationCompat.Action> = emptyList(),
+        description: StringValue,
+        showTimestamp: Boolean = false,
+        importance: Int = NotificationManager.IMPORTANCE_HIGH,
+        onGoing: Boolean = true,
+        onlyAlertOnce: Boolean = true,
+    ): Notification
 
-	fun remove(notificationId: Int)
+    fun createNotificationAction(
+        notificationAction: NotificationAction,
+        extraId: Int? = null,
+    ): NotificationCompat.Action
 
-	fun show(notificationId: Int, notification: Notification)
+    fun remove(notificationId: Int)
 
-	companion object {
-		const val AUTO_TUNNEL_NOTIFICATION_ID = 122
-		const val VPN_NOTIFICATION_ID = 100
-		const val EXTRA_ID = "id"
-	}
+    fun show(notificationId: Int, notification: Notification)
+
+    companion object {
+        const val AUTO_TUNNEL_NOTIFICATION_ID = 122
+        const val VPN_NOTIFICATION_ID = 100
+        const val EXTRA_ID = "id"
+    }
 }

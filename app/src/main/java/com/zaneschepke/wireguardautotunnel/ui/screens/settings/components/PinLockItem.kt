@@ -19,32 +19,33 @@ import xyz.teamgravity.pin_lock_compose.PinManager
 
 @Composable
 fun PinLockItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	val navController = LocalNavController.current
-	val context = LocalContext.current
+    val navController = LocalNavController.current
+    val context = LocalContext.current
 
-	fun onPinLockToggle() {
-		if (uiState.appState.isPinLockEnabled) {
-			viewModel.handleEvent(AppEvent.TogglePinLock)
-		} else {
-			PinManager.initialize(context)
-			navController.navigate(Route.Lock)
-		}
-	}
+    fun onPinLockToggle() {
+        if (uiState.appState.isPinLockEnabled) {
+            viewModel.handleEvent(AppEvent.TogglePinLock)
+        } else {
+            PinManager.initialize(context)
+            navController.navigate(Route.Lock)
+        }
+    }
 
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Pin,
-		title = {
-			Text(
-				text = stringResource(R.string.enable_app_lock),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appState.isPinLockEnabled,
-				onClick = { onPinLockToggle() },
-			)
-		},
-		onClick = { onPinLockToggle() },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Pin,
+        title = {
+            Text(
+                text = stringResource(R.string.enable_app_lock),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appState.isPinLockEnabled,
+                onClick = { onPinLockToggle() },
+            )
+        },
+        onClick = { onPinLockToggle() },
+    )
 }

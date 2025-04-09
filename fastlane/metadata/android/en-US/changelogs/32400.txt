@@ -1,5 +1,0 @@
-Enhancements:
-- Add basic WireGuard Kernel support
-- Improved location disclosure flow
-- Fix auto-tunnel permissions bug
-- Various other UI bug fixes

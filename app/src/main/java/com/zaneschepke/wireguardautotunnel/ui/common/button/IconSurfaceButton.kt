@@ -25,73 +25,67 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 
 @androidx.compose.runtime.Composable
-fun IconSurfaceButton(title: String, onClick: () -> Unit, selected: Boolean, leadingIcon: ImageVector? = null, description: String? = null) {
-	val border: BorderStroke? =
-		if (selected) {
-			BorderStroke(
-				1.dp,
-				MaterialTheme.colorScheme.primary,
-			)
-		} else {
-			null
-		}
-	Card(
-		modifier =
-		Modifier
-			.fillMaxWidth()
-			.height(IntrinsicSize.Min),
-		shape = RoundedCornerShape(8.dp),
-		border = border,
-		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-	) {
-		Box(
-			modifier = Modifier.clickable { onClick() }
-				.fillMaxWidth(),
-		) {
-			Column(
-				modifier =
-				Modifier
-					.padding(horizontal = 8.dp, vertical = 10.dp)
-					.padding(end = 16.dp).padding(start = 8.dp)
-					.fillMaxSize(),
-				verticalArrangement = Arrangement.Center,
-				horizontalAlignment = Alignment.Start,
-			) {
-				Row(
-					verticalAlignment = Alignment.Companion.CenterVertically,
-					horizontalArrangement = Arrangement.spacedBy(16.dp),
-				) {
-					Row(
-						horizontalArrangement = Arrangement.spacedBy(
-							16.dp,
-						),
-						verticalAlignment = Alignment.Companion.CenterVertically,
-						modifier = Modifier.padding(vertical = if (description == null) 10.dp else 0.dp),
-					) {
-						leadingIcon?.let {
-							Icon(
-								leadingIcon,
-								leadingIcon.name,
-								Modifier.size(iconSize),
-								if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-							)
-						}
-						Column {
-							Text(
-								title,
-								style = MaterialTheme.typography.titleMedium,
-							)
-							description?.let {
-								Text(
-									description,
-									color = MaterialTheme.colorScheme.onSurfaceVariant,
-									style = MaterialTheme.typography.bodyMedium,
-								)
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+fun IconSurfaceButton(
+    title: String,
+    onClick: () -> Unit,
+    selected: Boolean,
+    leadingIcon: ImageVector? = null,
+    description: String? = null,
+) {
+    val border: BorderStroke? =
+        if (selected) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        } else {
+            null
+        }
+    Card(
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        shape = RoundedCornerShape(8.dp),
+        border = border,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Box(modifier = Modifier.clickable { onClick() }.fillMaxWidth()) {
+            Column(
+                modifier =
+                    Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+                        .padding(end = 16.dp)
+                        .padding(start = 8.dp)
+                        .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.Companion.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.Companion.CenterVertically,
+                        modifier =
+                            Modifier.padding(vertical = if (description == null) 10.dp else 0.dp),
+                    ) {
+                        leadingIcon?.let {
+                            Icon(
+                                leadingIcon,
+                                leadingIcon.name,
+                                Modifier.size(iconSize),
+                                if (selected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                        Column {
+                            Text(title, style = MaterialTheme.typography.titleMedium)
+                            description?.let {
+                                Text(
+                                    description,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

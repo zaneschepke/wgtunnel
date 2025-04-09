@@ -1,5 +1,0 @@
-Was ist neu:
-- Behebung einer Regression beim Tunnel Stop
-- Log Verschleierung hinzugefügt
-- Ausblenden des Icons beim Scrollen
-- Türkische Übersetzung hinzugefügt

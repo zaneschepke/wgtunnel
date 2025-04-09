@@ -10,15 +10,12 @@ import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun GroupLabel(title: String) {
-	Row(
-		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.Start,
-	) {
-		Text(
-			title,
-			style = MaterialTheme.typography.titleMedium,
-			fontWeight = FontWeight.Bold,
-			color = MaterialTheme.colorScheme.onBackground,
-		)
-	}
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
 }

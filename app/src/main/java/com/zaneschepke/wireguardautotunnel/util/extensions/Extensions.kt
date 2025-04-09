@@ -7,8 +7,8 @@ import java.math.BigDecimal
 import java.text.DecimalFormat
 
 fun BigDecimal.toThreeDecimalPlaceString(): String {
-	val df = DecimalFormat("#.###")
-	return df.format(this)
+    val df = DecimalFormat("#.###")
+    return df.format(this)
 }
 
 fun <T> List<T>.update(index: Int, item: T): List<T> = toMutableList().apply { this[index] = item }

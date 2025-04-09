@@ -1,5 +1,0 @@
-Quoi de neuf :
-- Prise en charge de langues supplémentaires
-- Correction du bug de l'auto-tunnel avec les données mobiles
-- Correction du bouton d'action flottant sur AndroidTV
-- Autres optimisations et améliorations

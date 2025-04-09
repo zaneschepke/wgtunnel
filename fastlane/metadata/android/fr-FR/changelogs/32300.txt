@@ -1,5 +1,0 @@
-Améliorations :
-- Ajouter du support pour les données mobiles uniquement lors du tunnel automatique
-- Amélioration de l'interface de support
-- Mise à jour des liens de ressources 
-- Diverses autres corrections de bug

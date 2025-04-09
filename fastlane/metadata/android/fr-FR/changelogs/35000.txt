@@ -1,6 +1,0 @@
-Quoi de neuf :
-- Amélioration de la fiabilité des tunnels automatiques
-- Prise en charge des thèmes clair/sombre/dynamique
-- Prise en charge des scripts pré/post up/down
-- Supprimer la notification persistante du tunnel
-- Diverses autres corrections et améliorations

@@ -1,3 +1,0 @@
-Enhancements:
-- Fixed create config not saving
-- Bumped versions

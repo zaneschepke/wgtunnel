@@ -1,5 +1,0 @@
-Quoi de neuf :
-- Ajout d'un écran de logs
-- Ajout d'un verrouillage local de l'application
-- Ajout de la fonctionnalité de redémarrage du VPN en cas d'échec du ping
-- Diverses corrections de bug

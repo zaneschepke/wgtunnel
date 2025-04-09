@@ -1,5 +1,0 @@
-What's new:
-- Improve first launch flow
-- Switch to wireguard lib fork
-- Request VPN permission on first VPN start
-- Bump versions

@@ -16,35 +16,39 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun SplitTunnelScreen(appViewModel: AppViewModel, viewModel: SplitTunnelViewModel = hiltViewModel()) {
-	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun SplitTunnelScreen(
+    appViewModel: AppViewModel,
+    viewModel: SplitTunnelViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-	LaunchedEffect(Unit) {
-		appViewModel.handleEvent(AppEvent.SetScreenAction { viewModel.saveChanges() })
-	}
+    LaunchedEffect(Unit) {
+        appViewModel.handleEvent(AppEvent.SetScreenAction { viewModel.saveChanges() })
+    }
 
-	LaunchedEffect(uiState.success) {
-		if (uiState.success == true) {
-			appViewModel.handleEvent(AppEvent.ShowMessage(StringValue.StringResource(R.string.config_changes_saved)))
-			appViewModel.handleEvent(AppEvent.PopBackStack(true))
-		}
-	}
+    LaunchedEffect(uiState.success) {
+        if (uiState.success == true) {
+            appViewModel.handleEvent(
+                AppEvent.ShowMessage(StringValue.StringResource(R.string.config_changes_saved))
+            )
+            appViewModel.handleEvent(AppEvent.PopBackStack(true))
+        }
+    }
 
-	Crossfade(
-		targetState = uiState.loading,
-		animationSpec = tween(200),
-		modifier = Modifier
-			.fillMaxSize(),
-	) { isLoading ->
-		if (isLoading) {
-			SplitTunnelSkeleton()
-		} else {
-			SplitTunnelContent(
-				uiState = uiState,
-				onSplitOptionChange = viewModel::updateSplitOption,
-				onAppSelectionToggle = viewModel::toggleAppSelection,
-				onQueryChange = viewModel::onSearchQuery,
-			)
-		}
-	}
+    Crossfade(
+        targetState = uiState.loading,
+        animationSpec = tween(200),
+        modifier = Modifier.fillMaxSize(),
+    ) { isLoading ->
+        if (isLoading) {
+            SplitTunnelSkeleton()
+        } else {
+            SplitTunnelContent(
+                uiState = uiState,
+                onSplitOptionChange = viewModel::updateSplitOption,
+                onAppSelectionToggle = viewModel::toggleAppSelection,
+                onQueryChange = viewModel::onSearchQuery,
+            )
+        }
+    }
 }

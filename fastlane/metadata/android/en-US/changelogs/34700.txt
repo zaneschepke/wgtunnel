@@ -1,6 +1,0 @@
-What's new:
-- Fix crashing issues
-- Improve tile performance
-- Re-enable pin lock
-- Make restart on boot a setting
-- Various performance and bug fixes

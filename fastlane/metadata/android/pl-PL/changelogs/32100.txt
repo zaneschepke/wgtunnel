@@ -1,3 +1,0 @@
-Ulepszenia:
-- Naprawiono < błąd uprawnień Androida 9
-- Inne optymalizacje

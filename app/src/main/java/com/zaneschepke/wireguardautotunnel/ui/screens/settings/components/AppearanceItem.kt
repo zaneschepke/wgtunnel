@@ -14,16 +14,17 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 
 @Composable
 fun AppearanceItem(): SelectionItem {
-	val navController = LocalNavController.current
-	return SelectionItem(
-		leadingIcon = Icons.AutoMirrored.Outlined.ViewQuilt,
-		title = {
-			Text(
-				text = stringResource(R.string.appearance),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = { ForwardButton { navController.navigate(Route.Appearance) } },
-		onClick = { navController.navigate(Route.Appearance) },
-	)
+    val navController = LocalNavController.current
+    return SelectionItem(
+        leadingIcon = Icons.AutoMirrored.Outlined.ViewQuilt,
+        title = {
+            Text(
+                text = stringResource(R.string.appearance),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { navController.navigate(Route.Appearance) } },
+        onClick = { navController.navigate(Route.Appearance) },
+    )
 }

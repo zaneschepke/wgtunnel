@@ -4,7 +4,9 @@ import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 import kotlinx.coroutines.flow.Flow
 
 interface AppSettingRepository {
-	suspend fun save(appSettings: AppSettings)
-	val flow: Flow<AppSettings>
-	suspend fun get(): AppSettings
+    suspend fun save(appSettings: AppSettings)
+
+    val flow: Flow<AppSettings>
+
+    suspend fun get(): AppSettings
 }

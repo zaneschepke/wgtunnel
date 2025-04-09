@@ -1,6 +1,0 @@
-Neu:
-- Wildcard-Unterstützung für Wifi-Namen hinzugefügt
-- Live-Bearbeitung von Einstellungen von aktiven Tunneln/Auto-Tunneln
-- Niedrige Geschwindigkeit bei mobilen Daten repariert
-- Verschiedene Fehlerbehebungen und Verbesserungen
-- UI-Optimierungen

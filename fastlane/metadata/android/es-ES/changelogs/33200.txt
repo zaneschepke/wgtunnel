@@ -1,8 +1,0 @@
-Mejoras:
-- Gestión del estado de refactorización.
-- Mejorar la navegación de AndroidTV
-- Mejorar la eficiencia del túnel automático
-- Mejorar la navegación
-- Función de pausa de túnel automático
-- Se corrigió el inicio del túnel automático en primer plano.
-- Muchas correcciones de errores

@@ -1,2 +1,0 @@
-Correzioni:
-- Permessi primo piano Android 14

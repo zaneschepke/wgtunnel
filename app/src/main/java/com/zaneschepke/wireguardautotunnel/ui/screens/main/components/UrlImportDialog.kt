@@ -19,37 +19,28 @@ import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun UrlImportDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
-	var url by remember { mutableStateOf("") }
+    var url by remember { mutableStateOf("") }
 
-	AlertDialog(
-		onDismissRequest = onDismiss,
-		title = { Text(stringResource(R.string.add_from_url)) },
-		text = {
-			Column(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(vertical = 8.dp),
-			) {
-				OutlinedTextField(
-					value = url,
-					onValueChange = { url = it },
-					label = { Text(stringResource(R.string.enter_config_url)) },
-					modifier = Modifier.fillMaxWidth(),
-				)
-			}
-		},
-		confirmButton = {
-			TextButton(
-				onClick = { onConfirm(url) },
-				enabled = url.isNotBlank(),
-			) {
-				Text(stringResource(R.string.okay))
-			}
-		},
-		dismissButton = {
-			TextButton(onClick = onDismiss) {
-				Text(stringResource(R.string.cancel))
-			}
-		},
-	)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.add_from_url)) },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    label = { Text(stringResource(R.string.enter_config_url)) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(url) }, enabled = url.isNotBlank()) {
+                Text(stringResource(R.string.okay))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
 }

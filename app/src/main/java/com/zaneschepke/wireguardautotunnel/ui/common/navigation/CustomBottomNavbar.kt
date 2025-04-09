@@ -35,99 +35,87 @@ import com.zaneschepke.wireguardautotunnel.ui.Route
 
 @Composable
 fun CustomBottomNavbar(tabs: List<BottomNavItem>, navBarState: NavBarState) {
-	var selectedTabIndex by remember { mutableIntStateOf(0) }
-	var isChildRoute by remember { mutableStateOf(false) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var isChildRoute by remember { mutableStateOf(false) }
 
-	LaunchedEffect(tabs) {
-	}
-	when (navBarState.route) {
-		Route.Main -> {
-			selectedTabIndex = 0
-			isChildRoute = false
-		}
-		Route.AutoTunnel -> {
-			selectedTabIndex = 1
-			isChildRoute = false
-		}
-		Route.Settings -> {
-			selectedTabIndex = 2
-			isChildRoute = false
-		}
-		Route.Support -> {
-			selectedTabIndex = 3
-			isChildRoute = false
-		}
-		else -> isChildRoute = true
-	}
+    LaunchedEffect(tabs) {}
+    when (navBarState.route) {
+        Route.Main -> {
+            selectedTabIndex = 0
+            isChildRoute = false
+        }
+        Route.AutoTunnel -> {
+            selectedTabIndex = 1
+            isChildRoute = false
+        }
+        Route.Settings -> {
+            selectedTabIndex = 2
+            isChildRoute = false
+        }
+        Route.Support -> {
+            selectedTabIndex = 3
+            isChildRoute = false
+        }
+        else -> isChildRoute = true
+    }
 
-	val systemBars = WindowInsets.systemBars
-	val bottomPadding = with(LocalDensity.current) {
-		systemBars.getBottom(this).toDp()
-	}
-	val navHeight = 64.dp + bottomPadding
+    val systemBars = WindowInsets.systemBars
+    val bottomPadding = with(LocalDensity.current) { systemBars.getBottom(this).toDp() }
+    val navHeight = 64.dp + bottomPadding
 
-	Box(
-		modifier = Modifier
-			.fillMaxWidth()
-			.height(navHeight)
-			.background(Color.Transparent),
-	) {
-		BottomBarTabs(
-			tabs = tabs,
-			selectedTabIndex = selectedTabIndex,
-			isChildRoute = isChildRoute,
-			onTabSelected = {
-				selectedTabIndex = tabs.indexOf(it)
-			},
-		)
+    Box(modifier = Modifier.fillMaxWidth().height(navHeight).background(Color.Transparent)) {
+        BottomBarTabs(
+            tabs = tabs,
+            selectedTabIndex = selectedTabIndex,
+            isChildRoute = isChildRoute,
+            onTabSelected = { selectedTabIndex = tabs.indexOf(it) },
+        )
 
-		val animatedSelectedTabIndex by animateFloatAsState(
-			targetValue = selectedTabIndex.toFloat(),
-			label = "animatedSelectedTabIndex",
-			animationSpec = spring(
-				stiffness = Spring.StiffnessLow,
-				dampingRatio = Spring.DampingRatioLowBouncy,
-			),
-		)
+        val animatedSelectedTabIndex by
+            animateFloatAsState(
+                targetValue = selectedTabIndex.toFloat(),
+                label = "animatedSelectedTabIndex",
+                animationSpec =
+                    spring(
+                        stiffness = Spring.StiffnessLow,
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                    ),
+            )
 
-		val animatedColor by animateColorAsState(
-			targetValue = MaterialTheme.colorScheme.primary,
-			label = "animatedColor",
-			animationSpec = spring(
-				stiffness = Spring.StiffnessLow,
-			),
-		)
+        val animatedColor by
+            animateColorAsState(
+                targetValue = MaterialTheme.colorScheme.primary,
+                label = "animatedColor",
+                animationSpec = spring(stiffness = Spring.StiffnessLow),
+            )
 
-		Canvas(
-			modifier = Modifier
-				.fillMaxWidth()
-				.height(navHeight),
-		) {
-			val path = Path().apply {
-				addRoundRect(RoundRect(size.toRect(), CornerRadius(size.height)))
-			}
-			val length = PathMeasure().apply { setPath(path, false) }.length
+        Canvas(modifier = Modifier.fillMaxWidth().height(navHeight)) {
+            val path =
+                Path().apply { addRoundRect(RoundRect(size.toRect(), CornerRadius(size.height))) }
+            val length = PathMeasure().apply { setPath(path, false) }.length
 
-			val tabWidth = size.width / tabs.size
-			drawPath(
-				path,
-				brush = Brush.horizontalGradient(
-					colors = listOf(
-						animatedColor.copy(alpha = 0f),
-						animatedColor.copy(alpha = 1f),
-						animatedColor.copy(alpha = 1f),
-						animatedColor.copy(alpha = 0f),
-					),
-					startX = tabWidth * animatedSelectedTabIndex,
-					endX = tabWidth * (animatedSelectedTabIndex + 1),
-				),
-				style = Stroke(
-					width = 4f,
-					pathEffect = PathEffect.dashPathEffect(
-						intervals = floatArrayOf(length / 2, length),
-					),
-				),
-			)
-		}
-	}
+            val tabWidth = size.width / tabs.size
+            drawPath(
+                path,
+                brush =
+                    Brush.horizontalGradient(
+                        colors =
+                            listOf(
+                                animatedColor.copy(alpha = 0f),
+                                animatedColor.copy(alpha = 1f),
+                                animatedColor.copy(alpha = 1f),
+                                animatedColor.copy(alpha = 0f),
+                            ),
+                        startX = tabWidth * animatedSelectedTabIndex,
+                        endX = tabWidth * (animatedSelectedTabIndex + 1),
+                    ),
+                style =
+                    Stroke(
+                        width = 4f,
+                        pathEffect =
+                            PathEffect.dashPathEffect(intervals = floatArrayOf(length / 2, length)),
+                    ),
+            )
+        }
+    }
 }

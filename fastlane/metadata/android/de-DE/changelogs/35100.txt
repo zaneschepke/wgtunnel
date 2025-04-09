@@ -1,5 +1,0 @@
-Was ist neu?
-- Behebung von Problemen beim Starten von Tunneln im Hintergrund
-- Unterstützung für den Neustart von Diensten nach dem Update hinzugefügt
-- Verbesserungen der UI-Animationsgeschwindigkeit
-- Andere Optimierungen

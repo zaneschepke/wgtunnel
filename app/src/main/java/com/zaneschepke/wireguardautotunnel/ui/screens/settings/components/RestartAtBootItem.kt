@@ -15,20 +15,21 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun RestartAtBootItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Restore,
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appSettings.isRestoreOnBootEnabled,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleRestartAtBoot) },
-			)
-		},
-		title = {
-			Text(
-				text = stringResource(R.string.restart_at_boot),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleRestartAtBoot) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Restore,
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appSettings.isRestoreOnBootEnabled,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleRestartAtBoot) },
+            )
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.restart_at_boot),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleRestartAtBoot) },
+    )
 }

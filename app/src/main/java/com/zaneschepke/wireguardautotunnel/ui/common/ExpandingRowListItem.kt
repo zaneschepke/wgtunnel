@@ -22,50 +22,43 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExpandingRowListItem(
-	leading: @Composable () -> Unit,
-	text: String,
-	onHold: () -> Unit = {},
-	onClick: () -> Unit,
-	trailing: @Composable () -> Unit,
-	isExpanded: Boolean,
-	expanded: @Composable () -> Unit = {},
+    leading: @Composable () -> Unit,
+    text: String,
+    onHold: () -> Unit = {},
+    onClick: () -> Unit,
+    trailing: @Composable () -> Unit,
+    isExpanded: Boolean,
+    expanded: @Composable () -> Unit = {},
 ) {
-	Box(
-		modifier =
-		Modifier
-			.animateContentSize()
-			.clip(RoundedCornerShape(30.dp))
-			.combinedClickable(
-				onClick = { onClick() },
-				onLongClick = { onHold() },
-			),
-	) {
-		Column {
-			Row(
-				modifier =
-				Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 15.dp),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween,
-			) {
-				Row(
-					verticalAlignment = Alignment.CenterVertically,
-					horizontalArrangement = Arrangement.spacedBy(15.dp),
-					modifier = Modifier.fillMaxWidth(13 / 20f),
-				) {
-					leading()
-					Text(
-						text,
-						maxLines = 1,
-						overflow = TextOverflow.Ellipsis,
-						style = MaterialTheme.typography.labelLarge,
-						color = MaterialTheme.colorScheme.onBackground,
-					)
-				}
-				trailing()
-			}
-			if (isExpanded) expanded()
-		}
-	}
+    Box(
+        modifier =
+            Modifier.animateContentSize()
+                .clip(RoundedCornerShape(30.dp))
+                .combinedClickable(onClick = { onClick() }, onLongClick = { onHold() })
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(15.dp),
+                    modifier = Modifier.fillMaxWidth(13 / 20f),
+                ) {
+                    leading()
+                    Text(
+                        text,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+                trailing()
+            }
+            if (isExpanded) expanded()
+        }
+    }
 }

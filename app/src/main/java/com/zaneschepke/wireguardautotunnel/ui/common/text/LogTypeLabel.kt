@@ -13,14 +13,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun LogTypeLabel(color: Color, content: @Composable () -> Unit) {
-	Box(
-		modifier =
-		Modifier
-			.size(20.dp)
-			.clip(RoundedCornerShape(2.dp))
-			.background(color),
-		contentAlignment = Alignment.Center,
-	) {
-		content()
-	}
+    Box(
+        modifier = Modifier.size(20.dp).clip(RoundedCornerShape(2.dp)).background(color),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
+    }
 }

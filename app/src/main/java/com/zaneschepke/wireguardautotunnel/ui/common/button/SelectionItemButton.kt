@@ -25,49 +25,40 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SelectionItemButton(
-	leading: (@Composable () -> Unit)? = null,
-	buttonText: String,
-	trailing: (@Composable () -> Unit)? = null,
-	onClick: () -> Unit,
-	ripple: Boolean = true,
-	modifier: Modifier = Modifier,
+    leading: (@Composable () -> Unit)? = null,
+    buttonText: String,
+    trailing: (@Composable () -> Unit)? = null,
+    onClick: () -> Unit,
+    ripple: Boolean = true,
+    modifier: Modifier = Modifier,
 ) {
-	Card(
-		modifier =
-		modifier
-			.clip(RoundedCornerShape(8.dp))
-			.clickable(
-				indication = if (ripple) ripple() else null,
-				interactionSource = remember { MutableInteractionSource() },
-				onClick = { onClick() },
-			)
-			.height(56.dp),
-		colors =
-		CardDefaults.cardColors(
-			containerColor = Color.Transparent,
-		),
-	) {
-		Row(
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.Start,
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(end = 10.dp),
-		) {
-			leading?.let {
-				it()
-			}
-			Text(
-				buttonText,
-				style = MaterialTheme.typography.labelMedium,
-				color = MaterialTheme.colorScheme.onSurface,
-				modifier = Modifier.fillMaxWidth(3 / 4f),
-				maxLines = 2,
-				overflow = TextOverflow.Ellipsis,
-			)
-			trailing?.let {
-				it()
-			}
-		}
-	}
+    Card(
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable(
+                    indication = if (ripple) ripple() else null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = { onClick() },
+                )
+                .height(56.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.fillMaxSize().padding(end = 10.dp),
+        ) {
+            leading?.let { it() }
+            Text(
+                buttonText,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth(3 / 4f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            trailing?.let { it() }
+        }
+    }
 }

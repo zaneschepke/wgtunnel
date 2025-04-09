@@ -1,3 +1,0 @@
-Améliorations :
-- Correction du problème de non-enregistrement lors de la création de configuration 
-- Mise à jour des versions

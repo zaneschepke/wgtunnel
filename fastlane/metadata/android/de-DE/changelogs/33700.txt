@@ -1,2 +1,0 @@
-Was ist neu:
-- GUI Fix for Tunnel Anzeige

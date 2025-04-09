@@ -1,7 +1,0 @@
-Migliorie:
-- Aggiunta conferma eliminazione tunnel
-- Aggiunto permesso batteria in background
-Correzioni:
-- Bug disabilita tunnel bloccato
-- Bug campo email a
-- Modifica configurazione DNS vuoto

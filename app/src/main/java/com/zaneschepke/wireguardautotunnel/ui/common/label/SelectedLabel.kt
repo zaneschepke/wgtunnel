@@ -12,12 +12,12 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun SelectedLabel() {
-	Row(
-		modifier = Modifier.fillMaxSize(),
-		horizontalArrangement = Arrangement.End,
-		verticalAlignment = Alignment.CenterVertically,
-	) {
-		val icon = Icons.Outlined.CheckBox
-		Icon(icon, icon.name)
-	}
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val icon = Icons.Outlined.CheckBox
+        Icon(icon, icon.name)
+    }
 }

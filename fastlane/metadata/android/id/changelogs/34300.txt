@@ -1,6 +1,0 @@
-Apa yang baru:
-- Dukungan resmi untuk AmneziaWG
-- Impor/ekspor untuk konfigurasi Amnezia
-- Terowongan otomatis untuk hanya beralih sekali per perubahan jaringan
-- Dukungan bahasa tambahan
-- Perbaikan dan peningkatan bug lainnya

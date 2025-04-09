@@ -1,5 +1,0 @@
-Novità:
-- Migliorata stabilità auto tunnel
-- Migliorata sincronizzazione tile
-- Aggiunte risorse AndroidTV
-- Aggiunta firma apk

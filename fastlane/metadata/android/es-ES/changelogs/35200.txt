@@ -1,6 +1,0 @@
-Novedades:
-- Añadido soporte de comodines para nombres wifi
-- Edición en vivo de la configuración del túnel/auto-túnel mientras está activo
-- Corrección de la lentitud en datos móviles
-- Varias correcciones de errores y mejoras
-- Optimización de la interfaz de usuario

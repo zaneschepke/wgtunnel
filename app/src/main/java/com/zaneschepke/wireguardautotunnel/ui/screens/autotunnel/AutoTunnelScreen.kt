@@ -32,81 +32,89 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.Locati
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isLocationServicesEnabled
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
-	val context = LocalContext.current
-	val navController = LocalNavController.current
-	val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-	var currentText by remember { mutableStateOf("") }
-	var isBackgroundLocationGranted by remember { mutableStateOf(true) }
-	var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
-	var showLocationDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val navController = LocalNavController.current
+    val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    var currentText by remember { mutableStateOf("") }
+    var isBackgroundLocationGranted by remember { mutableStateOf(true) }
+    var showLocationServicesAlertDialog by remember { mutableStateOf(false) }
+    var showLocationDialog by remember { mutableStateOf(false) }
 
-	fun checkFineLocationGranted() {
-		isBackgroundLocationGranted = fineLocationState.status.isGranted
-	}
+    fun checkFineLocationGranted() {
+        isBackgroundLocationGranted = fineLocationState.status.isGranted
+    }
 
-	fun isWifiNameReadable(): Boolean {
-		return when {
-			!isBackgroundLocationGranted || !fineLocationState.status.isGranted -> {
-				showLocationDialog = true
-				false
-			}
-			!context.isLocationServicesEnabled() -> {
-				showLocationServicesAlertDialog = true
-				false
-			}
-			else -> true
-		}
-	}
+    fun isWifiNameReadable(): Boolean {
+        return when {
+            !isBackgroundLocationGranted || !fineLocationState.status.isGranted -> {
+                showLocationDialog = true
+                false
+            }
+            !context.isLocationServicesEnabled() -> {
+                showLocationServicesAlertDialog = true
+                false
+            }
+            else -> true
+        }
+    }
 
-	if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) checkFineLocationGranted()
-	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-		if (context.isRunningOnTv() && Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-			checkFineLocationGranted()
-		} else {
-			val backgroundLocationState = rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-			isBackgroundLocationGranted = backgroundLocationState.status.isGranted
-		}
-	}
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) checkFineLocationGranted()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (context.isRunningOnTv() && Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            checkFineLocationGranted()
+        } else {
+            val backgroundLocationState =
+                rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            isBackgroundLocationGranted = backgroundLocationState.status.isGranted
+        }
+    }
 
-	LaunchedEffect(uiState.appSettings.trustedNetworkSSIDs) {
-		currentText = ""
-	}
+    LaunchedEffect(uiState.appSettings.trustedNetworkSSIDs) { currentText = "" }
 
-	LocationServicesDialog(
-		showLocationServicesAlertDialog,
-		onDismiss = { showLocationServicesAlertDialog = false },
-		onAttest = { showLocationServicesAlertDialog = false },
-	)
+    LocationServicesDialog(
+        showLocationServicesAlertDialog,
+        onDismiss = { showLocationServicesAlertDialog = false },
+        onAttest = { showLocationServicesAlertDialog = false },
+    )
 
-	BackgroundLocationDialog(
-		showLocationDialog,
-		onDismiss = { showLocationDialog = false },
-		onAttest = { showLocationDialog = false },
-	)
+    BackgroundLocationDialog(
+        showLocationDialog,
+        onDismiss = { showLocationDialog = false },
+        onAttest = { showLocationDialog = false },
+    )
 
-	Column(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-		modifier = Modifier
-			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
-			.padding(vertical = 24.dp)
-			.padding(horizontal = 24.dp),
-	) {
-		SurfaceSelectionGroupButton(
-			items = WifiTunnelingItems(uiState, viewModel, currentText, { currentText = it }, { isWifiNameReadable() }),
-		)
-		SurfaceSelectionGroupButton(
-			items = NetworkTunnelingItems(uiState, viewModel),
-		)
-		SurfaceSelectionGroupButton(
-			items = listOf(AdvancedSettingsItem(onClick = { navController.navigate(Route.AutoTunnelAdvanced) })),
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        modifier =
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = 24.dp)
+                .padding(horizontal = 24.dp),
+    ) {
+        SurfaceSelectionGroupButton(
+            items =
+                WifiTunnelingItems(
+                    uiState,
+                    viewModel,
+                    currentText,
+                    { currentText = it },
+                    { isWifiNameReadable() },
+                )
+        )
+        SurfaceSelectionGroupButton(items = NetworkTunnelingItems(uiState, viewModel))
+        SurfaceSelectionGroupButton(
+            items =
+                listOf(
+                    AdvancedSettingsItem(
+                        onClick = { navController.navigate(Route.AutoTunnelAdvanced) }
+                    )
+                )
+        )
+    }
 }

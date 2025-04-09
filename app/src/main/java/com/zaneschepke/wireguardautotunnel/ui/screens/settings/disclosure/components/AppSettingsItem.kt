@@ -16,26 +16,26 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun AppSettingsItem(viewModel: AppViewModel): SelectionItem {
-	val context = LocalContext.current
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.LocationOn,
-		title = {
-			Text(
-				text = stringResource(R.string.launch_app_settings),
-				style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = {
-			ForwardButton {
-				context.launchAppSettings().also {
-					viewModel.handleEvent(AppEvent.SetLocationDisclosureShown)
-				}
-			}
-		},
-		onClick = {
-			context.launchAppSettings().also {
-				viewModel.handleEvent(AppEvent.SetLocationDisclosureShown)
-			}
-		},
-	)
+    val context = LocalContext.current
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.LocationOn,
+        title = {
+            Text(
+                text = stringResource(R.string.launch_app_settings),
+                style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = {
+            ForwardButton {
+                context.launchAppSettings().also {
+                    viewModel.handleEvent(AppEvent.SetLocationDisclosureShown)
+                }
+            }
+        },
+        onClick = {
+            context.launchAppSettings().also {
+                viewModel.handleEvent(AppEvent.SetLocationDisclosureShown)
+            }
+        },
+    )
 }

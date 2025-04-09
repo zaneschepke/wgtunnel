@@ -20,40 +20,37 @@ import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun <T> DropdownSelector(
-	currentValue: T,
-	options: List<T>,
-	onValueSelected: (T) -> Unit,
-	modifier: Modifier = Modifier,
-	label: @Composable (() -> Unit)? = null,
-	isExpanded: Boolean = false,
-	onDismiss: () -> Unit = {},
+    currentValue: T,
+    options: List<T>,
+    onValueSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    label: @Composable (() -> Unit)? = null,
+    isExpanded: Boolean = false,
+    onDismiss: () -> Unit = {},
 ) {
-	Row(
-		horizontalArrangement = Arrangement.spacedBy(5.dp),
-		verticalAlignment = Alignment.CenterVertically,
-	) {
-		if (label != null) label()
-		Text(
-			text = currentValue.toString(),
-			style = MaterialTheme.typography.bodyMedium,
-		)
-		Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown))
-	}
-	DropdownMenu(
-		modifier = modifier.height(250.dp),
-		scrollState = rememberScrollState(),
-		containerColor = MaterialTheme.colorScheme.surface,
-		expanded = isExpanded,
-		onDismissRequest = onDismiss,
-	) {
-		options.forEach { option ->
-			DropdownMenuItem(
-				text = { Text(text = option.toString()) },
-				onClick = {
-					onValueSelected(option)
-					onDismiss() // Close dropdown after selection
-				},
-			)
-		}
-	}
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (label != null) label()
+        Text(text = currentValue.toString(), style = MaterialTheme.typography.bodyMedium)
+        Icon(Icons.Default.ArrowDropDown, contentDescription = stringResource(R.string.dropdown))
+    }
+    DropdownMenu(
+        modifier = modifier.height(250.dp),
+        scrollState = rememberScrollState(),
+        containerColor = MaterialTheme.colorScheme.surface,
+        expanded = isExpanded,
+        onDismissRequest = onDismiss,
+    ) {
+        options.forEach { option ->
+            DropdownMenuItem(
+                text = { Text(text = option.toString()) },
+                onClick = {
+                    onValueSelected(option)
+                    onDismiss() // Close dropdown after selection
+                },
+            )
+        }
+    }
 }

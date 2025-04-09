@@ -16,32 +16,34 @@ val Brick = Color(0xFFCE4257)
 val Straw = Color(0xFFD4C483)
 
 sealed class ThemeColors(
-	val background: Color,
-	val surface: Color,
-	val primary: Color,
-	val secondary: Color,
-	val onSurface: Color,
-	val onBackground: Color,
-	val outline: Color,
+    val background: Color,
+    val surface: Color,
+    val primary: Color,
+    val secondary: Color,
+    val onSurface: Color,
+    val onBackground: Color,
+    val outline: Color,
 ) {
 
-	data object Light : ThemeColors(
-		background = LightGrey.copy(alpha = 0.95f),
-		surface = OffWhite,
-		primary = Aqua,
-		secondary = LightGrey,
-		onSurface = BalticSea,
-		outline = Plantation.copy(alpha = .75f),
-		onBackground = BalticSea,
-	)
+    data object Light :
+        ThemeColors(
+            background = LightGrey.copy(alpha = 0.95f),
+            surface = OffWhite,
+            primary = Aqua,
+            secondary = LightGrey,
+            onSurface = BalticSea,
+            outline = Plantation.copy(alpha = .75f),
+            onBackground = BalticSea,
+        )
 
-	data object Dark : ThemeColors(
-		background = BalticSea,
-		surface = Shark,
-		primary = Aqua,
-		secondary = Plantation,
-		onSurface = OffWhite,
-		outline = CoolGray,
-		onBackground = OffWhite,
-	)
+    data object Dark :
+        ThemeColors(
+            background = BalticSea,
+            surface = Shark,
+            primary = Aqua,
+            secondary = Plantation,
+            onSurface = OffWhite,
+            outline = CoolGray,
+            onBackground = OffWhite,
+        )
 }

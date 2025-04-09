@@ -15,31 +15,31 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun KernelModeItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Code,
-		title = {
-			Text(
-				text = stringResource(R.string.kernel),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		description = {
-			Text(
-				text = stringResource(R.string.use_kernel),
-				style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appSettings.isKernelEnabled,
-				enabled = !(
-					uiState.appSettings.isAutoTunnelEnabled ||
-						uiState.appSettings.isAlwaysOnVpnEnabled ||
-						uiState.activeTunnels.isNotEmpty()
-					),
-				onClick = { viewModel.handleEvent(AppEvent.ToggleKernelMode) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleKernelMode) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Code,
+        title = {
+            Text(
+                text = stringResource(R.string.kernel),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        description = {
+            Text(
+                text = stringResource(R.string.use_kernel),
+                style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appSettings.isKernelEnabled,
+                enabled =
+                    !(uiState.appSettings.isAutoTunnelEnabled ||
+                        uiState.appSettings.isAlwaysOnVpnEnabled ||
+                        uiState.activeTunnels.isNotEmpty()),
+                onClick = { viewModel.handleEvent(AppEvent.ToggleKernelMode) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleKernelMode) },
+    )
 }

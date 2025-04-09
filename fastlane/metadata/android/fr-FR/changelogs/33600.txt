@@ -1,5 +1,0 @@
-Quoi de neuf :
-- Amélioration du flux de première ouverture
-- Passage à un fork de la bibliothèque WireGuard
-- Demande d'autorisation VPN lors du premier démarrage du VPN
-- Mise à jour des versions

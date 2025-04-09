@@ -27,50 +27,50 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun WifiTunnelItem(
-	tunnelConf: TunnelConf,
-	appSettings: AppSettings,
-	viewModel: AppViewModel,
-	currentText: String,
-	onTextChange: (String) -> Unit,
+    tunnelConf: TunnelConf,
+    appSettings: AppSettings,
+    viewModel: AppViewModel,
+    currentText: String,
+    onTextChange: (String) -> Unit,
 ): SelectionItem {
-	return SelectionItem(
-		title = {
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.Start,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(vertical = 8.dp),
-			) {
-				Icon(
-					imageVector = Icons.Outlined.Security,
-					contentDescription = stringResource(R.string.use_tunnel_on_wifi_name),
-					modifier = Modifier.size(iconSize),
-				)
-				Text(
-					text = stringResource(R.string.use_tunnel_on_wifi_name),
-					style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-					modifier = Modifier
-						.padding(start = 16.dp),
-				)
-			}
-		},
-		description = {
-			TrustedNetworkTextBox(
-				trustedNetworks = tunnelConf.tunnelNetworks,
-				onDelete = { viewModel.handleEvent(AppEvent.DeleteTunnelRunSSID(it, tunnelConf)) },
-				currentText = currentText,
-				onSave = {
-					viewModel.handleEvent(AppEvent.AddTunnelRunSSID(it, tunnelConf))
-					onTextChange("") // Reset the text field after saving
-				},
-				onValueChange = onTextChange,
-				supporting = {
-					if (appSettings.isWildcardsEnabled) {
-						WildcardsLabel()
-					}
-				},
-			)
-		},
-	)
+    return SelectionItem(
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Security,
+                    contentDescription = stringResource(R.string.use_tunnel_on_wifi_name),
+                    modifier = Modifier.size(iconSize),
+                )
+                Text(
+                    text = stringResource(R.string.use_tunnel_on_wifi_name),
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                    modifier = Modifier.padding(start = 16.dp),
+                )
+            }
+        },
+        description = {
+            TrustedNetworkTextBox(
+                trustedNetworks = tunnelConf.tunnelNetworks,
+                onDelete = { viewModel.handleEvent(AppEvent.DeleteTunnelRunSSID(it, tunnelConf)) },
+                currentText = currentText,
+                onSave = {
+                    viewModel.handleEvent(AppEvent.AddTunnelRunSSID(it, tunnelConf))
+                    onTextChange("") // Reset the text field after saving
+                },
+                onValueChange = onTextChange,
+                supporting = {
+                    if (appSettings.isWildcardsEnabled) {
+                        WildcardsLabel()
+                    }
+                },
+            )
+        },
+    )
 }

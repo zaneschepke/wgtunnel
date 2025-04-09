@@ -33,79 +33,71 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TrustedNetworkTextBox(
-	trustedNetworks: List<String>,
-	onDelete: (ssid: String) -> Unit,
-	currentText: String,
-	onSave: (ssid: String) -> Unit,
-	onValueChange: (network: String) -> Unit,
-	supporting: @Composable () -> Unit,
+    trustedNetworks: List<String>,
+    onDelete: (ssid: String) -> Unit,
+    currentText: String,
+    onSave: (ssid: String) -> Unit,
+    onValueChange: (network: String) -> Unit,
+    supporting: @Composable () -> Unit,
 ) {
-	val context = LocalContext.current
-	Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-		FlowRow(
-			modifier =
-			Modifier.fillMaxWidth(),
-			horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
-		) {
-			trustedNetworks.forEach { ssid ->
-				ClickableIconButton(
-					onClick = {
-						if (context.isRunningOnTv()) {
-							onDelete(ssid)
-						}
-					},
-					onIconClick = {
-						onDelete(ssid)
-					},
-					text = ssid,
-					icon = Icons.Filled.Close,
-				)
-			}
-		}
-		CustomTextField(
-			textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
-			value = currentText,
-			onValueChange = onValueChange,
-			interactionSource = remember { MutableInteractionSource() },
-			label = {
-				Text(
-					stringResource(R.string.add_wifi_name),
-					color = MaterialTheme.colorScheme.onSurface,
-					style = MaterialTheme.typography.labelMedium,
-				)
-			},
-			containerColor = MaterialTheme.colorScheme.surface,
-			supportingText = supporting,
-			modifier =
-			Modifier
-				.padding(
-					top = 5.dp,
-					bottom = 10.dp,
-				).fillMaxWidth().padding(end = 16.dp),
-			singleLine = true,
-			keyboardOptions =
-			KeyboardOptions(
-				capitalization = KeyboardCapitalization.None,
-				imeAction = ImeAction.Done,
-			),
-			keyboardActions = KeyboardActions(onDone = { onSave(currentText) }),
-			trailing = {
-				if (currentText != "") {
-					IconButton(onClick = {
-						onSave(currentText)
-					}) {
-						val icon = Icons.Outlined.Add
-						Icon(
-							imageVector = icon,
-							contentDescription = stringResource(
-								R.string
-									.trusted_ssid_value_description,
-							),
-							tint = MaterialTheme.colorScheme.primary,
-						)
-					}
-				}
-			},
-		)
-	}
+    val context = LocalContext.current
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
+        ) {
+            trustedNetworks.forEach { ssid ->
+                ClickableIconButton(
+                    onClick = {
+                        if (context.isRunningOnTv()) {
+                            onDelete(ssid)
+                        }
+                    },
+                    onIconClick = { onDelete(ssid) },
+                    text = ssid,
+                    icon = Icons.Filled.Close,
+                )
+            }
+        }
+        CustomTextField(
+            textStyle =
+                MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+            value = currentText,
+            onValueChange = onValueChange,
+            interactionSource = remember { MutableInteractionSource() },
+            label = {
+                Text(
+                    stringResource(R.string.add_wifi_name),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            supportingText = supporting,
+            modifier =
+                Modifier.padding(top = 5.dp, bottom = 10.dp).fillMaxWidth().padding(end = 16.dp),
+            singleLine = true,
+            keyboardOptions =
+                KeyboardOptions(
+                    capitalization = KeyboardCapitalization.None,
+                    imeAction = ImeAction.Done,
+                ),
+            keyboardActions = KeyboardActions(onDone = { onSave(currentText) }),
+            trailing = {
+                if (currentText != "") {
+                    IconButton(onClick = { onSave(currentText) }) {
+                        val icon = Icons.Outlined.Add
+                        Icon(
+                            imageVector = icon,
+                            contentDescription =
+                                stringResource(R.string.trusted_ssid_value_description),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            },
+        )
+    }
 }

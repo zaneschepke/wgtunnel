@@ -1,5 +1,0 @@
-Verbeteringen:
-- Tunnelstatistieken toevoegen aan hoofdscherm
-- Instellingenscherm AndroidTV-navigatie verbeteren
-- Meldingsvibratie verwijderen
-- Diverse andere bugfixes

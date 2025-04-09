@@ -1,5 +1,0 @@
-What's new:
-- Improved auto tunnel reliability
-- Improved tile sync
-- Added AndroidTV assets
-- Added apk fingerprint

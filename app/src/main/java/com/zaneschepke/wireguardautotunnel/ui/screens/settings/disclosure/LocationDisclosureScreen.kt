@@ -17,31 +17,24 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.compon
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.components.SkipItem
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.goFromRoot
-
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
 fun LocationDisclosureScreen(appUiState: AppUiState, viewModel: AppViewModel) {
-	val navController = LocalNavController.current
+    val navController = LocalNavController.current
 
-	LaunchedEffect(Unit, appUiState) {
-		if (appUiState.appState.isLocationDisclosureShown) navController.goFromRoot(Route.AutoTunnel)
-	}
+    LaunchedEffect(Unit, appUiState) {
+        if (appUiState.appState.isLocationDisclosureShown)
+            navController.goFromRoot(Route.AutoTunnel)
+    }
 
-	Column(
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.Top),
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(top = 18.dp)
-			.padding(horizontal = 24.dp),
-	) {
-		LocationDisclosureHeader()
-		SurfaceSelectionGroupButton(
-			items = listOf(AppSettingsItem(viewModel)),
-		)
-		SurfaceSelectionGroupButton(
-			items = listOf(SkipItem(viewModel)),
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.Top),
+        modifier = Modifier.fillMaxSize().padding(top = 18.dp).padding(horizontal = 24.dp),
+    ) {
+        LocationDisclosureHeader()
+        SurfaceSelectionGroupButton(items = listOf(AppSettingsItem(viewModel)))
+        SurfaceSelectionGroupButton(items = listOf(SkipItem(viewModel)))
+    }
 }

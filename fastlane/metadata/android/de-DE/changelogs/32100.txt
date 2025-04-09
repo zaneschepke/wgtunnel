@@ -1,3 +1,0 @@
-Verbesserungen:
-- Berechtigungsfehler auf Android Versionen vor 9 behoben
-- Andere Optimierungen

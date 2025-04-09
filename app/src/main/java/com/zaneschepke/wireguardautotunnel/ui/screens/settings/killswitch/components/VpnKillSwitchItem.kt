@@ -13,20 +13,21 @@ import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 
 @Composable
 fun VpnKillSwitchItem(uiState: AppUiState, toggleVpnSwitch: () -> Unit): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.VpnKey,
-		title = {
-			Text(
-				text = stringResource(R.string.vpn_kill_switch),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appSettings.isVpnKillSwitchEnabled,
-				onClick = { toggleVpnSwitch() },
-			)
-		},
-		onClick = { toggleVpnSwitch() },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.VpnKey,
+        title = {
+            Text(
+                text = stringResource(R.string.vpn_kill_switch),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appSettings.isVpnKillSwitchEnabled,
+                onClick = { toggleVpnSwitch() },
+            )
+        },
+        onClick = { toggleVpnSwitch() },
+    )
 }

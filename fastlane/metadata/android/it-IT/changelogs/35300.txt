@@ -1,6 +1,0 @@
-Novità:
-- Dispositivi rootati ora acquisiscono nome wifi senza locazione
-- Migliorie a scorrimento e condivisione schermata log
-- Corretti problemi importazione tunne per AndroidTV 14
-- Miglioramenti UI statistiche tunnel
-- Altre correzioni e migliorie

@@ -1,2 +1,0 @@
-Poprawki:
-- Uprawnienia do pierwszego planu w systemie Android 14

@@ -1,5 +1,0 @@
-Co nowego:
-- Automatyczne tunelowanie do określonych tuneli według nazwy Wi-Fi
-- Automatyczne sterowanie tunelem z kafelka i skrótów
-- Automatyczne uruchamianie ręcznego tunelu, jeśli był włączony przed ponownym uruchomieniem
-- Różne poprawki błędów i ulepszenia wydajności

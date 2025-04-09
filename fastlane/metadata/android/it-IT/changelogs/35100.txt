@@ -1,5 +1,0 @@
-Novità:
-- Correzioni per tunnel che non si avviano dal background
-- Aggiunto supporto per riavvio servizi dopo aggiornamento
-- Migliorie velocità animazione UI 
-- Altre ottimizzazioni

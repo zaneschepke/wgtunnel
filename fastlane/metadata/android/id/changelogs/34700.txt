@@ -1,6 +1,0 @@
-Apa yang baru:
-- Perbaiki masalah error
-- Meningkatkan kinerja kartu
-- Aktifkan kembali kunci pin
-- Jadikan restart saat boot sebagai pengaturan
-- Berbagai perbaikan kinerja dan bug

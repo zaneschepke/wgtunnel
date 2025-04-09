@@ -15,26 +15,27 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun MobileDataTunnelItem(tunnelConf: TunnelConf, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.PhoneAndroid,
-		title = {
-			Text(
-				text = stringResource(R.string.mobile_tunnel),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		description = {
-			Text(
-				text = stringResource(R.string.mobile_data_tunnel),
-				style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = tunnelConf.isMobileDataTunnel,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleMobileDataTunnel(tunnelConf)) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleMobileDataTunnel(tunnelConf)) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.PhoneAndroid,
+        title = {
+            Text(
+                text = stringResource(R.string.mobile_tunnel),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        description = {
+            Text(
+                text = stringResource(R.string.mobile_data_tunnel),
+                style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = tunnelConf.isMobileDataTunnel,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleMobileDataTunnel(tunnelConf)) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleMobileDataTunnel(tunnelConf)) },
+    )
 }

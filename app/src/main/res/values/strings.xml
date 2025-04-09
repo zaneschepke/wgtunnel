@@ -39,7 +39,6 @@
     <string name="name">Name</string>
     <string name="always_on_vpn_support">Allow Always-On VPN </string>
     <string name="location_services_not_detected">Location Services Not Detected</string>
-    <string name="hint_search_packages">Search packages</string>
     <string name="db_name" translatable="false">wg-tunnel-db</string>
     <string name="auto_tunneling">Auto-tunneling</string>
     <string name="vpn_on">VPN on</string>
@@ -56,7 +55,6 @@
     <string name="listen_port">Listen port</string>
     <string name="random">(random)</string>
     <string name="optional">(optional)</string>
-    <string name="optional_no_recommend">(optional, not recommended)</string>
     <string name="preshared_key">Pre-shared key</string>
     <string name="seconds">seconds</string>
     <string name="persistent_keepalive">Persistent keepalive</string>
@@ -64,7 +62,6 @@
     <string name="error_authentication_failed">Authentication failed</string>
     <string name="error_authorization_failed">Failed to authorize</string>
     <string name="enabled_app_shortcuts">Enable app shortcuts</string>
-    <string name="export_configs">Export configs</string>
     <string name="unknown_error">Unknown error occurred</string>
     <string name="tunnel_on_wifi">Tunnel on untrusted wifi</string>
     <string name="my_email" translatable="false">support@zaneschepke.com</string>
@@ -76,14 +73,12 @@
     <string name="error_ssid_exists">SSID already exists</string>
     <string name="error_root_denied">Root shell denied</string>
     <string name="error_no_file_explorer">No file explorer installed</string>
-    <string name="error_invalid_code">Invalid QR code</string>
     <string name="location_services_missing_message">The app is not detecting any location services enabled on your device. Depending on the device, this could cause the untrusted wifi feature to fail to read the wifi name. Would you like to continue anyways?</string>
     <string name="auto_tunnel_title">Auto-tunnel service</string>
     <string name="delete_tunnel">Delete tunnel</string>
     <string name="delete_tunnel_message">Are you sure you would like to delete this tunnel?</string>
     <string name="yes">Yes</string>
-    <string name="tunneling_apps">Tunneling apps</string>
-	<string name="all">all</string>
+    <string name="all">all</string>
     <string name="no_email_detected">No email app detected</string>
     <string name="no_browser_detected">No browser detected</string>
     <string name="open_issue">Open an issue</string>
@@ -123,8 +118,6 @@
 	<string name="vpn_settings">VPN system settings</string>
 	<string name="always_on_message">VPN connection permission has been denied. Please check the</string>
 	<string name="always_on_message2">to make sure Always-on VPN is turned off for all other apps and try again</string>
-	<string name="chat_description">Join the community</string>
-	<string name="tunnel_required">Feature requires at least one tunnel</string>
     <string name="background_location_message">Allow all the time location permission and/or precise location is required for this feature. Please see</string>
 	<string name="app_settings">app settings</string>
 	<string name="background_location_message2">to make sure these permissions are enabled</string>
@@ -150,8 +143,7 @@
 	<string name="display_theme">Display theme</string>
 	<string name="trusted_wifi_names">Trusted wifi names</string>
 	<string name="add_wifi_name">Add wifi name</string>
-	<string name="on_demand_rules">On demand tunnel rules</string>
-	<string name="primary_tunnel">Primary tunnel</string>
+    <string name="primary_tunnel">Primary tunnel</string>
 	<string name="mobile_tunnel">Mobile data tunnel</string>
 	<string name="skip">Skip</string>
 	<string name="launch_app_settings">Launch app settings</string>
@@ -168,9 +160,7 @@
 	<string name="donate">Donate to project</string>
 	<string name="local_logging">Local logging</string>
 	<string name="enable_local_logging">Enable local logging</string>
-	<string name="configuration_change">Configuration change</string>
-	<string name="requires_app_relaunch">This change requires an app relaunch. Would you like to proceed?</string>
-	<string name="add_from_clipboard">Add from clipboard</string>
+    <string name="add_from_clipboard">Add from clipboard</string>
 	<string name="stop_on_no_internet">Stop on no internet</string>
 	<string name="stop_on_internet_loss">Stop tunnel on internet loss</string>
 	<string name="ethernet_tunnel">Ethernet tunnel</string>
@@ -192,10 +182,7 @@
 	<string name="post_up">Post up</string>
 	<string name="pre_down">Pre down</string>
 	<string name="post_down">Post down</string>
-    <string name="amnezia_kernel_message">Amnezia unavailable in kernel mode</string>
-    <string name="enable_amnezia">Enable Amnezia</string>
-	<string name="wg_compat_mode">WG compatibility mode</string>
-	<string name="quick_actions">Quick actions</string>
+    <string name="quick_actions">Quick actions</string>
     <string name="advanced_settings">Advanced settings</string>
 	<string name="debounce_delay">Debounce delay</string>
 	<string name="hide_amnezia_properties">Hide Amnezia properties</string>
@@ -204,23 +191,15 @@
 	<string name="remove_amnezia_compatibility">Remove Amnezia compatibility</string>
 	<string name="exclude_lan">Exclude LAN</string>
 	<string name="include_lan">Include LAN</string>
-    <string name="error_tunnel_start">Failed to starting tunnel</string>
     <string name="tunnel_control">Tunnel control</string>
 	<string name="auto_tunnel">Auto-tunnel</string>
     <string name="kill_switch_off">Stop kill switch on trusted</string>
 	<string name="server_ipv4">IPv4 hostname resolution</string>
 	<string name="prefer_ipv4">Prefer IPv4 connection</string>
-    <string name="dns_error">Failed to resolve endpoint DNS.</string>
-	<string name="start_failed_config">Failed to start tunnel with config error.</string>
-	<string name="unauthorized">Failed to start tunnel, unauthorized.</string>
-	<string name="tunne_start_failed_title">Tunnel failure</string>
-	<string name="multiple">Multiple</string>
-    <string name="export_amnezia">Export as Amnezia</string>
-	<string name="export_wireguard">Export as WireGuard</string>
+    <string name="multiple">Multiple</string>
     <string name="add_from_url">Add from URL</string>
     <string name="enter_config_url">Enter config URL</string>
     <string name="error_download_failed">Failed to download config</string>
-    <string name="error_invalid_url">Invalid URL</string>
     <string name="save">Save</string>
 	<string name="search">Search</string>
 	<string name="select">Select</string>

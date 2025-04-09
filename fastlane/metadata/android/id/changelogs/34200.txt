@@ -1,5 +1,0 @@
-Apa yang baru:
-- Perbaiki regresi stop tunnel
-- Tambahkan pengaburan log
-- Tambahkan sembunyikan FAB pada gulir
-- Tambahkan pelokalan Turki

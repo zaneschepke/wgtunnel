@@ -1,3 +1,0 @@
-Mejoras:
-- La configuración creada no se guardó.
-- Versión elevada

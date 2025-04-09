@@ -1,5 +1,0 @@
-Apa yang baru:
-- Layar Tambahkan log
-- Menambahkan kunci aplikasi lokal
-- Tambahkan restart vpn pada ping yang gagal
-- Berbagai perbaikan bug

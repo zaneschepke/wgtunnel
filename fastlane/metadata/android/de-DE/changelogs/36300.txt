@@ -1,3 +1,0 @@
-Was ist neu?
-- Fehler beim Umschalten des Kernelmodus behoben
-- Fehler beim Absturz der Benachrichtigung behoben

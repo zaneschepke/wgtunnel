@@ -1,6 +1,0 @@
-Novità:
-- Corretti problemi di crash
-- Migliorate le prestazioni
-- Ri-abilita blocco pin
-- Creata impostazione riavvia al boot
-- Varie correzioni di problemi e di prestazioni
