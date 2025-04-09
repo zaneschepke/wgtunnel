@@ -21,7 +21,7 @@
     <string name="tunnel_mobile_data">Tunel przez mobilną transmisję danych</string>
     <string name="random">(losowy)</string>
     <string name="pin_created">Kod PIN został pomyślnie utworzony</string>
-    <string name="enter_pin">Podaj swój kod PIN</string>
+    <string name="enter_pin">Podaj kod PIN</string>
     <string name="enable_app_lock">Włącz blokadę aplikacji</string>
     <string name="response_packet_junk_size">Rozmiar śmieciowego pakietu odpowiedzi</string>
     <string name="response_packet_magic_header">Nagłówek magicznego pakietu odpowiedzi</string>
