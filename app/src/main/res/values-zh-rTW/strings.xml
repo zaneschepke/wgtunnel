@@ -26,13 +26,11 @@
     <string name="add_tunnels_text">從檔案或 zip 壓縮檔新增</string>
     <string name="add_from_qr">從 QR code 新增</string>
     <string name="copy_public_key">複製公鑰</string>
-    <string name="optional_no_recommend">(可選, 不建議)</string>
     <string name="optional">(可選)</string>
     <string name="random">(隨機)</string>
     <string name="cancel">取消</string>
     <string name="private_key">私鑰</string>
     <string name="listen_port">監聽連接埠</string>
-    <string name="export_configs">匯出組態</string>
     <string name="create_import">手動建立</string>
     <string name="seconds">秒</string>
     <string name="docs_description">閱讀文件</string>
@@ -40,7 +38,6 @@
     <string name="delete_tunnel">刪除隧道</string>
     <string name="delete_tunnel_message">您確定要刪除此隧道？</string>
     <string name="yes">是</string>
-    <string name="error_invalid_code">無效的 QR code</string>
     <string name="no_browser_detected">未安裝瀏覽器</string>
     <string name="no_email_detected">未安裝電子郵件應用程式</string>
     <string name="open_issue">建立新的問題</string>
@@ -58,7 +55,6 @@
     <string name="getting_started_guide">取得入門指南</string>
     <string name="settings">設定</string>
     <string name="restart_at_boot">開機時重新啟動</string>
-    <string name="chat_description">加入社區</string>
     <string name="junk_packet_count">無效封包數</string>
     <string name="set_custom_ping_internal">Ping 間隔 (秒)</string>
     <string name="app_settings">應用程式設定</string>
@@ -77,18 +73,13 @@
     <string name="automatic">自動</string>
     <string name="add_wifi_name">新增WiFi SSID</string>
     <string name="allow_lan_traffic">允許 LAN 流量</string>
-    <string name="configuration_change">組態變更</string>
     <string name="stop_on_no_internet">沒有連上網路時停用</string>
     <string name="stop_on_internet_loss">網路連線斷開時停止隧道</string>
     <string name="add_from_clipboard">從剪貼簿新增</string>
     <string name="stop">停止</string>
-    <string name="amnezia_kernel_message">Amnezia 無法在核心模式使用</string>
-    <string name="enable_amnezia">啟用 Amnezia</string>
-    <string name="wg_compat_mode">WG 相容性模式</string>
     <string name="advanced_settings">進階設定</string>
     <string name="exclude_lan">排除 LAN</string>
     <string name="include_lan">包含 LAN</string>
-    <string name="error_tunnel_start">啟用隧道失敗</string>
     <string name="unknown_error">發生未知錯誤</string>
     <string name="error_file_format">無效的隧道組態檔案格式</string>
     <string name="endpoint">端點</string>
@@ -105,7 +96,6 @@
     <string name="enable_local_logging">啟用本地日誌記錄</string>
     <string name="email_description">給作者寄電子郵件</string>
     <string name="always_on_vpn_support">允許永久連線的 VPN</string>
-    <string name="hint_search_packages">搜尋軟體套件</string>
     <string name="vpn_on">VPN 已開啟</string>
     <string name="vpn_off">VPN 已關閉</string>
     <string name="error_root_denied">無法取得 root 權限</string>

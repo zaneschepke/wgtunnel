@@ -19,7 +19,6 @@
     <string name="enabled_app_shortcuts">Włącz skróty aplikacji</string>
     <string name="privacy_policy">Wyświetl politykę prywatności</string>
     <string name="tunnel_mobile_data">Tunel przez mobilną transmisję danych</string>
-    <string name="hint_search_packages">Wyszukaj pakiety</string>
     <string name="random">(losowy)</string>
     <string name="pin_created">Kod PIN został pomyślnie utworzony</string>
     <string name="enter_pin">Podaj swój kod PIN</string>
@@ -38,27 +37,21 @@
     <string name="seconds">sek.</string>
     <string name="prominent_background_location_message">Ta funkcja wymaga pozwolenia na dostęp do lokalizacji w tle, aby włączyć monitorowanie SSID sieci Wi-Fi nawet wtedy, gdy aplikacja jest zamknięta. Więcej szczegółów znajdziesz w polityce prywatności znajdującej się na ekranie Obsługa.</string>
     <string name="optional">(opcjonalnie)</string>
-    <string name="optional_no_recommend">(opcjonalnie, niezalecane)</string>
     <string name="preshared_key">Klucz wstępnie udostępniony</string>
     <string name="location_services_missing_message">Aplikacja nie wykrywa żadnych usług lokalizacyjnych włączonych na tym urządzeniu. W zależności od urządzenia może to spowodować, że funkcja niezaufanej sieci Wi-Fi nie będzie w stanie odczytać nazwy sieci Wi-Fi. Czy chcesz kontynuować mimo to?</string>
     <string name="read_logs">Przeczytaj dzienniki</string>
     <string name="support">Obsługa</string>
     <string name="init_packet_magic_header">Nagłówek magicznego pakietu początkowego</string>
-    <string name="chat_description">Dołącz do społeczności</string>
     <string name="cancel">Anuluj</string>
     <string name="always_on_message2">w celu upewnienia się, że funkcja stałego VPN jest wyłączona dla wszystkich innych aplikacji, następnie spróbuj ponownie</string>
-    <string name="requires_app_relaunch">Ta zmiana wymaga ponownego uruchomienia aplikacji. Czy chcesz kontynuować?</string>
     <string name="use_tunnel_on_wifi_name">Użyj tunelu na nazwę sieci Wi-Fi</string>
     <string name="root_accepted">Zezwolono na powłokę użytkownika root</string>
-    <string name="tunneling_apps">Aplikacje tunelujące</string>
     <string name="vpn_channel_name">Kanał powiadomień VPN</string>
     <string name="create_import">Utwórz od nowa</string>
-    <string name="error_invalid_code">Nieprawidłowy kod QR</string>
     <string name="always_on_message">Zezwolenie na połączenie VPN zostało odrzucone. Sprawdź</string>
     <string name="persistent_keepalive">Trwałe utrzymywanie połączenia</string>
     <string name="vpn_settings">Ustawienia systemowe VPN</string>
     <string name="no_browser_detected">Nie wykryto przeglądarki</string>
-    <string name="configuration_change">Zmiana konfiguracji</string>
     <string name="prominent_background_location_title">Ujawnienie lokalizacji w tle</string>
     <string name="email_subject">Obsługa aplikacji WG Tunnel</string>
     <string name="auto">(automatycznie)</string>
@@ -68,7 +61,6 @@
     <string name="tunnel_on_wifi">Tunel przez niezaufaną sieć Wi-Fi</string>
     <string name="dns_servers">Serwery DNS</string>
     <string name="error_file_extension">Plik nie jest w formacie .conf lub .zip</string>
-    <string name="export_configs">Eksportuj konfiguracje</string>
     <string name="copy_public_key">Skopiuj klucz publiczny</string>
     <string name="restart_on_ping">Uruchom ponownie w przypadku niepowodzenia pingowania (beta)</string>
     <string name="junk_packet_minimum_size">Minimalny rozmiar pakietu śmieciowego</string>
@@ -120,7 +112,6 @@
     <string name="junk_packet_count">Liczba pakietów śmieciowych</string>
     <string name="init_packet_junk_size">Rozmiar śmieciowego pakietu początkowego</string>
     <string name="vpn_denied_dialog_title">Odmowa zezwolenia</string>
-    <string name="tunnel_required">Funkcja wymaga co najmniej jednego tunelu</string>
     <string name="app_settings">ustawienia aplikacji</string>
     <string name="set_custom_ping_ip">Ustaw niestandardowy adres IP pingowania</string>
     <string name="default_ping_ip">(opcjonalnie, domyślnie do peerów)</string>
@@ -138,7 +129,6 @@
     <string name="display_theme">Motyw wyświetlania</string>
     <string name="trusted_wifi_names">Nazwy zaufanych sieci Wi-Fi</string>
     <string name="add_wifi_name">Dodaj nazwę sieci Wi-Fi</string>
-    <string name="on_demand_rules">Zasady korzystania z tunelu na żądanie</string>
     <string name="primary_tunnel">Tunel podstawowy</string>
     <string name="mobile_tunnel">Tunel mobilnej transmisji danych</string>
     <string name="skip">Pomiń</string>
@@ -177,9 +167,6 @@
     <string name="post_up">Po aktywacji</string>
     <string name="pre_down">Przed dezaktywacją</string>
     <string name="post_down">Po dezaktywacji</string>
-    <string name="amnezia_kernel_message">Protokół Amnezia niedostępny w trybie jądra</string>
-    <string name="enable_amnezia">Włącz protokół Amnezia</string>
-    <string name="wg_compat_mode">Tryb zgodności WG</string>
     <string name="quick_actions">Szybkie czynności</string>
     <string name="native_kill_switch">Natywny wyłącznik awaryjny</string>
     <string name="vpn_kill_switch">Wyłącznik awaryjny VPN</string>
@@ -193,17 +180,10 @@
     <string name="include_lan">Uwzględnij LAN</string>
     <string name="advanced_settings">Ustawienia zaawansowane</string>
     <string name="hide_amnezia_properties">Ukryj właściwości protokołu Amnezia</string>
-    <string name="error_tunnel_start">Nie udało się uruchomić tunelu</string>
     <string name="tunnel_control">Kontrola tunelu</string>
     <string name="auto_tunnel">Autotunel</string>
     <string name="kill_switch_off">Zatrzymaj wyłącznik awaryjny w zaufanej</string>
     <string name="server_ipv4">Rozpoznawanie nazw hostów IPv6</string>
     <string name="prefer_ipv4">Preferuj połączenie IPv4</string>
-    <string name="unauthorized">Nie udało się uruchomić tunelu, brak autoryzacji.</string>
     <string name="multiple">Wiele</string>
-    <string name="start_failed_config">Nie udało się uruchomić tunelu z powodu błędu konfiguracji.</string>
-    <string name="tunne_start_failed_title">Awaria tunelu</string>
-    <string name="dns_error">Nie udało się rozpoznać punktu końcowego DNS.</string>
-    <string name="export_amnezia">Eksportuj jako Amnezia</string>
-    <string name="export_wireguard">Eksportuj jako WireGuard</string>
 </resources>

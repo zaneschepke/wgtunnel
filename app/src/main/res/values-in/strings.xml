@@ -33,14 +33,12 @@
     <string name="listen_port">Dengarkan port</string>
     <string name="random">(acak)</string>
     <string name="optional">(opsional)</string>
-    <string name="optional_no_recommend">(opsional, tidak direkomendasikan)</string>
     <string name="preshared_key">kunci Pre-shared</string>
     <string name="seconds">detik</string>
     <string name="persistent_keepalive">Tetap hidup</string>
     <string name="cancel">Batal</string>
     <string name="error_authorization_failed">Gagal mengotorisasi</string>
     <string name="enabled_app_shortcuts">Mengaktifkan pintasan aplikasi</string>
-    <string name="export_configs">Ekspor konfigurasi</string>
     <string name="unknown_error">Terjadi kesalahan yang tidak diketahui</string>
     <string name="tunnel_on_wifi">Tunnel di wifi yang tidak tepercaya</string>
     <string name="email_subject">WG Tunnel Support</string>
@@ -51,11 +49,9 @@
     <string name="error_ssid_exists">SSID sudah ada</string>
     <string name="error_root_denied">Root shell ditolak</string>
     <string name="error_no_file_explorer">Tidak ada file explorer yang diinstal</string>
-    <string name="error_invalid_code">Kode QR tidak valid</string>
     <string name="location_services_missing_message">Aplikasi tidak mendeteksi layanan lokasi apa pun yang diaktifkan di perangkat Anda. Tergantung pada perangkatnya, hal ini dapat menyebabkan fitur wifi yang tidak tepercaya gagal membaca nama wifi. Apakah Anda ingin melanjutkan?</string>
     <string name="auto_tunnel_title">Layanan Auto-tunnel</string>
     <string name="yes">Ya</string>
-    <string name="tunneling_apps">Aplikasi tunneling</string>
     <string name="incorrect_pin">Pin salah</string>
     <string name="pin_created">Pin berhasil dibuat</string>
     <string name="enter_pin">Masukkan pin Anda</string>
@@ -79,8 +75,6 @@
     <string name="vpn_settings">Pengaturan sistem VPN</string>
     <string name="always_on_message">Izin koneksi VPN telah ditolak. Silakan periksa</string>
     <string name="always_on_message2">untuk memastikan VPN Selalu aktif dimatikan untuk semua aplikasi lain dan coba lagi</string>
-    <string name="chat_description">Bergabunglah dengan komunitas</string>
-    <string name="tunnel_required">Fitur membutuhkan setidaknya satu tunnel</string>
     <string name="background_location_message">Izinkan izin lokasi sepanjang waktu dan/atau lokasi yang tepat diperlukan untuk fitur ini. Silakan lihat</string>
     <string name="app_settings">pengaturan aplikasi</string>
     <string name="background_location_message2">untuk memastikan izin ini diaktifkan.</string>
