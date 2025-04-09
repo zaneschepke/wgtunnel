@@ -193,6 +193,14 @@ jobs:
           files: |
             ${{ github.workspace }}/temp/*
 
+      # notify socials
+      - name: Trigger on-publish workflow
+        if: ${{ inputs.release_type == 'release' }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          event-type: publish-release
+
   publish-fdroid:
     runs-on: ubuntu-latest
     needs:

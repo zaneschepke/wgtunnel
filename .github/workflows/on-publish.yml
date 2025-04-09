@@ -1,12 +1,10 @@
 name: on-publish
 
 on:
-  release:
-    types: [ released ]
-
+  repository_dispatch:
+    types: [ publish-release ]
 
 jobs:
-
   on-publish:
     name: On publish
     runs-on: ubuntu-latest
