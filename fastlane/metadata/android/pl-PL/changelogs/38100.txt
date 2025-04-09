@@ -1,0 +1,6 @@
+Co nowego:
+- Nowa integracja intencji zdalnej aplikacji
+- Kopiowanie aktywnej nazwy Wi-Fi do schowka
+- Naprawiono błąd wyłączania tunelu
+- Naprawiono błąd domyślnego serwera DNS, preferowanie DNS telefonu
+- Naprawiono konfiguracje statycznych hostów równorzędnych IPv6
