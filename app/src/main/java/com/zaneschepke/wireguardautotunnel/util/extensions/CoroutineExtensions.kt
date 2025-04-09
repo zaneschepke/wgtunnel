@@ -33,7 +33,7 @@ fun <T> ReceiveChannel<T>.chunked(scope: CoroutineScope, size: Int, time: Durati
                 whileSelect {
                     ticker.onReceive {
                         false // done with chunk when timer ticks, takes priority over received
-                              // elements
+                        // elements
                     }
                     this@chunked.onReceive {
                         chunk += it
