@@ -21,39 +21,40 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun RemoteControlItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboardManager.current
 
-	return SelectionItem(
-		leadingIcon = Icons.Filled.SmartToy,
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appState.isRemoteControlEnabled,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleRemoteControl) },
-			)
-		},
-		description = {
-			uiState.appState.remoteKey?.let { key ->
-				AnimatedVisibility(visible = uiState.appState.isRemoteControlEnabled) {
-					Text(
-						text = stringResource(R.string.remote_key_template, key),
-						style = MaterialTheme.typography.bodySmall.copy(
-							color = MaterialTheme.colorScheme.outline,
-						),
-						maxLines = 1,
-						overflow = TextOverflow.Ellipsis,
-						modifier = Modifier.clickable {
-							clipboardManager.setText(AnnotatedString(key))
-						},
-					)
-				}
-			}
-		},
-		title = {
-			Text(
-				text = stringResource(R.string.enable_remote_app_control),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleRemoteControl) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Filled.SmartToy,
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appState.isRemoteControlEnabled,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleRemoteControl) },
+            )
+        },
+        description = {
+            uiState.appState.remoteKey?.let { key ->
+                AnimatedVisibility(visible = uiState.appState.isRemoteControlEnabled) {
+                    Text(
+                        text = stringResource(R.string.remote_key_template, key),
+                        style =
+                            MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.outline
+                            ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier =
+                            Modifier.clickable { clipboardManager.setText(AnnotatedString(key)) },
+                    )
+                }
+            }
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.enable_remote_app_control),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleRemoteControl) },
+    )
 }

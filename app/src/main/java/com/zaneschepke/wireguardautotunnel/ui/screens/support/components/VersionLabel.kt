@@ -17,23 +17,22 @@ import com.zaneschepke.wireguardautotunnel.util.Constants
 
 @Composable
 fun VersionLabel() {
-	val clipboardManager = LocalClipboardManager.current
-	Row(
-		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.Start,
-	) {
-		val versionText = if (BuildConfig.BUILD_TYPE == Constants.RELEASE) {
-			BuildConfig.VERSION_NAME
-		} else {
-			"${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}"
-		}
-		Text(
-			"${stringResource(R.string.version)}: $versionText",
-			style = MaterialTheme.typography.labelMedium,
-			color = MaterialTheme.colorScheme.outline,
-			modifier = Modifier.clickable {
-				clipboardManager.setText(AnnotatedString(BuildConfig.VERSION_NAME))
-			},
-		)
-	}
+    val clipboardManager = LocalClipboardManager.current
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start) {
+        val versionText =
+            if (BuildConfig.BUILD_TYPE == Constants.RELEASE) {
+                BuildConfig.VERSION_NAME
+            } else {
+                "${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}"
+            }
+        Text(
+            "${stringResource(R.string.version)}: $versionText",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.outline,
+            modifier =
+                Modifier.clickable {
+                    clipboardManager.setText(AnnotatedString(BuildConfig.VERSION_NAME))
+                },
+        )
+    }
 }

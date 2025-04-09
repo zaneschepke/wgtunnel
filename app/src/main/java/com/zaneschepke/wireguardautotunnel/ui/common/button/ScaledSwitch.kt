@@ -9,19 +9,26 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ScaledSwitch(checked: Boolean, onClick: (checked: Boolean) -> Unit, enabled: Boolean = true, modifier: Modifier = Modifier) {
-	Switch(
-		checked,
-		{ onClick(it) },
-		modifier.scale((52.dp / 52.dp)),
-		enabled = enabled,
-		colors = SwitchDefaults.colors().copy(
-			checkedThumbColor = MaterialTheme.colorScheme.background,
-			checkedIconColor = MaterialTheme.colorScheme.background,
-			uncheckedTrackColor = MaterialTheme.colorScheme.surface,
-			uncheckedBorderColor = MaterialTheme.colorScheme.outline,
-			uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-			uncheckedIconColor = MaterialTheme.colorScheme.outline,
-		),
-	)
+fun ScaledSwitch(
+    checked: Boolean,
+    onClick: (checked: Boolean) -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
+    Switch(
+        checked,
+        { onClick(it) },
+        modifier.scale((52.dp / 52.dp)),
+        enabled = enabled,
+        colors =
+            SwitchDefaults.colors()
+                .copy(
+                    checkedThumbColor = MaterialTheme.colorScheme.background,
+                    checkedIconColor = MaterialTheme.colorScheme.background,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surface,
+                    uncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                    uncheckedIconColor = MaterialTheme.colorScheme.outline,
+                ),
+    )
 }

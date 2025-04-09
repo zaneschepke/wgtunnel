@@ -15,26 +15,27 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun LanTrafficItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Lan,
-		title = {
-			Text(
-				text = stringResource(R.string.allow_lan_traffic),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		description = {
-			Text(
-				text = stringResource(R.string.bypass_lan_for_kill_switch),
-				style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appSettings.isLanOnKillSwitchEnabled,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleLanOnKillSwitch) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleLanOnKillSwitch) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Lan,
+        title = {
+            Text(
+                text = stringResource(R.string.allow_lan_traffic),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        description = {
+            Text(
+                text = stringResource(R.string.bypass_lan_for_kill_switch),
+                style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appSettings.isLanOnKillSwitchEnabled,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleLanOnKillSwitch) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleLanOnKillSwitch) },
+    )
 }

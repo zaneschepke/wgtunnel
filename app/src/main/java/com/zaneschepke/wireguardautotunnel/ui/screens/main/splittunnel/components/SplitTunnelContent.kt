@@ -13,29 +13,27 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state.Spl
 
 @Composable
 fun SplitTunnelContent(
-	uiState: SplitTunnelUiState,
-	onSplitOptionChange: (SplitOption) -> Unit,
-	onAppSelectionToggle: (String) -> Unit,
-	onQueryChange: (String) -> Unit,
+    uiState: SplitTunnelUiState,
+    onSplitOptionChange: (SplitOption) -> Unit,
+    onAppSelectionToggle: (String) -> Unit,
+    onQueryChange: (String) -> Unit,
 ) {
-	Column(
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		modifier = Modifier
-			.fillMaxWidth()
-			.padding(top = 24.dp),
-	) {
-		SplitOptionSelector(
-			selectedOption = uiState.splitOption,
-			onOptionChange = onSplitOptionChange,
-		)
-		if (uiState.splitOption != SplitOption.ALL) {
-			AppListSection(
-				apps = uiState.tunneledApps,
-				onAppSelectionToggle = onAppSelectionToggle,
-				onQueryChange = onQueryChange,
-				uiState.searchQuery,
-			)
-		}
-	}
+    Column(
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+    ) {
+        SplitOptionSelector(
+            selectedOption = uiState.splitOption,
+            onOptionChange = onSplitOptionChange,
+        )
+        if (uiState.splitOption != SplitOption.ALL) {
+            AppListSection(
+                apps = uiState.tunneledApps,
+                onAppSelectionToggle = onAppSelectionToggle,
+                onQueryChange = onQueryChange,
+                uiState.searchQuery,
+            )
+        }
+    }
 }

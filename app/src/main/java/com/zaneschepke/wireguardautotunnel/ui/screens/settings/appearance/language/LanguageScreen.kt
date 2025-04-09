@@ -13,34 +13,31 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.langua
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.components.LanguageItem
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
-
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import java.text.Collator
 import java.util.*
 
 @Composable
 fun LanguageScreen(appUiState: AppUiState, viewModel: AppViewModel) {
-	val collator = Collator.getInstance(Locale.getDefault())
+    val collator = Collator.getInstance(Locale.getDefault())
 
-	val locales = LocaleUtil.supportedLocales.map {
-		val tag = it.replace("_", "-")
-		Locale.forLanguageTag(tag)
-	}
+    val locales =
+        LocaleUtil.supportedLocales.map {
+            val tag = it.replace("_", "-")
+            Locale.forLanguageTag(tag)
+        }
 
-	val sortedLocales = remember(locales) {
-		locales.sortedWith(compareBy(collator) { it.getDisplayName(it) }).toList()
-	}
+    val sortedLocales =
+        remember(locales) {
+            locales.sortedWith(compareBy(collator) { it.getDisplayName(it) }).toList()
+        }
 
-	LazyColumn(
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Top,
-		modifier = Modifier.padding(horizontal = 24.dp),
-	) {
-		item {
-			AutomaticLanguageItem(appUiState, viewModel)
-		}
-		items(sortedLocales, key = { it }) { locale ->
-			LanguageItem(locale, appUiState, viewModel)
-		}
-	}
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+        modifier = Modifier.padding(horizontal = 24.dp),
+    ) {
+        item { AutomaticLanguageItem(appUiState, viewModel) }
+        items(sortedLocales, key = { it }) { locale -> LanguageItem(locale, appUiState, viewModel) }
+    }
 }

@@ -26,55 +26,54 @@ import java.util.*
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TunnelList(
-	appUiState: AppUiState,
-	activeTunnels: Map<TunnelConf, TunnelState>,
-	selectedTunnel: TunnelConf?,
-	onSetSelectedTunnel: (TunnelConf?) -> Unit,
-	onDeleteTunnel: (TunnelConf) -> Unit,
-	onToggleTunnel: (TunnelConf, Boolean) -> Unit,
-	onExpandStats: () -> Unit,
-	onCopyTunnel: (TunnelConf) -> Unit,
-	modifier: Modifier = Modifier,
-	viewModel: AppViewModel,
+    appUiState: AppUiState,
+    activeTunnels: Map<TunnelConf, TunnelState>,
+    selectedTunnel: TunnelConf?,
+    onSetSelectedTunnel: (TunnelConf?) -> Unit,
+    onDeleteTunnel: (TunnelConf) -> Unit,
+    onToggleTunnel: (TunnelConf, Boolean) -> Unit,
+    onExpandStats: () -> Unit,
+    onCopyTunnel: (TunnelConf) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: AppViewModel,
 ) {
-	val context = LocalContext.current
-	val collator = Collator.getInstance(Locale.getDefault())
-	val sortedTunnels = remember(appUiState.tunnels) {
-		appUiState.tunnels.sortedWith(compareBy(collator) { it.tunName })
-	}
+    val context = LocalContext.current
+    val collator = Collator.getInstance(Locale.getDefault())
+    val sortedTunnels =
+        remember(appUiState.tunnels) {
+            appUiState.tunnels.sortedWith(compareBy(collator) { it.tunName })
+        }
 
-	LazyColumn(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top),
-		modifier = modifier
-			.pointerInput(Unit) {
-				if (appUiState.tunnels.isEmpty()) return@pointerInput
-			}.overscroll(ScrollableDefaults.overscrollEffect()),
-		state = rememberLazyListState(0, appUiState.tunnels.count()),
-		userScrollEnabled = true,
-		reverseLayout = false,
-		flingBehavior = ScrollableDefaults.flingBehavior(),
-	) {
-		if (appUiState.tunnels.isEmpty()) {
-			item {
-				GettingStartedLabel(onClick = { context.openWebUrl(it) })
-			}
-		}
-		items(sortedTunnels, key = { it.id }) { tunnel ->
-			val tunnelState = activeTunnels.getValueById(tunnel.id) ?: TunnelState()
-			TunnelRowItem(
-				isActive = tunnelState.status.isUpOrStarting(),
-				expanded = appUiState.appState.isTunnelStatsExpanded,
-				isSelected = selectedTunnel?.id == tunnel.id,
-				tunnel = tunnel,
-				tunnelState = tunnelState,
-				onSetSelectedTunnel = { onSetSelectedTunnel(it) },
-				onClick = onExpandStats,
-				onCopy = { onCopyTunnel(tunnel) },
-				onDelete = { onDeleteTunnel(tunnel) },
-				onSwitchClick = { checked -> onToggleTunnel(tunnel, checked) },
-				viewModel = viewModel,
-			)
-		}
-	}
+    LazyColumn(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top),
+        modifier =
+            modifier
+                .pointerInput(Unit) { if (appUiState.tunnels.isEmpty()) return@pointerInput }
+                .overscroll(ScrollableDefaults.overscrollEffect()),
+        state = rememberLazyListState(0, appUiState.tunnels.count()),
+        userScrollEnabled = true,
+        reverseLayout = false,
+        flingBehavior = ScrollableDefaults.flingBehavior(),
+    ) {
+        if (appUiState.tunnels.isEmpty()) {
+            item { GettingStartedLabel(onClick = { context.openWebUrl(it) }) }
+        }
+        items(sortedTunnels, key = { it.id }) { tunnel ->
+            val tunnelState = activeTunnels.getValueById(tunnel.id) ?: TunnelState()
+            TunnelRowItem(
+                isActive = tunnelState.status.isUpOrStarting(),
+                expanded = appUiState.appState.isTunnelStatsExpanded,
+                isSelected = selectedTunnel?.id == tunnel.id,
+                tunnel = tunnel,
+                tunnelState = tunnelState,
+                onSetSelectedTunnel = { onSetSelectedTunnel(it) },
+                onClick = onExpandStats,
+                onCopy = { onCopyTunnel(tunnel) },
+                onDelete = { onDeleteTunnel(tunnel) },
+                onSwitchClick = { checked -> onToggleTunnel(tunnel, checked) },
+                viewModel = viewModel,
+            )
+        }
+    }
 }

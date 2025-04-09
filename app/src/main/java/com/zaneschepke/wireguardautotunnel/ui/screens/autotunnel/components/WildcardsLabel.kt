@@ -9,8 +9,12 @@ import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun WildcardsLabel() {
-	Text(
-		stringResource(R.string.wildcards_active),
-		style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline, fontStyle = FontStyle.Italic),
-	)
+    Text(
+        stringResource(R.string.wildcards_active),
+        style =
+            MaterialTheme.typography.bodySmall.copy(
+                MaterialTheme.colorScheme.outline,
+                fontStyle = FontStyle.Italic,
+            ),
+    )
 }

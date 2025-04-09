@@ -15,26 +15,27 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun PrimaryTunnelItem(tunnelConf: TunnelConf, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Star,
-		title = {
-			Text(
-				text = stringResource(R.string.primary_tunnel),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		description = {
-			Text(
-				text = stringResource(R.string.set_primary_tunnel),
-				style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = tunnelConf.isPrimaryTunnel,
-				onClick = { viewModel.handleEvent(AppEvent.TogglePrimaryTunnel(tunnelConf)) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.TogglePrimaryTunnel(tunnelConf)) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Star,
+        title = {
+            Text(
+                text = stringResource(R.string.primary_tunnel),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        description = {
+            Text(
+                text = stringResource(R.string.set_primary_tunnel),
+                style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = tunnelConf.isPrimaryTunnel,
+                onClick = { viewModel.handleEvent(AppEvent.TogglePrimaryTunnel(tunnelConf)) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.TogglePrimaryTunnel(tunnelConf)) },
+    )
 }

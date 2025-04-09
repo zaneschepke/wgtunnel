@@ -9,26 +9,26 @@ import com.zaneschepke.wireguardautotunnel.R
 
 @Composable
 fun LocationServicesDialog(show: Boolean, onDismiss: () -> Unit, onAttest: () -> Unit) {
-	if (show) {
-		AlertDialog(
-			onDismissRequest = { onDismiss() },
-			confirmButton = {
-				TextButton(
-					onClick = {
-						onDismiss()
-						onAttest()
-					},
-				) {
-					Text(text = stringResource(R.string.okay))
-				}
-			},
-			dismissButton = {
-				TextButton(onClick = { onDismiss() }) {
-					Text(text = stringResource(R.string.cancel))
-				}
-			},
-			title = { Text(text = stringResource(R.string.location_services_not_detected)) },
-			text = { Text(text = stringResource(R.string.location_services_missing_message)) },
-		)
-	}
+    if (show) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDismiss()
+                        onAttest()
+                    }
+                ) {
+                    Text(text = stringResource(R.string.okay))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onDismiss() }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            },
+            title = { Text(text = stringResource(R.string.location_services_not_detected)) },
+            text = { Text(text = stringResource(R.string.location_services_missing_message)) },
+        )
+    }
 }

@@ -12,17 +12,16 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionIte
 
 @Composable
 fun AdvancedSettingsItem(onClick: () -> Unit): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Settings,
-		title = {
-			Text(
-				stringResource(R.string.advanced_settings),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = {
-			ForwardButton { onClick() }
-		},
-		onClick = { onClick() },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Settings,
+        title = {
+            Text(
+                stringResource(R.string.advanced_settings),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { onClick() } },
+        onClick = { onClick() },
+    )
 }

@@ -13,16 +13,16 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun LocalLoggingItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.ViewHeadline,
-		title = { SelectionItemLabel(R.string.local_logging) },
-		description = { SelectionItemLabel(R.string.enable_local_logging, isDescription = true) },
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appState.isLocalLogsEnabled,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleLocalLogging) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleLocalLogging) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.ViewHeadline,
+        title = { SelectionItemLabel(R.string.local_logging) },
+        description = { SelectionItemLabel(R.string.enable_local_logging, isDescription = true) },
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appState.isLocalLogsEnabled,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleLocalLogging) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleLocalLogging) },
+    )
 }

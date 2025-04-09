@@ -14,16 +14,17 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.launchNotificationSet
 
 @Composable
 fun NotificationsItem(): SelectionItem {
-	val context = LocalContext.current
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Notifications,
-		title = {
-			Text(
-				text = stringResource(R.string.notifications),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = { ForwardButton { context.launchNotificationSettings() } },
-		onClick = { context.launchNotificationSettings() },
-	)
+    val context = LocalContext.current
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Notifications,
+        title = {
+            Text(
+                text = stringResource(R.string.notifications),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { context.launchNotificationSettings() } },
+        onClick = { context.launchNotificationSettings() },
+    )
 }

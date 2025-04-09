@@ -14,16 +14,17 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 
 @Composable
 fun KillSwitchItem(): SelectionItem {
-	val navController = LocalNavController.current
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.VpnKeyOff,
-		title = {
-			Text(
-				text = stringResource(R.string.kill_switch_options),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = { ForwardButton { navController.navigate(Route.KillSwitch) } },
-		onClick = { navController.navigate(Route.KillSwitch) },
-	)
+    val navController = LocalNavController.current
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.VpnKeyOff,
+        title = {
+            Text(
+                text = stringResource(R.string.kill_switch_options),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { navController.navigate(Route.KillSwitch) } },
+        onClick = { navController.navigate(Route.KillSwitch) },
+    )
 }

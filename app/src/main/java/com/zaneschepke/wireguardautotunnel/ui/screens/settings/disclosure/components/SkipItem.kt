@@ -12,16 +12,14 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun SkipItem(viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		title = {
-			Text(
-				text = stringResource(R.string.skip),
-				style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = {
-			ForwardButton { viewModel.handleEvent(AppEvent.SetLocationDisclosureShown) }
-		},
-		onClick = { viewModel.handleEvent(AppEvent.SetLocationDisclosureShown) },
-	)
+    return SelectionItem(
+        title = {
+            Text(
+                text = stringResource(R.string.skip),
+                style = MaterialTheme.typography.bodyLarge.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { viewModel.handleEvent(AppEvent.SetLocationDisclosureShown) } },
+        onClick = { viewModel.handleEvent(AppEvent.SetLocationDisclosureShown) },
+    )
 }

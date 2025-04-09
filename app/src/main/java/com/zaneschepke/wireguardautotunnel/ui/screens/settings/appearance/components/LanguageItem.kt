@@ -14,16 +14,17 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 
 @Composable
 fun LanguageItem(): SelectionItem {
-	val navController = LocalNavController.current
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Translate,
-		title = {
-			Text(
-				text = stringResource(R.string.language),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = { ForwardButton { navController.navigate(Route.Language) } },
-		onClick = { navController.navigate(Route.Language) },
-	)
+    val navController = LocalNavController.current
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Translate,
+        title = {
+            Text(
+                text = stringResource(R.string.language),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { navController.navigate(Route.Language) } },
+        onClick = { navController.navigate(Route.Language) },
+    )
 }

@@ -1,8 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.data
 
 object Queries {
-	fun createDefaultSettings(): String {
-		return """
+    fun createDefaultSettings(): String {
+        return """
 		INSERT INTO Settings (is_tunnel_enabled,
 		        is_tunnel_on_mobile_data_enabled,
 		        trusted_network_ssids,
@@ -24,12 +24,14 @@ object Queries {
 		        'false',
 		        'false',
 		        'false')
-		""".trimIndent()
-	}
+		"""
+            .trimIndent()
+    }
 
-	fun createTunnelConfig(): String {
-		return """
+    fun createTunnelConfig(): String {
+        return """
 		INSERT INTO TunnelConfig (name, wg_quick) VALUES ('test', 'test')
-		""".trimIndent()
-	}
+		"""
+            .trimIndent()
+    }
 }

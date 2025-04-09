@@ -15,26 +15,27 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun ServerIpv4Item(tunnelConf: TunnelConf, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Dns,
-		title = {
-			Text(
-				text = stringResource(R.string.server_ipv4),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		description = {
-			Text(
-				text = stringResource(R.string.prefer_ipv4),
-				style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = tunnelConf.isIpv4Preferred,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleIpv4Preferred(tunnelConf)) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleIpv4Preferred(tunnelConf)) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Dns,
+        title = {
+            Text(
+                text = stringResource(R.string.server_ipv4),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        description = {
+            Text(
+                text = stringResource(R.string.prefer_ipv4),
+                style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = tunnelConf.isIpv4Preferred,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleIpv4Preferred(tunnelConf)) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleIpv4Preferred(tunnelConf)) },
+    )
 }

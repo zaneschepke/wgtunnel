@@ -15,20 +15,21 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun PingRestartItem(tunnelConf: TunnelConf, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.NetworkPing,
-		title = {
-			Text(
-				text = stringResource(R.string.restart_on_ping),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = tunnelConf.isPingEnabled,
-				onClick = { viewModel.handleEvent(AppEvent.TogglePingTunnelEnabled(tunnelConf)) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.TogglePingTunnelEnabled(tunnelConf)) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.NetworkPing,
+        title = {
+            Text(
+                text = stringResource(R.string.restart_on_ping),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = tunnelConf.isPingEnabled,
+                onClick = { viewModel.handleEvent(AppEvent.TogglePingTunnelEnabled(tunnelConf)) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.TogglePingTunnelEnabled(tunnelConf)) },
+    )
 }

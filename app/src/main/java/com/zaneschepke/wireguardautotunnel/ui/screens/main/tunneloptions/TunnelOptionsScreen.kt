@@ -24,41 +24,40 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.tunneloptions.compone
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.tunneloptions.components.ServerIpv4Item
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.tunneloptions.components.SplitTunnelingItem
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
 fun TunnelOptionsScreen(tunnelConf: TunnelConf, appUiState: AppUiState, viewModel: AppViewModel) {
-	var currentText by remember { mutableStateOf("") }
+    var currentText by remember { mutableStateOf("") }
 
-	LaunchedEffect(tunnelConf.tunnelNetworks) {
-		currentText = ""
-	}
+    LaunchedEffect(tunnelConf.tunnelNetworks) { currentText = "" }
 
-	Column(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-		modifier = Modifier
-			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
-			.padding(top = 24.dp)
-			.padding(horizontal = 24.dp),
-	) {
-		SurfaceSelectionGroupButton(
-			items = listOf(
-				PrimaryTunnelItem(tunnelConf, viewModel),
-				AutoTunnelingItem(tunnelConf),
-				ServerIpv4Item(tunnelConf, viewModel),
-				SplitTunnelingItem(tunnelConf),
-			),
-		)
-		SurfaceSelectionGroupButton(
-			items = buildList {
-				add(PingRestartItem(tunnelConf, viewModel))
-				if (tunnelConf.isPingEnabled) {
-					add(PingConfigItem(tunnelConf, viewModel))
-				}
-			},
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        modifier =
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 24.dp)
+                .padding(horizontal = 24.dp),
+    ) {
+        SurfaceSelectionGroupButton(
+            items =
+                listOf(
+                    PrimaryTunnelItem(tunnelConf, viewModel),
+                    AutoTunnelingItem(tunnelConf),
+                    ServerIpv4Item(tunnelConf, viewModel),
+                    SplitTunnelingItem(tunnelConf),
+                )
+        )
+        SurfaceSelectionGroupButton(
+            items =
+                buildList {
+                    add(PingRestartItem(tunnelConf, viewModel))
+                    if (tunnelConf.isPingEnabled) {
+                        add(PingConfigItem(tunnelConf, viewModel))
+                    }
+                }
+        )
+    }
 }

@@ -26,48 +26,46 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.state.ConfigUi
 
 @Composable
 fun InterfaceSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
-	var isDropDownExpanded by remember { mutableStateOf(false) }
+    var isDropDownExpanded by remember { mutableStateOf(false) }
 
-	Surface(
-		shape = RoundedCornerShape(12.dp),
-		color = MaterialTheme.colorScheme.surface,
-	) {
-		Column(
-			verticalArrangement = Arrangement.spacedBy(6.dp),
-			modifier = Modifier.padding(16.dp).focusGroup(),
-		) {
-			Row(
-				horizontalArrangement = Arrangement.SpaceBetween,
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier.fillMaxWidth(),
-			) {
-				GroupLabel(stringResource(R.string.interface_))
-				InterfaceDropdown(
-					expanded = isDropDownExpanded,
-					onExpandedChange = { isDropDownExpanded = it },
-					showScripts = uiState.showScripts,
-					showAmneziaValues = uiState.showAmneziaValues,
-					isAmneziaCompatibilitySet = uiState.configProxy.`interface`.isAmneziaCompatibilityModeSet(),
-					onToggleScripts = viewModel::toggleScripts,
-					onToggleAmneziaValues = viewModel::toggleAmneziaValues,
-					onToggleAmneziaCompatibility = viewModel::toggleAmneziaCompatibility,
-				)
-			}
-			ConfigurationTextBox(
-				value = uiState.tunnelName,
-				onValueChange = viewModel::updateTunnelName,
-				label = stringResource(R.string.name),
-				hint = stringResource(R.string.tunnel_name).lowercase(),
-				modifier = Modifier.fillMaxWidth(),
-			)
-			InterfaceFields(
-				interfaceState = uiState.configProxy.`interface`,
-				showAuthPrompt = { viewModel.toggleShowAuthPrompt() },
-				showScripts = uiState.showScripts,
-				showAmneziaValues = uiState.showAmneziaValues,
-				onInterfaceChange = viewModel::updateInterface,
-				isAuthenticated = uiState.isAuthenticated,
-			)
-		}
-	}
+    Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surface) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(16.dp).focusGroup(),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                GroupLabel(stringResource(R.string.interface_))
+                InterfaceDropdown(
+                    expanded = isDropDownExpanded,
+                    onExpandedChange = { isDropDownExpanded = it },
+                    showScripts = uiState.showScripts,
+                    showAmneziaValues = uiState.showAmneziaValues,
+                    isAmneziaCompatibilitySet =
+                        uiState.configProxy.`interface`.isAmneziaCompatibilityModeSet(),
+                    onToggleScripts = viewModel::toggleScripts,
+                    onToggleAmneziaValues = viewModel::toggleAmneziaValues,
+                    onToggleAmneziaCompatibility = viewModel::toggleAmneziaCompatibility,
+                )
+            }
+            ConfigurationTextBox(
+                value = uiState.tunnelName,
+                onValueChange = viewModel::updateTunnelName,
+                label = stringResource(R.string.name),
+                hint = stringResource(R.string.tunnel_name).lowercase(),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            InterfaceFields(
+                interfaceState = uiState.configProxy.`interface`,
+                showAuthPrompt = { viewModel.toggleShowAuthPrompt() },
+                showScripts = uiState.showScripts,
+                showAmneziaValues = uiState.showAmneziaValues,
+                onInterfaceChange = viewModel::updateInterface,
+                isAuthenticated = uiState.isAuthenticated,
+            )
+        }
+    }
 }

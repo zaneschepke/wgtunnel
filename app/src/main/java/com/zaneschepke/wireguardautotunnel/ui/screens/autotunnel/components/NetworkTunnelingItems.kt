@@ -19,80 +19,106 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun NetworkTunnelingItems(uiState: AppUiState, viewModel: AppViewModel): List<SelectionItem> {
-	return listOf(
-		SelectionItem(
-			leadingIcon = Icons.Outlined.SignalCellular4Bar,
-			title = {
-				Text(
-					stringResource(R.string.tunnel_mobile_data),
-					style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-				)
-			},
-			trailing = {
-				ScaledSwitch(
-					enabled = !uiState.appSettings.isAlwaysOnVpnEnabled,
-					checked = uiState.appSettings.isTunnelOnMobileDataEnabled,
-					onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
-				)
-			},
-			description = {
-				val cellularActive = remember(uiState.networkStatus) { uiState.networkStatus?.cellularConnected ?: false }
-				Text(
-					text = if (cellularActive) stringResource(R.string.active) else stringResource(R.string.inactive),
-					style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline),
-					maxLines = 1,
-					overflow = TextOverflow.Ellipsis,
-				)
-			},
-			onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
-		),
-		SelectionItem(
-			leadingIcon = Icons.Outlined.SettingsEthernet,
-			title = {
-				Text(
-					stringResource(R.string.tunnel_on_ethernet),
-					style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-				)
-			},
-			trailing = {
-				ScaledSwitch(
-					enabled = !uiState.appSettings.isAlwaysOnVpnEnabled,
-					checked = uiState.appSettings.isTunnelOnEthernetEnabled,
-					onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
-				)
-			},
-			description = {
-				val ethernetActive = remember(uiState.networkStatus) { uiState.networkStatus?.ethernetConnected ?: false }
-				Text(
-					text = if (ethernetActive) stringResource(R.string.active) else stringResource(R.string.inactive),
-					style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.outline),
-					maxLines = 1,
-					overflow = TextOverflow.Ellipsis,
-				)
-			},
-			onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
-		),
-		SelectionItem(
-			leadingIcon = Icons.Outlined.AirplanemodeActive,
-			title = {
-				Text(
-					stringResource(R.string.stop_on_no_internet),
-					style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-				)
-			},
-			description = {
-				Text(
-					stringResource(R.string.stop_on_internet_loss),
-					style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-				)
-			},
-			trailing = {
-				ScaledSwitch(
-					checked = uiState.appSettings.isStopOnNoInternetEnabled,
-					onClick = { viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet) },
-				)
-			},
-			onClick = { viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet) },
-		),
-	)
+    return listOf(
+        SelectionItem(
+            leadingIcon = Icons.Outlined.SignalCellular4Bar,
+            title = {
+                Text(
+                    stringResource(R.string.tunnel_mobile_data),
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                )
+            },
+            trailing = {
+                ScaledSwitch(
+                    enabled = !uiState.appSettings.isAlwaysOnVpnEnabled,
+                    checked = uiState.appSettings.isTunnelOnMobileDataEnabled,
+                    onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
+                )
+            },
+            description = {
+                val cellularActive =
+                    remember(uiState.networkStatus) {
+                        uiState.networkStatus?.cellularConnected ?: false
+                    }
+                Text(
+                    text =
+                        if (cellularActive) stringResource(R.string.active)
+                        else stringResource(R.string.inactive),
+                    style =
+                        MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.outline
+                        ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnCellular) },
+        ),
+        SelectionItem(
+            leadingIcon = Icons.Outlined.SettingsEthernet,
+            title = {
+                Text(
+                    stringResource(R.string.tunnel_on_ethernet),
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                )
+            },
+            trailing = {
+                ScaledSwitch(
+                    enabled = !uiState.appSettings.isAlwaysOnVpnEnabled,
+                    checked = uiState.appSettings.isTunnelOnEthernetEnabled,
+                    onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
+                )
+            },
+            description = {
+                val ethernetActive =
+                    remember(uiState.networkStatus) {
+                        uiState.networkStatus?.ethernetConnected ?: false
+                    }
+                Text(
+                    text =
+                        if (ethernetActive) stringResource(R.string.active)
+                        else stringResource(R.string.inactive),
+                    style =
+                        MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.outline
+                        ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
+        ),
+        SelectionItem(
+            leadingIcon = Icons.Outlined.AirplanemodeActive,
+            title = {
+                Text(
+                    stringResource(R.string.stop_on_no_internet),
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            MaterialTheme.colorScheme.onSurface
+                        ),
+                )
+            },
+            description = {
+                Text(
+                    stringResource(R.string.stop_on_internet_loss),
+                    style =
+                        MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+                )
+            },
+            trailing = {
+                ScaledSwitch(
+                    checked = uiState.appSettings.isStopOnNoInternetEnabled,
+                    onClick = { viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet) },
+                )
+            },
+            onClick = { viewModel.handleEvent(AppEvent.ToggleStopTunnelOnNoInternet) },
+        ),
+    )
 }

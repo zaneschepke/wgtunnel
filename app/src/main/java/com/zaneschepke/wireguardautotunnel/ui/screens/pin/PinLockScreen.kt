@@ -16,44 +16,46 @@ import xyz.teamgravity.pin_lock_compose.PinLock
 
 @Composable
 fun PinLockScreen(viewModel: AppViewModel) {
-	val context = LocalContext.current
-	val navController = LocalNavController.current
-	PinLock(
-		title = { pinExists ->
-			Text(
-				color = MaterialTheme.colorScheme.onSurface,
-				text =
-				if (pinExists) {
-					stringResource(id = R.string.enter_pin)
-				} else {
-					stringResource(
-						id = R.string.create_pin,
-					)
-				},
-			)
-		},
-		backgroundColor = MaterialTheme.colorScheme.surface,
-		textColor = MaterialTheme.colorScheme.onSurface,
-		onPinCorrect = {
-			// pin is correct, navigate or hide pin lock
-			if (context.isRunningOnTv()) {
-				navController.navigate(Route.Main)
-			} else {
-				val isPopped = navController.popBackStack()
-				if (!isPopped) {
-					navController.navigate(Route.Main)
-				}
-			}
-		},
-		onPinIncorrect = {
-			// pin is incorrect, show error
-			viewModel.handleEvent(AppEvent.ShowMessage(StringValue.StringResource(R.string.incorrect_pin)))
-		},
-		onPinCreated = {
-			// pin created for the first time, navigate or hide pin lock
-			viewModel.handleEvent(AppEvent.ShowMessage(StringValue.StringResource(R.string.pin_created)))
+    val context = LocalContext.current
+    val navController = LocalNavController.current
+    PinLock(
+        title = { pinExists ->
+            Text(
+                color = MaterialTheme.colorScheme.onSurface,
+                text =
+                    if (pinExists) {
+                        stringResource(id = R.string.enter_pin)
+                    } else {
+                        stringResource(id = R.string.create_pin)
+                    },
+            )
+        },
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        textColor = MaterialTheme.colorScheme.onSurface,
+        onPinCorrect = {
+            // pin is correct, navigate or hide pin lock
+            if (context.isRunningOnTv()) {
+                navController.navigate(Route.Main)
+            } else {
+                val isPopped = navController.popBackStack()
+                if (!isPopped) {
+                    navController.navigate(Route.Main)
+                }
+            }
+        },
+        onPinIncorrect = {
+            // pin is incorrect, show error
+            viewModel.handleEvent(
+                AppEvent.ShowMessage(StringValue.StringResource(R.string.incorrect_pin))
+            )
+        },
+        onPinCreated = {
+            // pin created for the first time, navigate or hide pin lock
+            viewModel.handleEvent(
+                AppEvent.ShowMessage(StringValue.StringResource(R.string.pin_created))
+            )
 
-			viewModel.handleEvent(AppEvent.TogglePinLock)
-		},
-	)
+            viewModel.handleEvent(AppEvent.TogglePinLock)
+        },
+    )
 }

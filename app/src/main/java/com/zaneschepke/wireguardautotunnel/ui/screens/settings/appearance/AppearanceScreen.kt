@@ -15,22 +15,13 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.compon
 
 @Composable
 fun AppearanceScreen() {
-	Column(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(top = 24.dp)
-			.padding(horizontal = 24.dp),
-	) {
-		SurfaceSelectionGroupButton(
-			items = listOf(LanguageItem()),
-		)
-		SurfaceSelectionGroupButton(
-			items = listOf(NotificationsItem()),
-		)
-		SurfaceSelectionGroupButton(
-			items = listOf(DisplayThemeItem()),
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        modifier = Modifier.fillMaxSize().padding(top = 24.dp).padding(horizontal = 24.dp),
+    ) {
+        SurfaceSelectionGroupButton(items = listOf(LanguageItem()))
+        SurfaceSelectionGroupButton(items = listOf(NotificationsItem()))
+        SurfaceSelectionGroupButton(items = listOf(DisplayThemeItem()))
+    }
 }

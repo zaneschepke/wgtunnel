@@ -32,65 +32,69 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.Restar
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
-
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
 fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: AppViewModel) {
-	val context = LocalContext.current
-	val focusManager = LocalFocusManager.current
-	val navController = LocalNavController.current
-	val isRunningOnTv = remember { context.isRunningOnTv() }
-	val interactionSource = remember { MutableInteractionSource() }
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val navController = LocalNavController.current
+    val isRunningOnTv = remember { context.isRunningOnTv() }
+    val interactionSource = remember { MutableInteractionSource() }
 
-	if (appViewState.showBottomSheet) {
-		ExportTunnelsBottomSheet(viewModel, isRunningOnTv)
-	}
+    if (appViewState.showBottomSheet) {
+        ExportTunnelsBottomSheet(viewModel, isRunningOnTv)
+    }
 
-	Column(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-		modifier = Modifier
-			.verticalScroll(rememberScrollState())
-			.fillMaxSize()
-			.padding(top = 24.dp)
-			.padding(bottom = 40.dp)
-			.padding(horizontal = 24.dp)
-			.then(
-				if (!isRunningOnTv) {
-					Modifier.clickable(
-						indication = null,
-						interactionSource = interactionSource,
-						onClick = { focusManager.clearFocus() },
-					)
-				} else {
-					Modifier
-				},
-			),
-	) {
-		SurfaceSelectionGroupButton(
-			items = buildList {
-				add(AppShortcutsItem(uiState, viewModel))
-				if (!isRunningOnTv) add(AlwaysOnVpnItem(uiState, viewModel))
-				add(KillSwitchItem())
-				add(RestartAtBootItem(uiState, viewModel))
-			},
-		)
-		SurfaceSelectionGroupButton(
-			items = buildList {
-				add(AppearanceItem())
-				add(LocalLoggingItem(uiState, viewModel))
-				if (uiState.appState.isLocalLogsEnabled) add(ReadLogsItem())
-				add(PinLockItem(uiState, viewModel))
-			},
-		)
-		if (!isRunningOnTv) {
-			SurfaceSelectionGroupButton(
-				items = listOf(KernelModeItem(uiState, viewModel)),
-			)
-		}
-		SurfaceSelectionGroupButton(
-			items = listOf(AdvancedSettingsItem(onClick = { navController.navigate(Route.SettingsAdvanced) })),
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        modifier =
+            Modifier.verticalScroll(rememberScrollState())
+                .fillMaxSize()
+                .padding(top = 24.dp)
+                .padding(bottom = 40.dp)
+                .padding(horizontal = 24.dp)
+                .then(
+                    if (!isRunningOnTv) {
+                        Modifier.clickable(
+                            indication = null,
+                            interactionSource = interactionSource,
+                            onClick = { focusManager.clearFocus() },
+                        )
+                    } else {
+                        Modifier
+                    }
+                ),
+    ) {
+        SurfaceSelectionGroupButton(
+            items =
+                buildList {
+                    add(AppShortcutsItem(uiState, viewModel))
+                    if (!isRunningOnTv) add(AlwaysOnVpnItem(uiState, viewModel))
+                    add(KillSwitchItem())
+                    add(RestartAtBootItem(uiState, viewModel))
+                }
+        )
+        SurfaceSelectionGroupButton(
+            items =
+                buildList {
+                    add(AppearanceItem())
+                    add(LocalLoggingItem(uiState, viewModel))
+                    if (uiState.appState.isLocalLogsEnabled) add(ReadLogsItem())
+                    add(PinLockItem(uiState, viewModel))
+                }
+        )
+        if (!isRunningOnTv) {
+            SurfaceSelectionGroupButton(items = listOf(KernelModeItem(uiState, viewModel)))
+        }
+        SurfaceSelectionGroupButton(
+            items =
+                listOf(
+                    AdvancedSettingsItem(
+                        onClick = { navController.navigate(Route.SettingsAdvanced) }
+                    )
+                )
+        )
+    }
 }

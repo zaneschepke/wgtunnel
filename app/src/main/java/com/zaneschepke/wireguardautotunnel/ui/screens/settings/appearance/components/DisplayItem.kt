@@ -14,16 +14,17 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 
 @Composable
 fun DisplayThemeItem(): SelectionItem {
-	val navController = LocalNavController.current
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.Contrast,
-		title = {
-			Text(
-				text = stringResource(R.string.display_theme),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = { ForwardButton { navController.navigate(Route.Display) } },
-		onClick = { navController.navigate(Route.Display) },
-	)
+    val navController = LocalNavController.current
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.Contrast,
+        title = {
+            Text(
+                text = stringResource(R.string.display_theme),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { navController.navigate(Route.Display) } },
+        onClick = { navController.navigate(Route.Display) },
+    )
 }

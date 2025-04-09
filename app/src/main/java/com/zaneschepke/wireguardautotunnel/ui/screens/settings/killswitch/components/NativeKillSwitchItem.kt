@@ -14,16 +14,17 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.launchVpnSettings
 
 @Composable
 fun NativeKillSwitchItem(): SelectionItem {
-	val context = LocalContext.current
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.AdminPanelSettings,
-		title = {
-			Text(
-				text = stringResource(R.string.native_kill_switch),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = { ForwardButton { context.launchVpnSettings() } },
-		onClick = { context.launchVpnSettings() },
-	)
+    val context = LocalContext.current
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.AdminPanelSettings,
+        title = {
+            Text(
+                text = stringResource(R.string.native_kill_switch),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = { ForwardButton { context.launchVpnSettings() } },
+        onClick = { context.launchVpnSettings() },
+    )
 }

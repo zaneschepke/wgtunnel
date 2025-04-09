@@ -24,48 +24,42 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogsBottomSheet(viewModel: AppViewModel) {
-	ModalBottomSheet(
-		containerColor = MaterialTheme.colorScheme.surface,
-		onDismissRequest = { viewModel.handleEvent(AppEvent.ToggleBottomSheet) },
-	) {
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.clickable {
-					viewModel.handleEvent(AppEvent.ToggleBottomSheet)
-					viewModel.handleEvent(AppEvent.ExportLogs)
-				}
-				.padding(10.dp),
-		) {
-			Icon(
-				imageVector = Icons.Filled.FolderZip,
-				contentDescription = stringResource(R.string.export_logs),
-				modifier = Modifier.padding(10.dp),
-			)
-			Text(
-				text = stringResource(R.string.export_logs),
-				modifier = Modifier.padding(10.dp),
-			)
-		}
-		HorizontalDivider()
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.clickable {
-					viewModel.handleEvent(AppEvent.ToggleBottomSheet)
-					viewModel.handleEvent(AppEvent.DeleteLogs)
-				}
-				.padding(10.dp),
-		) {
-			Icon(
-				imageVector = Icons.Filled.Delete,
-				contentDescription = stringResource(R.string.delete_logs),
-				modifier = Modifier.padding(10.dp),
-			)
-			Text(
-				text = stringResource(R.string.delete_logs),
-				modifier = Modifier.padding(10.dp),
-			)
-		}
-	}
+    ModalBottomSheet(
+        containerColor = MaterialTheme.colorScheme.surface,
+        onDismissRequest = { viewModel.handleEvent(AppEvent.ToggleBottomSheet) },
+    ) {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable {
+                        viewModel.handleEvent(AppEvent.ToggleBottomSheet)
+                        viewModel.handleEvent(AppEvent.ExportLogs)
+                    }
+                    .padding(10.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.FolderZip,
+                contentDescription = stringResource(R.string.export_logs),
+                modifier = Modifier.padding(10.dp),
+            )
+            Text(text = stringResource(R.string.export_logs), modifier = Modifier.padding(10.dp))
+        }
+        HorizontalDivider()
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable {
+                        viewModel.handleEvent(AppEvent.ToggleBottomSheet)
+                        viewModel.handleEvent(AppEvent.DeleteLogs)
+                    }
+                    .padding(10.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = stringResource(R.string.delete_logs),
+                modifier = Modifier.padding(10.dp),
+            )
+            Text(text = stringResource(R.string.delete_logs), modifier = Modifier.padding(10.dp))
+        }
+    }
 }

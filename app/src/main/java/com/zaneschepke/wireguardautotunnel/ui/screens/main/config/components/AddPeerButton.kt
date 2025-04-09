@@ -16,13 +16,11 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigViewMode
 
 @Composable
 fun AddPeerButton(viewModel: ConfigViewModel) {
-	Row(
-		horizontalArrangement = Arrangement.Center,
-		verticalAlignment = Alignment.CenterVertically,
-		modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-	) {
-		TextButton(onClick = { viewModel.addPeer() }) {
-			Text(stringResource(R.string.add_peer))
-		}
-	}
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+    ) {
+        TextButton(onClick = { viewModel.addPeer() }) { Text(stringResource(R.string.add_peer)) }
+    }
 }

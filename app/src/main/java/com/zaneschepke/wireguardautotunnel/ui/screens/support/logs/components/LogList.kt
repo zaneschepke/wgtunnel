@@ -11,19 +11,21 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.logcatter.model.LogMessage
 
 @Composable
-fun LogList(logs: List<LogMessage>, lazyColumnListState: LazyListState, modifier: Modifier = Modifier) {
-	LazyColumn(
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
-		state = lazyColumnListState,
-		modifier = modifier,
-	) {
-		itemsIndexed(
-			items = logs,
-			key = { index, _ -> index },
-			contentType = { _, _ -> null },
-		) { _, log ->
-			LogItem(log = log)
-		}
-	}
+fun LogList(
+    logs: List<LogMessage>,
+    lazyColumnListState: LazyListState,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
+        state = lazyColumnListState,
+        modifier = modifier,
+    ) {
+        itemsIndexed(items = logs, key = { index, _ -> index }, contentType = { _, _ -> null }) {
+            _,
+            log ->
+            LogItem(log = log)
+        }
+    }
 }

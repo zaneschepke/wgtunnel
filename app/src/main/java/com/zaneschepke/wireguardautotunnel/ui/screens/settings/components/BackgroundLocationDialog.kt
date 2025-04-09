@@ -15,35 +15,39 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.launchAppSettings
 
 @Composable
 fun BackgroundLocationDialog(show: Boolean, onDismiss: () -> Unit, onAttest: () -> Unit) {
-	val context = LocalContext.current
-	if (show) {
-		val alwaysOnDescription = buildAnnotatedString {
-			append(stringResource(R.string.background_location_message))
-			append(" ")
-			pushStringAnnotation(tag = "appSettings", annotation = "")
-			withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-				append(stringResource(id = R.string.app_settings))
-			}
-			pop()
-			append(" ")
-			append(stringResource(R.string.background_location_message2))
-			append(".")
-		}
-		InfoDialog(
-			onDismiss = { onDismiss() },
-			onAttest = { onDismiss() },
-			title = { Text(text = stringResource(R.string.vpn_denied_dialog_title)) },
-			body = {
-				ClickableText(
-					text = alwaysOnDescription,
-					style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.outline),
-				) {
-					alwaysOnDescription.getStringAnnotations(tag = "appSettings", it, it).firstOrNull()?.let {
-						context.launchAppSettings()
-					}
-				}
-			},
-			confirmText = { Text(text = stringResource(R.string.okay)) },
-		)
-	}
+    val context = LocalContext.current
+    if (show) {
+        val alwaysOnDescription = buildAnnotatedString {
+            append(stringResource(R.string.background_location_message))
+            append(" ")
+            pushStringAnnotation(tag = "appSettings", annotation = "")
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                append(stringResource(id = R.string.app_settings))
+            }
+            pop()
+            append(" ")
+            append(stringResource(R.string.background_location_message2))
+            append(".")
+        }
+        InfoDialog(
+            onDismiss = { onDismiss() },
+            onAttest = { onDismiss() },
+            title = { Text(text = stringResource(R.string.vpn_denied_dialog_title)) },
+            body = {
+                ClickableText(
+                    text = alwaysOnDescription,
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.outline
+                        ),
+                ) {
+                    alwaysOnDescription
+                        .getStringAnnotations(tag = "appSettings", it, it)
+                        .firstOrNull()
+                        ?.let { context.launchAppSettings() }
+                }
+            },
+            confirmText = { Text(text = stringResource(R.string.okay)) },
+        )
+    }
 }

@@ -15,20 +15,21 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun AppShortcutsItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Filled.AppShortcut,
-		trailing = {
-			ScaledSwitch(
-				checked = uiState.appSettings.isShortcutsEnabled,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleAppShortcuts) },
-			)
-		},
-		title = {
-			Text(
-				text = stringResource(R.string.enabled_app_shortcuts),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleAppShortcuts) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Filled.AppShortcut,
+        trailing = {
+            ScaledSwitch(
+                checked = uiState.appSettings.isShortcutsEnabled,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleAppShortcuts) },
+            )
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.enabled_app_shortcuts),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleAppShortcuts) },
+    )
 }

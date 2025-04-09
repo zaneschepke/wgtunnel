@@ -24,28 +24,35 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.autotunnel.components
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
-fun TunnelAutoTunnelScreen(tunnelConf: TunnelConf, appSettings: AppSettings, viewModel: AppViewModel) {
-	var currentText by remember { mutableStateOf("") }
+fun TunnelAutoTunnelScreen(
+    tunnelConf: TunnelConf,
+    appSettings: AppSettings,
+    viewModel: AppViewModel,
+) {
+    var currentText by remember { mutableStateOf("") }
 
-	LaunchedEffect(tunnelConf.tunnelNetworks) {
-		currentText = ""
-	}
+    LaunchedEffect(tunnelConf.tunnelNetworks) { currentText = "" }
 
-	Column(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-		modifier = Modifier
-			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
-			.padding(top = 24.dp)
-			.padding(horizontal = 24.dp),
-	) {
-		SurfaceSelectionGroupButton(
-			items = buildList {
-				add(MobileDataTunnelItem(tunnelConf, viewModel))
-				add(EthernetTunnelItem(tunnelConf, viewModel))
-				add(WifiTunnelItem(tunnelConf, appSettings, viewModel, currentText) { currentText = it })
-			},
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        modifier =
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 24.dp)
+                .padding(horizontal = 24.dp),
+    ) {
+        SurfaceSelectionGroupButton(
+            items =
+                buildList {
+                    add(MobileDataTunnelItem(tunnelConf, viewModel))
+                    add(EthernetTunnelItem(tunnelConf, viewModel))
+                    add(
+                        WifiTunnelItem(tunnelConf, appSettings, viewModel, currentText) {
+                            currentText = it
+                        }
+                    )
+                }
+        )
+    }
 }

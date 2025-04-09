@@ -12,53 +12,55 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.domain.state.WireGuardStatistics
 import com.zaneschepke.wireguardautotunnel.util.extensions.toBackendError
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import timber.log.Timber
-import javax.inject.Inject
 
-class KernelTunnel @Inject constructor(
-	@ApplicationScope private val applicationScope: CoroutineScope,
-	serviceManager: ServiceManager,
-	appDataRepository: AppDataRepository,
-	private val backend: Backend,
+class KernelTunnel
+@Inject
+constructor(
+    @ApplicationScope private val applicationScope: CoroutineScope,
+    serviceManager: ServiceManager,
+    appDataRepository: AppDataRepository,
+    private val backend: Backend,
 ) : BaseTunnel(applicationScope, appDataRepository, serviceManager) {
 
-	override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics? {
-		return try {
-			WireGuardStatistics(backend.getStatistics(tunnelConf))
-		} catch (e: Exception) {
-			Timber.e(e)
-			null
-		}
-	}
+    override fun getStatistics(tunnelConf: TunnelConf): TunnelStatistics? {
+        return try {
+            WireGuardStatistics(backend.getStatistics(tunnelConf))
+        } catch (e: Exception) {
+            Timber.e(e)
+            null
+        }
+    }
 
-	override suspend fun startBackend(tunnel: TunnelConf) {
-		try {
-			updateTunnelStatus(tunnel, TunnelStatus.Starting)
-			backend.setState(tunnel, Tunnel.State.UP, tunnel.toWgConfig())
-		} catch (e: BackendException) {
-			throw e.toBackendError()
-		}
-	}
+    override suspend fun startBackend(tunnel: TunnelConf) {
+        try {
+            updateTunnelStatus(tunnel, TunnelStatus.Starting)
+            backend.setState(tunnel, Tunnel.State.UP, tunnel.toWgConfig())
+        } catch (e: BackendException) {
+            throw e.toBackendError()
+        }
+    }
 
-	override fun stopBackend(tunnel: TunnelConf) {
-		Timber.i("Stopping tunnel ${tunnel.id} kernel")
-		try {
-			backend.setState(tunnel, Tunnel.State.DOWN, tunnel.toWgConfig())
-		} catch (e: BackendException) {
-			throw e.toBackendError()
-		}
-	}
+    override fun stopBackend(tunnel: TunnelConf) {
+        Timber.i("Stopping tunnel ${tunnel.id} kernel")
+        try {
+            backend.setState(tunnel, Tunnel.State.DOWN, tunnel.toWgConfig())
+        } catch (e: BackendException) {
+            throw e.toBackendError()
+        }
+    }
 
-	override fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
-		Timber.w("Not yet implemented for kernel")
-	}
+    override fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {
+        Timber.w("Not yet implemented for kernel")
+    }
 
-	override fun getBackendState(): BackendState {
-		return BackendState.INACTIVE
-	}
+    override fun getBackendState(): BackendState {
+        return BackendState.INACTIVE
+    }
 
-	override suspend fun runningTunnelNames(): Set<String> {
-		return backend.runningTunnelNames
-	}
+    override suspend fun runningTunnelNames(): Set<String> {
+        return backend.runningTunnelNames
+    }
 }

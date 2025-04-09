@@ -18,31 +18,32 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun DebounceDelaySelector(currentDelay: Int, onEvent: (AppEvent) -> Unit) {
-	var isDropDownExpanded by remember { mutableStateOf(false) }
+    var isDropDownExpanded by remember { mutableStateOf(false) }
 
-	SurfaceSelectionGroupButton(
-		listOf(
-			SelectionItem(
-				leadingIcon = Icons.Outlined.PauseCircle,
-				title = {
-					Text(
-						stringResource(R.string.debounce_delay),
-						style = MaterialTheme.typography.bodyMedium.copy(
-							color = MaterialTheme.colorScheme.onSurface,
-						),
-					)
-				},
-				onClick = { isDropDownExpanded = true },
-				trailing = {
-					DropdownSelector(
-						currentValue = currentDelay,
-						options = (0..10).toList(),
-						onValueSelected = { num -> onEvent(AppEvent.SetDebounceDelay(num)) },
-						isExpanded = isDropDownExpanded,
-						onDismiss = { isDropDownExpanded = false },
-					)
-				},
-			),
-		),
-	)
+    SurfaceSelectionGroupButton(
+        listOf(
+            SelectionItem(
+                leadingIcon = Icons.Outlined.PauseCircle,
+                title = {
+                    Text(
+                        stringResource(R.string.debounce_delay),
+                        style =
+                            MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                    )
+                },
+                onClick = { isDropDownExpanded = true },
+                trailing = {
+                    DropdownSelector(
+                        currentValue = currentDelay,
+                        options = (0..10).toList(),
+                        onValueSelected = { num -> onEvent(AppEvent.SetDebounceDelay(num)) },
+                        isExpanded = isDropDownExpanded,
+                        onDismiss = { isDropDownExpanded = false },
+                    )
+                },
+            )
+        )
+    )
 }

@@ -26,38 +26,40 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 
 @Composable
-fun CustomSnackBar(message: String, isRtl: Boolean = true, containerColor: Color = MaterialTheme.colorScheme.surface) {
-	val context = LocalContext.current
-	Snackbar(
-		containerColor = containerColor,
-		modifier =
-		Modifier
-			.fillMaxWidth(
-				if (context.isRunningOnTv()) 1 / 3f else 2 / 3f,
-			)
-			.padding(bottom = 100.dp),
-		shape = RoundedCornerShape(16.dp),
-	) {
-		CompositionLocalProvider(
-			LocalLayoutDirection provides if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
-		) {
-			Row(
-				modifier =
-				Modifier
-					.width(IntrinsicSize.Max)
-					.height(IntrinsicSize.Min),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.Start,
-			) {
-				val icon = Icons.Rounded.Info
-				Icon(
-					icon,
-					contentDescription = icon.name,
-					tint = MaterialTheme.colorScheme.onSurface,
-					modifier = Modifier.padding(end = 10.dp),
-				)
-				Text(message, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(end = 5.dp))
-			}
-		}
-	}
+fun CustomSnackBar(
+    message: String,
+    isRtl: Boolean = true,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+) {
+    val context = LocalContext.current
+    Snackbar(
+        containerColor = containerColor,
+        modifier =
+            Modifier.fillMaxWidth(if (context.isRunningOnTv()) 1 / 3f else 2 / 3f)
+                .padding(bottom = 100.dp),
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        CompositionLocalProvider(
+            LocalLayoutDirection provides if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+        ) {
+            Row(
+                modifier = Modifier.width(IntrinsicSize.Max).height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+            ) {
+                val icon = Icons.Rounded.Info
+                Icon(
+                    icon,
+                    contentDescription = icon.name,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(end = 10.dp),
+                )
+                Text(
+                    message,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(end = 5.dp),
+                )
+            }
+        }
+    }
 }

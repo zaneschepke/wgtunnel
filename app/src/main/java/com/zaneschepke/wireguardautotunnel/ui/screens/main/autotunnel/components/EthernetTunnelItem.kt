@@ -15,26 +15,27 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun EthernetTunnelItem(tunnelConf: TunnelConf, viewModel: AppViewModel): SelectionItem {
-	return SelectionItem(
-		leadingIcon = Icons.Outlined.SettingsEthernet,
-		title = {
-			Text(
-				text = stringResource(R.string.ethernet_tunnel),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		description = {
-			Text(
-				text = stringResource(R.string.set_ethernet_tunnel),
-				style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
-			)
-		},
-		trailing = {
-			ScaledSwitch(
-				checked = tunnelConf.isEthernetTunnel,
-				onClick = { viewModel.handleEvent(AppEvent.ToggleEthernetTunnel(tunnelConf)) },
-			)
-		},
-		onClick = { viewModel.handleEvent(AppEvent.ToggleEthernetTunnel(tunnelConf)) },
-	)
+    return SelectionItem(
+        leadingIcon = Icons.Outlined.SettingsEthernet,
+        title = {
+            Text(
+                text = stringResource(R.string.ethernet_tunnel),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        description = {
+            Text(
+                text = stringResource(R.string.set_ethernet_tunnel),
+                style = MaterialTheme.typography.bodySmall.copy(MaterialTheme.colorScheme.outline),
+            )
+        },
+        trailing = {
+            ScaledSwitch(
+                checked = tunnelConf.isEthernetTunnel,
+                onClick = { viewModel.handleEvent(AppEvent.ToggleEthernetTunnel(tunnelConf)) },
+            )
+        },
+        onClick = { viewModel.handleEvent(AppEvent.ToggleEthernetTunnel(tunnelConf)) },
+    )
 }

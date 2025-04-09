@@ -21,34 +21,30 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
 fun SettingsAdvancedScreen(appUiState: AppUiState, viewModel: AppViewModel) {
-	val context = LocalContext.current
+    val context = LocalContext.current
 
-	val activity = context as? MainActivity
+    val activity = context as? MainActivity
 
-	// Secure screen due to sensitive information
-	DisposableEffect(Unit) {
-		activity?.window?.setFlags(
-			WindowManager.LayoutParams.FLAG_SECURE,
-			WindowManager.LayoutParams.FLAG_SECURE,
-		)
-		onDispose {
-			activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-		}
-	}
+    // Secure screen due to sensitive information
+    DisposableEffect(Unit) {
+        activity
+            ?.window
+            ?.setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE,
+            )
+        onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+    }
 
-	Column(
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-		modifier = Modifier
-			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
-			.padding(top = 24.dp)
-			.padding(horizontal = 24.dp),
-	) {
-		SurfaceSelectionGroupButton(
-			listOf(
-				RemoteControlItem(appUiState, viewModel),
-			),
-		)
-	}
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        modifier =
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 24.dp)
+                .padding(horizontal = 24.dp),
+    ) {
+        SurfaceSelectionGroupButton(listOf(RemoteControlItem(appUiState, viewModel)))
+    }
 }

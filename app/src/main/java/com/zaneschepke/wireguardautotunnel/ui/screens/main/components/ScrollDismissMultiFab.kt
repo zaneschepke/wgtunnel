@@ -13,22 +13,18 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ScrollDismissFab(icon: @Composable () -> Unit, isVisible: Boolean, onClick: () -> Unit) {
-	AnimatedVisibility(
-		visible = isVisible,
-		enter = slideInVertically(initialOffsetY = { it * 2 }),
-		exit = slideOutVertically(targetOffsetY = { it * 2 }),
-		modifier =
-		Modifier
-			.focusGroup(),
-	) {
-		FloatingActionButton(
-			onClick = {
-				onClick()
-			},
-			shape = RoundedCornerShape(16.dp),
-			containerColor = MaterialTheme.colorScheme.primary,
-		) {
-			icon()
-		}
-	}
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = slideInVertically(initialOffsetY = { it * 2 }),
+        exit = slideOutVertically(targetOffsetY = { it * 2 }),
+        modifier = Modifier.focusGroup(),
+    ) {
+        FloatingActionButton(
+            onClick = { onClick() },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+        ) {
+            icon()
+        }
+    }
 }

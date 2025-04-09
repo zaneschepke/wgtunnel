@@ -13,36 +13,29 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 
 @Composable
 fun ConfigurationToggle(
-	label: String,
-	enabled: Boolean = true,
-	checked: Boolean,
-	onCheckChanged: (checked: Boolean) -> Unit,
-	modifier: Modifier = Modifier,
+    label: String,
+    enabled: Boolean = true,
+    checked: Boolean,
+    onCheckChanged: (checked: Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-	Row(
-		modifier =
-		Modifier
-			.fillMaxWidth(),
-		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.SpaceBetween,
-	) {
-		Text(
-			label,
-			textAlign = TextAlign.Start,
-			style = MaterialTheme.typography.labelLarge,
-			modifier =
-			Modifier
-				.weight(
-					weight = 1.0f,
-					fill = false,
-				),
-			softWrap = true,
-		)
-		ScaledSwitch(
-			modifier = modifier,
-			enabled = enabled,
-			checked = checked,
-			onClick = { onCheckChanged(it) },
-		)
-	}
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            label,
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.weight(weight = 1.0f, fill = false),
+            softWrap = true,
+        )
+        ScaledSwitch(
+            modifier = modifier,
+            enabled = enabled,
+            checked = checked,
+            onClick = { onCheckChanged(it) },
+        )
+    }
 }

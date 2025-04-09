@@ -27,61 +27,70 @@ import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
 
 @Composable
 fun SubmitConfigurationTextBox(
-	value: String?,
-	label: String,
-	hint: String,
-	isErrorValue: (value: String?) -> Boolean,
-	onSubmit: (value: String) -> Unit,
-	keyboardOptions: KeyboardOptions = KeyboardOptions(
-		capitalization = KeyboardCapitalization.None,
-		imeAction = ImeAction.Done,
-	),
+    value: String?,
+    label: String,
+    hint: String,
+    isErrorValue: (value: String?) -> Boolean,
+    onSubmit: (value: String) -> Unit,
+    keyboardOptions: KeyboardOptions =
+        KeyboardOptions(capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Done),
 ) {
-	val focusManager = LocalFocusManager.current
-	val interactionSource = remember { MutableInteractionSource() }
-	val isFocused by interactionSource.collectIsFocusedAsState()
-	val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-	var stateValue by remember { mutableStateOf(value ?: "") }
+    var stateValue by remember { mutableStateOf(value ?: "") }
 
-	CustomTextField(
-		isError = isErrorValue(stateValue),
-		textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
-		value = stateValue,
-		onValueChange = { stateValue = it },
-		interactionSource = interactionSource,
-		label = { Text(label, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelMedium) },
-		containerColor = MaterialTheme.colorScheme.surface,
-		placeholder = { Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline) },
-		modifier =
-		Modifier
-			.padding(
-				top = 5.dp,
-				bottom = 10.dp,
-			).fillMaxWidth().padding(end = 16.dp),
-		singleLine = true,
-		keyboardOptions = keyboardOptions,
-		keyboardActions = KeyboardActions(
-			onDone = {
-				onSubmit(stateValue)
-				keyboardController?.hide()
-			},
-		),
-		trailing = {
-			if (!isErrorValue(stateValue) && isFocused) {
-				IconButton(onClick = {
-					onSubmit(stateValue)
-					keyboardController?.hide()
-					focusManager.clearFocus()
-				}) {
-					val icon = Icons.Outlined.Save
-					Icon(
-						imageVector = icon,
-						contentDescription = icon.name,
-						tint = MaterialTheme.colorScheme.primary,
-					)
-				}
-			}
-		},
-	)
+    CustomTextField(
+        isError = isErrorValue(stateValue),
+        textStyle =
+            MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface),
+        value = stateValue,
+        onValueChange = { stateValue = it },
+        interactionSource = interactionSource,
+        label = {
+            Text(
+                label,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelMedium,
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        placeholder = {
+            Text(
+                hint,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline,
+            )
+        },
+        modifier = Modifier.padding(top = 5.dp, bottom = 10.dp).fillMaxWidth().padding(end = 16.dp),
+        singleLine = true,
+        keyboardOptions = keyboardOptions,
+        keyboardActions =
+            KeyboardActions(
+                onDone = {
+                    onSubmit(stateValue)
+                    keyboardController?.hide()
+                }
+            ),
+        trailing = {
+            if (!isErrorValue(stateValue) && isFocused) {
+                IconButton(
+                    onClick = {
+                        onSubmit(stateValue)
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }
+                ) {
+                    val icon = Icons.Outlined.Save
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = icon.name,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        },
+    )
 }

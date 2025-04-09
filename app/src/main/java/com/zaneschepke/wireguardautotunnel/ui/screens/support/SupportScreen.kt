@@ -20,19 +20,20 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.Version
 
 @Composable
 fun SupportScreen() {
-	val context = LocalContext.current
+    val context = LocalContext.current
 
-	Column(
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(top = 24.dp).padding(horizontal = 24.dp)
-			.verticalScroll(rememberScrollState()),
-		horizontalAlignment = Alignment.Start,
-		verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
-	) {
-		GroupLabel(stringResource(R.string.thank_you))
-		GeneralSupportOptions(context)
-		ContactSupportOptions(context)
-		VersionLabel()
-	}
+    Column(
+        modifier =
+            Modifier.fillMaxSize()
+                .padding(top = 24.dp)
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+    ) {
+        GroupLabel(stringResource(R.string.thank_you))
+        GeneralSupportOptions(context)
+        ContactSupportOptions(context)
+        VersionLabel()
+    }
 }

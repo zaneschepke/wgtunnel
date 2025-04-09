@@ -41,180 +41,182 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun TunnelRowItem(
-	isActive: Boolean,
-	expanded: Boolean,
-	isSelected: Boolean,
-	tunnel: TunnelConf,
-	tunnelState: TunnelState,
-	onSetSelectedTunnel: (TunnelConf?) -> Unit,
-	onClick: () -> Unit,
-	onCopy: () -> Unit,
-	onDelete: () -> Unit,
-	onSwitchClick: (Boolean) -> Unit,
-	viewModel: AppViewModel,
+    isActive: Boolean,
+    expanded: Boolean,
+    isSelected: Boolean,
+    tunnel: TunnelConf,
+    tunnelState: TunnelState,
+    onSetSelectedTunnel: (TunnelConf?) -> Unit,
+    onClick: () -> Unit,
+    onCopy: () -> Unit,
+    onDelete: () -> Unit,
+    onSwitchClick: (Boolean) -> Unit,
+    viewModel: AppViewModel,
 ) {
-	val context = LocalContext.current
-	val navController = LocalNavController.current
-	val haptic = LocalHapticFeedback.current
-	val itemFocusRequester = remember { FocusRequester() }
-	val isTv = context.isRunningOnTv()
+    val context = LocalContext.current
+    val navController = LocalNavController.current
+    val haptic = LocalHapticFeedback.current
+    val itemFocusRequester = remember { FocusRequester() }
+    val isTv = context.isRunningOnTv()
 
-	val leadingIconColor = if (!isActive) Color.Gray else tunnelState.statistics.asColor()
+    val leadingIconColor = if (!isActive) Color.Gray else tunnelState.statistics.asColor()
 
-	val (leadingIcon, size) = when {
-		tunnel.isPrimaryTunnel -> Pair(Icons.Rounded.Star, 16.dp)
-		tunnel.isMobileDataTunnel -> Pair(Icons.Rounded.Smartphone, 16.dp)
-		tunnel.isEthernetTunnel -> Pair(Icons.Rounded.SettingsEthernet, 16.dp)
-		else -> Pair(Icons.Rounded.Circle, 14.dp)
-	}
+    val (leadingIcon, size) =
+        when {
+            tunnel.isPrimaryTunnel -> Pair(Icons.Rounded.Star, 16.dp)
+            tunnel.isMobileDataTunnel -> Pair(Icons.Rounded.Smartphone, 16.dp)
+            tunnel.isEthernetTunnel -> Pair(Icons.Rounded.SettingsEthernet, 16.dp)
+            else -> Pair(Icons.Rounded.Circle, 14.dp)
+        }
 
-	ExpandingRowListItem(
-		leading = {
-			Icon(
-				leadingIcon,
-				stringResource(R.string.status),
-				tint = leadingIconColor,
-				modifier = Modifier.size(size),
-			)
-		},
-		text = tunnel.tunName,
-		onHold = {
-			haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-			onSetSelectedTunnel(tunnel)
-		},
-		onClick = {
-			if (!isTv) {
-				if (isActive) onClick()
-			} else {
-				onSetSelectedTunnel(tunnel)
-				itemFocusRequester.requestFocus()
-			}
-		},
-		isExpanded = expanded && isActive,
-		expanded = { if (isActive && expanded) TunnelStatisticsRow(tunnelState.statistics, tunnel) },
-		trailing = {
-			if (isSelected && !isTv) {
-				Row(
-					modifier = Modifier.fillMaxWidth(),
-					horizontalArrangement = Arrangement.SpaceEvenly,
-				) {
-					IconButton(
-						modifier = Modifier.weight(1f),
-						onClick = {
-							onSetSelectedTunnel(null)
-							navController.navigate(Route.TunnelOptions(tunnel.id))
-						},
-					) {
-						Icon(
-							Icons.Rounded.Settings,
-							stringResource(id = R.string.settings),
-							modifier = Modifier.size(24.dp),
-						)
-					}
-					IconButton(
-						modifier = Modifier.weight(1f),
-						onClick = {
-							onCopy()
-							onSetSelectedTunnel(null)
-						},
-					) {
-						Icon(
-							Icons.Rounded.CopyAll,
-							stringResource(R.string.copy),
-							modifier = Modifier.size(24.dp),
-						)
-					}
-					IconButton(
-						modifier = Modifier.weight(1f),
-						enabled = !isActive,
-						onClick = { onDelete() },
-					) {
-						Icon(
-							Icons.Rounded.Delete,
-							stringResource(R.string.delete_tunnel),
-							modifier = Modifier.size(24.dp),
-						)
-					}
-				}
-			} else if (isTv) {
-				Row(
-					modifier = Modifier.fillMaxWidth(),
-					horizontalArrangement = Arrangement.SpaceEvenly,
-				) {
-					IconButton(
-						modifier = Modifier.weight(1f),
-						onClick = {
-							navController.navigate(Route.TunnelOptions(tunnel.id))
-							onSetSelectedTunnel(null)
-						},
-					) {
-						Icon(
-							Icons.Rounded.Settings,
-							stringResource(id = R.string.settings),
-							modifier = Modifier.size(24.dp),
-						)
-					}
-					IconButton(
-						modifier = Modifier.weight(1f),
-						onClick = {
-							if (isActive) {
-								onClick()
-							} else {
-								viewModel.handleEvent(
-									AppEvent.ShowMessage(StringValue.StringResource(R.string.turn_on_tunnel)),
-								)
-							}
-						},
-					) {
-						Icon(
-							Icons.Rounded.Info,
-							stringResource(R.string.info),
-							modifier = Modifier.size(24.dp),
-						)
-					}
-					IconButton(
-						modifier = Modifier.weight(1f),
-						onClick = onCopy,
-					) {
-						Icon(
-							Icons.Rounded.CopyAll,
-							stringResource(R.string.copy),
-							modifier = Modifier.size(24.dp),
-						)
-					}
-					IconButton(
-						modifier = Modifier.weight(1f),
-						onClick = {
-							if (isActive) {
-								viewModel.handleEvent(
-									AppEvent.ShowMessage(StringValue.StringResource(R.string.turn_off_tunnel)),
-								)
-							} else {
-								onDelete()
-							}
-						},
-					) {
-						Icon(
-							Icons.Rounded.Delete,
-							stringResource(R.string.delete_tunnel),
-							modifier = Modifier.size(24.dp),
-						)
-					}
-					ScaledSwitch(
-						modifier = Modifier
-							.focusRequester(itemFocusRequester)
-							.weight(1f),
-						checked = isActive,
-						onClick = onSwitchClick,
-					)
-				}
-			} else {
-				ScaledSwitch(
-					modifier = Modifier.focusRequester(itemFocusRequester),
-					checked = isActive,
-					onClick = onSwitchClick,
-				)
-			}
-		},
-	)
+    ExpandingRowListItem(
+        leading = {
+            Icon(
+                leadingIcon,
+                stringResource(R.string.status),
+                tint = leadingIconColor,
+                modifier = Modifier.size(size),
+            )
+        },
+        text = tunnel.tunName,
+        onHold = {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            onSetSelectedTunnel(tunnel)
+        },
+        onClick = {
+            if (!isTv) {
+                if (isActive) onClick()
+            } else {
+                onSetSelectedTunnel(tunnel)
+                itemFocusRequester.requestFocus()
+            }
+        },
+        isExpanded = expanded && isActive,
+        expanded = {
+            if (isActive && expanded) TunnelStatisticsRow(tunnelState.statistics, tunnel)
+        },
+        trailing = {
+            if (isSelected && !isTv) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            onSetSelectedTunnel(null)
+                            navController.navigate(Route.TunnelOptions(tunnel.id))
+                        },
+                    ) {
+                        Icon(
+                            Icons.Rounded.Settings,
+                            stringResource(id = R.string.settings),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            onCopy()
+                            onSetSelectedTunnel(null)
+                        },
+                    ) {
+                        Icon(
+                            Icons.Rounded.CopyAll,
+                            stringResource(R.string.copy),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        enabled = !isActive,
+                        onClick = { onDelete() },
+                    ) {
+                        Icon(
+                            Icons.Rounded.Delete,
+                            stringResource(R.string.delete_tunnel),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
+            } else if (isTv) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            navController.navigate(Route.TunnelOptions(tunnel.id))
+                            onSetSelectedTunnel(null)
+                        },
+                    ) {
+                        Icon(
+                            Icons.Rounded.Settings,
+                            stringResource(id = R.string.settings),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (isActive) {
+                                onClick()
+                            } else {
+                                viewModel.handleEvent(
+                                    AppEvent.ShowMessage(
+                                        StringValue.StringResource(R.string.turn_on_tunnel)
+                                    )
+                                )
+                            }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Rounded.Info,
+                            stringResource(R.string.info),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    IconButton(modifier = Modifier.weight(1f), onClick = onCopy) {
+                        Icon(
+                            Icons.Rounded.CopyAll,
+                            stringResource(R.string.copy),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    IconButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (isActive) {
+                                viewModel.handleEvent(
+                                    AppEvent.ShowMessage(
+                                        StringValue.StringResource(R.string.turn_off_tunnel)
+                                    )
+                                )
+                            } else {
+                                onDelete()
+                            }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Rounded.Delete,
+                            stringResource(R.string.delete_tunnel),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    ScaledSwitch(
+                        modifier = Modifier.focusRequester(itemFocusRequester).weight(1f),
+                        checked = isActive,
+                        onClick = onSwitchClick,
+                    )
+                }
+            } else {
+                ScaledSwitch(
+                    modifier = Modifier.focusRequester(itemFocusRequester),
+                    checked = isActive,
+                    onClick = onSwitchClick,
+                )
+            }
+        },
+    )
 }

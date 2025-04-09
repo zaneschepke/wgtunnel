@@ -15,18 +15,19 @@ import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavControll
 
 @Composable
 fun SplitTunnelingItem(tunnelConf: TunnelConf): SelectionItem {
-	val navController = LocalNavController.current
-	return SelectionItem(
-		leadingIcon = Icons.AutoMirrored.Outlined.CallSplit,
-		title = {
-			Text(
-				text = stringResource(R.string.splt_tunneling),
-				style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
-			)
-		},
-		trailing = {
-			ForwardButton { navController.navigate(Route.SplitTunnel(id = tunnelConf.id)) }
-		},
-		onClick = { navController.navigate(Route.SplitTunnel(id = tunnelConf.id)) },
-	)
+    val navController = LocalNavController.current
+    return SelectionItem(
+        leadingIcon = Icons.AutoMirrored.Outlined.CallSplit,
+        title = {
+            Text(
+                text = stringResource(R.string.splt_tunneling),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurface),
+            )
+        },
+        trailing = {
+            ForwardButton { navController.navigate(Route.SplitTunnel(id = tunnelConf.id)) }
+        },
+        onClick = { navController.navigate(Route.SplitTunnel(id = tunnelConf.id)) },
+    )
 }

@@ -6,12 +6,13 @@ import com.zaneschepke.wireguardautotunnel.ui.state.PeerProxy
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 
 data class ConfigUiState(
-	val tunnelName: String = "",
-	val configProxy: ConfigProxy = ConfigProxy(`interface` = InterfaceProxy(), peers = listOf(PeerProxy())),
-	val showAmneziaValues: Boolean = false,
-	val showScripts: Boolean = false,
-	val isAuthenticated: Boolean = true,
-	val showAuthPrompt: Boolean = false,
-	val message: StringValue? = null,
-	val success: Boolean? = null,
+    val tunnelName: String = "",
+    val configProxy: ConfigProxy =
+        ConfigProxy(`interface` = InterfaceProxy(), peers = listOf(PeerProxy())),
+    val showAmneziaValues: Boolean = false,
+    val showScripts: Boolean = false,
+    val isAuthenticated: Boolean = true,
+    val showAuthPrompt: Boolean = false,
+    val message: StringValue? = null,
+    val success: Boolean? = null,
 )

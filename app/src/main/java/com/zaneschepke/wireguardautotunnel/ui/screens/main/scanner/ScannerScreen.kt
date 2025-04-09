@@ -12,24 +12,22 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun ScannerScreen(viewModel: AppViewModel) {
-	val context = LocalContext.current
+    val context = LocalContext.current
 
-	val barcodeView = remember {
-		CompoundBarcodeView(context).apply {
-			this.initializeFromIntent((context as Activity).intent)
-			this.setStatusText("")
-			this.decodeSingle { result ->
-				result.text?.let { barCodeOrQr ->
-					viewModel.handleEvent(AppEvent.ImportTunnelFromQrCode(barCodeOrQr))
-				}
-			}
-		}
-	}
-	AndroidView(factory = { barcodeView })
-	DisposableEffect(Unit) {
-		barcodeView.resume()
-		onDispose {
-			barcodeView.pause()
-		}
-	}
+    val barcodeView = remember {
+        CompoundBarcodeView(context).apply {
+            this.initializeFromIntent((context as Activity).intent)
+            this.setStatusText("")
+            this.decodeSingle { result ->
+                result.text?.let { barCodeOrQr ->
+                    viewModel.handleEvent(AppEvent.ImportTunnelFromQrCode(barCodeOrQr))
+                }
+            }
+        }
+    }
+    AndroidView(factory = { barcodeView })
+    DisposableEffect(Unit) {
+        barcodeView.resume()
+        onDispose { barcodeView.pause() }
+    }
 }
