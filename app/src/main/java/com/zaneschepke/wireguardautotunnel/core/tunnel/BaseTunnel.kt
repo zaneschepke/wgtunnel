@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.core.tunnel
 
+import com.wireguard.android.backend.BackendException
 import com.wireguard.android.backend.Tunnel
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
@@ -10,10 +11,11 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.extensions.asTunnelState
+import com.zaneschepke.wireguardautotunnel.util.extensions.toBackendError
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -35,8 +37,9 @@ abstract class BaseTunnel(
 
     private val tunMutex = Mutex()
     private val tunStatusMutex = Mutex()
+    private val bounceTunnelMutex = Mutex()
 
-    private val isBouncing = AtomicBoolean(false)
+    override val bouncingTunnelIds = ConcurrentHashMap<Int, TunnelStatus.StopReason>()
 
     abstract suspend fun startBackend(tunnel: TunnelConf)
 
@@ -98,7 +101,7 @@ abstract class BaseTunnel(
                     is org.amnezia.awg.backend.Tunnel.State ->
                         updateTunnelStatus(tunnelConf, state.asTunnelState())
                 }
-                handleServiceChangesOnStop()
+                handleServiceStateOnChange()
             }
             serviceManager.updateTunnelTile()
         }
@@ -111,13 +114,10 @@ abstract class BaseTunnel(
 
     override suspend fun startTunnel(tunnelConf: TunnelConf) {
         if (activeTuns.exists(tunnelConf.id) || tunThreads.containsKey(tunnelConf.id)) return
-        // stop active tunnels if we are userspace
         if (this@BaseTunnel is UserspaceTunnel) stopActiveTunnels()
         tunMutex.withLock {
-            // use thread to interrupt java backend if stuck (like in dns resolution)
-            tunThreads +=
-                tunnelConf.id to
-                    thread {
+            tunThreads[tunnelConf.id] = thread {
+                runCatching {
                         runBlocking {
                             try {
                                 Timber.d("Starting tunnel ${tunnelConf.id}...")
@@ -127,23 +127,32 @@ abstract class BaseTunnel(
                                 Timber.e(e, "Failed to start tunnel ${tunnelConf.name} userspace")
                                 updateTunnelStatus(tunnelConf, TunnelStatus.Error(e))
                             } catch (e: InterruptedException) {
-                                Timber.i(
+                                Timber.w(
                                     "Tunnel start has been interrupted as ${tunnelConf.name} failed to start"
                                 )
                             }
                         }
                     }
+                    .onFailure { Timber.w("Tunnel start has been interrupted") }
+            }
         }
     }
 
     private suspend fun startTunnelInner(tunnelConf: TunnelConf) {
         configureTunnelCallbacks(tunnelConf)
-        Timber.d("Started backend for tunnel ${tunnelConf.id}...")
-        startBackend(tunnelConf)
-        updateTunnelStatus(tunnelConf, TunnelStatus.Up)
-        Timber.d("DONE for tun ${tunnelConf.id}...")
-        saveTunnelActiveState(tunnelConf, true)
-        serviceManager.startTunnelForegroundService()
+        Timber.d("Starting  backend for tunnel ${tunnelConf.id}...")
+        try {
+            startBackend(tunnelConf)
+            updateTunnelStatus(tunnelConf, TunnelStatus.Up)
+            Timber.d("Started for tun ${tunnelConf.id}...")
+            saveTunnelActiveState(tunnelConf, true)
+            serviceManager.startTunnelForegroundService()
+        } catch (e: BackendException) {
+            Timber.e(e, "Failed to start backend for ${tunnelConf.name}")
+            val backendError = e.toBackendError()
+            updateTunnelStatus(tunnelConf, TunnelStatus.Error(backendError))
+            throw backendError
+        }
     }
 
     private suspend fun saveTunnelActiveState(tunnelConf: TunnelConf, active: Boolean) {
@@ -173,9 +182,9 @@ abstract class BaseTunnel(
         removeActiveTunnel(tunnel)
     }
 
-    private suspend fun handleServiceChangesOnStop() {
-        if (activeTuns.value.isEmpty() && !isBouncing.get())
-            return serviceManager.stopTunnelForegroundService()
+    private suspend fun handleServiceStateOnChange() {
+        if (activeTuns.value.isEmpty() && bouncingTunnelIds.isEmpty())
+            serviceManager.stopTunnelForegroundService()
     }
 
     private suspend fun handleStuckStartingTunnelShutdown(tunnel: TunnelConf) {
@@ -205,11 +214,23 @@ abstract class BaseTunnel(
     }
 
     override suspend fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
-        Timber.i("Bounce tunnel ${tunnelConf.name}")
-        isBouncing.set(true)
-        stopTunnel(tunnelConf, reason)
-        startTunnel(tunnelConf)
-        isBouncing.set(false)
+        bounceTunnelMutex.withLock {
+            Timber.i(
+                "Bounce tunnel ${tunnelConf.name} for reason: $reason, current bouncing: ${bouncingTunnelIds.size}"
+            )
+            bouncingTunnelIds[tunnelConf.id] = reason
+            try {
+                stopTunnel(tunnelConf, reason)
+                delay(300L)
+                startTunnel(tunnelConf)
+            } finally {
+                bouncingTunnelIds.remove(tunnelConf.id)
+                handleServiceStateOnChange()
+                Timber.d(
+                    "Cleared bounce state for ${tunnelConf.name}, remaining: ${bouncingTunnelIds.size}"
+                )
+            }
+        }
     }
 
     override suspend fun runningTunnelNames(): Set<String> =

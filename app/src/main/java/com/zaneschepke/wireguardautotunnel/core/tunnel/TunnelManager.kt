@@ -9,6 +9,7 @@ import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -61,6 +62,9 @@ constructor(
                 initialValue = emptyMap(),
             )
 
+    override val bouncingTunnelIds: ConcurrentHashMap<Int, TunnelStatus.StopReason> =
+        tunnelProviderFlow.value.bouncingTunnelIds
+
     override fun hasVpnPermission(): Boolean {
         return userspaceTunnel.hasVpnPermission()
     }
@@ -78,11 +82,11 @@ constructor(
     }
 
     override suspend fun stopTunnel(tunnelConf: TunnelConf?, reason: TunnelStatus.StopReason) {
-        tunnelProviderFlow.value.stopTunnel(tunnelConf)
+        tunnelProviderFlow.value.stopTunnel(tunnelConf, reason)
     }
 
     override suspend fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
-        tunnelProviderFlow.value.bounceTunnel(tunnelConf)
+        tunnelProviderFlow.value.bounceTunnel(tunnelConf, reason)
     }
 
     override fun setBackendState(backendState: BackendState, allowedIps: Collection<String>) {

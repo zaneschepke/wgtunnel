@@ -17,6 +17,7 @@ import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
+import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.distinctByKeys
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,6 +37,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -57,6 +60,9 @@ class TunnelForegroundService : LifecycleService() {
     private val isNetworkConnected = MutableStateFlow(true)
 
     private val tunnelJobs = ConcurrentHashMap<TunnelConf, Job>()
+    private val pingJobs = ConcurrentHashMap<TunnelConf, Job>()
+
+    private val jobsMutex = Mutex()
 
     override fun onCreate() {
         super.onCreate()
@@ -88,30 +94,84 @@ class TunnelForegroundService : LifecycleService() {
     }
 
     fun start() =
-        lifecycleScope.launch {
-            tunnelManager.activeTunnels.distinctByKeys().collect { tuns ->
-                if (tuns.isEmpty() && tunnelJobs.isEmpty()) return@collect
-                if (tuns.isEmpty() && tunnelJobs.isNotEmpty()) {
-                    return@collect tunnelJobs.forEach { (key, _) ->
-                        Timber.d("Stopping all tunnel jobs")
-                        tunnelJobs[key]?.cancel()
-                        tunnelJobs.remove(key)
-                    }
-                }
-                val (jobsToStop, jobsToStart) = findMissingKeys(tuns, tunnelJobs)
-                if (jobsToStop.isEmpty() && jobsToStart.isEmpty()) return@collect
-                jobsToStop.forEach { tun ->
-                    Timber.d("Stopping tunnel jobs for ${tun.tunName}")
-                    tunnelJobs[tun]?.cancel()
-                    tunnelJobs.remove(tun)
-                }
-                jobsToStart.forEach { tun ->
-                    Timber.d("Starting tunnel jobs for ${tun.tunName}")
-                    tunnelJobs += (tun to startTunnelJobs(tun))
-                }
+        lifecycleScope.launch(ioDispatcher) {
+            tunnelManager.activeTunnels.distinctByKeys().collect { activeTunnels ->
+                // No active tunnels and no jobs: nothing to do
+                if (activeTunnels.isEmpty() && tunnelJobs.isEmpty()) return@collect
+
+                // Synchronize jobs with active tunnels
+                synchronizeJobs(activeTunnels)
                 updateServiceNotification()
             }
         }
+
+    private suspend fun synchronizeJobs(activeTunnels: Map<TunnelConf, TunnelState>) {
+        jobsMutex.withLock {
+            // Stop jobs for tunnels that are no longer active
+            stopInactiveJobs(activeTunnels)
+            // Start jobs for new tunnels
+            startNewJobs(activeTunnels)
+        }
+    }
+
+    private fun stopInactiveJobs(activeTunnels: Map<TunnelConf, TunnelState>) {
+        // If no active tunnels, clear all jobs
+        if (activeTunnels.isEmpty()) {
+            clearAllJobs()
+            return
+        }
+        // Stop jobs for tunnels not in activeTunnels
+        val tunnelsToStop = tunnelJobs.keys - activeTunnels.keys
+        tunnelsToStop.forEach { tun -> stopTunnelJobs(tun) }
+    }
+
+    private fun clearAllJobs() {
+        tunnelJobs.forEach { (tun, job) ->
+            Timber.d("Stopping tunnel job for ${tun.tunName}")
+            job.cancel()
+        }
+        tunnelJobs.clear()
+
+        pingJobs.forEach { (tun, job) ->
+            if (isPingBounce(tun)) {
+                Timber.d("Preserving ping job for ${tun.tunName} due to PING bounce")
+                return@forEach
+            }
+            Timber.d("Stopping ping job for ${tun.tunName}")
+            job.cancel()
+        }
+        pingJobs.entries.removeIf { (tun, _) -> !isPingBounce(tun) }
+    }
+
+    private fun stopTunnelJobs(tun: TunnelConf) {
+        tunnelJobs.remove(tun)?.cancel()
+        Timber.d("Stopped tunnel job for ${tun.tunName}")
+        if (isPingBounce(tun))
+            return Timber.d("Preserving ${tun.tunName} ping job due to ping bounce")
+        pingJobs.remove(tun)?.cancel()
+        Timber.d("Stopped ping job for ${tun.tunName}")
+    }
+
+    private fun startNewJobs(activeTunnels: Map<TunnelConf, TunnelState>) {
+        val tunnelsToStart = activeTunnels.keys - tunnelJobs.keys
+        tunnelsToStart.forEach { tun ->
+            tunnelJobs[tun] = startTunnelJobs(tun)
+            Timber.d("Started tunnel job for ${tun.tunName}")
+
+            if (pingJobs[tun]?.isActive == true) {
+                Timber.d("Reusing active ping job for ${tun.tunName}")
+            } else {
+                pingJobs[tun]?.cancel() // Cancel any stale job
+                if (tun.isPingEnabled) {
+                    pingJobs[tun] = startPingJob(tun)
+                    Timber.d("Started ping job for ${tun.tunName}")
+                }
+            }
+        }
+    }
+
+    private fun isPingBounce(tun: TunnelConf): Boolean =
+        tunnelManager.bouncingTunnelIds[tun.id] == TunnelStatus.StopReason.PING
 
     // TODO Would be cool to have this include kill switch
     // TODO also we need to include errors
@@ -132,25 +192,14 @@ class TunnelForegroundService : LifecycleService() {
 
     // use same scope so we can cancel all of these
     private fun startTunnelJobs(tunnelConf: TunnelConf) =
-        lifecycleScope.launch {
+        lifecycleScope.launch(ioDispatcher) {
             // monitor if we have internet connectivity
             launch { startNetworkMonitorJob() }
             // job to trigger stats emit on interval
             launch { startTunnelStatsJob(tunnelConf) }
             // monitor changes to the tunnel config
             launch { startTunnelConfChangesJob(tunnelConf) }
-            // monitor tunnel ping
-            launch { startPingJob(tunnelConf) }
         }
-
-    private fun findMissingKeys(
-        map1: Map<TunnelConf, Any>,
-        map2: Map<TunnelConf, Any>,
-    ): Pair<Set<TunnelConf>, Set<TunnelConf>> {
-        val missingMap1 = map2.keys - map1.keys
-        val missingMap2 = map1.keys - map2.keys
-        return missingMap1 to missingMap2
-    }
 
     private suspend fun startTunnelConfChangesJob(tunnelConf: TunnelConf) {
         tunnelRepo.flow
@@ -188,24 +237,25 @@ class TunnelForegroundService : LifecycleService() {
         }
     }
 
-    // TODO fix cooldown
-    private suspend fun startPingJob(tunnel: TunnelConf) = coroutineScope {
-        delay(PING_START_DELAY)
-        while (isActive) {
-            val shouldBounce = shouldBounceTunnel(tunnel)
-            val delayMs =
-                if (shouldBounce) {
-                    // let this complete, even after cancel
-                    withContext(NonCancellable) {
-                        tunnelManager.bounceTunnel(tunnel, TunnelStatus.StopReason.PING)
+    private fun startPingJob(tunnel: TunnelConf) =
+        lifecycleScope.launch(ioDispatcher) {
+            // delay for initial duration
+            delay(tunnel.pingInterval ?: Constants.PING_INTERVAL)
+            while (isActive) {
+                val shouldBounce = shouldBounceTunnel(tunnel)
+                val delayMs =
+                    if (shouldBounce) {
+                        // let this complete, even after cancel
+                        withContext(NonCancellable) {
+                            tunnelManager.bounceTunnel(tunnel, TunnelStatus.StopReason.PING)
+                        }
+                        tunnel.pingCooldown ?: Constants.PING_COOLDOWN
+                    } else {
+                        tunnel.pingInterval ?: Constants.PING_INTERVAL
                     }
-                    tunnel.pingCooldown ?: Constants.PING_COOLDOWN
-                } else {
-                    tunnel.pingInterval ?: Constants.PING_INTERVAL
-                }
-            delay(delayMs)
+                delay(delayMs)
+            }
         }
-    }
 
     private suspend fun shouldBounceTunnel(tunnel: TunnelConf): Boolean {
         if (!isNetworkConnected.value) {
@@ -263,10 +313,10 @@ class TunnelForegroundService : LifecycleService() {
     // TODO add notification handling and optional log reading for restart on handshake failures
     companion object {
         const val STATS_DELAY = 1_000L
-        const val PING_START_DELAY = 30_000L
         // ipv6 disabled or block on network
-        // 		const val userspaceStartFailed = "Failed to send handshake initiation: write udp [::]"
-        // 		const val ipv6Fails = "Failed to send data packets: write udp [::]"
-        // 		const val ipv4Fails = "Failed to send data packets: write udp 0.0.0.0:51820"
+        // Failed to send handshake initiation: write udp [::]"
+        // Failed to send data packets: write udp [::]
+        // Failed to send data packets: write udp 0.0.0.0:51820
+        // Handshake did not complete after 5 seconds, retrying
     }
 }
