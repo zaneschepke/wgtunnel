@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,14 +27,18 @@ fun SupportScreen() {
     Column(
         modifier =
             Modifier.fillMaxSize()
-                .padding(top = 24.dp)
-                .padding(horizontal = 24.dp)
+                .padding(vertical = 24.dp)
+                .padding(horizontal = 12.dp)
                 .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
     ) {
-        GroupLabel(stringResource(R.string.thank_you))
+        GroupLabel(
+            stringResource(R.string.thank_you),
+            modifier = Modifier.padding(horizontal = 12.dp),
+        )
         GeneralSupportOptions(context)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
         ContactSupportOptions(context)
         VersionLabel()
     }

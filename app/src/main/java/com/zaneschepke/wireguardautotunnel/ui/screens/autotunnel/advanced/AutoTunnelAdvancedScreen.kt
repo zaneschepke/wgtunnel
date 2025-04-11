@@ -18,12 +18,12 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 fun AutoTunnelAdvancedScreen(appUiState: AppUiState, viewModel: AppViewModel) {
     Column(
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
         modifier =
             Modifier.fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 24.dp)
-                .padding(horizontal = 24.dp),
+                .padding(vertical = 24.dp)
+                .padding(horizontal = 12.dp),
     ) {
         DebounceDelaySelector(
             currentDelay = appUiState.appSettings.debounceDelaySeconds,

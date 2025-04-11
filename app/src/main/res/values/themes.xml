@@ -2,11 +2,11 @@
 <resources>
 
     <style name="Theme.WireguardAutoTunnel" parent="@style/Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@color/black_background</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
     <style name="Theme.App.Start" parent="@style/Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/black_background</item>
+        <item name="windowSplashScreenBackground">@color/background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.WireguardAutoTunnel</item>
     </style>

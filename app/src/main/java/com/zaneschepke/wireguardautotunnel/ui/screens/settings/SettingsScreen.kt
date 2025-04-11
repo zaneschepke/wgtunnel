@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -48,13 +50,12 @@ fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: A
 
     Column(
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
         modifier =
             Modifier.verticalScroll(rememberScrollState())
                 .fillMaxSize()
-                .padding(top = 24.dp)
-                .padding(bottom = 40.dp)
-                .padding(horizontal = 24.dp)
+                .padding(vertical = 24.dp)
+                .padding(horizontal = 12.dp)
                 .then(
                     if (!isRunningOnTv) {
                         Modifier.clickable(
@@ -76,6 +77,7 @@ fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: A
                     add(RestartAtBootItem(uiState, viewModel))
                 }
         )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
         SurfaceSelectionGroupButton(
             items =
                 buildList {
@@ -85,8 +87,10 @@ fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: A
                     add(PinLockItem(uiState, viewModel))
                 }
         )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
         if (!isRunningOnTv) {
             SurfaceSelectionGroupButton(items = listOf(KernelModeItem(uiState, viewModel)))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
         }
         SurfaceSelectionGroupButton(
             items =

@@ -38,12 +38,12 @@ fun SettingsAdvancedScreen(appUiState: AppUiState, viewModel: AppViewModel) {
 
     Column(
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
         modifier =
             Modifier.fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 24.dp)
-                .padding(horizontal = 24.dp),
+                .padding(vertical = 24.dp)
+                .padding(horizontal = 12.dp),
     ) {
         SurfaceSelectionGroupButton(listOf(RemoteControlItem(appUiState, viewModel)))
     }

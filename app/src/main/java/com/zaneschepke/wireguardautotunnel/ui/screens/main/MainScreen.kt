@@ -121,8 +121,7 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
             viewModel.handleEvent(AppEvent.CopyTunnel(it))
             viewModel.handleEvent(AppEvent.SetSelectedTunnel(null))
         },
-        modifier =
-            Modifier.fillMaxSize().padding(top = 12.dp, bottom = 24.dp).padding(horizontal = 12.dp),
+        modifier = Modifier.fillMaxSize().padding(vertical = 24.dp).padding(horizontal = 12.dp),
         viewModel = viewModel,
     )
 }

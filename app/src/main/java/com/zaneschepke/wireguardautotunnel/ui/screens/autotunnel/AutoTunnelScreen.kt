@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -90,12 +92,12 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
 
     Column(
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
         modifier =
             Modifier.fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 24.dp)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 12.dp),
     ) {
         SurfaceSelectionGroupButton(
             items =
@@ -107,7 +109,9 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
                     { isWifiNameReadable() },
                 )
         )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
         SurfaceSelectionGroupButton(items = NetworkTunnelingItems(uiState, viewModel))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
         SurfaceSelectionGroupButton(
             items =
                 listOf(

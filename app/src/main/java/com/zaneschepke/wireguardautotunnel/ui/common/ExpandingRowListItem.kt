@@ -33,18 +33,18 @@ fun ExpandingRowListItem(
     Box(
         modifier =
             Modifier.animateContentSize()
-                .clip(RoundedCornerShape(30.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .combinedClickable(onClick = { onClick() }, onLongClick = { onHold() })
     ) {
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(15.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth(13 / 20f),
                 ) {
                     leading()
