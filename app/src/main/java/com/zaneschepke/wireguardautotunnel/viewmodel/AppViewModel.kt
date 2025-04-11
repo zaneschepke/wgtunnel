@@ -462,6 +462,8 @@ constructor(
     }
 
     private fun handleKillSwitchChange(appSettings: AppSettings) {
+        // let auto tunnel handle kill switch changes if running
+        if (uiState.value.isAutoTunnelActive) return
         if (!appSettings.isVpnKillSwitchEnabled)
             return tunnelManager.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
         Timber.d("Starting kill switch")
