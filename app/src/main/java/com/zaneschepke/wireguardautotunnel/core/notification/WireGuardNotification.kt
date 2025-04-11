@@ -60,7 +60,7 @@ class WireGuardNotification @Inject constructor(@ApplicationContext override val
                 setOngoing(onGoing)
                 setPriority(NotificationCompat.PRIORITY_HIGH)
                 setShowWhen(showTimestamp)
-                setSmallIcon(R.drawable.ic_launcher)
+                setSmallIcon(R.drawable.ic_notification)
             }
             .build()
     }
@@ -102,7 +102,7 @@ class WireGuardNotification @Inject constructor(@ApplicationContext override val
                 PendingIntent.FLAG_IMMUTABLE,
             )
         return NotificationCompat.Action.Builder(
-                R.drawable.ic_launcher,
+                R.drawable.ic_notification,
                 notificationAction.title(context).uppercase(),
                 pendingIntent,
             )
