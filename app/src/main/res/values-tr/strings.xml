@@ -38,7 +38,6 @@
     <string name="name">Ad</string>
     <string name="always_on_vpn_support">Her Zaman Açık VPN’e İzin Ver</string>
     <string name="location_services_not_detected">Konum Servisleri Algılanmadı</string>
-    <string name="hint_search_packages">Paketleri ara</string>
     <string name="db_name" translatable="false">wg-tunnel-db</string>
     <string name="auto_tunneling">Otomatik tünelleme</string>
     <string name="vpn_on">VPN açık</string>
@@ -55,7 +54,6 @@
     <string name="listen_port">Dinleme portu</string>
     <string name="random">(rastgele)</string>
     <string name="optional">(isteğe bağlı)</string>
-    <string name="optional_no_recommend">(isteğe bağlı, önerilmez)</string>
     <string name="preshared_key">Ön paylaşımlı anahtar</string>
     <string name="seconds">saniye</string>
     <string name="persistent_keepalive">Kalıcı canlı tutma</string>
@@ -63,7 +61,6 @@
     <string name="error_authentication_failed">Kimlik doğrulama başarısız</string>
     <string name="error_authorization_failed">Yetkilendirme başarısız</string>
     <string name="enabled_app_shortcuts">Uygulama kısayollarını etkinleştir</string>
-    <string name="export_configs">Yapılandırmaları dışa aktar</string>
     <string name="unknown_error">Bilinmeyen bir hata oluştu</string>
     <string name="tunnel_on_wifi">Güvenilmeyen wifi’da tünel</string>
     <string name="my_email" translatable="false">support@zaneschepke.com</string>
@@ -75,13 +72,11 @@
     <string name="error_ssid_exists">SSID zaten mevcut</string>
     <string name="error_root_denied">Root kabuğu reddedildi</string>
     <string name="error_no_file_explorer">Dosya gezgini yüklü değil</string>
-    <string name="error_invalid_code">Geçersiz QR kodu</string>
     <string name="location_services_missing_message">Uygulama, cihazınızda etkinleştirilmiş herhangi bir konum servisi algılamıyor. Cihaza bağlı olarak, bu durum güvenilmeyen wifi özelliğinin wifi adını okuyamamasını sağlayabilir. Yine de devam etmek ister misiniz?</string>
     <string name="auto_tunnel_title">Otomatik tünel servisi</string>
     <string name="delete_tunnel">Tüneli sil</string>
     <string name="delete_tunnel_message">Bu tüneli silmek istediğinizden emin misiniz?</string>
     <string name="yes">Evet</string>
-    <string name="tunneling_apps">Tünelleme uygulamaları</string>
     <string name="all">tümü</string>
     <string name="no_email_detected">E-posta uygulaması algılanmadı</string>
     <string name="no_browser_detected">Tarayıcı algılanmadı</string>
@@ -122,8 +117,6 @@
     <string name="vpn_settings">VPN sistem ayarları</string>
     <string name="always_on_message">VPN bağlantı izni reddedildi. Lütfen</string>
     <string name="always_on_message2">diğer tüm uygulamalar için Her Zaman Açık VPN’in kapalı olduğundan emin olun ve tekrar deneyin</string>
-    <string name="chat_description">Topluluğa katıl</string>
-    <string name="tunnel_required">Bu özellik en az bir tünel gerektirir</string>
     <string name="background_location_message">Bu özellik için her zaman konum izni ve/veya hassas konum gereklidir. Lütfen</string>
     <string name="app_settings">uygulama ayarları</string>
     <string name="background_location_message2">bu izinlerin etkin olduğundan emin olun</string>
@@ -149,7 +142,6 @@
     <string name="display_theme">Ekran teması</string>
     <string name="trusted_wifi_names">Güvenilir wifi adları</string>
     <string name="add_wifi_name">Wifi adı ekle</string>
-    <string name="on_demand_rules">İsteğe bağlı tünel kuralları</string>
     <string name="primary_tunnel">Birincil tünel</string>
     <string name="mobile_tunnel">Mobil veri tüneli</string>
     <string name="skip">Atla</string>
@@ -167,8 +159,6 @@
     <string name="donate">Projeye bağış yap</string>
     <string name="local_logging">Yerel günlüğe kaydetme</string>
     <string name="enable_local_logging">Yerel günlüğe kaydetmeyi etkinleştir</string>
-    <string name="configuration_change">Yapılandırma değişikliği</string>
-    <string name="requires_app_relaunch">Bu değişiklik uygulamanın yeniden başlatılmasını gerektirir. Devam etmek ister misiniz?</string>
     <string name="add_from_clipboard">Panodan ekle</string>
     <string name="stop_on_no_internet">İnternet olmadığında durdur</string>
     <string name="stop_on_internet_loss">İnternet kaybında tüneli durdur</string>
@@ -191,9 +181,6 @@
     <string name="post_up">Sonra çalıştırma</string>
     <string name="pre_down">Ön kapatma</string>
     <string name="post_down">Sonra kapatma</string>
-    <string name="amnezia_kernel_message">Amnezia çekirdek modunda kullanılamaz</string>
-    <string name="enable_amnezia">Amnezia’yı etkinleştir</string>
-    <string name="wg_compat_mode">WG uyumluluk modu</string>
     <string name="quick_actions">Hızlı eylemler</string>
     <string name="advanced_settings">Gelişmiş ayarlar</string>
     <string name="debounce_delay">Gecikme süresi</string>
@@ -203,17 +190,10 @@
     <string name="remove_amnezia_compatibility">Amnezia uyumluluğunu kaldır</string>
     <string name="exclude_lan">LAN’ı hariç tut</string>
     <string name="include_lan">LAN’ı dahil et</string>
-    <string name="error_tunnel_start">Tünel başlatma başarısız</string>
     <string name="tunnel_control">Tünel kontrolü</string>
     <string name="auto_tunnel">Otomatik tünel</string>
     <string name="kill_switch_off">Güvenilirde kill switch’i durdur</string>
     <string name="server_ipv4">IPv4 ana makine çözünürlüğü</string>
     <string name="prefer_ipv4">IPv4 bağlantısını tercih et</string>
-    <string name="dns_error">Uç nokta DNS’si çözülemedi.</string>
-    <string name="start_failed_config">Yapılandırma hatası nedeniyle tünel başlatılamadı.</string>
-    <string name="unauthorized">Yetkisiz, tünel başlatılamadı.</string>
-    <string name="tunne_start_failed_title">Tünel hatası</string>
     <string name="multiple">Çoklu</string>
-    <string name="export_amnezia">Amnezia olarak dışa aktar</string>
-    <string name="export_wireguard">WireGuard olarak dışa aktar</string>
 </resources>

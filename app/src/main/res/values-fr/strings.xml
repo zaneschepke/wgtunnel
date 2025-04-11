@@ -20,7 +20,6 @@
     <string name="name">Nom</string>
     <string name="always_on_vpn_support">Autoriser le VPN permanent</string>
     <string name="location_services_not_detected">Services de localisation non détectés</string>
-    <string name="hint_search_packages">Rechercher des paquets</string>
     <string name="auto_tunneling">Tunnel automatique</string>
     <string name="vpn_off">VPN éteint</string>
     <string name="turn_on_tunnel">Cette action nécessite un tunnel actif</string>
@@ -47,7 +46,6 @@
     <string name="comma_separated_list">liste séparée par des virgules</string>
     <string name="listen_port">Port d\'écoute</string>
     <string name="random">(aléatoire)</string>
-    <string name="optional_no_recommend">(optionnel, non recommandé)</string>
     <string name="persistent_keepalive">Keepalive persistant</string>
     <string name="optional">(optionnel)</string>
     <string name="preshared_key">Clé pré-partagée</string>
@@ -55,7 +53,6 @@
     <string name="seconds">secondes</string>
     <string name="error_authentication_failed">Échec de l\'authentification</string>
     <string name="error_authorization_failed">Autorisation échouée</string>
-    <string name="export_configs">Exporter les configs</string>
     <string name="tunnel_on_wifi">Tunnel sur wifi non approuvé</string>
     <string name="email_chooser">Envoyer un mail…</string>
     <string name="docs_description">Lire la documentation</string>
@@ -67,7 +64,6 @@
     <string name="auto_tunnel_title">Service de tunnel automatique</string>
     <string name="delete_tunnel">Supprimer un tunnel</string>
     <string name="delete_tunnel_message">Êtes-vous sûr de vouloir supprimer ce tunnel ?</string>
-    <string name="tunneling_apps">Applis de tunnel</string>
     <string name="no_email_detected">Aucune application de mail détectée</string>
     <string name="no_browser_detected">Aucun navigateur détecté</string>
     <string name="open_issue">Signaler un problème</string>
@@ -88,7 +84,6 @@
     <string name="error_file_format">Format de configuration du tunnel invalide</string>
     <string name="restart_at_boot">Redémarrer au démarrage du système</string>
     <string name="vpn_settings">paramètres système des VPN</string>
-    <string name="tunnel_required">Cette fonctionnalité nécessite au moins un tunnel</string>
     <string name="app_settings">les réglages de l\'application</string>
     <string name="background_location_message2">afin de s\'assurer que ces permissions soient actives</string>
     <string name="root_accepted">Accès au shell root autorisé</string>
@@ -98,7 +93,6 @@
     <string name="never">jamais</string>
     <string name="handshake">handshake</string>
     <string name="logs">Journaux</string>
-    <string name="error_invalid_code">Code QR invalide</string>
     <string name="enabled_app_shortcuts">Activer les raccourcis</string>
     <string name="unknown_error">Une erreur inconnue s\'est produite</string>
     <string name="email_subject">Assistance WG Tunnel</string>
@@ -122,7 +116,6 @@
     <string name="vpn_denied_dialog_title">Permission Refusée</string>
     <string name="always_on_message">Connexion au VPN interdite. Merci de vérifier les</string>
     <string name="always_on_message2">afin de s\'assurer que le VPN permanent est désactivé pour toutes les autres applis puis réessayer</string>
-    <string name="chat_description">Rejoindre la communauté</string>
     <string name="background_location_message">L\'accès à la permission de localisation permanente et/ou la localisation précise est nécessaire pour cette fonctionnalité. Veuillez vérifier dans</string>
     <string name="default_ping_ip">(facultatif, par défaut les pairs)</string>
     <string name="set_custom_ping_internal">Intervalle de ping (sec)</string>
@@ -139,7 +132,6 @@
     <string name="dark">Sombre</string>
     <string name="dynamic">Dynamique</string>
     <string name="language">Langue</string>
-    <string name="on_demand_rules">Règles de tunnel à la demande</string>
     <string name="launch_app_settings">Ouvrir les paramètres de l\'appli</string>
     <string name="display_theme">Thème d\'affichage</string>
     <string name="trusted_wifi_names">Nom wifi approuvés</string>
@@ -156,10 +148,8 @@
     <string name="donate">Faire un don au projet</string>
     <string name="local_logging">Journalisation locale</string>
     <string name="enable_local_logging">Activer la journalisation locale</string>
-    <string name="configuration_change">Configuration modifiée</string>
     <string name="kernel_not_supported">Noyau non supporté</string>
     <string name="start_auto">Démarrer l\'auto-tunnel</string>
-    <string name="requires_app_relaunch">Cette modification nécessite un redémarrage de l\'application. Voulez-vous continuer ?</string>
     <string name="exclude_lan">Exclure le LAN</string>
     <string name="tunnel_specific_settings">Réglages spécifiques du tunnel</string>
     <string name="show_scripts">Voir les scripts</string>
@@ -178,9 +168,6 @@
     <string name="bypass_lan_for_kill_switch">Contourner le LAN en cas d\'arêt d\'urgence</string>
     <string name="stop">arrêter</string>
     <string name="splt_tunneling">Tunnel partagé</string>
-    <string name="amnezia_kernel_message">Amnezia n\'est pas disponible en mode noyau</string>
-    <string name="enable_amnezia">Activer Amnezia</string>
-    <string name="wg_compat_mode">Mode de compatibilité WG</string>
     <string name="quick_actions">Actions rapides</string>
     <string name="enable_amnezia_compatibility">Activer la prise en charge d\'Amnezia</string>
     <string name="include_lan">Inclure le LAN</string>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="peer">پیر</string>
-    <string name="optional_no_recommend">(اختیاری، تجویز کردہ نہیں)</string>
     <string name="add_from_qr">QR کوڈ سے شامل کریں۔</string>
     <string name="always_on_vpn_support">ہمیشہ آن VPN کی اجازت دیں۔</string>
     <string name="add_peer">ساتھی شامل کریں۔</string>
@@ -36,7 +35,6 @@
     <string name="endpoint">اختتامی نقطہ</string>
     <string name="name">نام</string>
     <string name="location_services_not_detected">مقام کی خدمات کا پتہ نہیں چلا</string>
-    <string name="hint_search_packages">پیکجز تلاش کریں۔</string>
     <string name="vpn_on">VPN آن</string>
     <string name="vpn_off">VPN آف ہے۔</string>
     <string name="turn_on_tunnel">کارروائی کے لیے فعال سرنگ کی ضرورت ہے۔</string>
@@ -50,7 +48,6 @@
     <string name="error_authentication_failed">تصدیق ناکام ہوگئی</string>
     <string name="error_authorization_failed">اجازت دینے میں ناکام</string>
     <string name="enabled_app_shortcuts">ایپ شارٹ کٹس کو فعال کریں۔</string>
-    <string name="export_configs">ترتیب برآمد کریں۔</string>
     <string name="tunnel_on_wifi">ناقابل اعتماد وائی فائی پر سرنگ</string>
     <string name="email_subject">ڈبلیو جی ٹنل سپورٹ</string>
     <string name="docs_description">دستاویزات پڑھیں</string>
@@ -59,12 +56,10 @@
     <string name="error_ssid_exists">SSID پہلے سے موجود ہے۔</string>
     <string name="error_root_denied">روٹ شیل سے انکار کر دیا گیا۔</string>
     <string name="error_no_file_explorer">کوئی فائل ایکسپلورر انسٹال نہیں ہے۔</string>
-    <string name="error_invalid_code">غلط QR کوڈ</string>
     <string name="auto_tunnel_title">آٹو ٹنل سروس</string>
     <string name="delete_tunnel">سرنگ کو حذف کریں۔</string>
     <string name="delete_tunnel_message">کیا آپ واقعی اس سرنگ کو حذف کرنا چاہیں گے؟</string>
     <string name="yes">جی ہاں</string>
-    <string name="tunneling_apps">ٹنلنگ ایپس</string>
     <string name="all">تمام</string>
     <string name="no_email_detected">کوئی ای میل ایپ نہیں ملی</string>
     <string name="no_browser_detected">کوئی براؤزر نہیں ملا</string>
@@ -86,7 +81,6 @@
     <string name="vpn_denied_dialog_title">اجازت نامنظور</string>
     <string name="vpn_settings">VPN سسٹم کی ترتیبات</string>
     <string name="always_on_message">VPN کنکشن کی اجازت مسترد کر دی گئی ہے۔ براہ کرم چیک کریں۔</string>
-    <string name="tunnel_required">خصوصیت کے لیے کم از کم ایک سرنگ درکار ہے۔</string>
     <string name="app_settings">ایپ کی ترتیبات</string>
     <string name="root_accepted">روٹ شیل کو قبول کر لیا گیا۔</string>
     <string name="set_custom_ping_ip">اپنی مرضی کے مطابق پنگ آئی پی سیٹ کریں۔</string>
@@ -122,20 +116,16 @@
     <string name="post_up">پوسٹ اپ</string>
     <string name="pre_down">پری نیچے</string>
     <string name="post_down">پوسٹ نیچے</string>
-    <string name="amnezia_kernel_message">کرنل موڈ میں ایمنیزیا دستیاب نہیں ہے۔</string>
     <string name="quick_actions">فوری اقدامات</string>
     <string name="advanced_settings">اعلی درجے کی ترتیبات</string>
     <string name="debounce_delay">ڈیباؤنس میں تاخیر</string>
     <string name="hide_amnezia_properties">Amnezia کی خصوصیات کو چھپائیں۔</string>
     <string name="exclude_lan">LAN کو خارج کریں۔</string>
     <string name="include_lan">LAN شامل کریں۔</string>
-    <string name="error_tunnel_start">سرنگ شروع کرنے میں ناکام</string>
     <string name="auto_tunnel">خودکار سرنگ</string>
     <string name="kill_switch_off">قابل اعتماد پر کِل سوئچ کو بند کریں۔</string>
     <string name="server_ipv4">IPv4 میزبان نام کی قرارداد</string>
-    <string name="unauthorized">سرنگ شروع کرنے میں ناکام، غیر مجاز۔</string>
     <string name="multiple">متعدد</string>
-    <string name="export_amnezia">Amnezia کے طور پر برآمد کریں۔</string>
     <string name="prominent_background_location_message">اس فیچر کو ایپلیکیشن بند ہونے کے باوجود بھی Wi-Fi SSID مانیٹرنگ کو فعال کرنے کے لیے پس منظر کی جگہ کی اجازت درکار ہے۔ مزید تفصیلات کے لیے، براہ کرم سپورٹ اسکرین پر منسلک رازداری کی پالیسی دیکھیں۔</string>
     <string name="email_chooser">ای میل بھیجیں…</string>
     <string name="add_tunnels_text">فائل یا زپ سے شامل کریں۔</string>
@@ -145,15 +135,11 @@
     <string name="unknown_error">نامعلوم خرابی پیش آگئی</string>
     <string name="seconds">سیکنڈ</string>
     <string name="persistent_keepalive">مسلسل زندہ رہنا</string>
-    <string name="on_demand_rules">آن ڈیمانڈ ٹنل رولز</string>
-    <string name="start_failed_config">تشکیل کی خرابی کے ساتھ سرنگ شروع کرنے میں ناکام۔</string>
     <string name="remove_amnezia_compatibility">Amnezia مطابقت کو ہٹا دیں۔</string>
     <string name="light">روشنی</string>
     <string name="set_ethernet_tunnel">ایتھرنیٹ ٹنل کے طور پر سیٹ کریں۔</string>
     <string name="launch_app_settings">ایپ کی ترتیبات شروع کریں۔</string>
-    <string name="chat_description">کمیونٹی میں شامل ہوں۔</string>
     <string name="monitoring_state_changes">ریاستی تبدیلیوں کی نگرانی</string>
-    <string name="configuration_change">کنفیگریشن تبدیلی</string>
     <string name="set_custom_ping_internal">پنگ وقفہ (سیکنڈ)</string>
     <string name="wifi_name_via_shell">شیل کے ذریعے وائی فائی کا نام</string>
     <string name="enter_pin">اپنا پن درج کریں۔</string>
@@ -161,7 +147,6 @@
     <string name="set_custom_ping_cooldown">پنگ دوبارہ شروع کول ڈاؤن (سیکنڈ)</string>
     <string name="handshake">مصافحہ</string>
     <string name="response_packet_magic_header">رسپانس پیکٹ میجک ہیڈر</string>
-    <string name="requires_app_relaunch">اس تبدیلی کے لیے ایپ کو دوبارہ لانچ کرنے کی ضرورت ہے۔ کیا آپ آگے بڑھنا چاہیں گے؟</string>
     <string name="unsure_how">اگر آپ کو یقین نہیں ہے کہ کیسے آگے بڑھیں۔</string>
     <string name="use_tunnel_on_wifi_name">وائی فائی نام پر ٹنل استعمال کریں۔</string>
     <string name="optional_default">"اختیاری، ڈیفالٹ: "</string>
@@ -183,7 +168,6 @@
     <string name="prefer_ipv4">IPv4 کنکشن کو ترجیح دیں۔</string>
     <string name="native_kill_switch">مقامی قتل سوئچ</string>
     <string name="auto_tunnel_channel_description">خودکار سرنگ ریاست کی اطلاعات کے لیے ایک چینل</string>
-    <string name="wg_compat_mode">WG مطابقت موڈ</string>
     <string name="use_wildcards">نام وائلڈ کارڈ استعمال کریں۔</string>
     <string name="stop_auto">آٹو ٹنل بند کرو</string>
     <string name="add_wifi_name">وائی فائی کا نام شامل کریں۔</string>
@@ -194,14 +178,10 @@
     <string name="underload_packet_magic_header">پیکٹ میجک ہیڈر کو انڈر لوڈ کریں۔</string>
     <string name="background_location_message">اس خصوصیت کے لیے ہر وقت مقام کی اجازت اور/یا درست مقام کی ضرورت ہے۔ ملاحظہ فرمائیں</string>
     <string name="always_on_message2">یہ یقینی بنانے کے لیے کہ ہمیشہ آن VPN دیگر تمام ایپس کے لیے بند ہے اور دوبارہ کوشش کریں۔</string>
-    <string name="enable_amnezia">Amnezia کو فعال کریں۔</string>
     <string name="ethernet_tunnel">ایتھرنیٹ سرنگ</string>
     <string name="auto_tunnel_channel_name">آٹو ٹنل نوٹیفکیشن چینل</string>
-    <string name="dns_error">اختتامی نقطہ DNS کو حل کرنے میں ناکام۔</string>
-    <string name="export_wireguard">وائر گارڈ کے بطور برآمد کریں۔</string>
     <string name="tunnel_running">ٹنل چل رہا ہے۔</string>
     <string name="tunnel_control">ٹنل کنٹرول</string>
-    <string name="tunne_start_failed_title">ٹنل کی ناکامی۔</string>
     <string name="vpn_channel_description">VPN ریاستی اطلاعات کے لیے ایک چینل</string>
     <string name="hide_scripts">اسکرپٹ چھپائیں۔</string>
     <string name="add_from_clipboard">کلپ بورڈ سے شامل کریں۔</string>

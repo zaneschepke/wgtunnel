@@ -1,0 +1,6 @@
+Co nowego:
+- Obsługa wielu tuneli w trybie jądra
+- Zastąpienie domyślnej preferencji DNS Ipv4 WG
+- Obsługa wyłącznika awaryjnego w zaufanych 
+- Ograniczenie zapytań o lokalizację przez autotunelowanie
+- Różne poprawki błędów i ulepszenia
