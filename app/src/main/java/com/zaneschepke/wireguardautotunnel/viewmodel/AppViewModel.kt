@@ -27,12 +27,7 @@ import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
-import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.FileReadException
-import com.zaneschepke.wireguardautotunnel.util.FileUtils
-import com.zaneschepke.wireguardautotunnel.util.InvalidFileExtensionException
-import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
-import com.zaneschepke.wireguardautotunnel.util.StringValue
+import com.zaneschepke.wireguardautotunnel.util.*
 import com.zaneschepke.wireguardautotunnel.util.extensions.withFirstState
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,14 +37,7 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
@@ -73,7 +61,7 @@ constructor(
     private val logReader: LogReader,
     private val fileUtils: FileUtils,
     private val shortcutManager: ShortcutManager,
-    private val networkMonitor: NetworkMonitor,
+    networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
     private val tunnelMutex = Mutex()
@@ -445,8 +433,8 @@ constructor(
         saveSettings(appSettings.copy(isAlwaysOnVpnEnabled = !appSettings.isAlwaysOnVpnEnabled))
 
     private suspend fun handleLocaleChange(localeTag: String) {
+        withContext(mainDispatcher) { LocaleUtil.changeLocale(localeTag) }
         appDataRepository.appState.setLocale(localeTag)
-        LocaleUtil.changeLocale(localeTag)
         _appViewState.update { it.copy(isConfigChanged = true) }
     }
 

@@ -47,7 +47,7 @@ fun SelectionItemButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.fillMaxSize().padding(end = 10.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
         ) {
             leading?.let { it() }
             Text(

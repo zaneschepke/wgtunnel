@@ -15,7 +15,7 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
-fun AutomaticLanguageItem(appUiState: AppUiState, viewModel: AppViewModel) {
+fun AutomaticLanguageItem(appUiState: AppUiState, viewModel: AppViewModel, isAndroidTv: Boolean) {
     Box(modifier = Modifier.padding(top = 24.dp)) {
         SelectionItemButton(
             buttonText = stringResource(R.string.automatic),
@@ -29,7 +29,7 @@ fun AutomaticLanguageItem(appUiState: AppUiState, viewModel: AppViewModel) {
                     }
                 }
             },
-            ripple = false,
+            ripple = isAndroidTv,
         )
     }
 }

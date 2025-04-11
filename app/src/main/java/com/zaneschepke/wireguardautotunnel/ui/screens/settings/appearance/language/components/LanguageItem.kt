@@ -9,7 +9,12 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import java.util.*
 
 @Composable
-fun LanguageItem(locale: Locale, appUiState: AppUiState, viewModel: AppViewModel) {
+fun LanguageItem(
+    locale: Locale,
+    appUiState: AppUiState,
+    viewModel: AppViewModel,
+    isAndroidTv: Boolean,
+) {
     SelectionItemButton(
         buttonText =
             locale.getDisplayLanguage(locale).replaceFirstChar {
@@ -28,6 +33,6 @@ fun LanguageItem(locale: Locale, appUiState: AppUiState, viewModel: AppViewModel
                 SelectedLabel()
             }
         },
-        ripple = false,
+        ripple = isAndroidTv,
     )
 }

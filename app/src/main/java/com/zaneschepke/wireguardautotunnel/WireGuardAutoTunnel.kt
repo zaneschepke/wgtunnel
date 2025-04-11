@@ -80,9 +80,6 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
         ServiceWorker.start(this)
 
         applicationScope.launch {
-            if (!appDataRepository.settings.get().isKernelEnabled) {
-                tunnelManager.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
-            }
             appDataRepository.appState.getLocale()?.let {
                 withContext(mainDispatcher) { LocaleUtil.changeLocale(it) }
             }
@@ -94,7 +91,7 @@ class WireGuardAutoTunnel : Application(), Configuration.Provider {
 
     override fun onTerminate() {
         applicationScope.launch {
-            tunnelManager.setBackendState(BackendState.SERVICE_ACTIVE, emptyList())
+            tunnelManager.setBackendState(BackendState.INACTIVE, emptyList())
         }
         super.onTerminate()
     }
