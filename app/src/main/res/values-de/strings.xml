@@ -226,4 +226,5 @@
     <string name="camera_permission_required">Kameraberechtigung erforderlich</string>
     <string name="wifi_name_template">Aktiv: %1$s</string>
     <string name="delete">Löschen</string>
+    <string name="nothing_here_yet">Noch nix hier!</string>
 </resources>
