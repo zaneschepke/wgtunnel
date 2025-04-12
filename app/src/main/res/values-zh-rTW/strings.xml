@@ -100,4 +100,8 @@
     <string name="vpn_off">VPN 已關閉</string>
     <string name="error_root_denied">無法取得 root 權限</string>
     <string name="root_accepted">已取得 root 權限</string>
+    <string name="enable_remote_app_control">啟用遠端應用程式控制</string>
+    <string name="join_telegram">加入 Telegram 社群</string>
+    <string name="add_from_url">從 URL 新增</string>
+    <string name="join_matrix">加入 Matrix 社群</string>
 </resources>
