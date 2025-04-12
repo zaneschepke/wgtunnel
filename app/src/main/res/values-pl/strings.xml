@@ -227,4 +227,5 @@
     <string name="export_tunnels_amnezia">Eksportuj tunele jako Amnezia</string>
     <string name="invalid_config_error">błąd nieprawidłowej konfiguracji</string>
     <string name="dns_resolve_error">błąd rozwiązywania DNS</string>
+    <string name="nothing_here_yet">Jeszcze nic tu nie ma!</string>
 </resources>
