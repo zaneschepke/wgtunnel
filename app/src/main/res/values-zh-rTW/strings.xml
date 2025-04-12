@@ -73,7 +73,7 @@
     <string name="automatic">自動</string>
     <string name="add_wifi_name">新增WiFi SSID</string>
     <string name="allow_lan_traffic">允許 LAN 流量</string>
-    <string name="stop_on_no_internet">沒有連上網路時停用</string>
+    <string name="stop_on_no_internet">沒有連上網路時停止</string>
     <string name="stop_on_internet_loss">網路連線斷開時停止隧道</string>
     <string name="add_from_clipboard">從剪貼簿新增</string>
     <string name="stop">停止</string>
