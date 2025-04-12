@@ -17,7 +17,6 @@
     <string name="allowed_ips">Allowed IPs</string>
     <string name="always_on_vpn_support">Altijd-aan VPN toestaan</string>
     <string name="location_services_not_detected">Locatieservices niet gevonden</string>
-    <string name="hint_search_packages">Zoek apps</string>
     <string name="endpoint">Endpoint</string>
     <string name="name">Naam</string>
     <string name="auto_tunneling">Auto-tunnelen</string>
@@ -26,7 +25,6 @@
     <string name="persistent_keepalive">Persistent keepalive</string>
     <string name="error_authorization_failed">Autorisatie mislukt</string>
     <string name="enabled_app_shortcuts">App snelkoppelingen inschakelen</string>
-    <string name="export_configs">Configs exporteren</string>
     <string name="random">(willekeurig)</string>
     <string name="thank_you">Bedankt voor het gebruiken van WG Tunnel!</string>
     <string name="trusted_ssid_value_description">Verstuur SSID</string>
@@ -51,11 +49,9 @@
     <string name="base64_key">Base64 sleutel</string>
     <string name="optional">(optioneel)</string>
     <string name="cancel">Annuleren</string>
-    <string name="optional_no_recommend">(optioneel, niet aanbevolen)</string>
     <string name="listen_port">Luisterpoort</string>
     <string name="preshared_key">Pre-shared key</string>
     <string name="auto_tunnel_title">Auto-tunnel service</string>
-    <string name="error_invalid_code">Ongeldige QR code</string>
     <string name="open_issue">Open een melding</string>
     <string name="create_pin">Stel PIN in</string>
     <string name="enable_app_lock">Schakel app-lock in</string>
@@ -75,7 +71,6 @@
     <string name="settings">Instellingen</string>
     <string name="support">Ondersteuning</string>
     <string name="junk_packet_minimum_size">Junk packet minimum grootte</string>
-    <string name="tunneling_apps">Tunnel apps</string>
     <string name="all">alle</string>
     <string name="no_browser_detected">Geen browser gevonden</string>
     <string name="kernel">Kernel</string>
@@ -89,7 +84,6 @@
     <string name="set_custom_ping_ip">Stel eigen ping IP in</string>
     <string name="add_peer">Peer toevoegen</string>
     <string name="init_packet_magic_header">Initiële packet magic header</string>
-    <string name="chat_description">Wordt lid van de community</string>
     <string name="prominent_background_location_title">Achtergrondlocatievrijgave</string>
     <string name="unknown_error">Onbekende fout opgetreden</string>
     <string name="email_subject">WG Tunnel ondersteuning</string>
@@ -119,7 +113,6 @@
     <string name="getting_started_guide">\"aan de slag\" handleiding</string>
     <string name="vpn_denied_dialog_title">Toegang geweigerd</string>
     <string name="vpn_settings">VPN systeeminstellingen</string>
-    <string name="tunnel_required">Functie vereist tenminste één tunnel</string>
     <string name="app_settings">app instellingen</string>
     <string name="root_accepted">Root toegang verleend</string>
     <string name="set_custom_ping_internal">Ping interval (sec)</string>

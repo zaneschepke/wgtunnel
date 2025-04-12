@@ -18,11 +18,9 @@
     <string name="base64_key">Ключ в base64</string>
     <string name="random">(випадково)</string>
     <string name="optional">(необов\'язково)</string>
-    <string name="optional_no_recommend">(необов\'язково, не рекомендується)</string>
     <string name="cancel">Скасувати</string>
     <string name="email_chooser">Надіслати E-Mail…</string>
     <string name="error_root_denied">Root доступ заборонено</string>
-    <string name="error_invalid_code">Некоректний QR-код</string>
     <string name="incorrect_pin">Невірний PIN-код</string>
     <string name="use_tunnel_on_wifi_name">Використовувати тунель в мережі Wi-Fi</string>
     <string name="version">Версія</string>
@@ -47,7 +45,6 @@
     <string name="mtu">MTU</string>
     <string name="peer">Пір</string>
     <string name="endpoint">Кінцева точка</string>
-    <string name="hint_search_packages">Пошук програм</string>
     <string name="name">Ім\'я</string>
     <string name="always_on_vpn_support">Дозволили Always-ON VPN</string>
     <string name="location_services_not_detected">Сервіси місце знаходження не знайдено</string>
@@ -65,7 +62,6 @@
     <string name="error_authorization_failed">Не вдалося авторизуватися</string>
     <string name="enabled_app_shortcuts">Дозволити ярлики</string>
     <string name="error_authentication_failed">Помилка автентифікації</string>
-    <string name="export_configs">Експорт конфігурації</string>
     <string name="unknown_error">Невідома помилка</string>
     <string name="tunnel_on_wifi">Тунелювати недовірені мережі Wi-Fi</string>
     <string name="email_subject">Підтримка WG-Tunnel</string>
@@ -79,7 +75,6 @@
     <string name="location_services_missing_message">Додаток не знайшов служб місце знаходження на вашому пристрої. На деяких пристроях це може привести до неможливості визначення назви мережі Wi-Fi і помилок функції недовірених Wi-Fi мереж. Все рівно хочете продовжити?</string>
     <string name="delete_tunnel_message">Ви дійсно хочете видалити цей тунель?</string>
     <string name="yes">Так</string>
-    <string name="tunneling_apps">Тунельовані додатки</string>
     <string name="auto">(авто)</string>
     <string name="all">всі</string>
     <string name="no_email_detected">Програми для надсилання email не знайдено</string>
@@ -123,7 +118,6 @@
     <string name="dark">Темна</string>
     <string name="language">Мова</string>
     <string name="add_wifi_name">Додати мережу Wi-Fi</string>
-    <string name="on_demand_rules">Правила тунелю на запит</string>
     <string name="primary_tunnel">Основний тунель</string>
     <string name="launch_app_settings">Налаштування запуску програми</string>
     <string name="learn_more">Дізнатись більше</string>
@@ -138,7 +132,6 @@
     <string name="logs">Журнали</string>
     <string name="mobile_tunnel">Тунель для мобільних даних</string>
     <string name="display_theme">Тема</string>
-    <string name="chat_description">Приєднатися до спільноти</string>
     <string name="automatic">Автоматично</string>
     <string name="never">ніколи</string>
     <string name="appearance">Зовнішній вигляд</string>
@@ -147,14 +140,12 @@
     <string name="use_wildcards">Використовувати підстановочні знаки в імені</string>
     <string name="optional_default">"необов\'язково, за замовчуванням: "</string>
     <string name="always_on_message2">, щоб переконатися, що функція «Постійний VPN» вимкнена для всіх інших програм, і спробуйте ще раз</string>
-    <string name="tunnel_required">Для цієї функції необхідний хоча б один тунель</string>
     <string name="background_location_message">Дозволяти весь час, доки для роботи цієї функції потрібен доступ на місцезнаходження та/або точне місцезнаходження. Дивіться</string>
     <string name="advanced_settings">Додаткові налаштування</string>
     <string name="quick_actions">Швидкі дії</string>
     <string name="tunnel_running">Тунель працює</string>
     <string name="monitoring_state_changes">Відстеження змін стану</string>
     <string name="donate">Пожертвувати на проект</string>
-    <string name="requires_app_relaunch">Дана зміна потребує перезапуску програми. Продовжити?</string>
     <string name="add_from_clipboard">Додати з буфера обміну</string>
     <string name="stop_on_no_internet">Зупинити без інтернету</string>
     <string name="native_kill_switch">Штатне екстрене відключення</string>
@@ -171,16 +162,12 @@
     <string name="post_up">Після активації</string>
     <string name="pre_down">До деактивації</string>
     <string name="post_down">Після деактивації</string>
-    <string name="amnezia_kernel_message">Amnezia недоступна у режимі ядра</string>
-    <string name="enable_amnezia">Використовувати Amnezia</string>
-    <string name="wg_compat_mode">Режим сумісності WG</string>
     <string name="debounce_delay">Затримка відбою</string>
     <string name="hide_amnezia_properties">Приховати налаштування Amnezia</string>
     <string name="hide_scripts">Приховати сценарії</string>
     <string name="remove_amnezia_compatibility">Вимкнути сумісність з Amnezia</string>
     <string name="exclude_lan">Виключити LAN</string>
     <string name="include_lan">Увімкнути LAN</string>
-    <string name="error_tunnel_start">Неможливо запустити тунель</string>
     <string name="tunnel_control">Управління тунелем</string>
     <string name="auto_tunnel">Автотунель</string>
     <string name="local_logging">Локальне ведення журналу</string>
@@ -188,7 +175,6 @@
     <string name="start_auto">Запустити автотунель</string>
     <string name="stop_auto">Зупинити автотунель</string>
     <string name="enable_local_logging">Увімкнути ведення журналу</string>
-    <string name="configuration_change">Зміна конфігурації</string>
     <string name="stop_on_internet_loss">Зупинити тунель під час втрати інтернету</string>
     <string name="ethernet_tunnel">Тунель для Ethernet</string>
     <string name="set_ethernet_tunnel">Призначити як тунель для Ethernet</string>
@@ -198,11 +184,5 @@
     <string name="kill_switch_off">Без екстреного вимкнення у довірених</string>
     <string name="server_ipv4">Отримання імені вузла IPv4</string>
     <string name="prefer_ipv4">Віддавати перевагу з\'єднанню IPv4</string>
-    <string name="dns_error">Не отримати кінцеву точку DNS.</string>
-    <string name="start_failed_config">Неможливо запустити тунель із помилкою конфігурації.</string>
-    <string name="unauthorized">Неможливо запустити тунель без авторизації.</string>
-    <string name="tunne_start_failed_title">Помилка тунелю</string>
     <string name="multiple">Декілька</string>
-    <string name="export_amnezia">Експортувати як Amnezia</string>
-    <string name="export_wireguard">Експортувати як WireGuard</string>
 </resources>

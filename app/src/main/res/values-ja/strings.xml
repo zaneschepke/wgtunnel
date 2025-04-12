@@ -24,7 +24,6 @@
     <string name="error_no_file_explorer">ファイルエクスプローラーはインストールされていません</string>
     <string name="error_authorization_failed">認証に失敗しました</string>
     <string name="enabled_app_shortcuts">アプリのショートカットを有効にする</string>
-    <string name="export_configs">設定のエクスポート</string>
     <string name="location_services_missing_message">アプリがデバイスで有効になっている位置情報サービスを検出しません。 デバイスによっては、信頼されていない無線LAN機能がWiFi名を読み取れない可能性があります。このまま続けますか？</string>
     <string name="no_email_detected">メールアプリは検出されません</string>
     <string name="email_description">メールを送る</string>
@@ -36,7 +35,6 @@
     <string name="add_tunnels_text">ファイルまたはzipから追加する</string>
     <string name="open_file">ファイルを開く</string>
     <string name="dns_servers">DNSサーバー</string>
-    <string name="optional_no_recommend">(オプション、非推奨）</string>
     <string name="preshared_key">事前共有鍵</string>
     <string name="delete_tunnel_message">このトンネルを削除しますか？</string>
     <string name="yes">はい</string>
@@ -55,6 +53,5 @@
     <string name="endpoint">エンドポイント</string>
     <string name="turn_on_tunnel">実行に有効なVPNトンネルが必要です</string>
     <string name="add_peer">ピアの追加</string>
-    <string name="error_invalid_code">無効なQRコード</string>
     <string name="delete_tunnel">トンネルの削除</string>
 </resources>
