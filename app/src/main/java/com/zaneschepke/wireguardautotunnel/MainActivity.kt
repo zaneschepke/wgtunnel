@@ -84,8 +84,8 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.displa
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.LanguageScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSwitchScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.extensions.goFromRoot
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel

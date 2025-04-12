@@ -36,13 +36,10 @@ import java.time.Instant
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import org.amnezia.awg.config.BadConfigException
 import org.amnezia.awg.config.Config
 import timber.log.Timber
@@ -64,9 +61,12 @@ constructor(
     networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
+    private var logsJob: Job? = null
+
     private val tunnelMutex = Mutex()
     private val settingsMutex = Mutex()
     private val tunControlMutex = Mutex()
+    private val loggerMutex = Mutex()
 
     private val _screenCallback = MutableStateFlow<(() -> Unit)?>(null)
 
@@ -75,7 +75,7 @@ constructor(
 
     private val _logs = MutableStateFlow<List<LogMessage>>(emptyList())
     val logs: StateFlow<List<LogMessage>> = _logs.asStateFlow()
-    private val maxLogSize = 10_000
+    private val maxLogSize = Constants.MAX_LOG_SIZE
 
     val uiState =
         combine(
@@ -88,7 +88,7 @@ constructor(
             ) { array ->
                 val settings = array[0] as AppSettings
                 val tunnels = array[1] as List<TunnelConf>
-                val generalState = array[2] as AppState
+                val appState = array[2] as AppState
                 val activeTunnels = array[3] as Map<TunnelConf, TunnelState>
                 val autoTunnel = array[4] as Boolean
                 val network = array[5] as NetworkStatus
@@ -97,7 +97,7 @@ constructor(
                     appSettings = settings,
                     tunnels = tunnels,
                     activeTunnels = activeTunnels,
-                    appState = generalState,
+                    appState = appState,
                     isAutoTunnelActive = autoTunnel,
                     isAppLoaded = true,
                     networkStatus = network,
@@ -115,7 +115,7 @@ constructor(
                 initPin(state.appState.isPinLockEnabled)
                 handleKillSwitchChange(state.appSettings)
                 initServicesFromSavedState(state)
-                if (state.appState.isLocalLogsEnabled) startCollectingLogs()
+                if (state.appState.isLocalLogsEnabled) logsJob = startCollectingLogs()
             }
         }
     }
@@ -213,7 +213,7 @@ constructor(
         appDataRepository.appState.setIsRemoteControlEnabled(enabled)
     }
 
-    private fun startCollectingLogs() {
+    private fun startCollectingLogs() =
         viewModelScope.launch {
             logReader.bufferedLogs.flowOn(ioDispatcher).collect { logMessage ->
                 _logs.update { currentList ->
@@ -226,7 +226,6 @@ constructor(
                 }
             }
         }
-    }
 
     private suspend fun handleAppReadyCheck(tunnels: List<TunnelConf>) {
         if (tunnels.size == appDataRepository.tunnels.count()) {
@@ -244,14 +243,16 @@ constructor(
         saveTunnel(tunnel.copy(isPingEnabled = !tunnel.isPingEnabled))
 
     private suspend fun handleToggleLocalLogging(currentlyEnabled: Boolean) {
-        val enable = !currentlyEnabled
-        appDataRepository.appState.setLocalLogsEnabled(enable)
-        withContext(mainDispatcher) {
+        loggerMutex.withLock {
+            val enable = !currentlyEnabled
+            appDataRepository.appState.setLocalLogsEnabled(enable)
             if (enable) {
+                logsJob?.cancel()
                 logReader.start()
-                startCollectingLogs()
+                logsJob = startCollectingLogs()
             } else {
                 logReader.stop()
+                logsJob?.cancel()
                 _logs.update { emptyList() }
             }
         }
@@ -677,9 +678,13 @@ constructor(
     }
 
     private suspend fun handleDeleteLogs() {
-        withContext(mainDispatcher) {
-            logReader.deleteAndClearLogs()
+        loggerMutex.withLock {
+            logsJob?.cancel()
             _logs.update { emptyList() }
+            logReader.stop()
+            logReader.deleteAndClearLogs()
+            logReader.start()
+            logsJob = startCollectingLogs()
         }
     }
 

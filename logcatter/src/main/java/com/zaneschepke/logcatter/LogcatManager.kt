@@ -62,6 +62,7 @@ class LogcatManager(pid: Int, logDir: String, maxFileSize: Long, maxFolderSize: 
         logJob?.cancel()
         logcatReader.stop()
         fileManager.close()
+        _bufferedLogs.resetReplayCache()
         isStarted = false
     }
 

@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.settings.logs.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn

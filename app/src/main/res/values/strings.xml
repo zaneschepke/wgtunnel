@@ -236,4 +236,5 @@
 	<string name="bio_update_required">Biometric security update required</string>
 	<string name="tunnel_starting">Tunnel starting</string>
 	<string name="enable_remote_app_control">Enable remote app control</string>
+    <string name="nothing_here_yet">Nothing here yet!</string>
 </resources>

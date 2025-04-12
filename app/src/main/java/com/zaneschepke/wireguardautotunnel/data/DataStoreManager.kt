@@ -24,7 +24,6 @@ class DataStoreManager(
     companion object {
         val locationDisclosureShown = booleanPreferencesKey("LOCATION_DISCLOSURE_SHOWN")
         val batteryDisableShown = booleanPreferencesKey("BATTERY_OPTIMIZE_DISABLE_SHOWN")
-        val currentSSID = stringPreferencesKey("CURRENT_SSID")
         val pinLockEnabled = booleanPreferencesKey("PIN_LOCK_ENABLED")
         val tunnelStatsExpanded = booleanPreferencesKey("TUNNEL_STATS_EXPANDED")
         val isLocalLogsEnabled = booleanPreferencesKey("LOCAL_LOGS_ENABLED")

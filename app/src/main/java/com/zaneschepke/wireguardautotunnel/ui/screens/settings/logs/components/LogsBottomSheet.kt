@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.support.logs.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.settings.logs.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row

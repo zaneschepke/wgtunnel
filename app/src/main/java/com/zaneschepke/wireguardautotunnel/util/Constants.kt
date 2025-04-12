@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.util
 
 object Constants {
 
+    const val MAX_LOG_SIZE = 10_000L
     const val BASE_PACKAGE = "com.zaneschepke.wireguardautotunnel"
 
     const val BASE_LOG_FILE_NAME = "wg_tunnel_logs"

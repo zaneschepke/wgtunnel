@@ -21,7 +21,7 @@ data class GeneralState(
             isBatteryOptimizationDisableShown,
             isPinLockEnabled,
             isTunnelStatsExpanded,
-            isLocationDisclosureShown,
+            isLocalLogsEnabled,
             isRemoteControlEnabled,
             remoteKey,
             locale,
