@@ -66,6 +66,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+			android:banner="@mipmap/ic_banner"
 			android:windowSoftInputMode="adjustNothing"
             android:theme="@style/Theme.WireguardAutoTunnel"
 			android:configChanges="orientation|screenSize|keyboardHidden"

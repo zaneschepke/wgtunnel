@@ -3,11 +3,17 @@
 
     <style name="Theme.WireguardAutoTunnel" parent="@style/Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@color/background</item>
+        <item name="android:colorPrimary">@color/background</item>
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
     </style>
 
     <style name="Theme.App.Start" parent="@style/Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.WireguardAutoTunnel</item>
+        <item name="android:colorPrimary">@color/background</item>
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
     </style>
 </resources>

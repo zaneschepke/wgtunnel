@@ -50,7 +50,7 @@ jobs:
       - name: Check for new commits
         id: check
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           # This script checks for commits newer than 23 hours ago
           NEW_COMMITS=$(git rev-list --count --after="$(date -Iseconds -d '23 hours ago')" ${{ github.sha }})
@@ -71,9 +71,9 @@ jobs:
     name: publish-github
     runs-on: ubuntu-latest
     env:
-      GH_USER: ${{ secrets.GH_USER }}
+      GH_USER: ${{ secrets.PAT_USERNAME }}
       # GH needed for gh cli
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_TOKEN: ${{ secrets.PAT }}
       GH_REPO: ${{ github.repository }}
 
     steps:
@@ -96,14 +96,14 @@ jobs:
         id: latest_release
         uses: kaliber5/action-get-release@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           latest: true
 
       - name: Generate Changelog
         id: changelog
         uses: requarks/changelog-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           toTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
           fromTag: "latest"
           writeToFile: false  # we won't write to file, just output
@@ -118,7 +118,7 @@ jobs:
         if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly'  || inputs.release_type == 'prerelease' }}
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PAT }}
           branch: ${{ github.ref }}
 
       - name: Make download dir
@@ -168,7 +168,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           body: |
             ${{ env.RELEASE_NOTES }}
@@ -220,13 +220,13 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+      SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
       KEY_STORE_FILE: 'android_keystore.jks'
       KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
-      GH_USER: ${{ secrets.GH_USER }}
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_USER: ${{ secrets.PAT_USERNAME }}
+      GH_TOKEN: ${{ secrets.PAT }}
 
     steps:
       - uses: actions/checkout@v4
@@ -248,7 +248,7 @@ jobs:
         with:
           fileName: ${{ env.KEY_STORE_FILE }}
           fileDir: ${{ env.KEY_STORE_LOCATION }}
-          encodedString: ${{ secrets.KEYSTORE }}
+          encodedString: ${{ secrets.ANDROID_KEYSTORE }}
 
       # create keystore path for gradle to read
       - name: Create keystore path env var

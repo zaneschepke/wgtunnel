@@ -48,9 +48,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+      SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
       KEY_STORE_FILE: 'android_keystore.jks'
       KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
     outputs:
@@ -74,7 +74,7 @@ jobs:
         with:
           fileName: ${{ env.KEY_STORE_FILE }}
           fileDir: ${{ env.KEY_STORE_LOCATION }}
-          encodedString: ${{ secrets.KEYSTORE }}
+          encodedString: ${{ secrets.ANDROID_KEYSTORE }}
 
       # create keystore path for gradle to read
       - name: Create keystore path env var
