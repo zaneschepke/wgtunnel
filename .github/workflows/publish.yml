@@ -90,6 +90,7 @@ jobs:
           tag: "latest"  # or any tag name you wish to use
           message: "Automated tag for HEAD commit"
           force_push_tag: true
+          github_token: ${{ secrets.PAT}}
           tag_exists_error: false
 
       - name: Get latest release
