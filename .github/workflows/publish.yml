@@ -110,14 +110,14 @@ jobs:
         id: latest_release
         uses: kaliber5/action-get-release@v1
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           latest: true
 
       - name: Generate Changelog
         id: changelog
         uses: requarks/changelog-action@v1
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           toTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
           fromTag: "latest"
           writeToFile: false  # we won't write to file, just output
