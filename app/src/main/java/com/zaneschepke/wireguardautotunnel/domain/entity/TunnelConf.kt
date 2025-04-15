@@ -3,17 +3,13 @@ package com.zaneschepke.wireguardautotunnel.domain.entity
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.defaultName
-import com.zaneschepke.wireguardautotunnel.util.extensions.extractNameAndNumber
-import com.zaneschepke.wireguardautotunnel.util.extensions.hasNumberInParentheses
-import com.zaneschepke.wireguardautotunnel.util.extensions.isReachable
-import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
+import com.zaneschepke.wireguardautotunnel.util.extensions.*
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.InputStream
 import java.net.InetAddress
 import java.nio.charset.StandardCharsets
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 data class TunnelConf(
     val id: Int = 0,
@@ -30,6 +26,7 @@ data class TunnelConf(
     val pingIp: String? = null,
     val isEthernetTunnel: Boolean = false,
     val isIpv4Preferred: Boolean = true,
+    val useCache: Boolean = false,
     @Transient private var stateChangeCallback: ((Any) -> Unit)? = null,
 ) : Tunnel, org.amnezia.awg.backend.Tunnel {
 
@@ -97,18 +94,8 @@ data class TunnelConf(
             )
             .apply {
                 stateChangeCallback = this@TunnelConf.stateChangeCallback
-                // 			tunnelStatsCallback = this@TunnelConf.tunnelStatsCallback
-                // 			bounceTunnelCallback = this@TunnelConf.bounceTunnelCallback
             }
     }
-
-    // 	fun onUpdateStatistics() {
-    // 		tunnelStatsCallback?.invoke()
-    // 	}
-    //
-    // 	fun bounceTunnel(tunnelConf: TunnelConf, reason: TunnelStatus.StopReason) {
-    // 		bounceTunnelCallback?.invoke(tunnelConf, reason)
-    // 	}
 
     fun toAmConfig(): org.amnezia.awg.config.Config {
         return configFromAmQuick(amQuick.ifBlank { wgQuick })
@@ -122,18 +109,14 @@ data class TunnelConf(
 
     override fun isIpv4ResolutionPreferred(): Boolean = isIpv4Preferred
 
+    override fun useCache(): Boolean = useCache
+
     override fun onStateChange(newState: org.amnezia.awg.backend.Tunnel.State) {
         stateChangeCallback?.invoke(newState)
     }
 
     override fun onStateChange(newState: Tunnel.State) {
         stateChangeCallback?.invoke(newState)
-    }
-
-    fun isTunnelConfigChanged(updatedConf: TunnelConf): Boolean {
-        return updatedConf.wgQuick != wgQuick ||
-            updatedConf.amQuick != amQuick ||
-            updatedConf.name != name
     }
 
     fun generateUniqueName(tunnelNames: List<String>): String {

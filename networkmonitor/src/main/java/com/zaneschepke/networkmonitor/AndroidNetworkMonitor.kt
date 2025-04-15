@@ -12,12 +12,15 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiManager
 import android.os.Build
 import com.wireguard.android.util.RootShell
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class AndroidNetworkMonitor(
@@ -39,6 +42,8 @@ class AndroidNetworkMonitor(
         appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     private val rootShell = RootShell(context)
 
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+
     @get:Synchronized @set:Synchronized var currentSsid: String? = null
 
     @get:Synchronized @set:Synchronized var wifiConnected = false
@@ -48,22 +53,26 @@ class AndroidNetworkMonitor(
     data class TransportState(val connected: Boolean = false)
 
     private val wifiFlow: Flow<WifiState> = callbackFlow {
+
         @Suppress("DEPRECATION")
-        fun getWifiSsid(): String? {
-            return if (runBlocking { useRootShellCallback() }) {
-                rootShell.getCurrentWifiName()
-            } else {
-                if (wifiManager == null) return null
-                try {
-                    wifiManager.connectionInfo?.ssid?.trim('"')?.takeIf { it.isNotEmpty() }
-                } catch (e: Exception) {
-                    Timber.e(e)
-                    null
+        suspend fun getWifiSsid(): String? {
+           return withContext(ioDispatcher) {
+                if (useRootShellCallback()) {
+                    rootShell.getCurrentWifiName()
+                } else {
+                    if (wifiManager == null) return@withContext null
+                    try {
+                        wifiManager.connectionInfo?.ssid?.trim('"')?.takeIf { it.isNotEmpty() }
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                        null
+                    }
                 }
             }
+
         }
 
-        fun handleUnknownWifi() {
+        suspend fun handleUnknownWifi() {
             val newSsid = getWifiSsid()
             // Only update if new SSID is valid; preserve existing valid SSID otherwise
             if (newSsid != null && newSsid != WifiManager.UNKNOWN_SSID) {
@@ -86,7 +95,9 @@ class AndroidNetworkMonitor(
                         Timber.d(
                             "Received update: Precise and all-the-time location permissions are enabled"
                         )
-                        handleUnknownWifi()
+                        launch {
+                            handleUnknownWifi()
+                        }
                     }
                 }
             }
@@ -103,7 +114,9 @@ class AndroidNetworkMonitor(
                         Timber.d(
                             "Location Services state changed. Enabled: $isLocationServicesEnabled, GPS: $isGpsEnabled, Network: $isNetworkEnabled"
                         )
-                        if (isLocationServicesEnabled) handleUnknownWifi()
+                        if (isLocationServicesEnabled) launch {
+                            handleUnknownWifi()
+                        }
                     }
                 }
             }
@@ -132,9 +145,11 @@ class AndroidNetworkMonitor(
             object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
                     Timber.d("Wi-Fi onAvailable: network=$network")
-                    currentSsid = getWifiSsid()
-                    wifiConnected = true
-                    trySend(WifiState(connected = true, ssid = currentSsid))
+                    launch {
+                        currentSsid = getWifiSsid()
+                        wifiConnected = true
+                        trySend(WifiState(connected = true, ssid = currentSsid))
+                    }
                 }
 
                 override fun onLost(network: Network) {
