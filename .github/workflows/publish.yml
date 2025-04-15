@@ -172,7 +172,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body: |
             ${{ env.RELEASE_NOTES }}
@@ -196,14 +196,6 @@ jobs:
           make_latest: ${{ inputs.release_type == 'release' }}
           files: |
             ${{ github.workspace }}/temp/*
-
-      # notify socials
-      - name: Trigger on-publish workflow
-        if: ${{ inputs.release_type == 'release' }}
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.PAT }}
-          event-type: publish-release
 
   publish-fdroid:
     runs-on: ubuntu-latest
