@@ -34,6 +34,9 @@ on:
 env:
   UPLOAD_DIR_ANDROID: android_artifacts
 
+permissions:
+  contents: write
+
 jobs:
   check_commits:
     name: Check for New Commits
@@ -90,21 +93,31 @@ jobs:
           tag: "latest"  # or any tag name you wish to use
           message: "Automated tag for HEAD commit"
           force_push_tag: true
-          github_token: ${{ secrets.PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_exists_error: false
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: latest
+          release_name: Automated Latest tag
+          draft: false
+          prerelease: false
 
       - name: Get latest release
         id: latest_release
         uses: kaliber5/action-get-release@v1
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           latest: true
 
       - name: Generate Changelog
         id: changelog
         uses: requarks/changelog-action@v1
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           toTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
           fromTag: "latest"
           writeToFile: false  # we won't write to file, just output
