@@ -96,16 +96,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_exists_error: false
 
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: latest
-          release_name: Automated Latest tag
-          draft: false
-          prerelease: false
-
       - name: Get latest release
         id: latest_release
         uses: kaliber5/action-get-release@v1
