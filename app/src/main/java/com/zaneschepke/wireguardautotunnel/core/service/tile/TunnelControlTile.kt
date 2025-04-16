@@ -148,11 +148,12 @@ class TunnelControlTile : TileService(), LifecycleOwner {
 
     private fun setTileDescription(description: String) {
         runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                qsTile.subtitle = description
-            }
+            if (qsTile == null) return@runCatching
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                qsTile.subtitle = description
                 qsTile.stateDescription = description
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                qsTile.subtitle = description
             }
             qsTile.updateTile()
         }
