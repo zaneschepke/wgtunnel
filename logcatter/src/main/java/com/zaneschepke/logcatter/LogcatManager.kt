@@ -57,6 +57,7 @@ class LogcatManager(pid: Int, logDir: String, maxFileSize: Long, maxFolderSize: 
         isStarted = true
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun stop() {
         if (!isStarted) return
         logJob?.cancel()

@@ -35,7 +35,7 @@ class RepositoryModule {
                 AppDatabase::class.java,
                 context.getString(R.string.db_name),
             )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(true)
             .addCallback(DatabaseCallback())
             .build()
     }
