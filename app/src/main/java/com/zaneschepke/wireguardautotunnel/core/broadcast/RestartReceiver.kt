@@ -8,6 +8,7 @@ import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -29,6 +30,8 @@ class RestartReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         Timber.d("RestartReceiver triggered with action: ${intent.action}")
+        // screen on for Android TV only to help with sleep shutdowns
+        if(intent.action == Intent.ACTION_SCREEN_ON && !context.isRunningOnTv()) return
         serviceManager.updateTunnelTile()
         serviceManager.updateAutoTunnelTile()
         applicationScope.launch(ioDispatcher) {

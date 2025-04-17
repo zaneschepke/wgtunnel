@@ -171,7 +171,7 @@
             android:exported="false"
 			android:directBootAware="true">
             <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
+				<action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
