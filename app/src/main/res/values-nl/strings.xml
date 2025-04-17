@@ -129,4 +129,25 @@
     <string name="language">Taal</string>
     <string name="automatic">Automatisch</string>
     <string name="notifications">Meldingen</string>
+    <string name="quick_actions">Snelle acties</string>
+    <string name="ethernet_tunnel">Ethernet tunnel</string>
+    <string name="set_ethernet_tunnel">Instellen als ethernet tunnel</string>
+    <string name="allow_lan_traffic">LAN trafiek toestaan</string>
+    <string name="vpn_channel_description">Een kanaal voor VPN status notificaties</string>
+    <string name="stop">stop</string>
+    <string name="splt_tunneling">Gesplitste tunneling</string>
+    <string name="tunnel_specific_settings">Tunnel specifieke instellingen</string>
+    <string name="advanced_settings">Geavanceerde instellingen</string>
+    <string name="hide_amnezia_properties">Amnezia eigenschappen verbergen</string>
+    <string name="hide_scripts">Scripts verbergen</string>
+    <string name="remove_amnezia_compatibility">Amnezia compatibiliteit verwijderen</string>
+    <string name="add_from_clipboard">Toevoegen van klembord</string>
+    <string name="show_scripts">Toon scripts</string>
+    <string name="auto_tunnel_channel_name">Auto-tunnel Notificatie Kanaal</string>
+    <string name="enable_local_logging">lokale logging inschakelen</string>
+    <string name="auto_tunnel_channel_description">Een kanaal voor auto-tunnel status notificaties</string>
+    <string name="enable_amnezia_compatibility">Amnezia compatibiliteit inschakelen</string>
+    <string name="add_from_url">Toevoegen met link</string>
+    <string name="stop_on_no_internet">Stoppen wanneer geen internet</string>
+    <string name="stop_on_internet_loss">Stop tunnel bij verlies van internet</string>
 </resources>

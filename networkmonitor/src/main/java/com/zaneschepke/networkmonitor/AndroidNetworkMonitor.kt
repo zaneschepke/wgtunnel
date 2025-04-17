@@ -53,10 +53,9 @@ class AndroidNetworkMonitor(
     data class TransportState(val connected: Boolean = false)
 
     private val wifiFlow: Flow<WifiState> = callbackFlow {
-
         @Suppress("DEPRECATION")
         suspend fun getWifiSsid(): String? {
-           return withContext(ioDispatcher) {
+            return withContext(ioDispatcher) {
                 if (useRootShellCallback()) {
                     rootShell.getCurrentWifiName()
                 } else {
@@ -69,7 +68,6 @@ class AndroidNetworkMonitor(
                     }
                 }
             }
-
         }
 
         suspend fun handleUnknownWifi() {
@@ -95,9 +93,7 @@ class AndroidNetworkMonitor(
                         Timber.d(
                             "Received update: Precise and all-the-time location permissions are enabled"
                         )
-                        launch {
-                            handleUnknownWifi()
-                        }
+                        launch { handleUnknownWifi() }
                     }
                 }
             }
@@ -114,9 +110,7 @@ class AndroidNetworkMonitor(
                         Timber.d(
                             "Location Services state changed. Enabled: $isLocationServicesEnabled, GPS: $isGpsEnabled, Network: $isNetworkEnabled"
                         )
-                        if (isLocationServicesEnabled) launch {
-                            handleUnknownWifi()
-                        }
+                        if (isLocationServicesEnabled) launch { handleUnknownWifi() }
                     }
                 }
             }

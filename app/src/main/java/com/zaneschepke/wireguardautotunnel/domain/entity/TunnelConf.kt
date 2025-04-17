@@ -4,12 +4,12 @@ import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.*
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.InputStream
 import java.net.InetAddress
 import java.nio.charset.StandardCharsets
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 data class TunnelConf(
     val id: Int = 0,
@@ -92,9 +92,7 @@ data class TunnelConf(
                 isEthernetTunnel,
                 isIpv4Preferred,
             )
-            .apply {
-                stateChangeCallback = this@TunnelConf.stateChangeCallback
-            }
+            .apply { stateChangeCallback = this@TunnelConf.stateChangeCallback }
     }
 
     fun toAmConfig(): org.amnezia.awg.config.Config {
