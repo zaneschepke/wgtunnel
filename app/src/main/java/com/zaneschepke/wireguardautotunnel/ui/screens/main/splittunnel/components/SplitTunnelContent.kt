@@ -29,7 +29,7 @@ fun SplitTunnelContent(
         )
         if (uiState.splitOption != SplitOption.ALL) {
             AppListSection(
-                apps = uiState.tunneledApps,
+                apps = uiState.queriedApps,
                 onAppSelectionToggle = onAppSelectionToggle,
                 onQueryChange = onQueryChange,
                 uiState.searchQuery,

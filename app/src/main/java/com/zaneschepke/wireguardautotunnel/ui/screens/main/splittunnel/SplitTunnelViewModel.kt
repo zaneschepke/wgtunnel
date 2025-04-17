@@ -50,6 +50,7 @@ constructor(
         tunnelId?.let { loadInitialState(it) }
     }
 
+    // TODO improve this loading experience
     private fun loadInitialState(tunnelId: Int) =
         viewModelScope.launch {
             val tunnel = tunnelRepository.getById(tunnelId) ?: return@launch
@@ -108,6 +109,7 @@ constructor(
                     loading = false,
                     tunnelConf = tunnel,
                     tunneledApps = tunneledApps,
+                    queriedApps = tunneledApps,
                     splitOption = splitOption,
                 )
             }
@@ -116,14 +118,14 @@ constructor(
     fun onSearchQuery(query: String) {
         val filteredApps =
             if (query.isBlank()) {
-                allTunneledApps
+                _uiState.value.tunneledApps
             } else {
-                allTunneledApps.filter {
+                _uiState.value.tunneledApps.filter {
                     it.first.name.contains(query, ignoreCase = true) ||
                         it.first.`package`.contains(query, ignoreCase = true)
                 }
             }
-        _uiState.update { it.copy(searchQuery = query, tunneledApps = filteredApps) }
+        _uiState.update { it.copy(searchQuery = query, queriedApps = filteredApps) }
     }
 
     fun updateSplitOption(newOption: SplitOption) {
@@ -136,7 +138,12 @@ constructor(
             currentState.tunneledApps.map { (app, selected) ->
                 if (app.`package` == packageName) Pair(app, !selected) else Pair(app, selected)
             }
-        _uiState.value = currentState.copy(tunneledApps = updatedApps)
+        val updatedQueryApps =
+            currentState.queriedApps.map { (app, selected) ->
+                if (app.`package` == packageName) Pair(app, !selected) else Pair(app, selected)
+            }
+        _uiState.value =
+            currentState.copy(tunneledApps = updatedApps, queriedApps = updatedQueryApps)
     }
 
     fun saveChanges() =
