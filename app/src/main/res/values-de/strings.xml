@@ -32,6 +32,7 @@
     <string name="name">Name</string>
     <string name="always_on_vpn_support">Always-On VPN erlauben</string>
     <string name="location_services_not_detected">Standortdienste nicht erkannt</string>
+    <string name="hint_search_packages">Pakete suchen</string>
     <string name="vpn_on">VPN an</string>
     <string name="vpn_off">VPN aus</string>
     <string name="create_import">Von Grund auf neu erstellen</string>
@@ -226,4 +227,5 @@
     <string name="camera_permission_required">Kameraberechtigung erforderlich</string>
     <string name="wifi_name_template">Aktiv: %1$s</string>
     <string name="delete">Löschen</string>
+    <string name="nothing_here_yet">Noch nix hier!</string>
 </resources>

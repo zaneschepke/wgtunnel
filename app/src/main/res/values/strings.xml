@@ -4,12 +4,15 @@
 	<string name="app_permission_description">Control tunnels and auto-tunnel features.</string>
     <string name="vpn_channel_id" translatable="false">VPN Channel</string>
     <string name="vpn_channel_name">VPN Notification Channel</string>
-	<string name="github_url" translatable="false">https://github.com/zaneschepke/wgtunnel/issues</string>
-    <string name="docs_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/overview.html</string>
-    <string name="privacy_policy_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/privacypolicy.html</string>
-	<string name="docs_wildcards" translatable="false" >https://zaneschepke.com/wgtunnel-docs/features.html#wildcard-wi-fi-name-support</string>
+	<string name="github_url" translatable="false">https://github.com/wgtunnel/wgtunnel/issues</string>
+    <string name="docs_url" translatable="false">https://wgtunnel.com/docs/</string>
+    <string name="getting_started_url" translatable="false">https://wgtunnel.com/docs/getting-started</string>
+    <string name="privacy_policy_url" translatable="false">https://wgtunnel.com/docs/privacy-policy/</string>
+	<string name="docs_wildcards" translatable="false" >https://wgtunnel.com/docs/auto-tunneling/#use-name-wildcards</string>
 	<string name="donate_url" translatable="false">https://zaneschepke.com/donate/</string>
-	<string name="error_file_extension">File is not a .conf or .zip</string>
+    <string name="matrix_url" translatable="false">https://matrix.to/#/#wg-tunnel-space:matrix.org</string>
+    <string name="telegram_url" translatable="false">https://t.me/wgtunnel</string>
+    <string name="error_file_extension">File is not a .conf or .zip</string>
     <string name="turn_off_tunnel">Action requires tunnel off</string>
     <string name="no_tunnels">No tunnels added yet!</string>
     <string name="tunnels">Tunnels</string>
@@ -107,10 +110,8 @@
     <string name="response_packet_magic_header">Response packet magic header</string>
     <string name="transport_packet_magic_header">Transport packet magic header</string>
     <string name="underload_packet_magic_header">Underload packet magic header</string>
-    <string name="telegram_url" translatable="false">https://t.me/wgtunnel</string>
     <string name="unsure_how">if you are unsure how to proceed</string>
     <string name="see_the">See the</string>
-    <string name="getting_started_url" translatable="false">https://zaneschepke.com/wgtunnel-docs/getting-started.html</string>
     <string name="getting_started_guide">getting started guide</string>
     <string name="error_file_format">Invalid tunnel config format</string>
     <string name="restart_at_boot">Restart on boot</string>
@@ -205,7 +206,6 @@
 	<string name="select">Select</string>
     <string name="join_telegram">Join Telegram community</string>
 	<string name="join_matrix">Join Matrix community</string>
-	<string name="matrix_url">https://matrix.to/#/#wg-tunnel-space:matrix.org</string>
     <string name="dropdown">Dropdown</string>
 	<string name="add_tunnel">Add tunnel</string>
     <string name="export_logs">Export stored logs</string>
