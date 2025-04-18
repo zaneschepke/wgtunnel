@@ -17,9 +17,12 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.core.tunnel.getValueById
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
+import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
+import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import java.text.Collator
 import java.util.*
 
@@ -27,17 +30,13 @@ import java.util.*
 @Composable
 fun TunnelList(
     appUiState: AppUiState,
-    activeTunnels: Map<TunnelConf, TunnelState>,
-    selectedTunnel: TunnelConf?,
-    onSetSelectedTunnel: (TunnelConf?) -> Unit,
-    onDeleteTunnel: (TunnelConf) -> Unit,
-    onToggleTunnel: (TunnelConf, Boolean) -> Unit,
-    onExpandStats: () -> Unit,
-    onCopyTunnel: (TunnelConf) -> Unit,
+    selectedTunnels: List<TunnelConf>,
     modifier: Modifier = Modifier,
+    onToggleTunnel: (TunnelConf, Boolean) -> Unit,
     viewModel: AppViewModel,
 ) {
     val context = LocalContext.current
+    val navController = LocalNavController.current
     val collator = Collator.getInstance(Locale.getDefault())
     val sortedTunnels =
         remember(appUiState.tunnels) {
@@ -60,19 +59,28 @@ fun TunnelList(
             item { GettingStartedLabel(onClick = { context.openWebUrl(it) }) }
         }
         items(sortedTunnels, key = { it.id }) { tunnel ->
-            val tunnelState = activeTunnels.getValueById(tunnel.id) ?: TunnelState()
+            val tunnelState =
+                remember(appUiState.activeTunnels) {
+                    appUiState.activeTunnels.getValueById(tunnel.id) ?: TunnelState()
+                }
+            val selected = remember(selectedTunnels) { selectedTunnels.any { it.id == tunnel.id } }
             TunnelRowItem(
-                isActive = tunnelState.status.isUpOrStarting(),
-                expanded = appUiState.appState.isTunnelStatsExpanded,
-                isSelected = selectedTunnel?.id == tunnel.id,
+                state = tunnelState,
+                expanded = appUiState.appState.expandedTunnelIds.contains(tunnel.id),
+                isSelected = selected,
                 tunnel = tunnel,
                 tunnelState = tunnelState,
-                onSetSelectedTunnel = { onSetSelectedTunnel(it) },
-                onClick = onExpandStats,
-                onCopy = { onCopyTunnel(tunnel) },
-                onDelete = { onDeleteTunnel(tunnel) },
+                onClick = {
+                    navController.navigate(Route.TunnelOptions(tunnel.id))
+                    viewModel.handleEvent(AppEvent.ClearSelectedTunnels)
+                },
+                onDoubleClick = {
+                    viewModel.handleEvent(AppEvent.ToggleTunnelStatsExpanded(tunnel.id))
+                },
+                onToggleSelectedTunnel = {
+                    viewModel.handleEvent(AppEvent.ToggleSelectedTunnel(it))
+                },
                 onSwitchClick = { checked -> onToggleTunnel(tunnel, checked) },
-                viewModel = viewModel,
             )
         }
     }

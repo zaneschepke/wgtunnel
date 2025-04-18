@@ -17,9 +17,9 @@ interface AppStateRepository {
 
     suspend fun setBatteryOptimizationDisableShown(shown: Boolean)
 
-    suspend fun isTunnelStatsExpanded(): Boolean
+    suspend fun setTunnelExpanded(id: Int)
 
-    suspend fun setTunnelStatsExpanded(expanded: Boolean)
+    suspend fun removeTunnelExpanded(id: Int)
 
     suspend fun setTheme(theme: Theme)
 

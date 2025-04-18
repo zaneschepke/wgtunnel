@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -49,6 +48,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
@@ -136,6 +136,7 @@ class MainActivity : AppCompatActivity() {
                     backStackEntry,
                     viewModel,
                     appUiState,
+                    appViewState,
                 )
             val snackbar = remember { SnackbarHostState() }
             var showVpnPermissionDialog by remember { mutableStateOf(false) }
@@ -218,7 +219,7 @@ class MainActivity : AppCompatActivity() {
                         batteryActivity.launch(
                             Intent().apply {
                                 action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                                data = Uri.parse("package:${this@MainActivity.packageName}")
+                                data = "package:${this@MainActivity.packageName}".toUri()
                             }
                         )
                     }
@@ -236,7 +237,7 @@ class MainActivity : AppCompatActivity() {
                         modifier =
                             Modifier.pointerInput(Unit) {
                                 detectTapGestures {
-                                    viewModel.handleEvent(AppEvent.SetSelectedTunnel(null))
+                                    viewModel.handleEvent(AppEvent.ClearSelectedTunnels)
                                 }
                             },
                         snackbarHost = {

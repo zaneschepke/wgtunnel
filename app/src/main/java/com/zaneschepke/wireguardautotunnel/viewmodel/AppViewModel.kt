@@ -128,8 +128,8 @@ constructor(
                         handleToggleLocalLogging(state.appState.isLocalLogsEnabled)
                     is AppEvent.SetDebounceDelay ->
                         handleSetDebounceDelay(state.appSettings, event.delay)
-                    is AppEvent.CopyTunnel -> handleCopyTunnel(event.tunnel, state.tunnels)
-                    is AppEvent.DeleteTunnel -> handleDeleteTunnel(event.tunnel, state)
+                    is AppEvent.CopySelectedTunnel -> handleCopySelectedTunnel(state.tunnels)
+                    is AppEvent.DeleteSelectedTunnels -> handleDeleteSelectedTunnels()
                     is AppEvent.ImportTunnelFromClipboard ->
                         handleClipboardImport(event.text, state.tunnels)
                     is AppEvent.ImportTunnelFromFile ->
@@ -142,8 +142,8 @@ constructor(
                     is AppEvent.StartTunnel -> handleStartTunnel(event.tunnel, state.appSettings)
                     is AppEvent.StopTunnel -> handleStopTunnel(event.tunnel)
                     AppEvent.ToggleAutoTunnel -> handleToggleAutoTunnel(state)
-                    AppEvent.ToggleTunnelStatsExpanded ->
-                        handleToggleExpandTunnelStats(state.appState.isTunnelStatsExpanded)
+                    is AppEvent.ToggleTunnelStatsExpanded ->
+                        handleToggleTunnelStats(event.tunnelId, state.appState)
                     AppEvent.ToggleAlwaysOn -> handleToggleAlwaysOnVPN(state.appSettings)
                     AppEvent.TogglePinLock -> handlePinLockToggled(state.appState.isPinLockEnabled)
                     AppEvent.SetLocationDisclosureShown -> setLocationDisclosureShown()
@@ -194,8 +194,7 @@ constructor(
                     AppEvent.DeleteLogs -> handleDeleteLogs()
                     is AppEvent.SetScreenAction -> _screenCallback.update { event.callback }
                     AppEvent.InvokeScreenAction -> _screenCallback.value?.invoke()
-                    is AppEvent.SetSelectedTunnel ->
-                        _appViewState.update { it.copy(selectedTunnel = event.tunnel) }
+                    is AppEvent.ToggleSelectedTunnel -> toggleSelectedTunnel(event.tunnel)
                     AppEvent.VpnPermissionRequested -> requestVpnPermission(false)
                     is AppEvent.AppReadyCheck -> handleAppReadyCheck(event.tunnels)
                     is AppEvent.ShowMessage -> handleShowMessage(event.message)
@@ -203,9 +202,30 @@ constructor(
                         _appViewState.update { it.copy(popBackStack = event.pop) }
                     is AppEvent.ClearTunnelError -> tunnelManager.clearError(event.tunnel)
                     AppEvent.ToggleRemoteControl -> handleToggleRemoteControl(state.appState)
+                    AppEvent.ClearSelectedTunnels -> clearSelectedTunnels()
+                    is AppEvent.SetShowModal ->
+                        _appViewState.update { it.copy(showModal = event.modalType) }
                 }
             }
         }
+
+    private fun toggleSelectedTunnel(tunnel: TunnelConf) =
+        _appViewState.update {
+            it.copy(
+                selectedTunnels =
+                    it.selectedTunnels.toMutableList().apply {
+                        if (it.selectedTunnels.contains(tunnel)) remove(tunnel) else add(tunnel)
+                    }
+            )
+        }
+
+    private suspend fun handleToggleTunnelStats(tunnelId: Int, appState: AppState) {
+        if (appState.expandedTunnelIds.contains(tunnelId)) {
+            appDataRepository.appState.removeTunnelExpanded(tunnelId)
+        } else {
+            appDataRepository.appState.setTunnelExpanded(tunnelId)
+        }
+    }
 
     private suspend fun handleToggleRemoteControl(appState: AppState) {
         val enabled = !appState.isRemoteControlEnabled
@@ -261,7 +281,8 @@ constructor(
     private suspend fun handleSetDebounceDelay(appSettings: AppSettings, delay: Int) =
         saveSettings(appSettings.copy(debounceDelaySeconds = delay))
 
-    private suspend fun handleCopyTunnel(tunnel: TunnelConf, existingTunnels: List<TunnelConf>) =
+    private suspend fun handleCopySelectedTunnel(existingTunnels: List<TunnelConf>) {
+        val tunnel = _appViewState.value.selectedTunnels.firstOrNull() ?: return
         saveTunnel(
             TunnelConf(
                 tunName = tunnel.generateUniqueName(existingTunnels.map { it.tunName }),
@@ -269,13 +290,21 @@ constructor(
                 amQuick = tunnel.amQuick,
             )
         )
-
-    private suspend fun handleDeleteTunnel(tunnel: TunnelConf, state: AppUiState) {
-        if (state.tunnels.size == 1 || tunnel.isPrimaryTunnel) {
-            serviceManager.stopAutoTunnel()
-        }
-        appDataRepository.tunnels.delete(tunnel)
+        clearSelectedTunnels()
     }
+
+    private fun clearSelectedTunnels() =
+        _appViewState.update {
+            it.copy(selectedTunnels = it.selectedTunnels.toMutableList().apply { clear() })
+        }
+
+    private suspend fun handleDeleteSelectedTunnels() =
+        _appViewState.value.selectedTunnels
+            .forEach {
+                appDataRepository.tunnels.delete(it)
+                appDataRepository.appState.removeTunnelExpanded(it.id)
+            }
+            .also { clearSelectedTunnels() }
 
     private fun requestVpnPermission(request: Boolean) =
         _appViewState.update { it.copy(requestVpnPermission = request) }
@@ -284,6 +313,7 @@ constructor(
         _appViewState.update { it.copy(requestBatteryPermission = request) }
 
     private suspend fun handleStartTunnel(tunnel: TunnelConf, appSettings: AppSettings) {
+        clearSelectedTunnels()
         tunControlMutex.withLock {
             if (!tunnelManager.hasVpnPermission() && !appSettings.isKernelEnabled)
                 return@withLock requestVpnPermission(true)
@@ -292,6 +322,7 @@ constructor(
     }
 
     private suspend fun handleStopTunnel(tunnel: TunnelConf) {
+        clearSelectedTunnels()
         tunControlMutex.withLock { tunnelManager.stopTunnel(tunnel) }
     }
 
@@ -308,10 +339,6 @@ constructor(
                 return@withLock requestBatteryPermission(true)
             serviceManager.toggleAutoTunnel()
         }
-    }
-
-    private suspend fun handleToggleExpandTunnelStats(currentlyEnabled: Boolean) {
-        appDataRepository.appState.setTunnelStatsExpanded(!currentlyEnabled)
     }
 
     private fun handleErrorShown() {

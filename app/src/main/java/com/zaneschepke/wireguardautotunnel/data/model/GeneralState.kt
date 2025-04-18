@@ -7,7 +7,7 @@ data class GeneralState(
     val isLocationDisclosureShown: Boolean = LOCATION_DISCLOSURE_SHOWN_DEFAULT,
     val isBatteryOptimizationDisableShown: Boolean = BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT,
     val isPinLockEnabled: Boolean = PIN_LOCK_ENABLED_DEFAULT,
-    val isTunnelStatsExpanded: Boolean = IS_TUNNEL_STATS_EXPANDED,
+    val expandedTunnelIds: List<Int> = emptyList(),
     val isLocalLogsEnabled: Boolean = IS_LOGS_ENABLED_DEFAULT,
     val isRemoteControlEnabled: Boolean = IS_REMOTE_CONTROL_ENABLED,
     val remoteKey: String? = null,
@@ -20,7 +20,7 @@ data class GeneralState(
             isLocationDisclosureShown,
             isBatteryOptimizationDisableShown,
             isPinLockEnabled,
-            isTunnelStatsExpanded,
+            expandedTunnelIds,
             isLocalLogsEnabled,
             isRemoteControlEnabled,
             remoteKey,
@@ -35,7 +35,7 @@ data class GeneralState(
                     isLocationDisclosureShown,
                     isBatteryOptimizationDisableShown,
                     isPinLockEnabled,
-                    isTunnelStatsExpanded,
+                    expandedTunnelIds,
                     isLocalLogsEnabled,
                     isRemoteControlEnabled,
                     remoteKey,
@@ -48,7 +48,6 @@ data class GeneralState(
         const val LOCATION_DISCLOSURE_SHOWN_DEFAULT = false
         const val BATTERY_OPTIMIZATION_DISABLE_SHOWN_DEFAULT = false
         const val PIN_LOCK_ENABLED_DEFAULT = false
-        const val IS_TUNNEL_STATS_EXPANDED = false
         const val IS_LOGS_ENABLED_DEFAULT = false
         const val IS_REMOTE_CONTROL_ENABLED = false
     }

@@ -3,6 +3,7 @@ package com.zaneschepke.wireguardautotunnel.viewmodel.event
 import android.net.Uri
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
+import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 
@@ -55,9 +56,9 @@ sealed class AppEvent {
 
     data class StopTunnel(val tunnel: TunnelConf) : AppEvent()
 
-    data class DeleteTunnel(val tunnel: TunnelConf) : AppEvent()
+    data object DeleteSelectedTunnels : AppEvent()
 
-    data class CopyTunnel(val tunnel: TunnelConf) : AppEvent()
+    data object CopySelectedTunnel : AppEvent()
 
     data class ImportTunnelFromFile(val data: Uri) : AppEvent()
 
@@ -67,7 +68,7 @@ sealed class AppEvent {
 
     data class ImportTunnelFromQrCode(val qrCode: String) : AppEvent()
 
-    data object ToggleTunnelStatsExpanded : AppEvent()
+    data class ToggleTunnelStatsExpanded(val tunnelId: Int) : AppEvent()
 
     data object SetBatteryOptimizeDisableShown : AppEvent()
 
@@ -111,11 +112,15 @@ sealed class AppEvent {
 
     data object ToggleBottomSheet : AppEvent()
 
-    data class SetSelectedTunnel(val tunnel: TunnelConf?) : AppEvent()
+    data class ToggleSelectedTunnel(val tunnel: TunnelConf) : AppEvent()
+
+    data object ClearSelectedTunnels : AppEvent()
 
     data object VpnPermissionRequested : AppEvent()
 
     data class AppReadyCheck(val tunnels: List<TunnelConf>) : AppEvent()
 
     data object ToggleRemoteControl : AppEvent()
+
+    data class SetShowModal(val modalType: AppViewState.ModalType) : AppEvent()
 }

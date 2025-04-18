@@ -9,7 +9,14 @@ data class AppViewState(
     val popBackStack: Boolean = false,
     val isAppReady: Boolean = false,
     val showBottomSheet: Boolean = false,
-    val selectedTunnel: TunnelConf? = null,
+    val selectedTunnels: List<TunnelConf> = emptyList(),
     val requestVpnPermission: Boolean = false,
     val requestBatteryPermission: Boolean = false,
-)
+    val showModal: ModalType = ModalType.NONE,
+) {
+    enum class ModalType {
+        NONE,
+        DELETE,
+        INFO,
+    }
+}

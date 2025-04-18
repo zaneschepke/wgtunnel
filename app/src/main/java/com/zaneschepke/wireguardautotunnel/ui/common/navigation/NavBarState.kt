@@ -1,12 +1,16 @@
 package com.zaneschepke.wireguardautotunnel.ui.common.navigation
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CopyAll
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +26,7 @@ import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
+import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Brick
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
@@ -42,8 +47,18 @@ fun currentNavBackStackEntryAsNavBarState(
     backStackEntry: NavBackStackEntry?,
     viewModel: AppViewModel,
     uiState: AppUiState,
+    appViewState: AppViewState,
 ): State<NavBarState> {
-    return produceState(initialValue = NavBarState(), key1 = backStackEntry, key2 = uiState) {
+    fun isActiveSelected(): Boolean =
+        uiState.activeTunnels.any { active ->
+            appViewState.selectedTunnels.any { active.key.id == it.id }
+        }
+    return produceState(
+        initialValue = NavBarState(),
+        key1 = backStackEntry,
+        key2 = uiState,
+        key3 = appViewState,
+    ) {
         value =
             when {
                 backStackEntry.isCurrentRoute(Route.Main::class) -> {
@@ -52,15 +67,88 @@ fun currentNavBackStackEntryAsNavBarState(
                         showBottom = true,
                         { Text(stringResource(R.string.tunnels)) },
                         {
-                            IconButton(
-                                onClick = { viewModel.handleEvent(AppEvent.ToggleBottomSheet) }
-                            ) {
-                                val icon = Icons.Rounded.Add
-                                Icon(
-                                    icon,
-                                    stringResource(R.string.add_tunnel),
-                                    modifier = Modifier.size(iconSize),
-                                )
+                            when (appViewState.selectedTunnels.size) {
+                                0 -> {
+                                    IconButton(
+                                        onClick = {
+                                            viewModel.handleEvent(AppEvent.ToggleBottomSheet)
+                                        }
+                                    ) {
+                                        val icon = Icons.Rounded.Add
+                                        Icon(
+                                            icon,
+                                            stringResource(R.string.add_tunnel),
+                                            modifier = Modifier.size(iconSize),
+                                        )
+                                    }
+                                }
+                                1 -> {
+                                    Row {
+                                        IconButton(onClick = {}) {
+                                            Icon(
+                                                Icons.Rounded.Share,
+                                                stringResource(R.string.share),
+                                                modifier = Modifier.size(iconSize),
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.handleEvent(AppEvent.CopySelectedTunnel)
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.CopyAll,
+                                                stringResource(R.string.copy),
+                                                modifier = Modifier.size(iconSize),
+                                            )
+                                        }
+                                        if (!isActiveSelected()) {
+                                            IconButton(
+                                                onClick = {
+                                                    viewModel.handleEvent(
+                                                        AppEvent.SetShowModal(
+                                                            AppViewState.ModalType.DELETE
+                                                        )
+                                                    )
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.Delete,
+                                                    stringResource(R.string.delete_tunnel),
+                                                    modifier = Modifier.size(iconSize),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    Row {
+                                        IconButton(onClick = {}) {
+                                            Icon(
+                                                Icons.Rounded.Share,
+                                                stringResource(R.string.share),
+                                                modifier = Modifier.size(iconSize),
+                                            )
+                                        }
+                                        if (!isActiveSelected()) {
+                                            IconButton(
+                                                onClick = {
+                                                    viewModel.handleEvent(
+                                                        AppEvent.SetShowModal(
+                                                            AppViewState.ModalType.DELETE
+                                                        )
+                                                    )
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.Delete,
+                                                    stringResource(R.string.delete_tunnel),
+                                                    modifier = Modifier.size(iconSize),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         },
                         route = Route.Main,

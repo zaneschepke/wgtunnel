@@ -38,13 +38,36 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
         dataStoreManager.saveToDataStore(DataStoreManager.batteryDisableShown, shown)
     }
 
-    override suspend fun isTunnelStatsExpanded(): Boolean {
-        return dataStoreManager.getFromStore(DataStoreManager.tunnelStatsExpanded)
-            ?: GeneralState.IS_TUNNEL_STATS_EXPANDED
+    override suspend fun setTunnelExpanded(id: Int) {
+        val ids =
+            dataStoreManager
+                .getFromStore(DataStoreManager.expandedTunnelIds)
+                ?.split(",")
+                ?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+
+        if (ids.contains(id)) return
+
+        val updatedList = ids.toMutableList().apply { add(id) }
+        dataStoreManager.saveToDataStore(
+            DataStoreManager.expandedTunnelIds,
+            updatedList.joinToString(","),
+        )
     }
 
-    override suspend fun setTunnelStatsExpanded(expanded: Boolean) {
-        dataStoreManager.saveToDataStore(DataStoreManager.tunnelStatsExpanded, expanded)
+    override suspend fun removeTunnelExpanded(id: Int) {
+        val ids =
+            dataStoreManager
+                .getFromStore(DataStoreManager.expandedTunnelIds)
+                ?.split(",")
+                ?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+
+        if (ids.isEmpty() || !ids.contains(id)) return
+
+        val updatedList = ids.toMutableList().apply { remove(id) }
+        dataStoreManager.saveToDataStore(
+            DataStoreManager.expandedTunnelIds,
+            updatedList.joinToString(","),
+        )
     }
 
     override suspend fun setTheme(theme: Theme) {
@@ -110,9 +133,10 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
                             isPinLockEnabled =
                                 pref[DataStoreManager.pinLockEnabled]
                                     ?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
-                            isTunnelStatsExpanded =
-                                pref[DataStoreManager.tunnelStatsExpanded]
-                                    ?: GeneralState.IS_TUNNEL_STATS_EXPANDED,
+                            expandedTunnelIds =
+                                pref[DataStoreManager.expandedTunnelIds]?.split(",")?.map {
+                                    it.toInt()
+                                } ?: emptyList(),
                             isLocalLogsEnabled =
                                 pref[DataStoreManager.isLocalLogsEnabled]
                                     ?: GeneralState.IS_LOGS_ENABLED_DEFAULT,

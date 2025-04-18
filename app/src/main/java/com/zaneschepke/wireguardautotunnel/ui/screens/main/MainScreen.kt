@@ -34,7 +34,6 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
     val navController = LocalNavController.current
     val clipboard = LocalClipboardManager.current
 
-    var showDeleteTunnelAlertDialog by remember { mutableStateOf(false) }
     var showUrlImportDialog by remember { mutableStateOf(false) }
 
     val tunnelFileImportResultLauncher =
@@ -63,13 +62,14 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
             navController.navigate(Route.Scanner)
         }
 
-    if (showDeleteTunnelAlertDialog && appViewState.selectedTunnel != null) {
+    if (appViewState.showModal == AppViewState.ModalType.DELETE) {
         InfoDialog(
-            onDismiss = { showDeleteTunnelAlertDialog = false },
+            onDismiss = {
+                viewModel.handleEvent(AppEvent.SetShowModal(AppViewState.ModalType.NONE))
+            },
             onAttest = {
-                appViewState.selectedTunnel.let { viewModel.handleEvent(AppEvent.DeleteTunnel(it)) }
-                showDeleteTunnelAlertDialog = false
-                viewModel.handleEvent(AppEvent.SetSelectedTunnel(null))
+                viewModel.handleEvent(AppEvent.DeleteSelectedTunnels)
+                viewModel.handleEvent(AppEvent.SetShowModal(AppViewState.ModalType.NONE))
             },
             title = { Text(text = stringResource(R.string.delete_tunnel)) },
             body = { Text(text = stringResource(R.string.delete_tunnel_message)) },
@@ -105,21 +105,10 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
 
     TunnelList(
         appUiState = appUiState,
-        activeTunnels = appUiState.activeTunnels,
-        selectedTunnel = appViewState.selectedTunnel,
-        onSetSelectedTunnel = { viewModel.handleEvent(AppEvent.SetSelectedTunnel(it)) },
-        onDeleteTunnel = {
-            viewModel.handleEvent(AppEvent.SetSelectedTunnel(it))
-            showDeleteTunnelAlertDialog = true
-        },
+        selectedTunnels = appViewState.selectedTunnels,
         onToggleTunnel = { tunnel, checked ->
             if (checked) viewModel.handleEvent(AppEvent.StartTunnel(tunnel))
             else viewModel.handleEvent(AppEvent.StopTunnel(tunnel))
-        },
-        onExpandStats = { viewModel.handleEvent(AppEvent.ToggleTunnelStatsExpanded) },
-        onCopyTunnel = {
-            viewModel.handleEvent(AppEvent.CopyTunnel(it))
-            viewModel.handleEvent(AppEvent.SetSelectedTunnel(null))
         },
         modifier = Modifier.fillMaxSize().padding(vertical = 24.dp).padding(horizontal = 12.dp),
         viewModel = viewModel,
