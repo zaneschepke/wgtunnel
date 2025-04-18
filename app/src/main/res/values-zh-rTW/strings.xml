@@ -125,4 +125,18 @@
     <string name="nothing_here_yet">這裡目前還沒有任何東西！</string>
     <string name="remove_amnezia_compatibility">移除 Amnezia 相容性</string>
     <string name="enable_amnezia_compatibility">啟用 Amnezia 相容性</string>
+    <string name="comma_separated_list">以逗號分隔的清單</string>
+    <string name="show_amnezia_properties">顯示 Amnezia 屬性</string>
+    <string name="background_location_message2">請確保啟用了這些權限</string>
+    <string name="set_custom_ping_ip">自訂 ping 目標 IP</string>
+    <string name="hide_amnezia_properties">隱藏 Amnezia 屬性</string>
+    <string name="active">使用中</string>
+    <string name="vpn_denied_dialog_title">被拒絕存取</string>
+    <string name="always_on_message">VPN 連線所需權限被拒絕，請檢查</string>
+    <string name="wildcards_active">啟用萬用字元</string>
+    <string name="multiple">多個</string>
+    <string name="export_tunnels_amnezia">將隧道匯出為 Amnezia</string>
+    <string name="export_tunnels_wireguard">將隧道匯出為 WireGuard</string>
+    <string name="wifi_name_template">使用中: %1$s</string>
+    <string name="inactive">未使用</string>
 </resources>
