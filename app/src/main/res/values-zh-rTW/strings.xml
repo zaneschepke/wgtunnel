@@ -15,7 +15,7 @@
     <string name="thank_you">感謝您使用 WG Tunnel!</string>
     <string name="open_file">開啟檔案</string>
     <string name="mtu">MTU</string>
-    <string name="okay">好</string>
+    <string name="okay">確認</string>
     <string name="qr_scan">掃描 QR code</string>
     <string name="dns_servers">DNS 伺服器</string>
     <string name="tunnel_name">隧道名稱</string>
@@ -71,7 +71,7 @@
     <string name="dynamic">動態</string>
     <string name="never">從不</string>
     <string name="automatic">自動</string>
-    <string name="add_wifi_name">新增WiFi SSID</string>
+    <string name="add_wifi_name">新增 WiFi SSID</string>
     <string name="allow_lan_traffic">允許 LAN 流量</string>
     <string name="stop_on_no_internet">沒有連上網路時停止</string>
     <string name="stop_on_internet_loss">網路連線斷開時停止隧道</string>
@@ -139,4 +139,5 @@
     <string name="export_tunnels_wireguard">將隧道匯出為 WireGuard</string>
     <string name="wifi_name_template">使用中: %1$s</string>
     <string name="inactive">未使用</string>
+    <string name="trusted_wifi_names">信任的 WiFi SSID</string>
 </resources>
