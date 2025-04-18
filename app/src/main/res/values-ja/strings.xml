@@ -81,4 +81,9 @@
     <string name="kill_switch">キルスイッチ</string>
     <string name="notifications">通知</string>
     <string name="logs">ログ</string>
+    <string name="add_from_clipboard">クリップボードからの追加</string>
+    <string name="automatic">自動</string>
+    <string name="add_wifi_name">Wifi名の追加</string>
+    <string name="language">設定言語</string>
+    <string name="trusted_wifi_names">信頼されたWifi名</string>
 </resources>
