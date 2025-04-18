@@ -1,0 +1,6 @@
+Co nowego:
+- Naprawiono problemy z rozwiązywaniem DNS
+- Ulepszono przywracanie Android TV w trybie uśpienia
+- Naprawiono błąd wyszukiwania w tunelu dzielonym
+- Aktualizacje tłumaczeń
+- Zaktualizowano łącza do dokumentów dla nowej witryny aplikacji
