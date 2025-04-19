@@ -223,6 +223,9 @@ dependencies {
     // worker
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
+
+    // qr
+    implementation(libs.qrcode.kotlin)
 }
 
 fun determineVersionName(): String {

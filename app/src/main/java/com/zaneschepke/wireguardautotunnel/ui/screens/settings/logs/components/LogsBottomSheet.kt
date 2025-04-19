@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
@@ -26,13 +27,17 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 fun LogsBottomSheet(viewModel: AppViewModel) {
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface,
-        onDismissRequest = { viewModel.handleEvent(AppEvent.ToggleBottomSheet) },
+        onDismissRequest = {
+            viewModel.handleEvent(AppEvent.SetBottomSheet(AppViewState.BottomSheet.NONE))
+        },
     ) {
         Row(
             modifier =
                 Modifier.fillMaxWidth()
                     .clickable {
-                        viewModel.handleEvent(AppEvent.ToggleBottomSheet)
+                        viewModel.handleEvent(
+                            AppEvent.SetBottomSheet(AppViewState.BottomSheet.NONE)
+                        )
                         viewModel.handleEvent(AppEvent.ExportLogs)
                     }
                     .padding(10.dp)
@@ -49,7 +54,9 @@ fun LogsBottomSheet(viewModel: AppViewModel) {
             modifier =
                 Modifier.fillMaxWidth()
                     .clickable {
-                        viewModel.handleEvent(AppEvent.ToggleBottomSheet)
+                        viewModel.handleEvent(
+                            AppEvent.SetBottomSheet(AppViewState.BottomSheet.NONE)
+                        )
                         viewModel.handleEvent(AppEvent.DeleteLogs)
                     }
                     .padding(10.dp)

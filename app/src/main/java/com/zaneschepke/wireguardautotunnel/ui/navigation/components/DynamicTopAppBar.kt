@@ -1,10 +1,6 @@
-package com.zaneschepke.wireguardautotunnel.ui.common.navigation
+package com.zaneschepke.wireguardautotunnel.ui.navigation.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.wireguardautotunnel.ui.state.NavBarState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

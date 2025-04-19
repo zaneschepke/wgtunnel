@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.main.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -22,6 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
+import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AuthorizationPromptWrapper
+import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
@@ -33,8 +35,8 @@ fun ExportTunnelsBottomSheet(viewModel: AppViewModel, isRunningOnTv: Boolean) {
     var exportType by remember { mutableStateOf(ConfigType.WG) }
 
     fun handleExport() {
-        viewModel.handleEvent(AppEvent.ToggleBottomSheet)
-        viewModel.handleEvent(AppEvent.ExportTunnels(exportType))
+        viewModel.handleEvent(AppEvent.SetBottomSheet(AppViewState.BottomSheet.NONE))
+        viewModel.handleEvent(AppEvent.ExportSelectedTunnels(exportType))
     }
 
     if (showAuthPrompt) {
@@ -51,7 +53,9 @@ fun ExportTunnelsBottomSheet(viewModel: AppViewModel, isRunningOnTv: Boolean) {
 
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface,
-        onDismissRequest = { viewModel.handleEvent(AppEvent.ToggleBottomSheet) },
+        onDismissRequest = {
+            viewModel.handleEvent(AppEvent.SetBottomSheet(AppViewState.BottomSheet.NONE))
+        },
     ) {
         Row(
             modifier =

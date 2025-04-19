@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.common.navigation
+package com.zaneschepke.wireguardautotunnel.ui.navigation.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.wireguardautotunnel.ui.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 

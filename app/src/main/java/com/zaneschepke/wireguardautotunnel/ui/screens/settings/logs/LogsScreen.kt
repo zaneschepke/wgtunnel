@@ -65,8 +65,11 @@ fun LogsScreen(appViewState: AppViewState, viewModel: AppViewModel) {
             }
     }
 
-    if (appViewState.showBottomSheet) {
-        LogsBottomSheet(viewModel)
+    when (appViewState.bottomSheet) {
+        AppViewState.BottomSheet.LOGS -> {
+            LogsBottomSheet(viewModel)
+        }
+        else -> Unit
     }
 
     if (logs.isEmpty()) {

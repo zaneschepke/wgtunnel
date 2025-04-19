@@ -43,7 +43,7 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
             dataStoreManager
                 .getFromStore(DataStoreManager.expandedTunnelIds)
                 ?.split(",")
-                ?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+                ?.mapNotNull { it.toIntOrNull() } ?: emptyList()
 
         if (ids.contains(id)) return
 
@@ -59,7 +59,7 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
             dataStoreManager
                 .getFromStore(DataStoreManager.expandedTunnelIds)
                 ?.split(",")
-                ?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+                ?.mapNotNull { it.toIntOrNull() } ?: emptyList()
 
         if (ids.isEmpty() || !ids.contains(id)) return
 
@@ -134,8 +134,8 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
                                 pref[DataStoreManager.pinLockEnabled]
                                     ?: GeneralState.PIN_LOCK_ENABLED_DEFAULT,
                             expandedTunnelIds =
-                                pref[DataStoreManager.expandedTunnelIds]?.split(",")?.map {
-                                    it.toInt()
+                                pref[DataStoreManager.expandedTunnelIds]?.split(",")?.mapNotNull {
+                                    it.toIntOrNull()
                                 } ?: emptyList(),
                             isLocalLogsEnabled =
                                 pref[DataStoreManager.isLocalLogsEnabled]

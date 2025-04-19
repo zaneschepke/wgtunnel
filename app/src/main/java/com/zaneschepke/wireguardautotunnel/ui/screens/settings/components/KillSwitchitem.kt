@@ -10,7 +10,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 
 @Composable
 fun KillSwitchItem(): SelectionItem {

@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.components
+package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size

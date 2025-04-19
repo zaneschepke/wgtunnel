@@ -238,4 +238,5 @@
 	<string name="enable_remote_app_control">Enable remote app control</string>
     <string name="nothing_here_yet">Nothing here yet!</string>
     <string name="share">Share</string>
+    <string name="select_all">Select all</string>
 </resources>

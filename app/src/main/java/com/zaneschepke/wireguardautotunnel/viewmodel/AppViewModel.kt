@@ -28,6 +28,7 @@ import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import com.zaneschepke.wireguardautotunnel.util.*
+import com.zaneschepke.wireguardautotunnel.util.extensions.addAllUnique
 import com.zaneschepke.wireguardautotunnel.util.extensions.withFirstState
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -183,18 +184,20 @@ constructor(
                         handleToggleStopKillSwitchOnTrusted(state.appSettings)
                     AppEvent.ToggleStopTunnelOnNoInternet ->
                         handleToggleStopOnNoInternet(state.appSettings)
-                    is AppEvent.ExportTunnels ->
-                        handleExportTunnels(event.configType, state.tunnels)
+                    is AppEvent.ExportSelectedTunnels ->
+                        handleExportSelectedTunnels(event.configType)
                     AppEvent.ExportLogs -> handleExportLogs()
                     AppEvent.MessageShown -> handleErrorShown()
                     is AppEvent.TogglePingTunnelEnabled -> handleTogglePingTunnel(event.tunnel)
                     is AppEvent.SetTunnelPingIp ->
                         handleTunnelPingIpChange(event.tunnelConf, event.ip)
-                    AppEvent.ToggleBottomSheet -> handleToggleBottomSheet()
+                    is AppEvent.SetBottomSheet -> handleSetBottomSheet(event.showSheet)
                     AppEvent.DeleteLogs -> handleDeleteLogs()
                     is AppEvent.SetScreenAction -> _screenCallback.update { event.callback }
                     AppEvent.InvokeScreenAction -> _screenCallback.value?.invoke()
-                    is AppEvent.ToggleSelectedTunnel -> toggleSelectedTunnel(event.tunnel)
+                    is AppEvent.ToggleSelectedTunnel -> handleToggleSelectedTunnel(event.tunnel)
+                    is AppEvent.ToggleSelectAllTunnels ->
+                        handleToggleSelectAllTunnels(state.tunnels)
                     AppEvent.VpnPermissionRequested -> requestVpnPermission(false)
                     is AppEvent.AppReadyCheck -> handleAppReadyCheck(event.tunnels)
                     is AppEvent.ShowMessage -> handleShowMessage(event.message)
@@ -209,7 +212,19 @@ constructor(
             }
         }
 
-    private fun toggleSelectedTunnel(tunnel: TunnelConf) =
+    private fun handleToggleSelectAllTunnels(tunnels: List<TunnelConf>) =
+        _appViewState.update { it ->
+            val remove = tunnels.size == it.selectedTunnels.size
+            it.copy(
+                selectedTunnels =
+                    it.selectedTunnels.toMutableList().apply {
+                        if (remove) removeAll(tunnels)
+                        else addAllUnique(tunnels) { existing, new -> existing.id == new.id }
+                    }
+            )
+        }
+
+    private fun handleToggleSelectedTunnel(tunnel: TunnelConf) =
         _appViewState.update {
             it.copy(
                 selectedTunnels =
@@ -253,8 +268,8 @@ constructor(
         }
     }
 
-    private fun handleToggleBottomSheet() =
-        _appViewState.update { it.copy(showBottomSheet = !it.showBottomSheet) }
+    private fun handleSetBottomSheet(bottomSheet: AppViewState.BottomSheet) =
+        _appViewState.update { it.copy(bottomSheet = bottomSheet) }
 
     private suspend fun handleTunnelPingIpChange(tunnelConf: TunnelConf, ip: String) =
         saveTunnel(tunnelConf.copy(pingIp = ip))
@@ -662,7 +677,8 @@ constructor(
             tunnelMutex.withLock { appDataRepository.tunnels.save(tunnel) }
         }
 
-    private suspend fun handleExportTunnels(configType: ConfigType, tunnels: List<TunnelConf>) {
+    private suspend fun handleExportSelectedTunnels(configType: ConfigType) {
+        val tunnels = _appViewState.value.selectedTunnels
         runCatching {
                 val (files, shareFileName) =
                     when (configType) {
@@ -687,6 +703,7 @@ constructor(
                 Timber.e(it)
                 handleShowMessage(StringValue.StringResource(R.string.export_failed))
             }
+        clearSelectedTunnels()
     }
 
     private suspend fun handleExportLogs() {

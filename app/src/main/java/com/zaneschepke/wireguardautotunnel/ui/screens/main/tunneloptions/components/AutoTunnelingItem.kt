@@ -11,7 +11,7 @@ import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 
 @Composable
 fun AutoTunnelingItem(tunnelConf: TunnelConf): SelectionItem {

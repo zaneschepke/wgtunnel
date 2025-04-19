@@ -21,28 +21,14 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarData
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -62,14 +48,15 @@ import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.VpnDeniedDialog
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.BottomNavItem
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.CustomBottomNavbar
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.DynamicTopAppBar
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.currentNavBackStackEntryAsNavBarState
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
+import com.zaneschepke.wireguardautotunnel.ui.navigation.BottomNavItem
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.navigation.components.CustomBottomNavbar
+import com.zaneschepke.wireguardautotunnel.ui.navigation.components.DynamicTopAppBar
+import com.zaneschepke.wireguardautotunnel.ui.navigation.components.currentNavBackStackEntryAsNavBarState
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.AutoTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.AutoTunnelAdvancedScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.autotunnel.TunnelAutoTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigScreen
@@ -82,7 +69,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.advanced.Settings
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.AppearanceScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.display.DisplayScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.LanguageScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSwitchScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
@@ -316,9 +302,7 @@ class MainActivity : AppCompatActivity() {
                                 composable<Route.Main> {
                                     MainScreen(appUiState, appViewState, viewModel)
                                 }
-                                composable<Route.Settings> {
-                                    SettingsScreen(appUiState, appViewState, viewModel)
-                                }
+                                composable<Route.Settings> { SettingsScreen(appUiState, viewModel) }
                                 composable<Route.SettingsAdvanced> {
                                     SettingsAdvancedScreen(appUiState, viewModel)
                                 }

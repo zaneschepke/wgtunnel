@@ -8,7 +8,7 @@ data class AppViewState(
     val errorMessage: StringValue? = null,
     val popBackStack: Boolean = false,
     val isAppReady: Boolean = false,
-    val showBottomSheet: Boolean = false,
+    val bottomSheet: BottomSheet = BottomSheet.NONE,
     val selectedTunnels: List<TunnelConf> = emptyList(),
     val requestVpnPermission: Boolean = false,
     val requestBatteryPermission: Boolean = false,
@@ -18,5 +18,12 @@ data class AppViewState(
         NONE,
         DELETE,
         INFO,
+    }
+
+    enum class BottomSheet {
+        EXPORT_TUNNELS,
+        IMPORT_TUNNELS,
+        LOGS,
+        NONE,
     }
 }

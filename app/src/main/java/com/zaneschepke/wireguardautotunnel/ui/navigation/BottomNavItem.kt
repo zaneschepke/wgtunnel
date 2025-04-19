@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.common.navigation
+package com.zaneschepke.wireguardautotunnel.ui.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.zaneschepke.wireguardautotunnel.ui.Route

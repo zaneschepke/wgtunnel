@@ -19,12 +19,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.AdvancedSettingsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AlwaysOnVpnItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AppShortcutsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AppearanceItem
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ExportTunnelsBottomSheet
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.KernelModeItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.KillSwitchItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocalLoggingItem
@@ -32,21 +31,16 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.PinLoc
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ReadLogsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.RestartAtBootItem
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
-fun SettingsScreen(uiState: AppUiState, appViewState: AppViewState, viewModel: AppViewModel) {
+fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val navController = LocalNavController.current
     val isRunningOnTv = remember { context.isRunningOnTv() }
     val interactionSource = remember { MutableInteractionSource() }
-
-    if (appViewState.showBottomSheet) {
-        ExportTunnelsBottomSheet(viewModel, isRunningOnTv)
-    }
 
     Column(
         horizontalAlignment = Alignment.Start,

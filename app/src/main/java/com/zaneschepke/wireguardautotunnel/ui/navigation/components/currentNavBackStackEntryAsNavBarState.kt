@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.common.navigation
+package com.zaneschepke.wireguardautotunnel.ui.navigation.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -10,6 +10,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.Icon
@@ -25,21 +26,15 @@ import androidx.navigation.NavController
 import androidx.navigation.toRoute
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.navigation.isCurrentRoute
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
+import com.zaneschepke.wireguardautotunnel.ui.state.NavBarState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Brick
 import com.zaneschepke.wireguardautotunnel.ui.theme.SilverTree
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
-
-data class NavBarState(
-    val showTop: Boolean = true,
-    val showBottom: Boolean = true,
-    val topTitle: @Composable (() -> Unit)? = null,
-    val topTrailing: @Composable (() -> Unit)? = null,
-    val route: Route? = null,
-)
 
 @Composable
 fun currentNavBackStackEntryAsNavBarState(
@@ -71,7 +66,11 @@ fun currentNavBackStackEntryAsNavBarState(
                                 0 -> {
                                     IconButton(
                                         onClick = {
-                                            viewModel.handleEvent(AppEvent.ToggleBottomSheet)
+                                            viewModel.handleEvent(
+                                                AppEvent.SetBottomSheet(
+                                                    AppViewState.BottomSheet.IMPORT_TUNNELS
+                                                )
+                                            )
                                         }
                                     ) {
                                         val icon = Icons.Rounded.Add
@@ -84,7 +83,28 @@ fun currentNavBackStackEntryAsNavBarState(
                                 }
                                 1 -> {
                                     Row {
-                                        IconButton(onClick = {}) {
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.handleEvent(
+                                                    AppEvent.ToggleSelectAllTunnels
+                                                )
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.SelectAll,
+                                                stringResource(R.string.select_all),
+                                                modifier = Modifier.size(iconSize),
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.handleEvent(
+                                                    AppEvent.SetBottomSheet(
+                                                        AppViewState.BottomSheet.EXPORT_TUNNELS
+                                                    )
+                                                )
+                                            }
+                                        ) {
                                             Icon(
                                                 Icons.Rounded.Share,
                                                 stringResource(R.string.share),
@@ -123,7 +143,28 @@ fun currentNavBackStackEntryAsNavBarState(
                                 }
                                 else -> {
                                     Row {
-                                        IconButton(onClick = {}) {
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.handleEvent(
+                                                    AppEvent.ToggleSelectAllTunnels
+                                                )
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.SelectAll,
+                                                stringResource(R.string.select_all),
+                                                modifier = Modifier.size(iconSize),
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.handleEvent(
+                                                    AppEvent.SetBottomSheet(
+                                                        AppViewState.BottomSheet.EXPORT_TUNNELS
+                                                    )
+                                                )
+                                            }
+                                        ) {
                                             Icon(
                                                 Icons.Rounded.Share,
                                                 stringResource(R.string.share),
@@ -198,18 +239,6 @@ fun currentNavBackStackEntryAsNavBarState(
                         showTop = true,
                         showBottom = true,
                         { Text(stringResource(R.string.settings)) },
-                        {
-                            IconButton(
-                                onClick = { viewModel.handleEvent(AppEvent.ToggleBottomSheet) }
-                            ) {
-                                val icon = Icons.Rounded.Menu
-                                Icon(
-                                    icon,
-                                    stringResource(R.string.quick_actions),
-                                    modifier = Modifier.size(iconSize),
-                                )
-                            }
-                        },
                         route = Route.Settings,
                     )
                 }
@@ -252,7 +281,11 @@ fun currentNavBackStackEntryAsNavBarState(
                         { Text(stringResource(R.string.logs)) },
                         {
                             IconButton(
-                                onClick = { viewModel.handleEvent(AppEvent.ToggleBottomSheet) }
+                                onClick = {
+                                    viewModel.handleEvent(
+                                        AppEvent.SetBottomSheet(AppViewState.BottomSheet.LOGS)
+                                    )
+                                }
                             ) {
                                 val icon = Icons.Rounded.Menu
                                 Icon(

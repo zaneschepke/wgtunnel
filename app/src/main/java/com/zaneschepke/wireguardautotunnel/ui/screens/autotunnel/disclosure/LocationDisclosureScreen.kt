@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure
+package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,10 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.ui.common.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.components.AppSettingsItem
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.components.LocationDisclosureHeader
-import com.zaneschepke.wireguardautotunnel.ui.screens.settings.disclosure.components.SkipItem
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure.components.AppSettingsItem
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure.components.LocationDisclosureHeader
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure.components.SkipItem
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.goFromRoot
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel

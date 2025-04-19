@@ -96,7 +96,7 @@ sealed class AppEvent {
 
     data class SaveTrustedSSID(val ssid: String) : AppEvent()
 
-    data class ExportTunnels(val configType: ConfigType) : AppEvent()
+    data class ExportSelectedTunnels(val configType: ConfigType) : AppEvent()
 
     data object ExportLogs : AppEvent()
 
@@ -110,7 +110,7 @@ sealed class AppEvent {
 
     data class PopBackStack(val pop: Boolean) : AppEvent()
 
-    data object ToggleBottomSheet : AppEvent()
+    data class SetBottomSheet(val showSheet: AppViewState.BottomSheet) : AppEvent()
 
     data class ToggleSelectedTunnel(val tunnel: TunnelConf) : AppEvent()
 
@@ -123,4 +123,6 @@ sealed class AppEvent {
     data object ToggleRemoteControl : AppEvent()
 
     data class SetShowModal(val modalType: AppViewState.ModalType) : AppEvent()
+
+    data object ToggleSelectAllTunnels : AppEvent()
 }

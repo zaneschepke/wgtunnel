@@ -20,3 +20,7 @@ typealias Tunnels = List<TunnelConf>
 typealias TunnelConfigs = List<TunnelConfig>
 
 typealias Packages = List<PackageInfo>
+
+fun <T> MutableList<T>.addAllUnique(elements: Collection<T>, comparator: (T, T) -> Boolean) {
+    addAll(elements.filterNot { new -> this.any { existing -> comparator(existing, new) } })
+}

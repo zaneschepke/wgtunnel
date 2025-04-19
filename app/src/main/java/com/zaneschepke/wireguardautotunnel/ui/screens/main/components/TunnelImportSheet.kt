@@ -29,7 +29,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TunnelImportSheet(
-    show: Boolean,
     onDismiss: () -> Unit,
     onFileClick: () -> Unit,
     onQrClick: () -> Unit,
@@ -40,69 +39,44 @@ fun TunnelImportSheet(
     val sheetState = rememberModalBottomSheetState()
 
     val context = LocalContext.current
-    if (show) {
-        ModalBottomSheet(
-            containerColor = MaterialTheme.colorScheme.surface,
-            onDismissRequest = { onDismiss() },
-            sheetState = sheetState,
+    ModalBottomSheet(
+        containerColor = MaterialTheme.colorScheme.surface,
+        onDismissRequest = { onDismiss() },
+        sheetState = sheetState,
+    ) {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable {
+                        onDismiss()
+                        onFileClick()
+                    }
+                    .padding(10.dp)
         ) {
+            Icon(
+                Icons.Filled.FileOpen,
+                contentDescription = stringResource(id = R.string.open_file),
+                modifier = Modifier.padding(10.dp),
+            )
+            Text(stringResource(id = R.string.add_tunnels_text), modifier = Modifier.padding(10.dp))
+        }
+        if (!context.isRunningOnTv()) {
+            HorizontalDivider()
             Row(
                 modifier =
                     Modifier.fillMaxWidth()
                         .clickable {
                             onDismiss()
-                            onFileClick()
+                            onQrClick()
                         }
                         .padding(10.dp)
             ) {
                 Icon(
-                    Icons.Filled.FileOpen,
-                    contentDescription = stringResource(id = R.string.open_file),
+                    Icons.Filled.QrCode,
+                    contentDescription = stringResource(id = R.string.qr_scan),
                     modifier = Modifier.padding(10.dp),
                 )
-                Text(
-                    stringResource(id = R.string.add_tunnels_text),
-                    modifier = Modifier.padding(10.dp),
-                )
-            }
-            if (!context.isRunningOnTv()) {
-                HorizontalDivider()
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .clickable {
-                                onDismiss()
-                                onQrClick()
-                            }
-                            .padding(10.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.QrCode,
-                        contentDescription = stringResource(id = R.string.qr_scan),
-                        modifier = Modifier.padding(10.dp),
-                    )
-                    Text(
-                        stringResource(id = R.string.add_from_qr),
-                        modifier = Modifier.padding(10.dp),
-                    )
-                }
-                HorizontalDivider()
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .clickable {
-                                onDismiss()
-                                onClipboardClick()
-                            }
-                            .padding(10.dp)
-                ) {
-                    val icon = Icons.Filled.ContentPasteGo
-                    Icon(icon, contentDescription = icon.name, modifier = Modifier.padding(10.dp))
-                    Text(
-                        stringResource(id = R.string.add_from_clipboard),
-                        modifier = Modifier.padding(10.dp),
-                    )
-                }
+                Text(stringResource(id = R.string.add_from_qr), modifier = Modifier.padding(10.dp))
             }
             HorizontalDivider()
             Row(
@@ -110,37 +84,51 @@ fun TunnelImportSheet(
                     Modifier.fillMaxWidth()
                         .clickable {
                             onDismiss()
-                            onUrlClick()
+                            onClipboardClick()
                         }
                         .padding(10.dp)
             ) {
-                Icon(
-                    Icons.Filled.Link,
-                    contentDescription = stringResource(id = R.string.add_from_url),
-                    modifier = Modifier.padding(10.dp),
-                )
-                Text(stringResource(id = R.string.add_from_url), modifier = Modifier.padding(10.dp))
-            }
-            HorizontalDivider()
-            Row(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .clickable {
-                            onDismiss()
-                            onManualImportClick()
-                        }
-                        .padding(10.dp)
-            ) {
-                Icon(
-                    Icons.Filled.Create,
-                    contentDescription = stringResource(id = R.string.create_import),
-                    modifier = Modifier.padding(10.dp),
-                )
+                val icon = Icons.Filled.ContentPasteGo
+                Icon(icon, contentDescription = icon.name, modifier = Modifier.padding(10.dp))
                 Text(
-                    stringResource(id = R.string.create_import),
+                    stringResource(id = R.string.add_from_clipboard),
                     modifier = Modifier.padding(10.dp),
                 )
             }
+        }
+        HorizontalDivider()
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable {
+                        onDismiss()
+                        onUrlClick()
+                    }
+                    .padding(10.dp)
+        ) {
+            Icon(
+                Icons.Filled.Link,
+                contentDescription = stringResource(id = R.string.add_from_url),
+                modifier = Modifier.padding(10.dp),
+            )
+            Text(stringResource(id = R.string.add_from_url), modifier = Modifier.padding(10.dp))
+        }
+        HorizontalDivider()
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable {
+                        onDismiss()
+                        onManualImportClick()
+                    }
+                    .padding(10.dp)
+        ) {
+            Icon(
+                Icons.Filled.Create,
+                contentDescription = stringResource(id = R.string.create_import),
+                modifier = Modifier.padding(10.dp),
+            )
+            Text(stringResource(id = R.string.create_import), modifier = Modifier.padding(10.dp))
         }
     }
 }
