@@ -227,4 +227,6 @@
     <string name="export_logs">导出已保存的日志</string>
     <string name="bio_not_supported">生物特征不受支持</string>
     <string name="nothing_here_yet">此处还什么都没有！</string>
+    <string name="select_all">全选</string>
+    <string name="share">分享</string>
 </resources>
