@@ -163,4 +163,6 @@
     <string name="learn_more">Zjistit více</string>
     <string name="stop">zastavit</string>
     <string name="server_ipv4">Překlad názvu hostitele IPv4</string>
+    <string name="select_all">Vybrat vše</string>
+    <string name="share">Sdílet</string>
 </resources>
