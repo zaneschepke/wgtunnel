@@ -86,7 +86,7 @@
     <string name="donate">Przekaż darowiznę na rzecz projektu</string>
     <string name="trusted_ssid_value_description">Prześlij SSID</string>
     <string name="all">wszystkie</string>
-    <string name="no_email_detected">Nie wykryto aplikacji e-mail</string>
+    <string name="no_email_detected">Nie wykryto aplikacji pocztowej</string>
     <string name="turn_off_tunnel">Czynność wymaga wyłączenia tunelu</string>
     <string name="add_from_qr">Dodaj z kodu QR</string>
     <string name="qr_scan">Skanuj kod QR</string>
@@ -140,14 +140,14 @@
     <string name="stop_auto">Zatrzymaj autotunel</string>
     <string name="tunnel_running">Tunel jest uruchomiony</string>
     <string name="enable_local_logging">Włącz lokalne rejestrowanie</string>
-    <string name="email_chooser">Wyślij e-mail…</string>
+    <string name="email_chooser">Wyślij wiadomość e-mail…</string>
     <string name="set_custom_ping_cooldown">Czas odnowienia pingowania (sek.)</string>
     <string name="open_file">Otwórz plik</string>
     <string name="okay">OK</string>
     <string name="no_tunnels">Nie dodano jeszcze żadnych tuneli!</string>
     <string name="exclude">Wyklucz</string>
     <string name="docs_description">Przeczytaj dokumentację</string>
-    <string name="email_description">Wyślij mi e-mail</string>
+    <string name="email_description">Wyślij mi wiadomość e-mail</string>
     <string name="set_primary_tunnel">Ustaw jako tunel podstawowy</string>
     <string name="mobile_data_tunnel">Ustaw jako tunel mobilnej transmisji danych</string>
     <string name="vpn_channel_id">Kanał VPN</string>
@@ -228,4 +228,6 @@
     <string name="invalid_config_error">błąd nieprawidłowej konfiguracji</string>
     <string name="dns_resolve_error">błąd rozwiązywania DNS</string>
     <string name="nothing_here_yet">Jeszcze nic tu nie ma!</string>
+    <string name="select_all">Wybierz wszystkie</string>
+    <string name="share">Udostępnij</string>
 </resources>
