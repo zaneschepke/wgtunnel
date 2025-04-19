@@ -22,16 +22,11 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Bolt
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -49,9 +44,8 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.VpnDeniedDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
-import com.zaneschepke.wireguardautotunnel.ui.navigation.BottomNavItem
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
-import com.zaneschepke.wireguardautotunnel.ui.navigation.components.CustomBottomNavbar
+import com.zaneschepke.wireguardautotunnel.ui.navigation.components.BottomNavbar
 import com.zaneschepke.wireguardautotunnel.ui.navigation.components.DynamicTopAppBar
 import com.zaneschepke.wireguardautotunnel.ui.navigation.components.currentNavBackStackEntryAsNavBarState
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.AutoTunnelScreen
@@ -73,7 +67,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSw
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
-import com.zaneschepke.wireguardautotunnel.util.extensions.goFromRoot
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -243,45 +236,7 @@ class MainActivity : AppCompatActivity() {
                                 enter = slideInVertically(initialOffsetY = { it }),
                                 exit = slideOutVertically(targetOffsetY = { it }),
                             ) {
-                                CustomBottomNavbar(
-                                    listOf(
-                                        BottomNavItem(
-                                            name = stringResource(R.string.tunnels),
-                                            route = Route.Main,
-                                            icon = Icons.Rounded.Home,
-                                            onClick = { navController.goFromRoot(Route.Main) },
-                                        ),
-                                        BottomNavItem(
-                                            name = stringResource(R.string.auto_tunnel),
-                                            route = Route.AutoTunnel,
-                                            icon = Icons.Rounded.Bolt,
-                                            onClick = {
-                                                val route =
-                                                    if (
-                                                        appUiState.appState
-                                                            .isLocationDisclosureShown
-                                                    )
-                                                        Route.AutoTunnel
-                                                    else Route.LocationDisclosure
-                                                navController.goFromRoot(route)
-                                            },
-                                            active = appUiState.isAutoTunnelActive,
-                                        ),
-                                        BottomNavItem(
-                                            name = stringResource(R.string.settings),
-                                            route = Route.Settings,
-                                            icon = Icons.Rounded.Settings,
-                                            onClick = { navController.goFromRoot(Route.Settings) },
-                                        ),
-                                        BottomNavItem(
-                                            name = stringResource(R.string.support),
-                                            route = Route.Support,
-                                            icon = Icons.Rounded.QuestionMark,
-                                            onClick = { navController.goFromRoot(Route.Support) },
-                                        ),
-                                    ),
-                                    navBarState = navBarState,
-                                )
+                                BottomNavbar(appUiState = appUiState)
                             }
                         },
                     ) { padding ->
