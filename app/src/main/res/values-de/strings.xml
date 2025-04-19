@@ -227,4 +227,6 @@
     <string name="wifi_name_template">Aktiv: %1$s</string>
     <string name="delete">Löschen</string>
     <string name="nothing_here_yet">Noch nix hier!</string>
+    <string name="share">Teilen</string>
+    <string name="select_all">Alles auswählen</string>
 </resources>
