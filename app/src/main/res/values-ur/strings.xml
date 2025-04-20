@@ -227,4 +227,6 @@
     <string name="export_tunnels_amnezia">ایمنیزیا کے طور پر سرنگیں برآمد کریں۔</string>
     <string name="bio_subtitle">اپنی بائیو میٹرک اسناد کا استعمال کرتے ہوئے لاگ ان کریں۔</string>
     <string name="bio_auth_title">بائیو میٹرک تصدیق</string>
+    <string name="share">شیئر کریں۔</string>
+    <string name="select_all">سبھی کو منتخب کریں۔</string>
 </resources>
