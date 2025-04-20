@@ -227,4 +227,6 @@
     <string name="enable_remote_app_control">Удалённое управление приложением</string>
     <string name="error_download_failed">Невозможно скачать конфигурацию</string>
     <string name="nothing_here_yet">Здесь пока ничего нет!</string>
+    <string name="select_all">Выбрать все</string>
+    <string name="share">Поделиться</string>
 </resources>
