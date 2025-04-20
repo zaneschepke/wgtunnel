@@ -11,7 +11,7 @@
     <string name="name">名稱</string>
     <string name="public_key">公鑰</string>
     <string name="privacy_policy">查看隱私政策</string>
-    <string name="tunnels">隧道列表</string>
+    <string name="tunnels">隧道清單</string>
     <string name="thank_you">感謝您使用 WG Tunnel!</string>
     <string name="open_file">開啟檔案</string>
     <string name="mtu">MTU</string>
@@ -92,7 +92,7 @@
     <string name="unsure_how">如果您不確定如何進行</string>
     <string name="see_the">請參閱</string>
     <string name="read_logs">查看日誌</string>
-    <string name="local_logging">本地日誌記錄</string>
+    <string name="local_logging">日誌</string>
     <string name="enable_local_logging">啟用本地日誌記錄</string>
     <string name="email_description">給作者寄電子郵件</string>
     <string name="always_on_vpn_support">允許永久連線的 VPN</string>
@@ -131,7 +131,7 @@
     <string name="set_custom_ping_ip">自訂 ping 目標 IP</string>
     <string name="hide_amnezia_properties">隱藏 Amnezia 屬性</string>
     <string name="active">使用中</string>
-    <string name="vpn_denied_dialog_title">被拒絕存取</string>
+    <string name="vpn_denied_dialog_title">拒絕存取</string>
     <string name="always_on_message">VPN 連線所需權限被拒絕，請檢查</string>
     <string name="wildcards_active">啟用萬用字元</string>
     <string name="multiple">多個</string>
@@ -140,4 +140,17 @@
     <string name="wifi_name_template">使用中: %1$s</string>
     <string name="inactive">未使用</string>
     <string name="trusted_wifi_names">信任的 WiFi SSID</string>
+    <string name="set_custom_ping_cooldown">Ping 重新開始冷卻時間 (秒)</string>
+    <string name="auto_tunnel">自動隧道管理</string>
+    <string name="auto_tunnel_title">自動隧道管理服務</string>
+    <string name="restart_on_ping">Ping 失敗後重新啟動隧道 (beta)</string>
+    <string name="select_all">全選</string>
+    <string name="share">分享</string>
+    <string name="start_auto">開始自動隧道管理</string>
+    <string name="auto_tunneling">自動隧道管理</string>
+    <string name="stop_auto">停止自動隧道管理</string>
+    <string name="debounce_delay">防抖延遲</string>
+    <string name="tunnel_control">隧道控制</string>
+    <string name="export_logs">匯出已儲存的日誌</string>
+    <string name="delete_logs">刪除並清理日誌</string>
 </resources>
