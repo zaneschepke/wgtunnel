@@ -165,4 +165,20 @@
     <string name="server_ipv4">Překlad názvu hostitele IPv4</string>
     <string name="select_all">Vybrat vše</string>
     <string name="share">Sdílet</string>
+    <string name="trusted_ssid_value_description">Odeslat SSID</string>
+    <string name="app_settings">nastavení aplikace</string>
+    <string name="debounce_delay">Debounce zpoždění</string>
+    <string name="always_on_message">Autorizace připojení VPN byla zamítnuta. Zkontrolujte prosím</string>
+    <string name="bio_not_created">Biometrické údaje nebyly vytvořeny</string>
+    <string name="bio_not_supported">Biometrie není podporována</string>
+    <string name="bio_subtitle">Přihlášení pomocí biometrických údajů</string>
+    <string name="config_error">Chybná konfigurace</string>
+    <string name="prominent_background_location_title">Zpřístupnění stávající polohy na pozadí</string>
+    <string name="vpn_denied_dialog_title">Povolení zamítnuto</string>
+    <string name="app_permission_title">Řídicí most pro WG tunely</string>
+    <string name="app_permission_description">Ovládání funkcí tunelu a automatického tunelu.</string>
+    <string name="enable_remote_app_control">Povolit vzdálené ovládání aplikace</string>
+    <string name="tunnel_starting">Spuštění tunelu</string>
+    <string name="bio_auth_title">Biometrické ověření</string>
+    <string name="nothing_here_yet">Zatím zde nic není!</string>
 </resources>
