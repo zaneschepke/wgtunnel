@@ -75,10 +75,7 @@ data class InterfaceProxy(
     }
 
     fun isAmneziaCompatibilityModeSet(): Boolean {
-        return junkPacketCount.toIntOrNull() in 3..<5 &&
-            junkPacketMinSize.toIntOrNull() == 40 &&
-            junkPacketMaxSize.toIntOrNull() == 70 &&
-            with(initPacketJunkSize.toIntOrNull()) { this == 0 || this == null } &&
+        return with(initPacketJunkSize.toIntOrNull()) { this == 0 || this == null } &&
             with(responsePacketJunkSize.toIntOrNull()) { this == 0 || this == null } &&
             initPacketMagicHeader.toLongOrNull() == 1L &&
             responsePacketMagicHeader.toLongOrNull() == 2L &&

@@ -27,6 +27,10 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.state.ConfigUi
 @Composable
 fun InterfaceSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
     var isDropDownExpanded by remember { mutableStateOf(false) }
+    val isAmneziaCompatibilitySet =
+        remember(uiState.configProxy.`interface`) {
+            uiState.configProxy.`interface`.isAmneziaCompatibilityModeSet()
+        }
 
     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surface) {
         Column(
@@ -44,8 +48,7 @@ fun InterfaceSection(uiState: ConfigUiState, viewModel: ConfigViewModel) {
                     onExpandedChange = { isDropDownExpanded = it },
                     showScripts = uiState.showScripts,
                     showAmneziaValues = uiState.showAmneziaValues,
-                    isAmneziaCompatibilitySet =
-                        uiState.configProxy.`interface`.isAmneziaCompatibilityModeSet(),
+                    isAmneziaCompatibilitySet = isAmneziaCompatibilitySet,
                     onToggleScripts = viewModel::toggleScripts,
                     onToggleAmneziaValues = viewModel::toggleAmneziaValues,
                     onToggleAmneziaCompatibility = viewModel::toggleAmneziaCompatibility,
