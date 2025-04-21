@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +22,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.SectionDivider
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
@@ -109,9 +108,9 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
                     { isWifiNameReadable() },
                 )
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
+        SectionDivider()
         SurfaceSelectionGroupButton(items = NetworkTunnelingItems(uiState, viewModel))
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
+        SectionDivider()
         SurfaceSelectionGroupButton(
             items =
                 listOf(

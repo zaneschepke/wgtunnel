@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.SectionDivider
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
@@ -70,7 +69,7 @@ fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
                     add(RestartAtBootItem(uiState, viewModel))
                 }
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
+        SectionDivider()
         SurfaceSelectionGroupButton(
             items =
                 buildList {
@@ -80,10 +79,10 @@ fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
                     add(PinLockItem(uiState, viewModel))
                 }
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
+        SectionDivider()
         if (!isTv) {
             SurfaceSelectionGroupButton(items = listOf(KernelModeItem(uiState, viewModel)))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
+            SectionDivider()
         }
         SurfaceSelectionGroupButton(
             items =

@@ -296,7 +296,7 @@ class MainActivity : AppCompatActivity() {
                                         appUiState.tunnels
                                             .firstOrNull { it.id == args.id }
                                             ?.let { config ->
-                                                TunnelOptionsScreen(config, appUiState, viewModel)
+                                                TunnelOptionsScreen(config, viewModel)
                                             }
                                     }
                                     composable<Route.Lock> { PinLockScreen(viewModel) }
