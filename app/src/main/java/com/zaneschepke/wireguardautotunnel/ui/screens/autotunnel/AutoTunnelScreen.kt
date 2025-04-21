@@ -25,6 +25,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.AdvancedSettingsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.NetworkTunnelingItems
@@ -33,7 +34,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.Backgr
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LocationServicesDialog
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.isLocationServicesEnabled
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -41,6 +41,7 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
     val context = LocalContext.current
     val navController = LocalNavController.current
+    val isTv = LocalIsAndroidTV.current
     val fineLocationState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var currentText by remember { mutableStateOf("") }
     var isBackgroundLocationGranted by remember { mutableStateOf(true) }
@@ -67,12 +68,11 @@ fun AutoTunnelScreen(uiState: AppUiState, viewModel: AppViewModel) {
 
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) checkFineLocationGranted()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        if (context.isRunningOnTv() && Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+        if (isTv && Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
             checkFineLocationGranted()
         } else {
             val backgroundLocationState =
                 rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-            isBackgroundLocationGranted = backgroundLocationState.status.isGranted
         }
     }
 

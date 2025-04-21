@@ -5,20 +5,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ExportTunnelsBottomSheet
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImportSheet
@@ -28,7 +24,6 @@ import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.StringValue
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
@@ -36,10 +31,9 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: AppViewModel) {
     val navController = LocalNavController.current
     val clipboard = LocalClipboardManager.current
-    val context = LocalContext.current
+    val isTv = LocalIsAndroidTV.current
 
     var showUrlImportDialog by remember { mutableStateOf(false) }
-    val isRunningOnTv = remember { context.isRunningOnTv() }
 
     val tunnelFileImportResultLauncher =
         rememberFileImportLauncherForResult(
@@ -84,7 +78,7 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
 
     when (appViewState.bottomSheet) {
         AppViewState.BottomSheet.EXPORT_TUNNELS -> {
-            ExportTunnelsBottomSheet(viewModel, isRunningOnTv)
+            ExportTunnelsBottomSheet(viewModel, isTv)
         }
         AppViewState.BottomSheet.IMPORT_TUNNELS -> {
             TunnelImportSheet(

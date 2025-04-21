@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.ui.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -16,3 +17,4 @@ fun <T : Route> NavBackStackEntry?.isCurrentRoute(cls: KClass<T>): Boolean {
 
 val LocalNavController =
     compositionLocalOf<NavHostController> { error("NavController was not provided") }
+val LocalIsAndroidTV = staticCompositionLocalOf { false }

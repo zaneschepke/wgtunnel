@@ -44,6 +44,7 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.VpnDeniedDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.snackbar.CustomSnackBar
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.navigation.components.BottomNavbar
 import com.zaneschepke.wireguardautotunnel.ui.navigation.components.DynamicTopAppBar
@@ -67,6 +68,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSw
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
+import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -104,6 +106,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContent {
+            val isTv = isRunningOnTv()
             val appUiState by viewModel.uiState.collectAsStateWithLifecycle()
             val appViewState by viewModel.appViewState.collectAsStateWithLifecycle()
 
@@ -205,106 +208,115 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            CompositionLocalProvider(LocalNavController provides navController) {
-                WireguardAutoTunnelTheme(theme = appUiState.appState.theme) {
-                    VpnDeniedDialog(
-                        showVpnPermissionDialog,
-                        onDismiss = { showVpnPermissionDialog = false },
-                    )
+            CompositionLocalProvider(LocalIsAndroidTV provides isTv) {
+                CompositionLocalProvider(LocalNavController provides navController) {
+                    WireguardAutoTunnelTheme(theme = appUiState.appState.theme) {
+                        VpnDeniedDialog(
+                            showVpnPermissionDialog,
+                            onDismiss = { showVpnPermissionDialog = false },
+                        )
 
-                    Scaffold(
-                        modifier =
-                            Modifier.pointerInput(Unit) {
-                                detectTapGestures {
-                                    viewModel.handleEvent(AppEvent.ClearSelectedTunnels)
+                        Scaffold(
+                            modifier =
+                                Modifier.pointerInput(Unit) {
+                                    detectTapGestures {
+                                        viewModel.handleEvent(AppEvent.ClearSelectedTunnels)
+                                    }
+                                },
+                            snackbarHost = {
+                                SnackbarHost(snackbar) { snackbarData: SnackbarData ->
+                                    CustomSnackBar(
+                                        snackbarData.visuals.message,
+                                        isRtl = false,
+                                        containerColor =
+                                            MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                                    )
                                 }
                             },
-                        snackbarHost = {
-                            SnackbarHost(snackbar) { snackbarData: SnackbarData ->
-                                CustomSnackBar(
-                                    snackbarData.visuals.message,
-                                    isRtl = false,
-                                    containerColor =
-                                        MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                                )
-                            }
-                        },
-                        topBar = { DynamicTopAppBar(navBarState) },
-                        bottomBar = {
-                            AnimatedVisibility(
-                                visible = navBarState.showBottom,
-                                enter = slideInVertically(initialOffsetY = { it }),
-                                exit = slideOutVertically(targetOffsetY = { it }),
+                            topBar = { DynamicTopAppBar(navBarState) },
+                            bottomBar = {
+                                AnimatedVisibility(
+                                    visible = navBarState.showBottom,
+                                    enter = slideInVertically(initialOffsetY = { it }),
+                                    exit = slideOutVertically(targetOffsetY = { it }),
+                                ) {
+                                    BottomNavbar(appUiState = appUiState)
+                                }
+                            },
+                        ) { padding ->
+                            Box(
+                                modifier =
+                                    Modifier.fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(padding)
+                                        .consumeWindowInsets(padding)
+                                        .imePadding()
                             ) {
-                                BottomNavbar(appUiState = appUiState)
-                            }
-                        },
-                    ) { padding ->
-                        Box(
-                            modifier =
-                                Modifier.fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(padding)
-                                    .consumeWindowInsets(padding)
-                                    .imePadding()
-                        ) {
-                            NavHost(
-                                navController,
-                                startDestination =
-                                    (if (appUiState.appState.isPinLockEnabled) Route.Lock
-                                    else Route.Main),
-                            ) {
-                                composable<Route.Main> {
-                                    MainScreen(appUiState, appViewState, viewModel)
-                                }
-                                composable<Route.Settings> { SettingsScreen(appUiState, viewModel) }
-                                composable<Route.SettingsAdvanced> {
-                                    SettingsAdvancedScreen(appUiState, viewModel)
-                                }
-                                composable<Route.LocationDisclosure> {
-                                    LocationDisclosureScreen(appUiState, viewModel)
-                                }
-                                composable<Route.AutoTunnel> {
-                                    AutoTunnelScreen(appUiState, viewModel)
-                                }
-                                composable<Route.Appearance> { AppearanceScreen() }
-                                composable<Route.Language> { LanguageScreen(appUiState, viewModel) }
-                                composable<Route.Display> { DisplayScreen(appUiState, viewModel) }
-                                composable<Route.Support> { SupportScreen() }
-                                composable<Route.AutoTunnelAdvanced> {
-                                    AutoTunnelAdvancedScreen(appUiState, viewModel)
-                                }
-                                composable<Route.Logs> { LogsScreen(appViewState, viewModel) }
-                                composable<Route.Config> { backStack ->
-                                    val args = backStack.toRoute<Route.Config>()
-                                    val config = appUiState.tunnels.firstOrNull { it.id == args.id }
-                                    ConfigScreen(config, viewModel)
-                                }
-                                composable<Route.TunnelOptions> { backStack ->
-                                    val args = backStack.toRoute<Route.TunnelOptions>()
-                                    appUiState.tunnels
-                                        .firstOrNull { it.id == args.id }
-                                        ?.let { config ->
-                                            TunnelOptionsScreen(config, appUiState, viewModel)
-                                        }
-                                }
-                                composable<Route.Lock> { PinLockScreen(viewModel) }
-                                composable<Route.Scanner> { ScannerScreen(viewModel) }
-                                composable<Route.KillSwitch> {
-                                    KillSwitchScreen(appUiState, viewModel)
-                                }
-                                composable<Route.SplitTunnel> { SplitTunnelScreen(viewModel) }
-                                composable<Route.TunnelAutoTunnel> { backStack ->
-                                    val args = backStack.toRoute<Route.TunnelOptions>()
-                                    appUiState.tunnels
-                                        .firstOrNull { it.id == args.id }
-                                        ?.let {
-                                            TunnelAutoTunnelScreen(
-                                                it,
-                                                appUiState.appSettings,
-                                                viewModel,
-                                            )
-                                        }
+                                NavHost(
+                                    navController,
+                                    startDestination =
+                                        (if (appUiState.appState.isPinLockEnabled) Route.Lock
+                                        else Route.Main),
+                                ) {
+                                    composable<Route.Main> {
+                                        MainScreen(appUiState, appViewState, viewModel)
+                                    }
+                                    composable<Route.Settings> {
+                                        SettingsScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.SettingsAdvanced> {
+                                        SettingsAdvancedScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.LocationDisclosure> {
+                                        LocationDisclosureScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.AutoTunnel> {
+                                        AutoTunnelScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.Appearance> { AppearanceScreen() }
+                                    composable<Route.Language> {
+                                        LanguageScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.Display> {
+                                        DisplayScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.Support> { SupportScreen() }
+                                    composable<Route.AutoTunnelAdvanced> {
+                                        AutoTunnelAdvancedScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.Logs> { LogsScreen(appViewState, viewModel) }
+                                    composable<Route.Config> { backStack ->
+                                        val args = backStack.toRoute<Route.Config>()
+                                        val config =
+                                            appUiState.tunnels.firstOrNull { it.id == args.id }
+                                        ConfigScreen(config, viewModel)
+                                    }
+                                    composable<Route.TunnelOptions> { backStack ->
+                                        val args = backStack.toRoute<Route.TunnelOptions>()
+                                        appUiState.tunnels
+                                            .firstOrNull { it.id == args.id }
+                                            ?.let { config ->
+                                                TunnelOptionsScreen(config, appUiState, viewModel)
+                                            }
+                                    }
+                                    composable<Route.Lock> { PinLockScreen(viewModel) }
+                                    composable<Route.Scanner> { ScannerScreen(viewModel) }
+                                    composable<Route.KillSwitch> {
+                                        KillSwitchScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.SplitTunnel> { SplitTunnelScreen(viewModel) }
+                                    composable<Route.TunnelAutoTunnel> { backStack ->
+                                        val args = backStack.toRoute<Route.TunnelOptions>()
+                                        appUiState.tunnels
+                                            .firstOrNull { it.id == args.id }
+                                            ?.let {
+                                                TunnelAutoTunnelScreen(
+                                                    it,
+                                                    appUiState.appSettings,
+                                                    viewModel,
+                                                )
+                                            }
+                                    }
                                 }
                             }
                         }

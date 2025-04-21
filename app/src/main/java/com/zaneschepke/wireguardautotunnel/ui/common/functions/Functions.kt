@@ -9,21 +9,23 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.util.Constants
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import timber.log.Timber
 
 @Composable
 fun rememberFileImportLauncherForResult(
     onNoFileExplorer: () -> Unit,
     onData: (data: Uri) -> Unit,
 ): ManagedActivityResultLauncher<String, Uri?> {
+    val isTv = LocalIsAndroidTV.current
     return rememberLauncherForActivityResult(
         object : ActivityResultContracts.GetContent() {
             override fun createIntent(context: Context, input: String): Intent {
                 val intent =
                     super.createIntent(context, input).apply {
                         type =
-                            if (context.isRunningOnTv()) {
+                            if (isTv) {
                                 Constants.ALLOWED_TV_FILE_TYPES
                             } else {
                                 Constants.ALL_FILE_TYPES
@@ -61,5 +63,45 @@ fun rememberFileImportLauncherForResult(
     ) { data ->
         if (data == null) return@rememberLauncherForActivityResult
         onData(data)
+    }
+}
+
+@Composable
+fun rememberFileExportLauncherForResult(
+    mimeType: String = Constants.ZIP_FILE_MIME_TYPE,
+    onResult: (Uri?) -> Unit,
+): ManagedActivityResultLauncher<String, Uri?> {
+    val isTv = LocalIsAndroidTV.current
+    return rememberLauncherForActivityResult(
+        contract =
+            object : ActivityResultContracts.CreateDocument(mimeType) {
+                override fun createIntent(context: Context, input: String): Intent {
+                    super.createIntent(context, input)
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type =
+                                if (isTv) {
+                                    Constants.ALLOWED_TV_FILE_TYPES
+                                } else {
+                                    mimeType
+                                }
+                            putExtra(Intent.EXTRA_TITLE, input)
+                        }
+
+                    Timber.d("Returning SAF intent for launch")
+                    return intent
+                }
+            }
+    ) { uri ->
+        Timber.d("SAF onResult called with Uri: $uri")
+        if (uri != null) {
+            Timber.d(
+                "Uri details: scheme=${uri.scheme}, authority=${uri.authority}, path=${uri.path}"
+            )
+        } else {
+            Timber.d("SAF picker canceled or failed to return a Uri")
+        }
+        onResult(uri)
     }
 }

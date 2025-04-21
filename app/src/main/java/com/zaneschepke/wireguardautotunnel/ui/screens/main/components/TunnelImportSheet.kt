@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 
 // TODO refactor this component
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +36,8 @@ fun TunnelImportSheet(
     onClipboardClick: () -> Unit,
     onUrlClick: () -> Unit,
 ) {
+    val isTv = LocalIsAndroidTV.current
+
     val sheetState = rememberModalBottomSheetState()
 
     val context = LocalContext.current
@@ -60,7 +62,7 @@ fun TunnelImportSheet(
             )
             Text(stringResource(id = R.string.add_tunnels_text), modifier = Modifier.padding(10.dp))
         }
-        if (!context.isRunningOnTv()) {
+        if (!isTv) {
             HorizontalDivider()
             Row(
                 modifier =

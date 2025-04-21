@@ -14,11 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components.AdvancedSettingsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AlwaysOnVpnItem
@@ -31,15 +31,14 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.PinLoc
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.ReadLogsItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.RestartAtBootItem
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 
 @Composable
 fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
-    val context = LocalContext.current
+    val isTv = LocalIsAndroidTV.current
     val focusManager = LocalFocusManager.current
     val navController = LocalNavController.current
-    val isRunningOnTv = remember { context.isRunningOnTv() }
+
     val interactionSource = remember { MutableInteractionSource() }
 
     Column(
@@ -51,7 +50,7 @@ fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
                 .padding(vertical = 24.dp)
                 .padding(horizontal = 12.dp)
                 .then(
-                    if (!isRunningOnTv) {
+                    if (!isTv) {
                         Modifier.clickable(
                             indication = null,
                             interactionSource = interactionSource,
@@ -66,7 +65,7 @@ fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
             items =
                 buildList {
                     add(AppShortcutsItem(uiState, viewModel))
-                    if (!isRunningOnTv) add(AlwaysOnVpnItem(uiState, viewModel))
+                    if (!isTv) add(AlwaysOnVpnItem(uiState, viewModel))
                     add(KillSwitchItem())
                     add(RestartAtBootItem(uiState, viewModel))
                 }
@@ -82,7 +81,7 @@ fun SettingsScreen(uiState: AppUiState, viewModel: AppViewModel) {
                 }
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
-        if (!isRunningOnTv) {
+        if (!isTv) {
             SurfaceSelectionGroupButton(items = listOf(KernelModeItem(uiState, viewModel)))
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(0.30f))
         }

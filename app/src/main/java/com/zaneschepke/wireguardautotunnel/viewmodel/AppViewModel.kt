@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.viewmodel
 
 import android.net.Uri
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wireguard.android.backend.WgQuickBackend
@@ -32,6 +33,7 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.addAllUnique
 import com.zaneschepke.wireguardautotunnel.util.extensions.withFirstState
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.IOException
 import java.net.URL
 import java.time.Instant
 import java.util.*
@@ -185,7 +187,8 @@ constructor(
                     AppEvent.ToggleStopTunnelOnNoInternet ->
                         handleToggleStopOnNoInternet(state.appSettings)
                     is AppEvent.ExportSelectedTunnels ->
-                        handleExportSelectedTunnels(event.configType)
+                        handleExportSelectedTunnels(event.configType, event.uri)
+
                     AppEvent.ExportLogs -> handleExportLogs()
                     AppEvent.MessageShown -> handleErrorShown()
                     is AppEvent.TogglePingTunnelEnabled -> handleTogglePingTunnel(event.tunnel)
@@ -677,33 +680,54 @@ constructor(
             tunnelMutex.withLock { appDataRepository.tunnels.save(tunnel) }
         }
 
-    private suspend fun handleExportSelectedTunnels(configType: ConfigType) {
+    private suspend fun handleExportSelectedTunnels(configType: ConfigType, uri: Uri?) {
         val tunnels = _appViewState.value.selectedTunnels
-        runCatching {
-                val (files, shareFileName) =
-                    when (configType) {
-                        ConfigType.AMNEZIA -> {
-                            Pair(
-                                fileUtils.createAmFiles(tunnels),
-                                "am-export_${Instant.now().epochSecond}.zip",
-                            )
+        try {
+            if (tunnels.isEmpty()) return
+            val (files, shareFileName) =
+                when (configType) {
+                    ConfigType.AMNEZIA -> {
+                        val amFiles = fileUtils.createAmFiles(tunnels)
+                        if (amFiles.isEmpty()) {
+                            throw IOException("No valid Amnezia config files created")
                         }
-                        ConfigType.WG -> {
-                            Pair(
-                                fileUtils.createWgFiles(tunnels),
-                                "wg-export_${Instant.now().epochSecond}.zip",
-                            )
-                        }
+                        Pair(amFiles, "am-export_${Instant.now().epochSecond}.zip")
                     }
-                val shareFile = fileUtils.createNewShareFile(shareFileName)
-                fileUtils.zipAll(shareFile, files)
-                fileUtils.shareFile(shareFile)
+                    ConfigType.WG -> {
+                        val wgFiles = fileUtils.createWgFiles(tunnels)
+                        if (wgFiles.isEmpty()) {
+                            throw IOException("No valid WireGuard config files created")
+                        }
+                        Pair(wgFiles, "wg-export_${Instant.now().epochSecond}.zip")
+                    }
+                }
+
+            val shareFile = fileUtils.createNewShareFile(shareFileName)
+            fileUtils.zipAll(shareFile, files)
+            if (!shareFile.exists() || shareFile.length() == 0L) {
+                throw IOException("Zip file is empty or not created: ${shareFile.path}")
             }
-            .onFailure {
-                Timber.e(it)
-                handleShowMessage(StringValue.StringResource(R.string.export_failed))
+
+            // fall back to save to downloads for older devices
+            if (uri != null) {
+                val copyResult = fileUtils.copyFileToUri(shareFile, uri)
+                copyResult.onFailure { error ->
+                    throw IOException("Failed to copy zip to Uri: ${error.message}")
+                }
+                handleShowMessage(StringValue.StringResource(R.string.export_success))
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    fileUtils.saveToDownloadsWithMediaStore(shareFile, Constants.ZIP_FILE_MIME_TYPE)
+                    handleShowMessage(StringValue.StringResource(R.string.export_success))
+                } else throw IOException("File exporting not supported on this device")
             }
-        clearSelectedTunnels()
+        } catch (e: Exception) {
+            Timber.e(e, "Export failed")
+            handleShowMessage(StringValue.StringResource(R.string.export_failed))
+        } finally {
+            handleSetBottomSheet(AppViewState.BottomSheet.NONE)
+            clearSelectedTunnels()
+        }
     }
 
     private suspend fun handleExportLogs() {

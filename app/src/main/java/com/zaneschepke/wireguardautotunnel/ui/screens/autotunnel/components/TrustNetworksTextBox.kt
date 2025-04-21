@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -28,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ClickableIconButton
 import com.zaneschepke.wireguardautotunnel.ui.common.textbox.CustomTextField
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -40,7 +39,7 @@ fun TrustedNetworkTextBox(
     onValueChange: (network: String) -> Unit,
     supporting: @Composable () -> Unit,
 ) {
-    val context = LocalContext.current
+    val isTv = LocalIsAndroidTV.current
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
@@ -49,7 +48,7 @@ fun TrustedNetworkTextBox(
             trustedNetworks.forEach { ssid ->
                 ClickableIconButton(
                     onClick = {
-                        if (context.isRunningOnTv()) {
+                        if (isTv) {
                             onDelete(ssid)
                         }
                     },

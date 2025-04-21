@@ -18,25 +18,45 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
+import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileExportLauncherForResult
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.AuthorizationPromptWrapper
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
+import com.zaneschepke.wireguardautotunnel.util.Constants
+import com.zaneschepke.wireguardautotunnel.util.extensions.hasSAFSupport
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportTunnelsBottomSheet(viewModel: AppViewModel, isRunningOnTv: Boolean) {
+    val context = LocalContext.current
+
+    var exportConfigType by remember { mutableStateOf(ConfigType.WG) }
+
+    val selectedTunnelsExportLauncher =
+        rememberFileExportLauncherForResult(
+            mimeType = Constants.ZIP_FILE_MIME_TYPE,
+            onResult = { file ->
+                Timber.d("Export launcher result: file=$file")
+                viewModel.handleEvent(AppEvent.ExportSelectedTunnels(exportConfigType, file))
+            },
+        )
+
     var showAuthPrompt by remember { mutableStateOf(false) }
     var isAuthorized by remember { mutableStateOf(false) }
-    var exportType by remember { mutableStateOf(ConfigType.WG) }
 
-    fun handleExport() {
-        viewModel.handleEvent(AppEvent.SetBottomSheet(AppViewState.BottomSheet.NONE))
-        viewModel.handleEvent(AppEvent.ExportSelectedTunnels(exportType))
+    fun handleFileExport() {
+        if (context.hasSAFSupport(Constants.ZIP_FILE_MIME_TYPE)) {
+            selectedTunnelsExportLauncher.launch(Constants.DEFAULT_EXPORT_FILE_NAME)
+        } else {
+            viewModel.handleEvent(AppEvent.ExportSelectedTunnels(exportConfigType, null))
+        }
     }
 
     if (showAuthPrompt) {
@@ -45,7 +65,6 @@ fun ExportTunnelsBottomSheet(viewModel: AppViewModel, isRunningOnTv: Boolean) {
             onSuccess = {
                 showAuthPrompt = false
                 isAuthorized = true
-                handleExport()
             },
             viewModel = viewModel,
         )
@@ -61,12 +80,12 @@ fun ExportTunnelsBottomSheet(viewModel: AppViewModel, isRunningOnTv: Boolean) {
             modifier =
                 Modifier.fillMaxWidth()
                     .clickable {
-                        exportType = ConfigType.AMNEZIA
+                        exportConfigType = ConfigType.AMNEZIA
                         if (!isAuthorized && !isRunningOnTv) {
                             showAuthPrompt = true
                             return@clickable
                         }
-                        handleExport()
+                        handleFileExport()
                     }
                     .padding(10.dp)
         ) {
@@ -85,12 +104,12 @@ fun ExportTunnelsBottomSheet(viewModel: AppViewModel, isRunningOnTv: Boolean) {
             modifier =
                 Modifier.fillMaxWidth()
                     .clickable {
-                        exportType = ConfigType.WG
+                        exportConfigType = ConfigType.WG
                         if (!isAuthorized && !isRunningOnTv) {
                             showAuthPrompt = true
                             return@clickable
                         }
-                        handleExport()
+                        handleFileExport()
                     }
                     .padding(10.dp)
         ) {

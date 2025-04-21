@@ -1,17 +1,18 @@
 package com.zaneschepke.wireguardautotunnel.ui.navigation.components
 
+import android.os.Build
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CopyAll
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -44,10 +46,63 @@ fun currentNavBackStackEntryAsNavBarState(
     uiState: AppUiState,
     appViewState: AppViewState,
 ): State<NavBarState> {
-    fun isActiveSelected(): Boolean =
+    fun isActiveSelected() =
         uiState.activeTunnels.any { active ->
-            appViewState.selectedTunnels.any { active.key.id == it.id }
+            appViewState.selectedTunnels.any { it.id == active.key.id }
         }
+
+    @Composable
+    fun ActionIconButton(icon: ImageVector, labelRes: Int, onClick: () -> Unit) {
+        IconButton(onClick = onClick) {
+            Icon(
+                icon,
+                contentDescription = stringResource(labelRes),
+                modifier = Modifier.size(iconSize),
+            )
+        }
+    }
+
+    @Composable
+    fun TunnelActionBar() {
+        val selectedCount = appViewState.selectedTunnels.size
+        val showDelete = !isActiveSelected()
+
+        Row {
+            if (selectedCount == 0) {
+                ActionIconButton(Icons.Rounded.Add, R.string.add_tunnel) {
+                    viewModel.handleEvent(
+                        AppEvent.SetBottomSheet(AppViewState.BottomSheet.IMPORT_TUNNELS)
+                    )
+                }
+            } else {
+                ActionIconButton(Icons.Rounded.SelectAll, R.string.select_all) {
+                    viewModel.handleEvent(AppEvent.ToggleSelectAllTunnels)
+                }
+                // due to permissions, and SAF issues on TV, not support less than Android 10 on
+                // Android TV for file exports
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ActionIconButton(Icons.Rounded.Download, R.string.download) {
+                        viewModel.handleEvent(
+                            AppEvent.SetBottomSheet(AppViewState.BottomSheet.EXPORT_TUNNELS)
+                        )
+                    }
+                }
+
+                if (selectedCount == 1) {
+                    ActionIconButton(Icons.Rounded.CopyAll, R.string.copy) {
+                        viewModel.handleEvent(AppEvent.CopySelectedTunnel)
+                    }
+                }
+
+                if (showDelete) {
+                    ActionIconButton(Icons.Rounded.Delete, R.string.delete_tunnel) {
+                        viewModel.handleEvent(AppEvent.SetShowModal(AppViewState.ModalType.DELETE))
+                    }
+                }
+            }
+        }
+    }
+
     return produceState(
         initialValue = NavBarState(),
         key1 = backStackEntry,
@@ -60,164 +115,32 @@ fun currentNavBackStackEntryAsNavBarState(
                     NavBarState(
                         showTop = true,
                         showBottom = true,
-                        { Text(stringResource(R.string.tunnels)) },
-                        {
-                            when (appViewState.selectedTunnels.size) {
-                                0 -> {
-                                    IconButton(
-                                        onClick = {
-                                            viewModel.handleEvent(
-                                                AppEvent.SetBottomSheet(
-                                                    AppViewState.BottomSheet.IMPORT_TUNNELS
-                                                )
-                                            )
-                                        }
-                                    ) {
-                                        val icon = Icons.Rounded.Add
-                                        Icon(
-                                            icon,
-                                            stringResource(R.string.add_tunnel),
-                                            modifier = Modifier.size(iconSize),
-                                        )
-                                    }
-                                }
-                                1 -> {
-                                    Row {
-                                        IconButton(
-                                            onClick = {
-                                                viewModel.handleEvent(
-                                                    AppEvent.ToggleSelectAllTunnels
-                                                )
-                                            }
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.SelectAll,
-                                                stringResource(R.string.select_all),
-                                                modifier = Modifier.size(iconSize),
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = {
-                                                viewModel.handleEvent(
-                                                    AppEvent.SetBottomSheet(
-                                                        AppViewState.BottomSheet.EXPORT_TUNNELS
-                                                    )
-                                                )
-                                            }
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.Share,
-                                                stringResource(R.string.share),
-                                                modifier = Modifier.size(iconSize),
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = {
-                                                viewModel.handleEvent(AppEvent.CopySelectedTunnel)
-                                            }
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.CopyAll,
-                                                stringResource(R.string.copy),
-                                                modifier = Modifier.size(iconSize),
-                                            )
-                                        }
-                                        if (!isActiveSelected()) {
-                                            IconButton(
-                                                onClick = {
-                                                    viewModel.handleEvent(
-                                                        AppEvent.SetShowModal(
-                                                            AppViewState.ModalType.DELETE
-                                                        )
-                                                    )
-                                                }
-                                            ) {
-                                                Icon(
-                                                    Icons.Rounded.Delete,
-                                                    stringResource(R.string.delete_tunnel),
-                                                    modifier = Modifier.size(iconSize),
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                else -> {
-                                    Row {
-                                        IconButton(
-                                            onClick = {
-                                                viewModel.handleEvent(
-                                                    AppEvent.ToggleSelectAllTunnels
-                                                )
-                                            }
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.SelectAll,
-                                                stringResource(R.string.select_all),
-                                                modifier = Modifier.size(iconSize),
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = {
-                                                viewModel.handleEvent(
-                                                    AppEvent.SetBottomSheet(
-                                                        AppViewState.BottomSheet.EXPORT_TUNNELS
-                                                    )
-                                                )
-                                            }
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.Share,
-                                                stringResource(R.string.share),
-                                                modifier = Modifier.size(iconSize),
-                                            )
-                                        }
-                                        if (!isActiveSelected()) {
-                                            IconButton(
-                                                onClick = {
-                                                    viewModel.handleEvent(
-                                                        AppEvent.SetShowModal(
-                                                            AppViewState.ModalType.DELETE
-                                                        )
-                                                    )
-                                                }
-                                            ) {
-                                                Icon(
-                                                    Icons.Rounded.Delete,
-                                                    stringResource(R.string.delete_tunnel),
-                                                    modifier = Modifier.size(iconSize),
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
+                        topTitle = { Text(stringResource(R.string.tunnels)) },
+                        topTrailing = { TunnelActionBar() },
                         route = Route.Main,
                     )
                 }
+
                 backStackEntry.isCurrentRoute(Route.AutoTunnel::class) -> {
+                    val (icon, label, tint) =
+                        if (uiState.appSettings.isAutoTunnelEnabled) {
+                            Triple(Icons.Rounded.Stop, R.string.stop_auto, Brick)
+                        } else {
+                            Triple(Icons.Rounded.PlayArrow, R.string.start_auto, SilverTree)
+                        }
+
                     NavBarState(
                         showTop = true,
                         showBottom = true,
-                        { Text(stringResource(R.string.auto_tunnel)) },
-                        {
+                        topTitle = { Text(stringResource(R.string.auto_tunnel)) },
+                        topTrailing = {
                             IconButton(
                                 onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnel) }
                             ) {
-                                val (icon, description, color) =
-                                    if (uiState.appSettings.isAutoTunnelEnabled) {
-                                        Triple(Icons.Rounded.Stop, R.string.stop_auto, Brick)
-                                    } else {
-                                        Triple(
-                                            Icons.Rounded.PlayArrow,
-                                            R.string.start_auto,
-                                            SilverTree,
-                                        )
-                                    }
                                 Icon(
                                     icon,
-                                    stringResource(description),
-                                    tint = color,
+                                    stringResource(label),
+                                    tint = tint,
                                     modifier = Modifier.size(iconSize),
                                 )
                             }
@@ -225,167 +148,143 @@ fun currentNavBackStackEntryAsNavBarState(
                         route = Route.AutoTunnel,
                     )
                 }
-                backStackEntry.isCurrentRoute(Route.AutoTunnelAdvanced::class) ||
-                    backStackEntry.isCurrentRoute(Route.SettingsAdvanced::class) -> {
-                    NavBarState(
-                        showTop = true,
-                        showBottom = true,
-                        { Text(stringResource(R.string.advanced_settings)) },
-                        route = Route.AutoTunnelAdvanced,
-                    )
-                }
-                backStackEntry.isCurrentRoute(Route.Settings::class) -> {
-                    NavBarState(
-                        showTop = true,
-                        showBottom = true,
-                        { Text(stringResource(R.string.settings)) },
-                        route = Route.Settings,
-                    )
-                }
-                backStackEntry.isCurrentRoute(Route.KillSwitch::class) -> {
-                    NavBarState(
-                        showTop = true,
-                        showBottom = true,
-                        { Text(stringResource(R.string.kill_switch)) },
-                        route = Route.KillSwitch,
-                    )
-                }
-                backStackEntry.isCurrentRoute(Route.Appearance::class) -> {
-                    NavBarState(
-                        showTop = true,
-                        showBottom = true,
-                        { Text(stringResource(R.string.appearance)) },
-                        route = Route.Appearance,
-                    )
-                }
-                backStackEntry.isCurrentRoute(Route.Language::class) -> {
-                    NavBarState(
-                        showTop = true,
-                        showBottom = true,
-                        { Text(stringResource(R.string.language)) },
-                        route = Route.Language,
-                    )
-                }
-                backStackEntry.isCurrentRoute(Route.Display::class) -> {
-                    NavBarState(
-                        showTop = true,
-                        showBottom = true,
-                        { Text(stringResource(R.string.display_theme)) },
-                        route = Route.Display,
-                    )
-                }
+
                 backStackEntry.isCurrentRoute(Route.Logs::class) -> {
                     NavBarState(
                         showTop = true,
                         showBottom = false,
-                        { Text(stringResource(R.string.logs)) },
-                        {
-                            IconButton(
-                                onClick = {
-                                    viewModel.handleEvent(
-                                        AppEvent.SetBottomSheet(AppViewState.BottomSheet.LOGS)
-                                    )
-                                }
-                            ) {
-                                val icon = Icons.Rounded.Menu
-                                Icon(
-                                    icon,
-                                    stringResource(R.string.quick_actions),
-                                    modifier = Modifier.size(iconSize),
+                        topTitle = { Text(stringResource(R.string.logs)) },
+                        topTrailing = {
+                            ActionIconButton(Icons.Rounded.Menu, R.string.quick_actions) {
+                                viewModel.handleEvent(
+                                    AppEvent.SetBottomSheet(AppViewState.BottomSheet.LOGS)
                                 )
                             }
                         },
                         route = Route.Logs,
                     )
                 }
-                backStackEntry.isCurrentRoute(Route.TunnelOptions::class) -> {
-                    val args = backStackEntry?.toRoute<Route.TunnelOptions>()
-                    val tunnel = uiState.tunnels.find { it.id == args?.id }
+
+                backStackEntry.isCurrentRoute(Route.Settings::class) ->
                     NavBarState(
                         showTop = true,
                         showBottom = true,
-                        { tunnel?.name?.let { Text(it) } },
-                        {
-                            IconButton(
-                                onClick = {
-                                    tunnel?.id?.let {
-                                        navController.navigate(Route.Config(id = it))
-                                    }
-                                }
-                            ) {
-                                val icon = Icons.Rounded.Edit
-                                Icon(
-                                    icon,
-                                    stringResource(R.string.edit_tunnel),
-                                    modifier = Modifier.size(iconSize),
-                                )
+                        topTitle = { Text(stringResource(R.string.settings)) },
+                        route = Route.Settings,
+                    )
+
+                backStackEntry.isCurrentRoute(Route.Appearance::class) ->
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.appearance)) },
+                        route = Route.Appearance,
+                    )
+
+                backStackEntry.isCurrentRoute(Route.Language::class) ->
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.language)) },
+                        route = Route.Language,
+                    )
+
+                backStackEntry.isCurrentRoute(Route.Display::class) ->
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.display_theme)) },
+                        route = Route.Display,
+                    )
+
+                backStackEntry.isCurrentRoute(Route.KillSwitch::class) ->
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.kill_switch)) },
+                        route = Route.KillSwitch,
+                    )
+
+                backStackEntry.isCurrentRoute(Route.Support::class) ->
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.support)) },
+                        route = Route.Support,
+                    )
+
+                backStackEntry.isCurrentRoute(Route.AutoTunnelAdvanced::class) ||
+                    backStackEntry.isCurrentRoute(Route.SettingsAdvanced::class) ->
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.advanced_settings)) },
+                        route = Route.AutoTunnelAdvanced,
+                    )
+
+                backStackEntry.isCurrentRoute(Route.TunnelOptions::class) -> {
+                    val args = backStackEntry?.toRoute<Route.TunnelOptions>()
+                    val tunnel = uiState.tunnels.find { it.id == args?.id }
+
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { tunnel?.name?.let { Text(it) } },
+                        topTrailing = {
+                            ActionIconButton(Icons.Rounded.Edit, R.string.edit_tunnel) {
+                                tunnel?.id?.let { navController.navigate(Route.Config(it)) }
                             }
                         },
                         route = args?.let { Route.TunnelOptions(it.id) },
                     )
                 }
+
                 backStackEntry.isCurrentRoute(Route.SplitTunnel::class) -> {
                     val args = backStackEntry?.toRoute<Route.SplitTunnel>()
                     val name = uiState.tunnels.find { it.id == args?.id }?.name
+
                     NavBarState(
                         showTop = true,
                         showBottom = true,
-                        { name?.let { Text(it) } },
-                        {
-                            IconButton(
-                                onClick = { viewModel.handleEvent(AppEvent.InvokeScreenAction) }
-                            ) {
-                                val icon = Icons.Rounded.Save
-                                Icon(
-                                    icon,
-                                    stringResource(R.string.save),
-                                    modifier = Modifier.size(iconSize),
-                                )
+                        topTitle = { name?.let { Text(it) } },
+                        topTrailing = {
+                            ActionIconButton(Icons.Rounded.Save, R.string.save) {
+                                viewModel.handleEvent(AppEvent.InvokeScreenAction)
                             }
                         },
                         route = args?.let { Route.SplitTunnel(it.id) },
                     )
                 }
+
                 backStackEntry.isCurrentRoute(Route.Config::class) -> {
                     val args = backStackEntry?.toRoute<Route.Config>()
                     val name = uiState.tunnels.find { it.id == args?.id }?.name
+
                     NavBarState(
                         showTop = true,
                         showBottom = true,
-                        { name?.let { Text(it) } },
-                        {
-                            IconButton(
-                                onClick = { viewModel.handleEvent(AppEvent.InvokeScreenAction) }
-                            ) {
-                                val icon = Icons.Rounded.Save
-                                Icon(
-                                    icon,
-                                    stringResource(R.string.save),
-                                    modifier = Modifier.size(iconSize),
-                                )
+                        topTitle = { name?.let { Text(it) } },
+                        topTrailing = {
+                            ActionIconButton(Icons.Rounded.Save, R.string.save) {
+                                viewModel.handleEvent(AppEvent.InvokeScreenAction)
                             }
                         },
                         route = args?.let { Route.Config(it.id) },
                     )
                 }
+
                 backStackEntry.isCurrentRoute(Route.TunnelAutoTunnel::class) -> {
                     val args = backStackEntry?.toRoute<Route.TunnelAutoTunnel>()
                     val name = uiState.tunnels.find { it.id == args?.id }?.name
+
                     NavBarState(
                         showTop = true,
                         showBottom = true,
-                        { name?.let { Text(it) } },
+                        topTitle = { name?.let { Text(it) } },
                         route = args?.let { Route.TunnelAutoTunnel(it.id) },
                     )
                 }
-                backStackEntry.isCurrentRoute(Route.Support::class) -> {
-                    NavBarState(
-                        showTop = true,
-                        showBottom = true,
-                        { Text(stringResource(R.string.support)) },
-                        route = Route.Support,
-                    )
-                }
+
                 else -> NavBarState(showTop = false, showBottom = false)
             }
     }

@@ -14,13 +14,15 @@ object Constants {
     const val ZIP_FILE_EXTENSION = ".zip"
     const val URI_CONTENT_SCHEME = "content"
     private const val TEXT_MIME_TYPE = "text/plain"
-    private const val ZIP_FILE_MIME_TYPE = "application/zip"
+    const val ZIP_FILE_MIME_TYPE = "application/zip"
     const val ALLOWED_TV_FILE_TYPES = "${TEXT_MIME_TYPE}|${ZIP_FILE_MIME_TYPE}"
     const val ALL_FILE_TYPES = "*/*"
     const val GOOGLE_TV_EXPLORER_STUB = "com.google.android.tv.frameworkpackagestubs"
     const val ANDROID_TV_EXPLORER_STUB = "com.android.tv.frameworkpackagestubs"
     const val VPN_SETTINGS_PACKAGE = "android.net.vpn.SETTINGS"
     const val SYSTEM_EXEMPT_SERVICE_TYPE_ID = 1024
+
+    const val DEFAULT_EXPORT_FILE_NAME = "wgtunnel-export.zip"
 
     const val SUBSCRIPTION_TIMEOUT = 5_000L
 

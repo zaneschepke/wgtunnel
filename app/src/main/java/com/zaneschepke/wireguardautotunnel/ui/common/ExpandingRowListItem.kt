@@ -22,6 +22,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -35,6 +36,7 @@ fun ExpandingRowListItem(
     isSelected: Boolean,
     expanded: (@Composable () -> Unit)?,
 ) {
+    val isTv = LocalIsAndroidTV.current
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -42,15 +44,22 @@ fun ExpandingRowListItem(
         modifier =
             Modifier.animateContentSize()
                 .clip(RoundedCornerShape(8.dp))
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onHold()
-                    },
-                    onDoubleClick = onDoubleClick,
+                .then(
+                    if (!isTv) {
+                        Modifier.combinedClickable(
+                                onClick = onClick,
+                                onLongClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onHold()
+                                },
+                                onDoubleClick = onDoubleClick,
+                            )
+                            .indication(
+                                interactionSource = interactionSource,
+                                indication = ripple(),
+                            )
+                    } else Modifier
                 )
-                .indication(interactionSource = interactionSource, indication = ripple())
     ) {
         LaunchedEffect(isSelected) {
             if (isSelected) {

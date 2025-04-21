@@ -96,7 +96,7 @@ sealed class AppEvent {
 
     data class SaveTrustedSSID(val ssid: String) : AppEvent()
 
-    data class ExportSelectedTunnels(val configType: ConfigType) : AppEvent()
+    data class ExportSelectedTunnels(val configType: ConfigType, val uri: Uri?) : AppEvent()
 
     data object ExportLogs : AppEvent()
 

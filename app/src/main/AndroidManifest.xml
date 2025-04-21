@@ -16,7 +16,6 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!--start service on boot permission-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!--android tv support-->
 
 	<permission
 		android:name="${applicationId}.permission.CONTROL_TUNNELS"
@@ -172,6 +171,7 @@
 			android:directBootAware="true">
             <intent-filter>
 				<action android:name="android.intent.action.SCREEN_ON" />
+				<action android:name="android.intent.action.USER_PRESENT" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />

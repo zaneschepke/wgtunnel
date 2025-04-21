@@ -8,13 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.components.AutomaticLanguageItem
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.language.components.LanguageItem
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.LocaleUtil
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import java.text.Collator
 import java.util.*
@@ -22,9 +21,7 @@ import java.util.*
 @Composable
 fun LanguageScreen(appUiState: AppUiState, viewModel: AppViewModel) {
     val collator = Collator.getInstance(Locale.getDefault())
-
-    val context = LocalContext.current
-    val isAndroidTv = remember { context.isRunningOnTv() }
+    val isTv = LocalIsAndroidTV.current
 
     val locales =
         LocaleUtil.supportedLocales.map {
@@ -42,9 +39,9 @@ fun LanguageScreen(appUiState: AppUiState, viewModel: AppViewModel) {
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.padding(horizontal = 12.dp),
     ) {
-        item { AutomaticLanguageItem(appUiState, viewModel, isAndroidTv) }
+        item { AutomaticLanguageItem(appUiState, viewModel, isTv) }
         items(sortedLocales, key = { it }) { locale ->
-            LanguageItem(locale, appUiState, viewModel, isAndroidTv)
+            LanguageItem(locale, appUiState, viewModel, isTv)
         }
     }
 }

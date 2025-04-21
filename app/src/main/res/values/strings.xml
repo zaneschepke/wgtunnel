@@ -239,4 +239,6 @@
     <string name="nothing_here_yet">Nothing here yet!</string>
     <string name="share">Share</string>
     <string name="select_all">Select all</string>
+    <string name="export_success">Export success</string>
+    <string name="download">Download</string>
 </resources>

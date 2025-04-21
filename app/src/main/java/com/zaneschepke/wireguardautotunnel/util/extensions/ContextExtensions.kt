@@ -14,14 +14,14 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.widget.Toast
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.core.location.LocationManagerCompat
+import androidx.core.net.toUri
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.core.service.tile.AutoTunnelControlTile
 import com.zaneschepke.wireguardautotunnel.core.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import java.io.InputStream
+import timber.log.Timber
 
 private const val BASELINE_HEIGHT = 2201
 private const val BASELINE_WIDTH = 1080
@@ -31,7 +31,7 @@ private const val ANDROID_TV_SIZE_MULTIPLIER = 1.5f
 fun Context.openWebUrl(url: String): Result<Unit> {
     return kotlin
         .runCatching {
-            val webpage: Uri = Uri.parse(url)
+            val webpage: Uri = url.toUri()
             val intent =
                 Intent(Intent.ACTION_VIEW, webpage).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -52,37 +52,6 @@ val Context.actionBarSize
             attrs.getDimension(0, 0F).toInt().also { attrs.recycle() }
         }
 
-fun Context.resizeHeight(dp: Dp): Dp {
-    val displayMetrics = resources.displayMetrics
-    val density = displayMetrics.density
-    val height =
-        (displayMetrics.heightPixels - this.actionBarSize) *
-            (if (isRunningOnTv()) ANDROID_TV_SIZE_MULTIPLIER else 1f)
-    val resizeHeightPercentage =
-        (height.toFloat() / BASELINE_HEIGHT) * (BASELINE_DENSITY.toFloat() / density)
-    return dp * resizeHeightPercentage
-}
-
-fun Context.resizeHeight(textUnit: TextUnit): TextUnit {
-    val displayMetrics = resources.displayMetrics
-    val density = displayMetrics.density
-    val height =
-        (displayMetrics.heightPixels - actionBarSize) *
-            (if (isRunningOnTv()) ANDROID_TV_SIZE_MULTIPLIER else 1f)
-    val resizeHeightPercentage =
-        (height.toFloat() / BASELINE_HEIGHT) * (BASELINE_DENSITY.toFloat() / density)
-    return textUnit * resizeHeightPercentage * 1.1
-}
-
-fun Context.resizeWidth(dp: Dp): Dp {
-    val displayMetrics = resources.displayMetrics
-    val density = displayMetrics.density
-    val width = displayMetrics.widthPixels
-    val resizeWidthPercentage =
-        (width.toFloat() / BASELINE_WIDTH) * (BASELINE_DENSITY.toFloat() / density)
-    return dp * resizeWidthPercentage
-}
-
 fun Context.launchNotificationSettings() {
     if (isRunningOnTv()) return launchAppSettings()
     val settingsIntent: Intent =
@@ -92,6 +61,43 @@ fun Context.launchNotificationSettings() {
     this.startActivity(settingsIntent)
 }
 
+fun Context.hasSAFSupport(mimeType: String): Boolean {
+    val intent =
+        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            type = mimeType
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+    val activitiesToResolveIntent =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.queryIntentActivities(
+                intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong()),
+            )
+        } else {
+            packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        }
+    Timber.d(
+        "Found ${activitiesToResolveIntent.size} activities: ${activitiesToResolveIntent.map { it.activityInfo.packageName }}"
+    )
+
+    return if (activitiesToResolveIntent.isEmpty()) {
+        Timber.w("No activities found to handle SAF intent")
+        false
+    } else if (
+        isRunningOnTv() &&
+            activitiesToResolveIntent.all {
+                val name = it.activityInfo.packageName
+                name.startsWith(Constants.GOOGLE_TV_EXPLORER_STUB) ||
+                    name.startsWith(Constants.ANDROID_TV_EXPLORER_STUB)
+            }
+    ) {
+        Timber.w("Only stub file explorers found on TV")
+        false
+    } else {
+        true
+    }
+}
+
 fun Context.launchShareFile(file: Uri) {
     val shareIntent =
         Intent().apply {
@@ -99,6 +105,7 @@ fun Context.launchShareFile(file: Uri) {
             type = Constants.ALL_FILE_TYPES
             putExtra(Intent.EXTRA_STREAM, file)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
     val chooserIntent =
         Intent.createChooser(shareIntent, "").apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
@@ -117,7 +124,7 @@ fun Context.showToast(resId: Int) {
 fun Context.launchSupportEmail() {
     val intent =
         Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:")
+            data = "mailto:".toUri()
             putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.my_email)))
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject))
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
