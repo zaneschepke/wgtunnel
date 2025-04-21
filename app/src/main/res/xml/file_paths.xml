@@ -2,4 +2,5 @@
 <paths>
 	<files-path name="files" path="." />
 	<external-path name="external_files" path="." />
+	<external-files-path name="apks" path="/" />
 </paths>

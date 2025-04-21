@@ -13,6 +13,7 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.util.extensions.getInputStreamFromUri
+import com.zaneschepke.wireguardautotunnel.util.extensions.installApk
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchShareFile
 import com.zaneschepke.wireguardautotunnel.util.extensions.toWgQuickString
 import java.io.*
@@ -253,4 +254,8 @@ class FileUtils(private val context: Context, private val ioDispatcher: Coroutin
 
             return@withContext itemUri
         }
+
+    fun installApk(file: File) {
+        context.installApk(file)
+    }
 }

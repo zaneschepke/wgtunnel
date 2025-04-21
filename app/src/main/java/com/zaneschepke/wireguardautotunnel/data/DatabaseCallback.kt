@@ -7,7 +7,6 @@ import timber.log.Timber
 class DatabaseCallback : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) =
         db.run {
-            // Notice non-ui thread is here
             beginTransaction()
             try {
                 execSQL(Queries.createDefaultSettings())

@@ -8,19 +8,25 @@ import com.zaneschepke.wireguardautotunnel.data.DataStoreManager
 import com.zaneschepke.wireguardautotunnel.data.DatabaseCallback
 import com.zaneschepke.wireguardautotunnel.data.dao.SettingsDao
 import com.zaneschepke.wireguardautotunnel.data.dao.TunnelConfigDao
+import com.zaneschepke.wireguardautotunnel.data.network.GitHubApi
+import com.zaneschepke.wireguardautotunnel.data.network.KtorClient
+import com.zaneschepke.wireguardautotunnel.data.network.KtorGitHubApi
 import com.zaneschepke.wireguardautotunnel.data.repository.AppDataRoomRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.DataStoreAppStateRepository
+import com.zaneschepke.wireguardautotunnel.data.repository.GitHubUpdateRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.RoomSettingsRepository
 import com.zaneschepke.wireguardautotunnel.data.repository.RoomTunnelRepository
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
+import com.zaneschepke.wireguardautotunnel.domain.repository.UpdateRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.HttpClient
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -93,5 +99,35 @@ class RepositoryModule {
         appStateRepository: AppStateRepository,
     ): AppDataRepository {
         return AppDataRoomRepository(settingsRepository, tunnelRepository, appStateRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(): HttpClient {
+        return KtorClient.create()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGitHubApi(client: HttpClient): GitHubApi {
+        return KtorGitHubApi(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUpdateRepository(
+        gitHubApi: GitHubApi,
+        client: HttpClient,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
+        @ApplicationContext context: Context,
+    ): UpdateRepository {
+        return GitHubUpdateRepository(
+            gitHubApi,
+            client,
+            "wgtunnel",
+            "wgtunnel",
+            context,
+            ioDispatcher,
+        )
     }
 }

@@ -224,8 +224,17 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
 
-    // qr
+    // util
     implementation(libs.qrcode.kotlin)
+    implementation(libs.semver4j)
+    implementation(libs.markdown.compose)
+
+    // Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
 }
 
 fun determineVersionName(): String {

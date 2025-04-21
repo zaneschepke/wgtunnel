@@ -5,12 +5,14 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItemLabel
+import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionLabelType
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchSupportEmail
@@ -25,7 +27,12 @@ fun ContactSupportOptions(context: android.content.Context) {
                     listOf(
                         SelectionItem(
                             leadingIcon = ImageVector.vectorResource(R.drawable.matrix),
-                            title = { SelectionItemLabel(R.string.join_matrix) },
+                            title = {
+                                SelectionItemLabel(
+                                    stringResource(R.string.join_matrix),
+                                    SelectionLabelType.TITLE,
+                                )
+                            },
                             trailing = {
                                 ForwardButton {
                                     context.openWebUrl(context.getString(R.string.matrix_url))
@@ -35,7 +42,12 @@ fun ContactSupportOptions(context: android.content.Context) {
                         ),
                         SelectionItem(
                             leadingIcon = ImageVector.vectorResource(R.drawable.telegram),
-                            title = { SelectionItemLabel(R.string.join_telegram) },
+                            title = {
+                                SelectionItemLabel(
+                                    stringResource(R.string.join_telegram),
+                                    SelectionLabelType.TITLE,
+                                )
+                            },
                             trailing = {
                                 ForwardButton {
                                     context.openWebUrl(context.getString(R.string.telegram_url))
@@ -47,7 +59,12 @@ fun ContactSupportOptions(context: android.content.Context) {
                         ),
                         SelectionItem(
                             leadingIcon = ImageVector.vectorResource(R.drawable.github),
-                            title = { SelectionItemLabel(R.string.open_issue) },
+                            title = {
+                                SelectionItemLabel(
+                                    stringResource(R.string.open_issue),
+                                    SelectionLabelType.TITLE,
+                                )
+                            },
                             trailing = {
                                 ForwardButton {
                                     context.openWebUrl(context.getString(R.string.github_url))
@@ -57,7 +74,12 @@ fun ContactSupportOptions(context: android.content.Context) {
                         ),
                         SelectionItem(
                             leadingIcon = Icons.Filled.Mail,
-                            title = { SelectionItemLabel(R.string.email_description) },
+                            title = {
+                                SelectionItemLabel(
+                                    stringResource(R.string.email_description),
+                                    SelectionLabelType.TITLE,
+                                )
+                            },
                             trailing = { ForwardButton { context.launchSupportEmail() } },
                             onClick = { context.launchSupportEmail() },
                         ),
@@ -67,7 +89,12 @@ fun ContactSupportOptions(context: android.content.Context) {
                     add(
                         SelectionItem(
                             leadingIcon = Icons.Filled.Favorite,
-                            title = { SelectionItemLabel(R.string.donate) },
+                            title = {
+                                SelectionItemLabel(
+                                    stringResource(R.string.donate),
+                                    SelectionLabelType.TITLE,
+                                )
+                            },
                             trailing = {
                                 ForwardButton {
                                     context.openWebUrl(context.getString(R.string.donate_url))

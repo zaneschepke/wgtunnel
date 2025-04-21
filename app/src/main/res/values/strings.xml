@@ -220,6 +220,7 @@
 	<string name="tunnel_error_template">Tunnel failed with: %1$s</string>
 	<string name="wifi_name_template">Active: %1$s</string>
 	<string name="remote_key_template">Key: %1$s</string>
+    <string name="version_template">Current version: %1$s</string>
 	<string name="config_error">config error</string>
 	<string name="dns_resolve_error">dns resolution error</string>
 	<string name="invalid_config_error">invalid_config_error</string>
@@ -241,4 +242,14 @@
     <string name="select_all">Select all</string>
     <string name="export_success">Export success</string>
     <string name="download">Download</string>
+    <string name="check_for_update">Check for update</string>
+    <string name="update_check_failed">Update check failed.</string>
+    <string name="checking_for_update">Checking for updates</string>
+    <string name="latest_installed">You are already running the latest version.</string>
+    <string name="update_download_failed">Update download failed.</string>
+    <string name="update_available">Update Available!</string>
+    <string name="download_and_install">Download and Install</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="install_updated_permission">This app needs permission to install updates.</string>
+    <string name="allow">Allow</string>
 </resources>

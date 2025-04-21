@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.util
 
+import com.vdurmont.semver4j.Semver
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
@@ -37,5 +38,11 @@ object NumberUtils {
         } else {
             null
         }
+    }
+
+    fun compareVersions(newVersion: String, currentVersion: String): Int {
+        val newSemver = Semver(newVersion, Semver.SemverType.LOOSE)
+        val currentSemver = Semver(currentVersion, Semver.SemverType.LOOSE)
+        return newSemver.compareTo(currentSemver)
     }
 }

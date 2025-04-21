@@ -280,7 +280,9 @@ class MainActivity : AppCompatActivity() {
                                     composable<Route.Display> {
                                         DisplayScreen(appUiState, viewModel)
                                     }
-                                    composable<Route.Support> { SupportScreen() }
+                                    composable<Route.Support> {
+                                        SupportScreen(appViewModel = viewModel)
+                                    }
                                     composable<Route.AutoTunnelAdvanced> {
                                         AutoTunnelAdvancedScreen(appUiState, viewModel)
                                     }

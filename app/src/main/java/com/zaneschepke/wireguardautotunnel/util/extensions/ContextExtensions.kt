@@ -14,19 +14,16 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
 import androidx.core.net.toUri
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.core.service.tile.AutoTunnelControlTile
 import com.zaneschepke.wireguardautotunnel.core.service.tile.TunnelControlTile
 import com.zaneschepke.wireguardautotunnel.util.Constants
+import java.io.File
 import java.io.InputStream
 import timber.log.Timber
-
-private const val BASELINE_HEIGHT = 2201
-private const val BASELINE_WIDTH = 1080
-private const val BASELINE_DENSITY = 2.625
-private const val ANDROID_TV_SIZE_MULTIPLIER = 1.5f
 
 fun Context.openWebUrl(url: String): Result<Unit> {
     return kotlin
@@ -203,4 +200,28 @@ fun Context.getAllInternetCapablePackages(): List<PackageInfo> {
     } else {
         packageManager.getPackagesHoldingPermissions(permissions, 0)
     }
+}
+
+fun Context.canInstallPackages(): Boolean {
+    return packageManager.canRequestPackageInstalls()
+}
+
+fun Context.requestInstallPackagesPermission() {
+    val intent =
+        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+            data = "package:${packageName}".toUri()
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+    startActivity(intent)
+}
+
+fun Context.installApk(apkFile: File) {
+    val apkUri = FileProvider.getUriForFile(this, getString(R.string.provider), apkFile)
+    val intent =
+        Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(apkUri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+    startActivity(intent)
 }
