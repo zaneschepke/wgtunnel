@@ -7,6 +7,7 @@ plugins {
 	alias(libs.plugins.androidLibrary) apply false
 	alias(libs.plugins.compose.compiler) apply false
 	alias(libs.plugins.ktfmt)
+	alias(libs.plugins.licensee) apply false
 }
 
 subprojects {

@@ -213,6 +213,15 @@ fun currentNavBackStackEntryAsNavBarState(
                         route = Route.Support,
                     )
 
+                backStackEntry.isCurrentRoute(Route.License::class) -> {
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.licenses)) },
+                        route = Route.License,
+                    )
+                }
+
                 backStackEntry.isCurrentRoute(Route.AutoTunnelAdvanced::class) ||
                     backStackEntry.isCurrentRoute(Route.SettingsAdvanced::class) ->
                     NavBarState(

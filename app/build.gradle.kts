@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.grgit)
+    alias(libs.plugins.licensee)
 }
 
 val versionFile = file("$rootDir/versionCode.txt")
@@ -139,6 +140,14 @@ android {
         buildConfig = true
     }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
+
+    licensee {
+        Constants.allowedLicenses.forEach { allow(it) }
+        allowUrl(Constants.XZING_LICENSE_URL)
+
+        // Fix for qrcode-kotlin (MIT, custom URL)
+        allowUrl("https://rafaellins.mit-license.org/2021/")
+    }
 }
 
 dependencies {
@@ -227,7 +236,6 @@ dependencies {
     // util
     implementation(libs.qrcode.kotlin)
     implementation(libs.semver4j)
-    implementation(libs.markdown.compose)
 
     // Ktor
     implementation(libs.ktor.client.core)
@@ -263,3 +271,17 @@ tasks.whenTaskAdded {
         dependsOn(incrementVersionCode)
     }
 }
+
+tasks.register<Copy>("copyLicenseeJsonToAssets") {
+    dependsOn("licensee")
+
+    val outputAssets = layout.projectDirectory.dir("src/main/assets")
+
+    from(layout.buildDirectory.file("reports/licensee/androidFdroidRelease/artifacts.json")) {
+        rename("artifacts.json", "licenses.json")
+    }
+
+    into(outputAssets)
+}
+
+tasks.named("preBuild") { dependsOn("copyLicenseeJsonToAssets") }

@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zaneschepke.wireguardautotunnel.BuildConfig
+import com.google.zxing.client.android.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.SectionDivider
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
@@ -29,7 +29,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.requestInstallPackage
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
-import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: AppViewModel) {
@@ -63,8 +62,13 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
             },
             title = { Text(stringResource(R.string.update_available)) },
             body = {
-                Column {
-                    MarkdownText(uiState.appUpdate?.releaseNotes ?: "")
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(uiState.appUpdate?.version ?: "")
+                    Text(uiState.appUpdate?.releaseNotes ?: "")
                     if (uiState.isLoading) {
                         LinearProgressIndicator(
                             progress = { uiState.downloadProgress },

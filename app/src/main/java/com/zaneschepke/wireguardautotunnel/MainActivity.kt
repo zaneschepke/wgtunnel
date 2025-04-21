@@ -67,6 +67,7 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.settings.appearance.langua
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.killswitch.KillSwitchScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.logs.LogsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.SupportScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.support.license.LicenseScreen
 import com.zaneschepke.wireguardautotunnel.ui.theme.WireguardAutoTunnelTheme
 import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
@@ -283,6 +284,7 @@ class MainActivity : AppCompatActivity() {
                                     composable<Route.Support> {
                                         SupportScreen(appViewModel = viewModel)
                                     }
+                                    composable<Route.License> { LicenseScreen() }
                                     composable<Route.AutoTunnelAdvanced> {
                                         AutoTunnelAdvancedScreen(appUiState, viewModel)
                                     }

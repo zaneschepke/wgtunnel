@@ -47,13 +47,13 @@ class GitHubUpdateRepository(
         withContext(ioDispatcher) {
             try {
                 // clean up old files
-                context.cacheDir?.listFiles()?.forEach { file ->
+                context.getExternalFilesDir(null)?.listFiles()?.forEach { file ->
                     if (file.extension == "apk") file.delete()
                 }
 
                 val response: HttpResponse = httpClient.get(apkUrl)
 
-                val apkFile = File(context.cacheDir, fileName)
+                val apkFile = File(context.getExternalFilesDir(null), fileName)
 
                 val channel: ByteReadChannel = response.bodyAsChannel()
                 val totalBytes: Long = response.contentLength() ?: -1L
