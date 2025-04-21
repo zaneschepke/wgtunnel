@@ -14,7 +14,6 @@ import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
-import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ExportTunnelsBottomSheet
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.TunnelImportSheet
@@ -31,7 +30,6 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: AppViewModel) {
     val navController = LocalNavController.current
     val clipboard = LocalClipboardManager.current
-    val isTv = LocalIsAndroidTV.current
 
     var showUrlImportDialog by remember { mutableStateOf(false) }
 
@@ -78,7 +76,7 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
 
     when (appViewState.bottomSheet) {
         AppViewState.BottomSheet.EXPORT_TUNNELS -> {
-            ExportTunnelsBottomSheet(viewModel, isTv)
+            ExportTunnelsBottomSheet(viewModel)
         }
         AppViewState.BottomSheet.IMPORT_TUNNELS -> {
             TunnelImportSheet(

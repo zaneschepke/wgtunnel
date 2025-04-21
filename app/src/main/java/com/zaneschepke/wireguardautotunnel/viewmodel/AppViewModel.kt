@@ -711,10 +711,15 @@ constructor(
             // fall back to save to downloads for older devices
             if (uri != null) {
                 val copyResult = fileUtils.copyFileToUri(shareFile, uri)
-                copyResult.onFailure { error ->
-                    throw IOException("Failed to copy zip to Uri: ${error.message}")
-                }
-                handleShowMessage(StringValue.StringResource(R.string.export_success))
+                copyResult.fold(
+                    onSuccess = {
+                        handleShowMessage(StringValue.StringResource(R.string.export_success))
+                    },
+                    onFailure = { error ->
+                        Timber.w("User likely cancelled or file write failed: ${error.message}")
+                        handleShowMessage(StringValue.StringResource(R.string.export_failed))
+                    },
+                )
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     fileUtils.saveToDownloadsWithMediaStore(shareFile, Constants.ZIP_FILE_MIME_TYPE)
