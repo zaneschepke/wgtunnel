@@ -54,7 +54,7 @@
     <application
         android:name=".WireGuardAutoTunnel"
         android:allowBackup="false"
-        android:banner="@drawable/ic_banner"
+        android:banner="@mipmap/ic_banner"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
@@ -67,7 +67,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-			android:banner="@mipmap/ic_banner"
 			android:windowSoftInputMode="adjustNothing"
             android:theme="@style/Theme.WireguardAutoTunnel"
 			android:configChanges="orientation|screenSize|keyboardHidden"
