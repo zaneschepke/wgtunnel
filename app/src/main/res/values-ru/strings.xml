@@ -146,7 +146,7 @@
     <string name="use_root_shell_for_wifi">Использовать root-доступ для получения имени сети Wi-Fi</string>
     <string name="wifi_name_via_shell">Имя Wi-Fi через root</string>
     <string name="start_auto">Запустить автотуннель</string>
-    <string name="tunnel_running">Туннель работает</string>
+    <string name="tunnel_running">Работающий туннель</string>
     <string name="monitoring_state_changes">Отслеживание изменений состояния</string>
     <string name="enable_local_logging">Включить ведение журнала</string>
     <string name="add_from_clipboard">Добавить из буфера обмена</string>
@@ -229,4 +229,18 @@
     <string name="nothing_here_yet">Здесь пока ничего нет!</string>
     <string name="select_all">Выбрать все</string>
     <string name="share">Поделиться</string>
+    <string name="export_success">Экспорт успешно выполнен</string>
+    <string name="check_for_update">Проверить обновление</string>
+    <string name="update_check_failed">Проверка обновлений не выполнена.</string>
+    <string name="checking_for_update">Проверка обновления</string>
+    <string name="latest_installed">Вы уже используете последнюю версию.</string>
+    <string name="update_available">Доступно обновление!</string>
+    <string name="install_updated_permission">Этому приложению нужно разрешение на установку обновлений.</string>
+    <string name="allow">Разрешить</string>
+    <string name="download">Скачать</string>
+    <string name="download_and_install">Скачать и установить</string>
+    <string name="update_download_failed">Невозможно скачать обновление.</string>
+    <string name="version_template">Текущая версия: %1$s</string>
+    <string name="licenses">Лицензии</string>
+    <string name="permission_required">Требуется разрешение</string>
 </resources>
