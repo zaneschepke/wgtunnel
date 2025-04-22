@@ -229,4 +229,18 @@
     <string name="nothing_here_yet">此处还什么都没有！</string>
     <string name="select_all">全选</string>
     <string name="share">分享</string>
+    <string name="version_template">当前版本：%1$s</string>
+    <string name="export_success">导出成功</string>
+    <string name="download">下载</string>
+    <string name="check_for_update">检查更新</string>
+    <string name="update_check_failed">更新检查失败了。</string>
+    <string name="checking_for_update">正在检查更新</string>
+    <string name="latest_installed">你已经在运行最新版本。</string>
+    <string name="update_download_failed">更新下载失败。</string>
+    <string name="update_available">有更新可用！</string>
+    <string name="download_and_install">下载并安装</string>
+    <string name="permission_required">需要权限</string>
+    <string name="licenses">许可证</string>
+    <string name="install_updated_permission">本应用需要权限来安装更新。</string>
+    <string name="allow">允许</string>
 </resources>
