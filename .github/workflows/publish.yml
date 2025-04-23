@@ -132,12 +132,12 @@ jobs:
           latest: true
       - name: Generate Changelog
         id: changelog
-        uses: requarks/changelog-action@v1.8.0
+        uses: requarks/changelog-action@v1
         with:
-          toTag: ${{ env.TAG_NAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          toTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
           fromTag: "latest"
           writeToFile: false
-          token: ${{ secrets.PAT }}
       - name: Make download dir
         run: mkdir ${{ github.workspace }}/temp
       - name: Download artifacts
