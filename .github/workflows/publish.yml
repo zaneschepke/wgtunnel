@@ -139,8 +139,9 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.UPLOAD_DIR_ANDROID }}
+          pattern: android_artifacts_*
           path: ${{ github.workspace }}/temp
+          merge-multiple: true
       - name: Set version release notes
         if: ${{ inputs.release_type == 'release' }}
         run: |

@@ -119,9 +119,10 @@ jobs:
       - name: Get release apk path
         id: apk-path
         run: echo "path=$(find . -regex '^.*/build/outputs/apk/${{ inputs.flavor }}/${{ inputs.build_type }}/.*\.apk$' -type f | head -1 | tail -c+2)" >> $GITHUB_OUTPUT
-      - name: Upload release apk
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.UPLOAD_DIR_ANDROID }}
-          path: ${{ github.workspace }}/${{ steps.apk-path.outputs.path }}
+          name: android_artifacts_${{ inputs.flavor }}
+          path: app/build/outputs/apk/${{ inputs.flavor }}/release/wgtunnel-${{ inputs.flavor }}-release-*.apk
           retention-days: 1
+          if-no-files-found: warn
