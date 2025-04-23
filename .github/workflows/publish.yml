@@ -51,6 +51,7 @@ env:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   check_commits:
@@ -90,22 +91,26 @@ jobs:
   publish:
     needs:
       - check_commits
-      - build-fdroid
       - build-full
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: publish-github
     runs-on: ubuntu-latest
-    env:
-      GH_USER: ${{ secrets.PAT_USERNAME }}
-      GH_TOKEN: ${{ secrets.PAT }}
-      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
+      - name: Set TAG_NAME
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "TAG_NAME=nightly" >> $GITHUB_ENV
+            echo "RELEASE_TYPE=nightly" >> $GITHUB_ENV
+          fi
       - name: Set latest tag
         uses: rickstaa/action-create-tag@v1
         id: tag_creation
@@ -136,10 +141,6 @@ jobs:
         with:
           name: ${{ env.UPLOAD_DIR_ANDROID }}
           path: ${{ github.workspace }}/temp
-      - if: github.event_name == 'workflow_dispatch'
-        run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-      - if: github.event_name == 'schedule'
-        run: echo "TAG_NAME=nightly" >> $GITHUB_ENV
       - name: Set version release notes
         if: ${{ inputs.release_type == 'release' }}
         run: |
@@ -148,32 +149,45 @@ jobs:
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "$RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+
       - name: On nightly release notes
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
           echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
-          gh release delete nightly --yes || true
-          git push origin :nightly || true
+
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
           echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
-          gh release delete ${{ github.event.inputs.tag_name }} --yes || true
-      - name: Get checksum
+
+      - name: Delete previous release
+        if: ${{ contains(env.TAG_NAME, 'nightly') || inputs.release_type == 'prerelease' }}
+        uses: ClementTsang/delete-tag-and-release@v0.3.1
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get checksums
         id: checksum
         run: |
-          file_path=$(find ${{ github.workspace }}/temp -type f -iname "*.apk" | tail -1)
-          echo "checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")" >> $GITHUB_OUTPUT
+          checksums=""
+          for file_path in $(find ${{ github.workspace }}/temp -type f -iname "*.apk"); do
+            checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")
+            checksums="$checksums\n$file_path: $checksum"
+          done
+          echo "checksum<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$checksums" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body: |
             ${{ env.RELEASE_NOTES }}
 
-            SHA-256 fingerprint for the 4096-bit signing certificate:
+            SHA-256 fingerprints for the 4096-bit signing certificate:
             ```sh
             ${{ steps.checksum.outputs.checksum }}
             ```
@@ -192,3 +206,5 @@ jobs:
           make_latest: ${{ inputs.release_type == 'release' }}
           files: |
             ${{ github.workspace }}/temp/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
