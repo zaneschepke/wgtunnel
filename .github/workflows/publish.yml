@@ -103,21 +103,54 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
-      - name: Delete existing nightly release and tag
-        if: ${{ contains(env.TAG_NAME, 'nightly') }}
+      - name: Set TAG_NAME
         run: |
-          gh release delete nightly --yes
-          git push origin :nightly
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "TAG_NAME=nightly" >> $GITHUB_ENV
+            echo "RELEASE_TYPE=nightly" >> $GITHUB_ENV
+          fi
+      - name: Delete existing nightly release and tag
+        if: ${{ github.event_name == 'schedule' || inputs.release_type == 'nightly' }}
+        run: |
+          echo "Checking for existing nightly release..."
+          gh release view nightly && (echo "Deleting nightly release..."; gh release delete nightly --yes) || echo "No nightly release found"
+          echo "Checking for existing nightly tag..."
+          git fetch origin +refs/tags/nightly:refs/tags/nightly
+          if git rev-parse nightly >/dev/null 2>&1; then
+            echo "Deleting nightly tag..."
+            git push origin :nightly
+          else
+            echo "No nightly tag found"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Delete existing prerelease
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
-          gh release delete ${{ github.event.inputs.tag_name }} --yes
-          git push origin :${{ github.event.inputs.tag_name }}
+          echo "Checking for existing prerelease ${{ github.event.inputs.tag_name }}..."
+          gh release view ${{ github.event.inputs.tag_name }} && (echo "Deleting prerelease..."; gh release delete ${{ github.event.inputs.tag_name }} --yes) || echo "No prerelease found"
+          echo "Checking for existing prerelease tag..."
+          git fetch origin +refs/tags/${{ github.event.inputs.tag_name }}:refs/tags/${{ github.event.inputs.tag_name }}
+          if git rev-parse ${{ github.event.inputs.tag_name }} >/dev/null 2>&1; then
+            echo "Deleting prerelease tag..."
+            git push origin :${{ github.event.inputs.tag_name }}
+          else
+            echo "No prerelease tag found"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+      - name: Recreate nightly tag
+        if: ${{ github.event_name == 'schedule' || inputs.release_type == 'nightly' }}
+        run: |
+          echo "Creating nightly tag..."
+          git tag -f nightly
+          git push origin nightly --force
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Set latest tag
@@ -140,7 +173,7 @@ jobs:
         uses: requarks/changelog-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          toTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
+          toTag: ${{ env.TAG_NAME }}
           fromTag: "latest"
           writeToFile: false
       - name: Make download dir
@@ -150,12 +183,6 @@ jobs:
         with:
           name: ${{ env.UPLOAD_DIR_ANDROID }}
           path: ${{ github.workspace }}/temp
-      - if: github.event_name == 'workflow_dispatch'
-        run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-      - if: github.event_name == 'schedule'
-        run: |
-          echo "TAG_NAME=nightly" >> $GITHUB_ENV
-          echo "RELEASE_TYPE=nightly" >> $GITHUB_ENV
       - name: Set version release notes
         if: ${{ inputs.release_type == 'release' }}
         run: |
@@ -165,13 +192,15 @@ jobs:
           echo "$RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
       - name: On nightly release notes
-        if: ${{ contains(env.TAG_NAME, 'nightly') }}
+        if: ${{ github.event_name == 'schedule' || inputs.release_type == 'nightly' }}
         run: |
-          echo "RELEASE_NOTES=Nightly build for WG Tunnel." >> $GITHUB_ENV
+          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=nightly -Pflavor=full | grep -oP '\d+\.\d+\.\d+-nightly\+git\.\w+')
+          echo "RELEASE_NOTES=Nightly build for version $VERSION_NAME" >> $GITHUB_ENV
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
-          echo "RELEASE_NOTES=Beta version for WG Tunnel." >> $GITHUB_ENV
+          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=prerelease -Pflavor=full | grep -oP '\d+\.\d+\.\d+-beta\+git\.\w+')
+          echo "RELEASE_NOTES=Testing version for $VERSION_NAME" >> $GITHUB_ENV
       - name: Get checksums
         id: checksum
         run: |
@@ -186,8 +215,6 @@ jobs:
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body: |
             ${{ env.RELEASE_NOTES }}
@@ -211,3 +238,5 @@ jobs:
           make_latest: ${{ inputs.release_type == 'release' }}
           files: |
             ${{ github.workspace }}/temp/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
