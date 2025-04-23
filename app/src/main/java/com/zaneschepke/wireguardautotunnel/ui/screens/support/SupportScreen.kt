@@ -121,7 +121,7 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
         )
         UpdateSection(
             onUpdateCheck = {
-                if (BuildConfig.DEBUG || BuildConfig.VERSION_NAME.contains("beta"))
+                if (BuildConfig.DEBUG || BuildConfig.VERSION_NAME.contains("beta") || BuildConfig.FLAVOR == "google")
                     return@UpdateSection context.showToast(R.string.update_check_unsupported)
                 context.showToast(R.string.checking_for_update)
                 viewModel.handleUpdateCheck()
