@@ -117,7 +117,7 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
     ) {
         GroupLabel(
             stringResource(R.string.thank_you),
-            modifier = Modifier.padding(horizontal = 12.dp),
+            modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
         )
         UpdateSection(
             onUpdateCheck = {
