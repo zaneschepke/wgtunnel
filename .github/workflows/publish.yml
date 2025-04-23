@@ -154,7 +154,6 @@ jobs:
         run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
       - if: github.event_name == 'schedule'
         run: |
-          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=nightly -Pflavor=full | grep -oP '\d+\.\d+\.\d+-nightly\+git\.\w+')
           echo "TAG_NAME=nightly" >> $GITHUB_ENV
           echo "RELEASE_TYPE=nightly" >> $GITHUB_ENV
       - name: Set version release notes
@@ -168,13 +167,11 @@ jobs:
       - name: On nightly release notes
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
-          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=nightly -Pflavor=full | grep -oP '\d+\.\d+\.\d+-nightly\+git\.\w+')
-          echo "RELEASE_NOTES=Nightly build for version $VERSION_NAME" >> $GITHUB_ENV
+          echo "RELEASE_NOTES=Nightly build for WG Tunnel." >> $GITHUB_ENV
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
-          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=prerelease -Pflavor=full | grep -oP '\d+\.\d+\.\d+-beta\+git\.\w+')
-          echo "RELEASE_NOTES=Testing version for $VERSION_NAME" >> $GITHUB_ENV
+          echo "RELEASE_NOTES=Beta version for WG Tunnel." >> $GITHUB_ENV
       - name: Get checksums
         id: checksum
         run: |
