@@ -51,6 +51,7 @@ env:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   check_commits:
@@ -90,7 +91,6 @@ jobs:
   publish:
     needs:
       - check_commits
-      - build-fdroid
       - build-full
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: publish-github
@@ -106,6 +106,20 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
+      - name: Delete existing nightly release and tag
+        if: ${{ contains(env.TAG_NAME, 'nightly') }}
+        run: |
+          gh release delete nightly --yes
+          git push origin :nightly
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+      - name: Delete existing prerelease
+        if: ${{ inputs.release_type == 'prerelease' }}
+        run: |
+          gh release delete ${{ github.event.inputs.tag_name }} --yes
+          git push origin :${{ github.event.inputs.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Set latest tag
         uses: rickstaa/action-create-tag@v1
         id: tag_creation
@@ -139,7 +153,10 @@ jobs:
       - if: github.event_name == 'workflow_dispatch'
         run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
       - if: github.event_name == 'schedule'
-        run: echo "TAG_NAME=nightly" >> $GITHUB_ENV
+        run: |
+          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=nightly -Pflavor=full | grep -oP '\d+\.\d+\.\d+-nightly\+git\.\w+')
+          echo "TAG_NAME=nightly" >> $GITHUB_ENV
+          echo "RELEASE_TYPE=nightly" >> $GITHUB_ENV
       - name: Set version release notes
         if: ${{ inputs.release_type == 'release' }}
         run: |
@@ -151,19 +168,24 @@ jobs:
       - name: On nightly release notes
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
-          echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
-          gh release delete nightly --yes || true
-          git push origin :nightly || true
+          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=nightly -Pflavor=full | grep -oP '\d+\.\d+\.\d+-nightly\+git\.\w+')
+          echo "RELEASE_NOTES=Nightly build for version $VERSION_NAME" >> $GITHUB_ENV
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
-          echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
-          gh release delete ${{ github.event.inputs.tag_name }} --yes || true
-      - name: Get checksum
+          VERSION_NAME=$(./gradlew -q :app:printVersionName -PbuildType=prerelease -Pflavor=full | grep -oP '\d+\.\d+\.\d+-beta\+git\.\w+')
+          echo "RELEASE_NOTES=Testing version for $VERSION_NAME" >> $GITHUB_ENV
+      - name: Get checksums
         id: checksum
         run: |
-          file_path=$(find ${{ github.workspace }}/temp -type f -iname "*.apk" | tail -1)
-          echo "checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")" >> $GITHUB_OUTPUT
+          checksums=""
+          for file_path in $(find ${{ github.workspace }}/temp -type f -iname "*.apk"); do
+            checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")
+            checksums="$checksums\n$file_path: $checksum"
+          done
+          echo "checksum<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$checksums" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -173,7 +195,7 @@ jobs:
           body: |
             ${{ env.RELEASE_NOTES }}
 
-            SHA-256 fingerprint for the 4096-bit signing certificate:
+            SHA-256 fingerprints for the 4096-bit signing certificate:
             ```sh
             ${{ steps.checksum.outputs.checksum }}
             ```
