@@ -101,30 +101,14 @@ fun Project.isPrereleaseBuild(): Boolean {
 fun Project.computeVersionCode(): Int {
     val isNightlyBuild = isNightlyBuild()
     val isPreReleaseBuild = isPrereleaseBuild()
+    var versionCode = Constants.VERSION_CODE
 
-    // Static version from Constants.kt
-    val baseVersion = Semver.parse(Constants.VERSION_NAME) ?: Semver.of(0, 0, 0)
-
-    val version = when {
-        isNightlyBuild -> {
-            // Bump patch for nightly
-            Semver.of(
-                baseVersion.major,
-                baseVersion.minor,
-                baseVersion.patch + 1
-            )
-        }
-        isPreReleaseBuild -> {
-            // Bump minor for pre-release
-            Semver.of(
-                baseVersion.major,
-                baseVersion.minor + 1,
-                0
-            )
-        }
-        else -> baseVersion
+    if (isPreReleaseBuild) {
+        versionCode += 100 // Minor bump
+    }
+    if (isNightlyBuild) {
+        versionCode += 1 // Patch bump
     }
 
-    val baseVersionCode = version.major * 10000 + version.minor * 100 + version.patch
-    return baseVersionCode + getVersionCodeIncrement()
+    return versionCode + getVersionCodeIncrement()
 }
