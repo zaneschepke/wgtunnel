@@ -95,10 +95,6 @@ jobs:
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: publish-github
     runs-on: ubuntu-latest
-    env:
-      GH_USER: ${{ secrets.PAT_USERNAME }}
-      GH_TOKEN: ${{ secrets.PAT }}
-      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -153,17 +149,26 @@ jobs:
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "$RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+
       - name: On nightly release notes
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
           echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
-          gh release delete nightly --yes || true
-          git push origin :nightly || true
+
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
           echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
-          gh release delete ${{ github.event.inputs.tag_name }} --yes || true
+
+      - name: Delete previous release
+        if: ${{ contains(env.TAG_NAME, 'nightly') || inputs.release_type == 'prerelease' }}
+        uses: ClementTsang/delete-tag-and-release@v0.3.1
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Get checksums
         id: checksum
         run: |
