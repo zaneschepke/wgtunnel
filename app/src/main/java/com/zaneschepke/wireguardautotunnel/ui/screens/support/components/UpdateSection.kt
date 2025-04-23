@@ -1,5 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.rounded.CloudDownload
@@ -11,7 +12,6 @@ import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionIte
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItemLabel
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionLabelType
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
-import com.zaneschepke.wireguardautotunnel.util.Constants
 
 @Composable
 fun UpdateSection(onUpdateCheck: () -> Unit = {}) {
@@ -26,16 +26,20 @@ fun UpdateSection(onUpdateCheck: () -> Unit = {}) {
                     )
                 },
                 description = {
-                    val versionName =
-                        if (BuildConfig.BUILD_TYPE == Constants.RELEASE) {
-                            "v${BuildConfig.VERSION_NAME}"
-                        } else {
-                            "v${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}"
-                        }
-                    SelectionItemLabel(
-                        stringResource(R.string.version_template, versionName),
-                        SelectionLabelType.DESCRIPTION,
-                    )
+                    Column {
+                        SelectionItemLabel(
+                            stringResource(
+                                R.string.version_template,
+                                "v${BuildConfig.VERSION_NAME + 
+                                    if(BuildConfig.DEBUG) "-debug" else "" }",
+                            ),
+                            SelectionLabelType.DESCRIPTION,
+                        )
+                        SelectionItemLabel(
+                            stringResource(R.string.flavor_template, BuildConfig.FLAVOR),
+                            SelectionLabelType.DESCRIPTION,
+                        )
+                    }
                 },
                 onClick = onUpdateCheck,
             )

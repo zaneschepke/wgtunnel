@@ -1,76 +1,7 @@
+
+import org.ajoberstar.grgit.Grgit
 import org.gradle.api.Project
-import java.io.File
-import java.util.*
-
-fun Project.getCurrentFlavor(): String {
-    val taskRequestsStr = gradle.startParameter.taskRequests.toString()
-    val pattern: java.util.regex.Pattern =
-        if (taskRequestsStr.contains(":app:assemble")) {
-            java.util.regex.Pattern.compile(":app:assemble(\\w+)(Release|Debug)")
-        } else {
-            java.util.regex.Pattern.compile(":app:bundle(\\w+)(Release|Debug)")
-        }
-
-    val matcher = pattern.matcher(taskRequestsStr)
-    val flavor =
-        if (matcher.find()) {
-            matcher.group(1).lowercase()
-        } else {
-            print("NO FLAVOR FOUND")
-            ""
-        }
-    return flavor
-}
-
-fun Project.getBuildTaskName(): String {
-    val taskRequestsStr = gradle.startParameter.taskRequests[0].toString()
-    return taskRequestsStr.also {
-        project.logger.lifecycle("Build task: $it")
-    }
-}
-
-fun getLocalProperty(key: String, file: String = "local.properties"): String? {
-    val properties = Properties()
-    val localProperties = File(file)
-    if (localProperties.isFile) {
-        java.io.InputStreamReader(java.io.FileInputStream(localProperties), Charsets.UTF_8)
-            .use { reader ->
-                properties.load(reader)
-            }
-    } else return null
-    return properties.getProperty(key)
-}
-
-
-fun Project.getSigningProperties(): Properties {
-    return Properties().apply {
-        // created local file for signing details
-        try {
-            load(file("signing.properties").reader())
-        } catch (_: Exception) {
-            load(file("signing_template.properties").reader())
-        }
-    }
-}
-
-fun Project.getStoreFile(): File {
-    return file(
-        System.getenv()
-            .getOrDefault(
-                Constants.KEY_STORE_PATH_VAR,
-                getSigningProperties().getProperty(Constants.KEY_STORE_PATH_VAR),
-            ),
-    )
-}
-
-fun Project.getSigningProperty(property: String): String {
-    // try to get secrets from env first for pipeline build, then properties file for local
-    return System.getenv()
-        .getOrDefault(
-            property,
-            getSigningProperties().getProperty(property),
-        )
-}
+import org.semver4j.Semver
 
 fun Project.languageList(): List<String> {
 	return fileTree("../app/src/main/res") { include("**/strings.xml") }
@@ -84,6 +15,116 @@ fun Project.languageList(): List<String> {
 		.toList() + "en"
 }
 
+// Get the Git commit hash
+fun Project.getGitCommitHash(): String {
+    var grgit: Grgit? = null
+    try {
+        grgit = Grgit.open(mapOf("currentDir" to projectDir))
+        return grgit.head().abbreviatedId
+    } catch (e: Exception) {
+        logger.warn("Failed to get Git commit hash: ${e.message}. Using fallback.")
+        return "unknown"
+    } finally {
+        grgit?.close()
+    }
+}
 
+// Get commit count since last commit for versionCode increment
+fun Project.getCommitCountSinceLastCommit(): Int {
+    var grgit: Grgit? = null
+    try {
+        grgit = Grgit.open(mapOf("currentDir" to projectDir))
+        val headCommit = grgit.head()
+        val log = grgit.log(mapOf(
+            "includes" to listOf(headCommit.id)
+        ))
+        return log.size
+    } catch (e: Exception) {
+        logger.warn("Failed to get commit count: ${e.message}. Using fallback.")
+        return 0
+    } finally {
+        grgit?.close()
+    }
+}
 
+// Get versionCode increment for nightly/pre-release
+fun Project.getVersionCodeIncrement(): Int {
+    val isNightlyBuild = gradle.startParameter.taskNames.any { it.lowercase().contains("nightly") }
+    val isPreReleaseBuild = gradle.startParameter.taskNames.any { it.lowercase().contains("prerelease") }
+    if (!isNightlyBuild && !isPreReleaseBuild) return 0
 
+    return System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+        ?: System.getenv("CI_BUILD_NUMBER")?.toIntOrNull()
+        ?: getCommitCountSinceLastCommit()
+}
+
+// Compute versionName dynamic bumping for nightly/pre-release
+fun Project.computeVersionName(): String {
+    val isNightlyBuild = isNightlyBuild()
+    val isPreReleaseBuild = isPrereleaseBuild()
+
+    // Static version from Constants.kt
+    val baseVersion = Semver.parse(Constants.VERSION_NAME) ?: Semver.of(0, 0, 0)
+
+    return when {
+        isNightlyBuild -> {
+            // Bump patch for nightly
+            val nightlyVersion = Semver.of(
+                baseVersion.major,
+                baseVersion.minor,
+                baseVersion.patch + 1
+            )
+            "${nightlyVersion}-nightly+git.${getGitCommitHash()}"
+        }
+        isPreReleaseBuild -> {
+            // Bump minor for pre-release
+            val preReleaseVersion = Semver.of(
+                baseVersion.major,
+                baseVersion.minor + 1,
+                0
+            )
+            "${preReleaseVersion}-beta+git.${getGitCommitHash()}"
+        }
+        else -> Constants.VERSION_NAME
+    }
+}
+
+fun Project.isNightlyBuild(): Boolean {
+    return gradle.startParameter.taskNames.any { it.lowercase().contains(Constants.NIGHTLY) }
+}
+
+fun Project.isPrereleaseBuild(): Boolean {
+    return gradle.startParameter.taskNames.any { it.lowercase().contains(Constants.PRERELEASE) }
+}
+
+// Compute versionCode (static baseline, dynamic bumping for nightly/pre-release)
+fun Project.computeVersionCode(): Int {
+    val isNightlyBuild = isNightlyBuild()
+    val isPreReleaseBuild = isPrereleaseBuild()
+
+    // Static version from Constants.kt
+    val baseVersion = Semver.parse(Constants.VERSION_NAME) ?: Semver.of(0, 0, 0)
+
+    val version = when {
+        isNightlyBuild -> {
+            // Bump patch for nightly
+            Semver.of(
+                baseVersion.major,
+                baseVersion.minor,
+                baseVersion.patch + 1
+            )
+        }
+        isPreReleaseBuild -> {
+            // Bump minor for pre-release
+            Semver.of(
+                baseVersion.major,
+                baseVersion.minor + 1,
+                0
+            )
+        }
+        else -> baseVersion
+    }
+
+    val baseVersionCode = version.major * 10000 + version.minor * 100 + version.patch
+    return baseVersionCode + getVersionCodeIncrement()
+}

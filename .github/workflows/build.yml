@@ -1,4 +1,5 @@
-name: build
+name: Build
+
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +13,14 @@ on:
           - prerelease
           - nightly
           - release
+      flavor:
+        type: choice
+        description: "Product flavor"
+        required: true
+        default: fdroid
+        options:
+          - fdroid
+          - full
     secrets:
       SIGNING_KEY_ALIAS:
         required: false
@@ -30,6 +39,11 @@ on:
         description: "Build type"
         required: true
         default: debug
+      flavor:
+        type: string
+        description: "Product flavor"
+        required: false
+        default: fdroid
     secrets:
       SIGNING_KEY_ALIAS:
         required: false
@@ -41,6 +55,7 @@ on:
         required: false
       KEYSTORE:
         required: false
+
 env:
   UPLOAD_DIR_ANDROID: android_artifacts
 
@@ -48,15 +63,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
-      SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
       KEY_STORE_FILE: 'android_keystore.jks'
       KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
     outputs:
       UPLOAD_DIR_ANDROID: ${{ env.UPLOAD_DIR_ANDROID }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -65,61 +82,46 @@ jobs:
           cache: gradle
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
-      # Here we need to decode keystore.jks from base64 string and place it
-      # in the folder specified in the release signing configuration
       - name: Decode Keystore
         id: decode_keystore
         uses: timheuer/base64-to-file@v1.2
         with:
           fileName: ${{ env.KEY_STORE_FILE }}
           fileDir: ${{ env.KEY_STORE_LOCATION }}
-          encodedString: ${{ secrets.ANDROID_KEYSTORE }}
-
-      # create keystore path for gradle to read
+          encodedString: ${{ secrets.KEYSTORE }}
       - name: Create keystore path env var
         if: ${{ inputs.build_type != 'debug' }}
         run: |
           store_path=${{ env.KEY_STORE_LOCATION }}${{ env.KEY_STORE_FILE }}
           echo "KEY_STORE_PATH=$store_path" >> $GITHUB_ENV
-
       - name: Create service_account.json
         if: ${{ inputs.build_type != 'debug' }}
         id: createServiceAccount
-        run: echo '${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}' > service_account.json
-
-      - name: Build Fdroid Release APK
-        if: ${{ inputs.build_type == 'release' }}
-        run: ./gradlew :app:assembleFdroidRelease --info
-
-      - name: Build Fdroid Prerelease APK
-        if: ${{ inputs.build_type == 'prerelease' }}
-        run: ./gradlew :app:assembleFdroidPrerelease --info
-
-      - name: Build Fdroid Nightly APK
-        if: ${{ inputs.build_type == 'nightly' }}
-        run: ./gradlew :app:assembleFdroidNightly --info
-
-      - name: Build Debug APK
-        if: ${{ inputs.build_type == 'debug' }}
-        run: ./gradlew :app:assembleFdroidDebug --stacktrace
-
-      # bump versionCode for nightly and prerelease builds
-      - name: Commit and push versionCode changes
-        if: ${{ inputs.build_type == 'nightly' || inputs.build_type == 'prerelease' }}
+        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service_account.json
+      - name: Build APK
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git add versionCode.txt
-          git commit -m "Automated build update"
-
+          flavor=${{ inputs.flavor }}
+          build_type=${{ inputs.build_type }}
+          case $build_type in
+            "release")
+              ./gradlew :app:assemble${flavor^}Release --info
+              ;;
+            "prerelease")
+              ./gradlew :app:assemble${flavor^}Prerelease --info
+              ;;
+            "nightly")
+              ./gradlew :app:assemble${flavor^}Nightly --info
+              ;;
+            "debug")
+              ./gradlew :app:assemble${flavor^}Debug --stacktrace
+              ;;
+          esac
       - name: Get release apk path
         id: apk-path
-        run: echo "path=$(find . -regex '^.*/build/outputs/apk/fdroid/${{ inputs.build_type }}/.*\.apk$' -type f | head -1 | tail -c+2)" >> $GITHUB_OUTPUT
-
+        run: echo "path=$(find . -regex '^.*/build/outputs/apk/${{ inputs.flavor }}/${{ inputs.build_type }}/.*\.apk$' -type f | head -1 | tail -c+2)" >> $GITHUB_OUTPUT
       - name: Upload release apk
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.UPLOAD_DIR_ANDROID }}
-          path: ${{github.workspace}}/${{ steps.apk-path.outputs.path }}
+          path: ${{ github.workspace }}/${{ steps.apk-path.outputs.path }}
           retention-days: 1

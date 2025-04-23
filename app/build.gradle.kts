@@ -9,33 +9,14 @@ plugins {
     alias(libs.plugins.licensee)
 }
 
-val versionFile = file("$rootDir/versionCode.txt")
-
-val versionCodeIncrement =
-    with(getBuildTaskName().lowercase()) {
-        when {
-            this.contains(Constants.NIGHTLY) || this.contains(Constants.PRERELEASE) -> {
-                if (versionFile.exists()) {
-                    versionFile.readText().trim().toInt() + 1
-                } else {
-                    1
-                }
-            }
-            else -> 0
-        }
-    }
-
 android {
     namespace = Constants.APP_ID
     compileSdk = Constants.TARGET_SDK
 
     androidResources { generateLocaleConfig = true }
 
-    // reproducibility
     dependenciesInfo {
-        // Disables dependency metadata when building APKs.
         includeInApk = false
-        // Disables dependency metadata when building Android App Bundles.
         includeInBundle = false
     }
 
@@ -43,14 +24,12 @@ android {
         applicationId = Constants.APP_ID
         minSdk = Constants.MIN_SDK
         targetSdk = Constants.TARGET_SDK
-        versionCode = Constants.VERSION_CODE + versionCodeIncrement
-        versionName = determineVersionName()
+        versionCode = computeVersionCode()
+        versionName = computeVersionName()
 
         ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
-        sourceSets {
-            getByName("debug").assets.srcDirs(files("$projectDir/schemas")) // Room
-        }
+        sourceSets { getByName("debug").assets.srcDirs(files("$projectDir/schemas")) }
 
         buildConfigField(
             "String[]",
@@ -64,15 +43,18 @@ android {
 
     signingConfigs {
         create(Constants.RELEASE) {
-            storeFile = getStoreFile()
-            storePassword = getSigningProperty(Constants.STORE_PASS_VAR)
-            keyAlias = getSigningProperty(Constants.KEY_ALIAS_VAR)
-            keyPassword = getSigningProperty(Constants.KEY_PASS_VAR)
+            storeFile = file(System.getenv("KEY_STORE_PATH") ?: "keystore/android_keystore.jks")
+            storePassword =
+                LocalProperties.get("SIGNING_STORE_PASSWORD")
+                    ?: System.getenv("SIGNING_STORE_PASSWORD")
+            keyAlias =
+                LocalProperties.get("SIGNING_KEY_ALIAS") ?: System.getenv("SIGNING_KEY_ALIAS")
+            keyPassword =
+                LocalProperties.get("SIGNING_KEY_PASSWORD") ?: System.getenv("SIGNING_KEY_PASSWORD")
         }
     }
 
     buildTypes {
-        // don't strip
         packaging.jniLibs.keepDebugSymbols.addAll(
             listOf("libwg-go.so", "libwg-quick.so", "libwg.so")
         )
@@ -88,6 +70,7 @@ android {
             signingConfig = signingConfigs.getByName(Constants.RELEASE)
             resValue("string", "provider", "\"${Constants.APP_NAME}.provider\"")
         }
+
         debug {
             applicationIdSuffix = ".debug"
             resValue("string", "app_name", "WG Tunnel - Debug")
@@ -108,27 +91,21 @@ android {
             resValue("string", "app_name", "WG Tunnel - Nightly")
             resValue("string", "provider", "\"${Constants.APP_NAME}.provider.nightly\"")
         }
-
-        applicationVariants.all {
-            val variant = this
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-                .forEach { output ->
-                    val outputFileName =
-                        "${Constants.APP_NAME}-${variant.flavorName}-" +
-                            "${variant.buildType.name}-${variant.versionName}.apk"
-                    output.outputFileName = outputFileName
-                }
-        }
     }
-    flavorDimensions.add(Constants.TYPE)
+
+    flavorDimensions.add("type")
     productFlavors {
         create("fdroid") {
-            dimension = Constants.TYPE
-            proguardFile("fdroid-rules.pro")
+            dimension = "type"
+            buildConfigField("String", "FLAVOR", "\"fdroid\"")
         }
-        create("general") { dimension = Constants.TYPE }
+        create("google") {
+            dimension = "type"
+            buildConfigField("String", "FLAVOR", "\"google\"")
+        }
+        create("full") { dimension = "type" }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -144,9 +121,22 @@ android {
     licensee {
         Constants.allowedLicenses.forEach { allow(it) }
         allowUrl(Constants.XZING_LICENSE_URL)
-
-        // Fix for qrcode-kotlin (MIT, custom URL)
         allowUrl("https://rafaellins.mit-license.org/2021/")
+    }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val outputFileName =
+                    if (variant.flavorName == "fdroid" && variant.buildType.name == "release") {
+                        "${Constants.APP_NAME}-fdroid-release-${variant.versionName}.apk"
+                    } else {
+                        "${Constants.APP_NAME}-${variant.flavorName}-v${variant.versionName}.apk"
+                    }
+                output.outputFileName = outputFileName
+            }
     }
 }
 
@@ -156,8 +146,6 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    // helpers for implementing LifecycleOwner in a Service
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -169,7 +157,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.storage)
 
-    // test
     testImplementation(libs.junit)
     testImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -180,107 +167,63 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.manifest)
 
-    // tunnel
     implementation(libs.tunnel)
     implementation(libs.amneziawg.android)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    // logging
     implementation(libs.timber)
 
-    // compose navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
 
-    // accompanist
     implementation(libs.accompanist.permissions)
     implementation(libs.accompanist.drawablepainter)
 
-    // storage
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.datastore.preferences)
 
-    // lifecycle
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.process)
 
-    // serialization
     implementation(libs.kotlinx.serialization.json)
 
-    // ui
     implementation(libs.zxing.android.embedded)
     implementation(libs.material.icons.extended)
 
-    // bio
     implementation(libs.androidx.biometric.ktx)
     implementation(libs.pin.lock.compose)
 
-    // shortcuts
     implementation(libs.androidx.core)
 
-    // splash
     implementation(libs.androidx.core.splashscreen)
 
-    // worker
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
 
-    // util
     implementation(libs.qrcode.kotlin)
     implementation(libs.semver4j)
 
-    // Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
-}
-
-fun determineVersionName(): String {
-    return with(getBuildTaskName().lowercase()) {
-        when {
-            contains(Constants.NIGHTLY) || contains(Constants.PRERELEASE) ->
-                Constants.VERSION_NAME + "-${grgitService.service.get().grgit.head().abbreviatedId}"
-            else -> Constants.VERSION_NAME
-        }
-    }
-}
-
-val incrementVersionCode by
-    tasks.registering {
-        doLast {
-            val versionFile = file("$rootDir/versionCode.txt")
-            if (versionFile.exists()) {
-                versionFile.writeText(versionCodeIncrement.toString())
-                println("Incremented versionCode to $versionCodeIncrement")
-            }
-        }
-    }
-
-tasks.whenTaskAdded {
-    if (name.startsWith("assemble") && !name.lowercase().contains("debug")) {
-        dependsOn(incrementVersionCode)
-    }
+    implementation(libs.slf4j.android)
 }
 
 tasks.register<Copy>("copyLicenseeJsonToAssets") {
     dependsOn("licensee")
-
     val outputAssets = layout.projectDirectory.dir("src/main/assets")
-
     from(layout.buildDirectory.file("reports/licensee/androidFdroidRelease/artifacts.json")) {
         rename("artifacts.json", "licenses.json")
     }
-
     into(outputAssets)
 }
 

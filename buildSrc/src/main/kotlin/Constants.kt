@@ -7,15 +7,10 @@ object Constants {
     const val APP_ID = "com.zaneschepke.wireguardautotunnel"
     const val APP_NAME = "wgtunnel"
 
-    const val STORE_PASS_VAR = "SIGNING_STORE_PASSWORD"
-    const val KEY_ALIAS_VAR = "SIGNING_KEY_ALIAS"
-    const val KEY_PASS_VAR = "SIGNING_KEY_PASSWORD"
-    const val KEY_STORE_PATH_VAR = "KEY_STORE_PATH"
-
+    // build types
     const val RELEASE = "release"
     const val NIGHTLY = "nightly"
 	const val PRERELEASE = "prerelease"
-    const val TYPE = "type"
 
     val allowedLicenses = listOf("MIT", "Apache-2.0", "BSD-3-Clause")
     const val XZING_LICENSE_URL: String = "https://github.com/journeyapps/zxing-android-embedded/blob/master/COPYING"

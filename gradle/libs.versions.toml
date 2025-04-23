@@ -5,7 +5,6 @@ amneziawgAndroid = "1.3.8"
 androidx-junit = "1.2.1"
 appcompat = "1.7.0"
 biometricKtx = "1.2.0-alpha05"
-markdownCompose = "0.5.7"
 coreKtx = "1.16.0"
 datastorePreferences = "1.1.4"
 desugar_jdk_libs = "2.1.5"
@@ -22,6 +21,7 @@ pinLockCompose = "1.0.4"
 qrcodeKotlin = "4.4.1"
 roomVersion = "2.7.0"
 semver4j = "3.1.0"
+slf4jAndroid = "1.7.36"
 timber = "5.0.1"
 tunnel = "1.2.14"
 androidGradlePlugin = "8.9.2"
@@ -95,12 +95,12 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorCli
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktorClientCore" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientCore" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
-markdown-compose = { module = "com.github.jeziellago:compose-markdown", version.ref = "markdownCompose" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 
 pin-lock-compose = { module = "com.zaneschepke:pin_lock_compose", version.ref = "pinLockCompose" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcodeKotlin" }
 semver4j = { module = "com.vdurmont:semver4j", version.ref = "semver4j" }
+slf4j-android = { module = "org.slf4j:slf4j-android", version.ref = "slf4jAndroid" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 tunnel = { module = "com.zaneschepke:wireguard-android", version.ref = "tunnel" }
 

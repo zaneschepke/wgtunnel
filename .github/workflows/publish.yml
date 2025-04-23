@@ -2,12 +2,12 @@ name: publish
 
 on:
   schedule:
-  - cron: "4 3 * * *"
+    - cron: "4 3 * * *"
   workflow_dispatch:
     inputs:
       track:
         type: choice
-        description: "Google play release track"
+        description: "Google Play release track"
         options:
           - none
           - internal
@@ -30,7 +30,22 @@ on:
         description: "Tag name for release"
         required: false
         default: nightly
+      flavor:
+        type: choice
+        description: "Product flavor"
+        required: true
+        default: full
+        options:
+          - fdroid
+          - full
   workflow_call:
+    inputs:
+      flavor:
+        type: string
+        description: "Product flavor"
+        required: false
+        default: full
+
 env:
   UPLOAD_DIR_ANDROID: android_artifacts
 
@@ -43,66 +58,69 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       has_new_commits: ${{ steps.check.outputs.new_commits }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # This fetches all history so we can check commits
-
+          fetch-depth: 0
       - name: Check for new commits
         id: check
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
-          # This script checks for commits newer than 23 hours ago
           NEW_COMMITS=$(git rev-list --count --after="$(date -Iseconds -d '23 hours ago')" ${{ github.sha }})
           echo "new_commits=$NEW_COMMITS" >> $GITHUB_OUTPUT
 
-  build:
-    if: ${{ inputs.release_type != 'none' }}
+  build-fdroid:
+    if: ${{ inputs.release_type == 'release' || inputs.flavor == 'fdroid' }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
       build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
+      flavor: fdroid
+
+  build-full:
+    if: ${{ inputs.release_type == 'release' || inputs.release_type == 'nightly' || inputs.release_type == 'prerelease' || inputs.flavor == 'full' }}
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
+      flavor: full
 
   publish:
     needs:
       - check_commits
-      - build
+      - build-fdroid
+      - build-full
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: publish-github
     runs-on: ubuntu-latest
     env:
       GH_USER: ${{ secrets.PAT_USERNAME }}
-      # GH needed for gh cli
       GH_TOKEN: ${{ secrets.PAT }}
       GH_REPO: ${{ github.repository }}
-
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
-
-      # update latest tag
       - name: Set latest tag
         uses: rickstaa/action-create-tag@v1
         id: tag_creation
         with:
-          tag: "latest"  # or any tag name you wish to use
+          tag: "latest"
           message: "Automated tag for HEAD commit"
           force_push_tag: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_exists_error: false
-
       - name: Get latest release
         id: latest_release
         uses: kaliber5/action-get-release@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           latest: true
-
       - name: Generate Changelog
         id: changelog
         uses: requarks/changelog-action@v1
@@ -110,65 +128,43 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           toTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
           fromTag: "latest"
-          writeToFile: false  # we won't write to file, just output
-
-      - name: Get version code
-        if: ${{ inputs.release_type == 'release' }}
-        run: |
-          version_code=$(grep "VERSION_CODE" buildSrc/src/main/kotlin/Constants.kt | awk '{print $5}' | tr -d '\n')
-          echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
-
-      - name: Push changes
-        if: ${{ inputs.release_type == '' || inputs.release_type == 'nightly'  || inputs.release_type == 'prerelease' }}
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.PAT }}
-          branch: ${{ github.ref }}
-
+          writeToFile: false
       - name: Make download dir
         run: mkdir ${{ github.workspace }}/temp
-
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.UPLOAD_DIR_ANDROID }}
           path: ${{ github.workspace }}/temp
-
-      # Setup TAG_NAME, which is used as a general "name"
       - if: github.event_name == 'workflow_dispatch'
         run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
       - if: github.event_name == 'schedule'
         run: echo "TAG_NAME=nightly" >> $GITHUB_ENV
-
       - name: Set version release notes
         if: ${{ inputs.release_type == 'release' }}
         run: |
-          RELEASE_NOTES="$(cat ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/${{ env.VERSION_CODE }}.txt)"
+          VERSION_NAME=$(grep "const val VERSION_NAME" buildSrc/src/main/kotlin/Constants.kt | awk -F'"' '{print $2}')
+          RELEASE_NOTES="$(cat ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/${VERSION_NAME}.txt || echo "No changelog found for ${VERSION_NAME}")"
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           echo "$RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
       - name: On nightly release notes
         if: ${{ contains(env.TAG_NAME, 'nightly') }}
         run: |
           echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
           gh release delete nightly --yes || true
           git push origin :nightly || true
-
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
           echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
           gh release delete ${{ github.event.inputs.tag_name }} --yes || true
-
       - name: Get checksum
         id: checksum
         run: |
-          file_path=$(find ${{ github.workspace }}/temp -type f -iname "*.apk" | tail -n1)
+          file_path=$(find ${{ github.workspace }}/temp -type f -iname "*.apk" | tail -1)
           echo "checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")" >> $GITHUB_OUTPUT
-
-
-      - name: Create Release with Fastlane changelog notes
+      - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
         env:
@@ -196,72 +192,3 @@ jobs:
           make_latest: ${{ inputs.release_type == 'release' }}
           files: |
             ${{ github.workspace }}/temp/*
-
-  publish-fdroid:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-    if: inputs.release_type == 'release'
-    steps:
-      - name: Dispatch update for fdroid repo
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.PAT }}
-          repository: zaneschepke/fdroid
-          event-type: fdroid-update
-
-  publish-play:
-    if: ${{ inputs.track != 'none' && inputs.track != '' }}
-    name: Publish to Google Play
-    runs-on: ubuntu-latest
-
-    env:
-      SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
-      SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
-      KEY_STORE_FILE: 'android_keystore.jks'
-      KEY_STORE_LOCATION: ${{ github.workspace }}/app/keystore/
-      GH_USER: ${{ secrets.PAT_USERNAME }}
-      GH_TOKEN: ${{ secrets.PAT }}
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: gradle
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # Here we need to decode keystore.jks from base64 string and place it
-      # in the folder specified in the release signing configuration
-      - name: Decode Keystore
-        id: decode_keystore
-        uses: timheuer/base64-to-file@v1.2
-        with:
-          fileName: ${{ env.KEY_STORE_FILE }}
-          fileDir: ${{ env.KEY_STORE_LOCATION }}
-          encodedString: ${{ secrets.ANDROID_KEYSTORE }}
-
-      # create keystore path for gradle to read
-      - name: Create keystore path env var
-        run: |
-          store_path=${{ env.KEY_STORE_LOCATION }}${{ env.KEY_STORE_FILE }}
-          echo "KEY_STORE_PATH=$store_path" >> $GITHUB_ENV
-
-      - name: Create service_account.json
-        id: createServiceAccount
-        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service_account.json
-
-      - name: Deploy with fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2' # Not needed with a .ruby-version file
-          bundler-cache: true
-
-      - name: Distribute app to Prod track 🚀
-        run: (cd ${{ github.workspace }} && bundle install && bundle exec fastlane ${{ inputs.track }})
-

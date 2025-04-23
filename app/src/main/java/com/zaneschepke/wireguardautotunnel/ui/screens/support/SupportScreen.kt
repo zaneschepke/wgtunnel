@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.zxing.client.android.BuildConfig
+import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.SectionDivider
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
@@ -23,8 +23,8 @@ import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.ContactSupportOptions
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.GeneralSupportOptions
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.UpdateSection
-import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.canInstallPackages
+import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestInstallPackagesPermission
 import com.zaneschepke.wireguardautotunnel.util.extensions.showToast
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
@@ -54,6 +54,10 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
         InfoDialog(
             onDismiss = { viewModel.handleUpdateShown() },
             onAttest = {
+                if (BuildConfig.FLAVOR != "full") {
+                    uiState.appUpdate?.apkUrl?.let { context.openWebUrl(it) }
+                    return@InfoDialog
+                }
                 if (context.canInstallPackages()) {
                     viewModel.handleDownloadAndInstallApk()
                 } else {
@@ -80,7 +84,12 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
                     }
                 }
             },
-            confirmText = { Text(stringResource(R.string.download_and_install)) },
+            confirmText = {
+                Text(
+                    if (BuildConfig.FLAVOR != "full") stringResource(R.string.download)
+                    else stringResource(R.string.download_and_install)
+                )
+            },
         )
     }
 
@@ -110,15 +119,15 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
             stringResource(R.string.thank_you),
             modifier = Modifier.padding(horizontal = 12.dp),
         )
-        if (BuildConfig.BUILD_TYPE == Constants.RELEASE) {
-            UpdateSection(
-                onUpdateCheck = {
-                    context.showToast(R.string.checking_for_update)
-                    viewModel.handleUpdateCheck()
-                }
-            )
-            SectionDivider()
-        }
+        UpdateSection(
+            onUpdateCheck = {
+                if (BuildConfig.DEBUG || BuildConfig.VERSION_NAME.contains("beta"))
+                    return@UpdateSection context.showToast(R.string.update_check_unsupported)
+                context.showToast(R.string.checking_for_update)
+                viewModel.handleUpdateCheck()
+            }
+        )
+        SectionDivider()
         GeneralSupportOptions(context)
         SectionDivider()
         ContactSupportOptions(context)

@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
 import android.content.Context
+import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.data.network.GitHubApi
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.entity.AppUpdate
@@ -16,6 +17,7 @@ import io.ktor.utils.io.readAvailable
 import java.io.File
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class GitHubUpdateRepository(
     private val gitHubApi: GitHubApi,
@@ -27,11 +29,24 @@ class GitHubUpdateRepository(
 ) : UpdateRepository {
     override suspend fun checkForUpdate(currentVersion: String): Result<AppUpdate?> =
         withContext(ioDispatcher) {
-            gitHubApi.getLatestRelease(githubOwner, githubRepo).map { release ->
-                if (
-                    NumberUtils.compareVersions(release.tagName.removePrefix("v"), currentVersion) >
-                        0
-                ) {
+            Timber.i("Checking for update")
+            val release =
+                if (BuildConfig.VERSION_NAME.contains("nightly")) {
+                    gitHubApi.getNightlyRelease(githubOwner, githubRepo)
+                } else {
+                    gitHubApi.getLatestRelease(githubOwner, githubRepo)
+                }
+            release.map { release ->
+                val apkAsset =
+                    release.assets.find { asset ->
+                        asset.name.startsWith("wgtunnel-full-v") && asset.name.endsWith(".apk")
+                    }
+                val newVersion =
+                    apkAsset?.name?.removePrefix("wgtunnel-full-v")?.removeSuffix(".apk")
+                        ?: return@map null
+
+                Timber.i("Latest version: $newVersion, current version: $currentVersion")
+                if (NumberUtils.compareVersions(newVersion, currentVersion) > 0) {
                     release.toAppUpdate()
                 } else {
                     null

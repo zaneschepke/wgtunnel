@@ -5,6 +5,7 @@ import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
 import kotlin.math.pow
+import timber.log.Timber
 
 object NumberUtils {
     private const val BYTES_IN_KB = 1024.0
@@ -41,8 +42,13 @@ object NumberUtils {
     }
 
     fun compareVersions(newVersion: String, currentVersion: String): Int {
-        val newSemver = Semver(newVersion, Semver.SemverType.LOOSE)
-        val currentSemver = Semver(currentVersion, Semver.SemverType.LOOSE)
-        return newSemver.compareTo(currentSemver)
+        try {
+            val newSemver = Semver(newVersion, Semver.SemverType.LOOSE)
+            val currentSemver = Semver(currentVersion, Semver.SemverType.LOOSE)
+            return newSemver.compareTo(currentSemver)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to compare versions $newVersion and $currentVersion")
+            return 0
+        }
     }
 }
