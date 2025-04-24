@@ -240,7 +240,9 @@
     <string name="download">Скачать</string>
     <string name="download_and_install">Скачать и установить</string>
     <string name="update_download_failed">Невозможно скачать обновление.</string>
-    <string name="version_template">Текущая версия: %1$s</string>
+    <string name="version_template">Версия: %1$s</string>
     <string name="licenses">Лицензии</string>
     <string name="permission_required">Требуется разрешение</string>
+    <string name="update_check_unsupported">Проверка обновлений не поддерживается для этого типа сборок.</string>
+    <string name="flavor_template">Сборка: %1$s</string>
 </resources>
