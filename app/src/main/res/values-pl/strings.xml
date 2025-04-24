@@ -231,7 +231,7 @@
     <string name="select_all">Wybierz wszystkie</string>
     <string name="share">Udostępnij</string>
     <string name="download">Pobierz</string>
-    <string name="version_template">Bieżąca wersja: %1$s</string>
+    <string name="version_template">Wersja: %1$s</string>
     <string name="check_for_update">Sprawdź aktualizację</string>
     <string name="update_check_failed">Sprawdzanie aktualizacji zakończyło się niepowodzeniem.</string>
     <string name="checking_for_update">Sprawdzanie aktualizacji</string>
@@ -245,4 +245,5 @@
     <string name="export_success">Eksport zakończony powodzeniem</string>
     <string name="licenses">Licencje</string>
     <string name="update_check_unsupported">Sprawdzanie aktualizacji nie jest obsługiwane w tym typie kompilacji.</string>
+    <string name="flavor_template">Wariant: %1$s</string>
 </resources>
