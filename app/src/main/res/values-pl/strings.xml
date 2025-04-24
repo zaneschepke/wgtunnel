@@ -244,4 +244,5 @@
     <string name="allow">Zezwól</string>
     <string name="export_success">Eksport zakończony powodzeniem</string>
     <string name="licenses">Licencje</string>
+    <string name="update_check_unsupported">Sprawdzanie aktualizacji nie jest obsługiwane w tym typie kompilacji.</string>
 </resources>
