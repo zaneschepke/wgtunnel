@@ -12,6 +12,7 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiManager
 import android.os.Build
 import com.wireguard.android.util.RootShell
+import java.util.Collections
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -47,6 +48,9 @@ class AndroidNetworkMonitor(
     @get:Synchronized @set:Synchronized var currentSsid: String? = null
 
     @get:Synchronized @set:Synchronized var wifiConnected = false
+
+    // Track active Wi-Fi networks and last active network ID
+    private val activeNetworks = Collections.synchronizedSet(mutableSetOf<Network>())
 
     data class WifiState(val connected: Boolean = false, val ssid: String? = null)
 
@@ -139,6 +143,7 @@ class AndroidNetworkMonitor(
             object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
                     Timber.d("Wi-Fi onAvailable: network=$network")
+                    activeNetworks.add(network)
                     launch {
                         currentSsid = getWifiSsid()
                         wifiConnected = true
@@ -148,9 +153,17 @@ class AndroidNetworkMonitor(
 
                 override fun onLost(network: Network) {
                     Timber.d("Wi-Fi onLost: network=$network")
-                    currentSsid = null
-                    wifiConnected = false
-                    trySend(WifiState(connected = false, ssid = null))
+                    activeNetworks.remove(network)
+                    if (activeNetworks.isEmpty()) {
+                        Timber.d(
+                            "All Wi-Fi networks disconnected, clearing currentSsid and wifiConnected"
+                        )
+                        currentSsid = null
+                        wifiConnected = false
+                        trySend(WifiState(connected = false, ssid = null))
+                    } else {
+                        Timber.d("Wi-Fi onLost, but still connected to other networks, ignoring")
+                    }
                 }
             }
 
