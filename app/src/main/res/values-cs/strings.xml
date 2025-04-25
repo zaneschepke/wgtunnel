@@ -185,7 +185,7 @@
     <string name="download">Stáhnout</string>
     <string name="check_for_update">Zkontrolovat aktualizaci</string>
     <string name="update_check_failed">Kontrola aktualizace se nezdařila.</string>
-    <string name="version_template">Aktuální verze: %1$s</string>
+    <string name="version_template">Verze: %1$s</string>
     <string name="update_download_failed">Stažení aktualizace se nezdařilo.</string>
     <string name="update_available">Dostupná aktualizace!</string>
     <string name="download_and_install">Stáhnout a nainstalovat</string>
@@ -212,4 +212,11 @@
     <string name="info">Informace</string>
     <string name="copy">Kopírovat</string>
     <string name="status">Stav</string>
+    <string name="launch_app_settings">Spustit nastavení aplikace</string>
+    <string name="tunnel_running">Tunel je v provozu</string>
+    <string name="wildcards_active">Wildcards aktivní</string>
+    <string name="root_accepted">Root shell přijata</string>
+    <string name="background_location_message">Autorizace povolit vždy polohu a/nebo přesná poloha je vyžadováno pro tuto funkci. Viz</string>
+    <string name="update_check_unsupported">Kontrola aktualizací není u tohoto typu sestavení podporována.</string>
+    <string name="background_location_message2">abyste se ujistili, že jsou tato oprávnění povolena.</string>
 </resources>
