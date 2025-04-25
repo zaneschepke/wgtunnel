@@ -7,12 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
+import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberClipboardHelper
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberFileImportLauncherForResult
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.components.ExportTunnelsBottomSheet
@@ -29,7 +29,7 @@ import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 @Composable
 fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: AppViewModel) {
     val navController = LocalNavController.current
-    val clipboard = LocalClipboardManager.current
+    val clipboard = rememberClipboardHelper()
 
     var showUrlImportDialog by remember { mutableStateOf(false) }
 
@@ -90,8 +90,9 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
                     requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                 },
                 onClipboardClick = {
-                    clipboard.getText()?.text?.let {
-                        viewModel.handleEvent(AppEvent.ImportTunnelFromClipboard(it))
+                    clipboard.paste { result ->
+                        if (result != null)
+                            viewModel.handleEvent(AppEvent.ImportTunnelFromClipboard(result))
                     }
                 },
                 onManualImportClick = {

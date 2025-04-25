@@ -9,6 +9,7 @@ sealed class NetworkStatus {
 
     data class Connected(
         val wifiSsid: String? = null,
+        val securityType: WifiSecurityType? = null,
         override val wifiConnected: Boolean = false,
         override val ethernetConnected: Boolean = false,
         override val cellularConnected: Boolean = false,

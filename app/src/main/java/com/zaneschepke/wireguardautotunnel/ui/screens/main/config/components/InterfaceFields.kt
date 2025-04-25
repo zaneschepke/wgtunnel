@@ -16,16 +16,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.config.ConfigurationTextBox
+import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberClipboardHelper
 import com.zaneschepke.wireguardautotunnel.ui.state.InterfaceProxy
 
 @Composable
@@ -38,7 +37,7 @@ fun InterfaceFields(
     onInterfaceChange: (InterfaceProxy) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = rememberClipboardHelper()
     val keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
     val keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
 
@@ -88,9 +87,7 @@ fun InterfaceFields(
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         trailingIcon = {
-            IconButton(
-                onClick = { clipboardManager.setText(AnnotatedString(interfaceState.publicKey)) }
-            ) {
+            IconButton(onClick = { clipboardManager.copy(interfaceState.publicKey) }) {
                 Icon(Icons.Rounded.ContentCopy, stringResource(R.string.copy_public_key))
             }
         },

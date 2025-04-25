@@ -8,20 +8,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
+import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberClipboardHelper
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
 
 @Composable
 fun RemoteControlItem(uiState: AppUiState, viewModel: AppViewModel): SelectionItem {
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = rememberClipboardHelper()
 
     return SelectionItem(
         leadingIcon = Icons.Filled.SmartToy,
@@ -42,8 +41,7 @@ fun RemoteControlItem(uiState: AppUiState, viewModel: AppViewModel): SelectionIt
                             ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier =
-                            Modifier.clickable { clipboardManager.setText(AnnotatedString(key)) },
+                        modifier = Modifier.clickable { clipboardManager.copy(key) },
                     )
                 }
             }

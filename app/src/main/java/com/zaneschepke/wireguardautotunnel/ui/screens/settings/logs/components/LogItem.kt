@@ -11,17 +11,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zaneschepke.logcatter.model.LogMessage
+import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberClipboardHelper
 import com.zaneschepke.wireguardautotunnel.ui.common.text.LogTypeLabel
 
 @Composable
 fun LogItem(log: LogMessage) {
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = rememberClipboardHelper()
     val fontSize = 10.sp
 
     Row(
@@ -32,7 +31,7 @@ fun LogItem(log: LogMessage) {
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = { clipboardManager.setText(AnnotatedString(log.toString())) },
+                    onClick = { clipboardManager.copy(log.toString()) },
                 ),
     ) {
         Text(text = log.tag, modifier = Modifier.fillMaxSize(0.3f), fontSize = fontSize)

@@ -22,16 +22,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.networkmonitor.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
+import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberClipboardHelper
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LearnMoreLinkLabel
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
@@ -48,7 +47,7 @@ fun WifiTunnelingItems(
     isWifiNameReadable: () -> Boolean,
 ): List<SelectionItem> {
     val context = LocalContext.current
-    val clipboard = LocalClipboardManager.current
+    val clipboardHelper = rememberClipboardHelper()
 
     val baseItems =
         listOf(
@@ -71,29 +70,41 @@ fun WifiTunnelingItems(
                     )
                 },
                 description = {
-                    val wifiName by
+                    val wifiInfo by
                         remember(uiState.networkStatus) {
                             derivedStateOf {
                                 (uiState.networkStatus as? NetworkStatus.Connected)
                                     ?.takeIf { it.wifiConnected }
-                                    ?.wifiSsid
+                                    .let { Pair(it?.wifiSsid, it?.securityType) }
                             }
                         }
-                    Text(
-                        text =
-                            wifiName?.let { stringResource(R.string.wifi_name_template, it) }
-                                ?: stringResource(R.string.inactive),
-                        style =
-                            MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.outline
-                            ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier =
-                            Modifier.clickable {
-                                wifiName?.let { clipboard.setText(AnnotatedString(it)) }
-                            },
-                    )
+                    val (wifiName, securityType) = wifiInfo
+                    Column {
+                        Text(
+                            text =
+                                wifiName?.let { stringResource(R.string.wifi_name_template, it) }
+                                    ?: stringResource(R.string.inactive),
+                            style =
+                                MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.outline
+                                ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier =
+                                Modifier.clickable { wifiName?.let { clipboardHelper.copy(it) } },
+                        )
+                        securityType?.let {
+                            Text(
+                                text = stringResource(R.string.security_template, it.name),
+                                style =
+                                    MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.outline
+                                    ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
                 },
                 onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi) },
             ),

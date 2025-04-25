@@ -1,7 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AirplanemodeActive
+import androidx.compose.material.icons.outlined.PublicOff
 import androidx.compose.material.icons.outlined.SettingsEthernet
 import androidx.compose.material.icons.outlined.SignalCellular4Bar
 import androidx.compose.material3.MaterialTheme
@@ -95,7 +95,7 @@ fun NetworkTunnelingItems(uiState: AppUiState, viewModel: AppViewModel): List<Se
             onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnEthernet) },
         ),
         SelectionItem(
-            leadingIcon = Icons.Outlined.AirplanemodeActive,
+            leadingIcon = Icons.Outlined.PublicOff,
             title = {
                 Text(
                     stringResource(R.string.stop_on_no_internet),

@@ -46,13 +46,18 @@ class AndroidNetworkMonitor(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
     @get:Synchronized @set:Synchronized var currentSsid: String? = null
+    @get:Synchronized @set:Synchronized var securityType: WifiSecurityType? = null
 
     @get:Synchronized @set:Synchronized var wifiConnected = false
 
     // Track active Wi-Fi networks and last active network ID
     private val activeNetworks = Collections.synchronizedSet(mutableSetOf<Network>())
 
-    data class WifiState(val connected: Boolean = false, val ssid: String? = null)
+    data class WifiState(
+        val connected: Boolean = false,
+        val ssid: String? = null,
+        val securityType: WifiSecurityType? = null,
+    )
 
     data class TransportState(val connected: Boolean = false)
 
@@ -76,15 +81,15 @@ class AndroidNetworkMonitor(
 
         suspend fun handleUnknownWifi() {
             val newSsid = getWifiSsid()
+            val securityType = wifiManager?.getCurrentSecurityType()
             // Only update if new SSID is valid; preserve existing valid SSID otherwise
             if (newSsid != null && newSsid != WifiManager.UNKNOWN_SSID) {
                 currentSsid = newSsid
-                trySend(WifiState(connected = wifiConnected, ssid = currentSsid))
+                trySend(WifiState(wifiConnected, currentSsid, securityType))
             } else if (currentSsid == null || currentSsid == WifiManager.UNKNOWN_SSID) {
                 currentSsid = newSsid
-                trySend(WifiState(connected = wifiConnected, ssid = currentSsid))
+                trySend(WifiState(wifiConnected, currentSsid, securityType))
             }
-            Timber.d("handleUnknownWifi: currentSsid=$currentSsid")
         }
 
         val locationPermissionReceiver =
@@ -146,8 +151,15 @@ class AndroidNetworkMonitor(
                     activeNetworks.add(network)
                     launch {
                         currentSsid = getWifiSsid()
+                        securityType = wifiManager?.getCurrentSecurityType()
                         wifiConnected = true
-                        trySend(WifiState(connected = true, ssid = currentSsid))
+                        trySend(
+                            WifiState(
+                                connected = true,
+                                ssid = currentSsid,
+                                securityType = securityType,
+                            )
+                        )
                     }
                 }
 
@@ -160,7 +172,7 @@ class AndroidNetworkMonitor(
                         )
                         currentSsid = null
                         wifiConnected = false
-                        trySend(WifiState(connected = false, ssid = null))
+                        trySend(WifiState(connected = false, ssid = null, securityType = null))
                     } else {
                         Timber.d("Wi-Fi onLost, but still connected to other networks, ignoring")
                     }
@@ -241,6 +253,7 @@ class AndroidNetworkMonitor(
                 if (hasAnyConnection) {
                         NetworkStatus.Connected(
                             wifiSsid = wifi.ssid,
+                            securityType = wifi.securityType,
                             wifiConnected = wifi.connected,
                             cellularConnected = cellular.connected,
                             ethernetConnected = ethernet.connected,

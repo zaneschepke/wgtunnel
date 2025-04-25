@@ -221,6 +221,7 @@
 	<string name="wifi_name_template">Active: %1$s</string>
 	<string name="remote_key_template">Key: %1$s</string>
     <string name="version_template">Version: %1$s</string>
+    <string name="security_template">Security: %1$s</string>
     <string name="flavor_template">Flavor: %1$s</string>
 	<string name="config_error">config error</string>
 	<string name="dns_resolve_error">dns resolution error</string>
