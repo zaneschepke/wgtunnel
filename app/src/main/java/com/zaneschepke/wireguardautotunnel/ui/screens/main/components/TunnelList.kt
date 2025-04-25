@@ -42,7 +42,13 @@ fun TunnelList(
     val collator = Collator.getInstance(Locale.getDefault())
     val sortedTunnels =
         remember(appUiState.tunnels) {
-            appUiState.tunnels.sortedWith(compareBy(collator) { it.tunName })
+            appUiState.tunnels.sortedWith(
+                compareBy(
+                    // primary tunnel first
+                    { !it.isPrimaryTunnel },
+                    { collator.compare(it.tunName, "") },
+                )
+            )
         }
 
     LazyColumn(
