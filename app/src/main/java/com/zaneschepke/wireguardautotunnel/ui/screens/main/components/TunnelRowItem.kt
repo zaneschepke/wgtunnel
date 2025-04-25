@@ -26,7 +26,6 @@ import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.common.ExpandingRowListItem
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
-import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.util.extensions.asColor
 
 @Composable
@@ -40,9 +39,8 @@ fun TunnelRowItem(
     onDoubleClick: () -> Unit,
     onToggleSelectedTunnel: (TunnelConf) -> Unit,
     onSwitchClick: (Boolean) -> Unit,
+    isTv: Boolean,
 ) {
-    val isTv = LocalIsAndroidTV.current
-
     val leadingIconColor =
         remember(state) {
             if (state.status.isUp()) tunnelState.statistics.asColor() else Color.Gray

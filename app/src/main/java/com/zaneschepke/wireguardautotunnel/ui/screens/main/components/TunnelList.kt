@@ -18,6 +18,7 @@ import com.zaneschepke.wireguardautotunnel.core.tunnel.getValueById
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
@@ -35,6 +36,7 @@ fun TunnelList(
     onToggleTunnel: (TunnelConf, Boolean) -> Unit,
     viewModel: AppViewModel,
 ) {
+    val isTv = LocalIsAndroidTV.current
     val context = LocalContext.current
     val navController = LocalNavController.current
     val collator = Collator.getInstance(Locale.getDefault())
@@ -71,8 +73,12 @@ fun TunnelList(
                 tunnel = tunnel,
                 tunnelState = tunnelState,
                 onClick = {
-                    navController.navigate(Route.TunnelOptions(tunnel.id))
-                    viewModel.handleEvent(AppEvent.ClearSelectedTunnels)
+                    if (selectedTunnels.isNotEmpty() && !isTv) {
+                        viewModel.handleEvent(AppEvent.ToggleSelectedTunnel(tunnel))
+                    } else {
+                        navController.navigate(Route.TunnelOptions(tunnel.id))
+                        viewModel.handleEvent(AppEvent.ClearSelectedTunnels)
+                    }
                 },
                 onDoubleClick = {
                     viewModel.handleEvent(AppEvent.ToggleTunnelStatsExpanded(tunnel.id))
@@ -81,6 +87,7 @@ fun TunnelList(
                     viewModel.handleEvent(AppEvent.ToggleSelectedTunnel(it))
                 },
                 onSwitchClick = { checked -> onToggleTunnel(tunnel, checked) },
+                isTv = isTv,
             )
         }
     }
