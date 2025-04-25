@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.overscroll
+import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,7 +58,7 @@ fun TunnelList(
         modifier =
             modifier
                 .pointerInput(Unit) { if (appUiState.tunnels.isEmpty()) return@pointerInput }
-                .overscroll(ScrollableDefaults.overscrollEffect()),
+                .overscroll(rememberOverscrollEffect()),
         state = rememberLazyListState(0, appUiState.tunnels.count()),
         userScrollEnabled = true,
         reverseLayout = false,

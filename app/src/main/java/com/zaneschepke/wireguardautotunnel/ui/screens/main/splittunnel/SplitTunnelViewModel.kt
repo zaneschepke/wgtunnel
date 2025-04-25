@@ -18,7 +18,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.Collator
 import java.util.*
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +49,6 @@ constructor(
         tunnelId?.let { loadInitialState(it) }
     }
 
-    // TODO improve this loading experience
     private fun loadInitialState(tunnelId: Int) =
         viewModelScope.launch {
             val tunnel = tunnelRepository.getById(tunnelId) ?: return@launch
@@ -66,7 +64,7 @@ constructor(
 
             val installedPackages = packages.map { it.packageName }.toSet()
 
-            // remove uninstalled apps
+            // Remove uninstalled apps
             proxyInterface.includedApplications.retainAll { it in installedPackages }
             proxyInterface.excludedApplications.retainAll { it in installedPackages }
 
@@ -98,11 +96,12 @@ constructor(
                             selected,
                         )
                     }
-                    .sortedWith(compareBy(collator) { it.first.name })
+                    .sortedWith(
+                        compareByDescending<Pair<TunnelApp, Boolean>> { it.second }
+                            .thenBy(collator) { it.first.name }
+                    )
 
             allTunneledApps = tunneledApps
-
-            delay(500)
 
             _uiState.update {
                 SplitTunnelUiState(
