@@ -10,6 +10,9 @@ val Plantation = Color(0xFF264A49)
 val Shark = Color(0xFF21272A)
 val BalticSea = Color(0xFF1C1B1F)
 
+// amoled
+val ElectricTeal = Color(0xFF4DD0E1)
+
 // Status colors
 val SilverTree = Color(0xFF6DB58B)
 val Brick = Color(0xFFCE4257)

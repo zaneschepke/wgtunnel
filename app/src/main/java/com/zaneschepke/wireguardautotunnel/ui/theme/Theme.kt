@@ -44,6 +44,8 @@ enum class Theme {
     AUTOMATIC,
     LIGHT,
     DARK,
+    DARKER,
+    AMOLED,
     DYNAMIC,
 }
 
@@ -58,6 +60,18 @@ fun WireguardAutoTunnelTheme(theme: Theme = Theme.AUTOMATIC, content: @Composabl
             Theme.DARK -> {
                 isDark = true
                 DarkColorScheme
+            }
+            Theme.DARKER -> {
+                isDark = true
+                DarkColorScheme.copy(surface = BalticSea, background = BalticSea)
+            }
+            Theme.AMOLED -> {
+                isDark = true
+                DarkColorScheme.copy(
+                    surface = Color.Black,
+                    background = Color.Black,
+                    primary = ElectricTeal,
+                )
             }
             Theme.LIGHT -> {
                 isDark = false

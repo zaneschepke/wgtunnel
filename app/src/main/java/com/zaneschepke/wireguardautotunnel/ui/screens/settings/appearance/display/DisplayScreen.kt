@@ -23,25 +23,21 @@ fun DisplayScreen(appUiState: AppUiState, viewModel: AppViewModel) {
         verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
         modifier = Modifier.fillMaxSize().padding(top = 24.dp).padding(horizontal = 24.dp),
     ) {
-        IconSurfaceButton(
-            title = stringResource(R.string.automatic),
-            onClick = { viewModel.handleEvent(AppEvent.SetTheme(Theme.AUTOMATIC)) },
-            selected = appUiState.appState.theme == Theme.AUTOMATIC,
-        )
-        IconSurfaceButton(
-            title = stringResource(R.string.light),
-            onClick = { viewModel.handleEvent(AppEvent.SetTheme(Theme.LIGHT)) },
-            selected = appUiState.appState.theme == Theme.LIGHT,
-        )
-        IconSurfaceButton(
-            title = stringResource(R.string.dark),
-            onClick = { viewModel.handleEvent(AppEvent.SetTheme(Theme.DARK)) },
-            selected = appUiState.appState.theme == Theme.DARK,
-        )
-        IconSurfaceButton(
-            title = stringResource(R.string.dynamic),
-            onClick = { viewModel.handleEvent(AppEvent.SetTheme(Theme.DYNAMIC)) },
-            selected = appUiState.appState.theme == Theme.DYNAMIC,
-        )
+        enumValues<Theme>().forEach {
+            val title =
+                when (it) {
+                    Theme.DARK -> stringResource(R.string.dark)
+                    Theme.LIGHT -> stringResource(R.string.light)
+                    Theme.AUTOMATIC -> stringResource(R.string.automatic)
+                    Theme.DYNAMIC -> stringResource(R.string.dynamic)
+                    Theme.DARKER -> stringResource(R.string.darker)
+                    Theme.AMOLED -> stringResource(R.string.amoled)
+                }
+            IconSurfaceButton(
+                title = title,
+                onClick = { viewModel.handleEvent(AppEvent.SetTheme(it)) },
+                selected = appUiState.appState.theme == it,
+            )
+        }
     }
 }
