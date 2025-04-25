@@ -246,4 +246,6 @@
     <string name="licenses">Licencje</string>
     <string name="update_check_unsupported">Sprawdzanie aktualizacji nie jest obsługiwane w tym typie kompilacji.</string>
     <string name="flavor_template">Wariant: %1$s</string>
+    <string name="darker">Ciemniejszy</string>
+    <string name="amoled">AMOLED</string>
 </resources>
