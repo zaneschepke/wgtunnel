@@ -248,4 +248,5 @@
     <string name="flavor_template">Wariant: %1$s</string>
     <string name="darker">Ciemniejszy</string>
     <string name="amoled">AMOLED</string>
+    <string name="security_template">Zabezpieczenia: %1$s</string>
 </resources>
