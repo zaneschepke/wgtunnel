@@ -229,7 +229,7 @@
     <string name="nothing_here_yet">Noch nix hier!</string>
     <string name="share">Teilen</string>
     <string name="select_all">Alles auswählen</string>
-    <string name="version_template">Aktuelle Version: %1$s</string>
+    <string name="version_template">Version: %1$s</string>
     <string name="export_success">Export Erfolg</string>
     <string name="download">Download</string>
     <string name="check_for_update">Auf Update prüfen</string>
@@ -243,4 +243,9 @@
     <string name="allow">Erlauben</string>
     <string name="install_updated_permission">Diese App benötigt die Berechtigung, um Updates zu installieren.</string>
     <string name="latest_installed">Du verwendesz bereits die neueste Version.</string>
+    <string name="security_template">Sicherheit: %1$s</string>
+    <string name="amoled">AMOLED</string>
+    <string name="flavor_template">Variante: %1$s</string>
+    <string name="darker">Dunkler</string>
+    <string name="update_check_unsupported">Updateprüfung wird bei diesem Build-Typ nicht unterstützt.</string>
 </resources>
