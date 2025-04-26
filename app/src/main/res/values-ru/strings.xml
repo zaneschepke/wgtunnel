@@ -245,4 +245,7 @@
     <string name="permission_required">Требуется разрешение</string>
     <string name="update_check_unsupported">Проверка обновлений не поддерживается для этого типа сборок.</string>
     <string name="flavor_template">Сборка: %1$s</string>
+    <string name="amoled">AMOLED</string>
+    <string name="darker">Ночная</string>
+    <string name="security_template">Защита: %1$s</string>
 </resources>
