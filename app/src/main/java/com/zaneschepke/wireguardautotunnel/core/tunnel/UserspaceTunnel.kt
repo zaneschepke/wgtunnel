@@ -69,7 +69,7 @@ constructor(
     // restore vpn kill switch if needed
     private fun handlePreviouslyEnabledVpnKillSwitch() {
         // let auto tunnel handle this if it is active
-        if (!serviceManager.autoTunnelActive.value) {
+        if (serviceManager.autoTunnelService.value == null) {
             previousBackendState?.let { (state, lanEnabled) ->
                 Timber.d("Restoring kill switch configuration")
                 val lan = if (lanEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()

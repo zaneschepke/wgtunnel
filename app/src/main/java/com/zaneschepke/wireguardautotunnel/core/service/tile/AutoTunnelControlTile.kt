@@ -38,8 +38,8 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         Timber.d("Start listening called for auto tunnel tile")
         lifecycleScope.launch {
-            serviceManager.autoTunnelActive.collect {
-                if (it) return@collect setActive()
+            serviceManager.autoTunnelService.collect {
+                if (it != null) return@collect setActive()
                 setInactive()
             }
         }
@@ -56,7 +56,7 @@ class AutoTunnelControlTile : TileService(), LifecycleOwner {
         super.onClick()
         unlockAndRun {
             lifecycleScope.launch {
-                if (serviceManager.autoTunnelActive.value) {
+                if (serviceManager.autoTunnelService.value != null) {
                     serviceManager.stopAutoTunnel()
                     setInactive()
                 } else {

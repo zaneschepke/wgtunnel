@@ -39,7 +39,9 @@ class RestartReceiver : BroadcastReceiver() {
         applicationScope.launch(ioDispatcher) {
             val settings = appDataRepository.settings.get()
             if (settings.isRestoreOnBootEnabled) {
-                if (settings.isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value) {
+                if (
+                    settings.isAutoTunnelEnabled && serviceManager.autoTunnelService.value == null
+                ) {
                     Timber.d("Starting auto-tunnel on boot/update")
                     serviceManager.startAutoTunnel()
                 } else {

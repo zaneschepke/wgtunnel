@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.core.service.autotunnel
 
 import android.content.Intent
+import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
@@ -28,7 +29,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.Tunnels
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -68,21 +68,23 @@ class AutoTunnelService : LifecycleService() {
 
     private var killSwitchJob: Job? = null
 
+    class LocalBinder(val service: AutoTunnelService) : Binder()
+
+    private val binder = LocalBinder(this)
+
     override fun onCreate() {
         super.onCreate()
-        serviceManager.autoTunnelService.complete(this)
         launchWatcherNotification()
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
-        return null
+        return binder
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Timber.d("onStartCommand executed with startId: $startId")
-        serviceManager.autoTunnelService.complete(this)
         start()
         return START_STICKY
     }
@@ -105,7 +107,7 @@ class AutoTunnelService : LifecycleService() {
     }
 
     override fun onDestroy() {
-        serviceManager.autoTunnelService = CompletableDeferred()
+        serviceManager.handleAutoTunnelServiceDestroy()
         restoreVpnKillSwitch()
         super.onDestroy()
     }

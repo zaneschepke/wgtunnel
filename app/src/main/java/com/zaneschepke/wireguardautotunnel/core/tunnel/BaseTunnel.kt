@@ -193,15 +193,16 @@ abstract class BaseTunnel(
             tunThreads[tunnel.id]?.let {
                 if (it.state != Thread.State.TERMINATED) {
                     it.interrupt()
-                    updateTunnelStatus(tunnel, TunnelStatus.Down)
                 } else {
                     Timber.d("Thread already terminated")
                 }
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to stop tunnel thread for ${tunnel.name}")
+        } finally {
+            updateTunnelStatus(tunnel, TunnelStatus.Down)
+            cleanUpTunThread(tunnel)
         }
-        cleanUpTunThread(tunnel)
     }
 
     private fun cleanUpTunThread(tunnel: TunnelConf) {

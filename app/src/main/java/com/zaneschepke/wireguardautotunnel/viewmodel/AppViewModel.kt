@@ -86,7 +86,7 @@ constructor(
                 appDataRepository.tunnels.flow,
                 appDataRepository.appState.flow,
                 tunnelManager.activeTunnels,
-                serviceManager.autoTunnelActive,
+                serviceManager.autoTunnelService.map { it != null },
                 networkMonitor.networkStatusFlow,
             ) { array ->
                 val settings = array[0] as AppSettings

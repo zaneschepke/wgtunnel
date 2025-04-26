@@ -57,7 +57,7 @@ constructor(
         withContext(ioDispatcher) {
             Timber.i("Service worker started")
             with(appDataRepository.settings.get()) {
-                if (isAutoTunnelEnabled && !serviceManager.autoTunnelActive.value)
+                if (isAutoTunnelEnabled && serviceManager.autoTunnelService.value == null)
                     return@with serviceManager.startAutoTunnel()
                 if (tunnelManager.activeTunnels.value.isEmpty())
                     tunnelManager.restorePreviousState()

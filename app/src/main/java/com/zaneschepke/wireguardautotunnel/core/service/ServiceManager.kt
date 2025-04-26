@@ -1,10 +1,11 @@
 package com.zaneschepke.wireguardautotunnel.core.service
 
-import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.net.VpnService
-import com.zaneschepke.wireguardautotunnel.WireGuardAutoTunnel
+import android.os.IBinder
 import com.zaneschepke.wireguardautotunnel.core.service.autotunnel.AutoTunnelService
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
@@ -13,7 +14,6 @@ import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestAutoTunnelTileServiceUpdate
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestTunnelTileServiceStateUpdate
 import jakarta.inject.Inject
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,23 +37,37 @@ constructor(
 
     private val autoTunnelMutex = Mutex()
 
-    private val _autoTunnelActive = MutableStateFlow(false)
-    val autoTunnelActive = _autoTunnelActive.asStateFlow()
+    private val _tunnelService = MutableStateFlow<TunnelForegroundService?>(null)
+    private val _autoTunnelService = MutableStateFlow<AutoTunnelService?>(null)
+    val autoTunnelService = _autoTunnelService.asStateFlow()
 
-    var autoTunnelService = CompletableDeferred<AutoTunnelService>()
-    var backgroundService = CompletableDeferred<TunnelForegroundService>()
-
-    private fun <T : Service> startService(cls: Class<T>, background: Boolean) {
-        runCatching {
-                val intent = Intent(context, cls)
-                if (background) {
-                    context.startForegroundService(intent)
-                } else {
-                    context.startService(intent)
-                }
+    private val tunnelServiceConnection =
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, service: IBinder) {
+                val binder = service as? TunnelForegroundService.LocalBinder
+                _tunnelService.value = binder?.service
+                Timber.d("TunnelForegroundService connected")
             }
-            .onFailure { Timber.e(it) }
-    }
+
+            override fun onServiceDisconnected(name: ComponentName) {
+                _tunnelService.value = null
+                Timber.d("TunnelForegroundService disconnected")
+            }
+        }
+
+    private val autoTunnelServiceConnection =
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, service: IBinder) {
+                val binder = service as? AutoTunnelService.LocalBinder
+                _autoTunnelService.value = binder?.service
+                Timber.d("AutoTunnelService connected")
+            }
+
+            override fun onServiceDisconnected(name: ComponentName) {
+                _autoTunnelService.value = null
+                Timber.d("AutoTunnelService disconnected")
+            }
+        }
 
     fun hasVpnPermission(): Boolean {
         return VpnService.prepare(context) == null
@@ -63,20 +77,13 @@ constructor(
         autoTunnelMutex.withLock {
             val settings = appDataRepository.settings.get()
             appDataRepository.settings.save(settings.copy(isAutoTunnelEnabled = true))
-            if (autoTunnelService.isCompleted) {
-                _autoTunnelActive.update { true }
-                return
+            if (_autoTunnelService.value != null) return
+            withContext(ioDispatcher) {
+                val intent = Intent(context, AutoTunnelService::class.java)
+                context.startForegroundService(intent)
+                context.bindService(intent, autoTunnelServiceConnection, Context.BIND_AUTO_CREATE)
+                withContext(mainDispatcher) { updateAutoTunnelTile() }
             }
-            runCatching {
-                    autoTunnelService = CompletableDeferred()
-                    startService(AutoTunnelService::class.java, !WireGuardAutoTunnel.isForeground())
-                    _autoTunnelActive.update { true }
-                }
-                .onFailure {
-                    Timber.e(it)
-                    _autoTunnelActive.update { false }
-                }
-            withContext(mainDispatcher) { updateAutoTunnelTile() }
         }
     }
 
@@ -84,43 +91,44 @@ constructor(
         autoTunnelMutex.withLock {
             val settings = appDataRepository.settings.get()
             appDataRepository.settings.save(settings.copy(isAutoTunnelEnabled = false))
-            if (!autoTunnelService.isCompleted) return
-            runCatching {
-                    val service = autoTunnelService.await()
-                    service.stop()
-                    _autoTunnelActive.update { false }
-                    autoTunnelService = CompletableDeferred()
+            if (_autoTunnelService.value == null) return
+            _autoTunnelService.value?.let { service ->
+                service.stop()
+                try {
+                    context.unbindService(autoTunnelServiceConnection)
+                } finally {
+                    _tunnelService.value = null
                 }
-                .onFailure { Timber.e(it) }
+            }
             withContext(mainDispatcher) { updateAutoTunnelTile() }
         }
     }
 
-    fun startTunnelForegroundService() {
-        if (backgroundService.isCompleted) return
-        runCatching {
-                backgroundService = CompletableDeferred()
-                startService(
-                    TunnelForegroundService::class.java,
-                    !WireGuardAutoTunnel.isForeground(),
-                )
+    suspend fun startTunnelForegroundService() {
+        if (_tunnelService.value != null) return
+        withContext(ioDispatcher) {
+            applicationScope.launch(ioDispatcher) {
+                val intent = Intent(context, TunnelForegroundService::class.java)
+                context.startForegroundService(intent)
+                context.bindService(intent, tunnelServiceConnection, Context.BIND_AUTO_CREATE)
             }
-            .onFailure { Timber.e(it) }
+        }
     }
 
-    suspend fun stopTunnelForegroundService() {
-        if (!backgroundService.isCompleted) return
-        runCatching {
-                val service = backgroundService.await()
-                service.stop()
-                backgroundService = CompletableDeferred()
+    fun stopTunnelForegroundService() {
+        _tunnelService.value?.let { service ->
+            service.stop()
+            try {
+                context.unbindService(tunnelServiceConnection)
+            } finally {
+                _tunnelService.value = null
             }
-            .onFailure { Timber.e(it) }
+        }
     }
 
     fun toggleAutoTunnel() {
         applicationScope.launch(ioDispatcher) {
-            if (_autoTunnelActive.value) stopAutoTunnel() else startAutoTunnel()
+            if (_autoTunnelService.value != null) stopAutoTunnel() else startAutoTunnel()
         }
     }
 
@@ -130,5 +138,13 @@ constructor(
 
     fun updateTunnelTile() {
         context.requestTunnelTileServiceStateUpdate()
+    }
+
+    fun handleTunnelServiceDestroy() {
+        _tunnelService.update { null }
+    }
+
+    fun handleAutoTunnelServiceDestroy() {
+        _autoTunnelService.update { null }
     }
 }
