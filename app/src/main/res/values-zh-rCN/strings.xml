@@ -245,4 +245,7 @@
     <string name="allow">允许</string>
     <string name="update_check_unsupported">更新检查不支持此构建类型。</string>
     <string name="flavor_template">版本架构：%1$s</string>
+    <string name="security_template">安全性：%1$s</string>
+    <string name="darker">颜色更深</string>
+    <string name="amoled">AMOLED</string>
 </resources>
