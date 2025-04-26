@@ -219,4 +219,6 @@
     <string name="background_location_message">Autorizace povolit vždy polohu a/nebo přesná poloha je vyžadováno pro tuto funkci. Viz</string>
     <string name="update_check_unsupported">Kontrola aktualizací není u tohoto typu sestavení podporována.</string>
     <string name="background_location_message2">abyste se ujistili, že jsou tato oprávnění povolena.</string>
+    <string name="darker">Tmavší</string>
+    <string name="amoled">AMOLED</string>
 </resources>
