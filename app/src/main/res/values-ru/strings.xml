@@ -112,7 +112,7 @@
     <string name="always_on_message2">, чтобы убедиться, что функция «Постоянный VPN» отключена для всех других приложений, и повторите попытку</string>
     <string name="background_location_message">Разрешать всё время, пока для работы этой функции требуется доступ на определение местоположения и/или точное местоположение. Смотрите</string>
     <string name="vpn_settings">Системные настройки VPN</string>
-    <string name="vpn_denied_dialog_title">Нет разрешения</string>
+    <string name="vpn_denied_dialog_title">Отказано в доступе</string>
     <string name="set_custom_ping_internal">Интервал пинга (сек.)</string>
     <string name="optional_default">"необязательно, по умолчанию: "</string>
     <string name="set_custom_ping_ip">Назначить свой IP для пинга</string>
@@ -171,7 +171,7 @@
     <string name="post_up">После активации</string>
     <string name="pre_down">До деактивации</string>
     <string name="post_down">После деактивации</string>
-    <string name="debounce_delay">Задержка отбоя</string>
+    <string name="debounce_delay">Задержка изменения сети</string>
     <string name="remove_amnezia_compatibility">Отключить совместимость с Amnezia</string>
     <string name="exclude_lan">Исключить LAN</string>
     <string name="hide_scripts">Скрыть сценарии</string>
