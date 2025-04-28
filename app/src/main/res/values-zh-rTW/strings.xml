@@ -22,7 +22,7 @@
     <string name="config_changes_saved">組態變更已儲存。</string>
     <string name="exclude">排除</string>
     <string name="include">包含</string>
-    <string name="addresses">地址</string>
+    <string name="addresses">位址</string>
     <string name="add_tunnels_text">從檔案或 zip 壓縮檔新增</string>
     <string name="add_from_qr">從 QR code 新增</string>
     <string name="copy_public_key">複製公鑰</string>
@@ -59,7 +59,7 @@
     <string name="set_custom_ping_internal">Ping 間隔 (秒)</string>
     <string name="app_settings">應用程式設定</string>
     <string name="logs">日誌</string>
-    <string name="dark">暗色</string>
+    <string name="dark">灰色</string>
     <string name="light">亮色</string>
     <string name="donate">捐款</string>
     <string name="appearance">外觀</string>
@@ -74,7 +74,7 @@
     <string name="add_wifi_name">新增 WiFi SSID</string>
     <string name="allow_lan_traffic">允許 LAN 流量</string>
     <string name="stop_on_no_internet">沒有連上網路時停止</string>
-    <string name="stop_on_internet_loss">網路連線斷開時停止隧道</string>
+    <string name="stop_on_internet_loss">網路斷線時停止隧道</string>
     <string name="add_from_clipboard">從剪貼簿新增</string>
     <string name="stop">停止</string>
     <string name="advanced_settings">進階設定</string>
@@ -160,7 +160,7 @@
     <string name="use_wildcards">SSID 使用萬用字元</string>
     <string name="allow">允許</string>
     <string name="check_for_update">檢查更新</string>
-    <string name="version_template">目前版本: %1$s</string>
+    <string name="version_template">版本: %1$s</string>
     <string name="update_available">有可用更新！</string>
     <string name="update_download_failed">下載更新失敗。</string>
     <string name="latest_installed">您正在執行最新版本。</string>
@@ -172,4 +172,8 @@
     <string name="licenses">授權條款</string>
     <string name="update_check_failed">檢查更新失敗。</string>
     <string name="download_and_install">下載並安裝</string>
+    <string name="app_permission_description">控制隧道和自動隧道管理功能。</string>
+    <string name="amoled">AMOLED</string>
+    <string name="update_check_unsupported">更新檢查不支援此建置類型。</string>
+    <string name="darker">黑色</string>
 </resources>
