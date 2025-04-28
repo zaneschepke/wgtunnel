@@ -8,6 +8,7 @@ abstract class TunnelStatistics {
         val rxBytes: Long,
         val txBytes: Long,
         val latestHandshakeEpochMillis: Long,
+        val resolvedEndpoint: String,
     )
 
     abstract fun peerStats(peer: Key): PeerStats?

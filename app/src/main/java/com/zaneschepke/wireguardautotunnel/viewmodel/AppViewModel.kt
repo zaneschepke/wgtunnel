@@ -39,6 +39,8 @@ import java.time.Instant
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
@@ -56,7 +58,7 @@ constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
     @AppShell private val rootShell: Provider<RootShell>,
-    private val tunnelManager: TunnelManager,
+    val tunnelManager: TunnelManager,
     private val serviceManager: ServiceManager,
     private val logReader: LogReader,
     private val fileUtils: FileUtils,
@@ -206,7 +208,6 @@ constructor(
                     is AppEvent.ShowMessage -> handleShowMessage(event.message)
                     is AppEvent.PopBackStack ->
                         _appViewState.update { it.copy(popBackStack = event.pop) }
-                    is AppEvent.ClearTunnelError -> tunnelManager.clearError(event.tunnel)
                     AppEvent.ToggleRemoteControl -> handleToggleRemoteControl(state.appState)
                     AppEvent.ClearSelectedTunnels -> clearSelectedTunnels()
                     is AppEvent.SetShowModal ->
@@ -264,6 +265,9 @@ constructor(
                 }
             }
         }
+
+    private fun handleTunnelErrors() =
+        viewModelScope.launch { tunnelManager.errorEvents.collect { errorEvent -> } }
 
     private suspend fun handleAppReadyCheck(tunnels: List<TunnelConf>) {
         if (tunnels.size == appDataRepository.tunnels.count()) {

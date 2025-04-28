@@ -1,11 +1,13 @@
 package com.zaneschepke.wireguardautotunnel.core.tunnel
 
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.enums.BackendError
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface TunnelProvider {
@@ -46,11 +48,11 @@ interface TunnelProvider {
 
     val activeTunnels: StateFlow<Map<TunnelConf, TunnelState>>
 
+    val errorEvents: SharedFlow<Pair<TunnelConf, BackendError>>
+
     val bouncingTunnelIds: ConcurrentHashMap<Int, TunnelStatus.StopReason>
 
     fun hasVpnPermission(): Boolean
-
-    suspend fun clearError(tunnelConf: TunnelConf)
 
     suspend fun updateTunnelStatistics(tunnel: TunnelConf)
 }

@@ -39,7 +39,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zaneschepke.networkmonitor.NetworkMonitor
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
-import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.VpnDeniedDialog
@@ -110,6 +109,7 @@ class MainActivity : AppCompatActivity() {
             val isTv = isRunningOnTv()
             val appUiState by viewModel.uiState.collectAsStateWithLifecycle()
             val appViewState by viewModel.appViewState.collectAsStateWithLifecycle()
+            val tunnelError by viewModel.tunnelManager.errorEvents.collectAsStateWithLifecycle(null)
 
             val navController = rememberNavController()
             val backStackEntry by navController.currentBackStackEntryAsState()
@@ -151,6 +151,15 @@ class MainActivity : AppCompatActivity() {
                     viewModel.handleEvent(AppEvent.SetBatteryOptimizeDisableShown)
                 }
 
+            LaunchedEffect(tunnelError) {
+                if (tunnelError == null) return@LaunchedEffect
+                val message = tunnelError!!.second.toStringRes()
+                val context = this@MainActivity
+                snackbar.showSnackbar(
+                    context.getString(R.string.tunnel_error_template, context.getString(message))
+                )
+            }
+
             with(appViewState) {
                 LaunchedEffect(isConfigChanged) {
                     if (isConfigChanged) {
@@ -164,21 +173,6 @@ class MainActivity : AppCompatActivity() {
                     errorMessage?.let {
                         snackbar.showSnackbar(it.asString(this@MainActivity))
                         viewModel.handleEvent(AppEvent.MessageShown)
-                    }
-                }
-                LaunchedEffect(appUiState.activeTunnels) {
-                    appUiState.activeTunnels.mapNotNull { (tunnelConf, tunnelState) ->
-                        (tunnelState.status as? TunnelStatus.Error)?.let { error ->
-                            val message = error.error.toStringRes()
-                            val context = this@MainActivity
-                            snackbar.showSnackbar(
-                                context.getString(
-                                    R.string.tunnel_error_template,
-                                    context.getString(message),
-                                )
-                            )
-                            viewModel.handleEvent(AppEvent.ClearTunnelError(tunnelConf))
-                        }
                     }
                 }
                 LaunchedEffect(popBackStack) {

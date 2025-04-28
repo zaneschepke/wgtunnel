@@ -5,6 +5,7 @@ import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.di.Kernel
 import com.zaneschepke.wireguardautotunnel.di.Userspace
 import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.enums.BackendError
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
@@ -15,6 +16,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -62,15 +64,14 @@ constructor(
                 initialValue = emptyMap(),
             )
 
+    override val errorEvents: SharedFlow<Pair<TunnelConf, BackendError>>
+        get() = tunnelProviderFlow.value.errorEvents
+
     override val bouncingTunnelIds: ConcurrentHashMap<Int, TunnelStatus.StopReason> =
         tunnelProviderFlow.value.bouncingTunnelIds
 
     override fun hasVpnPermission(): Boolean {
         return userspaceTunnel.hasVpnPermission()
-    }
-
-    override suspend fun clearError(tunnelConf: TunnelConf) {
-        tunnelProviderFlow.value.clearError(tunnelConf)
     }
 
     override suspend fun updateTunnelStatistics(tunnel: TunnelConf) {

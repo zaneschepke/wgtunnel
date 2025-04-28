@@ -1,7 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.domain.enums
 
 sealed class TunnelStatus {
-    data class Error(val error: BackendError) : TunnelStatus()
 
     data object Up : TunnelStatus()
 

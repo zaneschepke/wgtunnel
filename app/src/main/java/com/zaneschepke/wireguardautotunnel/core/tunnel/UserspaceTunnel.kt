@@ -50,8 +50,9 @@ constructor(
         } catch (e: BackendException) {
             Timber.e(e, "Failed to stop tunnel ${tunnel.id}")
             throw e.toBackendError()
+        } finally {
+            handlePreviouslyEnabledVpnKillSwitch()
         }
-        handlePreviouslyEnabledVpnKillSwitch()
     }
 
     // stop vpn kill switch if we need to resolve DNS for peer endpoints
