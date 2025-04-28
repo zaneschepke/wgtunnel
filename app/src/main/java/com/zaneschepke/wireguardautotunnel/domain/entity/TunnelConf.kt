@@ -60,6 +60,10 @@ data class TunnelConf(
         return result
     }
 
+    fun isStaticallyConfigured(): Boolean {
+        return toAmConfig().peers.all { it.endpoint.get().host.isValidIpv4orIpv6Address() }
+    }
+
     fun copyWithCallback(
         id: Int = this.id,
         tunName: String = this.tunName,

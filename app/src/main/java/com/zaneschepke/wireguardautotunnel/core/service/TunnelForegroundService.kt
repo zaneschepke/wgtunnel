@@ -165,8 +165,12 @@ class TunnelForegroundService : LifecycleService() {
             } else {
                 pingJobs[tun]?.cancel() // Cancel any stale job
                 if (tun.isPingEnabled) {
-                    pingJobs[tun] = startPingJob(tun)
-                    Timber.d("Started ping job for ${tun.tunName}")
+                    if (tun.isStaticallyConfigured()) {
+                        Timber.d("Skipping ping for statically configured tunnel")
+                    } else {
+                        pingJobs[tun] = startPingJob(tun)
+                        Timber.d("Started ping job for ${tun.tunName}")
+                    }
                 }
             }
         }
