@@ -150,4 +150,25 @@
     <string name="add_from_url">Toevoegen met link</string>
     <string name="stop_on_no_internet">Stoppen wanneer geen internet</string>
     <string name="stop_on_internet_loss">Stop tunnel bij verlies van internet</string>
+    <string name="mobile_tunnel">Mobiele datatunnel</string>
+    <string name="wildcards_active">Wildcards actief</string>
+    <string name="wifi_name_via_shell">Wifi naam via shell</string>
+    <string name="vpn_kill_switch">VPN kill switch</string>
+    <string name="kill_switch_options">Kill switch opties</string>
+    <string name="use_root_shell_for_wifi">Gebruik root shell om wifi naam te bepalen</string>
+    <string name="kernel_not_supported">Kernel niet ondersteund</string>
+    <string name="start_auto">Start auto-tunnel</string>
+    <string name="stop_auto">Stop auto-tunnel</string>
+    <string name="tunnel_running">Tunnel actief</string>
+    <string name="donate">Doneer aan project</string>
+    <string name="local_logging">Lokale logboeken</string>
+    <string name="monitoring_state_changes">Monitor statuswijzigingen</string>
+    <string name="trusted_wifi_names">Vertrouwde Wifi namen</string>
+    <string name="add_wifi_name">Wifi naam toevoegen</string>
+    <string name="launch_app_settings">Open applicatie-instellingen</string>
+    <string name="use_wildcards">Gebruik wildcards in naam</string>
+    <string name="learn_more">Lees meer</string>
+    <string name="app_permission_description">Configureer tunnels een auto-tunnel instellingen.</string>
+    <string name="skip">Overslaan</string>
+    <string name="primary_tunnel">Primaire tunnel</string>
 </resources>
