@@ -52,8 +52,9 @@ fun InterfaceFields(
             if (isAuthenticated) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             IconButton(
-                enabled = isAuthenticated,
+                enabled = true,
                 onClick = {
+                    if(!isAuthenticated) return@IconButton showAuthPrompt()
                     val keypair = com.wireguard.crypto.KeyPair()
                     onInterfaceChange(
                         interfaceState.copy(
