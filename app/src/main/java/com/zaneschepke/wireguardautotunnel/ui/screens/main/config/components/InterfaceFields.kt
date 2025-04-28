@@ -54,7 +54,7 @@ fun InterfaceFields(
             IconButton(
                 enabled = true,
                 onClick = {
-                    if(!isAuthenticated) return@IconButton showAuthPrompt()
+                    if (!isAuthenticated) return@IconButton showAuthPrompt()
                     val keypair = com.wireguard.crypto.KeyPair()
                     onInterfaceChange(
                         interfaceState.copy(

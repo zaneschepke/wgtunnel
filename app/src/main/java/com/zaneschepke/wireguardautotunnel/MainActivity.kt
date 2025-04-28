@@ -134,6 +134,7 @@ class MainActivity : AppCompatActivity() {
                             vpnPermissionDenied = true
                         } else {
                             vpnPermissionDenied = false
+                            showVpnPermissionDialog = false
                         }
                     },
                 )
@@ -208,7 +209,10 @@ class MainActivity : AppCompatActivity() {
                     WireguardAutoTunnelTheme(theme = appUiState.appState.theme) {
                         VpnDeniedDialog(
                             showVpnPermissionDialog,
-                            onDismiss = { showVpnPermissionDialog = false },
+                            onDismiss = {
+                                showVpnPermissionDialog = false
+                                vpnPermissionDenied = false
+                            },
                         )
 
                         Scaffold(
