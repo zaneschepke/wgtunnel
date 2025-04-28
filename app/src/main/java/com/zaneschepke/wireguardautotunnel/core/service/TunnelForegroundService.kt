@@ -2,6 +2,7 @@ package com.zaneschepke.wireguardautotunnel.core.service
 
 import android.app.Notification
 import android.content.Intent
+import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
@@ -23,7 +24,6 @@ import com.zaneschepke.wireguardautotunnel.util.extensions.distinctByKeys
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -64,9 +64,12 @@ class TunnelForegroundService : LifecycleService() {
 
     private val jobsMutex = Mutex()
 
+    class LocalBinder(val service: TunnelForegroundService) : Binder()
+
+    private val binder = LocalBinder(this)
+
     override fun onCreate() {
         super.onCreate()
-        serviceManager.backgroundService.complete(this)
         ServiceCompat.startForeground(
             this@TunnelForegroundService,
             NotificationManager.VPN_NOTIFICATION_ID,
@@ -75,14 +78,13 @@ class TunnelForegroundService : LifecycleService() {
         )
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
-        return null
+        return binder
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        serviceManager.backgroundService.complete(this)
         ServiceCompat.startForeground(
             this@TunnelForegroundService,
             NotificationManager.VPN_NOTIFICATION_ID,
@@ -273,7 +275,7 @@ class TunnelForegroundService : LifecycleService() {
     }
 
     override fun onDestroy() {
-        serviceManager.backgroundService = CompletableDeferred()
+        serviceManager.handleTunnelServiceDestroy()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }

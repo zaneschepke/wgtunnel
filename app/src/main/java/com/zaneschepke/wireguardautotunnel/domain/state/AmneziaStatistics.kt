@@ -12,6 +12,7 @@ class AmneziaStatistics(private val statistics: Statistics) : TunnelStatistics()
                 rxBytes = stats.rxBytes,
                 txBytes = stats.txBytes,
                 latestHandshakeEpochMillis = stats.latestHandshakeEpochMillis,
+                resolvedEndpoint = stats.resolvedEndpoint,
             )
         }
     }

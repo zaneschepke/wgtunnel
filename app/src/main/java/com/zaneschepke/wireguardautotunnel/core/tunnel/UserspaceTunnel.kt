@@ -50,8 +50,9 @@ constructor(
         } catch (e: BackendException) {
             Timber.e(e, "Failed to stop tunnel ${tunnel.id}")
             throw e.toBackendError()
+        } finally {
+            handlePreviouslyEnabledVpnKillSwitch()
         }
-        handlePreviouslyEnabledVpnKillSwitch()
     }
 
     // stop vpn kill switch if we need to resolve DNS for peer endpoints
@@ -69,7 +70,7 @@ constructor(
     // restore vpn kill switch if needed
     private fun handlePreviouslyEnabledVpnKillSwitch() {
         // let auto tunnel handle this if it is active
-        if (!serviceManager.autoTunnelActive.value) {
+        if (serviceManager.autoTunnelService.value == null) {
             previousBackendState?.let { (state, lanEnabled) ->
                 Timber.d("Restoring kill switch configuration")
                 val lan = if (lanEnabled) TunnelConf.LAN_BYPASS_ALLOWED_IPS else emptyList()

@@ -106,8 +106,6 @@ sealed class AppEvent {
 
     data class ShowMessage(val message: StringValue) : AppEvent()
 
-    data class ClearTunnelError(val tunnel: TunnelConf) : AppEvent()
-
     data class PopBackStack(val pop: Boolean) : AppEvent()
 
     data class SetBottomSheet(val showSheet: AppViewState.BottomSheet) : AppEvent()

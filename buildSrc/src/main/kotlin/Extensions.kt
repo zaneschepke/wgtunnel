@@ -80,8 +80,8 @@ fun Project.computeVersionName(): String {
             // Bump minor for pre-release
             val preReleaseVersion = Semver.of(
                 baseVersion.major,
-                baseVersion.minor + 1,
-                0
+                baseVersion.minor,
+                0 + 1,
             )
             "${preReleaseVersion}-beta+git.${getGitCommitHash()}"
         }
