@@ -240,7 +240,12 @@
     <string name="allow">اجازت دیں۔</string>
     <string name="licenses">لائسنس</string>
     <string name="download">ڈاؤن لوڈ کریں۔</string>
-    <string name="version_template">موجودہ ورژن: %1$s</string>
+    <string name="version_template">ورژن: %1$s</string>
     <string name="export_success">برآمد کی کامیابی</string>
     <string name="latest_installed">آپ پہلے ہی تازہ ترین ورژن چلا رہے ہیں۔</string>
+    <string name="darker">گہرا</string>
+    <string name="amoled">ایمولیڈ</string>
+    <string name="security_template">سیکیورٹی: %1$s</string>
+    <string name="update_check_unsupported">اپ ڈیٹ چیک اس قسم کی تعمیر کی حمایت نہیں کرتا ہے۔</string>
+    <string name="flavor_template">ذائقہ: %1$s</string>
 </resources>
