@@ -121,6 +121,6 @@ jobs:
           prerelease: true
           make_latest: false
           files: |
-            ${{ github.workspace }}/temp/*
+            ${{ github.workspace }}/temp/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
