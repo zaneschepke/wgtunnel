@@ -1,9 +1,9 @@
 name: nightly
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "4 3 * * *"
-  workflow_dispatch:
 
 jobs:
   check_commits:
