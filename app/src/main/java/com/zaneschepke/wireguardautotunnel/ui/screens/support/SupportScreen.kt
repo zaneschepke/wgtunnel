@@ -87,7 +87,8 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
             },
             confirmText = {
                 Text(
-                    if (BuildConfig.FLAVOR != Constants.STANDALONE_FLAVOR) stringResource(R.string.download)
+                    if (BuildConfig.FLAVOR != Constants.STANDALONE_FLAVOR)
+                        stringResource(R.string.download)
                     else stringResource(R.string.download_and_install)
                 )
             },
