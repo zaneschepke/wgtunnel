@@ -123,6 +123,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android_artifacts_${{ inputs.flavor }}
-          path: app/build/outputs/apk/${{ inputs.flavor }}/release/wgtunnel-${{ inputs.flavor }}-release-*.apk
+          path: app/build/outputs/apk/${{ inputs.flavor }}/release/wgtunnel-${{ inputs.flavor }}${{ inputs.flavor == 'fdroid' && '-release' || '' }}-*.apk
           retention-days: 1
           if-no-files-found: warn
