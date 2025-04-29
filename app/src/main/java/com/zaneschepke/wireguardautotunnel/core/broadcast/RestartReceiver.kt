@@ -3,12 +3,12 @@ package com.zaneschepke.wireguardautotunnel.core.broadcast
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.ApplicationScope
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
-import com.zaneschepke.wireguardautotunnel.util.extensions.isRunningOnTv
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -26,13 +26,12 @@ class RestartReceiver : BroadcastReceiver() {
 
     @Inject lateinit var tunnelManager: TunnelManager
 
+    @Inject lateinit var logReader: LogReader
+
     @Inject @IoDispatcher lateinit var ioDispatcher: CoroutineDispatcher
 
     override fun onReceive(context: Context, intent: Intent) {
         Timber.d("RestartReceiver triggered with action: ${intent.action}")
-        // screen on for Android TV only to help with sleep shutdowns
-        val isTv = context.isRunningOnTv()
-        if (intent.action == Intent.ACTION_USER_PRESENT && !isTv) return
         serviceManager.updateTunnelTile()
         serviceManager.updateAutoTunnelTile()
         applicationScope.launch(ioDispatcher) {
@@ -50,6 +49,7 @@ class RestartReceiver : BroadcastReceiver() {
             } else {
                 Timber.d("Restore on boot disabled, skipping")
             }
+            if (intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) logReader.deleteAndClearLogs()
         }
     }
 }
