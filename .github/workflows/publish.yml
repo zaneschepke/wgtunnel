@@ -1,8 +1,9 @@
 name: publish
+permissions:
+  contents: write
+  packages: write
 
 on:
-  schedule:
-    - cron: "4 3 * * *"
   workflow_dispatch:
     inputs:
       track:
@@ -22,14 +23,13 @@ on:
         options:
           - none
           - prerelease
-          - nightly
           - release
         default: release
         required: true
       tag_name:
         description: "Tag name for release"
         required: false
-        default: nightly
+        default: 1.1.1
       flavor:
         type: choice
         description: "Product flavor"
@@ -46,71 +46,37 @@ on:
         required: false
         default: standalone
 
-env:
-  UPLOAD_DIR_ANDROID: android_artifacts
-
-permissions:
-  contents: write
-  packages: write
-
 jobs:
-  check_commits:
-    name: Check for New Commits
-    runs-on: ubuntu-latest
-    outputs:
-      has_new_commits: ${{ steps.check.outputs.new_commits }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Check for new commits
-        id: check
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        run: |
-          NEW_COMMITS=$(git rev-list --count --after="$(date -Iseconds -d '23 hours ago')" ${{ github.sha }})
-          echo "new_commits=$NEW_COMMITS" >> $GITHUB_OUTPUT
 
   build-fdroid:
     if: ${{ inputs.release_type == 'release' || inputs.flavor == 'fdroid' }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
-      build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
+      build_type: ${{ inputs.release_type }}
       flavor: fdroid
 
   build-standalone:
-    if: ${{ inputs.release_type == 'release' || inputs.release_type == 'nightly' || inputs.release_type == 'prerelease' || inputs.flavor == 'standalone' }}
+    if: ${{ inputs.release_type == 'release' || inputs.release_type == 'prerelease' || inputs.flavor == 'standalone' }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
-      build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
+      build_type: ${{ inputs.release_type }}
       flavor: standalone
 
   publish:
     needs:
-      - check_commits
       - build-standalone
-    if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: publish-github
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           ref: main
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
-      - name: Set TAG_NAME
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-          elif [ "${{ github.event_name }}" = "schedule" ]; then
-            echo "TAG_NAME=nightly" >> $GITHUB_ENV
-            echo "RELEASE_TYPE=nightly" >> $GITHUB_ENV
-          fi
+
       - name: Set latest tag
         uses: rickstaa/action-create-tag@v1
         id: tag_creation
@@ -126,22 +92,26 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           latest: true
+
       - name: Generate Changelog
         id: changelog
         uses: requarks/changelog-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          toTag: ${{ github.event_name == 'schedule' && 'nightly' || steps.latest_release.outputs.tag_name }}
+          toTag: ${{ steps.latest_release.outputs.tag_name }}
           fromTag: "latest"
           writeToFile: false
+
       - name: Make download dir
         run: mkdir ${{ github.workspace }}/temp
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: android_artifacts_*
           path: ${{ github.workspace }}/temp
           merge-multiple: true
+
       - name: Set version release notes
         if: ${{ inputs.release_type == 'release' }}
         run: |
@@ -151,36 +121,22 @@ jobs:
           echo "$RELEASE_NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: On nightly release notes
-        if: ${{ contains(env.TAG_NAME, 'nightly') }}
-        run: |
-          echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
-
       - name: On prerelease release notes
         if: ${{ inputs.release_type == 'prerelease' }}
         run: |
           echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
 
-      - name: Delete previous release
-        if: ${{ contains(env.TAG_NAME, 'nightly') || inputs.release_type == 'prerelease' }}
-        uses: ClementTsang/delete-tag-and-release@v0.4.0
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          delete_release: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get checksums
+      - name: Get checksum
         id: checksum
         run: |
-          checksums=""
-          for file_path in $(find ${{ github.workspace }}/temp -type f -iname "*.apk"); do
-            checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")
-            checksums="$checksums\n$file_path: $checksum"
-          done
-          echo "checksum<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$checksums" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          file_path=$(find ${{ github.workspace }}/temp -type f -iname "*.apk" | head -n 1)
+          if [ -z "$file_path" ]; then
+            echo "No APK file found"
+            exit 1
+          fi
+          checksum=$(apksigner verify --print-certs "$file_path" | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")
+          echo "checksum=$checksum" >> $GITHUB_OUTPUT
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -200,13 +156,13 @@ jobs:
 
             ### Changelog
             ${{ steps.changelog.outputs.changes }}
-          tag_name: ${{ env.TAG_NAME }}
-          name: ${{ env.TAG_NAME }}
+          tag_name: ${{ github.event.inputs.tag_name }}
+          name: ${{ github.event.inputs.tag_name }}
           draft: false
-          prerelease: ${{ inputs.release_type == 'prerelease' || inputs.release_type == '' || inputs.release_type == 'nightly' }}
+          prerelease: ${{ inputs.release_type == 'prerelease' }}
           make_latest: ${{ inputs.release_type == 'release' }}
           files: |
-            ${{ github.workspace }}/temp/*
+            ${{ github.workspace }}/temp/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -224,7 +180,7 @@ jobs:
           event-type: fdroid-update
 
   publish-play:
-    if: ${{ inputs.track != 'none' && inputs.track != '' }}
+    if: ${{ inputs.track != 'none' }}
     name: Publish to Google Play
     runs-on: ubuntu-latest
 

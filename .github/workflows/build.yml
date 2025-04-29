@@ -1,4 +1,6 @@
-name: Build
+name: build
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
@@ -94,10 +96,7 @@ jobs:
         run: |
           store_path=${{ env.KEY_STORE_LOCATION }}${{ env.KEY_STORE_FILE }}
           echo "KEY_STORE_PATH=$store_path" >> $GITHUB_ENV
-      - name: Create service_account.json
-        if: ${{ inputs.build_type != 'debug' }}
-        id: createServiceAccount
-        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > service_account.json
+
       - name: Build APK
         run: |
           flavor=${{ inputs.flavor }}
@@ -123,6 +122,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android_artifacts_${{ inputs.flavor }}
-          path: app/build/outputs/apk/${{ inputs.flavor }}/release/wgtunnel-${{ inputs.flavor }}-release-*.apk
+          path: app/build/outputs/apk/${{ inputs.flavor }}/${{ inputs.build_type  }}/wgtunnel-${{ inputs.flavor }}${{ inputs.flavor == 'fdroid' && '-release' || '' }}-*.apk
           retention-days: 1
           if-no-files-found: warn
