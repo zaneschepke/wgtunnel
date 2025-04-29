@@ -1,7 +1,6 @@
 name: nightly
 
 on:
-  push:
   schedule:
     - cron: "4 3 * * *"
   workflow_dispatch:
