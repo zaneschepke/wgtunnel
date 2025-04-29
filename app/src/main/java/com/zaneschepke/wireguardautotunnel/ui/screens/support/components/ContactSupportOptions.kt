@@ -85,7 +85,7 @@ fun ContactSupportOptions(context: android.content.Context) {
                         ),
                     )
                 )
-                if (BuildConfig.FLAVOR == Constants.FDROID_FLAVOR) {
+                if (BuildConfig.FLAVOR != Constants.GOOGLE_PLAY_FLAVOR) {
                     add(
                         SelectionItem(
                             leadingIcon = Icons.Filled.Favorite,

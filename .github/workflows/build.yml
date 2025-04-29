@@ -20,7 +20,7 @@ on:
         default: fdroid
         options:
           - fdroid
-          - full
+          - standalone
     secrets:
       SIGNING_KEY_ALIAS:
         required: false

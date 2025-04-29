@@ -103,7 +103,10 @@ android {
             dimension = "type"
             buildConfigField("String", "FLAVOR", "\"google\"")
         }
-        create("full") { dimension = "type" }
+        create("standalone") {
+            dimension = "type"
+            buildConfigField("String", "FLAVOR", "\"standalone\"")
+        }
     }
 
     compileOptions {

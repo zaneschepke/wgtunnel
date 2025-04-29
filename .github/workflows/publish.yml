@@ -34,17 +34,17 @@ on:
         type: choice
         description: "Product flavor"
         required: true
-        default: full
+        default: standalone
         options:
           - fdroid
-          - full
+          - standalone
   workflow_call:
     inputs:
       flavor:
         type: string
         description: "Product flavor"
         required: false
-        default: full
+        default: standalone
 
 env:
   UPLOAD_DIR_ANDROID: android_artifacts
@@ -80,18 +80,18 @@ jobs:
       build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
       flavor: fdroid
 
-  build-full:
-    if: ${{ inputs.release_type == 'release' || inputs.release_type == 'nightly' || inputs.release_type == 'prerelease' || inputs.flavor == 'full' }}
+  build-standalone:
+    if: ${{ inputs.release_type == 'release' || inputs.release_type == 'nightly' || inputs.release_type == 'prerelease' || inputs.flavor == 'standalone' }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
       build_type: ${{ inputs.release_type == '' && 'nightly' || inputs.release_type }}
-      flavor: full
+      flavor: standalone
 
   publish:
     needs:
       - check_commits
-      - build-full
+      - build-standalone
     if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
     name: publish-github
     runs-on: ubuntu-latest

@@ -23,6 +23,7 @@ import com.zaneschepke.wireguardautotunnel.ui.common.label.GroupLabel
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.ContactSupportOptions
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.GeneralSupportOptions
 import com.zaneschepke.wireguardautotunnel.ui.screens.support.components.UpdateSection
+import com.zaneschepke.wireguardautotunnel.util.Constants
 import com.zaneschepke.wireguardautotunnel.util.extensions.canInstallPackages
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.util.extensions.requestInstallPackagesPermission
@@ -54,7 +55,7 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
         InfoDialog(
             onDismiss = { viewModel.handleUpdateShown() },
             onAttest = {
-                if (BuildConfig.FLAVOR != "full") {
+                if (BuildConfig.FLAVOR != Constants.STANDALONE_FLAVOR) {
                     uiState.appUpdate?.apkUrl?.let { context.openWebUrl(it) }
                     return@InfoDialog
                 }
@@ -86,7 +87,7 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
             },
             confirmText = {
                 Text(
-                    if (BuildConfig.FLAVOR != "full") stringResource(R.string.download)
+                    if (BuildConfig.FLAVOR != Constants.STANDALONE_FLAVOR) stringResource(R.string.download)
                     else stringResource(R.string.download_and_install)
                 )
             },
@@ -124,7 +125,7 @@ fun SupportScreen(viewModel: SupportViewModel = hiltViewModel(), appViewModel: A
                 if (
                     BuildConfig.DEBUG ||
                         BuildConfig.VERSION_NAME.contains("beta") ||
-                        BuildConfig.FLAVOR == "google"
+                        BuildConfig.FLAVOR == Constants.GOOGLE_PLAY_FLAVOR
                 )
                     return@UpdateSection context.showToast(R.string.update_check_unsupported)
                 context.showToast(R.string.checking_for_update)

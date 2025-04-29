@@ -35,5 +35,7 @@ object Constants {
     const val QR_CODE_NAME_PROPERTY = "# Name ="
 
     const val FDROID_FLAVOR = "fdroid"
+    const val GOOGLE_PLAY_FLAVOR = "google"
+    const val STANDALONE_FLAVOR = "standalone"
     const val RELEASE = "release"
 }
