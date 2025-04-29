@@ -6,7 +6,7 @@ androidx-junit = "1.2.1"
 appcompat = "1.7.0"
 biometricKtx = "1.2.0-alpha05"
 coreKtx = "1.16.0"
-datastorePreferences = "1.1.4"
+datastorePreferences = "1.1.5"
 desugar_jdk_libs = "2.1.5"
 espressoCore = "3.6.1"
 hiltAndroid = "2.56.2"
@@ -28,7 +28,8 @@ androidGradlePlugin = "8.9.2"
 kotlin = "2.1.20"
 ksp = "2.1.20-2.0.0"
 composeBom = "2025.04.01"
-compose = "1.7.8"
+compose = "1.8.0"
+icons = "1.7.8"
 workRuntimeKtxVersion = "2.10.1"
 zxingAndroidEmbedded = "4.3.0"
 coreSplashscreen = "1.0.1"
@@ -95,7 +96,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorCli
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktorClientCore" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientCore" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-compose" }
-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "icons" }
 
 pin-lock-compose = { module = "com.zaneschepke:pin_lock_compose", version.ref = "pinLockCompose" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcodeKotlin" }
