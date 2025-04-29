@@ -1,0 +1,126 @@
+name: nightly
+
+on:
+  push:
+  schedule:
+    - cron: "4 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  check_commits:
+    name: Check for New Commits
+    runs-on: ubuntu-latest
+    outputs:
+      has_new_commits: ${{ steps.check.outputs.new_commits }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Check for new commits
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        run: |
+          NEW_COMMITS=$(git rev-list --count --after="$(date -Iseconds -d '23 hours ago')" ${{ github.sha }})
+          echo "new_commits=$NEW_COMMITS" >> $GITHUB_OUTPUT
+
+  build-standalone-nightly:
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    with:
+      build_type: "nightly"
+      flavor: standalone
+
+  publish:
+    needs:
+      - check_commits
+      - build-standalone-nightly
+    if: ${{ needs.check_commits.outputs.has_new_commits > 0 && inputs.release_type != 'none' }}
+    name: publish-nightly
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update && sudo apt install -y gh apksigner
+      - name: Set latest tag
+        uses: rickstaa/action-create-tag@v1
+        id: tag_creation
+        with:
+          tag: "latest"
+          message: "Automated tag for HEAD commit"
+          force_push_tag: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_exists_error: false
+
+      - name: Generate Changelog
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          toTag: "nightly"
+          fromTag: "latest"
+          writeToFile: false
+
+      - name: Make download dir
+        run: mkdir ${{ github.workspace }}/temp
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: android_artifacts_*
+          path: ${{ github.workspace }}/temp
+
+      - name: Set release notes
+        run: |
+          echo "RELEASE_NOTES=Nightly build for the latest development version of the app." >> $GITHUB_ENV
+
+      - name: Delete previous nightly version
+        uses: ClementTsang/delete-tag-and-release@v0.4.0
+        with:
+          tag_name: "nightly"
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get checksums
+        id: checksum
+        run: |
+          checksums=""
+          for file_path in $(find ${{ github.workspace }}/temp -type f -iname "*.apk"); do
+            checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")
+            checksums="$checksums\n$file_path: $checksum"
+          done
+          echo "checksum<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$checksums" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create nightly release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            ${{ env.RELEASE_NOTES }}
+
+            SHA-256 fingerprints for the 4096-bit signing certificate:
+            ```sh
+            ${{ steps.checksum.outputs.checksum }}
+            ```
+
+            To verify fingerprint:
+            ```sh
+            apksigner verify --print-certs [path to APK file] | grep SHA-256
+            ```
+
+            ### Changelog
+            ${{ steps.changelog.outputs.changes }}
+          tag_name: nightly
+          name: nightly
+          draft: false
+          prerelease: true
+          make_latest: false
+          files: |
+            ${{ github.workspace }}/temp/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
