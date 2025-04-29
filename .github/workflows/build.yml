@@ -1,4 +1,6 @@
-name: Build
+name: build
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:

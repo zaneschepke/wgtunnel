@@ -1,4 +1,7 @@
 name: publish
+permissions:
+  contents: write
+  packages: write
 
 on:
   workflow_dispatch:
@@ -45,10 +48,6 @@ on:
 
 env:
   UPLOAD_DIR_ANDROID: android_artifacts
-
-permissions:
-  contents: write
-  packages: write
 
 jobs:
 
