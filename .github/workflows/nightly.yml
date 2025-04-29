@@ -84,17 +84,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get checksums
+      - name: Get checksum
         id: checksum
         run: |
-          checksums=""
-          for file_path in $(find ${{ github.workspace }}/temp -type f -iname "*.apk"); do
-            checksum=$(apksigner verify -print-certs $file_path | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")
-            checksums="$checksums\n$file_path: $checksum"
-          done
-          echo "checksum<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$checksums" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          file_path=$(find ${{ github.workspace }}/temp -type f -iname "*.apk" | head -n 1)
+          if [ -z "$file_path" ]; then
+            echo "No APK file found"
+            exit 1
+          fi
+          checksum=$(apksigner verify --print-certs "$file_path" | grep -Po "(?<=SHA-256 digest:) .*" | tr -d "[:blank:]")
+          echo "checksum=$checksum" >> $GITHUB_OUTPUT
 
       - name: Create nightly release
         id: create_release
