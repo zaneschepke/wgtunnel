@@ -29,8 +29,6 @@ sealed class Route {
 
     @Serializable data object Lock : Route()
 
-    @Serializable data object Scanner : Route()
-
     @Serializable data object License : Route()
 
     @Serializable data class Config(val id: Int) : Route()

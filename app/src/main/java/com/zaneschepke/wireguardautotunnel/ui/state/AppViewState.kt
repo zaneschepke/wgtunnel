@@ -18,6 +18,7 @@ data class AppViewState(
         NONE,
         DELETE,
         INFO,
+        QR,
     }
 
     enum class BottomSheet {

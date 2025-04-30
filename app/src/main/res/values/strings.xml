@@ -258,4 +258,8 @@
     <string name="update_check_unsupported">Update check not supported this build type.</string>
     <string name="darker">Darker</string>
     <string name="amoled">AMOLED</string>
+    <string name="show_qr">Show QR</string>
+    <string name="amnezia">Amnezia</string>
+    <string name="wireguard">WireGuard</string>
+    <string name="done">Done</string>
 </resources>

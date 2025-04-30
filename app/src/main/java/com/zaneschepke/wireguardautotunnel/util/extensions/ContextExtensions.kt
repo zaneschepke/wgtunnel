@@ -1,6 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
 import android.Manifest
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Context.POWER_SERVICE
@@ -17,6 +18,9 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.location.LocationManagerCompat
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.core.service.tile.AutoTunnelControlTile
 import com.zaneschepke.wireguardautotunnel.core.service.tile.TunnelControlTile
@@ -224,4 +228,23 @@ fun Context.installApk(apkFile: File) {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     startActivity(intent)
+}
+
+fun Activity.setScreenBrightness(brightness: Float) {
+    window.attributes = window.attributes.apply { screenBrightness = brightness }
+}
+
+fun Activity.enableImmersiveMode() {
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    val controller = WindowCompat.getInsetsController(window, window.decorView)
+    controller.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    controller.hide(WindowInsetsCompat.Type.systemBars())
+}
+
+fun Activity.disableImmersiveMode() {
+    WindowCompat.setDecorFitsSystemWindows(window, true)
+    val controller = WindowCompat.getInsetsController(window, window.decorView)
+    controller.show(WindowInsetsCompat.Type.systemBars())
+    window.statusBarColor = android.graphics.Color.TRANSPARENT
 }

@@ -39,8 +39,6 @@ import java.time.Instant
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
@@ -402,6 +400,7 @@ constructor(
 
     private suspend fun handleClipboardImport(config: String, tunnels: List<TunnelConf>) {
         runCatching {
+                Timber.d("Config: $config")
                 val amConfig = TunnelConf.configFromAmQuick(config)
                 val tunnelConf = TunnelConf.tunnelConfigFromAmConfig(amConfig)
                 saveTunnel(
@@ -690,7 +689,7 @@ constructor(
             if (tunnels.isEmpty()) return
             val (files, shareFileName) =
                 when (configType) {
-                    ConfigType.AMNEZIA -> {
+                    ConfigType.AM -> {
                         val amFiles = fileUtils.createAmFiles(tunnels)
                         if (amFiles.isEmpty()) {
                             throw IOException("No valid Amnezia config files created")

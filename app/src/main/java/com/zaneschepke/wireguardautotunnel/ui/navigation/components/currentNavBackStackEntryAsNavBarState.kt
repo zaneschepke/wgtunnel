@@ -4,16 +4,7 @@ import android.os.Build
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CopyAll
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -240,8 +231,17 @@ fun currentNavBackStackEntryAsNavBarState(
                         showBottom = true,
                         topTitle = { tunnel?.name?.let { Text(it) } },
                         topTrailing = {
-                            ActionIconButton(Icons.Rounded.Edit, R.string.edit_tunnel) {
-                                tunnel?.id?.let { navController.navigate(Route.Config(it)) }
+                            Row {
+                                ActionIconButton(Icons.Rounded.QrCode2, R.string.show_qr) {
+                                    tunnel?.id?.let {
+                                        viewModel.handleEvent(
+                                            AppEvent.SetShowModal(AppViewState.ModalType.QR)
+                                        )
+                                    }
+                                }
+                                ActionIconButton(Icons.Rounded.Edit, R.string.edit_tunnel) {
+                                    tunnel?.id?.let { navController.navigate(Route.Config(it)) }
+                                }
                             }
                         },
                         route = args?.let { Route.TunnelOptions(it.id) },

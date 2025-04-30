@@ -1,5 +1,5 @@
 [versions]
-accompanist = "0.37.2"
+accompanist = "0.37.3"
 activityCompose = "1.10.1"
 amneziawgAndroid = "1.3.10"
 androidx-junit = "1.2.1"
@@ -18,7 +18,7 @@ lifecycle-runtime-compose = "2.8.7"
 material3 = "1.3.2"
 navigationCompose = "2.8.9"
 pinLockCompose = "1.0.4"
-qrcodeKotlin = "4.4.1"
+qrose = "1.0.1"
 roomVersion = "2.7.1"
 semver4j = "3.1.0"
 slf4jAndroid = "1.7.36"
@@ -99,7 +99,7 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "icons" }
 
 pin-lock-compose = { module = "com.zaneschepke:pin_lock_compose", version.ref = "pinLockCompose" }
-qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcodeKotlin" }
+qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
 semver4j = { module = "com.vdurmont:semver4j", version.ref = "semver4j" }
 slf4j-android = { module = "org.slf4j:slf4j-android", version.ref = "slf4jAndroid" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }

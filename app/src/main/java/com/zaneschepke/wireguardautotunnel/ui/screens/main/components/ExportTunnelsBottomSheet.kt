@@ -93,7 +93,7 @@ fun ExportTunnelsBottomSheet(viewModel: AppViewModel) {
         ExportOptionRow(
             label = stringResource(R.string.export_tunnels_amnezia),
             onClick = {
-                exportConfigType = ConfigType.AMNEZIA
+                exportConfigType = ConfigType.AM
                 if (!isAuthorized && !isTv) {
                     showAuthPrompt = true
                 } else {

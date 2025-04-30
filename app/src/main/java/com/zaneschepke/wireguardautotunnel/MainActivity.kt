@@ -22,7 +22,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -54,7 +53,6 @@ import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure.Loca
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.autotunnel.TunnelAutoTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.config.ConfigScreen
-import com.zaneschepke.wireguardautotunnel.ui.screens.main.scanner.ScannerScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.SplitTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.tunneloptions.TunnelOptionsScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.pin.PinLockScreen
@@ -298,11 +296,10 @@ class MainActivity : AppCompatActivity() {
                                         appUiState.tunnels
                                             .firstOrNull { it.id == args.id }
                                             ?.let { config ->
-                                                TunnelOptionsScreen(config, viewModel)
+                                                TunnelOptionsScreen(config, viewModel, appViewState)
                                             }
                                     }
                                     composable<Route.Lock> { PinLockScreen(viewModel) }
-                                    composable<Route.Scanner> { ScannerScreen(viewModel) }
                                     composable<Route.KillSwitch> {
                                         KillSwitchScreen(appUiState, viewModel)
                                     }

@@ -110,9 +110,9 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions { jvmTarget = Constants.JVM_TARGET }
     buildFeatures {
@@ -124,7 +124,6 @@ android {
     licensee {
         Constants.allowedLicenses.forEach { allow(it) }
         allowUrl(Constants.XZING_LICENSE_URL)
-        allowUrl("https://rafaellins.mit-license.org/2021/")
     }
 
     applicationVariants.all {
@@ -198,6 +197,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.zxing.android.embedded)
+
     implementation(libs.material.icons.extended)
 
     implementation(libs.androidx.biometric.ktx)
@@ -210,7 +210,7 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
 
-    implementation(libs.qrcode.kotlin)
+    implementation(libs.qrose)
     implementation(libs.semver4j)
 
     implementation(libs.ktor.client.core)

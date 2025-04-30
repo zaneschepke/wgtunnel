@@ -9,6 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import com.zaneschepke.wireguardautotunnel.R
 import com.zaneschepke.wireguardautotunnel.ui.Route
 import com.zaneschepke.wireguardautotunnel.ui.common.dialog.InfoDialog
@@ -45,6 +47,17 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
             onData = { data -> viewModel.handleEvent(AppEvent.ImportTunnelFromFile(data)) },
         )
 
+    val scanLauncher =
+        rememberLauncherForActivityResult(
+            contract = ScanContract(),
+            onResult = { result ->
+                {
+                    if (result != null && result.contents.isNotEmpty())
+                        viewModel.handleEvent(AppEvent.ImportTunnelFromQrCode(result.contents))
+                }
+            },
+        )
+
     val requestPermissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted
             ->
@@ -56,7 +69,7 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
                 )
                 return@rememberLauncherForActivityResult
             }
-            navController.navigate(Route.Scanner)
+            scanLauncher.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE))
         }
 
     if (appViewState.showModal == AppViewState.ModalType.DELETE) {
