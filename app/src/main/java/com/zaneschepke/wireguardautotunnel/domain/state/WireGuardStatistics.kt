@@ -12,7 +12,7 @@ class WireGuardStatistics(private val statistics: Statistics) : TunnelStatistics
                 txBytes = peerStats.txBytes,
                 rxBytes = peerStats.rxBytes,
                 latestHandshakeEpochMillis = peerStats.latestHandshakeEpochMillis,
-                resolvedEndpoint = peerStats.rosolvedEndpoint,
+                resolvedEndpoint = peerStats.resolvedEndpoint,
             )
         }
     }

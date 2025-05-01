@@ -26,7 +26,6 @@ data class TunnelConf(
     val pingIp: String? = null,
     val isEthernetTunnel: Boolean = false,
     val isIpv4Preferred: Boolean = true,
-    val useCache: Boolean = false,
     @Transient private var stateChangeCallback: ((Any) -> Unit)? = null,
 ) : Tunnel, org.amnezia.awg.backend.Tunnel {
 
@@ -110,8 +109,6 @@ data class TunnelConf(
     override fun getName(): String = tunName
 
     override fun isIpv4ResolutionPreferred(): Boolean = isIpv4Preferred
-
-    override fun useCache(): Boolean = useCache
 
     override fun onStateChange(newState: org.amnezia.awg.backend.Tunnel.State) {
         stateChangeCallback?.invoke(newState)
