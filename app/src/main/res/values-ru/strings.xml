@@ -248,4 +248,8 @@
     <string name="amoled">AMOLED</string>
     <string name="darker">Ночная</string>
     <string name="security_template">Защита: %1$s</string>
+    <string name="wireguard">WireGuard</string>
+    <string name="done">Готово</string>
+    <string name="amnezia">Amnezia</string>
+    <string name="show_qr">Показать QR-код</string>
 </resources>
