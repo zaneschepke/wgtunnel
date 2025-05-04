@@ -249,4 +249,8 @@
     <string name="darker">Ciemniejszy</string>
     <string name="amoled">AMOLED</string>
     <string name="security_template">Zabezpieczenia: %1$s</string>
+    <string name="show_qr">Pokaż kod QR</string>
+    <string name="amnezia">Amnezia</string>
+    <string name="wireguard">WireGuard</string>
+    <string name="done">Gotowe</string>
 </resources>
