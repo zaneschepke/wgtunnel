@@ -248,4 +248,8 @@
     <string name="flavor_template">Variante: %1$s</string>
     <string name="darker">Dunkler</string>
     <string name="update_check_unsupported">Updateprüfung wird bei diesem Build-Typ nicht unterstützt.</string>
+    <string name="wireguard">WireGuard</string>
+    <string name="done">Erledigt</string>
+    <string name="show_qr">QR anzeigen</string>
+    <string name="amnezia">Amnezia</string>
 </resources>
