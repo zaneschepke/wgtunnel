@@ -218,7 +218,19 @@
     <string name="root_accepted">Root shell přijata</string>
     <string name="background_location_message">Autorizace povolit vždy polohu a/nebo přesná poloha je vyžadováno pro tuto funkci. Viz</string>
     <string name="update_check_unsupported">Kontrola aktualizací není u tohoto typu sestavení podporována.</string>
-    <string name="background_location_message2">abyste se ujistili, že jsou tato oprávnění povolena.</string>
+    <string name="background_location_message2">abyste se ujistili, že jsou tato oprávnění povolena</string>
     <string name="darker">Tmavší</string>
     <string name="amoled">AMOLED</string>
+    <string name="default_ping_ip">(nepovinné, výchozí hodnota je peers)</string>
+    <string name="monitoring_state_changes">Monitorování změn stavu</string>
+    <string name="pre_up">Před aktivací</string>
+    <string name="pre_down">Před deaktivací</string>
+    <string name="post_up">Po aktivaci</string>
+    <string name="optional_default">"nepovinné, výchozí: "</string>
+    <string name="flavor_template">Varianta: %1$s</string>
+    <string name="security_template">Zabezpečení: %1$s</string>
+    <string name="done">Hotovo</string>
+    <string name="wireguard">WireGuard</string>
+    <string name="amnezia">Amnezia</string>
+    <string name="show_qr">Zobrazit QR kód</string>
 </resources>
