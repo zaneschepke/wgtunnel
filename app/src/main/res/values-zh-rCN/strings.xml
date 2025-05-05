@@ -248,4 +248,8 @@
     <string name="security_template">安全性：%1$s</string>
     <string name="darker">颜色更深</string>
     <string name="amoled">AMOLED</string>
+    <string name="show_qr">显示二维码</string>
+    <string name="amnezia">Amnezia</string>
+    <string name="wireguard">WireGuard</string>
+    <string name="done">完成</string>
 </resources>
