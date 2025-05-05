@@ -1,0 +1,5 @@
+Co je nového:
+- Oprava regrese automatického tunelu
+- Vylepšení synchronizace dlaždic
+- Optimalizace dotazování na název sítě Wi-Fi
+- Vylení kontrol oprávnění pro monitorování sítě

@@ -1,0 +1,6 @@
+Co je nového:
+- Opravena chyba DNS způsobující nefunkční připojení tunelu
+- Opravena chyba zaseknutí tunelu při spuštění
+- Přidán QR kód pro zobrazení tunelu
+- Přidán přeložný koncový bod do statistik
+- Různé další opravy chyb
