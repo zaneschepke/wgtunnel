@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="no_tunnels">Chưa có đường nối nào!</string>
+    <string name="tunnels">Các đường nối</string>
+    <string name="error_file_extension">Tệp không phải .conf hay .zip</string>
+</resources>
