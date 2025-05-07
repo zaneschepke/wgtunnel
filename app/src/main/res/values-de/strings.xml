@@ -12,7 +12,7 @@
     <string name="turn_on_tunnel">Für diese Aktion muss ein aktiver Tunnel bestehen</string>
     <string name="prominent_background_location_message">Diese Funktion erfordert die Erlaubnis zur Standortbestimmung im Hintergrund, um die Überwachung der WLAN SSID zu ermöglichen, auch wenn die Anwendung geschlossen ist. Weitere Einzelheiten in den Datenschutzbestimmungen, die auf dem Support-Bildschirm verlinkt sind.</string>
     <string name="prominent_background_location_title">Vereinbarung der Standortberechtigung im Hintergrund</string>
-    <string name="thank_you">Danke fürs Benutzen von WG Tunnel!</string>
+    <string name="thank_you">Danke für die Nutzung von WG Tunnel!</string>
     <string name="trusted_ssid_value_description">SSID übermitteln</string>
     <string name="add_tunnels_text">Von Datei oder ZIP hinzufügen</string>
     <string name="open_file">Datei öffnen</string>
@@ -140,7 +140,7 @@
     <string name="local_logging">Lokales Logging</string>
     <string name="enable_local_logging">Lokales Logging aktivieren</string>
     <string name="add_from_clipboard">Aus Zwischenablage einfügen</string>
-    <string name="kill_switch">Kill Switch</string>
+    <string name="kill_switch">Notschalter</string>
     <string name="automatic">Automatisch</string>
     <string name="language">Sprache</string>
     <string name="display_theme">Anzeigetheme</string>
@@ -227,4 +227,29 @@
     <string name="wifi_name_template">Aktiv: %1$s</string>
     <string name="delete">Löschen</string>
     <string name="nothing_here_yet">Noch nix hier!</string>
+    <string name="share">Teilen</string>
+    <string name="select_all">Alles auswählen</string>
+    <string name="version_template">Version: %1$s</string>
+    <string name="export_success">Export Erfolg</string>
+    <string name="download">Download</string>
+    <string name="check_for_update">Auf Update prüfen</string>
+    <string name="update_check_failed">Updateprüfung fehlgeschlagen.</string>
+    <string name="checking_for_update">Überpüfe auf Updates</string>
+    <string name="update_download_failed">Updatedownload fehlgeschlagen.</string>
+    <string name="update_available">Update verfügbar!</string>
+    <string name="download_and_install">Herunterladen und installieren</string>
+    <string name="permission_required">Berechtigung erforderlich</string>
+    <string name="licenses">Lizenzen</string>
+    <string name="allow">Erlauben</string>
+    <string name="install_updated_permission">Diese App benötigt die Berechtigung, um Updates zu installieren.</string>
+    <string name="latest_installed">Du verwendesz bereits die neueste Version.</string>
+    <string name="security_template">Sicherheit: %1$s</string>
+    <string name="amoled">AMOLED</string>
+    <string name="flavor_template">Variante: %1$s</string>
+    <string name="darker">Dunkler</string>
+    <string name="update_check_unsupported">Updateprüfung wird bei diesem Build-Typ nicht unterstützt.</string>
+    <string name="wireguard">WireGuard</string>
+    <string name="done">Erledigt</string>
+    <string name="show_qr">QR anzeigen</string>
+    <string name="amnezia">Amnezia</string>
 </resources>
