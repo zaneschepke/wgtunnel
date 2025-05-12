@@ -51,10 +51,8 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
         rememberLauncherForActivityResult(
             contract = ScanContract(),
             onResult = { result ->
-                {
-                    if (result != null && result.contents.isNotEmpty())
-                        viewModel.handleEvent(AppEvent.ImportTunnelFromQrCode(result.contents))
-                }
+                if (result != null && result.contents.isNotEmpty())
+                    viewModel.handleEvent(AppEvent.ImportTunnelFromQrCode(result.contents))
             },
         )
 
@@ -69,7 +67,7 @@ fun MainScreen(appUiState: AppUiState, appViewState: AppViewState, viewModel: Ap
                 )
                 return@rememberLauncherForActivityResult
             }
-            scanLauncher.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE))
+            scanLauncher.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setBeepEnabled(false))
         }
 
     if (appViewState.showModal == AppViewState.ModalType.DELETE) {

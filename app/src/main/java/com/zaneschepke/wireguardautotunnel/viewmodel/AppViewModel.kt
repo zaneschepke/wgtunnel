@@ -400,7 +400,6 @@ constructor(
 
     private suspend fun handleClipboardImport(config: String, tunnels: List<TunnelConf>) {
         runCatching {
-                Timber.d("Config: $config")
                 val amConfig = TunnelConf.configFromAmQuick(config)
                 val tunnelConf = TunnelConf.tunnelConfigFromAmConfig(amConfig)
                 saveTunnel(
