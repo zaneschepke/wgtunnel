@@ -231,3 +231,10 @@ tasks.register<Copy>("copyLicenseeJsonToAssets") {
 }
 
 tasks.named("preBuild") { dependsOn("copyLicenseeJsonToAssets") }
+
+// https://gist.github.com/obfusk/61046e09cee352ae6dd109911534b12e#fix-proposed-by-linsui-disable-baseline-profiles
+tasks.whenTaskAdded {
+    if (name.contains("ArtProfile")) {
+        enabled = false
+    }
+}
