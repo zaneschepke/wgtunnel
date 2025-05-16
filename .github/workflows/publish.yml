@@ -4,6 +4,9 @@ permissions:
   packages: write
 
 on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
   workflow_dispatch:
     inputs:
       track:
@@ -49,19 +52,19 @@ on:
 jobs:
 
   build-fdroid:
-    if: ${{ inputs.release_type == 'release' || inputs.flavor == 'fdroid' }}
+    if: ${{ github.event_name == 'push' || inputs.release_type == 'release' || inputs.flavor == 'fdroid' }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
-      build_type: ${{ inputs.release_type }}
+      build_type: ${{ github.event_name == 'push' && 'release' || inputs.release_type }}
       flavor: fdroid
 
   build-standalone:
-    if: ${{ inputs.release_type == 'release' || inputs.release_type == 'prerelease' || inputs.flavor == 'standalone' }}
+    if: ${{ github.event_name == 'push' || inputs.release_type == 'release' || inputs.release_type == 'prerelease' || inputs.flavor == 'standalone' }}
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
-      build_type: ${{ inputs.release_type }}
+      build_type: ${{ github.event_name == 'push' && 'release' || inputs.release_type }}
       flavor: standalone
 
   publish:
@@ -72,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'push' && github.ref || 'main' }}
       - name: Install system dependencies
         run: |
           sudo apt update && sudo apt install -y gh apksigner
@@ -113,7 +116,7 @@ jobs:
           merge-multiple: true
 
       - name: Set version release notes
-        if: ${{ inputs.release_type == 'release' }}
+        if: ${{ github.event_name == 'push' || inputs.release_type == 'release' }}
         run: |
           VERSION_NAME=$(grep "const val VERSION_NAME" buildSrc/src/main/kotlin/Constants.kt | awk -F'"' '{print $2}')
           RELEASE_NOTES="$(cat ${{ github.workspace }}/fastlane/metadata/android/en-US/changelogs/${VERSION_NAME}.txt || echo "No changelog found for ${VERSION_NAME}")"
@@ -122,7 +125,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: On prerelease release notes
-        if: ${{ inputs.release_type == 'prerelease' }}
+        if: ${{ github.event_name != 'push' && inputs.release_type == 'prerelease' }}
         run: |
           echo "RELEASE_NOTES=Testing version of app for specific feature." >> $GITHUB_ENV
 
@@ -156,11 +159,11 @@ jobs:
 
             ### Changelog
             ${{ steps.changelog.outputs.changes }}
-          tag_name: ${{ github.event.inputs.tag_name }}
-          name: ${{ github.event.inputs.tag_name }}
+          tag_name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag_name }}
+          name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag_name }}
           draft: false
-          prerelease: ${{ inputs.release_type == 'prerelease' }}
-          make_latest: ${{ inputs.release_type == 'release' }}
+          prerelease: ${{ github.event_name != 'push' && inputs.release_type == 'prerelease' }}
+          make_latest: ${{ github.event_name == 'push' || inputs.release_type == 'release' }}
           files: |
             ${{ github.workspace }}/temp/**/*.apk
         env:
@@ -170,7 +173,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-fdroid
-    if: inputs.release_type == 'release'
+    if: ${{ github.event_name == 'push' || inputs.release_type == 'release' }}
     steps:
       - name: Dispatch update for fdroid repo
         uses: peter-evans/repository-dispatch@v3
@@ -180,7 +183,7 @@ jobs:
           event-type: fdroid-update
 
   publish-play:
-    if: ${{ inputs.track != 'none' }}
+    if: ${{ github.event_name == 'push' || inputs.track != 'none' }}
     name: Publish to Google Play
     runs-on: ubuntu-latest
 
@@ -230,4 +233,6 @@ jobs:
           bundler-cache: true
 
       - name: Distribute app to Prod track 🚀
-        run: (cd ${{ github.workspace }} && bundle install && bundle exec fastlane ${{ inputs.track }})
+        run: |
+          track=${{ github.event_name == 'push' && 'production' || inputs.track }}
+          (cd ${{ github.workspace }} && bundle install && bundle exec fastlane $track)
