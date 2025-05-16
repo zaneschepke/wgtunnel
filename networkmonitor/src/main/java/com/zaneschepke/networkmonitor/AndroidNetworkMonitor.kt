@@ -51,7 +51,7 @@ class AndroidNetworkMonitor(
     @get:Synchronized @set:Synchronized var wifiConnected = false
 
     // Track active Wi-Fi networks and last active network ID
-    private val activeNetworks = Collections.synchronizedSet(mutableSetOf<Network>())
+    private val activeNetworks = Collections.synchronizedSet(mutableSetOf<String>())
 
     data class WifiState(
         val connected: Boolean = false,
@@ -148,7 +148,7 @@ class AndroidNetworkMonitor(
             object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
                     Timber.d("Wi-Fi onAvailable: network=$network")
-                    activeNetworks.add(network)
+                    activeNetworks.add(network.toString())
                     launch {
                         currentSsid = getWifiSsid()
                         securityType = wifiManager?.getCurrentSecurityType()
@@ -165,7 +165,7 @@ class AndroidNetworkMonitor(
 
                 override fun onLost(network: Network) {
                     Timber.d("Wi-Fi onLost: network=$network")
-                    activeNetworks.remove(network)
+                    activeNetworks.remove(network.toString())
                     if (activeNetworks.isEmpty()) {
                         Timber.d(
                             "All Wi-Fi networks disconnected, clearing currentSsid and wifiConnected"
