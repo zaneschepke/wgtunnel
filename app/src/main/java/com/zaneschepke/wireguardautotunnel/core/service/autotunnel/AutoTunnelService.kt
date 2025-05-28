@@ -265,32 +265,35 @@ class AutoTunnelService : LifecycleService() {
 
             var reevaluationJob: Job? = null
 
-            autoTunnelStateFlow
-                .debounce(settings.debounceDelayMillis())
-                .collect { watcherState ->
-                    if (watcherState == defaultState) return@collect
-                    reevaluationJob?.cancel()
-                    handleAutoTunnelEvent(watcherState)
+            autoTunnelStateFlow.debounce(settings.debounceDelayMillis()).collect { watcherState ->
+                if (watcherState == defaultState) return@collect
+                reevaluationJob?.cancel()
+                handleAutoTunnelEvent(watcherState)
 
-                    // schedule one-time re-evaluation
-                    reevaluationJob = launch {
-                        delay(REEVALUATE_CHECK_DELAY)
-                        if (watcherState != defaultState) {
-                            Timber.d("Re-evaluating auto-tunnel state..")
-                            handleAutoTunnelEvent(watcherState)
-                        }
+                // schedule one-time re-evaluation
+                reevaluationJob = launch {
+                    delay(REEVALUATE_CHECK_DELAY)
+                    if (watcherState != defaultState) {
+                        Timber.d("Re-evaluating auto-tunnel state..")
+                        handleAutoTunnelEvent(watcherState)
                     }
                 }
+            }
         }
 
     private suspend fun handleAutoTunnelEvent(watcherState: AutoTunnelState) {
         Timber.i("Auto-tunnel settings: ${watcherState.settings.toAutoTunnelStateString()}")
         Timber.i("Auto-tunnel network state: ${watcherState.networkState}")
-        when (val event = watcherState.asAutoTunnelEvent().also { Timber.i("Auto-tunnel event: ${it.javaClass.simpleName}") }) {
+        when (
+            val event =
+                watcherState.asAutoTunnelEvent().also {
+                    Timber.i("Auto-tunnel event: ${it.javaClass.simpleName}")
+                }
+        ) {
             is AutoTunnelEvent.Start ->
-                (event.tunnelConf ?: appDataRepository.get().getPrimaryOrFirstTunnel())
-                    ?.let {
-                        tunnelManager.startTunnel(it) }
+                (event.tunnelConf ?: appDataRepository.get().getPrimaryOrFirstTunnel())?.let {
+                    tunnelManager.startTunnel(it)
+                }
             is AutoTunnelEvent.Stop -> tunnelManager.stopTunnel()
             AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: nothing to do")
         }

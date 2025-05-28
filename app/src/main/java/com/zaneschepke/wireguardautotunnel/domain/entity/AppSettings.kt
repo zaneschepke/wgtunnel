@@ -35,6 +35,7 @@ data class AppSettings(
             Wildcards: $isWildcardsEnabled
             StopOnNoInternet: $isStopOnNoInternetEnabled
             Trusted Networks: $trustedNetworkSSIDs
-        """.trimIndent()
+        """
+            .trimIndent()
     }
 }
