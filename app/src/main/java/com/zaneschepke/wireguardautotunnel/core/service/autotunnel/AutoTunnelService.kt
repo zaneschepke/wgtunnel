@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -261,18 +262,41 @@ class AutoTunnelService : LifecycleService() {
         lifecycleScope.launch(ioDispatcher) {
             Timber.i("Starting auto-tunnel network event watcher")
             val settings = appDataRepository.get().settings.get()
-            Timber.d("Starting with debounce delay of: ${settings.debounceDelaySeconds} seconds")
-            autoTunnelStateFlow.debounce(settings.debounceDelayMillis()).collect { watcherState ->
-                if (watcherState == defaultState) return@collect
-                Timber.d("New auto tunnel state emitted ${watcherState.networkState}")
-                when (val event = watcherState.asAutoTunnelEvent()) {
-                    is AutoTunnelEvent.Start ->
-                        (event.tunnelConf ?: appDataRepository.get().getPrimaryOrFirstTunnel())
-                            ?.let { tunnelManager.startTunnel(it) }
-                    // TODO improve this to target specific tunnels to better support multi-tunnel
-                    is AutoTunnelEvent.Stop -> tunnelManager.stopTunnel()
-                    AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: no condition met")
+
+            var reevaluationJob: Job? = null
+
+            autoTunnelStateFlow
+                .debounce(settings.debounceDelayMillis())
+                .collect { watcherState ->
+                    if (watcherState == defaultState) return@collect
+                    reevaluationJob?.cancel()
+                    handleAutoTunnelEvent(watcherState)
+
+                    // schedule one-time re-evaluation
+                    reevaluationJob = launch {
+                        delay(REEVALUATE_CHECK_DELAY)
+                        if (watcherState != defaultState) {
+                            Timber.d("Re-evaluating auto-tunnel state..")
+                            handleAutoTunnelEvent(watcherState)
+                        }
+                    }
                 }
-            }
         }
+
+    private suspend fun handleAutoTunnelEvent(watcherState: AutoTunnelState) {
+        Timber.i("Auto-tunnel settings: ${watcherState.settings.toAutoTunnelStateString()}")
+        Timber.i("Auto-tunnel network state: ${watcherState.networkState}")
+        when (val event = watcherState.asAutoTunnelEvent().also { Timber.i("Auto-tunnel event: ${it.javaClass.simpleName}") }) {
+            is AutoTunnelEvent.Start ->
+                (event.tunnelConf ?: appDataRepository.get().getPrimaryOrFirstTunnel())
+                    ?.let {
+                        tunnelManager.startTunnel(it) }
+            is AutoTunnelEvent.Stop -> tunnelManager.stopTunnel()
+            AutoTunnelEvent.DoNothing -> Timber.i("Auto-tunneling: nothing to do")
+        }
+    }
+
+    companion object {
+        const val REEVALUATE_CHECK_DELAY = 5_000L
+    }
 }

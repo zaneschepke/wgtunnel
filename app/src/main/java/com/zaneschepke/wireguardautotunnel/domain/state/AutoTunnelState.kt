@@ -16,6 +16,7 @@ data class AutoTunnelState(
     val tunnels: List<TunnelConf> = emptyList(),
 ) {
 
+    // also need to check for Wi-Fi state as there is some overlap when they are both connected
     private fun isMobileDataActive(): Boolean {
         return !networkState.isEthernetConnected &&
             !networkState.isWifiConnected &&
@@ -50,6 +51,7 @@ data class AutoTunnelState(
         return getTunnelWithMatchingTunnelNetwork() ?: tunnels.firstOrNull { it.isPrimaryTunnel }
     }
 
+    // ignore cellular state as there is overlap where it may still be active, but not prioritized
     private fun isWifiActive(): Boolean {
         return !networkState.isEthernetConnected && networkState.isWifiConnected
     }

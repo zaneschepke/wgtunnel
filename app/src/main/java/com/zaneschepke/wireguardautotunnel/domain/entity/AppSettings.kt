@@ -26,4 +26,15 @@ data class AppSettings(
     fun debounceDelayMillis(): Long {
         return debounceDelaySeconds * 1000L
     }
+
+    fun toAutoTunnelStateString(): String {
+        return """
+            TunnelOnWifi: $isTunnelOnWifiEnabled
+            TunnelOnMobileData: $isTunnelOnMobileDataEnabled
+            TunnelOnEthernet: $isTunnelOnEthernetEnabled
+            Wildcards: $isWildcardsEnabled
+            StopOnNoInternet: $isStopOnNoInternetEnabled
+            Trusted Networks: $trustedNetworkSSIDs
+        """.trimIndent()
+    }
 }
