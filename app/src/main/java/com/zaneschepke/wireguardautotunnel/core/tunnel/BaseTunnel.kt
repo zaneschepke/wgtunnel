@@ -114,16 +114,16 @@ abstract class BaseTunnel(
         if (this@BaseTunnel is UserspaceTunnel) stopActiveTunnels()
         tunMutex.withLock {
             tunThreads[tunnelConf.id] = thread {
-                runBlocking {
-                    try {
+                try {
+                    runBlocking {
                         Timber.d("Starting tunnel ${tunnelConf.id}...")
                         startTunnelInner(tunnelConf)
                         Timber.d("Started complete for tunnel ${tunnelConf.name}...")
-                    } catch (e: InterruptedException) {
-                        Timber.w(
-                            "Tunnel start has been interrupted as ${tunnelConf.name} failed to start"
-                        )
                     }
+                } catch (e: InterruptedException) {
+                    Timber.w(
+                        "Tunnel start has been interrupted as ${tunnelConf.name} failed to start"
+                    )
                 }
             }
         }

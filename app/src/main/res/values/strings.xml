@@ -255,7 +255,7 @@
     <string name="install_updated_permission">This app needs permission to install updates.</string>
     <string name="allow">Allow</string>
     <string name="licenses">Licenses</string>
-    <string name="update_check_unsupported">Update check not supported this build type.</string>
+    <string name="update_check_unsupported">Update check is not supported for this build type.</string>
     <string name="darker">Darker</string>
     <string name="amoled">AMOLED</string>
     <string name="show_qr">Show QR</string>
