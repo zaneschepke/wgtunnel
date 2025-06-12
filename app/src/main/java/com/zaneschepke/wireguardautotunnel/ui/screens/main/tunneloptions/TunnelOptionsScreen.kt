@@ -10,7 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.ui.common.SectionDivider
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SurfaceSelectionGroupButton
 import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalIsAndroidTV

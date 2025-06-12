@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.main.splittunnel.state
 
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 
 data class SplitTunnelUiState(
     val loading: Boolean = true,

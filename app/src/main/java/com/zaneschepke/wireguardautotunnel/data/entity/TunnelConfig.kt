@@ -1,10 +1,9 @@
-package com.zaneschepke.wireguardautotunnel.data.model
+package com.zaneschepke.wireguardautotunnel.data.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 
 @Entity(indices = [Index(value = ["name"], unique = true)])
 data class TunnelConfig(
@@ -30,48 +29,7 @@ data class TunnelConfig(
     var isIpv4Preferred: Boolean = true,
 ) {
 
-    fun toTunnel(): TunnelConf {
-        return TunnelConf(
-            id,
-            name,
-            wgQuick,
-            tunnelNetworks,
-            isMobileDataTunnel,
-            isPrimaryTunnel,
-            amQuick,
-            isActive,
-            isPingEnabled,
-            pingInterval,
-            pingCooldown,
-            pingIp,
-            isEthernetTunnel,
-            isIpv4Preferred,
-        )
-    }
-
     companion object {
-
         const val AM_QUICK_DEFAULT = ""
-
-        fun from(tunnelConf: TunnelConf): TunnelConfig {
-            return with(tunnelConf) {
-                return TunnelConfig(
-                    id,
-                    tunName,
-                    wgQuick,
-                    tunnelNetworks.toMutableList(),
-                    isMobileDataTunnel,
-                    isPrimaryTunnel,
-                    amQuick,
-                    isActive,
-                    isPingEnabled,
-                    pingInterval,
-                    pingCooldown,
-                    pingIp,
-                    isEthernetTunnel,
-                    isIpv4Preferred,
-                )
-            }
-        }
     }
 }

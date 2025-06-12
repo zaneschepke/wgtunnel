@@ -188,6 +188,14 @@ fun currentNavBackStackEntryAsNavBarState(
                         route = Route.Display,
                     )
 
+                backStackEntry.isCurrentRoute(Route.WifiDetectionMethod::class) ->
+                    NavBarState(
+                        showTop = true,
+                        showBottom = true,
+                        topTitle = { Text(stringResource(R.string.wifi_detection_method)) },
+                        route = Route.WifiDetectionMethod,
+                    )
+
                 backStackEntry.isCurrentRoute(Route.KillSwitch::class) ->
                     NavBarState(
                         showTop = true,

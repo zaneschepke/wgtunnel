@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zaneschepke.wireguardautotunnel.BuildConfig
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppUpdate
+import com.zaneschepke.wireguardautotunnel.domain.model.AppUpdate
 import com.zaneschepke.wireguardautotunnel.domain.repository.UpdateRepository
 import com.zaneschepke.wireguardautotunnel.util.FileUtils
 import com.zaneschepke.wireguardautotunnel.util.StringValue

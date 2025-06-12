@@ -3,10 +3,10 @@ package com.zaneschepke.wireguardautotunnel.domain.state
 import com.zaneschepke.wireguardautotunnel.core.tunnel.allDown
 import com.zaneschepke.wireguardautotunnel.core.tunnel.hasActive
 import com.zaneschepke.wireguardautotunnel.core.tunnel.isUp
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.events.AutoTunnelEvent
 import com.zaneschepke.wireguardautotunnel.domain.events.KillSwitchEvent
+import com.zaneschepke.wireguardautotunnel.domain.model.AppSettings
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.util.extensions.isMatchingToWildcardList
 
 data class AutoTunnelState(

@@ -1,18 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.Filter1
-import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.outlined.VpnKeyOff
-import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,14 +17,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.zaneschepke.networkmonitor.AndroidNetworkMonitor
 import com.zaneschepke.networkmonitor.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.R
+import com.zaneschepke.wireguardautotunnel.ui.Route
+import com.zaneschepke.wireguardautotunnel.ui.common.button.ForwardButton
 import com.zaneschepke.wireguardautotunnel.ui.common.button.ScaledSwitch
 import com.zaneschepke.wireguardautotunnel.ui.common.button.surface.SelectionItem
 import com.zaneschepke.wireguardautotunnel.ui.common.functions.rememberClipboardHelper
+import com.zaneschepke.wireguardautotunnel.ui.navigation.LocalNavController
 import com.zaneschepke.wireguardautotunnel.ui.screens.settings.components.LearnMoreLinkLabel
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
 import com.zaneschepke.wireguardautotunnel.ui.theme.iconSize
+import com.zaneschepke.wireguardautotunnel.util.extensions.asString
 import com.zaneschepke.wireguardautotunnel.util.extensions.openWebUrl
 import com.zaneschepke.wireguardautotunnel.viewmodel.AppViewModel
 import com.zaneschepke.wireguardautotunnel.viewmodel.event.AppEvent
@@ -47,6 +43,7 @@ fun WifiTunnelingItems(
     isWifiNameReadable: () -> Boolean,
 ): List<SelectionItem> {
     val context = LocalContext.current
+    val navController = LocalNavController.current
     val clipboardHelper = rememberClipboardHelper()
 
     val baseItems =
@@ -107,40 +104,40 @@ fun WifiTunnelingItems(
                     }
                 },
                 onClick = { viewModel.handleEvent(AppEvent.ToggleAutoTunnelOnWifi) },
-            ),
-            SelectionItem(
-                leadingIcon = Icons.Outlined.Code,
-                title = {
-                    Text(
-                        stringResource(R.string.wifi_name_via_shell),
-                        style =
-                            MaterialTheme.typography.bodyMedium.copy(
-                                MaterialTheme.colorScheme.onSurface
-                            ),
-                    )
-                },
-                description = {
-                    Text(
-                        stringResource(R.string.use_root_shell_for_wifi),
-                        style =
-                            MaterialTheme.typography.bodySmall.copy(
-                                MaterialTheme.colorScheme.outline
-                            ),
-                    )
-                },
-                trailing = {
-                    ScaledSwitch(
-                        checked = uiState.appSettings.isWifiNameByShellEnabled,
-                        onClick = { viewModel.handleEvent(AppEvent.ToggleRootShellWifi) },
-                    )
-                },
-                onClick = { viewModel.handleEvent(AppEvent.ToggleRootShellWifi) },
-            ),
+            )
         )
 
     return if (uiState.appSettings.isTunnelOnWifiEnabled) {
         baseItems +
             listOf(
+                SelectionItem(
+                    leadingIcon = Icons.Outlined.WifiFind,
+                    title = {
+                        Text(
+                            stringResource(R.string.wifi_detection_method),
+                            style =
+                                MaterialTheme.typography.bodyMedium.copy(
+                                    MaterialTheme.colorScheme.onSurface
+                                ),
+                        )
+                    },
+                    description = {
+                        Text(
+                            stringResource(
+                                R.string.current_template,
+                                uiState.appSettings.wifiDetectionMethod.asString(context),
+                            ),
+                            style =
+                                MaterialTheme.typography.bodySmall.copy(
+                                    MaterialTheme.colorScheme.outline
+                                ),
+                        )
+                    },
+                    trailing = {
+                        ForwardButton { navController.navigate(Route.WifiDetectionMethod) }
+                    },
+                    onClick = { navController.navigate(Route.WifiDetectionMethod) },
+                ),
                 SelectionItem(
                     leadingIcon = Icons.Outlined.Filter1,
                     title = {
@@ -205,7 +202,8 @@ fun WifiTunnelingItems(
                             currentText = currentText,
                             onSave = { ssid ->
                                 if (
-                                    uiState.appSettings.isWifiNameByShellEnabled ||
+                                    uiState.appSettings.wifiDetectionMethod ==
+                                        AndroidNetworkMonitor.WifiDetectionMethod.ROOT ||
                                         isWifiNameReadable()
                                 ) {
                                     viewModel.handleEvent(AppEvent.SaveTrustedSSID(ssid))

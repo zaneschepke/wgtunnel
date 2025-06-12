@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.data.model
+package com.zaneschepke.wireguardautotunnel.data.entity
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

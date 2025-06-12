@@ -15,12 +15,12 @@ import com.zaneschepke.wireguardautotunnel.core.notification.WireGuardNotificati
 import com.zaneschepke.wireguardautotunnel.core.service.ServiceManager
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
 import com.zaneschepke.wireguardautotunnel.domain.events.AutoTunnelEvent
 import com.zaneschepke.wireguardautotunnel.domain.events.KillSwitchEvent
+import com.zaneschepke.wireguardautotunnel.domain.model.AppSettings
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.AutoTunnelState
 import com.zaneschepke.wireguardautotunnel.domain.state.NetworkState

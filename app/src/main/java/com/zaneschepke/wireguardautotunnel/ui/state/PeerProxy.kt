@@ -1,7 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.ui.state
 
 import com.wireguard.config.Peer
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.util.extensions.joinAndTrim
 
 data class PeerProxy(

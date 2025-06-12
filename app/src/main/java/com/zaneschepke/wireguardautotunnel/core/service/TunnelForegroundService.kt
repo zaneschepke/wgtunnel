@@ -14,9 +14,9 @@ import com.zaneschepke.wireguardautotunnel.core.notification.NotificationManager
 import com.zaneschepke.wireguardautotunnel.core.notification.WireGuardNotification
 import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.NotificationAction
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.util.Constants

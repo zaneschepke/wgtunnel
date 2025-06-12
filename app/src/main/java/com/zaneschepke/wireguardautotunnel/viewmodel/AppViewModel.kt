@@ -8,6 +8,7 @@ import com.wireguard.android.backend.WgQuickBackend
 import com.wireguard.android.util.RootShell
 import com.zaneschepke.logcatter.LogReader
 import com.zaneschepke.logcatter.model.LogMessage
+import com.zaneschepke.networkmonitor.AndroidNetworkMonitor
 import com.zaneschepke.networkmonitor.NetworkMonitor
 import com.zaneschepke.networkmonitor.NetworkStatus
 import com.zaneschepke.wireguardautotunnel.R
@@ -18,11 +19,11 @@ import com.zaneschepke.wireguardautotunnel.core.tunnel.TunnelManager
 import com.zaneschepke.wireguardautotunnel.di.AppShell
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
 import com.zaneschepke.wireguardautotunnel.di.MainDispatcher
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppState
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.BackendState
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
+import com.zaneschepke.wireguardautotunnel.domain.model.AppSettings
+import com.zaneschepke.wireguardautotunnel.domain.model.AppState
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import com.zaneschepke.wireguardautotunnel.ui.state.AppUiState
@@ -177,7 +178,6 @@ constructor(
                         handleDeleteTrustedSSID(event.ssid, state.appSettings)
                     AppEvent.ToggleAutoTunnelWildcards ->
                         handleToggleAutoTunnelWildcards(state.appSettings)
-                    AppEvent.ToggleRootShellWifi -> handleToggleRootShellWifi(state.appSettings)
                     is AppEvent.SaveTrustedSSID ->
                         handleSaveTrustedSSID(event.ssid, state.appSettings)
                     AppEvent.ToggleAutoTunnelOnEthernet ->
@@ -210,9 +210,30 @@ constructor(
                     AppEvent.ClearSelectedTunnels -> clearSelectedTunnels()
                     is AppEvent.SetShowModal ->
                         _appViewState.update { it.copy(showModal = event.modalType) }
+
+                    is AppEvent.SetDetectionMethod ->
+                        handleSetDetectionMethod(event.detectionMethod, state.appSettings)
                 }
             }
         }
+
+    private suspend fun handleSetDetectionMethod(
+        detectionMethod: AndroidNetworkMonitor.WifiDetectionMethod,
+        appSettings: AppSettings,
+    ) {
+        if (detectionMethod == appSettings.wifiDetectionMethod) return
+        when (detectionMethod) {
+            AndroidNetworkMonitor.WifiDetectionMethod.ROOT -> {
+                val allowed = requestRoot()
+                if (!allowed) return
+            }
+            // TODO check if shizuku available
+            AndroidNetworkMonitor.WifiDetectionMethod.SHIZUKU -> Unit
+            else -> Unit
+        }
+        saveSettings(appSettings.copy(wifiDetectionMethod = detectionMethod))
+        handleShowMessage(StringValue.StringResource(R.string.app_restart_required))
+    }
 
     private fun handleToggleSelectAllTunnels(tunnels: List<TunnelConf>) =
         _appViewState.update { it ->
@@ -264,6 +285,7 @@ constructor(
             }
         }
 
+    // TODO
     private fun handleTunnelErrors() =
         viewModelScope.launch { tunnelManager.errorEvents.collect { errorEvent -> } }
 
@@ -629,14 +651,6 @@ constructor(
                 trustedNetworkSSIDs = (appSettings.trustedNetworkSSIDs - ssid).toMutableList()
             )
         )
-
-    private suspend fun handleToggleRootShellWifi(appSettings: AppSettings) {
-        if (requestRoot()) {
-            saveSettings(
-                appSettings.copy(isWifiNameByShellEnabled = !appSettings.isWifiNameByShellEnabled)
-            )
-        }
-    }
 
     private suspend fun handleToggleTunnelOnEthernet(appSettings: AppSettings) =
         saveSettings(

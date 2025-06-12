@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.state
 
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 
 data class AppViewState(

@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppDataRepository
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppSettingRepository
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository

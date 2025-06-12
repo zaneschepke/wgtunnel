@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelStatistics
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import com.zaneschepke.wireguardautotunnel.util.extensions.toThreeDecimalPlaceString

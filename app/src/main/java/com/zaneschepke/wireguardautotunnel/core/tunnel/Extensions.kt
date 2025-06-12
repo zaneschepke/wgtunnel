@@ -1,7 +1,7 @@
 package com.zaneschepke.wireguardautotunnel.core.tunnel
 
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.TunnelStatus
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.state.TunnelState
 import kotlinx.coroutines.flow.MutableStateFlow
 

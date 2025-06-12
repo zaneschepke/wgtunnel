@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.domain.entity
+package com.zaneschepke.wireguardautotunnel.domain.model
 
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config

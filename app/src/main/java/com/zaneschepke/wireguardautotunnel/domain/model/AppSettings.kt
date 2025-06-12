@@ -1,4 +1,6 @@
-package com.zaneschepke.wireguardautotunnel.domain.entity
+package com.zaneschepke.wireguardautotunnel.domain.model
+
+import com.zaneschepke.networkmonitor.AndroidNetworkMonitor
 
 data class AppSettings(
     val id: Int = 0,
@@ -15,13 +17,16 @@ data class AppSettings(
     val isPingEnabled: Boolean = false,
     val isAmneziaEnabled: Boolean = false,
     val isWildcardsEnabled: Boolean = false,
-    val isWifiNameByShellEnabled: Boolean = false,
     val isStopOnNoInternetEnabled: Boolean = false,
     val isVpnKillSwitchEnabled: Boolean = false,
     val isKernelKillSwitchEnabled: Boolean = false,
     val isLanOnKillSwitchEnabled: Boolean = false,
     val debounceDelaySeconds: Int = 3,
     val isDisableKillSwitchOnTrustedEnabled: Boolean = false,
+    val isTunnelOnUnsecureEnabled: Boolean = false,
+    val splitTunnelApps: List<String> = emptyList(),
+    val wifiDetectionMethod: AndroidNetworkMonitor.WifiDetectionMethod =
+        AndroidNetworkMonitor.WifiDetectionMethod.DEFAULT,
 ) {
     fun debounceDelayMillis(): Long {
         return debounceDelaySeconds * 1000L

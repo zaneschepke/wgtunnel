@@ -8,12 +8,12 @@ import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import com.zaneschepke.wireguardautotunnel.data.dao.SettingsDao
 import com.zaneschepke.wireguardautotunnel.data.dao.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.data.model.Settings
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.entity.Settings
+import com.zaneschepke.wireguardautotunnel.data.entity.TunnelConfig
 
 @Database(
     entities = [Settings::class, TunnelConfig::class],
-    version = 16,
+    version = 17,
     autoMigrations =
         [
             AutoMigration(from = 1, to = 2),
@@ -31,10 +31,11 @@ import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
             AutoMigration(from = 13, to = 14),
             AutoMigration(from = 14, to = 15),
             AutoMigration(from = 15, to = 16),
+            AutoMigration(from = 16, to = 17, spec = WifiDetectionMigration::class),
         ],
     exportSchema = true,
 )
-@TypeConverters(DatabaseListConverters::class)
+@TypeConverters(DatabaseConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun settingDao(): SettingsDao
 
@@ -47,3 +48,6 @@ class RemoveLegacySettingColumnsMigration : AutoMigrationSpec
 
 @DeleteColumn(tableName = "Settings", columnName = "is_auto_tunnel_paused")
 class RemoveTunnelPauseMigration : AutoMigrationSpec
+
+@DeleteColumn(tableName = "Settings", columnName = "is_wifi_by_shell_enabled")
+class WifiDetectionMigration : AutoMigrationSpec

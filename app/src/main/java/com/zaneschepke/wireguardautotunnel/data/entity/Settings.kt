@@ -1,9 +1,8 @@
-package com.zaneschepke.wireguardautotunnel.data.model
+package com.zaneschepke.wireguardautotunnel.data.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppSettings
 
 @Entity
 data class Settings(
@@ -32,8 +31,6 @@ data class Settings(
     val isAmneziaEnabled: Boolean = false,
     @ColumnInfo(name = "is_wildcards_enabled", defaultValue = "false")
     val isWildcardsEnabled: Boolean = false,
-    @ColumnInfo(name = "is_wifi_by_shell_enabled", defaultValue = "false")
-    val isWifiNameByShellEnabled: Boolean = false,
     @ColumnInfo(name = "is_stop_on_no_internet_enabled", defaultValue = "false")
     val isStopOnNoInternetEnabled: Boolean = false,
     @ColumnInfo(name = "is_vpn_kill_switch_enabled", defaultValue = "false")
@@ -46,61 +43,23 @@ data class Settings(
     val debounceDelaySeconds: Int = 3,
     @ColumnInfo(name = "is_disable_kill_switch_on_trusted_enabled", defaultValue = "false")
     val isDisableKillSwitchOnTrustedEnabled: Boolean = false,
+    @ColumnInfo(name = "is_tunnel_on_unsecure_enabled", defaultValue = "false")
+    val isTunnelOnUnsecureEnabled: Boolean = false,
+    @ColumnInfo(name = "split_tunnel_apps", defaultValue = "")
+    val splitTunnelApps: MutableList<String> = mutableListOf(),
+    @ColumnInfo(name = "wifi_detection_method", defaultValue = "0")
+    val wifiDetectionMethod: WifiDetectionMethod = WifiDetectionMethod.fromValue(0),
 ) {
 
-    fun toAppSettings(): AppSettings {
-        return AppSettings(
-            id,
-            isAutoTunnelEnabled,
-            isTunnelOnMobileDataEnabled,
-            trustedNetworkSSIDs,
-            isAlwaysOnVpnEnabled,
-            isTunnelOnEthernetEnabled,
-            isShortcutsEnabled,
-            isTunnelOnWifiEnabled,
-            isKernelEnabled,
-            isRestoreOnBootEnabled,
-            isMultiTunnelEnabled,
-            isPingEnabled,
-            isAmneziaEnabled,
-            isWildcardsEnabled,
-            isWifiNameByShellEnabled,
-            isStopOnNoInternetEnabled,
-            isVpnKillSwitchEnabled,
-            isKernelKillSwitchEnabled,
-            isLanOnKillSwitchEnabled,
-            debounceDelaySeconds,
-            isDisableKillSwitchOnTrustedEnabled,
-        )
-    }
+    enum class WifiDetectionMethod(val value: Int) {
+        DEFAULT(0),
+        LEGACY(1),
+        ROOT(2),
+        SHIZUKU(3);
 
-    companion object {
-        fun from(appSettings: AppSettings): Settings {
-            return with(appSettings) {
-                Settings(
-                    id,
-                    isAutoTunnelEnabled,
-                    isTunnelOnMobileDataEnabled,
-                    trustedNetworkSSIDs.toMutableList(),
-                    isAlwaysOnVpnEnabled,
-                    isTunnelOnEthernetEnabled,
-                    isShortcutsEnabled,
-                    isTunnelOnWifiEnabled,
-                    isKernelEnabled,
-                    isRestoreOnBootEnabled,
-                    isMultiTunnelEnabled,
-                    isPingEnabled,
-                    isAmneziaEnabled,
-                    isWildcardsEnabled,
-                    isWifiNameByShellEnabled,
-                    isStopOnNoInternetEnabled,
-                    isVpnKillSwitchEnabled,
-                    isKernelKillSwitchEnabled,
-                    isLanOnKillSwitchEnabled,
-                    debounceDelaySeconds,
-                    isDisableKillSwitchOnTrustedEnabled,
-                )
-            }
+        companion object {
+            fun fromValue(value: Int): WifiDetectionMethod =
+                entries.find { it.value == value } ?: DEFAULT
         }
     }
 }

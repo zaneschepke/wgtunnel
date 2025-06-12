@@ -1,8 +1,8 @@
 package com.zaneschepke.wireguardautotunnel.util.extensions
 
 import android.content.pm.PackageInfo
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.data.entity.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import java.math.BigDecimal
 import java.text.DecimalFormat
 

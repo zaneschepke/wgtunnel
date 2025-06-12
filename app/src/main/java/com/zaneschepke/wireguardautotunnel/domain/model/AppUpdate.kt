@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.domain.entity
+package com.zaneschepke.wireguardautotunnel.domain.model
 
 data class AppUpdate(
     val version: String,

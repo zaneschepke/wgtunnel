@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.domain.events
 
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 
 sealed class AutoTunnelEvent {
     data class Start(val tunnelConf: TunnelConf? = null) : AutoTunnelEvent()

@@ -1,4 +1,4 @@
-package com.zaneschepke.wireguardautotunnel.domain.entity
+package com.zaneschepke.wireguardautotunnel.domain.model
 
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 

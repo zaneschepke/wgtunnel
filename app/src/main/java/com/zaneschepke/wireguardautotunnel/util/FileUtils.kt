@@ -10,8 +10,8 @@ import android.provider.OpenableColumns
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.data.entity.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.util.extensions.getInputStreamFromUri
 import com.zaneschepke.wireguardautotunnel.util.extensions.installApk
 import com.zaneschepke.wireguardautotunnel.util.extensions.launchShareFile

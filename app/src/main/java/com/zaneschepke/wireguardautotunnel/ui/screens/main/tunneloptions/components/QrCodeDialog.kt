@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.zaneschepke.wireguardautotunnel.MainActivity
 import com.zaneschepke.wireguardautotunnel.R
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.util.extensions.setScreenBrightness
 import io.github.alexzhirkevich.qrose.options.QrBallShape
 import io.github.alexzhirkevich.qrose.options.QrBrush

@@ -1,9 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.dao.TunnelConfigDao
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.mapper.TunnelConfigMapper
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.domain.repository.TunnelRepository
 import com.zaneschepke.wireguardautotunnel.util.extensions.Tunnels
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,19 +17,25 @@ class RoomTunnelRepository(
 ) : TunnelRepository {
 
     override val flow =
-        tunnelConfigDao.getAllFlow().flowOn(ioDispatcher).map { it.map { it.toTunnel() } }
+        tunnelConfigDao.getAllFlow().flowOn(ioDispatcher).map {
+            it.map(TunnelConfigMapper::toTunnelConf)
+        }
 
     override suspend fun getAll(): Tunnels {
-        return withContext(ioDispatcher) { tunnelConfigDao.getAll().map { it.toTunnel() } }
+        return withContext(ioDispatcher) {
+            tunnelConfigDao.getAll().map(TunnelConfigMapper::toTunnelConf)
+        }
     }
 
     override suspend fun save(tunnelConf: TunnelConf) {
-        withContext(ioDispatcher) { tunnelConfigDao.save(TunnelConfig.from(tunnelConf)) }
+        withContext(ioDispatcher) {
+            tunnelConfigDao.save(TunnelConfigMapper.toTunnelConfig(tunnelConf))
+        }
     }
 
     override suspend fun saveAll(tunnelConfList: List<TunnelConf>) {
         withContext(ioDispatcher) {
-            tunnelConfigDao.saveAll(tunnelConfList.map(TunnelConfig::from))
+            tunnelConfigDao.saveAll(tunnelConfList.map(TunnelConfigMapper::toTunnelConfig))
         }
     }
 
@@ -55,15 +61,21 @@ class RoomTunnelRepository(
     }
 
     override suspend fun delete(tunnelConf: TunnelConf) {
-        withContext(ioDispatcher) { tunnelConfigDao.delete(TunnelConfig.from(tunnelConf)) }
+        withContext(ioDispatcher) {
+            tunnelConfigDao.delete(TunnelConfigMapper.toTunnelConfig(tunnelConf))
+        }
     }
 
     override suspend fun getById(id: Int): TunnelConf? {
-        return withContext(ioDispatcher) { tunnelConfigDao.getById(id.toLong())?.toTunnel() }
+        return withContext(ioDispatcher) {
+            tunnelConfigDao.getById(id.toLong())?.let(TunnelConfigMapper::toTunnelConf)
+        }
     }
 
     override suspend fun getActive(): Tunnels {
-        return withContext(ioDispatcher) { tunnelConfigDao.getActive().map { it.toTunnel() } }
+        return withContext(ioDispatcher) {
+            tunnelConfigDao.getActive().map(TunnelConfigMapper::toTunnelConf)
+        }
     }
 
     override suspend fun count(): Int {
@@ -71,22 +83,26 @@ class RoomTunnelRepository(
     }
 
     override suspend fun findByTunnelName(name: String): TunnelConf? {
-        return withContext(ioDispatcher) { tunnelConfigDao.getByName(name)?.toTunnel() }
+        return withContext(ioDispatcher) {
+            tunnelConfigDao.getByName(name)?.let(TunnelConfigMapper::toTunnelConf)
+        }
     }
 
     override suspend fun findByTunnelNetworksName(name: String): Tunnels {
         return withContext(ioDispatcher) {
-            tunnelConfigDao.findByTunnelNetworkName(name).map { it.toTunnel() }
+            tunnelConfigDao.findByTunnelNetworkName(name).map(TunnelConfigMapper::toTunnelConf)
         }
     }
 
     override suspend fun findByMobileDataTunnel(): Tunnels {
         return withContext(ioDispatcher) {
-            tunnelConfigDao.findByMobileDataTunnel().map { it.toTunnel() }
+            tunnelConfigDao.findByMobileDataTunnel().map(TunnelConfigMapper::toTunnelConf)
         }
     }
 
     override suspend fun findPrimary(): Tunnels {
-        return withContext(ioDispatcher) { tunnelConfigDao.findByPrimary().map { it.toTunnel() } }
+        return withContext(ioDispatcher) {
+            tunnelConfigDao.findByPrimary().map(TunnelConfigMapper::toTunnelConf)
+        }
     }
 }

@@ -1,8 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.data.repository
 
 import com.zaneschepke.wireguardautotunnel.data.DataStoreManager
-import com.zaneschepke.wireguardautotunnel.data.model.GeneralState
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppState
+import com.zaneschepke.wireguardautotunnel.data.entity.GeneralState
+import com.zaneschepke.wireguardautotunnel.data.mapper.GeneralStateMapper
+import com.zaneschepke.wireguardautotunnel.domain.model.AppState
 import com.zaneschepke.wireguardautotunnel.domain.repository.AppStateRepository
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
@@ -153,5 +154,5 @@ class DataStoreAppStateRepository(private val dataStoreManager: DataStoreManager
                     }
                 } ?: GeneralState()
             }
-            .map { it.toAppState() }
+            .map(GeneralStateMapper::toAppState)
 }

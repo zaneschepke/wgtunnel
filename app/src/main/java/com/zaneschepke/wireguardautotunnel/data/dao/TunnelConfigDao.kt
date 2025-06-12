@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.zaneschepke.wireguardautotunnel.data.model.TunnelConfig
+import com.zaneschepke.wireguardautotunnel.data.entity.TunnelConfig
 import com.zaneschepke.wireguardautotunnel.util.extensions.TunnelConfigs
 import kotlinx.coroutines.flow.Flow
 

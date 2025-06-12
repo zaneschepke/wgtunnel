@@ -2,9 +2,10 @@ package com.zaneschepke.wireguardautotunnel.data.repository
 
 import android.content.Context
 import com.zaneschepke.wireguardautotunnel.BuildConfig
+import com.zaneschepke.wireguardautotunnel.data.mapper.GitHubReleaseMapper
 import com.zaneschepke.wireguardautotunnel.data.network.GitHubApi
 import com.zaneschepke.wireguardautotunnel.di.IoDispatcher
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppUpdate
+import com.zaneschepke.wireguardautotunnel.domain.model.AppUpdate
 import com.zaneschepke.wireguardautotunnel.domain.repository.UpdateRepository
 import com.zaneschepke.wireguardautotunnel.util.NumberUtils
 import io.ktor.client.HttpClient
@@ -47,7 +48,7 @@ class GitHubUpdateRepository(
 
                 Timber.i("Latest version: $newVersion, current version: $currentVersion")
                 if (NumberUtils.compareVersions(newVersion, currentVersion) > 0) {
-                    release.toAppUpdate()
+                    GitHubReleaseMapper.toAppUpdate(release)
                 } else {
                     null
                 }

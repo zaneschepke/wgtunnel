@@ -1,9 +1,10 @@
 package com.zaneschepke.wireguardautotunnel.data
 
 import androidx.room.TypeConverter
+import com.zaneschepke.wireguardautotunnel.data.entity.Settings
 import kotlinx.serialization.json.Json
 
-class DatabaseListConverters {
+class DatabaseConverters {
     @TypeConverter
     fun listToString(value: MutableList<String>): String {
         return Json.encodeToString(value)
@@ -20,4 +21,10 @@ class DatabaseListConverters {
             Json.decodeFromString<MutableList<String>>(json)
         }
     }
+
+    @TypeConverter fun fromStatus(status: Settings.WifiDetectionMethod): Int = status.value
+
+    @TypeConverter
+    fun toStatus(value: Int): Settings.WifiDetectionMethod =
+        Settings.WifiDetectionMethod.fromValue(value)
 }

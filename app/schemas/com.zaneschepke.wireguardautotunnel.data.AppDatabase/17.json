@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 16,
-    "identityHash": "ae51793c4d09ea3194ecd26f0606f35c",
+    "version": 17,
+    "identityHash": "380d82359c99933cc9ce783347c4ec31",
     "entities": [
       {
         "tableName": "Settings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `is_tunnel_enabled` INTEGER NOT NULL, `is_tunnel_on_mobile_data_enabled` INTEGER NOT NULL, `trusted_network_ssids` TEXT NOT NULL, `is_always_on_vpn_enabled` INTEGER NOT NULL, `is_tunnel_on_ethernet_enabled` INTEGER NOT NULL, `is_shortcuts_enabled` INTEGER NOT NULL DEFAULT false, `is_tunnel_on_wifi_enabled` INTEGER NOT NULL DEFAULT false, `is_kernel_enabled` INTEGER NOT NULL DEFAULT false, `is_restore_on_boot_enabled` INTEGER NOT NULL DEFAULT false, `is_multi_tunnel_enabled` INTEGER NOT NULL DEFAULT false, `is_ping_enabled` INTEGER NOT NULL DEFAULT false, `is_amnezia_enabled` INTEGER NOT NULL DEFAULT false, `is_wildcards_enabled` INTEGER NOT NULL DEFAULT false, `is_wifi_by_shell_enabled` INTEGER NOT NULL DEFAULT false, `is_stop_on_no_internet_enabled` INTEGER NOT NULL DEFAULT false, `is_vpn_kill_switch_enabled` INTEGER NOT NULL DEFAULT false, `is_kernel_kill_switch_enabled` INTEGER NOT NULL DEFAULT false, `is_lan_on_kill_switch_enabled` INTEGER NOT NULL DEFAULT false, `debounce_delay_seconds` INTEGER NOT NULL DEFAULT 3, `is_disable_kill_switch_on_trusted_enabled` INTEGER NOT NULL DEFAULT false)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `is_tunnel_enabled` INTEGER NOT NULL, `is_tunnel_on_mobile_data_enabled` INTEGER NOT NULL, `trusted_network_ssids` TEXT NOT NULL, `is_always_on_vpn_enabled` INTEGER NOT NULL, `is_tunnel_on_ethernet_enabled` INTEGER NOT NULL, `is_shortcuts_enabled` INTEGER NOT NULL DEFAULT false, `is_tunnel_on_wifi_enabled` INTEGER NOT NULL DEFAULT false, `is_kernel_enabled` INTEGER NOT NULL DEFAULT false, `is_restore_on_boot_enabled` INTEGER NOT NULL DEFAULT false, `is_multi_tunnel_enabled` INTEGER NOT NULL DEFAULT false, `is_ping_enabled` INTEGER NOT NULL DEFAULT false, `is_amnezia_enabled` INTEGER NOT NULL DEFAULT false, `is_wildcards_enabled` INTEGER NOT NULL DEFAULT false, `is_stop_on_no_internet_enabled` INTEGER NOT NULL DEFAULT false, `is_vpn_kill_switch_enabled` INTEGER NOT NULL DEFAULT false, `is_kernel_kill_switch_enabled` INTEGER NOT NULL DEFAULT false, `is_lan_on_kill_switch_enabled` INTEGER NOT NULL DEFAULT false, `debounce_delay_seconds` INTEGER NOT NULL DEFAULT 3, `is_disable_kill_switch_on_trusted_enabled` INTEGER NOT NULL DEFAULT false, `is_tunnel_on_unsecure_enabled` INTEGER NOT NULL DEFAULT false, `split_tunnel_apps` TEXT NOT NULL DEFAULT '', `wifi_detection_method` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "id",
@@ -101,13 +101,6 @@
             "defaultValue": "false"
           },
           {
-            "fieldPath": "isWifiNameByShellEnabled",
-            "columnName": "is_wifi_by_shell_enabled",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "false"
-          },
-          {
             "fieldPath": "isStopOnNoInternetEnabled",
             "columnName": "is_stop_on_no_internet_enabled",
             "affinity": "INTEGER",
@@ -148,6 +141,27 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "false"
+          },
+          {
+            "fieldPath": "isTunnelOnUnsecureEnabled",
+            "columnName": "is_tunnel_on_unsecure_enabled",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "false"
+          },
+          {
+            "fieldPath": "splitTunnelApps",
+            "columnName": "split_tunnel_apps",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "wifiDetectionMethod",
+            "columnName": "wifi_detection_method",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -275,7 +289,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ae51793c4d09ea3194ecd26f0606f35c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '380d82359c99933cc9ce783347c4ec31')"
     ]
   }
 }

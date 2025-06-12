@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.ui.screens.support
 
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppUpdate
+import com.zaneschepke.wireguardautotunnel.domain.model.AppUpdate
 import com.zaneschepke.wireguardautotunnel.util.StringValue
 
 data class SupportUiState(

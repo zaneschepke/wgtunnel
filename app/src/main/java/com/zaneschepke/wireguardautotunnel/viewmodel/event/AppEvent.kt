@@ -1,8 +1,9 @@
 package com.zaneschepke.wireguardautotunnel.viewmodel.event
 
 import android.net.Uri
-import com.zaneschepke.wireguardautotunnel.domain.entity.TunnelConf
+import com.zaneschepke.networkmonitor.AndroidNetworkMonitor
 import com.zaneschepke.wireguardautotunnel.domain.enums.ConfigType
+import com.zaneschepke.wireguardautotunnel.domain.model.TunnelConf
 import com.zaneschepke.wireguardautotunnel.ui.state.AppViewState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import com.zaneschepke.wireguardautotunnel.util.StringValue
@@ -78,6 +79,9 @@ sealed class AppEvent {
 
     data class SetTheme(val theme: Theme) : AppEvent()
 
+    data class SetDetectionMethod(val detectionMethod: AndroidNetworkMonitor.WifiDetectionMethod) :
+        AppEvent()
+
     data object ToggleAutoTunnelOnWifi : AppEvent()
 
     data object ToggleAutoTunnelOnCellular : AppEvent()
@@ -89,8 +93,6 @@ sealed class AppEvent {
     data object ToggleStopTunnelOnNoInternet : AppEvent()
 
     data object ToggleAutoTunnelWildcards : AppEvent()
-
-    data object ToggleRootShellWifi : AppEvent()
 
     data class DeleteTrustedSSID(val ssid: String) : AppEvent()
 

@@ -113,9 +113,11 @@ class TunnelModule {
         @ApplicationContext context: Context,
         settingsRepository: AppSettingRepository,
     ): NetworkMonitor {
-        return AndroidNetworkMonitor(context) {
-            runBlocking { settingsRepository.get().isWifiNameByShellEnabled }
-        }
+        val method = runBlocking { settingsRepository.get().wifiDetectionMethod }
+        return AndroidNetworkMonitor(
+            context,
+            AndroidNetworkMonitor.WifiDetectionMethod.fromValue(method.value),
+        )
     }
 
     @Singleton

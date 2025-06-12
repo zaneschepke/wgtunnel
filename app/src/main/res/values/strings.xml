@@ -152,7 +152,7 @@
 	<string name="learn_more">Learn more</string>
 	<string name="wildcards_active">Wildcards active</string>
     <string name="wifi_name_via_shell">Wifi name via shell</string>
-	<string name="use_root_shell_for_wifi">Use root shell to get wifi name</string>
+	<string name="use_root_shell_for_wifi">Use a root shell to get Wi-Fi information, preventing the need for location permissions</string>
 	<string name="kernel_not_supported">Kernel not supported</string>
 	<string name="start_auto">Start auto-tunnel</string>
 	<string name="stop_auto">Stop auto-tunnel</string>
@@ -222,6 +222,7 @@
 	<string name="remote_key_template">Key: %1$s</string>
     <string name="version_template">Version: %1$s</string>
     <string name="security_template">Security: %1$s</string>
+    <string name="current_template">Current: %1$s</string>
     <string name="flavor_template">Flavor: %1$s</string>
 	<string name="config_error">config error</string>
 	<string name="dns_resolve_error">dns resolution error</string>
@@ -262,4 +263,20 @@
     <string name="amnezia">Amnezia</string>
     <string name="wireguard">WireGuard</string>
     <string name="done">Done</string>
+    <string name="use_deprecated_wifi_api">Use deprecated Wi-Fi API</string>
+    <string name="app_restart_required">App restart required</string>
+    <string name="wifi_detection_method">Wi-Fi detection method</string>
+    <string name="_default">Default</string>
+    <string name="legacy">Legacy</string>
+    <string name="root">Root</string>
+    <string name="shizuku">Shizuku</string>
+    <string name="legacy_api_description">Use an Android 12 deprecated method for getting Wi-Fi information that limits
+        location queries, but may not work reliably on newer devices
+    </string>
+    <string name="use_shell_via_shizuku">Use shell via Shizuku to get Wi-Fi information, preventing the need for
+        location permission on non-rooted devices
+    </string>
+    <string name="use_android_recommended">Use Android\'s recommended method for getting Wi-Fi information, based on
+        Android version
+    </string>
 </resources>

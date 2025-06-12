@@ -73,7 +73,7 @@ fun IconSurfaceButton(
                                 else MaterialTheme.colorScheme.onSurface,
                             )
                         }
-                        Column {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(title, style = MaterialTheme.typography.titleMedium)
                             description?.let {
                                 Text(

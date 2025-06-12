@@ -1,6 +1,6 @@
 package com.zaneschepke.wireguardautotunnel.domain.repository
 
-import com.zaneschepke.wireguardautotunnel.domain.entity.AppState
+import com.zaneschepke.wireguardautotunnel.domain.model.AppState
 import com.zaneschepke.wireguardautotunnel.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
 

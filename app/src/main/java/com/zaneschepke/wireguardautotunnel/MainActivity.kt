@@ -49,6 +49,7 @@ import com.zaneschepke.wireguardautotunnel.ui.navigation.components.DynamicTopAp
 import com.zaneschepke.wireguardautotunnel.ui.navigation.components.currentNavBackStackEntryAsNavBarState
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.AutoTunnelScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.advanced.AutoTunnelAdvancedScreen
+import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.detection.WifiDetectionMethodScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.autotunnel.disclosure.LocationDisclosureScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.MainScreen
 import com.zaneschepke.wireguardautotunnel.ui.screens.main.autotunnel.TunnelAutoTunnelScreen
@@ -283,6 +284,9 @@ class MainActivity : AppCompatActivity() {
                                     composable<Route.License> { LicenseScreen() }
                                     composable<Route.AutoTunnelAdvanced> {
                                         AutoTunnelAdvancedScreen(appUiState, viewModel)
+                                    }
+                                    composable<Route.WifiDetectionMethod> {
+                                        WifiDetectionMethodScreen(appUiState, viewModel)
                                     }
                                     composable<Route.Logs> { LogsScreen(appViewState, viewModel) }
                                     composable<Route.Config> { backStack ->
