@@ -31,8 +31,9 @@ class GitHubUpdateRepository(
     override suspend fun checkForUpdate(currentVersion: String): Result<AppUpdate?> =
         withContext(ioDispatcher) {
             Timber.i("Checking for update")
+            val isNightly = BuildConfig.VERSION_NAME.contains("nightly")
             val release =
-                if (BuildConfig.VERSION_NAME.contains("nightly")) {
+                if (isNightly) {
                     gitHubApi.getNightlyRelease(githubOwner, githubRepo)
                 } else {
                     gitHubApi.getLatestRelease(githubOwner, githubRepo)
@@ -47,6 +48,8 @@ class GitHubUpdateRepository(
                         ?: return@map null
 
                 Timber.i("Latest version: $newVersion, current version: $currentVersion")
+                if (isNightly && newVersion != currentVersion)
+                    return@map GitHubReleaseMapper.toAppUpdate(release)
                 if (NumberUtils.compareVersions(newVersion, currentVersion) > 0) {
                     GitHubReleaseMapper.toAppUpdate(release)
                 } else {
