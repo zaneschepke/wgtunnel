@@ -29,7 +29,7 @@ fun NetworkCapabilities.getWifiSsid(): String? {
         val info: WifiInfo
         if (transportInfo is WifiInfo) {
             info = transportInfo as WifiInfo
-            return info.ssid
+            return info.ssid.removeSurrounding("\"").trim()
         }
     }
     return null

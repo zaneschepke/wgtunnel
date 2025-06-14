@@ -73,6 +73,8 @@ class AutoTunnelService : LifecycleService() {
 
     private val binder = LocalBinder(this)
 
+    private var isServiceRunning = false
+
     override fun onCreate() {
         super.onCreate()
         launchWatcherNotification()
@@ -91,6 +93,8 @@ class AutoTunnelService : LifecycleService() {
     }
 
     fun start() {
+        if (isServiceRunning) return
+        isServiceRunning = true
         kotlin
             .runCatching {
                 launchWatcherNotification()
@@ -103,6 +107,7 @@ class AutoTunnelService : LifecycleService() {
     }
 
     fun stop() {
+        isServiceRunning = false
         wakeLock?.let { if (it.isHeld) it.release() }
         stopSelf()
     }

@@ -181,8 +181,16 @@ class AndroidNetworkMonitor(context: Context, val wifiDetectionMethod: WifiDetec
                 activeWifiNetworks.add(network.toString())
                 currentSsid =
                     when (wifiDetectionMethod) {
-                        WifiDetectionMethod.DEFAULT ->
-                            networkCapabilities?.getWifiSsid() ?: getWifiSsid()
+                        WifiDetectionMethod.DEFAULT -> {
+                            if (networkCapabilities == null) {
+                                Timber.d("Capabilities not available, getting SSID via legacy API")
+                                getWifiSsid()
+                            } else
+                                networkCapabilities.getWifiSsid().also {
+                                    Timber.d("Got SSID from capabilities")
+                                }
+                        }
+
                         WifiDetectionMethod.LEGACY -> getWifiSsid()
                         WifiDetectionMethod.ROOT -> rootShell.getCurrentWifiName()
                         // TODO implement Shizuku
@@ -212,18 +220,12 @@ class AndroidNetworkMonitor(context: Context, val wifiDetectionMethod: WifiDetec
                     }
                 else ->
                     object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
-                        private var netCapabilities: NetworkCapabilities? = null
-
-                        override fun onAvailable(network: Network) {
-                            Timber.i("Wi-Fi change detected using new API")
-                            launch { handleOnWifiAvailable(network, netCapabilities) }
-                        }
 
                         override fun onCapabilitiesChanged(
                             network: Network,
                             networkCapabilities: NetworkCapabilities,
                         ) {
-                            launch { wifiMutex.withLock { netCapabilities = networkCapabilities } }
+                            launch { handleOnWifiAvailable(network, networkCapabilities) }
                         }
 
                         override fun onLost(network: Network) {
